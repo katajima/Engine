@@ -1,17 +1,5 @@
 {
     "MeleeAttack2": {
-        "接続先(弱攻撃)": {
-            "type": "string",
-            "value": "MeleeCombo1"
-        },
-        "接続先(強攻撃)": {
-            "type": "string",
-            "value": "Attack10"
-        },
-        "接続先(スキル)": {
-            "type": "string",
-            "value": ""
-        },
         "Y方向ノックバック": {
             "type": "bool",
             "value": true
@@ -52,7 +40,35 @@
             "type": "float",
             "value": 0.30000001192092896
         },
+        "カメラズーム": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラズーム時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラズーム速度": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラズーム量": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラズーム開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラロックオン": {
+            "type": "bool",
+            "value": true
+        },
+        "カメラロックオンズーム": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラロックオン回転引き継ぎ": {
             "type": "bool",
             "value": true
         },
@@ -340,6 +356,18 @@
         "打ち上げ持続時間": {
             "type": "float",
             "value": 0.0
+        },
+        "接続先(スキル)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(弱攻撃)": {
+            "type": "string",
+            "value": "MeleeCombo1"
+        },
+        "接続先(強攻撃)": {
+            "type": "string",
+            "value": "Attack10"
         },
         "移動スピード": {
             "type": "Vector3",

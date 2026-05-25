@@ -121,6 +121,40 @@ namespace Combo {
 		}
 	}
 
+	void System::RenameComboReferences(const std::string& oldName, const std::string& newName) {
+		for (auto& [nodeName, data] : comboGlobalDatas_) {
+			bool changed = false;
+			if (data.connection.lightAttack == oldName) {
+				data.connection.lightAttack = newName;
+				changed = true;
+			}
+			if (data.connection.heavyAttack == oldName) {
+				data.connection.heavyAttack = newName;
+				changed = true;
+			}
+			if (data.connection.skill == oldName) {
+				data.connection.skill = newName;
+				changed = true;
+			}
+			if (changed) {
+				SetGlobalComboData(nodeName == oldName ? newName : nodeName, data);
+			}
+		}
+
+		auto renameStart = [&](std::string& startName, const std::string& key) {
+			if (startName == oldName) {
+				startName = newName;
+				globalVariables->SetValue(name, key, newName);
+			}
+		};
+		renameStart(groundLightStart_, kGroundLightStartKey);
+		renameStart(airLightStart_, kAirLightStartKey);
+		renameStart(groundHeavyStart_, kGroundHeavyStartKey);
+		renameStart(airHeavyStart_, kAirHeavyStartKey);
+		renameStart(groundSkillStart_, kGroundSkillStartKey);
+		renameStart(airSkillStart_, kAirSkillStartKey);
+	}
+
 	bool System::StartCombo(const std::string& name) {
 		auto it = comboNodes_.find(name);
 		if (it != comboNodes_.end()) {
@@ -133,11 +167,11 @@ namespace Combo {
 	std::string System::ResolveStartCombo(ActionInput input, bool isLanding) const {
 		switch (input) {
 		case ActionInput::LightAttack:
-			return isLanding ? "MeleeAttack1" : "JumpAttack";
+			return isLanding ? groundLightStart_ : airLightStart_;
 		case ActionInput::HeavyAttack:
-			return "Attack10";
+			return isLanding ? groundHeavyStart_ : airHeavyStart_;
 		case ActionInput::Skill:
-			return isLanding ? "SkillAttack01" : "JumpSkillAttack01";
+			return isLanding ? groundSkillStart_ : airSkillStart_;
 		default:
 			return "";
 		}
@@ -638,8 +672,25 @@ namespace Combo {
 		this->name = name;
 		globalVariables->CreateGroup(name);
 
+		globalVariables->AddItem(name, kGroundLightStartKey, groundLightStart_);
+		globalVariables->AddItem(name, kAirLightStartKey, airLightStart_);
+		globalVariables->AddItem(name, kGroundHeavyStartKey, groundHeavyStart_);
+		globalVariables->AddItem(name, kAirHeavyStartKey, airHeavyStart_);
+		globalVariables->AddItem(name, kGroundSkillStartKey, groundSkillStart_);
+		globalVariables->AddItem(name, kAirSkillStartKey, airSkillStart_);
+		groundLightStart_ = globalVariables->GetValue<std::string>(name, kGroundLightStartKey);
+		airLightStart_ = globalVariables->GetValue<std::string>(name, kAirLightStartKey);
+		groundHeavyStart_ = globalVariables->GetValue<std::string>(name, kGroundHeavyStartKey);
+		airHeavyStart_ = globalVariables->GetValue<std::string>(name, kAirHeavyStartKey);
+		groundSkillStart_ = globalVariables->GetValue<std::string>(name, kGroundSkillStartKey);
+		airSkillStart_ = globalVariables->GetValue<std::string>(name, kAirSkillStartKey);
 
 		for (auto& data : globalVariables->GetGroupData(name)) {
+			if (data.first == kGroundLightStartKey || data.first == kAirLightStartKey ||
+				data.first == kGroundHeavyStartKey || data.first == kAirHeavyStartKey ||
+				data.first == kGroundSkillStartKey || data.first == kAirSkillStartKey) {
+				continue;
+			}
 			CreateCombo(globalVariables->GetValue<std::string>(name, data.first));
 		}
 

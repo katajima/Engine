@@ -126,6 +126,24 @@ void Engine::GlobalVariables::RemoveGroup(const std::string& groupName)
 	groupKeys_.erase(groupName);
 }
 
+bool Engine::GlobalVariables::RenameGroup(const std::string& oldName, const std::string& newName)
+{
+	if (oldName.empty() || newName.empty() || oldName == newName ||
+		datas_.find(oldName) == datas_.end() || datas_.find(newName) != datas_.end()) {
+		return false;
+	}
+
+	datas_[newName] = std::move(datas_[oldName]);
+	datas_.erase(oldName);
+
+	auto keyIt = groupKeys_.find(oldName);
+	if (keyIt != groupKeys_.end()) {
+		groupKeys_[newName] = std::move(keyIt->second);
+		groupKeys_.erase(keyIt);
+	}
+	return true;
+}
+
 /// <summary>
 /// 複製
 /// </summary>

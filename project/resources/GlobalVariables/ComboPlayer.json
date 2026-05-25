@@ -68,9 +68,33 @@
             "type": "string",
             "value": "SkillAttack01"
         },
-        "testAttack": {
+        "testAttack02": {
             "type": "string",
-            "value": "testAttack"
+            "value": "testAttack02"
+        },
+        "開始コンボ(地上スキル)": {
+            "type": "string",
+            "value": "SkillAttack01"
+        },
+        "開始コンボ(地上弱攻撃)": {
+            "type": "string",
+            "value": "MeleeAttack1"
+        },
+        "開始コンボ(地上強攻撃)": {
+            "type": "string",
+            "value": "Attack10"
+        },
+        "開始コンボ(空中スキル)": {
+            "type": "string",
+            "value": "JumpSkillAttack01"
+        },
+        "開始コンボ(空中弱攻撃)": {
+            "type": "string",
+            "value": "JumpAttack"
+        },
+        "開始コンボ(空中強攻撃)": {
+            "type": "string",
+            "value": "Attack10"
         }
     }
 }

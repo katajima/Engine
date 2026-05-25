@@ -129,6 +129,7 @@ namespace Combo {
 		// コンボノードの管理
 		void DrawNodeManagement();
 		void AddComboNode();
+		void RenameComboNode(const std::string& oldName, const std::string& newName);
 		void DeleteComboNode(const std::string& comboName);
 	private:
 		// コンボエディターブロック作成
@@ -150,6 +151,8 @@ namespace Combo {
 		// 選択中のコンボエディターブロック名
 		std::string selectedComboEditorBlockName_;
 		std::array<char, 128> newComboNameBuffer_{};
+		std::array<char, 128> renameComboNameBuffer_{};
+		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;
 

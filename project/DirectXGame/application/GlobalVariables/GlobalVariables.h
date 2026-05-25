@@ -62,6 +62,8 @@ namespace Engine {
 		void RemoveItem(const std::string& groupName, const std::string& key);
 		// 削除(グループ)
 		void RemoveGroup(const std::string& groupName);
+		// グループ名変更
+		bool RenameGroup(const std::string& oldName, const std::string& newName);
 
 		// 複製
 		bool DuplicateItem(

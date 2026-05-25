@@ -18,6 +18,13 @@ namespace Combo {
 		return "ヒットエフェクト名前" + std::to_string(index);
 	}
 
+	const std::string kGroundLightStartKey = "開始コンボ(地上弱攻撃)";
+	const std::string kAirLightStartKey = "開始コンボ(空中弱攻撃)";
+	const std::string kGroundHeavyStartKey = "開始コンボ(地上強攻撃)";
+	const std::string kAirHeavyStartKey = "開始コンボ(空中強攻撃)";
+	const std::string kGroundSkillStartKey = "開始コンボ(地上スキル)";
+	const std::string kAirSkillStartKey = "開始コンボ(空中スキル)";
+
 
 	/// <summary>
 	/// コンボシステム
@@ -105,6 +112,8 @@ namespace Combo {
 		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
 		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to);
+		// コンボ名を参照している接続と開始ルートを更新
+		void RenameComboReferences(const std::string& oldName, const std::string& newName);
 		// 最初のコンボ
 		bool StartCombo(const std::string& name);
 		// コンボが終了したか
@@ -160,6 +169,12 @@ namespace Combo {
 		bool isDebug = false;
 		std::optional<ActionInput> pendingCostInput_;
 		float pendingStaminaCost_ = 0.0f;
+		std::string groundLightStart_ = "MeleeAttack1";
+		std::string airLightStart_ = "JumpAttack";
+		std::string groundHeavyStart_ = "Attack10";
+		std::string airHeavyStart_ = "Attack10";
+		std::string groundSkillStart_ = "SkillAttack01";
+		std::string airSkillStart_ = "JumpSkillAttack01";
 
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;

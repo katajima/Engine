@@ -520,6 +520,12 @@ namespace Combo {
 
 		if (!selectedComboEditorBlockName_.empty()) {
 			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
+			if (ImGui::Button("Rename Selected Combo")) {
+				pendingRenameComboName_ = selectedComboEditorBlockName_;
+				strncpy_s(renameComboNameBuffer_.data(), renameComboNameBuffer_.size(),
+					selectedComboEditorBlockName_.c_str(), _TRUNCATE);
+				ImGui::OpenPopup("Confirm Combo Rename");
+			}
 			if (ImGui::Button("Delete Selected Combo")) {
 				pendingDeleteComboName_ = selectedComboEditorBlockName_;
 				ImGui::OpenPopup("Confirm Combo Delete");
@@ -543,6 +549,28 @@ namespace Combo {
 				DeleteComboNode(pendingDeleteComboName_);
 				pendingDeleteComboName_.clear();
 				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Combo Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Rename combo '%s'", pendingRenameComboName_.c_str());
+			ImGui::InputText("New Combo Name", renameComboNameBuffer_.data(), renameComboNameBuffer_.size());
+			ImGui::TextWrapped("This updates saved data, start routes, and all connections to this combo.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingRenameComboName_.clear();
+				renameComboNameBuffer_.fill('\0');
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Apply Rename", ImVec2(160.0f, 0.0f))) {
+				RenameComboNode(pendingRenameComboName_, renameComboNameBuffer_.data());
+				if (nodeManagementMessage_.rfind("Renamed combo:", 0) == 0) {
+					pendingRenameComboName_.clear();
+					renameComboNameBuffer_.fill('\0');
+					ImGui::CloseCurrentPopup();
+				}
 			}
 			ImGui::EndPopup();
 		}
@@ -580,9 +608,71 @@ namespace Combo {
 		nodeManagementMessage_ = "Added and saved combo: " + comboName;
 	}
 
+	void Editor::RenameComboNode(const std::string& oldName, const std::string& newName) {
+		if (oldName.empty() || !globalVariables->HasKey(comboSystem->GetName(), oldName)) {
+			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+		if (newName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return;
+		}
+		if (oldName == newName) {
+			nodeManagementMessage_ = "Enter a different combo name.";
+			return;
+		}
+		for (const unsigned char c : newName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), newName) ||
+			globalVariables->HasGroup(newName)) {
+			nodeManagementMessage_ = "A combo or saved data with that name already exists.";
+			return;
+		}
+
+		SetGlobalData();
+		if (!globalVariables->RenameGroup(oldName, newName)) {
+			nodeManagementMessage_ = "Could not rename the saved combo data.";
+			return;
+		}
+
+		globalVariables->RemoveItem(comboSystem->GetName(), oldName);
+		globalVariables->SetValue(comboSystem->GetName(), newName, newName);
+		comboSystem->RenameComboReferences(oldName, newName);
+
+		for (const auto& node : comboSystem->GetComboNodeStates()) {
+			if (node.first != oldName) {
+				globalVariables->SaveFile(node.first);
+			}
+		}
+		globalVariables->SaveFile(newName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		globalVariables->RemoveSavedFile(oldName);
+
+		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+		if (player) {
+			player->Reload();
+		}
+		selectedComboEditorBlockName_ = newName;
+		ApplyComboEditorToSystem();
+		nodeManagementMessage_ = "Renamed combo: " + oldName + " -> " + newName;
+	}
+
 	void Editor::DeleteComboNode(const std::string& comboName) {
 		if (comboName.empty() || !globalVariables->HasKey(comboSystem->GetName(), comboName)) {
 			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+		if (globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName) {
+			nodeManagementMessage_ = "A configured start combo cannot be deleted because attacks must keep a valid entry point.";
 			return;
 		}
 
