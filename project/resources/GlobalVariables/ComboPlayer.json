@@ -32,6 +32,10 @@
             "type": "string",
             "value": "JumpSkillAttack01"
         },
+        "LaunchAttack": {
+            "type": "string",
+            "value": "LaunchAttack"
+        },
         "MeleeAttack1": {
             "type": "string",
             "value": "MeleeAttack1"

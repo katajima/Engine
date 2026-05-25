@@ -161,7 +161,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
@@ -179,13 +179,6 @@ void CharacterDebugScene::Update(){
 	
 	inputSystem_->Update(GetTime());
 
-	// リトライ
-	if (input_->IsTriggerKey(DIK_R)) {
-	//	GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
-	}
-	if (input_->IsTriggerKey(DIK_T)) {
-	//	GetSceneManager()->ChangeScene("TITLE", 0.25f);
-	}
 	// デバッグモード設定
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
 
