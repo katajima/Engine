@@ -26610,7 +26610,7 @@ private: // 一旦
 		Vector3 rotate = { Math::DegreesToRadians(-90), 0, 0 };
 
 
-		int maxGauge_ = 40;			// 最大ゲージ設定
+		int maxGauge_ = 20;			// 最大ゲージ設定
 		int maxBullet = 40;			// 発射数
 		int bulletNum = 0;			// 弾番号
 
@@ -28412,7 +28412,7 @@ void PlayerUI::InitializePlayerUI() {
 
 	// 初期化スペシャルUI
 	spSpriteData.color = { 0,0,1,1 };
-	spSpriteData.maxMeter = 40.0f;
+	spSpriteData.maxMeter = 20.0f;
 	InitUIMeter("SpecailBer", spSpriteData.pos + Vector2{ 0,50 }, true);
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");
 	specailBer->SetMaxSize(spSpriteData.size, spSpriteData.offset);		// 最大サイズ
@@ -63401,7 +63401,7 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("CHARACTER");
 
 #ifdef _DEBUG
-	sceneManager_->ChangeScene("CHARACTER");
+	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
 	sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("GAMEPLAY");
