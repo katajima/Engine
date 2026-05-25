@@ -905,6 +905,24 @@ void Engine::GlobalVariables::RemoveGroup(const std::string& groupName)
 	groupKeys_.erase(groupName);
 }
 
+bool Engine::GlobalVariables::RenameGroup(const std::string& oldName, const std::string& newName)
+{
+	if (oldName.empty() || newName.empty() || oldName == newName ||
+		datas_.find(oldName) == datas_.end() || datas_.find(newName) != datas_.end()) {
+		return false;
+	}
+
+	datas_[newName] = std::move(datas_[oldName]);
+	datas_.erase(oldName);
+
+	auto keyIt = groupKeys_.find(oldName);
+	if (keyIt != groupKeys_.end()) {
+		groupKeys_[newName] = std::move(keyIt->second);
+		groupKeys_.erase(keyIt);
+	}
+	return true;
+}
+
 /// <summary>
 /// 複製
 /// </summary>
@@ -1350,6 +1368,8 @@ namespace Engine {
 		void RemoveItem(const std::string& groupName, const std::string& key);
 		// 削除(グループ)
 		void RemoveGroup(const std::string& groupName);
+		// グループ名変更
+		bool RenameGroup(const std::string& oldName, const std::string& newName);
 
 		// 複製
 		bool DuplicateItem(
@@ -2132,6 +2152,8 @@ struct HitReactionData {
 	float downTime = 0.0f;
 	// 打ち上げ時に重力を弱める/止める時間
 	float launchFloatTime = 0.0f;
+	// 打ち上げ開始位置からの最大高度
+	float launchMaxHeight = 10.0f;
 	// 重力を適用するか
 	bool gravityEnabled = false;
 	// 重力倍率
@@ -2141,6 +2163,7 @@ struct HitReactionData {
 	// エフェクト
 	std::vector<HitEffectEntry> hitEffectNames;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.cpp
@@ -2460,6 +2483,8 @@ namespace Combo {
 		ImGuiApplyHitBox();
 		// カメラ設定
 		ImGuiCamera();
+		// コンボ接続設定
+		ImGuiConnection();
 		// ステートのコンボデータ取得	
 		ComboData& comboData = state->Data();
 		// ステートの時間設定
@@ -2680,6 +2705,9 @@ namespace Combo {
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
+			if (data_.hitReaction.type == HitReactionType::Launch) {
+				ImGui::SliderFloat("打ち上げ最大高度(命中位置基準)", &data_.hitReaction.launchMaxHeight, 0.0f, 100.0f, "%.2f");
+			}
 			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
 			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
 
@@ -2704,6 +2732,39 @@ namespace Combo {
 		}
 	};
 
+	void EditorBlock::ImGuiConnection() {
+		if (!ImGui::CollapsingHeader("コンボ接続")) {
+			return;
+		}
+
+		auto drawConnection = [this](const char* label, std::string& target) {
+			const char* preview = target.empty() ? "なし" : target.c_str();
+			if (ImGui::BeginCombo(label, preview)) {
+				const bool noSelection = target.empty();
+				if (ImGui::Selectable("なし", noSelection)) {
+					target.clear();
+				}
+				if (noSelection) {
+					ImGui::SetItemDefaultFocus();
+				}
+				for (const std::string& comboName : conectComboNames_) {
+					const bool selected = target == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						target = comboName;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		};
+
+		drawConnection("弱攻撃入力の接続先", data_.connection.lightAttack);
+		drawConnection("強攻撃入力の接続先", data_.connection.heavyAttack);
+		drawConnection("スキル入力の接続先", data_.connection.skill);
+	}
+
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
@@ -2723,6 +2784,8 @@ namespace Combo {
 		data_.camera = comboData.GetComboCamera().GetData();
 		// エフェクト
 		data_.effect = comboData.GetComboEffect().GetData();
+		// 接続
+		data_.connection = comboSystem->GetComboGlobalData(stateName).connection;
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
@@ -2830,12 +2893,14 @@ namespace Combo {
 
 		// 全てセーブ
 		if (ImGui::Button("AllSave")) {
+			SetGlobalData();
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				globalVariables->SaveFile(it.first);
 			}
 		}
 		// セーブ
 		if (ImGui::Button("Save")) {
+			SetGlobalData();
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				if (it.first == selectedComboEditorBlockName_)
 					globalVariables->SaveFile(it.first);
@@ -2863,6 +2928,12 @@ namespace Combo {
 
 		if (!selectedComboEditorBlockName_.empty()) {
 			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
+			if (ImGui::Button("Rename Selected Combo")) {
+				pendingRenameComboName_ = selectedComboEditorBlockName_;
+				strncpy_s(renameComboNameBuffer_.data(), renameComboNameBuffer_.size(),
+					selectedComboEditorBlockName_.c_str(), _TRUNCATE);
+				ImGui::OpenPopup("Confirm Combo Rename");
+			}
 			if (ImGui::Button("Delete Selected Combo")) {
 				pendingDeleteComboName_ = selectedComboEditorBlockName_;
 				ImGui::OpenPopup("Confirm Combo Delete");
@@ -2886,6 +2957,28 @@ namespace Combo {
 				DeleteComboNode(pendingDeleteComboName_);
 				pendingDeleteComboName_.clear();
 				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Combo Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Rename combo '%s'", pendingRenameComboName_.c_str());
+			ImGui::InputText("New Combo Name", renameComboNameBuffer_.data(), renameComboNameBuffer_.size());
+			ImGui::TextWrapped("This updates saved data, start routes, and all connections to this combo.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingRenameComboName_.clear();
+				renameComboNameBuffer_.fill('\0');
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Apply Rename", ImVec2(160.0f, 0.0f))) {
+				RenameComboNode(pendingRenameComboName_, renameComboNameBuffer_.data());
+				if (nodeManagementMessage_.rfind("Renamed combo:", 0) == 0) {
+					pendingRenameComboName_.clear();
+					renameComboNameBuffer_.fill('\0');
+					ImGui::CloseCurrentPopup();
+				}
 			}
 			ImGui::EndPopup();
 		}
@@ -2923,10 +3016,96 @@ namespace Combo {
 		nodeManagementMessage_ = "Added and saved combo: " + comboName;
 	}
 
+	void Editor::RenameComboNode(const std::string& oldName, const std::string& newName) {
+		if (oldName.empty() || !globalVariables->HasKey(comboSystem->GetName(), oldName)) {
+			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+		if (newName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return;
+		}
+		if (oldName == newName) {
+			nodeManagementMessage_ = "Enter a different combo name.";
+			return;
+		}
+		for (const unsigned char c : newName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), newName) ||
+			globalVariables->HasGroup(newName)) {
+			nodeManagementMessage_ = "A combo or saved data with that name already exists.";
+			return;
+		}
+
+		SetGlobalData();
+		if (!globalVariables->RenameGroup(oldName, newName)) {
+			nodeManagementMessage_ = "Could not rename the saved combo data.";
+			return;
+		}
+
+		globalVariables->RemoveItem(comboSystem->GetName(), oldName);
+		globalVariables->SetValue(comboSystem->GetName(), newName, newName);
+		comboSystem->RenameComboReferences(oldName, newName);
+
+		for (const auto& node : comboSystem->GetComboNodeStates()) {
+			if (node.first != oldName) {
+				globalVariables->SaveFile(node.first);
+			}
+		}
+		globalVariables->SaveFile(newName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		globalVariables->RemoveSavedFile(oldName);
+
+		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+		if (player) {
+			player->Reload();
+		}
+		selectedComboEditorBlockName_ = newName;
+		ApplyComboEditorToSystem();
+		nodeManagementMessage_ = "Renamed combo: " + oldName + " -> " + newName;
+	}
+
 	void Editor::DeleteComboNode(const std::string& comboName) {
 		if (comboName.empty() || !globalVariables->HasKey(comboSystem->GetName(), comboName)) {
 			nodeManagementMessage_ = "The selected combo no longer exists.";
 			return;
+		}
+		if (globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName) {
+			nodeManagementMessage_ = "A configured start combo cannot be deleted because attacks must keep a valid entry point.";
+			return;
+		}
+
+		for (auto& node : comboSystem->GetComboNodeStates()) {
+			if (node.first == comboName) {
+				continue;
+			}
+			GlobalData& data = comboSystem->GetComboGlobalData(node.first);
+			bool changed = false;
+			if (data.connection.lightAttack == comboName) {
+				data.connection.lightAttack.clear();
+				changed = true;
+			}
+			if (data.connection.heavyAttack == comboName) {
+				data.connection.heavyAttack.clear();
+				changed = true;
+			}
+			if (data.connection.skill == comboName) {
+				data.connection.skill.clear();
+				changed = true;
+			}
+			if (changed) {
+				comboSystem->SetGlobalComboData(node.first, data);
+				globalVariables->SaveFile(node.first);
+			}
 		}
 
 		globalVariables->RemoveItem(comboSystem->GetName(), comboName);
@@ -2979,6 +3158,9 @@ namespace Combo {
 		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
 		for (auto& comboState : comboSystem->GetComboNodeStates()) {
 			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.first, owner);
+		}
+		for (auto& combo : comboEditorBlocks_) {
+			combo.second.SetConectComboNames(comboEditorBlockNames_);
 		}
 
 		// コンボ再構築後、選択が消えてたら補正
@@ -3042,7 +3224,8 @@ namespace Combo {
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
-
+			// 接続
+			data.connection = comboEditorBlocks_[it.first].GetData().connection;
 
 		}
 
@@ -3130,6 +3313,8 @@ namespace Combo {
 		void ImGuiReaction();
 		// カメラ設定
 		void ImGuiCamera();
+		// コンボ接続設定
+		void ImGuiConnection();
 	private:
 		// シーケンサーの状態をステートに適応
 		void SequencerApplyToState();
@@ -3205,6 +3390,7 @@ namespace Combo {
 		// コンボノードの管理
 		void DrawNodeManagement();
 		void AddComboNode();
+		void RenameComboNode(const std::string& oldName, const std::string& newName);
 		void DeleteComboNode(const std::string& comboName);
 	private:
 		// コンボエディターブロック作成
@@ -3226,6 +3412,8 @@ namespace Combo {
 		// 選択中のコンボエディターブロック名
 		std::string selectedComboEditorBlockName_;
 		std::array<char, 128> newComboNameBuffer_{};
+		std::array<char, 128> renameComboNameBuffer_{};
+		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;
 
@@ -3384,6 +3572,13 @@ namespace Combo {
 		float trailEffectLifeTime = 1.0;
 	};
 
+	// 保存項目用コンボ接続データ
+	struct GlobalConnection {
+		std::string lightAttack = "";
+		std::string heavyAttack = "";
+		std::string skill = "";
+	};
+
 	// 保存項目用コンボデータ
 	struct GlobalData {
 		// 攻撃タイプ
@@ -3402,6 +3597,8 @@ namespace Combo {
 		GloblEffectData effect{};
 		// カメラ 
 		GlobalCameraData camera{};
+		// 次のコンボへの接続
+		GlobalConnection connection{};
 	};
 };
 
@@ -3786,8 +3983,19 @@ namespace Combo {
 			currentState->Enter(owner, ctx);	// 開始処理
 		}
 		bufferedInput.reset(); // 状態遷移したら入力リセット
+		isBufferedInputAccepted_ = false;
 	}
 
+	bool StateMachine::CanTransition(ActionInput input) const {
+		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
+		return node && node->HasNextState(input);
+	}
+
+	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
+		std::optional<ActionInput> result = transitionedInput_;
+		transitionedInput_.reset();
+		return result;
+	}
 
 	void StateMachine::Update(const Character::CharacterContext& ctx) {
 		// ステートが無いなら早期リターン
@@ -3796,33 +4004,41 @@ namespace Combo {
 		// 現在のステート更新
 		currentState->Update(owner, ctx);
 
-		// 入力がバッファされていて、入力受付時間内なら状態遷移
-		if (bufferedInput) {
+		if (!isDebug && owner->GetCurrentMainState() != Character::CharacterMainState::Attack) {
+			bufferedInput.reset();
+			isBufferedInputAccepted_ = false;
+			return;
+		}
 
-			// コンボ移行時間に達して次のステートへ移行するなら
-			if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
-				auto next = currentState->HandleInput(owner, *bufferedInput);
+		// 入力種類は RequestAttack から渡された ActionInput を正とする。
+		if (bufferedInput) {
+			if (currentState->IsInputAcceptable()) {
+				isBufferedInputAccepted_ = true;
+			}
+			// 入力受付済みで、コンボ移行時間に達したら状態遷移する。
+			if (isBufferedInputAccepted_ && currentState->GetNextStateTime()) {
+				ActionInput transitionInput = *bufferedInput;
+				auto next = currentState->HandleInput(owner, transitionInput);
 				if (currentState->GetIsCompulsionNext()) {
-					next = currentState->HandleInput(owner, ActionInput::LightAttack);
+					transitionInput = ActionInput::LightAttack;
+					next = currentState->HandleInput(owner, transitionInput);
 				}
 
 				// もし次のステートがあれば、遷移
 				if (next) {
+					transitionedInput_ = transitionInput;
 					SetState(next, ctx);
 				}
 				bufferedInput.reset();
+				isBufferedInputAccepted_ = false;
 			}
 		}
-		else {// コンボ移行時間に達して次のステートへ移行するなら
-			if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
-				if (currentState->GetIsCompulsionNext()) {
-					auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
+		else if (currentState->GetNextStateTime() && currentState->GetIsCompulsionNext()) {
+			auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
 
-					// もし次のステートがあれば、遷移
-					if (next) {
-						SetState(next, ctx);
-					}
-				}
+			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
+			if (next) {
+				SetState(next, ctx);
 			}
 		}
 	}
@@ -3931,6 +4147,9 @@ namespace Combo {
         bool HasNextState() const {
             return !nextStates.empty();
         }
+        bool HasNextState(ActionInput input) const {
+            return nextStates.find(input) != nextStates.end();
+        }
         // 入力受付可能か
         bool IsInputAcceptable() override {
             return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
@@ -3996,7 +4215,10 @@ namespace Combo {
         // 入力はバッファに保存のみ
         void HandleInput(ActionInput input) {
             bufferedInput = input;
+            isBufferedInputAccepted_ = false;
         }
+        bool CanTransition(ActionInput input) const;
+        std::optional<ActionInput> ConsumeTransitionedInput();
         // リセット
         void Reset() { SetState(rootState,{}); }
         // 設定
@@ -4026,6 +4248,8 @@ namespace Combo {
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<ActionInput> bufferedInput;   // 入力バッファ
+        std::optional<ActionInput> transitionedInput_;
+        bool isBufferedInputAccepted_ = false;
         bool isDebug = false;
     };
 }
@@ -4036,6 +4260,10 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cp
 ============================================================
 #include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
+#include <DirectXGame/application/base/Character/State/CharacterStateMachine.h>
 
 namespace Combo {
 
@@ -4055,7 +4283,58 @@ namespace Combo {
 	void System::Update(const Character::CharacterContext& ctx) {
 		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
+		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
+		if (transitionedInput && pendingCostInput_ && *transitionedInput == *pendingCostInput_) {
+			PayStamina(pendingStaminaCost_);
+		}
+		if (transitionedInput) {
+			pendingCostInput_.reset();
+			pendingStaminaCost_ = 0.0f;
+		}
 		comboDebug_->Update(ctx.dt);
+	}
+
+	bool System::RequestAttack(ActionInput input) {
+		if (!owner || owner->GetCurrentMainState() == Character::CharacterMainState::Special) {
+			return false;
+		}
+
+		const float staminaCost = GetStaminaCost(input);
+		if (!CanPayStamina(staminaCost)) {
+			return false;
+		}
+
+		if (owner->GetCurrentMainState() == Character::CharacterMainState::Attack) {
+			if (!comboStateMachine_->CanTransition(input)) {
+				return false;
+			}
+
+			comboStateMachine_->HandleInput(input);
+			pendingCostInput_ = input;
+			pendingStaminaCost_ = staminaCost;
+			return true;
+		}
+
+		const Character::CharacterMainState state = owner->GetCurrentMainState();
+		const bool canStart =
+			state == Character::CharacterMainState::Idle ||
+			state == Character::CharacterMainState::Move ||
+			state == Character::CharacterMainState::Jump;
+		if (!canStart || !owner->GetMoveComponent()) {
+			return false;
+		}
+
+		const std::string startCombo = ResolveStartCombo(input, owner->GetMoveComponent()->GetIsLanding());
+		if (!StartCombo(startCombo)) {
+			return false;
+		}
+
+		pendingCostInput_.reset();
+		pendingStaminaCost_ = 0.0f;
+		owner->GetAttackController()->SetIsAttack(true);
+		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
+		PayStamina(staminaCost);
+		return true;
 	}
 
 	void System::ClearNode() {
@@ -4070,6 +4349,8 @@ namespace Combo {
 		comboGlobalDatas_.clear();
 		comboNodenames_.clear();
 		parentTransforms_.clear();
+		pendingCostInput_.reset();
+		pendingStaminaCost_ = 0.0f;
 	}
 
 	void System::AddComboNode(const std::string& name, std::shared_ptr<NodeState> node) {
@@ -4100,10 +4381,75 @@ namespace Combo {
 		}
 	}
 
-	void System::StartCombo(const std::string& name) {
+	void System::RenameComboReferences(const std::string& oldName, const std::string& newName) {
+		for (auto& [nodeName, data] : comboGlobalDatas_) {
+			bool changed = false;
+			if (data.connection.lightAttack == oldName) {
+				data.connection.lightAttack = newName;
+				changed = true;
+			}
+			if (data.connection.heavyAttack == oldName) {
+				data.connection.heavyAttack = newName;
+				changed = true;
+			}
+			if (data.connection.skill == oldName) {
+				data.connection.skill = newName;
+				changed = true;
+			}
+			if (changed) {
+				SetGlobalComboData(nodeName == oldName ? newName : nodeName, data);
+			}
+		}
+
+		auto renameStart = [&](std::string& startName, const std::string& key) {
+			if (startName == oldName) {
+				startName = newName;
+				globalVariables->SetValue(name, key, newName);
+			}
+		};
+		renameStart(groundLightStart_, kGroundLightStartKey);
+		renameStart(airLightStart_, kAirLightStartKey);
+		renameStart(groundHeavyStart_, kGroundHeavyStartKey);
+		renameStart(airHeavyStart_, kAirHeavyStartKey);
+		renameStart(groundSkillStart_, kGroundSkillStartKey);
+		renameStart(airSkillStart_, kAirSkillStartKey);
+	}
+
+	bool System::StartCombo(const std::string& name) {
 		auto it = comboNodes_.find(name);
 		if (it != comboNodes_.end()) {
 			comboStateMachine_->SetRoot(it->second);
+			return true;
+		}
+		return false;
+	}
+
+	std::string System::ResolveStartCombo(ActionInput input, bool isLanding) const {
+		switch (input) {
+		case ActionInput::LightAttack:
+			return isLanding ? groundLightStart_ : airLightStart_;
+		case ActionInput::HeavyAttack:
+			return isLanding ? groundHeavyStart_ : airHeavyStart_;
+		case ActionInput::Skill:
+			return isLanding ? groundSkillStart_ : airSkillStart_;
+		default:
+			return "";
+		}
+	}
+
+	float System::GetStaminaCost(ActionInput input) const {
+		return input == ActionInput::Skill ? 25.0f : 0.0f;
+	}
+
+	bool System::CanPayStamina(float cost) const {
+		return cost <= 0.0f ||
+			(owner->GetCharacterParameterComponent() &&
+				owner->GetCharacterParameterComponent()->GetStamina() >= cost);
+	}
+
+	void System::PayStamina(float cost) {
+		if (cost > 0.0f && owner->GetCharacterParameterComponent()) {
+			owner->GetCharacterParameterComponent()->Stamina().Add(-cost);
 		}
 	}
 
@@ -4127,6 +4473,12 @@ namespace Combo {
 		{
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+		}
+		// 接続
+		{
+			globalVariables->AddItem(name, "接続先(弱攻撃)", data.connection.lightAttack);
+			globalVariables->AddItem(name, "接続先(強攻撃)", data.connection.heavyAttack);
+			globalVariables->AddItem(name, "接続先(スキル)", data.connection.skill);
 		}
 		// 条件
 		{
@@ -4209,6 +4561,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->AddItem(name, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
 			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
@@ -4252,6 +4605,12 @@ namespace Combo {
 		{
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+		}
+		// 接続
+		{
+			data.connection.lightAttack = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃)");
+			data.connection.heavyAttack = globalVariables->GetValue<std::string>(name, "接続先(強攻撃)");
+			data.connection.skill = globalVariables->GetValue<std::string>(name, "接続先(スキル)");
 		}
 		// 条件
 		{
@@ -4313,6 +4672,7 @@ namespace Combo {
 			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
 			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+			data.hitReaction.launchMaxHeight = globalVariables->GetValue<float>(name, "打ち上げ最大高度");
 			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
 			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
 
@@ -4378,6 +4738,12 @@ namespace Combo {
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 		}
+		// 接続
+		{
+			globalVariables->SetValue(name, "接続先(弱攻撃)", data.connection.lightAttack);
+			globalVariables->SetValue(name, "接続先(強攻撃)", data.connection.heavyAttack);
+			globalVariables->SetValue(name, "接続先(スキル)", data.connection.skill);
+		}
 		// 条件
 		{
 			globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
@@ -4441,6 +4807,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->SetValue(name, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
 			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
@@ -4550,15 +4917,47 @@ namespace Combo {
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
 	}
 
+	void System::ConnectSavedCombos() {
+		for (const auto& [nodeName, data] : comboGlobalDatas_) {
+			if (!data.connection.lightAttack.empty()) {
+				ConnectCombo(nodeName, ActionInput::LightAttack, data.connection.lightAttack);
+			}
+			if (!data.connection.heavyAttack.empty()) {
+				ConnectCombo(nodeName, ActionInput::HeavyAttack, data.connection.heavyAttack);
+			}
+			if (!data.connection.skill.empty()) {
+				ConnectCombo(nodeName, ActionInput::Skill, data.connection.skill);
+			}
+		}
+	}
+
 	void System::Create(const std::string name) {
 		this->name = name;
 		globalVariables->CreateGroup(name);
 
+		globalVariables->AddItem(name, kGroundLightStartKey, groundLightStart_);
+		globalVariables->AddItem(name, kAirLightStartKey, airLightStart_);
+		globalVariables->AddItem(name, kGroundHeavyStartKey, groundHeavyStart_);
+		globalVariables->AddItem(name, kAirHeavyStartKey, airHeavyStart_);
+		globalVariables->AddItem(name, kGroundSkillStartKey, groundSkillStart_);
+		globalVariables->AddItem(name, kAirSkillStartKey, airSkillStart_);
+		groundLightStart_ = globalVariables->GetValue<std::string>(name, kGroundLightStartKey);
+		airLightStart_ = globalVariables->GetValue<std::string>(name, kAirLightStartKey);
+		groundHeavyStart_ = globalVariables->GetValue<std::string>(name, kGroundHeavyStartKey);
+		airHeavyStart_ = globalVariables->GetValue<std::string>(name, kAirHeavyStartKey);
+		groundSkillStart_ = globalVariables->GetValue<std::string>(name, kGroundSkillStartKey);
+		airSkillStart_ = globalVariables->GetValue<std::string>(name, kAirSkillStartKey);
 
 		for (auto& data : globalVariables->GetGroupData(name)) {
+			if (data.first == kGroundLightStartKey || data.first == kAirLightStartKey ||
+				data.first == kGroundHeavyStartKey || data.first == kAirHeavyStartKey ||
+				data.first == kGroundSkillStartKey || data.first == kAirSkillStartKey) {
+				continue;
+			}
 			CreateCombo(globalVariables->GetValue<std::string>(name, data.first));
 		}
 
+		ConnectSavedCombos();
 	}
 
 #pragma endregion // 保存　適応
@@ -4573,6 +4972,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 #include <map>
 #include <string>
 #include <memory>
+#include <optional>
 #include "ComboDebug.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
@@ -4587,6 +4987,13 @@ namespace Combo {
 	static std::string MakeHitEffectNameKey(int index) {
 		return "ヒットエフェクト名前" + std::to_string(index);
 	}
+
+	const std::string kGroundLightStartKey = "開始コンボ(地上弱攻撃)";
+	const std::string kAirLightStartKey = "開始コンボ(空中弱攻撃)";
+	const std::string kGroundHeavyStartKey = "開始コンボ(地上強攻撃)";
+	const std::string kAirHeavyStartKey = "開始コンボ(空中強攻撃)";
+	const std::string kGroundSkillStartKey = "開始コンボ(地上スキル)";
+	const std::string kAirSkillStartKey = "開始コンボ(空中スキル)";
 
 
 	/// <summary>
@@ -4605,6 +5012,8 @@ namespace Combo {
 
 		// コンボ更新
 		void Update(const Character::CharacterContext& ctx);
+		// プレイヤーからの攻撃入力要求
+		bool RequestAttack(ActionInput input);
 		// クリア
 		void ClearNode();
 		// 名前設定
@@ -4673,12 +5082,10 @@ namespace Combo {
 		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
 		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to);
+		// コンボ名を参照している接続と開始ルートを更新
+		void RenameComboReferences(const std::string& oldName, const std::string& newName);
 		// 最初のコンボ
-		void StartCombo(const std::string& name);
-		// インプット
-		void InputCombo(ActionInput input) {
-			comboStateMachine_->HandleInput(input);
-		}
+		bool StartCombo(const std::string& name);
 		// コンボが終了したか
 		bool IsComboFinished() const {
 			return comboStateMachine_->IsComboFinished();
@@ -4705,6 +5112,11 @@ namespace Combo {
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
+		void ConnectSavedCombos();
+		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
+		float GetStaminaCost(ActionInput input) const;
+		bool CanPayStamina(float cost) const;
+		void PayStamina(float cost);
 
 		
 	private:
@@ -4725,6 +5137,14 @@ namespace Combo {
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 
 		bool isDebug = false;
+		std::optional<ActionInput> pendingCostInput_;
+		float pendingStaminaCost_ = 0.0f;
+		std::string groundLightStart_ = "MeleeAttack1";
+		std::string airLightStart_ = "JumpAttack";
+		std::string groundHeavyStart_ = "Attack10";
+		std::string airHeavyStart_ = "Attack10";
+		std::string groundSkillStart_ = "SkillAttack01";
+		std::string airSkillStart_ = "JumpSkillAttack01";
 
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
@@ -6113,13 +6533,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCondi
 void Combo::ComboCondition::Update(const Character::CharacterContext& ctx, float timer) {
 
 	// キャンセル受付クラス更新
-	if (!nextRecever_.GetIsNext()) {
-		cancelReceiver_.Update(ctx,data_, timer);
-	}
-	// コンボ入力受付クラス更新
-	if (!cancelReceiver_.GetIsCancel()) {
-		nextRecever_.Update(ctx, data_, timer);
-	}
+	cancelReceiver_.Update(ctx,data_, timer);
 	// 終了条件
 	endCondition_.Update(ctx, data_, timer);
 	// 移行条件
@@ -6790,6 +7204,7 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
+	launchStartHeight_ = 0.0f;
 	isAction_ = false;
 	hitMotionState_ = HitMotionState::None;
 
@@ -6829,7 +7244,18 @@ void HitMotionSystem::Update(float dt) {
 	// リアクション移動の有効時間中だけ毎フレームリクエストを送る
 	if (timer_ < data_.duration) {
 		Vector3 velocity = BuildMoveVelocity();
-		SendReactionMoveRequest(velocity * dt);
+		Vector3 movement = velocity * dt;
+		if (data_.type == HitReactionType::Launch && movement.y > 0.0f) {
+			const float maxHeight = launchStartHeight_ + data_.launchMaxHeight;
+			const float remainingHeight = maxHeight - owner->GetWorldTransform().GetWorldPosition().y;
+			if (remainingHeight <= 0.0f) {
+				movement.y = 0.0f;
+			}
+			else if (movement.y > remainingHeight) {
+				movement.y = remainingHeight;
+			}
+		}
+		SendReactionMoveRequest(movement);
 	}
 
 	// Down 状態への遷移
@@ -6870,6 +7296,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	hitStunTimer_ = data_.hitStunTime;	// ヒットスタン時間
 	downTimer_ = data_.downTime;		// ダウン時間
 	launchFloatTime_ = data_.launchFloatTime;	// 打ち上げ時間　
+	launchStartHeight_ = owner->GetWorldTransform().GetWorldPosition().y;
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	isAction_ = true;
 
@@ -7037,6 +7464,7 @@ void HitMotionSystem::FinishReaction() {
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	launchFloatTime_ = 0.0f;
+	launchStartHeight_ = 0.0f;
 	hitMotionState_ = HitMotionState::None;
 }
 
@@ -7076,6 +7504,7 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 		});
 }
 #pragma endregion
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
@@ -7179,6 +7608,8 @@ private:
 	float downTimer_ = 0.0f;
 	// 打ち上げ時間
 	float launchFloatTime_ = 0.0f;
+	// 打ち上げ開始時の高さ
+	float launchStartHeight_ = 0.0f;
 	// ヒットストップ時間
 	float hitStopTime_ = 0.0f;
 	// セルフヒットストップ時間
@@ -7197,6 +7628,7 @@ private:
 	// エフェクト
 	EffectSystem* effectSystem = nullptr;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
@@ -7917,119 +8349,18 @@ namespace HitBox {
 File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHandler.cpp
 ============================================================
 #include "AttackInputHandler.h"
-#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-
-AttackDecision AttackBranchResolver::Resolve(const AttackContext& ctx,
-    ActionInput input){
-    AttackDecision result{};
-
-    if (ctx.isSpecial) {
-        return result;
-    }
-
-    // 最初か
-    const bool canStart =
-        (ctx.mainState == Character::CharacterMainState::Move) ||
-        (ctx.mainState == Character::CharacterMainState::Idle) ||
-        (ctx.mainState == Character::CharacterMainState::Jump);
-
-    // 攻撃中か
-    const bool isAttack = (ctx.mainState == Character::CharacterMainState::Attack);
-
-    // 攻撃中なら
-    if (isAttack) {
-       
-        if (input == ActionInput::Skill) {
-            if (ctx.stamina < 25) {
-                return result;
-            }
-			result.staminaCost = 25;
-        }
-        result.accepted = true;
-        result.isComboInput = true;
-        result.comboInput = input;
-        return result;
-    }
-
-    if (!canStart) {
-        return result;
-    }
-
-    switch (input) {
-    case ActionInput::LightAttack:
-        result.accepted = true;
-        result.shouldChangeToAttackState = true;
-        result.startComboName = ctx.isLanding ? "MeleeAttack1" : "JumpAttack";
-        break;
-
-    case ActionInput::HeavyAttack:
-        result.accepted = true;
-        result.shouldChangeToAttackState = true;
-        result.startComboName = ctx.isLanding ? "Attack10" : "Attack10";
-        break;
-
-    case ActionInput::Skill:
-        if (ctx.stamina < 25) {
-            return result;
-        }
-        result.accepted = true;
-        result.shouldChangeToAttackState = true;
-        result.startComboName = ctx.isLanding ? "SkillAttack01" :"JumpSkillAttack01";
-        result.staminaCost = 25;
-        break;
-
-    default:
-        break;
-    }
-
-    return result;
-}
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHandler.h
 ============================================================
 #pragma once
-#include<memory>
-#include<string>
-#include "DirectXGame/application/base/Character/State/MainState.h"
-
-
 // 動作種類
 enum class ActionInput {
 	LightAttack,        // 弱攻撃
 	HeavyAttack,        // 強攻撃
 	Skill,				// スキル攻撃
 };
-
-// 攻撃コンテキスト
-struct AttackContext {
-	Character::CharacterMainState mainState = Character::CharacterMainState::Idle;
-	bool isLanding = true;
-	bool isSpecial = false;
-	int stamina = 0;
-};
-
-// 使用攻撃判定データ
-struct AttackDecision {
-	bool accepted = false;
-	bool isComboInput = false;
-	ActionInput comboInput = ActionInput::LightAttack;
-	bool shouldChangeToAttackState = false;
-	std::string startComboName;
-	float staminaCost = 0;
-};
-
-// 判定で攻撃を選別するクラス
-class AttackBranchResolver {
-public:
-	static AttackDecision Resolve(const AttackContext& ctx, ActionInput input);
-};
-
-// 前方宣言
-namespace Character {
-	class BaseCharacter;
-}
 
 
 ============================================================
@@ -20218,40 +20549,9 @@ namespace Character {
 	void NormalPlayer::SkillAttack() { RequestAttack(ActionInput::Skill); };
 
 	void NormalPlayer::RequestAttack(ActionInput input) {
-		AttackContext ctx{};
-		ctx.mainState = stateMachine_->GetCurrentMainState();
-		ctx.isLanding = moveComponent_->GetIsLanding();
-		ctx.isSpecial = isSpecial;
-		ctx.stamina = static_cast<int>(parameterComponent_->GetStamina());
-
-		const AttackDecision decision = AttackBranchResolver::Resolve(ctx, input);
-		if (!decision.accepted) {
-			return;
-		}
-
 		auto* ac = GetAttackController();
-		if (!ac) {
-			return;
-		}
-
-		if (decision.isComboInput) {
-			ac->GetComboSystem()->InputCombo(decision.comboInput);
-
-
-			if (decision.staminaCost > 0) {
-				parameterComponent_->Stamina().Add(-decision.staminaCost);
-			}
-			return;
-		}
-
-		if (decision.shouldChangeToAttackState) {
-			ac->SetIsAttack(true);
-			stateMachine_->ChangeState(CharacterMainState::Attack);
-			ac->GetComboSystem()->StartCombo(decision.startComboName);
-
-			if (decision.staminaCost > 0) {
-				parameterComponent_->Stamina().Add(-decision.staminaCost);
-			}
+		if (ac && ac->GetComboSystem()) {
+			ac->GetComboSystem()->RequestAttack(input);
 		}
 	}
 
@@ -20265,34 +20565,6 @@ namespace Character {
 		comboSystem->SetParentTransform("NoParent", nullptr);
 		// ComboPlayer に登録されたノードを読み込むことで、攻撃データの追加をコード変更なしで反映する。
 		comboSystem->Create("ComboPlayer");
-
-		
-
-		// コンボ連結設定
-		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::LightAttack, "MeleeCombo1"); // コンボ連結
-		
-		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::LightAttack, "MeleeCombo2"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::LightAttack, "MeleeCombo3"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::LightAttack, "MeleeCombo4"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::LightAttack, "MeleeCombo5"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::LightAttack, "MeleeCombo6"); // コンボ連結
-
-		// 弱攻撃の途中から強攻撃フィニッシュへ派生可能にする。
-		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::HeavyAttack, "Attack10");
-		// 強攻撃専用の追撃。
-		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11");
-
-		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
-		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結
-		comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // スキル後の追撃
-
-		comboSystem->ConnectCombo("JumpSkillAttack01", ActionInput::LightAttack, "JumpAttack"); // コンボ連結
 
 	}
 
@@ -30090,7 +30362,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
@@ -30108,13 +30380,6 @@ void CharacterDebugScene::Update(){
 	
 	inputSystem_->Update(GetTime());
 
-	// リトライ
-	if (input_->IsTriggerKey(DIK_R)) {
-	//	GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
-	}
-	if (input_->IsTriggerKey(DIK_T)) {
-	//	GetSceneManager()->ChangeScene("TITLE", 0.25f);
-	}
 	// デバッグモード設定
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
 
