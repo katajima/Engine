@@ -62,7 +62,7 @@
         },
         "カメラロックオン": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "カメラロックオンズーム": {
             "type": "bool",

@@ -42,19 +42,19 @@
         },
         "カメラズーム": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "カメラズーム時間": {
             "type": "float",
-            "value": 0.0
+            "value": 0.2800000011920929
         },
         "カメラズーム速度": {
             "type": "float",
-            "value": 0.0
+            "value": 3.0
         },
         "カメラズーム量": {
             "type": "float",
-            "value": 0.0
+            "value": 1.2599999904632568
         },
         "カメラズーム開始時間": {
             "type": "float",
@@ -62,7 +62,7 @@
         },
         "カメラロックオン": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "カメラロックオンズーム": {
             "type": "bool",
