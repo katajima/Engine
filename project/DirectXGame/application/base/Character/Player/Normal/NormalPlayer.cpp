@@ -357,41 +357,7 @@ namespace Character {
 		// ComboPlayer に登録されたノードを読み込むことで、攻撃データの追加をコード変更なしで反映する。
 		comboSystem->Create("ComboPlayer");
 
-		// 近接小攻撃1のデータ送る
-		comboSystem->CreateCombo("MeleeAttack1");
-		// 近接小攻撃2のデータ送る
-		comboSystem->CreateCombo("MeleeAttack2");
-		// 近接小連撃1のデータ送る
-		comboSystem->CreateCombo("MeleeCombo1");
-		// 近接小連撃2のデータ送る
-		comboSystem->CreateCombo("MeleeCombo2");
-		// 近接小連撃3のデータ送る
-		comboSystem->CreateCombo("MeleeCombo3");
-
-		// ジャンプ攻撃のデータ送る
-		comboSystem->CreateCombo("JumpAttack");
 		
-		
-		// スキル攻撃のデータ送る
-		comboSystem->CreateCombo("SkillAttack01");
-		// ジャンプスキル攻撃のデータ送る
-		comboSystem->CreateCombo("JumpSkillAttack01");
-
-
-		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6");
-		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7");
-		// コンボ8のデータ送る
-		comboSystem->CreateCombo("Attack8");
-		// コンボ9のデータ送る
-		comboSystem->CreateCombo("Attack9");
-		// コンボ10のデータ送る
-		comboSystem->CreateCombo("Attack10");
-		// コンボ11のデータ送る
-		comboSystem->CreateCombo("Attack11");
-		// テスト用
-		comboSystem->CreateCombo("testAttack");
 
 		// コンボ連結設定
 		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
@@ -399,11 +365,17 @@ namespace Character {
 		
 		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::LightAttack, "MeleeCombo2"); // コンボ連結
 		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::LightAttack, "MeleeCombo3"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::LightAttack, "MeleeCombo4"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::LightAttack, "MeleeCombo5"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::LightAttack, "MeleeCombo6"); // コンボ連結
 
 		// 弱攻撃の途中から強攻撃フィニッシュへ派生可能にする。
 		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::HeavyAttack, "Attack10");
 		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::HeavyAttack, "Attack10");
 		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::HeavyAttack, "Attack10");
 		// 強攻撃専用の追撃。
 		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11");
 

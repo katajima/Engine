@@ -52,6 +52,18 @@
             "type": "string",
             "value": "MeleeCombo3"
         },
+        "MeleeCombo4": {
+            "type": "string",
+            "value": "MeleeCombo4"
+        },
+        "MeleeCombo5": {
+            "type": "string",
+            "value": "MeleeCombo5"
+        },
+        "MeleeCombo6": {
+            "type": "string",
+            "value": "MeleeCombo6"
+        },
         "SkillAttack01": {
             "type": "string",
             "value": "SkillAttack01"
