@@ -97,7 +97,7 @@ private: // 一旦
 		Vector3 rotate = { Math::DegreesToRadians(-90), 0, 0 };
 
 
-		int maxGauge_ = 40;			// 最大ゲージ設定
+		int maxGauge_ = 20;			// 最大ゲージ設定
 		int maxBullet = 40;			// 発射数
 		int bulletNum = 0;			// 弾番号
 

@@ -126,7 +126,7 @@ void PlayerUI::InitializePlayerUI() {
 
 	// 初期化スペシャルUI
 	spSpriteData.color = { 0,0,1,1 };
-	spSpriteData.maxMeter = 40.0f;
+	spSpriteData.maxMeter = 20.0f;
 	InitUIMeter("SpecailBer", spSpriteData.pos + Vector2{ 0,50 }, true);
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");
 	specailBer->SetMaxSize(spSpriteData.size, spSpriteData.offset);		// 最大サイズ
