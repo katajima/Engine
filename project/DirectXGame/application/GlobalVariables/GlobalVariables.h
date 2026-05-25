@@ -77,6 +77,9 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void SaveFile(const std::string& groupName);
 
+		// 保存ファイル削除
+		bool RemoveSavedFile(const std::string& groupName);
+
 		/// <summary>
 		/// ディレクトリの全ファイル読み込み
 		/// </summary>

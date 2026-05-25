@@ -237,6 +237,13 @@ void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
 	ofs.close();
 }
 
+bool Engine::GlobalVariables::RemoveSavedFile(const std::string& groupName) {
+	const std::filesystem::path filePath = std::filesystem::path(kDirectoryPath) / (groupName + ".json");
+	std::error_code error;
+	const bool removed = std::filesystem::remove(filePath, error);
+	return removed && !error;
+}
+
 /// <summary>
 /// 全ロード
 /// </summary>

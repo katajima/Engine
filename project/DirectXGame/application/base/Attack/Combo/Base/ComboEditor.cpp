@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <cctype>
 
 namespace Combo {
 
@@ -426,6 +427,7 @@ namespace Combo {
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
 		comboSystem->SertIsDebug(isComboEditorActive_);
+		DrawNodeManagement();
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
@@ -467,6 +469,98 @@ namespace Combo {
 		ImGui::End();
 #endif // _DEBUG
 	};
+
+	void Editor::DrawNodeManagement() {
+#ifdef _DEBUG
+		ImGui::SeparatorText("Combo Nodes");
+		ImGui::InputText("New Combo Name", newComboNameBuffer_.data(), newComboNameBuffer_.size());
+		ImGui::SameLine();
+		if (ImGui::Button("Add Combo")) {
+			AddComboNode();
+		}
+
+		if (!selectedComboEditorBlockName_.empty()) {
+			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
+			if (ImGui::Button("Delete Selected Combo")) {
+				pendingDeleteComboName_ = selectedComboEditorBlockName_;
+				ImGui::OpenPopup("Confirm Combo Delete");
+			}
+		}
+
+		if (!nodeManagementMessage_.empty()) {
+			ImGui::TextWrapped("%s", nodeManagementMessage_.c_str());
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Combo Delete", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Delete combo '%s'?", pendingDeleteComboName_.c_str());
+			ImGui::TextWrapped("This removes it from the combo list and deletes its saved JSON data.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingDeleteComboName_.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Delete Permanently", ImVec2(160.0f, 0.0f))) {
+				DeleteComboNode(pendingDeleteComboName_);
+				pendingDeleteComboName_.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::Separator();
+#endif
+	}
+
+	void Editor::AddComboNode() {
+		std::string comboName = newComboNameBuffer_.data();
+		if (comboName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return;
+		}
+		for (const unsigned char c : comboName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "A combo with that name already exists.";
+			return;
+		}
+		if (globalVariables->HasGroup(comboName)) {
+			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+			return;
+		}
+
+		comboSystem->CreateCombo(comboName);
+		globalVariables->SaveFile(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		ApplyComboEditorToSystem();
+		selectedComboEditorBlockName_ = comboName;
+		newComboNameBuffer_.fill('\0');
+		nodeManagementMessage_ = "Added and saved combo: " + comboName;
+	}
+
+	void Editor::DeleteComboNode(const std::string& comboName) {
+		if (comboName.empty() || !globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+
+		globalVariables->RemoveItem(comboSystem->GetName(), comboName);
+		globalVariables->RemoveGroup(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		const bool removedFile = globalVariables->RemoveSavedFile(comboName);
+
+		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+		if (player) {
+			player->Reload();
+		}
+		ApplyComboEditorToSystem();
+		nodeManagementMessage_ = removedFile
+			? "Deleted combo: " + comboName
+			: "Removed combo from the list, but its JSON file could not be deleted: " + comboName;
+	}
 
 	void Editor::UpdateImGui(float dt) {
 #ifdef _DEBUG

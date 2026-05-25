@@ -32,6 +32,7 @@ namespace Combo {
 
 		comboNodes_.clear();
 		comboGlobalDatas_.clear();
+		comboNodenames_.clear();
 		parentTransforms_.clear();
 	}
 

@@ -181,10 +181,10 @@ void CharacterDebugScene::Update(){
 
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
+	//	GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
 	}
 	if (input_->IsTriggerKey(DIK_T)) {
-		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+	//	GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	// デバッグモード設定
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());

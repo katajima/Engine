@@ -1,5 +1,6 @@
 #pragma once
 #include  "ComboImGui.h"
+#include <array>
 #include "map"
 #include "DirectXGame/engine/Effect/EffectGlovalData.h"
 namespace Engine {
@@ -123,6 +124,10 @@ namespace Combo {
 		void ApplyComboEditorToSystem();
 		// グローバルデータ設定
 		void SetGlobalData();
+		// コンボノードの管理
+		void DrawNodeManagement();
+		void AddComboNode();
+		void DeleteComboNode(const std::string& comboName);
 	private:
 		// コンボエディターブロック作成
 		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
@@ -142,6 +147,9 @@ namespace Combo {
 
 		// 選択中のコンボエディターブロック名
 		std::string selectedComboEditorBlockName_;
+		std::array<char, 128> newComboNameBuffer_{};
+		std::string pendingDeleteComboName_;
+		std::string nodeManagementMessage_;
 
 		GlobalData data;
 
