@@ -87,6 +87,9 @@ namespace Combo {
         bool HasNextState() const {
             return !nextStates.empty();
         }
+        bool HasNextState(ActionInput input) const {
+            return nextStates.find(input) != nextStates.end();
+        }
         // 入力受付可能か
         bool IsInputAcceptable() override {
             return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
@@ -152,7 +155,10 @@ namespace Combo {
         // 入力はバッファに保存のみ
         void HandleInput(ActionInput input) {
             bufferedInput = input;
+            isBufferedInputAccepted_ = false;
         }
+        bool CanTransition(ActionInput input) const;
+        std::optional<ActionInput> ConsumeTransitionedInput();
         // リセット
         void Reset() { SetState(rootState,{}); }
         // 設定
@@ -182,6 +188,8 @@ namespace Combo {
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<ActionInput> bufferedInput;   // 入力バッファ
+        std::optional<ActionInput> transitionedInput_;
+        bool isBufferedInputAccepted_ = false;
         bool isDebug = false;
     };
 }

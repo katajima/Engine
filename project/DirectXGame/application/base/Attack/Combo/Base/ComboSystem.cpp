@@ -1,5 +1,9 @@
 #include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
+#include <DirectXGame/application/base/Character/State/CharacterStateMachine.h>
 
 namespace Combo {
 
@@ -19,7 +23,58 @@ namespace Combo {
 	void System::Update(const Character::CharacterContext& ctx) {
 		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
+		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
+		if (transitionedInput && pendingCostInput_ && *transitionedInput == *pendingCostInput_) {
+			PayStamina(pendingStaminaCost_);
+		}
+		if (transitionedInput) {
+			pendingCostInput_.reset();
+			pendingStaminaCost_ = 0.0f;
+		}
 		comboDebug_->Update(ctx.dt);
+	}
+
+	bool System::RequestAttack(ActionInput input) {
+		if (!owner || owner->GetCurrentMainState() == Character::CharacterMainState::Special) {
+			return false;
+		}
+
+		const float staminaCost = GetStaminaCost(input);
+		if (!CanPayStamina(staminaCost)) {
+			return false;
+		}
+
+		if (owner->GetCurrentMainState() == Character::CharacterMainState::Attack) {
+			if (!comboStateMachine_->CanTransition(input)) {
+				return false;
+			}
+
+			comboStateMachine_->HandleInput(input);
+			pendingCostInput_ = input;
+			pendingStaminaCost_ = staminaCost;
+			return true;
+		}
+
+		const Character::CharacterMainState state = owner->GetCurrentMainState();
+		const bool canStart =
+			state == Character::CharacterMainState::Idle ||
+			state == Character::CharacterMainState::Move ||
+			state == Character::CharacterMainState::Jump;
+		if (!canStart || !owner->GetMoveComponent()) {
+			return false;
+		}
+
+		const std::string startCombo = ResolveStartCombo(input, owner->GetMoveComponent()->GetIsLanding());
+		if (!StartCombo(startCombo)) {
+			return false;
+		}
+
+		pendingCostInput_.reset();
+		pendingStaminaCost_ = 0.0f;
+		owner->GetAttackController()->SetIsAttack(true);
+		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
+		PayStamina(staminaCost);
+		return true;
 	}
 
 	void System::ClearNode() {
@@ -34,6 +89,8 @@ namespace Combo {
 		comboGlobalDatas_.clear();
 		comboNodenames_.clear();
 		parentTransforms_.clear();
+		pendingCostInput_.reset();
+		pendingStaminaCost_ = 0.0f;
 	}
 
 	void System::AddComboNode(const std::string& name, std::shared_ptr<NodeState> node) {
@@ -64,10 +121,41 @@ namespace Combo {
 		}
 	}
 
-	void System::StartCombo(const std::string& name) {
+	bool System::StartCombo(const std::string& name) {
 		auto it = comboNodes_.find(name);
 		if (it != comboNodes_.end()) {
 			comboStateMachine_->SetRoot(it->second);
+			return true;
+		}
+		return false;
+	}
+
+	std::string System::ResolveStartCombo(ActionInput input, bool isLanding) const {
+		switch (input) {
+		case ActionInput::LightAttack:
+			return isLanding ? "MeleeAttack1" : "JumpAttack";
+		case ActionInput::HeavyAttack:
+			return "Attack10";
+		case ActionInput::Skill:
+			return isLanding ? "SkillAttack01" : "JumpSkillAttack01";
+		default:
+			return "";
+		}
+	}
+
+	float System::GetStaminaCost(ActionInput input) const {
+		return input == ActionInput::Skill ? 25.0f : 0.0f;
+	}
+
+	bool System::CanPayStamina(float cost) const {
+		return cost <= 0.0f ||
+			(owner->GetCharacterParameterComponent() &&
+				owner->GetCharacterParameterComponent()->GetStamina() >= cost);
+	}
+
+	void System::PayStamina(float cost) {
+		if (cost > 0.0f && owner->GetCharacterParameterComponent()) {
+			owner->GetCharacterParameterComponent()->Stamina().Add(-cost);
 		}
 	}
 

@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <optional>
 #include "ComboDebug.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
@@ -34,6 +35,8 @@ namespace Combo {
 
 		// コンボ更新
 		void Update(const Character::CharacterContext& ctx);
+		// プレイヤーからの攻撃入力要求
+		bool RequestAttack(ActionInput input);
 		// クリア
 		void ClearNode();
 		// 名前設定
@@ -103,11 +106,7 @@ namespace Combo {
 		// コンボ接続
 		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to);
 		// 最初のコンボ
-		void StartCombo(const std::string& name);
-		// インプット
-		void InputCombo(ActionInput input) {
-			comboStateMachine_->HandleInput(input);
-		}
+		bool StartCombo(const std::string& name);
 		// コンボが終了したか
 		bool IsComboFinished() const {
 			return comboStateMachine_->IsComboFinished();
@@ -134,6 +133,10 @@ namespace Combo {
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
+		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
+		float GetStaminaCost(ActionInput input) const;
+		bool CanPayStamina(float cost) const;
+		void PayStamina(float cost);
 
 		
 	private:
@@ -154,6 +157,8 @@ namespace Combo {
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 
 		bool isDebug = false;
+		std::optional<ActionInput> pendingCostInput_;
+		float pendingStaminaCost_ = 0.0f;
 
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;

@@ -309,40 +309,9 @@ namespace Character {
 	void NormalPlayer::SkillAttack() { RequestAttack(ActionInput::Skill); };
 
 	void NormalPlayer::RequestAttack(ActionInput input) {
-		AttackContext ctx{};
-		ctx.mainState = stateMachine_->GetCurrentMainState();
-		ctx.isLanding = moveComponent_->GetIsLanding();
-		ctx.isSpecial = isSpecial;
-		ctx.stamina = static_cast<int>(parameterComponent_->GetStamina());
-
-		const AttackDecision decision = AttackBranchResolver::Resolve(ctx, input);
-		if (!decision.accepted) {
-			return;
-		}
-
 		auto* ac = GetAttackController();
-		if (!ac) {
-			return;
-		}
-
-		if (decision.isComboInput) {
-			ac->GetComboSystem()->InputCombo(decision.comboInput);
-
-
-			if (decision.staminaCost > 0) {
-				parameterComponent_->Stamina().Add(-decision.staminaCost);
-			}
-			return;
-		}
-
-		if (decision.shouldChangeToAttackState) {
-			ac->SetIsAttack(true);
-			stateMachine_->ChangeState(CharacterMainState::Attack);
-			ac->GetComboSystem()->StartCombo(decision.startComboName);
-
-			if (decision.staminaCost > 0) {
-				parameterComponent_->Stamina().Add(-decision.staminaCost);
-			}
+		if (ac && ac->GetComboSystem()) {
+			ac->GetComboSystem()->RequestAttack(input);
 		}
 	}
 

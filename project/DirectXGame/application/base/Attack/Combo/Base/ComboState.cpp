@@ -74,8 +74,19 @@ namespace Combo {
 			currentState->Enter(owner, ctx);	// 開始処理
 		}
 		bufferedInput.reset(); // 状態遷移したら入力リセット
+		isBufferedInputAccepted_ = false;
 	}
 
+	bool StateMachine::CanTransition(ActionInput input) const {
+		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
+		return node && node->HasNextState(input);
+	}
+
+	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
+		std::optional<ActionInput> result = transitionedInput_;
+		transitionedInput_.reset();
+		return result;
+	}
 
 	void StateMachine::Update(const Character::CharacterContext& ctx) {
 		// ステートが無いなら早期リターン
@@ -84,33 +95,41 @@ namespace Combo {
 		// 現在のステート更新
 		currentState->Update(owner, ctx);
 
-		// 入力がバッファされていて、入力受付時間内なら状態遷移
-		if (bufferedInput) {
+		if (!isDebug && owner->GetCurrentMainState() != Character::CharacterMainState::Attack) {
+			bufferedInput.reset();
+			isBufferedInputAccepted_ = false;
+			return;
+		}
 
-			// コンボ移行時間に達して次のステートへ移行するなら
-			if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
-				auto next = currentState->HandleInput(owner, *bufferedInput);
+		// 入力種類は RequestAttack から渡された ActionInput を正とする。
+		if (bufferedInput) {
+			if (currentState->IsInputAcceptable()) {
+				isBufferedInputAccepted_ = true;
+			}
+			// 入力受付済みで、コンボ移行時間に達したら状態遷移する。
+			if (isBufferedInputAccepted_ && currentState->GetNextStateTime()) {
+				ActionInput transitionInput = *bufferedInput;
+				auto next = currentState->HandleInput(owner, transitionInput);
 				if (currentState->GetIsCompulsionNext()) {
-					next = currentState->HandleInput(owner, ActionInput::LightAttack);
+					transitionInput = ActionInput::LightAttack;
+					next = currentState->HandleInput(owner, transitionInput);
 				}
 
 				// もし次のステートがあれば、遷移
 				if (next) {
+					transitionedInput_ = transitionInput;
 					SetState(next, ctx);
 				}
 				bufferedInput.reset();
+				isBufferedInputAccepted_ = false;
 			}
 		}
-		else {// コンボ移行時間に達して次のステートへ移行するなら
-			if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
-				if (currentState->GetIsCompulsionNext()) {
-					auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
+		else if (currentState->GetNextStateTime() && currentState->GetIsCompulsionNext()) {
+			auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
 
-					// もし次のステートがあれば、遷移
-					if (next) {
-						SetState(next, ctx);
-					}
-				}
+			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
+			if (next) {
+				SetState(next, ctx);
 			}
 		}
 	}

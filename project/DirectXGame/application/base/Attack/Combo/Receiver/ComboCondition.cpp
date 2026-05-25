@@ -6,13 +6,7 @@
 void Combo::ComboCondition::Update(const Character::CharacterContext& ctx, float timer) {
 
 	// キャンセル受付クラス更新
-	if (!nextRecever_.GetIsNext()) {
-		cancelReceiver_.Update(ctx,data_, timer);
-	}
-	// コンボ入力受付クラス更新
-	if (!cancelReceiver_.GetIsCancel()) {
-		nextRecever_.Update(ctx, data_, timer);
-	}
+	cancelReceiver_.Update(ctx,data_, timer);
 	// 終了条件
 	endCondition_.Update(ctx, data_, timer);
 	// 移行条件
