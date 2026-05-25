@@ -326,34 +326,6 @@ namespace Character {
 		// ComboPlayer に登録されたノードを読み込むことで、攻撃データの追加をコード変更なしで反映する。
 		comboSystem->Create("ComboPlayer");
 
-		
-
-		// コンボ連結設定
-		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::LightAttack, "MeleeCombo1"); // コンボ連結
-		
-		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::LightAttack, "MeleeCombo2"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::LightAttack, "MeleeCombo3"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::LightAttack, "MeleeCombo4"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::LightAttack, "MeleeCombo5"); // コンボ連結
-		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::LightAttack, "MeleeCombo6"); // コンボ連結
-
-		// 弱攻撃の途中から強攻撃フィニッシュへ派生可能にする。
-		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::HeavyAttack, "Attack10");
-		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::HeavyAttack, "Attack10");
-		// 強攻撃専用の追撃。
-		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11");
-
-		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
-		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結
-		comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // スキル後の追撃
-
-		comboSystem->ConnectCombo("JumpSkillAttack01", ActionInput::LightAttack, "JumpAttack"); // コンボ連結
-
 	}
 
 	void NormalPlayer::Reload() { ReloadComboData(); }

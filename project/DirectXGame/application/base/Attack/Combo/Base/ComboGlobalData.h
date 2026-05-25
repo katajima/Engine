@@ -142,6 +142,13 @@ namespace Combo {
 		float trailEffectLifeTime = 1.0;
 	};
 
+	// 保存項目用コンボ接続データ
+	struct GlobalConnection {
+		std::string lightAttack = "";
+		std::string heavyAttack = "";
+		std::string skill = "";
+	};
+
 	// 保存項目用コンボデータ
 	struct GlobalData {
 		// 攻撃タイプ
@@ -160,5 +167,7 @@ namespace Combo {
 		GloblEffectData effect{};
 		// カメラ 
 		GlobalCameraData camera{};
+		// 次のコンボへの接続
+		GlobalConnection connection{};
 	};
 };

@@ -1,5 +1,17 @@
 {
     "SkillAttack01": {
+        "接続先(弱攻撃)": {
+            "type": "string",
+            "value": "Attack6"
+        },
+        "接続先(強攻撃)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(スキル)": {
+            "type": "string",
+            "value": "SkillAttack01"
+        },
         "Y方向ノックバック": {
             "type": "bool",
             "value": false

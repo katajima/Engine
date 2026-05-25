@@ -133,6 +133,7 @@ namespace Combo {
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
+		void ConnectSavedCombos();
 		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
 		float GetStaminaCost(ActionInput input) const;
 		bool CanPayStamina(float cost) const;

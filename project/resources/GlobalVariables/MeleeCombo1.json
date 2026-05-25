@@ -1,5 +1,17 @@
 {
     "MeleeCombo1": {
+        "接続先(弱攻撃)": {
+            "type": "string",
+            "value": "MeleeCombo2"
+        },
+        "接続先(強攻撃)": {
+            "type": "string",
+            "value": "Attack10"
+        },
+        "接続先(スキル)": {
+            "type": "string",
+            "value": ""
+        },
         "Y方向ノックバック": {
             "type": "bool",
             "value": false

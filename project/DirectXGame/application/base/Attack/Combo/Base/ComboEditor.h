@@ -52,6 +52,8 @@ namespace Combo {
 		void ImGuiReaction();
 		// カメラ設定
 		void ImGuiCamera();
+		// コンボ接続設定
+		void ImGuiConnection();
 	private:
 		// シーケンサーの状態をステートに適応
 		void SequencerApplyToState();

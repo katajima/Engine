@@ -78,6 +78,8 @@ namespace Combo {
 		ImGuiApplyHitBox();
 		// カメラ設定
 		ImGuiCamera();
+		// コンボ接続設定
+		ImGuiConnection();
 		// ステートのコンボデータ取得	
 		ComboData& comboData = state->Data();
 		// ステートの時間設定
@@ -322,6 +324,39 @@ namespace Combo {
 		}
 	};
 
+	void EditorBlock::ImGuiConnection() {
+		if (!ImGui::CollapsingHeader("コンボ接続")) {
+			return;
+		}
+
+		auto drawConnection = [this](const char* label, std::string& target) {
+			const char* preview = target.empty() ? "なし" : target.c_str();
+			if (ImGui::BeginCombo(label, preview)) {
+				const bool noSelection = target.empty();
+				if (ImGui::Selectable("なし", noSelection)) {
+					target.clear();
+				}
+				if (noSelection) {
+					ImGui::SetItemDefaultFocus();
+				}
+				for (const std::string& comboName : conectComboNames_) {
+					const bool selected = target == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						target = comboName;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		};
+
+		drawConnection("弱攻撃入力の接続先", data_.connection.lightAttack);
+		drawConnection("強攻撃入力の接続先", data_.connection.heavyAttack);
+		drawConnection("スキル入力の接続先", data_.connection.skill);
+	}
+
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
@@ -341,6 +376,8 @@ namespace Combo {
 		data_.camera = comboData.GetComboCamera().GetData();
 		// エフェクト
 		data_.effect = comboData.GetComboEffect().GetData();
+		// 接続
+		data_.connection = comboSystem->GetComboGlobalData(stateName).connection;
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
@@ -448,12 +485,14 @@ namespace Combo {
 
 		// 全てセーブ
 		if (ImGui::Button("AllSave")) {
+			SetGlobalData();
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				globalVariables->SaveFile(it.first);
 			}
 		}
 		// セーブ
 		if (ImGui::Button("Save")) {
+			SetGlobalData();
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				if (it.first == selectedComboEditorBlockName_)
 					globalVariables->SaveFile(it.first);
@@ -547,6 +586,30 @@ namespace Combo {
 			return;
 		}
 
+		for (auto& node : comboSystem->GetComboNodeStates()) {
+			if (node.first == comboName) {
+				continue;
+			}
+			GlobalData& data = comboSystem->GetComboGlobalData(node.first);
+			bool changed = false;
+			if (data.connection.lightAttack == comboName) {
+				data.connection.lightAttack.clear();
+				changed = true;
+			}
+			if (data.connection.heavyAttack == comboName) {
+				data.connection.heavyAttack.clear();
+				changed = true;
+			}
+			if (data.connection.skill == comboName) {
+				data.connection.skill.clear();
+				changed = true;
+			}
+			if (changed) {
+				comboSystem->SetGlobalComboData(node.first, data);
+				globalVariables->SaveFile(node.first);
+			}
+		}
+
 		globalVariables->RemoveItem(comboSystem->GetName(), comboName);
 		globalVariables->RemoveGroup(comboName);
 		globalVariables->SaveFile(comboSystem->GetName());
@@ -597,6 +660,9 @@ namespace Combo {
 		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
 		for (auto& comboState : comboSystem->GetComboNodeStates()) {
 			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.first, owner);
+		}
+		for (auto& combo : comboEditorBlocks_) {
+			combo.second.SetConectComboNames(comboEditorBlockNames_);
 		}
 
 		// コンボ再構築後、選択が消えてたら補正
@@ -660,7 +726,8 @@ namespace Combo {
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
-
+			// 接続
+			data.connection = comboEditorBlocks_[it.first].GetData().connection;
 
 		}
 

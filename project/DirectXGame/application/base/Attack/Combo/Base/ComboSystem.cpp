@@ -180,6 +180,12 @@ namespace Combo {
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 		}
+		// 接続
+		{
+			globalVariables->AddItem(name, "接続先(弱攻撃)", data.connection.lightAttack);
+			globalVariables->AddItem(name, "接続先(強攻撃)", data.connection.heavyAttack);
+			globalVariables->AddItem(name, "接続先(スキル)", data.connection.skill);
+		}
 		// 条件
 		{
 			globalVariables->AddItem(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
@@ -305,6 +311,12 @@ namespace Combo {
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 		}
+		// 接続
+		{
+			data.connection.lightAttack = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃)");
+			data.connection.heavyAttack = globalVariables->GetValue<std::string>(name, "接続先(強攻撃)");
+			data.connection.skill = globalVariables->GetValue<std::string>(name, "接続先(スキル)");
+		}
 		// 条件
 		{
 			data.condition.stateInput.startTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -429,6 +441,12 @@ namespace Combo {
 		{
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+		}
+		// 接続
+		{
+			globalVariables->SetValue(name, "接続先(弱攻撃)", data.connection.lightAttack);
+			globalVariables->SetValue(name, "接続先(強攻撃)", data.connection.heavyAttack);
+			globalVariables->SetValue(name, "接続先(スキル)", data.connection.skill);
 		}
 		// 条件
 		{
@@ -602,6 +620,20 @@ namespace Combo {
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
 	}
 
+	void System::ConnectSavedCombos() {
+		for (const auto& [nodeName, data] : comboGlobalDatas_) {
+			if (!data.connection.lightAttack.empty()) {
+				ConnectCombo(nodeName, ActionInput::LightAttack, data.connection.lightAttack);
+			}
+			if (!data.connection.heavyAttack.empty()) {
+				ConnectCombo(nodeName, ActionInput::HeavyAttack, data.connection.heavyAttack);
+			}
+			if (!data.connection.skill.empty()) {
+				ConnectCombo(nodeName, ActionInput::Skill, data.connection.skill);
+			}
+		}
+	}
+
 	void System::Create(const std::string name) {
 		this->name = name;
 		globalVariables->CreateGroup(name);
@@ -611,6 +643,7 @@ namespace Combo {
 			CreateCombo(globalVariables->GetValue<std::string>(name, data.first));
 		}
 
+		ConnectSavedCombos();
 	}
 
 #pragma endregion // 保存　適応
