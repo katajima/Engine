@@ -172,6 +172,8 @@ struct HitReactionData {
 	float downTime = 0.0f;
 	// 打ち上げ時に重力を弱める/止める時間
 	float launchFloatTime = 0.0f;
+	// 打ち上げ開始位置からの最大高度
+	float launchMaxHeight = 10.0f;
 	// 重力を適用するか
 	bool gravityEnabled = false;
 	// 重力倍率

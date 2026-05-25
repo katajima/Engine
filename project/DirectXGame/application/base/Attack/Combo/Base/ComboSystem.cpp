@@ -301,6 +301,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->AddItem(name, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
 			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
@@ -411,6 +412,7 @@ namespace Combo {
 			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
 			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+			data.hitReaction.launchMaxHeight = globalVariables->GetValue<float>(name, "打ち上げ最大高度");
 			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
 			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
 
@@ -545,6 +547,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->SetValue(name, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
 			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 

@@ -15,6 +15,7 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
+	launchStartHeight_ = 0.0f;
 	isAction_ = false;
 	hitMotionState_ = HitMotionState::None;
 
@@ -54,7 +55,18 @@ void HitMotionSystem::Update(float dt) {
 	// リアクション移動の有効時間中だけ毎フレームリクエストを送る
 	if (timer_ < data_.duration) {
 		Vector3 velocity = BuildMoveVelocity();
-		SendReactionMoveRequest(velocity * dt);
+		Vector3 movement = velocity * dt;
+		if (data_.type == HitReactionType::Launch && movement.y > 0.0f) {
+			const float maxHeight = launchStartHeight_ + data_.launchMaxHeight;
+			const float remainingHeight = maxHeight - owner->GetWorldTransform().GetWorldPosition().y;
+			if (remainingHeight <= 0.0f) {
+				movement.y = 0.0f;
+			}
+			else if (movement.y > remainingHeight) {
+				movement.y = remainingHeight;
+			}
+		}
+		SendReactionMoveRequest(movement);
 	}
 
 	// Down 状態への遷移
@@ -95,6 +107,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	hitStunTimer_ = data_.hitStunTime;	// ヒットスタン時間
 	downTimer_ = data_.downTime;		// ダウン時間
 	launchFloatTime_ = data_.launchFloatTime;	// 打ち上げ時間　
+	launchStartHeight_ = owner->GetWorldTransform().GetWorldPosition().y;
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	isAction_ = true;
 
@@ -262,6 +275,7 @@ void HitMotionSystem::FinishReaction() {
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	launchFloatTime_ = 0.0f;
+	launchStartHeight_ = 0.0f;
 	hitMotionState_ = HitMotionState::None;
 }
 

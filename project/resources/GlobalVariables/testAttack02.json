@@ -353,6 +353,10 @@
             "type": "float",
             "value": 0.0
         },
+        "打ち上げ最大高度": {
+            "type": "float",
+            "value": 10.0
+        },
         "接続先(スキル)": {
             "type": "string",
             "value": "testAttack02"

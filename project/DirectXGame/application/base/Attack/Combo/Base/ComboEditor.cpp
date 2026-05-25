@@ -300,6 +300,9 @@ namespace Combo {
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
+			if (data_.hitReaction.type == HitReactionType::Launch) {
+				ImGui::SliderFloat("打ち上げ最大高度(命中位置基準)", &data_.hitReaction.launchMaxHeight, 0.0f, 100.0f, "%.2f");
+			}
 			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
 			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
 

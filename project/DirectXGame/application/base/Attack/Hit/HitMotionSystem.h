@@ -97,6 +97,8 @@ private:
 	float downTimer_ = 0.0f;
 	// 打ち上げ時間
 	float launchFloatTime_ = 0.0f;
+	// 打ち上げ開始時の高さ
+	float launchStartHeight_ = 0.0f;
 	// ヒットストップ時間
 	float hitStopTime_ = 0.0f;
 	// セルフヒットストップ時間
