@@ -44,6 +44,8 @@ namespace Combo {
 		void Update(const Character::CharacterContext& ctx);
 		// プレイヤーからの攻撃入力要求
 		bool RequestAttack(ActionInput input);
+		// 現在のコンボ攻撃が命中したことを通知
+		void NotifyAttackHit();
 		// クリア
 		void ClearNode();
 		// 名前設定
@@ -111,7 +113,8 @@ namespace Combo {
 		// ノード追加(データから生成)
 		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
-		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to);
+		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to,
+			TransitionCondition condition = TransitionCondition::Default);
 		// コンボ名を参照している接続と開始ルートを更新
 		void RenameComboReferences(const std::string& oldName, const std::string& newName);
 		// 最初のコンボ

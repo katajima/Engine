@@ -3,6 +3,7 @@
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 namespace Combo {
@@ -13,6 +14,7 @@ namespace Combo {
 	void NodeState::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化 
 		timeInState = 0.0f;
+		hasHit_ = false;
 		// アニメーションの設定
 		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 
@@ -21,6 +23,63 @@ namespace Combo {
 		// コンボデータ開始
 		comboData.SetIsDebug(isDebug);
 		comboData.Enter(owner, ctx);
+	}
+
+	std::shared_ptr<State> NodeState::HandleInput(Character::BaseCharacter* owner, ActionInput input) {
+		auto it = nextStates.find(input);
+		if (it == nextStates.end()) {
+			return nullptr;
+		}
+
+		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
+		const std::weak_ptr<NodeState>& conditionalTarget =
+			onGround ? (hasHit_ ? it->second.groundHit : it->second.groundMiss)
+			: (hasHit_ ? it->second.airHit : it->second.airMiss);
+		if (auto next = conditionalTarget.lock()) {
+			return next;
+		}
+		return it->second.defaultTarget.lock();
+	}
+
+	void NodeState::SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next) {
+		TransitionTargets& targets = nextStates[input];
+		switch (condition) {
+		case TransitionCondition::GroundMiss:
+			targets.groundMiss = next;
+			break;
+		case TransitionCondition::GroundHit:
+			targets.groundHit = next;
+			break;
+		case TransitionCondition::AirMiss:
+			targets.airMiss = next;
+			break;
+		case TransitionCondition::AirHit:
+			targets.airHit = next;
+			break;
+		default:
+			targets.defaultTarget = next;
+			break;
+		}
+	}
+
+	bool NodeState::HasNextState() const {
+		for (const auto& [input, targets] : nextStates) {
+			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
+				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool NodeState::HasNextState(ActionInput input) const {
+		auto it = nextStates.find(input);
+		if (it == nextStates.end()) {
+			return false;
+		}
+		const TransitionTargets& targets = it->second;
+		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
+			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired();
 	}
 
 	// 更新
@@ -79,13 +138,20 @@ namespace Combo {
 
 	bool StateMachine::CanTransition(ActionInput input) const {
 		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
-		return node && node->HasNextState(input);
+		return node && node->HandleInput(owner, input) != nullptr;
 	}
 
 	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
 		std::optional<ActionInput> result = transitionedInput_;
 		transitionedInput_.reset();
 		return result;
+	}
+
+	void StateMachine::NotifyCurrentStateHit() {
+		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
+		if (node) {
+			node->NotifyHit();
+		}
 	}
 
 	void StateMachine::Update(const Character::CharacterContext& ctx) {

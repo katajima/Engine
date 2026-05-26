@@ -77,6 +77,12 @@ namespace Combo {
 		return true;
 	}
 
+	void System::NotifyAttackHit() {
+		if (comboStateMachine_) {
+			comboStateMachine_->NotifyCurrentStateHit();
+		}
+	}
+
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット
@@ -112,30 +118,36 @@ namespace Combo {
 		comboNodes_[nodeName]->SetName(nodeName);	// ノード名設定
 	}
 
-	void System::ConnectCombo(const std::string& from, ActionInput input, const std::string& to) {
+	void System::ConnectCombo(const std::string& from, ActionInput input, const std::string& to, TransitionCondition condition) {
 		auto itFrom = comboNodes_.find(from);
 		auto itTo = comboNodes_.find(to);
 		if (itFrom != comboNodes_.end()) {
 			if (itTo != comboNodes_.end())
-				itFrom->second->SetNextState(input, itTo->second);
+				itFrom->second->SetNextState(input, condition, itTo->second);
 		}
 	}
 
 	void System::RenameComboReferences(const std::string& oldName, const std::string& newName) {
 		for (auto& [nodeName, data] : comboGlobalDatas_) {
 			bool changed = false;
-			if (data.connection.lightAttack == oldName) {
-				data.connection.lightAttack = newName;
-				changed = true;
-			}
-			if (data.connection.heavyAttack == oldName) {
-				data.connection.heavyAttack = newName;
-				changed = true;
-			}
-			if (data.connection.skill == oldName) {
-				data.connection.skill = newName;
-				changed = true;
-			}
+			auto renameTarget = [&](std::string& target) {
+				if (target == oldName) {
+					target = newName;
+					changed = true;
+				}
+			};
+			auto renameConditional = [&](GlobalConditionalConnection& targets) {
+				renameTarget(targets.groundMiss);
+				renameTarget(targets.groundHit);
+				renameTarget(targets.airMiss);
+				renameTarget(targets.airHit);
+			};
+			renameTarget(data.connection.lightAttack);
+			renameTarget(data.connection.heavyAttack);
+			renameTarget(data.connection.skill);
+			renameConditional(data.connection.lightCondition);
+			renameConditional(data.connection.heavyCondition);
+			renameConditional(data.connection.skillCondition);
 			if (changed) {
 				SetGlobalComboData(nodeName == oldName ? newName : nodeName, data);
 			}
@@ -219,6 +231,18 @@ namespace Combo {
 			globalVariables->AddItem(name, "接続先(弱攻撃)", data.connection.lightAttack);
 			globalVariables->AddItem(name, "接続先(強攻撃)", data.connection.heavyAttack);
 			globalVariables->AddItem(name, "接続先(スキル)", data.connection.skill);
+			globalVariables->AddItem(name, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
+			globalVariables->AddItem(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
+			globalVariables->AddItem(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
+			globalVariables->AddItem(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->AddItem(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
+			globalVariables->AddItem(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
+			globalVariables->AddItem(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
+			globalVariables->AddItem(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->AddItem(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
+			globalVariables->AddItem(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
+			globalVariables->AddItem(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
+			globalVariables->AddItem(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
 		}
 		// 条件
 		{
@@ -351,6 +375,18 @@ namespace Combo {
 			data.connection.lightAttack = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃)");
 			data.connection.heavyAttack = globalVariables->GetValue<std::string>(name, "接続先(強攻撃)");
 			data.connection.skill = globalVariables->GetValue<std::string>(name, "接続先(スキル)");
+			data.connection.lightCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-地上-未ヒット)");
+			data.connection.lightCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-地上-ヒット)");
+			data.connection.lightCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-未ヒット)");
+			data.connection.lightCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-ヒット)");
+			data.connection.heavyCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-未ヒット)");
+			data.connection.heavyCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-ヒット)");
+			data.connection.heavyCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-未ヒット)");
+			data.connection.heavyCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-ヒット)");
+			data.connection.skillCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-未ヒット)");
+			data.connection.skillCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-ヒット)");
+			data.connection.skillCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-未ヒット)");
+			data.connection.skillCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-ヒット)");
 		}
 		// 条件
 		{
@@ -483,6 +519,18 @@ namespace Combo {
 			globalVariables->SetValue(name, "接続先(弱攻撃)", data.connection.lightAttack);
 			globalVariables->SetValue(name, "接続先(強攻撃)", data.connection.heavyAttack);
 			globalVariables->SetValue(name, "接続先(スキル)", data.connection.skill);
+			globalVariables->SetValue(name, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
+			globalVariables->SetValue(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
+			globalVariables->SetValue(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
+			globalVariables->SetValue(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->SetValue(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
+			globalVariables->SetValue(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
+			globalVariables->SetValue(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
+			globalVariables->SetValue(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->SetValue(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
+			globalVariables->SetValue(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
+			globalVariables->SetValue(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
+			globalVariables->SetValue(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
 		}
 		// 条件
 		{
@@ -659,6 +707,20 @@ namespace Combo {
 
 	void System::ConnectSavedCombos() {
 		for (const auto& [nodeName, data] : comboGlobalDatas_) {
+			auto connectConditional = [&](ActionInput input, const GlobalConditionalConnection& targets) {
+				if (!targets.groundMiss.empty()) {
+					ConnectCombo(nodeName, input, targets.groundMiss, TransitionCondition::GroundMiss);
+				}
+				if (!targets.groundHit.empty()) {
+					ConnectCombo(nodeName, input, targets.groundHit, TransitionCondition::GroundHit);
+				}
+				if (!targets.airMiss.empty()) {
+					ConnectCombo(nodeName, input, targets.airMiss, TransitionCondition::AirMiss);
+				}
+				if (!targets.airHit.empty()) {
+					ConnectCombo(nodeName, input, targets.airHit, TransitionCondition::AirHit);
+				}
+			};
 			if (!data.connection.lightAttack.empty()) {
 				ConnectCombo(nodeName, ActionInput::LightAttack, data.connection.lightAttack);
 			}
@@ -668,6 +730,9 @@ namespace Combo {
 			if (!data.connection.skill.empty()) {
 				ConnectCombo(nodeName, ActionInput::Skill, data.connection.skill);
 			}
+			connectConditional(ActionInput::LightAttack, data.connection.lightCondition);
+			connectConditional(ActionInput::HeavyAttack, data.connection.heavyCondition);
+			connectConditional(ActionInput::Skill, data.connection.skillCondition);
 		}
 	}
 

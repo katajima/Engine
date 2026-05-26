@@ -4,6 +4,14 @@
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
+	enum class TransitionCondition {
+		Default,
+		GroundMiss,
+		GroundHit,
+		AirMiss,
+		AirHit,
+	};
+
     /// <summary>
     /// コンボステートクラス
     /// </summary>
@@ -68,28 +76,15 @@ namespace Combo {
     public:
 
         // 入力があったら
-        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override {
-            auto it = nextStates.find(input);
-
-            if (it != nextStates.end()) {
-                return it->second.lock();
-            }
-
-            return nullptr;
-        }
+        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override;
 
         // 次のステート
-        void SetNextState(ActionInput input, std::shared_ptr<NodeState> next) {
-            nextStates[input] = next;
-        }
+        void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
+        void NotifyHit() { hasHit_ = true; }
 
         // 次のステートは存在するか
-        bool HasNextState() const {
-            return !nextStates.empty();
-        }
-        bool HasNextState(ActionInput input) const {
-            return nextStates.find(input) != nextStates.end();
-        }
+        bool HasNextState() const;
+        bool HasNextState(ActionInput input) const;
         // 入力受付可能か
         bool IsInputAcceptable() override {
             return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
@@ -136,8 +131,16 @@ namespace Combo {
         std::string animation;
         // コンボデータ
         ComboData comboData;
+        struct TransitionTargets {
+            std::weak_ptr<NodeState> defaultTarget;
+            std::weak_ptr<NodeState> groundMiss;
+            std::weak_ptr<NodeState> groundHit;
+            std::weak_ptr<NodeState> airMiss;
+            std::weak_ptr<NodeState> airHit;
+        };
         // 次のステートマップ
-        std::map<ActionInput, std::weak_ptr<NodeState>> nextStates;
+        std::map<ActionInput, TransitionTargets> nextStates;
+        bool hasHit_ = false;
     };
 
     /// <summary>
@@ -159,6 +162,7 @@ namespace Combo {
         }
         bool CanTransition(ActionInput input) const;
         std::optional<ActionInput> ConsumeTransitionedInput();
+        void NotifyCurrentStateHit();
         // リセット
         void Reset() { SetState(rootState,{}); }
         // 設定

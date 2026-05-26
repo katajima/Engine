@@ -355,9 +355,24 @@ namespace Combo {
 			}
 		};
 
-		drawConnection("弱攻撃入力の接続先", data_.connection.lightAttack);
-		drawConnection("強攻撃入力の接続先", data_.connection.heavyAttack);
-		drawConnection("スキル入力の接続先", data_.connection.skill);
+		auto drawInputConnections = [&](const char* inputLabel, std::string& defaultTarget,
+			GlobalConditionalConnection& conditionalTargets) {
+			ImGui::PushID(inputLabel);
+			if (ImGui::TreeNode(inputLabel)) {
+				drawConnection("標準の接続先", defaultTarget);
+				drawConnection("地上 / 未ヒット", conditionalTargets.groundMiss);
+				drawConnection("地上 / ヒット", conditionalTargets.groundHit);
+				drawConnection("空中 / 未ヒット", conditionalTargets.airMiss);
+				drawConnection("空中 / ヒット", conditionalTargets.airHit);
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+		};
+
+		ImGui::TextWrapped("条件付き接続が未設定の場合は、標準の接続先が使用されます。");
+		drawInputConnections("弱攻撃入力", data_.connection.lightAttack, data_.connection.lightCondition);
+		drawInputConnections("強攻撃入力", data_.connection.heavyAttack, data_.connection.heavyCondition);
+		drawInputConnections("スキル入力", data_.connection.skill, data_.connection.skillCondition);
 	}
 
 	void EditorBlock::SequencerApplyToState() {
@@ -685,18 +700,24 @@ namespace Combo {
 			}
 			GlobalData& data = comboSystem->GetComboGlobalData(node.first);
 			bool changed = false;
-			if (data.connection.lightAttack == comboName) {
-				data.connection.lightAttack.clear();
-				changed = true;
-			}
-			if (data.connection.heavyAttack == comboName) {
-				data.connection.heavyAttack.clear();
-				changed = true;
-			}
-			if (data.connection.skill == comboName) {
-				data.connection.skill.clear();
-				changed = true;
-			}
+			auto clearTarget = [&](std::string& target) {
+				if (target == comboName) {
+					target.clear();
+					changed = true;
+				}
+			};
+			auto clearConditional = [&](GlobalConditionalConnection& targets) {
+				clearTarget(targets.groundMiss);
+				clearTarget(targets.groundHit);
+				clearTarget(targets.airMiss);
+				clearTarget(targets.airHit);
+			};
+			clearTarget(data.connection.lightAttack);
+			clearTarget(data.connection.heavyAttack);
+			clearTarget(data.connection.skill);
+			clearConditional(data.connection.lightCondition);
+			clearConditional(data.connection.heavyCondition);
+			clearConditional(data.connection.skillCondition);
 			if (changed) {
 				comboSystem->SetGlobalComboData(node.first, data);
 				globalVariables->SaveFile(node.first);

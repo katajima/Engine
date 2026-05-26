@@ -61,6 +61,7 @@ namespace HitBox {
 		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
 		player->GetAttackController()->GetHitCounter().Hit();
+		player->GetAttackController()->GetComboSystem()->NotifyAttackHit();
 	}
 
 	void HitBoxFunction::UpdateTypeEnemy() {

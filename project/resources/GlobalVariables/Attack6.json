@@ -365,11 +365,59 @@
             "type": "string",
             "value": ""
         },
+        "接続先(スキル-地上-ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(スキル-地上-未ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(スキル-空中-ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(スキル-空中-未ヒット)": {
+            "type": "string",
+            "value": ""
+        },
         "接続先(弱攻撃)": {
             "type": "string",
             "value": "Attack7"
         },
+        "接続先(弱攻撃-地上-ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(弱攻撃-地上-未ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(弱攻撃-空中-ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(弱攻撃-空中-未ヒット)": {
+            "type": "string",
+            "value": ""
+        },
         "接続先(強攻撃)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(強攻撃-地上-ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(強攻撃-地上-未ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(強攻撃-空中-ヒット)": {
+            "type": "string",
+            "value": ""
+        },
+        "接続先(強攻撃-空中-未ヒット)": {
             "type": "string",
             "value": ""
         },

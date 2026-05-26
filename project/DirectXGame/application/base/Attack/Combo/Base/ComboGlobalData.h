@@ -143,10 +143,20 @@ namespace Combo {
 	};
 
 	// 保存項目用コンボ接続データ
+	struct GlobalConditionalConnection {
+		std::string groundMiss = "";
+		std::string groundHit = "";
+		std::string airMiss = "";
+		std::string airHit = "";
+	};
+
 	struct GlobalConnection {
 		std::string lightAttack = "";
 		std::string heavyAttack = "";
 		std::string skill = "";
+		GlobalConditionalConnection lightCondition{};
+		GlobalConditionalConnection heavyCondition{};
+		GlobalConditionalConnection skillCondition{};
 	};
 
 	// 保存項目用コンボデータ
