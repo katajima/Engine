@@ -12,6 +12,8 @@
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiDebugSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSpawnDebugSystem.h>
 
 #include "CharacterGlobalData.h"
 
@@ -109,6 +111,8 @@ namespace Character {
 		void Clear(Type type);
 		// ウェーブ切り替え用に、敵を即削除せず退場演出へ移行させる
 		void BeginEnemyWaveExit(float duration = 1.2f);
+		// 指定した群衆グループだけを、退場演出を伴って削除する
+		void BeginEnemyCrowdExit(int crowdGroupId, float duration = 1.2f);
 
 		float GetScore() { return score; }
 	private:
@@ -120,6 +124,10 @@ namespace Character {
 		uint32_t enemyCount_ = 0;	
 		// 敵AIシステム
 		std::unique_ptr<EnemyAiSystem> enemyAiSystem_;	
+		// 敵AIの判断内容を可視化するデバッグシステム
+		std::unique_ptr<EnemyAiDebugSystem> enemyAiDebugSystem_;
+		// 任意の群衆をImGuiから生成するデバッグシステム
+		std::unique_ptr<EnemyCrowdSpawnDebugSystem> enemyCrowdSpawnDebugSystem_;
 
 		float score = 0.0f;
 

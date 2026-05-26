@@ -138,13 +138,6 @@ namespace Game {
 
 		CreateGameEvent("result", data);
 
-
-		/*data.changeType_ = GameEventChangeType::kInput;
-		data.eventType_ = GameEventType::kEnd;
-		data.time_.max = 10.0f;
-
-		CreateGameEvent("end", data);*/
-
 		ConnectNode("start", "", "breakTime");
 		ConnectNode("breakTime", "", "battle01");
 		ConnectNode("battle01", "", "waveExit01");
@@ -157,8 +150,7 @@ namespace Game {
 		ConnectNode("waveExit04", "", "battle05");
 		ConnectNode("battle05", "", "waveExit05");
 		ConnectNode("waveExit05", "", "result");
-		//ConnectNode("result", "", "end");
-
+		
 		eventStateMachine_->SetRoot(GetNodeState("start"));
 	}
 

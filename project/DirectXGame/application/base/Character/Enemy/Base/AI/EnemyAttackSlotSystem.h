@@ -23,6 +23,8 @@ namespace Character {
 		);
 
 		const AttackSlot* FindSlot(BaseEnemy* enemy) const;
+		// デバッグ描画など読み取り用途に、全攻撃位置を公開する
+		const auto& GetSlots() const { return slots_; }
 
 	private:
 		void CreateSlots(const Vector3& targetPos, float targetRotateY);

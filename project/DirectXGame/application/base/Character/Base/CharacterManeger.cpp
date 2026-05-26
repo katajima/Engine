@@ -4,6 +4,7 @@
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/engine/Math/Random.h>
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,
@@ -18,6 +19,13 @@ namespace Character {
 		// 敵AIシステムの初期化
 		enemyAiSystem_ = std::make_unique<EnemyAiSystem>();
 		enemyAiSystem_->Initialize();
+
+		// AIデバッグ表示はライン描画基盤へ接続し、デバッグビルド時だけ表示を切り替える
+		enemyAiDebugSystem_ = std::make_unique<EnemyAiDebugSystem>();
+		enemyAiDebugSystem_->Initialize(entityManager->Get3DLineCommon());
+
+		// テストしたい群衆構成をゲーム中に作れる生成デバッグ機能を用意する
+		enemyCrowdSpawnDebugSystem_ = std::make_unique<EnemyCrowdSpawnDebugSystem>();
 	}
 
 	void CharacterManager::Update(float dt,bool isMove) {
@@ -53,6 +61,7 @@ namespace Character {
 
 		// キャラクター更新(敵)
 		std::vector<BaseEnemy*> enemies;
+		std::vector<BaseEnemy*> debugEnemies;
 		std::vector<const BaseCharacter*> target;
 
 		// 先に敵一覧だけ作る
@@ -64,11 +73,14 @@ namespace Character {
 			if (character->GetCharacterType() == Type::Enemy) {
 				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
 
-				if (enemy->GetAlive() && !enemy->IsWaveExiting() && hasEnemyTarget) {
-					// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
-					enemy->SetTargetCharacters(player);
-					target.push_back(enemy);
-					enemies.push_back(enemy);
+				if (enemy->GetAlive() && !enemy->IsWaveExiting()) {
+					debugEnemies.push_back(enemy);
+					if (hasEnemyTarget) {
+						// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
+						enemy->SetTargetCharacters(player);
+						target.push_back(enemy);
+						enemies.push_back(enemy);
+					}
 				}
 			}
 		}
@@ -101,6 +113,12 @@ namespace Character {
 
 		// 攻撃要求許可
 		enemyAiSystem_->UpdateRequest(enemies, dt);
+
+		// 移動目標、役割、攻撃トークンを画面上へ可視化する
+		enemyAiDebugSystem_->Update(debugEnemies, enemyAiSystem_.get());
+
+		// 入力内容に応じた敵生成は更新ループの末尾で行い、次フレームからAIへ参加させる
+		enemyCrowdSpawnDebugSystem_->Update(this);
 
 		// キャラクター更新(プレイヤー)
 		if (player) {
@@ -153,6 +171,7 @@ namespace Character {
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetEffect(effect);						// エフェクト設定
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
+		enemy->SetType(enemyType);						// 一覧表示や種類別処理に使用する敵種類を保持
 		enemy->SetCrowdGroupId(groupId);					// 群衆グループ設定
 		enemy->SetCrowdMemberIndex(enemyCount_++);			// 群衆内番号設定
 		enemy->SetCrowdBehavior(crowdBehavior);				// 群衆の行動パターン設定
@@ -190,7 +209,8 @@ namespace Character {
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
-			pos.y = 0.0f;
+			// 高さは出現中心に固定し、ImGuiやイベントから指定した位置を反映する
+			pos.y = origin.y;
 			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos }, crowdBehavior);
 		}
 	}
@@ -214,6 +234,24 @@ namespace Character {
 				if (enemy->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
 					enemy->BeginWaveExit(duration);
 				}
+			}
+		}
+	}
+
+	void CharacterManager::BeginEnemyCrowdExit(int crowdGroupId, float duration) {
+		for (auto& character : character_) {
+			if (!character || character->GetCharacterType() != Type::Enemy || !character->GetAlive()) {
+				continue;
+			}
+
+			BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+			if (enemy->GetCrowdGroupId() != crowdGroupId || enemy->IsWaveExiting()) {
+				continue;
+			}
+
+			// 撃破中の敵は既存の撃破演出を維持し、活動中の同一群衆だけを退場させる
+			if (enemy->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
+				enemy->BeginWaveExit(duration);
 			}
 		}
 	}
