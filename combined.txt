@@ -181,9 +181,10 @@
     └── └── └── └── ├── Enemy/
     └── └── └── └── └── ├── Base/
     └── └── └── └── └── └── ├── AI/
+    └── └── └── └── └── └── └── ├── EnemyAiDebugSystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyAiDebugSystem.h
     └── └── └── └── └── └── └── ├── EnemyAiSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAiSystem.h
-    └── └── └── └── └── └── └── ├── EnemyAttackRequest.cpp
     └── └── └── └── └── └── └── ├── EnemyAttackRequest.h
     └── └── └── └── └── └── └── ├── EnemyAttackRequestSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAttackRequestSystem.h
@@ -199,6 +200,8 @@
     └── └── └── └── └── └── └── ├── EnemyCrowdLayerSystem.h
     └── └── └── └── └── └── └── ├── EnemyCrowdPatternSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyCrowdPatternSystem.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdSpawnDebugSystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyCrowdSpawnDebugSystem.h
     └── └── └── └── └── └── └── ├── EnemyCrowdSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyCrowdSystem.h
     └── └── └── └── └── └── └── ├── EnemyFlockingSystem.cpp
@@ -2760,9 +2763,24 @@ namespace Combo {
 			}
 		};
 
-		drawConnection("弱攻撃入力の接続先", data_.connection.lightAttack);
-		drawConnection("強攻撃入力の接続先", data_.connection.heavyAttack);
-		drawConnection("スキル入力の接続先", data_.connection.skill);
+		auto drawInputConnections = [&](const char* inputLabel, std::string& defaultTarget,
+			GlobalConditionalConnection& conditionalTargets) {
+			ImGui::PushID(inputLabel);
+			if (ImGui::TreeNode(inputLabel)) {
+				drawConnection("標準の接続先", defaultTarget);
+				drawConnection("地上 / 未ヒット", conditionalTargets.groundMiss);
+				drawConnection("地上 / ヒット", conditionalTargets.groundHit);
+				drawConnection("空中 / 未ヒット", conditionalTargets.airMiss);
+				drawConnection("空中 / ヒット", conditionalTargets.airHit);
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+		};
+
+		ImGui::TextWrapped("条件付き接続が未設定の場合は、標準の接続先が使用されます。");
+		drawInputConnections("弱攻撃入力", data_.connection.lightAttack, data_.connection.lightCondition);
+		drawInputConnections("強攻撃入力", data_.connection.heavyAttack, data_.connection.heavyCondition);
+		drawInputConnections("スキル入力", data_.connection.skill, data_.connection.skillCondition);
 	}
 
 	void EditorBlock::SequencerApplyToState() {
@@ -3090,18 +3108,24 @@ namespace Combo {
 			}
 			GlobalData& data = comboSystem->GetComboGlobalData(node.first);
 			bool changed = false;
-			if (data.connection.lightAttack == comboName) {
-				data.connection.lightAttack.clear();
-				changed = true;
-			}
-			if (data.connection.heavyAttack == comboName) {
-				data.connection.heavyAttack.clear();
-				changed = true;
-			}
-			if (data.connection.skill == comboName) {
-				data.connection.skill.clear();
-				changed = true;
-			}
+			auto clearTarget = [&](std::string& target) {
+				if (target == comboName) {
+					target.clear();
+					changed = true;
+				}
+			};
+			auto clearConditional = [&](GlobalConditionalConnection& targets) {
+				clearTarget(targets.groundMiss);
+				clearTarget(targets.groundHit);
+				clearTarget(targets.airMiss);
+				clearTarget(targets.airHit);
+			};
+			clearTarget(data.connection.lightAttack);
+			clearTarget(data.connection.heavyAttack);
+			clearTarget(data.connection.skill);
+			clearConditional(data.connection.lightCondition);
+			clearConditional(data.connection.heavyCondition);
+			clearConditional(data.connection.skillCondition);
 			if (changed) {
 				comboSystem->SetGlobalComboData(node.first, data);
 				globalVariables->SaveFile(node.first);
@@ -3573,10 +3597,20 @@ namespace Combo {
 	};
 
 	// 保存項目用コンボ接続データ
+	struct GlobalConditionalConnection {
+		std::string groundMiss = "";
+		std::string groundHit = "";
+		std::string airMiss = "";
+		std::string airHit = "";
+	};
+
 	struct GlobalConnection {
 		std::string lightAttack = "";
 		std::string heavyAttack = "";
 		std::string skill = "";
+		GlobalConditionalConnection lightCondition{};
+		GlobalConditionalConnection heavyCondition{};
+		GlobalConditionalConnection skillCondition{};
 	};
 
 	// 保存項目用コンボデータ
@@ -3912,6 +3946,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.cpp
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 namespace Combo {
@@ -3922,6 +3957,7 @@ namespace Combo {
 	void NodeState::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化 
 		timeInState = 0.0f;
+		hasHit_ = false;
 		// アニメーションの設定
 		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 
@@ -3930,6 +3966,63 @@ namespace Combo {
 		// コンボデータ開始
 		comboData.SetIsDebug(isDebug);
 		comboData.Enter(owner, ctx);
+	}
+
+	std::shared_ptr<State> NodeState::HandleInput(Character::BaseCharacter* owner, ActionInput input) {
+		auto it = nextStates.find(input);
+		if (it == nextStates.end()) {
+			return nullptr;
+		}
+
+		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
+		const std::weak_ptr<NodeState>& conditionalTarget =
+			onGround ? (hasHit_ ? it->second.groundHit : it->second.groundMiss)
+			: (hasHit_ ? it->second.airHit : it->second.airMiss);
+		if (auto next = conditionalTarget.lock()) {
+			return next;
+		}
+		return it->second.defaultTarget.lock();
+	}
+
+	void NodeState::SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next) {
+		TransitionTargets& targets = nextStates[input];
+		switch (condition) {
+		case TransitionCondition::GroundMiss:
+			targets.groundMiss = next;
+			break;
+		case TransitionCondition::GroundHit:
+			targets.groundHit = next;
+			break;
+		case TransitionCondition::AirMiss:
+			targets.airMiss = next;
+			break;
+		case TransitionCondition::AirHit:
+			targets.airHit = next;
+			break;
+		default:
+			targets.defaultTarget = next;
+			break;
+		}
+	}
+
+	bool NodeState::HasNextState() const {
+		for (const auto& [input, targets] : nextStates) {
+			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
+				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool NodeState::HasNextState(ActionInput input) const {
+		auto it = nextStates.find(input);
+		if (it == nextStates.end()) {
+			return false;
+		}
+		const TransitionTargets& targets = it->second;
+		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
+			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired();
 	}
 
 	// 更新
@@ -3988,13 +4081,20 @@ namespace Combo {
 
 	bool StateMachine::CanTransition(ActionInput input) const {
 		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
-		return node && node->HasNextState(input);
+		return node && node->HandleInput(owner, input) != nullptr;
 	}
 
 	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
 		std::optional<ActionInput> result = transitionedInput_;
 		transitionedInput_.reset();
 		return result;
+	}
+
+	void StateMachine::NotifyCurrentStateHit() {
+		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
+		if (node) {
+			node->NotifyHit();
+		}
 	}
 
 	void StateMachine::Update(const Character::CharacterContext& ctx) {
@@ -4064,6 +4164,14 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.h
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
+	enum class TransitionCondition {
+		Default,
+		GroundMiss,
+		GroundHit,
+		AirMiss,
+		AirHit,
+	};
+
     /// <summary>
     /// コンボステートクラス
     /// </summary>
@@ -4128,28 +4236,15 @@ namespace Combo {
     public:
 
         // 入力があったら
-        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override {
-            auto it = nextStates.find(input);
-
-            if (it != nextStates.end()) {
-                return it->second.lock();
-            }
-
-            return nullptr;
-        }
+        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override;
 
         // 次のステート
-        void SetNextState(ActionInput input, std::shared_ptr<NodeState> next) {
-            nextStates[input] = next;
-        }
+        void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
+        void NotifyHit() { hasHit_ = true; }
 
         // 次のステートは存在するか
-        bool HasNextState() const {
-            return !nextStates.empty();
-        }
-        bool HasNextState(ActionInput input) const {
-            return nextStates.find(input) != nextStates.end();
-        }
+        bool HasNextState() const;
+        bool HasNextState(ActionInput input) const;
         // 入力受付可能か
         bool IsInputAcceptable() override {
             return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
@@ -4196,8 +4291,16 @@ namespace Combo {
         std::string animation;
         // コンボデータ
         ComboData comboData;
+        struct TransitionTargets {
+            std::weak_ptr<NodeState> defaultTarget;
+            std::weak_ptr<NodeState> groundMiss;
+            std::weak_ptr<NodeState> groundHit;
+            std::weak_ptr<NodeState> airMiss;
+            std::weak_ptr<NodeState> airHit;
+        };
         // 次のステートマップ
-        std::map<ActionInput, std::weak_ptr<NodeState>> nextStates;
+        std::map<ActionInput, TransitionTargets> nextStates;
+        bool hasHit_ = false;
     };
 
     /// <summary>
@@ -4219,6 +4322,7 @@ namespace Combo {
         }
         bool CanTransition(ActionInput input) const;
         std::optional<ActionInput> ConsumeTransitionedInput();
+        void NotifyCurrentStateHit();
         // リセット
         void Reset() { SetState(rootState,{}); }
         // 設定
@@ -4337,6 +4441,12 @@ namespace Combo {
 		return true;
 	}
 
+	void System::NotifyAttackHit() {
+		if (comboStateMachine_) {
+			comboStateMachine_->NotifyCurrentStateHit();
+		}
+	}
+
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット
@@ -4372,30 +4482,36 @@ namespace Combo {
 		comboNodes_[nodeName]->SetName(nodeName);	// ノード名設定
 	}
 
-	void System::ConnectCombo(const std::string& from, ActionInput input, const std::string& to) {
+	void System::ConnectCombo(const std::string& from, ActionInput input, const std::string& to, TransitionCondition condition) {
 		auto itFrom = comboNodes_.find(from);
 		auto itTo = comboNodes_.find(to);
 		if (itFrom != comboNodes_.end()) {
 			if (itTo != comboNodes_.end())
-				itFrom->second->SetNextState(input, itTo->second);
+				itFrom->second->SetNextState(input, condition, itTo->second);
 		}
 	}
 
 	void System::RenameComboReferences(const std::string& oldName, const std::string& newName) {
 		for (auto& [nodeName, data] : comboGlobalDatas_) {
 			bool changed = false;
-			if (data.connection.lightAttack == oldName) {
-				data.connection.lightAttack = newName;
-				changed = true;
-			}
-			if (data.connection.heavyAttack == oldName) {
-				data.connection.heavyAttack = newName;
-				changed = true;
-			}
-			if (data.connection.skill == oldName) {
-				data.connection.skill = newName;
-				changed = true;
-			}
+			auto renameTarget = [&](std::string& target) {
+				if (target == oldName) {
+					target = newName;
+					changed = true;
+				}
+			};
+			auto renameConditional = [&](GlobalConditionalConnection& targets) {
+				renameTarget(targets.groundMiss);
+				renameTarget(targets.groundHit);
+				renameTarget(targets.airMiss);
+				renameTarget(targets.airHit);
+			};
+			renameTarget(data.connection.lightAttack);
+			renameTarget(data.connection.heavyAttack);
+			renameTarget(data.connection.skill);
+			renameConditional(data.connection.lightCondition);
+			renameConditional(data.connection.heavyCondition);
+			renameConditional(data.connection.skillCondition);
 			if (changed) {
 				SetGlobalComboData(nodeName == oldName ? newName : nodeName, data);
 			}
@@ -4479,6 +4595,18 @@ namespace Combo {
 			globalVariables->AddItem(name, "接続先(弱攻撃)", data.connection.lightAttack);
 			globalVariables->AddItem(name, "接続先(強攻撃)", data.connection.heavyAttack);
 			globalVariables->AddItem(name, "接続先(スキル)", data.connection.skill);
+			globalVariables->AddItem(name, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
+			globalVariables->AddItem(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
+			globalVariables->AddItem(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
+			globalVariables->AddItem(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->AddItem(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
+			globalVariables->AddItem(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
+			globalVariables->AddItem(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
+			globalVariables->AddItem(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->AddItem(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
+			globalVariables->AddItem(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
+			globalVariables->AddItem(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
+			globalVariables->AddItem(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
 		}
 		// 条件
 		{
@@ -4611,6 +4739,18 @@ namespace Combo {
 			data.connection.lightAttack = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃)");
 			data.connection.heavyAttack = globalVariables->GetValue<std::string>(name, "接続先(強攻撃)");
 			data.connection.skill = globalVariables->GetValue<std::string>(name, "接続先(スキル)");
+			data.connection.lightCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-地上-未ヒット)");
+			data.connection.lightCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-地上-ヒット)");
+			data.connection.lightCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-未ヒット)");
+			data.connection.lightCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-ヒット)");
+			data.connection.heavyCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-未ヒット)");
+			data.connection.heavyCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-ヒット)");
+			data.connection.heavyCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-未ヒット)");
+			data.connection.heavyCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-ヒット)");
+			data.connection.skillCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-未ヒット)");
+			data.connection.skillCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-ヒット)");
+			data.connection.skillCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-未ヒット)");
+			data.connection.skillCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-ヒット)");
 		}
 		// 条件
 		{
@@ -4743,6 +4883,18 @@ namespace Combo {
 			globalVariables->SetValue(name, "接続先(弱攻撃)", data.connection.lightAttack);
 			globalVariables->SetValue(name, "接続先(強攻撃)", data.connection.heavyAttack);
 			globalVariables->SetValue(name, "接続先(スキル)", data.connection.skill);
+			globalVariables->SetValue(name, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
+			globalVariables->SetValue(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
+			globalVariables->SetValue(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
+			globalVariables->SetValue(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->SetValue(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
+			globalVariables->SetValue(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
+			globalVariables->SetValue(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
+			globalVariables->SetValue(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->SetValue(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
+			globalVariables->SetValue(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
+			globalVariables->SetValue(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
+			globalVariables->SetValue(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
 		}
 		// 条件
 		{
@@ -4919,6 +5071,20 @@ namespace Combo {
 
 	void System::ConnectSavedCombos() {
 		for (const auto& [nodeName, data] : comboGlobalDatas_) {
+			auto connectConditional = [&](ActionInput input, const GlobalConditionalConnection& targets) {
+				if (!targets.groundMiss.empty()) {
+					ConnectCombo(nodeName, input, targets.groundMiss, TransitionCondition::GroundMiss);
+				}
+				if (!targets.groundHit.empty()) {
+					ConnectCombo(nodeName, input, targets.groundHit, TransitionCondition::GroundHit);
+				}
+				if (!targets.airMiss.empty()) {
+					ConnectCombo(nodeName, input, targets.airMiss, TransitionCondition::AirMiss);
+				}
+				if (!targets.airHit.empty()) {
+					ConnectCombo(nodeName, input, targets.airHit, TransitionCondition::AirHit);
+				}
+			};
 			if (!data.connection.lightAttack.empty()) {
 				ConnectCombo(nodeName, ActionInput::LightAttack, data.connection.lightAttack);
 			}
@@ -4928,6 +5094,9 @@ namespace Combo {
 			if (!data.connection.skill.empty()) {
 				ConnectCombo(nodeName, ActionInput::Skill, data.connection.skill);
 			}
+			connectConditional(ActionInput::LightAttack, data.connection.lightCondition);
+			connectConditional(ActionInput::HeavyAttack, data.connection.heavyCondition);
+			connectConditional(ActionInput::Skill, data.connection.skillCondition);
 		}
 	}
 
@@ -5014,6 +5183,8 @@ namespace Combo {
 		void Update(const Character::CharacterContext& ctx);
 		// プレイヤーからの攻撃入力要求
 		bool RequestAttack(ActionInput input);
+		// 現在のコンボ攻撃が命中したことを通知
+		void NotifyAttackHit();
 		// クリア
 		void ClearNode();
 		// 名前設定
@@ -5081,7 +5252,8 @@ namespace Combo {
 		// ノード追加(データから生成)
 		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
-		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to);
+		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to,
+			TransitionCondition condition = TransitionCondition::Default);
 		// コンボ名を参照している接続と開始ルートを更新
 		void RenameComboReferences(const std::string& oldName, const std::string& newName);
 		// 最初のコンボ
@@ -7886,6 +8058,7 @@ namespace HitBox {
 		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
 		player->GetAttackController()->GetHitCounter().Hit();
+		player->GetAttackController()->GetComboSystem()->NotifyAttackHit();
 	}
 
 	void HitBoxFunction::UpdateTypeEnemy() {
@@ -14080,6 +14253,7 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/engine/Math/Random.h>
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,
@@ -14094,6 +14268,13 @@ namespace Character {
 		// 敵AIシステムの初期化
 		enemyAiSystem_ = std::make_unique<EnemyAiSystem>();
 		enemyAiSystem_->Initialize();
+
+		// AIデバッグ表示はライン描画基盤へ接続し、デバッグビルド時だけ表示を切り替える
+		enemyAiDebugSystem_ = std::make_unique<EnemyAiDebugSystem>();
+		enemyAiDebugSystem_->Initialize(entityManager->Get3DLineCommon());
+
+		// テストしたい群衆構成をゲーム中に作れる生成デバッグ機能を用意する
+		enemyCrowdSpawnDebugSystem_ = std::make_unique<EnemyCrowdSpawnDebugSystem>();
 	}
 
 	void CharacterManager::Update(float dt,bool isMove) {
@@ -14129,6 +14310,7 @@ namespace Character {
 
 		// キャラクター更新(敵)
 		std::vector<BaseEnemy*> enemies;
+		std::vector<BaseEnemy*> debugEnemies;
 		std::vector<const BaseCharacter*> target;
 
 		// 先に敵一覧だけ作る
@@ -14140,11 +14322,14 @@ namespace Character {
 			if (character->GetCharacterType() == Type::Enemy) {
 				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
 
-				if (enemy->GetAlive() && !enemy->IsWaveExiting() && hasEnemyTarget) {
-					// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
-					enemy->SetTargetCharacters(player);
-					target.push_back(enemy);
-					enemies.push_back(enemy);
+				if (enemy->GetAlive() && !enemy->IsWaveExiting()) {
+					debugEnemies.push_back(enemy);
+					if (hasEnemyTarget) {
+						// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
+						enemy->SetTargetCharacters(player);
+						target.push_back(enemy);
+						enemies.push_back(enemy);
+					}
 				}
 			}
 		}
@@ -14177,6 +14362,12 @@ namespace Character {
 
 		// 攻撃要求許可
 		enemyAiSystem_->UpdateRequest(enemies, dt);
+
+		// 移動目標、役割、攻撃トークンを画面上へ可視化する
+		enemyAiDebugSystem_->Update(debugEnemies, enemyAiSystem_.get());
+
+		// 入力内容に応じた敵生成は更新ループの末尾で行い、次フレームからAIへ参加させる
+		enemyCrowdSpawnDebugSystem_->Update(this);
 
 		// キャラクター更新(プレイヤー)
 		if (player) {
@@ -14229,6 +14420,7 @@ namespace Character {
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetEffect(effect);						// エフェクト設定
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
+		enemy->SetType(enemyType);						// 一覧表示や種類別処理に使用する敵種類を保持
 		enemy->SetCrowdGroupId(groupId);					// 群衆グループ設定
 		enemy->SetCrowdMemberIndex(enemyCount_++);			// 群衆内番号設定
 		enemy->SetCrowdBehavior(crowdBehavior);				// 群衆の行動パターン設定
@@ -14266,7 +14458,8 @@ namespace Character {
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
-			pos.y = 0.0f;
+			// 高さは出現中心に固定し、ImGuiやイベントから指定した位置を反映する
+			pos.y = origin.y;
 			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos }, crowdBehavior);
 		}
 	}
@@ -14294,6 +14487,24 @@ namespace Character {
 		}
 	}
 
+	void CharacterManager::BeginEnemyCrowdExit(int crowdGroupId, float duration) {
+		for (auto& character : character_) {
+			if (!character || character->GetCharacterType() != Type::Enemy || !character->GetAlive()) {
+				continue;
+			}
+
+			BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+			if (enemy->GetCrowdGroupId() != crowdGroupId || enemy->IsWaveExiting()) {
+				continue;
+			}
+
+			// 撃破中の敵は既存の撃破演出を維持し、活動中の同一群衆だけを退場させる
+			if (enemy->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
+				enemy->BeginWaveExit(duration);
+			}
+		}
+	}
+
 }
 
 
@@ -14315,6 +14526,8 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiDebugSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSpawnDebugSystem.h>
 
 #include "CharacterGlobalData.h"
 
@@ -14412,6 +14625,8 @@ namespace Character {
 		void Clear(Type type);
 		// ウェーブ切り替え用に、敵を即削除せず退場演出へ移行させる
 		void BeginEnemyWaveExit(float duration = 1.2f);
+		// 指定した群衆グループだけを、退場演出を伴って削除する
+		void BeginEnemyCrowdExit(int crowdGroupId, float duration = 1.2f);
 
 		float GetScore() { return score; }
 	private:
@@ -14423,6 +14638,10 @@ namespace Character {
 		uint32_t enemyCount_ = 0;	
 		// 敵AIシステム
 		std::unique_ptr<EnemyAiSystem> enemyAiSystem_;	
+		// 敵AIの判断内容を可視化するデバッグシステム
+		std::unique_ptr<EnemyAiDebugSystem> enemyAiDebugSystem_;
+		// 任意の群衆をImGuiから生成するデバッグシステム
+		std::unique_ptr<EnemyCrowdSpawnDebugSystem> enemyCrowdSpawnDebugSystem_;
 
 		float score = 0.0f;
 
@@ -14595,6 +14814,253 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiDebugSystem.cpp
+============================================================
+#include "EnemyAiDebugSystem.h"
+#include "EnemyAiSystem.h"
+#include "EnemyAttackRequest.h"
+#include "EnemyAttackSlotSystem.h"
+#include "EnemyCrowdBehaviorData.h"
+#include "EnemyCrowdData.h"
+#include "EnemyCrowdSystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
+
+#ifdef _DEBUG
+#include "imgui.h"
+#endif
+
+namespace Character {
+#ifdef _DEBUG
+	namespace {
+		const char* ToText(EnemyAttackRing ring) {
+			switch (ring) {
+			case EnemyAttackRing::TooClose: return "TooClose";
+			case EnemyAttackRing::Attack: return "Attack";
+			case EnemyAttackRing::Standby: return "Standby";
+			case EnemyAttackRing::Approach: return "Approach";
+			case EnemyAttackRing::None:
+			default: return "None";
+			}
+		}
+
+		const char* ToText(EnemyCrowdLayer layer) {
+			switch (layer) {
+			case EnemyCrowdLayer::Attack: return "Attack";
+			case EnemyCrowdLayer::Standby: return "Standby";
+			case EnemyCrowdLayer::Approach:
+			default: return "Approach";
+			}
+		}
+
+		const char* ToText(EnemyCrowdBehaviorType type) {
+			switch (type) {
+			case EnemyCrowdBehaviorType::Rush: return "Rush";
+			case EnemyCrowdBehaviorType::Encircle: return "Encircle";
+			case EnemyCrowdBehaviorType::WaveAssault: return "Wave Assault";
+			case EnemyCrowdBehaviorType::Formation: return "Formation";
+			case EnemyCrowdBehaviorType::FlowCrowd: return "Flow Crowd";
+			case EnemyCrowdBehaviorType::PressureCrowd: return "Pressure Crowd";
+			case EnemyCrowdBehaviorType::DistributedEncircle: return "Distributed Encircle";
+			case EnemyCrowdBehaviorType::DensityAdaptive: return "Density Adaptive";
+			case EnemyCrowdBehaviorType::Spiral: return "Spiral";
+			case EnemyCrowdBehaviorType::Hunting: return "Hunting";
+			case EnemyCrowdBehaviorType::Flocking:
+			default: return "Flocking";
+			}
+		}
+
+		Vector4 LayerColor(EnemyCrowdLayer layer) {
+			switch (layer) {
+			case EnemyCrowdLayer::Attack: return { 1.0f, 0.2f, 0.2f, 1.0f };
+			case EnemyCrowdLayer::Standby: return { 1.0f, 0.8f, 0.1f, 1.0f };
+			case EnemyCrowdLayer::Approach:
+			default: return { 0.1f, 0.9f, 0.4f, 1.0f };
+			}
+		}
+	}
+#endif
+
+	void EnemyAiDebugSystem::Initialize(Engine::LineCommon* lineCommon) {
+		lineCommon_ = lineCommon;
+	}
+
+	void EnemyAiDebugSystem::Update(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+#ifdef _DEBUG
+		DrawControlPanel(enemies, aiSystem);
+		if (isVisible_ && lineCommon_ && aiSystem) {
+			DrawWorldDebug(enemies, aiSystem);
+		}
+#else
+		(void)enemies;
+		(void)aiSystem;
+#endif
+	}
+
+#ifdef _DEBUG
+	void EnemyAiDebugSystem::DrawControlPanel(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+		if (!ImGui::Begin("Enemy AI Debug")) {
+			ImGui::End();
+			return;
+		}
+
+		ImGui::Checkbox("AI表示", &isVisible_);
+		ImGui::Checkbox("最終移動目標", &showMoveTarget_);
+		ImGui::Checkbox("隊形スロット", &showFormationSlot_);
+		ImGui::Checkbox("フロー方向", &showFlowDirection_);
+		ImGui::Checkbox("攻撃スロット", &showAttackSlots_);
+		ImGui::Checkbox("敵ごとの判断", &showEnemyDetails_);
+		ImGui::Separator();
+
+		int ringCount[5]{};
+		int layerCount[3]{};
+		int grantedCount = 0;
+		for (BaseEnemy* enemy : enemies) {
+			if (!enemy) {
+				continue;
+			}
+
+			EnemyAttackRing ring = EnemyAttackRing::None;
+			if (EnemyAttackRequest* request = enemy->GetEnemyAttackSystem()->GetAttackRequest()) {
+				ring = request->GetRing();
+				if (request->GetIsGranted()) {
+					grantedCount++;
+				}
+			}
+			ringCount[static_cast<int>(ring)]++;
+
+			if (aiSystem) {
+				if (const EnemyFlockingSteering* steering = aiSystem->GetCrowdSystem()->FindSteering(enemy)) {
+					layerCount[static_cast<int>(steering->layer)]++;
+				}
+			}
+		}
+
+		ImGui::Text("対象敵数: %d / 攻撃許可: %d", static_cast<int>(enemies.size()), grantedCount);
+		ImGui::Text("Ring  Attack:%d  Approach:%d  Standby:%d  TooClose:%d",
+			ringCount[static_cast<int>(EnemyAttackRing::Attack)],
+			ringCount[static_cast<int>(EnemyAttackRing::Approach)],
+			ringCount[static_cast<int>(EnemyAttackRing::Standby)],
+			ringCount[static_cast<int>(EnemyAttackRing::TooClose)]);
+		ImGui::Text("Layer Attack:%d  Approach:%d  Standby:%d",
+			layerCount[static_cast<int>(EnemyCrowdLayer::Attack)],
+			layerCount[static_cast<int>(EnemyCrowdLayer::Approach)],
+			layerCount[static_cast<int>(EnemyCrowdLayer::Standby)]);
+
+		if (showEnemyDetails_ && aiSystem) {
+			ImGui::Separator();
+			for (BaseEnemy* enemy : enemies) {
+				if (!enemy) {
+					continue;
+				}
+
+				EnemyAttackRequest* request = enemy->GetEnemyAttackSystem()->GetAttackRequest();
+				const EnemyFlockingSteering* steering = aiSystem->GetCrowdSystem()->FindSteering(enemy);
+				const EnemyAttackRing ring = request ? request->GetRing() : EnemyAttackRing::None;
+				const EnemyCrowdLayer layer = steering ? steering->layer : EnemyCrowdLayer::Approach;
+				const bool granted = request && request->GetIsGranted();
+
+				ImGui::BulletText("#%u G%d  %s / %s / %s%s",
+					enemy->GetCrowdMemberIndex(),
+					enemy->GetCrowdGroupId(),
+					ToText(enemy->GetCrowdBehavior().type),
+					ToText(layer),
+					ToText(ring),
+					granted ? " [TOKEN]" : "");
+			}
+		}
+
+		ImGui::End();
+	}
+
+	void EnemyAiDebugSystem::DrawWorldDebug(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+		Engine::LineMeshData& lines = lineCommon_->GetDebugLineMeshData();
+		EnemyCrowdSystem* crowdSystem = aiSystem->GetCrowdSystem();
+
+		for (BaseEnemy* enemy : enemies) {
+			if (!enemy) {
+				continue;
+			}
+
+			const Vector3 start = enemy->GetWorldPosition() + Vector3{ 0.0f, 0.4f, 0.0f };
+			const EnemyFlockingSteering* steering = crowdSystem->FindSteering(enemy);
+			const Vector4 color = steering ? LayerColor(steering->layer) : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+			if (showMoveTarget_ && steering) {
+				const Vector3 moveTarget = steering->moveTarget + Vector3{ 0.0f, 0.4f, 0.0f };
+				lines.AddLine(start, moveTarget, color);
+				lines.AddLineSphere(Sphere{ moveTarget, 0.32f }, color, 4, 4);
+			}
+
+			if (showFormationSlot_) {
+				if (const CrowdSlot* slot = crowdSystem->FindSlot(enemy)) {
+					const Vector3 position = slot->position + Vector3{ 0.0f, 0.2f, 0.0f };
+					lines.AddLine(start, position, { 0.2f, 0.7f, 1.0f, 1.0f });
+					lines.AddLineSphere(Sphere{ position, 0.24f }, { 0.2f, 0.7f, 1.0f, 1.0f }, 4, 4);
+				}
+			}
+
+			if (showFlowDirection_ && steering) {
+				const Vector3 directionEnd = start + steering->flowDirection * 2.0f;
+				lines.AddLine(start, directionEnd, { 0.2f, 0.9f, 1.0f, 1.0f });
+			}
+		}
+
+		if (showAttackSlots_) {
+			for (const AttackSlot& slot : aiSystem->GetAttackSlotSystem()->GetSlots()) {
+				const Vector4 color = slot.occupied ?
+					Vector4{ 1.0f, 0.25f, 0.15f, 1.0f } :
+					Vector4{ 0.45f, 0.45f, 0.45f, 1.0f };
+				const Vector3 position = slot.position + Vector3{ 0.0f, 0.15f, 0.0f };
+				lines.AddLineSphere(Sphere{ position, 0.45f }, color, 6, 4);
+			}
+		}
+	}
+#endif
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiDebugSystem.h
+============================================================
+#pragma once
+#include <vector>
+
+namespace Engine {
+	class LineCommon;
+}
+
+namespace Character {
+	class BaseEnemy;
+	class EnemyAiSystem;
+
+	/// <summary>
+	/// 敵AIが選択した移動先や役割を可視化するデバッグ専用システム。
+	/// </summary>
+	class EnemyAiDebugSystem {
+	public:
+		void Initialize(Engine::LineCommon* lineCommon);
+		void Update(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem);
+
+	private:
+#ifdef _DEBUG
+		void DrawControlPanel(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem);
+		void DrawWorldDebug(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem);
+#endif
+
+	private:
+		Engine::LineCommon* lineCommon_ = nullptr;
+		bool isVisible_ = false;			// デバッグ表示全体の有効化
+		bool showMoveTarget_ = true;		// フロッキング合成後の最終移動目標
+		bool showFormationSlot_ = false;	// 群衆パターンが作った隊形位置
+		bool showFlowDirection_ = false;	// 流れ制御が示す進行方向
+		bool showAttackSlots_ = true;		// プレイヤー周囲の攻撃位置
+		bool showEnemyDetails_ = false;		// 敵ごとの判断一覧
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.cpp
 ============================================================
 #include "EnemyAiSystem.h"
@@ -14665,13 +15131,6 @@ namespace Character {
 		std::unique_ptr<EnemyCrowdSystem> crowdSystem_ = nullptr;
 	};
 }
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackRequest.cpp
-============================================================
-#include "EnemyAttackRequest.h"
-
 
 
 ============================================================
@@ -15042,6 +15501,8 @@ namespace Character {
 		);
 
 		const AttackSlot* FindSlot(BaseEnemy* enemy) const;
+		// デバッグ描画など読み取り用途に、全攻撃位置を公開する
+		const auto& GetSlots() const { return slots_; }
 
 	private:
 		void CreateSlots(const Vector3& targetPos, float targetRotateY);
@@ -15870,6 +16331,271 @@ namespace Character {
 
 	private:
 		float elapsedTime_ = 0.0f;	// 動き続けるパターンで共通利用する経過時間
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSpawnDebugSystem.cpp
+============================================================
+#include "EnemyCrowdSpawnDebugSystem.h"
+
+#include "DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/EnemyData.h"
+#include "DirectXGame/engine/struct/Structs3D.h"
+
+#ifdef _DEBUG
+#include <map>
+
+#include "imgui.h"
+#endif
+
+namespace Character {
+#ifdef _DEBUG
+	namespace {
+		const char* ToText(EnemyCrowdBehaviorType type) {
+			switch (type) {
+			case EnemyCrowdBehaviorType::Rush: return "直進型";
+			case EnemyCrowdBehaviorType::Encircle: return "包囲型";
+			case EnemyCrowdBehaviorType::WaveAssault: return "波状型";
+			case EnemyCrowdBehaviorType::Flocking: return "群れ型";
+			case EnemyCrowdBehaviorType::Formation: return "隊列型";
+			case EnemyCrowdBehaviorType::FlowCrowd: return "流動型";
+			case EnemyCrowdBehaviorType::PressureCrowd: return "圧迫型";
+			case EnemyCrowdBehaviorType::DistributedEncircle: return "分散包囲型";
+			case EnemyCrowdBehaviorType::DensityAdaptive: return "密度制御型";
+			case EnemyCrowdBehaviorType::Spiral: return "スパイラル型";
+			case EnemyCrowdBehaviorType::Hunting: return "ハンティング型";
+			default: return "不明";
+			}
+		}
+
+		struct CrowdSummary {
+			int count = 0;
+			int smallMeleeCount = 0;
+			int smallRangedCount = 0;
+			int mediumMeleeCount = 0;
+			int dummyCount = 0;
+			EnemyCrowdBehaviorType behaviorType = EnemyCrowdBehaviorType::Flocking;
+		};
+	}
+#endif
+
+	void EnemyCrowdSpawnDebugSystem::Update(CharacterManager* characterManager) {
+#ifdef _DEBUG
+		if (!ImGui::Begin("Enemy Crowd Spawn")) {
+			ImGui::End();
+			return;
+		}
+
+		ImGui::Text("出現位置と範囲");
+		ImGui::DragFloat3("出現位置", &spawnPosition_.x, 0.25f);
+		ImGui::DragFloat("出現範囲 X", &spawnAreaSize_.x, 0.25f, 0.0f, 100.0f);
+		ImGui::DragFloat("出現範囲 Z", &spawnAreaSize_.z, 0.25f, 0.0f, 100.0f);
+
+		ImGui::Separator();
+		ImGui::Text("群衆行動");
+		static const char* behaviorNames[] = {
+			"直進型 (Rush)",
+			"包囲型 (Encircle)",
+			"波状型 (Wave Assault)",
+			"群れ型 (Flocking)",
+			"隊列型 (Formation)",
+			"流動型 (Flow Crowd)",
+			"圧迫型 (Pressure Crowd)",
+			"分散包囲型 (Distributed Encircle)",
+			"密度制御型 (Density Adaptive)",
+			"スパイラル型 (Spiral)",
+			"ハンティング型 (Hunting)",
+		};
+		int behaviorIndex = static_cast<int>(behaviorType_);
+		if (ImGui::Combo("群衆タイプ", &behaviorIndex, behaviorNames, IM_ARRAYSIZE(behaviorNames))) {
+			behaviorType_ = static_cast<EnemyCrowdBehaviorType>(behaviorIndex);
+		}
+
+		// パターン変更を試しやすいよう、利用可能な設定値を常に編集できるようにする
+		ImGui::DragFloat("基準半径", &radius_, 0.1f, 1.0f, 50.0f);
+		ImGui::DragFloat("隊列間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+		ImGui::DragFloat("回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
+		ImGui::DragFloat("波の切替秒数", &waveInterval_, 0.1f, 0.1f, 20.0f);
+		ImGui::DragInt("波の列数", &waveCount_, 1.0f, 1, 10);
+
+		static const char* formationNames[] = { "横列", "円形", "V字", "方陣" };
+		int formationIndex = static_cast<int>(formationShape_);
+		if (ImGui::Combo("隊列の陣形", &formationIndex, formationNames, IM_ARRAYSIZE(formationNames))) {
+			formationShape_ = static_cast<EnemyFormationShape>(formationIndex);
+		}
+
+		ImGui::Separator();
+		ImGui::Text("敵の種類と人数");
+		ImGui::DragInt("小型近接", &smallMeleeCount_, 1.0f, 0, 60);
+		ImGui::DragInt("小型遠距離", &smallRangedCount_, 1.0f, 0, 60);
+		ImGui::DragInt("中型近接", &mediumMeleeCount_, 1.0f, 0, 60);
+		ImGui::DragInt("ダミー", &dummyCount_, 1.0f, 0, 60);
+
+		const int totalCount = smallMeleeCount_ + smallRangedCount_ + mediumMeleeCount_ + dummyCount_;
+		ImGui::Text("生成合計: %d", totalCount);
+
+		if (ImGui::Button("群衆を出現") && totalCount > 0) {
+			SpawnConfiguredCrowd(characterManager);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("人数をクリア")) {
+			smallMeleeCount_ = 0;
+			smallRangedCount_ = 0;
+			mediumMeleeCount_ = 0;
+			dummyCount_ = 0;
+		}
+
+		ImGui::Separator();
+		DrawActiveCrowds(characterManager);
+
+		ImGui::End();
+#else
+		(void)characterManager;
+#endif
+	}
+
+#ifdef _DEBUG
+	CrowdBehaviorSettings EnemyCrowdSpawnDebugSystem::BuildBehaviorSettings() const {
+		CrowdBehaviorSettings settings{};
+		settings.type = behaviorType_;
+		settings.formation = formationShape_;
+		settings.radius = radius_;
+		settings.spacing = spacing_;
+		settings.angularSpeed = angularSpeed_;
+		settings.waveInterval = waveInterval_;
+		settings.waveCount = static_cast<uint32_t>(waveCount_);
+		return settings;
+	}
+
+	void EnemyCrowdSpawnDebugSystem::SpawnConfiguredCrowd(CharacterManager* characterManager) {
+		if (!characterManager) {
+			return;
+		}
+
+		const Vector3 halfArea = { spawnAreaSize_.x * 0.5f, 0.0f, spawnAreaSize_.z * 0.5f };
+		const AABB spawnArea = {
+			spawnPosition_ - halfArea,
+			spawnPosition_ + halfArea
+		};
+		const CrowdBehaviorSettings settings = BuildBehaviorSettings();
+		const int groupId = nextGroupId_++;
+
+		// 種類が異なる敵も同じgroupIdを持つため、ひとつの群衆として協調して動く
+		characterManager->CreateEnemyGroup(EnemyType::kSmallMelee, groupId, smallMeleeCount_, spawnPosition_, spawnArea, settings);
+		characterManager->CreateEnemyGroup(EnemyType::kSmallRanged, groupId, smallRangedCount_, spawnPosition_, spawnArea, settings);
+		characterManager->CreateEnemyGroup(EnemyType::kMediumMelee, groupId, mediumMeleeCount_, spawnPosition_, spawnArea, settings);
+		characterManager->CreateEnemyGroup(EnemyType::kDummy, groupId, dummyCount_, spawnPosition_, spawnArea, settings);
+	}
+
+	void EnemyCrowdSpawnDebugSystem::DrawActiveCrowds(CharacterManager* characterManager) {
+		if (!characterManager || !ImGui::CollapsingHeader("現在の群衆", ImGuiTreeNodeFlags_DefaultOpen)) {
+			return;
+		}
+
+		std::map<int, CrowdSummary> activeCrowds;
+		for (BaseCharacter* character : characterManager->GetCharacters()) {
+			if (!character || character->GetCharacterType() != Type::Enemy) {
+				continue;
+			}
+
+			BaseEnemy* enemy = static_cast<BaseEnemy*>(character);
+			if (!enemy->GetAlive() || enemy->IsWaveExiting()) {
+				continue;
+			}
+
+			CrowdSummary& summary = activeCrowds[enemy->GetCrowdGroupId()];
+			summary.count++;
+			summary.behaviorType = enemy->GetCrowdBehavior().type;
+			switch (enemy->GetType()) {
+			case EnemyType::kSmallMelee:
+				summary.smallMeleeCount++;
+				break;
+			case EnemyType::kSmallRanged:
+				summary.smallRangedCount++;
+				break;
+			case EnemyType::kMediumMelee:
+				summary.mediumMeleeCount++;
+				break;
+			case EnemyType::kDummy:
+				summary.dummyCount++;
+				break;
+			}
+		}
+
+		if (activeCrowds.empty()) {
+			ImGui::Text("活動中の群衆はありません");
+			return;
+		}
+
+		for (const auto& [groupId, summary] : activeCrowds) {
+			ImGui::PushID(groupId);
+			ImGui::Text("ID %d / %s / %d体", groupId, ToText(summary.behaviorType), summary.count);
+			ImGui::Text("  近接:%d  遠距離:%d  中型:%d  ダミー:%d",
+				summary.smallMeleeCount,
+				summary.smallRangedCount,
+				summary.mediumMeleeCount,
+				summary.dummyCount);
+			if (ImGui::Button("削除 (退場演出)")) {
+				// 即座に消さず、既存のウェーブ終了と同じ自然な退場処理へ移行する
+				characterManager->BeginEnemyCrowdExit(groupId);
+			}
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+	}
+#endif
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSpawnDebugSystem.h
+============================================================
+#pragma once
+
+#include "DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h"
+#include "DirectXGame/engine/struct/Vector3.h"
+
+namespace Character {
+	class CharacterManager;
+
+	/// <summary>
+	/// ImGuiから任意の編成と行動設定を持つ群衆を生成するデバッグ機能。
+	/// </summary>
+	class EnemyCrowdSpawnDebugSystem {
+	public:
+		// デバッグウィンドウを更新し、生成ボタンが押されたときだけ敵を追加する
+		void Update(CharacterManager* characterManager);
+
+	private:
+#ifdef _DEBUG
+		// 画面に入力された値を、既存の群衆AIが利用する設定へまとめる
+		CrowdBehaviorSettings BuildBehaviorSettings() const;
+		// 選択中の敵構成をひとつの群衆グループとして生成する
+		void SpawnConfiguredCrowd(CharacterManager* characterManager);
+		// 現在活動中の群衆を一覧表示し、指定された群衆の退場要求を受け取る
+		void DrawActiveCrowds(CharacterManager* characterManager);
+#endif
+
+		Vector3 spawnPosition_ = { 0.0f, 0.0f, 40.0f };
+		Vector3 spawnAreaSize_ = { 10.0f, 0.0f, 10.0f };
+
+		EnemyCrowdBehaviorType behaviorType_ = EnemyCrowdBehaviorType::Flocking;
+		EnemyFormationShape formationShape_ = EnemyFormationShape::Line;
+		float radius_ = 11.0f;
+		float spacing_ = 3.0f;
+		float angularSpeed_ = 0.7f;
+		float waveInterval_ = 2.0f;
+		int waveCount_ = 3;
+
+		int smallMeleeCount_ = 5;
+		int smallRangedCount_ = 0;
+		int mediumMeleeCount_ = 0;
+		int dummyCount_ = 0;
+
+		// 手動生成した群衆が互いに混ざらないよう、生成操作ごとにIDを更新する
+		int nextGroupId_ = 10000;
 	};
 }
 
@@ -23672,13 +24398,6 @@ namespace Game {
 
 		CreateGameEvent("result", data);
 
-
-		/*data.changeType_ = GameEventChangeType::kInput;
-		data.eventType_ = GameEventType::kEnd;
-		data.time_.max = 10.0f;
-
-		CreateGameEvent("end", data);*/
-
 		ConnectNode("start", "", "breakTime");
 		ConnectNode("breakTime", "", "battle01");
 		ConnectNode("battle01", "", "waveExit01");
@@ -23691,8 +24410,7 @@ namespace Game {
 		ConnectNode("waveExit04", "", "battle05");
 		ConnectNode("battle05", "", "waveExit05");
 		ConnectNode("waveExit05", "", "result");
-		//ConnectNode("result", "", "end");
-
+		
 		eventStateMachine_->SetRoot(GetNodeState("start"));
 	}
 
@@ -63401,7 +64119,7 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("CHARACTER");
 
 #ifdef _DEBUG
-	//sceneManager_->ChangeScene("CHARACTER");
+	sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
 	sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("GAMEPLAY");
@@ -74089,7 +74807,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Death\DeathSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp" />
@@ -74101,6 +74818,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiDebugSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.cpp" />
@@ -74516,6 +75235,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiDebugSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h" />
@@ -75852,10 +76573,13 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiDebugSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp">
@@ -77094,6 +77818,12 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiDebugSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.h">
