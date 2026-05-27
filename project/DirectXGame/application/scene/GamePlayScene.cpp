@@ -221,6 +221,7 @@ void GamePlayScene::Update()
 	// キャラクターマネージャー更新
 	characterManager_->Update(GetTime(),gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
+	specalPointManager_->SetTarget(characterManager_->GetPlayer()));
 	specalPointManager_->Update(GetTime());
 	// 弾マネージャ
 	bulletManager_->Update();

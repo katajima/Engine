@@ -211,11 +211,13 @@ void CharacterDebugScene::Update(){
 	// キャラクターマネージャー更新
 	characterManager_->Update(GetTime(),true);
 
+	characterManager_->GetPlayer()->GetBasicParameters()->HP.value = 200;
+
+
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
 
-
-
+	
 	// カメラ管理の更新
 	cameraManager_->Update();
 	// 弾マネージャ
@@ -248,28 +250,8 @@ void CharacterDebugScene::Draw2D(){
 void CharacterDebugScene::UpdateImGui() {
 
 #ifdef _DEBUG
-	if (input_->IsTriggerKey(DIK_P)) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
-
 	ImGui::Begin("Debug");
 	ImGui::InputInt("playerID", &GetSceneData().playerID);
-
-	static const char* EnemyTypeLabels[] = {
-				"小型近距離",
-				"小型遠距離",
-				"中型近距離",
-				"ダミー"
-	};
-	Engine::ImGuiManager::Select("敵種類", EnemyTypeLabels, enemyType);
-	ImGui::DragFloat3("敵出現位置", &enemyPos.x, 0.1f);
-	if (ImGui::Button("敵出現")) {
-		characterManager_->CreateCharacter(enemyType, "enemy", 0, { {1,1,1},{},enemyPos });
-	}
-	if (ImGui::Button("ダミー位置リセット")) {
-		characterManager_->GetEnemy(tagNumber)->GetObjectComponent()->GetWorldTransform().translate_ = {};
-	}
 	Vector2 inputPos = input_->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	
@@ -285,10 +267,7 @@ void CharacterDebugScene::UpdateImGui() {
 	if (ImGui::Button("ズーム")) {
 		cameraManager_->GetBaseCamera()->GetCameraController()->GetZoom()->Request(zoomData);
 	}
-
 	ImGui::End();
-
-
 #endif // _DEBUG
 }
 
