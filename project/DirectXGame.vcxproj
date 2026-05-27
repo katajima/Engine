@@ -146,7 +146,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp" />
@@ -574,7 +573,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
-    <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraData.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h" />
