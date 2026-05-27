@@ -2478,6 +2478,8 @@ namespace Combo {
 
 		// 終了条件
 		ImGuiEndConditionType();
+		// 攻撃種別と遠距離設定
+		ImGuiAttackType();
 		// 移動関係設定
 		ImGuiMove();
 		// リアクション設定
@@ -2617,6 +2619,42 @@ namespace Combo {
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+		}
+	}
+
+	void EditorBlock::ImGuiAttackType() {
+		if (!ImGui::CollapsingHeader("攻撃種別")) {
+			return;
+		}
+
+		static const char* ComboTypeLabels[] = {
+			"移動のみ",
+			"近距離",
+			"遠距離",
+			"近距離 + 遠距離",
+		};
+		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
+
+		if (data_.type != Type::kRange && data_.type != Type::kMix) {
+			return;
+		}
+
+		ImGui::SeparatorText("遠距離攻撃設定");
+		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
+		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
+		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
+
+		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
+			data_.range.rangeWindowEnd = data_.range.rangeWindowStart;
+		}
+		if (data_.range.interval < 0.001f) {
+			data_.range.interval = 0.001f;
+		}
+		if (data_.range.count < 1) {
+			data_.range.count = 1;
 		}
 	}
 
@@ -2804,6 +2842,9 @@ namespace Combo {
 		data_.effect = comboData.GetComboEffect().GetData();
 		// 接続
 		data_.connection = comboSystem->GetComboGlobalData(stateName).connection;
+		// 攻撃タイプと遠距離攻撃
+		data_.type = comboData.GetType();
+		data_.range = comboData.GetComboRange().GetData();
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
@@ -3250,6 +3291,9 @@ namespace Combo {
 
 			// 接続
 			data.connection = comboEditorBlocks_[it.first].GetData().connection;
+			// 攻撃タイプと遠距離攻撃
+			data.type = comboEditorBlocks_[it.first].GetData().type;
+			data.range = comboEditorBlocks_[it.first].GetData().range;
 
 		}
 
@@ -3331,6 +3375,8 @@ namespace Combo {
 		void ImGuiApplyHitBox();
 		// 終了条件
 		void ImGuiEndConditionType();
+		// 攻撃種別と遠距離設定
+		void ImGuiAttackType();
 		// 移動関係設定
 		void ImGuiMove();
 		// リアクション設定
@@ -3491,6 +3537,16 @@ namespace Combo {
 		kRange,		// 遠距離
 		kMix,		// 合わせ
 	};
+
+	// 保存項目用遠距離攻撃データ
+	struct GlobalRange {
+		float rangeWindowStart = 0.1f;
+		float rangeWindowEnd = 0.5f;
+		float speed = 1.0f;
+		float interval = 0.5f;
+		int count = 1;
+		float damage = 1.0f;
+	};
 	// 時間
 	struct StateTime {
 		// 入力受付時間
@@ -3617,6 +3673,8 @@ namespace Combo {
 	struct GlobalData {
 		// 攻撃タイプ
 		Type type = Type::kMelle;
+		// 遠距離攻撃
+		GlobalRange range{};
 		// 敵に送るリアクションデータ
 		HitReactionData hitReaction{};
 		// ヒットボックス関係
@@ -4581,9 +4639,17 @@ namespace Combo {
 			comboNodenames_[name] = name;
 			globalVariables->AddItem(this->name, name.c_str(), name);
 		}
-		
 
-		
+		// 攻撃タイプと遠距離攻撃
+		{
+			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
+			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
+			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
+			globalVariables->AddItem(name, "遠距離発射間隔", data.range.interval);
+			globalVariables->AddItem(name, "遠距離発射数", data.range.count);
+			globalVariables->AddItem(name, "遠距離ダメージ", data.range.damage);
+		}
 
 		// エフェクト
 		{
@@ -4728,7 +4794,17 @@ namespace Combo {
 	};
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
-		
+		// 攻撃タイプと遠距離攻撃
+		{
+			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
+			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
+			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
+			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
+			data.range.interval = globalVariables->GetValue<float>(name, "遠距離発射間隔");
+			data.range.count = globalVariables->GetValue<int>(name, "遠距離発射数");
+			data.range.damage = globalVariables->GetValue<float>(name, "遠距離ダメージ");
+		}
+
 		// エフェクト
 		{
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
@@ -4872,7 +4948,17 @@ namespace Combo {
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
-		
+		// 攻撃タイプと遠距離攻撃
+		{
+			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
+			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
+			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
+			globalVariables->SetValue(name, "遠距離発射間隔", data.range.interval);
+			globalVariables->SetValue(name, "遠距離発射数", data.range.count);
+			globalVariables->SetValue(name, "遠距離ダメージ", data.range.damage);
+		}
+
 		// エフェクト
 		{
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
@@ -5022,6 +5108,9 @@ namespace Combo {
 	};
 
 	void System::SetData(ComboData& data, const GlobalData& gData) {
+		// 攻撃タイプと遠距離攻撃
+		data.SetType(gData.type);
+		data.GetComboRange().GetData() = gData.range;
 		// ヒットボックスとリアクションデータ 
 		data.GetComboHitBox().GetCollData() = HitBox::CollData{ "",gData.hitBox ,gData.hitReaction };
 		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName));
@@ -6528,25 +6617,44 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.cp
 ============================================================
 #include "ComboRange.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
+#include <algorithm>
 
 // 開始
 void Combo::ComboRange::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 	bulletSpawn = owner->GetBulletSpawn();
 	bulletCount = 0;
+	nextShotTime = data_.rangeWindowStart;
 }
 // 更新
 void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float timer) {
-
-	if (data_.count < bulletCount) {
-		bulletCount++;
+	if (!bulletSpawn || data_.count <= bulletCount ||
+		timer < data_.rangeWindowStart || timer > data_.rangeWindowEnd) {
+		return;
 	}
 
+	const float interval = (std::max)(data_.interval, 0.001f);
+	while (bulletCount < data_.count &&
+		timer >= nextShotTime && nextShotTime <= data_.rangeWindowEnd) {
+		BulletInfo info{};
+		info.position = ctx.position;
+		info.targetPos = ctx.target ? ctx.target->GetWorldPosition() : ctx.position + ctx.direction;
+		info.speed = data_.speed;
+		info.damage = data_.damage;
+		info.type = ProjectileType::NORMAL;
+		bulletSpawn->GenerateBullet(BulletType::kPlayerBullet, info);
 
+		bulletCount++;
+		nextShotTime += interval;
+	}
 }
 // 終了
 void Combo::ComboRange::Exit(Character::BaseCharacter* owner) {
 	bulletCount = 0;
+	nextShotTime = 0.0f;
+	bulletSpawn = nullptr;
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.h
@@ -6569,21 +6677,7 @@ namespace Combo {
 	/// </summary>
 	class ComboRange {
 	public:
-		// データ
-		struct Data {
-			// 発射スタート
-			float rangeWindowStart = 0.1f;		
-			// 発射エンド
-			float rangeWindowEnd = 0.5f;			
-			// 弾速
-			float speed = 1.0f;
-			// 弾の発射間隔
-			float intarval = 0.5f;
-			// 発射する弾の数
-			int count = 1;
-			//　ダメージ
-			float damage = 1.0f;
-		};
+		using Data = GlobalRange;
 		// 開始
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 		// 更新
@@ -6598,7 +6692,8 @@ namespace Combo {
 		// データ
 		Data data_;
 		// 発射した弾の数
-		int bulletCount = 0;	
+		int bulletCount = 0;
+		float nextShotTime = 0.0f;
 	};
 
 }
@@ -9756,6 +9851,14 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 		bullet->SetOwner(owner);	// 持ち主設定
 		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
 	}
+	else if (type == BulletType::kPlayerBullet) {
+		bullet = std::make_unique<PlayerBullet>();
+		bullet->SetInfo(info); // 設定
+		bullet->SetEffect(effect);	// エフェクトセット
+		bullet->SetTarget(target);	// 敵セット
+		bullet->SetOwner(owner);	// 持ち主設定
+		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
+	}
 	else {
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
 		bullet->SetInfo(info); // 設定
@@ -10262,6 +10365,7 @@ File Path: project/DirectXGame/application/base/Bullet/PlayerBullet.cpp
 
 #include "DirectXGame/engine/math/random.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Attack/AttackController.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 // 初期化
@@ -10321,6 +10425,10 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 
 		// 敵にダメージ
 		enemy->AddDamage(parameter_.damage);
+		if (owner && owner->GetAttackController()) {
+			owner->GetAttackController()->GetHitCounter().Hit();
+			owner->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		}
 
 		if (enemy->GetCharacterParameterComponent()->GetHP() > 0) {
 			enemy->GetHitMotionSystem()->EmitHitEffect();	// エフェクト出現
@@ -10385,6 +10493,7 @@ void PlayerBullet::Final()
 	}
 }
 ;
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/PlayerBullet.h
@@ -26522,7 +26631,7 @@ void SpecalPointManager::Update(float dt) {
 			}),
 		points.end());
 
-	if (target);
+	if (target)
 	// 更新
 	for (auto& point : points) {
 		point->SetTargetPos(target->GetObjectComponent()->GetWorldPosition());
@@ -31718,7 +31827,7 @@ void GamePlayScene::Update()
 	// キャラクターマネージャー更新
 	characterManager_->Update(GetTime(),gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
-	specalPointManager_->SetTarget(characterManager_->GetPlayer()));
+	specalPointManager_->SetTarget(characterManager_->GetPlayer());
 	specalPointManager_->Update(GetTime());
 	// 弾マネージャ
 	bulletManager_->Update();
