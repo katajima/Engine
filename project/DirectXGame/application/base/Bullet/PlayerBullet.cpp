@@ -6,6 +6,7 @@
 
 #include "DirectXGame/engine/math/random.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Attack/AttackController.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 // 初期化
@@ -65,6 +66,10 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 
 		// 敵にダメージ
 		enemy->AddDamage(parameter_.damage);
+		if (owner && owner->GetAttackController()) {
+			owner->GetAttackController()->GetHitCounter().Hit();
+			owner->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		}
 
 		if (enemy->GetCharacterParameterComponent()->GetHP() > 0) {
 			enemy->GetHitMotionSystem()->EmitHitEffect();	// エフェクト出現

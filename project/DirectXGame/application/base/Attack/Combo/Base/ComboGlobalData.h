@@ -37,6 +37,16 @@ namespace Combo {
 		kRange,		// 遠距離
 		kMix,		// 合わせ
 	};
+
+	// 保存項目用遠距離攻撃データ
+	struct GlobalRange {
+		float rangeWindowStart = 0.1f;
+		float rangeWindowEnd = 0.5f;
+		float speed = 1.0f;
+		float interval = 0.5f;
+		int count = 1;
+		float damage = 1.0f;
+	};
 	// 時間
 	struct StateTime {
 		// 入力受付時間
@@ -163,6 +173,8 @@ namespace Combo {
 	struct GlobalData {
 		// 攻撃タイプ
 		Type type = Type::kMelle;
+		// 遠距離攻撃
+		GlobalRange range{};
 		// 敵に送るリアクションデータ
 		HitReactionData hitReaction{};
 		// ヒットボックス関係

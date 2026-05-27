@@ -217,9 +217,17 @@ namespace Combo {
 			comboNodenames_[name] = name;
 			globalVariables->AddItem(this->name, name.c_str(), name);
 		}
-		
 
-		
+		// 攻撃タイプと遠距離攻撃
+		{
+			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
+			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
+			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
+			globalVariables->AddItem(name, "遠距離発射間隔", data.range.interval);
+			globalVariables->AddItem(name, "遠距離発射数", data.range.count);
+			globalVariables->AddItem(name, "遠距離ダメージ", data.range.damage);
+		}
 
 		// エフェクト
 		{
@@ -364,7 +372,17 @@ namespace Combo {
 	};
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
-		
+		// 攻撃タイプと遠距離攻撃
+		{
+			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
+			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
+			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
+			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
+			data.range.interval = globalVariables->GetValue<float>(name, "遠距離発射間隔");
+			data.range.count = globalVariables->GetValue<int>(name, "遠距離発射数");
+			data.range.damage = globalVariables->GetValue<float>(name, "遠距離ダメージ");
+		}
+
 		// エフェクト
 		{
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
@@ -508,7 +526,17 @@ namespace Combo {
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
-		
+		// 攻撃タイプと遠距離攻撃
+		{
+			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
+			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
+			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
+			globalVariables->SetValue(name, "遠距離発射間隔", data.range.interval);
+			globalVariables->SetValue(name, "遠距離発射数", data.range.count);
+			globalVariables->SetValue(name, "遠距離ダメージ", data.range.damage);
+		}
+
 		// エフェクト
 		{
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
@@ -658,6 +686,9 @@ namespace Combo {
 	};
 
 	void System::SetData(ComboData& data, const GlobalData& gData) {
+		// 攻撃タイプと遠距離攻撃
+		data.SetType(gData.type);
+		data.GetComboRange().GetData() = gData.range;
 		// ヒットボックスとリアクションデータ 
 		data.GetComboHitBox().GetCollData() = HitBox::CollData{ "",gData.hitBox ,gData.hitReaction };
 		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName));

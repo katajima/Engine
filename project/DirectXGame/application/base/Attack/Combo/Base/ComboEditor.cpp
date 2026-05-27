@@ -70,6 +70,8 @@ namespace Combo {
 
 		// 終了条件
 		ImGuiEndConditionType();
+		// 攻撃種別と遠距離設定
+		ImGuiAttackType();
 		// 移動関係設定
 		ImGuiMove();
 		// リアクション設定
@@ -209,6 +211,42 @@ namespace Combo {
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+		}
+	}
+
+	void EditorBlock::ImGuiAttackType() {
+		if (!ImGui::CollapsingHeader("攻撃種別")) {
+			return;
+		}
+
+		static const char* ComboTypeLabels[] = {
+			"移動のみ",
+			"近距離",
+			"遠距離",
+			"近距離 + 遠距離",
+		};
+		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
+
+		if (data_.type != Type::kRange && data_.type != Type::kMix) {
+			return;
+		}
+
+		ImGui::SeparatorText("遠距離攻撃設定");
+		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
+		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
+		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
+
+		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
+			data_.range.rangeWindowEnd = data_.range.rangeWindowStart;
+		}
+		if (data_.range.interval < 0.001f) {
+			data_.range.interval = 0.001f;
+		}
+		if (data_.range.count < 1) {
+			data_.range.count = 1;
 		}
 	}
 
@@ -396,6 +434,9 @@ namespace Combo {
 		data_.effect = comboData.GetComboEffect().GetData();
 		// 接続
 		data_.connection = comboSystem->GetComboGlobalData(stateName).connection;
+		// 攻撃タイプと遠距離攻撃
+		data_.type = comboData.GetType();
+		data_.range = comboData.GetComboRange().GetData();
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
@@ -842,6 +883,9 @@ namespace Combo {
 
 			// 接続
 			data.connection = comboEditorBlocks_[it.first].GetData().connection;
+			// 攻撃タイプと遠距離攻撃
+			data.type = comboEditorBlocks_[it.first].GetData().type;
+			data.range = comboEditorBlocks_[it.first].GetData().range;
 
 		}
 

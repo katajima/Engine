@@ -25,7 +25,7 @@ void SpecalPointManager::Update(float dt) {
 			}),
 		points.end());
 
-	if (target);
+	if (target)
 	// 更新
 	for (auto& point : points) {
 		point->SetTargetPos(target->GetObjectComponent()->GetWorldPosition());

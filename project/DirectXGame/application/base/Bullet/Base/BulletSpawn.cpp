@@ -44,6 +44,14 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 		bullet->SetOwner(owner);	// 持ち主設定
 		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
 	}
+	else if (type == BulletType::kPlayerBullet) {
+		bullet = std::make_unique<PlayerBullet>();
+		bullet->SetInfo(info); // 設定
+		bullet->SetEffect(effect);	// エフェクトセット
+		bullet->SetTarget(target);	// 敵セット
+		bullet->SetOwner(owner);	// 持ち主設定
+		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
+	}
 	else {
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
 		bullet->SetInfo(info); // 設定
