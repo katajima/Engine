@@ -1,6 +1,6 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/Combo/Base/ComboSequencer.h"
-#include "ComboSystem.h"
+#include "ComboSequencer.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 

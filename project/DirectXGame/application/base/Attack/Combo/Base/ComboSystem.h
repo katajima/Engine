@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <optional>
-#include "ComboDebug.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {

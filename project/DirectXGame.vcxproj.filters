@@ -831,7 +831,7 @@
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp">
@@ -876,7 +876,7 @@
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp">
@@ -954,7 +954,7 @@
     <ClCompile Include="DirectXGame\application\base\Character\Base\BaseCharacter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboImGui.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp">
@@ -1048,6 +1048,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1982,7 +1985,7 @@
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapItem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSequencer.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboSequencer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\scene\CharacterDebugScene.h">
@@ -2003,7 +2006,7 @@
     <ClInclude Include="DirectXGame\engine\Material\MaterialInstance.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h">
@@ -2069,7 +2072,7 @@
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.h">
@@ -2162,7 +2165,7 @@
     <ClInclude Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboImGui.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\scene\CustomScene.h">
@@ -2277,6 +2280,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

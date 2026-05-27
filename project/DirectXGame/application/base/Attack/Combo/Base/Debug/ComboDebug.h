@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
-#include "ComboState.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboState.h"
 
 namespace Character {
 	class BaseCharacter; // 前方宣言
