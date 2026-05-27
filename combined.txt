@@ -18,18 +18,21 @@
     └── └── └── └── └── ├── Base/
     └── └── └── └── └── └── ├── ComboData.cpp
     └── └── └── └── └── └── ├── ComboData.h
-    └── └── └── └── └── └── ├── ComboDebug.cpp
-    └── └── └── └── └── └── ├── ComboDebug.h
-    └── └── └── └── └── └── ├── ComboEditor.cpp
-    └── └── └── └── └── └── ├── ComboEditor.h
     └── └── └── └── └── └── ├── ComboGlobalData.h
-    └── └── └── └── └── └── ├── ComboImGui.cpp
-    └── └── └── └── └── └── ├── ComboImGui.h
-    └── └── └── └── └── └── ├── ComboSequencer.h
     └── └── └── └── └── └── ├── ComboState.cpp
     └── └── └── └── └── └── ├── ComboState.h
     └── └── └── └── └── └── ├── ComboSystem.cpp
-    └── └── └── └── └── └── └── ComboSystem.h
+    └── └── └── └── └── └── ├── ComboSystem.h
+    └── └── └── └── └── └── └── Debug/
+    └── └── └── └── └── └──     ├── ComboDebug.cpp
+    └── └── └── └── └── └──     ├── ComboDebug.h
+    └── └── └── └── └── └──     ├── ComboEditor.cpp
+    └── └── └── └── └── └──     ├── ComboEditor.h
+    └── └── └── └── └── └──     ├── ComboEditorBlock.cpp
+    └── └── └── └── └── └──     ├── ComboEditorBlock.h
+    └── └── └── └── └── └──     ├── ComboImGui.cpp
+    └── └── └── └── └── └──     ├── ComboImGui.h
+    └── └── └── └── └── └──     └── ComboSequencer.h
     └── └── └── └── └── ├── Effect/
     └── └── └── └── └── └── ├── ComboEffect.cpp
     └── └── └── └── └── └── └── ComboEffect.h
@@ -2328,1174 +2331,6 @@ namespace Combo {
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboDebug.cpp
-============================================================
-#include "ComboDebug.h"
-#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
-#include <DirectXGame/application/base/Attack/AttackController.h>
-
-namespace Combo {
-	// 初期化
-	void ComboDebug::Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner) {
-		this->owner = owner;
-		this->lineCommon = lineCommon;
-	};
-
-	// 更新
-	void ComboDebug::Update(float dt) {
-#ifdef _DEBUG
-		if (owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()) {
-			ComboData data = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()->Data();
-			Vector3 ownerPos = owner->GetWorldTransform().GetWorldPosition();
-
-
-			// ターゲット位置
-			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ data.GetComboMotion().GetComboMove().GetTargetPosition(),3 }, { 0,1,1,1 }, 8, 8);
-
-
-			// ロックオン半径
-			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.radius }, { 0,1,0,1 }, 8, 8);
-
-
-			// 方向
-			lineCommon->GetLineMeshData().AddLine(ownerPos, ownerPos + data.GetComboMotion().GetComboMove().GetDirection() * 10);
-
-		}
-#endif // _DEBUG
-	};
-
-
-
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboDebug.h
-============================================================
-#pragma once
-#include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
-#include "ComboState.h"
-
-namespace Character {
-	class BaseCharacter; // 前方宣言
-}
-
-namespace Engine {
-	class GlobalVariables;
-	class LineCommon;
-}
-
-namespace Combo {
-
-	/// <summary>
-	/// コンボ用デバッグ
-	/// </summary>
-	class ComboDebug {
-	public:
-		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner);
-
-		// 更新
-		void Update(float dt);
-
-	private:
-		Character::BaseCharacter* owner = nullptr;
-		Engine::LineCommon* lineCommon = nullptr;
-	};
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.cpp
-============================================================
-#include "ComboEditor.h"
-
-#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
-#include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
-#include <cctype>
-
-namespace Combo {
-
-#pragma region ComboEditorBlock
-
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon,
-		Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,
-		const std::string& stateName, Character::BaseCharacter* owner,
-		EffectSystem* effectSystem) {
-		this->globalVariables = globalVariables;	// 保存項目
-		this->lineCommon = lineCommon;
-		this->stateName = stateName;						// ステート
-		this->owner = owner;						// オーナー
-		this->comboSystem = comboSystem;			// コンボシステム
-		this->effectSystem = effectSystem;
-
-		// シーケンサー初期化
-		sequence_.ClearEvents();
-
-		// 最大フレーム設定
-		sequence_.SetFrameMax(maxFrame);
-
-		// コンボ名設定
-		comboName_ = "Combo_" + stateName;
-
-		// シーケンサーにコンボデータを適用させる
-		SequencerApplyToState();
-		// ステートのコンボデータ取得	
-		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
-		// ステートの時間設定
-		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
-	}
-
-	void EditorBlock::UpdateImGui(float dt, bool isActive) {
-
-		auto state = comboSystem->GetComboNodeState(stateName);
-		// 選択中でなければ処理しない
-		if (!nowChoice_) return;
-		if (currentFrame == 0 && isPlaying && isActive) {
-			comboSystem->GetComboStateMachine()->SetRoot(state);
-		}
-		if (isActive)
-			state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
-
-#ifdef _DEBUG
-
-		ImGui::Begin("Attack Editor");
-		ImGui::Separator();
-		ImGui::Text("Combo Name: %s", comboName_.c_str());
-		ImGui::Separator();
-
-		// 現在の時間
-		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
-
-		// シーケンサーの設定と表示
-		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
-
-		// アニメーション
-		ComboImGui::ApplyAnimationToState("アニメーション", isActive, currentFrame, maxFrame, data_.animation,
-			owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
-			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
-
-
-		// 終了条件
-		ImGuiEndConditionType();
-		// 攻撃種別と遠距離設定
-		ImGuiAttackType();
-		// 移動関係設定
-		ImGuiMove();
-		// リアクション設定
-		ImGuiReaction();
-		// ヒットボックス設定
-		ImGuiApplyHitBox();
-		// カメラ設定
-		ImGuiCamera();
-		// コンボ接続設定
-		ImGuiConnection();
-		// ステートのコンボデータ取得	
-		ComboData& comboData = state->Data();
-		// ステートの時間設定
-		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
-		comboData.SetIsDebug(true);
-		ImGui::End();
-
-#endif // _DEBUG
-	}
-
-#pragma region ImGui
-
-	void EditorBlock::ImGuiApplyHitBox() {
-		if (ImGui::CollapsingHeader("ヒットボックス")) {
-
-			// 形状タイプ
-			static const char* HitBoxShapeTypeLabels[] = {
-				"OBB",
-				"AABB",
-				"Sphere"
-			};
-			Engine::ImGuiManager::Select("形状", HitBoxShapeTypeLabels, data_.hitBox.shapeType);
-
-
-			// 使用者タイプ
-			static const char* HitBoxUseTypeLabels[] = {
-				"プレイヤー",
-				"敵",
-				"その他",
-			};
-			Engine::ImGuiManager::Select("使用者", HitBoxUseTypeLabels, data_.hitBox.useType);
-
-
-			// ペアレント設定
-			Engine::ImGuiManager::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
-
-			// ヒットボックス出現条件
-			static const char* HitBoxSpawnTypeLabels[] = {
-				"時間経過",
-				"着地",
-				"空中",
-				"ボタンを離したら",
-			};
-			Engine::ImGuiManager::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType);
-
-			// 依存先タイプ
-			static const char* HitBoxParentTypeLabels[] = {
-				"親子付け",
-				"孤立",
-				"追従先からの孤立",
-				"ターゲットの位置",
-			};
-			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
-
-			// 影響タイプ
-			static const char* HitBoxHitEffectTypeLabels[] = {
-				"ダメージのみ",
-				"力の影響のみ",
-				"ダメージと力の影響",
-			};
-			Engine::ImGuiManager::Select("ヒットボックス影響", HitBoxHitEffectTypeLabels, data_.hitBox.hitEffectType);
-
-			// 生存タイプ
-			static const char* HitBoxLifetimeTypeLabels[] = {
-				"無期限",
-				"期限付き",
-			};
-			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
-
-
-			// タグタイプ
-			static const char* HitBoxTagTypeLabels[] = {
-				"何もなし",
-				"プレイヤー",
-				"敵",
-				"プレイヤー攻撃",
-				"敵攻撃",
-				"障害物(壁や床)",
-				"アイテム",
-				"プレイヤーによる影響",
-				"敵による影響"
-			};
-			Engine::ImGuiManager::Select("コライダー(タグ)", HitBoxTagTypeLabels, data_.hitBox.tag);
-
-			// レイヤタイプ
-			static const char* HitBoxLayerTypeLabels[] = {
-				"デフォルト",
-				"プレイヤー",
-				"敵",
-				"プレイヤー攻撃",
-				"敵攻撃",
-				"環境",
-				"全て",
-			};
-			Engine::ImGuiManager::Select("コライダー(レイヤー)", HitBoxLayerTypeLabels, data_.hitBox.layer);
-			Engine::ImGuiManager::Select("コライダー(マスク)", HitBoxLayerTypeLabels, data_.hitBox.mask);
-
-
-			// ヒット記録を使用
-			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
-			// オフセット
-			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
-			// サイズ
-			if (data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
-				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
-				ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
-			// 半径
-			if (data_.hitBox.shapeType == HitBox::ShapeType::kSphere)
-				ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
-
-		}
-	}
-
-	void EditorBlock::ImGuiEndConditionType() {
-		if (ImGui::CollapsingHeader("条件")) {
-			static const char* EndConditionTypeLabels[] = {
-			"着地したら",
-			"離したら",
-			"メータが空になったら",
-			"時間経過",
-			"当たったら",
-			"特殊ケース",
-			};
-			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
-
-			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");
-			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
-			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
-			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
-		}
-	}
-
-	void EditorBlock::ImGuiAttackType() {
-		if (!ImGui::CollapsingHeader("攻撃種別")) {
-			return;
-		}
-
-		static const char* ComboTypeLabels[] = {
-			"移動のみ",
-			"近距離",
-			"遠距離",
-			"近距離 + 遠距離",
-		};
-		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
-
-		if (data_.type != Type::kRange && data_.type != Type::kMix) {
-			return;
-		}
-
-		ImGui::SeparatorText("遠距離攻撃設定");
-		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
-		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
-		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
-		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
-		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
-		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
-
-		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
-			data_.range.rangeWindowEnd = data_.range.rangeWindowStart;
-		}
-		if (data_.range.interval < 0.001f) {
-			data_.range.interval = 0.001f;
-		}
-		if (data_.range.count < 1) {
-			data_.range.count = 1;
-		}
-	}
-
-	void EditorBlock::ImGuiMove() {
-		if (ImGui::CollapsingHeader("移動関係")) {
-			static const char* MoveTypeLabels[] = {
-			"入力方向",
-			"ターゲットに向かって",
-			"前方",
-			"カメラ方向",
-			};
-			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
-
-			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
-			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
-
-			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
-			if (data_.move.localMoveVector.x >= 1.0f) {
-				data_.move.localMoveVector.x = 1.0f;
-			}
-			if (data_.move.localMoveVector.y >= 1.0f) {
-				data_.move.localMoveVector.y = 1.0f;
-			}
-			if (data_.move.localMoveVector.z >= 1.0f) {
-				data_.move.localMoveVector.z = 1.0f;
-			}
-			if (data_.move.localMoveVector.x <= -1.0f) {
-				data_.move.localMoveVector.x = -1.0f;
-			}
-			if (data_.move.localMoveVector.y <= -1.0f) {
-				data_.move.localMoveVector.y = -1.0f;
-			}
-			if (data_.move.localMoveVector.z <= -1.0f) {
-				data_.move.localMoveVector.z = -1.0f;
-			}
-			ImGui::Checkbox("ローカル移動ベクトルを正規化してから使うか", &data_.move.isNormalizeLocalMove);
-			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
-			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
-			ImGui::Checkbox("移動方向とキャラクターの向く方向を一致させるか", &data_.move.alignCharacterToMovement);
-
-			ImGui::Checkbox("重力", &data_.move.isGravity);
-			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
-			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
-
-			// ターゲットなら
-			if (data_.move.moveType == Combo::MoveType::kTraget) {
-				static const char* LockOnTypeLabels[] = {
-				"当てた相手",
-				"近い相手",
-				};
-				Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.move.lockOnData.type);
-				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.radius, 0.0f, 100.0f);
-				static const char* TargetMoveTypeLabels[] = {
-				"なし",
-				"移動",
-				"瞬間移動",
-				"補間移動"
-				};
-				Engine::ImGuiManager::Select("ターゲット移動タイプ", TargetMoveTypeLabels, data_.move.lockOnData.targetMoveType);
-				ImGui::SliderFloat("ターゲット接近距離半径", &data_.move.lockOnData.moveTargetRadius, 0.0f, 100.0f);
-
-			}
-		}
-	}
-
-	// リアクション設定
-	void EditorBlock::ImGuiReaction() {
-		if (ImGui::CollapsingHeader("リアクション")) {
-			static const char* HitReactionTypeLabels[] = {
-				"ノックバック",
-				"吹っ飛び",
-				"打ち上げ",
-				"壁バウンド"
-			};
-			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.type);
-
-			ImGui::SliderFloat("持続時間", &data_.hitReaction.duration, 0.0f, 5.0f, "%.2f");
-			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
-			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
-			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
-			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
-			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
-			data_.hitReaction.damageData.GetOne().SetDamage(damage);
-			ImGui::Checkbox("一回しかヒットストップしない", &data_.hitReaction.isSingleHitStop);
-
-			ImGui::SliderFloat("ヒットストップ時間(相手)", &data_.hitReaction.targetHitStopTime, 0.0f, 10.0f, "%.2f");
-			ImGui::SliderFloat("ヒットストップ時間(自分)", &data_.hitReaction.selfHitStopTime, 0.0f, 10.0f, "%.2f");
-
-			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
-			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
-			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
-			if (data_.hitReaction.type == HitReactionType::Launch) {
-				ImGui::SliderFloat("打ち上げ最大高度(命中位置基準)", &data_.hitReaction.launchMaxHeight, 0.0f, 100.0f, "%.2f");
-			}
-			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
-			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
-
-			DrawHitEffectEditor(data_.hitReaction, effectSystem->GetEffectGlobalDatas());
-		}
-	}
-
-	// カメラ設定
-	void  EditorBlock::ImGuiCamera() {
-		if (ImGui::CollapsingHeader("カメラ関係")) {
-			ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
-			ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
-			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation,0.01f, 0.0f, 10.0f);
-			
-			ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
-			ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
-			ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
-			ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration,0.01f ,0.0f, 60.0f);
-			ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
-			ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
-
-		}
-	};
-
-	void EditorBlock::ImGuiConnection() {
-		if (!ImGui::CollapsingHeader("コンボ接続")) {
-			return;
-		}
-
-		auto drawConnection = [this](const char* label, std::string& target) {
-			const char* preview = target.empty() ? "なし" : target.c_str();
-			if (ImGui::BeginCombo(label, preview)) {
-				const bool noSelection = target.empty();
-				if (ImGui::Selectable("なし", noSelection)) {
-					target.clear();
-				}
-				if (noSelection) {
-					ImGui::SetItemDefaultFocus();
-				}
-				for (const std::string& comboName : conectComboNames_) {
-					const bool selected = target == comboName;
-					if (ImGui::Selectable(comboName.c_str(), selected)) {
-						target = comboName;
-					}
-					if (selected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-		};
-
-		auto drawInputConnections = [&](const char* inputLabel, std::string& defaultTarget,
-			GlobalConditionalConnection& conditionalTargets) {
-			ImGui::PushID(inputLabel);
-			if (ImGui::TreeNode(inputLabel)) {
-				drawConnection("標準の接続先", defaultTarget);
-				drawConnection("地上 / 未ヒット", conditionalTargets.groundMiss);
-				drawConnection("地上 / ヒット", conditionalTargets.groundHit);
-				drawConnection("空中 / 未ヒット", conditionalTargets.airMiss);
-				drawConnection("空中 / ヒット", conditionalTargets.airHit);
-				ImGui::TreePop();
-			}
-			ImGui::PopID();
-		};
-
-		ImGui::TextWrapped("条件付き接続が未設定の場合は、標準の接続先が使用されます。");
-		drawInputConnections("弱攻撃入力", data_.connection.lightAttack, data_.connection.lightCondition);
-		drawInputConnections("強攻撃入力", data_.connection.heavyAttack, data_.connection.heavyCondition);
-		drawInputConnections("スキル入力", data_.connection.skill, data_.connection.skillCondition);
-	}
-
-	void EditorBlock::SequencerApplyToState() {
-
-		// ステートのコンボデータ取得	
-		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
-
-		// 移動データ
-		data_.move = comboData.GetComboMotion().GetComboMove().GetData();
-		// ヒットボックスデータ
-		data_.hitBox = comboData.GetComboHitBox().GetCollData().hitBoxData;
-		// リアクションデータ
-		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
-		// アニメーション
-		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
-		// 条件
-		data_.condition = comboData.GetComboCondition().GetData();
-		// カメラ
-		data_.camera = comboData.GetComboCamera().GetData();
-		// エフェクト
-		data_.effect = comboData.GetComboEffect().GetData();
-		// 接続
-		data_.connection = comboSystem->GetComboGlobalData(stateName).connection;
-		// 攻撃タイプと遠距離攻撃
-		data_.type = comboData.GetType();
-		data_.range = comboData.GetComboRange().GetData();
-		// シーケンサー適応
-		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
-	}
-
-	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction,
-		const std::map<std::string, EffectGlobalData>& effectDatas) {
-		ImGui::SeparatorText("ヒットエフェクト");
-		ImGui::Text("※エディタでリロードしてから保存してください");
-
-		int removeIndex = -1;
-
-		for (int i = 0; i < static_cast<int>(reaction.hitEffectNames.size()); ++i) {
-			ImGui::PushID(i);
-
-			HitEffectEntry& entry = reaction.hitEffectNames[i];
-
-			char slotBuffer[128]{};
-			char effectBuffer[128]{};
-
-			strncpy_s(slotBuffer, entry.slotName.c_str(), _TRUNCATE);
-			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
-
-			ImGui::InputText("スロット名", slotBuffer, sizeof(slotBuffer));
-			ImGui::InputText("エフェクト名", effectBuffer, sizeof(effectBuffer));
-
-			entry.slotName = slotBuffer;
-			entry.effectName = effectBuffer;
-
-			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
-				for (const auto& effectPair : effectDatas) {
-					const bool isSelected = (entry.effectName == effectPair.first);
-					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
-						entry.effectName = effectPair.first;
-					}
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-
-			if (ImGui::Button("削除")) {
-				removeIndex = i;
-			}
-
-			ImGui::Separator();
-			ImGui::PopID();
-		}
-
-		if (removeIndex >= 0 && removeIndex < static_cast<int>(reaction.hitEffectNames.size())) {
-			reaction.hitEffectNames.erase(reaction.hitEffectNames.begin() + removeIndex);
-		}
-
-		if (ImGui::Button("ヒットエフェクト追加")) {
-			reaction.hitEffectNames.push_back(HitEffectEntry{
-				.slotName = "NewEffect",
-				.effectName = ""
-				});
-		}
-	}
-
-#pragma endregion // ImGui管理
-
-#pragma endregion // コンボ単位管理
-
-
-#pragma region コンボエディター
-
-	void Editor::Initialize(Engine::LineCommon* lineCommon,
-		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables,
-		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
-		this->comboSystem = comboSystem;
-		this->lineCommon = lineCommon;
-		this->globalVariables = globalVariables;
-		this->owner = owner;
-		this->effectSystem = effectSystem;
-
-		// コンボシステムからコンボエディターブロックを作成
-		ApplyComboEditorToSystem();
-	}
-
-	void Editor::Update(float dt) {
-#ifdef _DEBUG
-		ImGui::Begin("Comdo");
-		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
-		comboSystem->SertIsDebug(isComboEditorActive_);
-		DrawNodeManagement();
-		// リロード
-		if (ImGui::Button("Relord")) {
-			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
-			// グローバルデータ設定
-			SetGlobalData();
-			// リロード
-			player->Reload();
-			// コンボエディター
-			ApplyComboEditorToSystem();
-		}
-
-		ImGui::Separator();
-		if (ImGui::Button("SaveComboName")) {
-			globalVariables->SaveFile(comboSystem->GetName());
-		}
-		ImGui::Separator();
-
-
-		// 全てセーブ
-		if (ImGui::Button("AllSave")) {
-			SetGlobalData();
-			for (auto& it : comboSystem->GetComboNodeStates()) {
-				globalVariables->SaveFile(it.first);
-			}
-		}
-		// セーブ
-		if (ImGui::Button("Save")) {
-			SetGlobalData();
-			for (auto& it : comboSystem->GetComboNodeStates()) {
-				if (it.first == selectedComboEditorBlockName_)
-					globalVariables->SaveFile(it.first);
-			}
-		}
-
-
-		if (isComboEditorActive_)
-			UpdateImGui(dt);
-
-
-
-		ImGui::End();
-#endif // _DEBUG
-	};
-
-	void Editor::DrawNodeManagement() {
-#ifdef _DEBUG
-		ImGui::SeparatorText("Combo Nodes");
-		ImGui::InputText("New Combo Name", newComboNameBuffer_.data(), newComboNameBuffer_.size());
-		ImGui::SameLine();
-		if (ImGui::Button("Add Combo")) {
-			AddComboNode();
-		}
-
-		if (!selectedComboEditorBlockName_.empty()) {
-			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
-			if (ImGui::Button("Rename Selected Combo")) {
-				pendingRenameComboName_ = selectedComboEditorBlockName_;
-				strncpy_s(renameComboNameBuffer_.data(), renameComboNameBuffer_.size(),
-					selectedComboEditorBlockName_.c_str(), _TRUNCATE);
-				ImGui::OpenPopup("Confirm Combo Rename");
-			}
-			if (ImGui::Button("Delete Selected Combo")) {
-				pendingDeleteComboName_ = selectedComboEditorBlockName_;
-				ImGui::OpenPopup("Confirm Combo Delete");
-			}
-		}
-
-		if (!nodeManagementMessage_.empty()) {
-			ImGui::TextWrapped("%s", nodeManagementMessage_.c_str());
-		}
-
-		if (ImGui::BeginPopupModal("Confirm Combo Delete", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("Delete combo '%s'?", pendingDeleteComboName_.c_str());
-			ImGui::TextWrapped("This removes it from the combo list and deletes its saved JSON data.");
-			ImGui::Separator();
-			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
-				pendingDeleteComboName_.clear();
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Delete Permanently", ImVec2(160.0f, 0.0f))) {
-				DeleteComboNode(pendingDeleteComboName_);
-				pendingDeleteComboName_.clear();
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-		if (ImGui::BeginPopupModal("Confirm Combo Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("Rename combo '%s'", pendingRenameComboName_.c_str());
-			ImGui::InputText("New Combo Name", renameComboNameBuffer_.data(), renameComboNameBuffer_.size());
-			ImGui::TextWrapped("This updates saved data, start routes, and all connections to this combo.");
-			ImGui::Separator();
-			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
-				pendingRenameComboName_.clear();
-				renameComboNameBuffer_.fill('\0');
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Apply Rename", ImVec2(160.0f, 0.0f))) {
-				RenameComboNode(pendingRenameComboName_, renameComboNameBuffer_.data());
-				if (nodeManagementMessage_.rfind("Renamed combo:", 0) == 0) {
-					pendingRenameComboName_.clear();
-					renameComboNameBuffer_.fill('\0');
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			ImGui::EndPopup();
-		}
-		ImGui::Separator();
-#endif
-	}
-
-	void Editor::AddComboNode() {
-		std::string comboName = newComboNameBuffer_.data();
-		if (comboName.empty()) {
-			nodeManagementMessage_ = "Combo name is required.";
-			return;
-		}
-		for (const unsigned char c : comboName) {
-			if (!std::isalnum(c) && c != '_') {
-				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
-				return;
-			}
-		}
-		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
-			nodeManagementMessage_ = "A combo with that name already exists.";
-			return;
-		}
-		if (globalVariables->HasGroup(comboName)) {
-			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
-			return;
-		}
-
-		comboSystem->CreateCombo(comboName);
-		globalVariables->SaveFile(comboName);
-		globalVariables->SaveFile(comboSystem->GetName());
-		ApplyComboEditorToSystem();
-		selectedComboEditorBlockName_ = comboName;
-		newComboNameBuffer_.fill('\0');
-		nodeManagementMessage_ = "Added and saved combo: " + comboName;
-	}
-
-	void Editor::RenameComboNode(const std::string& oldName, const std::string& newName) {
-		if (oldName.empty() || !globalVariables->HasKey(comboSystem->GetName(), oldName)) {
-			nodeManagementMessage_ = "The selected combo no longer exists.";
-			return;
-		}
-		if (newName.empty()) {
-			nodeManagementMessage_ = "Combo name is required.";
-			return;
-		}
-		if (oldName == newName) {
-			nodeManagementMessage_ = "Enter a different combo name.";
-			return;
-		}
-		for (const unsigned char c : newName) {
-			if (!std::isalnum(c) && c != '_') {
-				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
-				return;
-			}
-		}
-		if (globalVariables->HasKey(comboSystem->GetName(), newName) ||
-			globalVariables->HasGroup(newName)) {
-			nodeManagementMessage_ = "A combo or saved data with that name already exists.";
-			return;
-		}
-
-		SetGlobalData();
-		if (!globalVariables->RenameGroup(oldName, newName)) {
-			nodeManagementMessage_ = "Could not rename the saved combo data.";
-			return;
-		}
-
-		globalVariables->RemoveItem(comboSystem->GetName(), oldName);
-		globalVariables->SetValue(comboSystem->GetName(), newName, newName);
-		comboSystem->RenameComboReferences(oldName, newName);
-
-		for (const auto& node : comboSystem->GetComboNodeStates()) {
-			if (node.first != oldName) {
-				globalVariables->SaveFile(node.first);
-			}
-		}
-		globalVariables->SaveFile(newName);
-		globalVariables->SaveFile(comboSystem->GetName());
-		globalVariables->RemoveSavedFile(oldName);
-
-		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
-		if (player) {
-			player->Reload();
-		}
-		selectedComboEditorBlockName_ = newName;
-		ApplyComboEditorToSystem();
-		nodeManagementMessage_ = "Renamed combo: " + oldName + " -> " + newName;
-	}
-
-	void Editor::DeleteComboNode(const std::string& comboName) {
-		if (comboName.empty() || !globalVariables->HasKey(comboSystem->GetName(), comboName)) {
-			nodeManagementMessage_ = "The selected combo no longer exists.";
-			return;
-		}
-		if (globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundLightStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirLightStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundHeavyStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirHeavyStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundSkillStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName) {
-			nodeManagementMessage_ = "A configured start combo cannot be deleted because attacks must keep a valid entry point.";
-			return;
-		}
-
-		for (auto& node : comboSystem->GetComboNodeStates()) {
-			if (node.first == comboName) {
-				continue;
-			}
-			GlobalData& data = comboSystem->GetComboGlobalData(node.first);
-			bool changed = false;
-			auto clearTarget = [&](std::string& target) {
-				if (target == comboName) {
-					target.clear();
-					changed = true;
-				}
-			};
-			auto clearConditional = [&](GlobalConditionalConnection& targets) {
-				clearTarget(targets.groundMiss);
-				clearTarget(targets.groundHit);
-				clearTarget(targets.airMiss);
-				clearTarget(targets.airHit);
-			};
-			clearTarget(data.connection.lightAttack);
-			clearTarget(data.connection.heavyAttack);
-			clearTarget(data.connection.skill);
-			clearConditional(data.connection.lightCondition);
-			clearConditional(data.connection.heavyCondition);
-			clearConditional(data.connection.skillCondition);
-			if (changed) {
-				comboSystem->SetGlobalComboData(node.first, data);
-				globalVariables->SaveFile(node.first);
-			}
-		}
-
-		globalVariables->RemoveItem(comboSystem->GetName(), comboName);
-		globalVariables->RemoveGroup(comboName);
-		globalVariables->SaveFile(comboSystem->GetName());
-		const bool removedFile = globalVariables->RemoveSavedFile(comboName);
-
-		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
-		if (player) {
-			player->Reload();
-		}
-		ApplyComboEditorToSystem();
-		nodeManagementMessage_ = removedFile
-			? "Deleted combo: " + comboName
-			: "Removed combo from the list, but its JSON file could not be deleted: " + comboName;
-	}
-
-	void Editor::UpdateImGui(float dt) {
-#ifdef _DEBUG
-
-		// 何もなければ何もしない
-		if (comboEditorBlocks_.empty()) return;
-
-		// 
-		Engine::ImGuiManager::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
-
-		ImGui::Separator();
-		ImGui::Text("Editing: %s", selectedComboEditorBlockName_.c_str());
-
-
-		// --- 選択されているブロックだけ表示 ---
-		for (auto& combo : comboEditorBlocks_) {
-			const std::string& name = combo.first;
-
-			// ★ ここがポイント：選択中だけ true
-			const bool nowChoice = (name == selectedComboEditorBlockName_);
-			combo.second.SetNowChoice(nowChoice);
-
-			// 選択中の1つだけ UpdateImGui 内部で描画される
-			combo.second.UpdateImGui(dt, isComboEditorActive_);
-		}
-#endif // _DEBUG
-	}
-
-	void Editor::ApplyComboEditorToSystem() {
-		// コンボエディターブロッククリア
-		comboEditorBlocks_.clear();
-		comboEditorBlockNames_.clear();
-
-		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
-		for (auto& comboState : comboSystem->GetComboNodeStates()) {
-			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.first, owner);
-		}
-		for (auto& combo : comboEditorBlocks_) {
-			combo.second.SetConectComboNames(comboEditorBlockNames_);
-		}
-
-		// コンボ再構築後、選択が消えてたら補正
-		if (!comboEditorBlocks_.empty()) {
-			if (selectedComboEditorBlockName_.empty() ||
-				comboEditorBlocks_.find(selectedComboEditorBlockName_) == comboEditorBlocks_.end()) {
-				selectedComboEditorBlockName_ = comboEditorBlocks_.begin()->first;
-			}
-		}
-		else {
-			selectedComboEditorBlockName_.clear();
-		}
-	}
-
-	void Editor::SetGlobalData() {
-
-		for (auto& it : comboSystem->GetComboNodeStates()) {
-
-			AttackSequence combo = comboEditorBlocks_[it.first].GetAttackSequence();
-			GlobalData& data = comboSystem->GetComboGlobalData(it.first);
-
-
-			// 条件
-			{
-				data.condition = comboEditorBlocks_[it.first].GetData().condition;
-				// 入力の時間
-				data.condition.stateInput.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
-				data.condition.stateInput.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
-				// キャンセル可能時間
-				data.condition.stateCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").startFrame);
-				data.condition.stateCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").endFrame);
-				// キャンセル可能時間(移動)
-				data.condition.stateMoveCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").startFrame);
-				data.condition.stateMoveCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").endFrame);
-				// コンボ移行時間
-				data.condition.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
-				// ステート終了時間
-				data.condition.stateEndTime = comboEditorBlocks_[it.first].GetMaxFrame();
-			}
-
-			// リアクション
-			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
-			// ヒットボックス生成時間
-			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
-			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
-			data.hitBox.windowStart = hitBoxStart;
-			data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
-
-			// 移動時間
-			data.move = comboEditorBlocks_[it.first].GetData().move;
-			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
-
-
-			// アニメーションスピード
-			data.animation = comboEditorBlocks_[it.first].GetData().animation;
-
-			// カメラ
-			data.camera = comboEditorBlocks_[it.first].GetData().camera;
-			// エフェクト
-			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
-			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
-
-			// 接続
-			data.connection = comboEditorBlocks_[it.first].GetData().connection;
-			// 攻撃タイプと遠距離攻撃
-			data.type = comboEditorBlocks_[it.first].GetData().type;
-			data.range = comboEditorBlocks_[it.first].GetData().range;
-
-		}
-
-		comboSystem->SetGlobalComboDatas();
-	}
-
-	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner) {
-
-		// 既に存在する場合は追加しない
-		if (comboEditorBlocks_.find(comboName) != comboEditorBlocks_.end()) {
-			return;
-		}
-
-		// コンボエディターブロック作成
-		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner, effectSystem);
-
-		// 名前リストに追加
-		comboEditorBlockNames_.push_back(comboName);
-
-		// マップに追加
-		comboEditorBlocks_[comboName] = block;
-	}
-
-#pragma endregion // コンボエディター
-
-}
-
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.h
-============================================================
-#pragma once
-#include  "ComboImGui.h"
-#include <array>
-#include "map"
-#include "DirectXGame/engine/Effect/EffectGlovalData.h"
-namespace Engine {
-	class GlobalVariables;
-	class LineCommon;
-}
-// 前方宣言
-namespace Character {
-	class BaseCharacter;
-	class BasePlayer;
-}
-class EffectSystem;
-
-namespace Combo {
-	class EditorBlock {
-	public:
-		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables,
-			Combo::System* comboSystem, const std::string& stateName, 
-			Character::BaseCharacter* owner, EffectSystem* effectSystem);
-		// 更新
-		void UpdateImGui(float dt, bool isActive);
-	public:
-		// エディタ上で選択中か設定
-		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
-		// コエディタ上で選択中か取得
-		bool GetNowChoice() const { return nowChoice_; }
-
-		// 接続可能なコンボ名リスト設定
-		void SetConectComboNames(const std::vector<std::string>& names) { conectComboNames_ = names; }
-
-
-		// シーケンサー取得
-		AttackSequence GetAttackSequence() const { return sequence_; }
-
-		// 最大フレーム取得
-		float GetMaxFrame() const { return ConvertUtility::FramesToSeconds(maxFrame); }
-
-		// データ取得
-		GlobalData GetData() const { return data_; }
-	private:
-		// ヒットボックス設定
-		void ImGuiApplyHitBox();
-		// 終了条件
-		void ImGuiEndConditionType();
-		// 攻撃種別と遠距離設定
-		void ImGuiAttackType();
-		// 移動関係設定
-		void ImGuiMove();
-		// リアクション設定
-		void ImGuiReaction();
-		// カメラ設定
-		void ImGuiCamera();
-		// コンボ接続設定
-		void ImGuiConnection();
-	private:
-		// シーケンサーの状態をステートに適応
-		void SequencerApplyToState();
-
-		void DrawHitEffectEditor(HitReactionData& reaction, 
-			const std::map<std::string, EffectGlobalData>& effectDatas);
-
-	private: // 貰いもの
-		Engine::GlobalVariables* globalVariables = nullptr;
-		Engine::LineCommon* lineCommon = nullptr;
-		EffectSystem* effectSystem = nullptr;
-	private: // もらいもの
-		// 所有者
-		Character::BaseCharacter* owner = nullptr;
-		// コンボシステム
-		Combo::System* comboSystem = nullptr;
-		// 接続可能なコンボ名リスト
-		std::vector<std::string> conectComboNames_;
-	private:
-		// ノードステート
-		std::string stateName = "";
-		// シーケンサー
-		AttackSequence sequence_;
-	private:
-		// 現在のフレーム
-		int currentFrame = 0;
-		// 再生中か
-		bool isPlaying = true;
-		// ループ再生するか
-		bool loopPlay = true;
-		// 最初のフレーム
-		int firstFrame = 0;
-		// マックスフレーム(二十秒)
-		int maxFrame = 300;
-
-
-		int selected = -1;
-		bool expanded = true;
-		// コンボ名
-		std::string comboName_ = "Combo1";
-		// 今選択中か
-		bool nowChoice_ = false;
-		// コンボエディターがアクティブか
-		bool isComboEditorActive_ = true;
-	private:
-		// データ
-		GlobalData data_;
-	};
-
-
-
-	// コンボエディター
-	class Editor {
-	public:
-
-		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem,
-			Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner,
-			EffectSystem* effectSystem);
-		// 更新 
-		void Update(float dt);
-
-		// コンボエディターがアクティブか取得
-		bool IsActive() const { return isComboEditorActive_; }
-
-	private:
-		// 更新
-		void UpdateImGui(float dt);
-		// コンボエディターブロックをコンボシステムに適応
-		void ApplyComboEditorToSystem();
-		// グローバルデータ設定
-		void SetGlobalData();
-		// コンボノードの管理
-		void DrawNodeManagement();
-		void AddComboNode();
-		void RenameComboNode(const std::string& oldName, const std::string& newName);
-		void DeleteComboNode(const std::string& comboName);
-	private:
-		// コンボエディターブロック作成
-		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
-	private: // もらいもの
-		// コンボシステム
-		Combo::System* comboSystem = nullptr;
-		Engine::GlobalVariables* globalVariables = nullptr;
-		Engine::LineCommon* lineCommon = nullptr;
-		Character::BaseCharacter* owner = nullptr;
-		EffectSystem* effectSystem = nullptr;
-	private:
-		// コンボエディターブロックマップ
-		std::map<std::string, EditorBlock> comboEditorBlocks_;
-		// コンボエディターブロック名リスト
-		std::vector<std::string> comboEditorBlockNames_;
-
-
-		// 選択中のコンボエディターブロック名
-		std::string selectedComboEditorBlockName_;
-		std::array<char, 128> newComboNameBuffer_{};
-		std::array<char, 128> renameComboNameBuffer_{};
-		std::string pendingRenameComboName_;
-		std::string pendingDeleteComboName_;
-		std::string nodeManagementMessage_;
-
-		GlobalData data;
-
-		// コンボエディターがアクティブか
-		bool isComboEditorActive_ = true;
-	};
-}
-
-
-============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h
 ============================================================
 #pragma once
@@ -3692,307 +2527,6 @@ namespace Combo {
 		// 次のコンボへの接続
 		GlobalConnection connection{};
 	};
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboImGui.cpp
-============================================================
-#include "ComboImGui.h"
-#include <DirectXGame/engine/Animation/AnimationComponent.h>
-
-void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
-	int& currentFrame, int& firstFrame, int& maxFrame) {
-	// 現在のフレーム表示
-	if (isActive) {
-		ImGui::Checkbox("再生するか", &isPlaying);
-		ImGui::Checkbox("ループ再生", &loopPlay);
-		ImGui::Separator();
-		ImGui::Text("Current Frame: %d", currentFrame);
-	}
-	ImGui::DragInt("最大フレーム", &maxFrame);
-	ImGui::SliderInt("Current Frame", &currentFrame, 0, maxFrame);
-	// 最初フレーム設定
-	// 最初フレーム設定
-	ImGui::DragInt("firstFrame ", &firstFrame, 1.0f, 0, maxFrame);
-	// 最初のフレームが0未満にならないようにする
-	if (0 > firstFrame) {
-		firstFrame = 0;
-	}
-	ImGui::Separator();
-
-	if (isPlaying && isActive) {
-		currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
-	}
-
-	// 最大値に行ったら戻す
-	if (currentFrame >= sequence.GetFrameMax() && loopPlay) {
-		currentFrame = 0;
-	}
-	else if (currentFrame >= sequence.GetFrameMax()) {
-		currentFrame = sequence.GetFrameMax();
-	}
-}
-
-
-void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
-	bool isActive, int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
-	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
-
-	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
-		ImGui::SliderFloat("アニメーションスピード", &animationData.animationSpeed, 0.1f, 10.0f, "%.2f");
-		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.0f, 10.0f, "%.2f");
-		ImGui::Checkbox("アニメーションループ", &animationData.animationLoop);
-
-		float endTime = static_cast<float>(maxFrame) /60.0f;
-
-		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
-		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
-
-		// BeginComboでの選択
-		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
-	}
-
-	if (isActive) {
-		// ループ再生
-		animation->SetIsLoop(false);
-		// アニメーション設定
-		animation->SetAnimation(nowAnimationName, 0);
-		// ステートのアニメーション時間設定
-		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
-		animation->SetAnimationTime(animationTime);
-	}
-}
-
-
-#pragma region Sequence
-
-void Combo::ComboImGui::SequenceSettings(AttackSequence& sequence, int& currentFrame, int& firstFrame, int& maxFrame, bool& expanded, int& selected) {
-	// 最大フレーム設定
-	sequence.SetFrameMax(maxFrame);
-
-	// シーケンサー設定
-	if (ImGui::CollapsingHeader("シーケンサー")) {
-		ImGui::SliderFloat("Frame PixelWidthTarget",
-			&ImSequencer::g_framePixelWidthTarget,
-			1.0f, 40.0f, "%.1f px");
-		ImGui::SliderFloat("Frame PixelWidth",
-			&ImSequencer::g_framePixelWidth,
-			1.0f, 40.0f, "%.1f px");
-		ImGui::SliderInt("Frame LegendWidth",
-			&ImSequencer::g_legendWidth,
-			50, 500, "%d px");
-
-
-		// シーケンサー表示
-		ImGui::Separator();
-		ImSequencer::Sequencer(
-			&sequence,
-			&currentFrame,
-			&expanded,
-			&selected,
-			&firstFrame,
-			ImSequencer::SEQUENCER_EDIT_ALL |
-			ImSequencer::SEQUENCER_ADD |
-			ImSequencer::SEQUENCER_DEL
-		);
-		ImGui::Separator();
-	}
-}
-
-void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData& comboData, int& maxFrame) {
-
-	// コンボ入力可能時間
-	float inputStart = comboData.GetComboCondition().GetNextInputStart();
-	float inputEnd = comboData.GetComboCondition().GetNextInputEnd();
-
-	// コンボキャンセル時間
-	float cancelStart = comboData.GetComboCondition().GetCancelInputStart();
-	float cancelEnd = comboData.GetComboCondition().GetCancelInputEnd();
-	// コンボキャンセル時間
-	float cancelMoveStart = comboData.GetComboCondition().GetMoveCancelInputStart();
-	float cancelMoveEnd = comboData.GetComboCondition().GetMoveCancelInputEnd();
-
-
-
-	// コンボ移行時間
-	float nextComboTime = comboData.GetComboCondition().GetData().stateNextTime;
-	float endComboTime = comboData.GetComboCondition().GetData().stateEndTime;
-
-	// ヒットボックス生成時間
-	float hitBoxStart = comboData.GetComboHitBox().GetCollData().hitBoxData.windowStart;
-	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetCollData().hitBoxData.lifeTime;
-
-	// コンボ終了時間
-	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
-
-	// 移動時間
-	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.startTime;
-	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.endTime;
-
-	// トレイルエフェクト
-	float trailStart = comboData.GetComboEffect().GetData().trailEffectStartTime;
-	float trailEnd = trailStart + comboData.GetComboEffect().GetData().trailEffectLifeTime;
-
-	AddSequencerEvent(sequence,inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
-	AddSequencerEvent(sequence,cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");
-	AddSequencerEvent(sequence,cancelMoveStart, cancelMoveEnd, 0xFFFFFF00, "移動キャンセル可能時間");
-	AddSequencerEvent(sequence,nextComboTime, endComboTime, 0xFFFF0000, "コンボ移行開始時間");
-	AddSequencerEvent(sequence,hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
-	AddSequencerEvent(sequence,moveStart, moveEnd, 0xFF000000, "移動時間");
-	AddSequencerEvent(sequence,trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
-}
-
-void Combo::ComboImGui::AddSequencerEvent(AttackSequence& sequence, float startFrame, float endFrame, 
-	unsigned int color, const std::string& name) {
-	sequence.AddEvent({ ConvertUtility::SecondsToFrames(startFrame,60.0f) , ConvertUtility::SecondsToFrames(endFrame,60.0f), color, name });
-}
-
-#pragma endregion // シーケンサー
-
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboImGui.h
-============================================================
-#pragma once
-#include "DirectXGame/application/base/Attack/Combo/Base/ComboSequencer.h"
-#include "ComboSystem.h"
-#include "DirectXGame/engine/Utility/ConvertUtility.h"
-#include "DirectXGame/engine/Animation/Animation.h"
-
-namespace Combo {
-	class ComboImGui {
-	public:
-		// 現在の時間
-		static void CurrentFrame(float dt,bool isActive ,const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
-			int& currentFrame, int& firstFrame, int& maxFrame);
-
-		// アニメーション設定と表示
-		static void ApplyAnimationToState(const std::string& name, bool isActive, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
-			Engine::AnimationComponent* animation,const std::string& nowAnimationName);
-	public: // シーケンサー
-		// シーケンサー設定と表示
-		static void SequenceSettings(AttackSequence& sequence, int& currentFrame, int& firstFrame, int& maxFrame,
-			bool& expanded, int& selected);
-
-		// シーケンサー適応
-		static void SequencerApplyToState(AttackSequence& sequence, ComboData& comboData, int& maxFrame);
-	private:
-		// シーケンサー追加
-		static void AddSequencerEvent(AttackSequence& sequence,float startFrame, float endFrame, 
-			unsigned int color, const std::string& name);
-	};
-
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSequencer.h
-============================================================
-#pragma once
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-
-// イベント構造体
-struct AttackEvent {
-	int startFrame;
-	int endFrame;
-	unsigned int color;
-	std::string name;
-};
-
-//  攻撃シーケンス
-class AttackSequence : public ImSequencer::SequenceInterface {
-public:
-	
-	// 最小フレーム
-	int GetFrameMin() const override { return 0; }		
-	// 全体フレーム幅
-	int GetFrameMax() const override { return maxFrame_; }
-	// アイテム数
-	int GetItemCount() const override { return (int)events.size(); }	
-
-	// 開始フレーム、終了フレーム、タイプ、色を返す
-	void Get(int index, int** start, int** end, int* type, unsigned int* color) override {
-		if (start) *start = &events[index].startFrame;
-		if (end)   *end = &events[index].endFrame;
-		if (type)  *type = 0;
-		if (color) *color = events[index].color;
-	}
-
-	// アイテムのラベルを返す
-	const char* GetItemLabel(int index) const override {
-		return events[index].name.c_str();
-	}
-
-	// [+] 追加ボタンで呼ばれる処理
-	void Add(int /*type*/) override {
-		events.push_back({ 0, 10, 0xFF00FF00, "NewEvent" });
-	}
-
-	// [-] 削除ボタンで呼ばれる処理
-	void Del(int index) override {
-		events.erase(events.begin() + index);
-	}
-
-	// 複製ボタンで呼ばれる処理
-	void Duplicate(int index) override {
-		events.push_back(events[index]);
-	}
-
-	// イベントの追加
-	void AddEvent(const AttackEvent& event) {
-		events.push_back(event);
-	}
-
-	// イベントのクリア
-	void ClearEvents() {
-		events.clear();
-	}
-
-public: // 編集系
-	// 最大フレーム設定
-	void  SetFrameMax(int frame) { maxFrame_ = frame; }
-
-public: // 取得系
-
-	// イベント一覧取得
-	const std::vector<AttackEvent>& GetEvents() const {
-		return events;
-	}
-
-	// イベント取得
-	const AttackEvent& GetEvent(int index) const {
-		return events[index];
-	}
-
-	// 名前でイベント取得
-	const AttackEvent& GetEvent(const std::string name) const {
-		// / 名前で検索
-		for(int i = 0; i < static_cast<int>(events.size()); ++i) {
-			if (events[i].name == name) {
-				return events[i];
-			}
-		}
-
-		/// 見つからなかった場合は空のイベントを返す
-		return events[0];
-	}
-
-	// イベント名取得
-	std::string GetEventName(int index) const {
-		if (index >= 0 && index < static_cast<int>(events.size())) {
-			return events[index].name;
-		}
-		return "";
-	}
-
-
-private:
-	// イベント一覧
-	std::vector<AttackEvent> events;
-	// 最大フレーム
-	int maxFrame_ = 300;
-
 };
 
 
@@ -5231,7 +3765,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 #include <string>
 #include <memory>
 #include <optional>
-#include "ComboDebug.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
@@ -5411,6 +3945,1495 @@ namespace Combo {
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Character::BaseCharacter* owner = nullptr;
 	};
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.cpp
+============================================================
+#include "ComboDebug.h"
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Attack/AttackController.h>
+
+namespace Combo {
+	// 初期化
+	void ComboDebug::Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner) {
+		this->owner = owner;
+		this->lineCommon = lineCommon;
+	};
+
+	// 更新
+	void ComboDebug::Update(float dt) {
+#ifdef _DEBUG
+		if (owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()) {
+			ComboData data = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()->Data();
+			Vector3 ownerPos = owner->GetWorldTransform().GetWorldPosition();
+
+
+			// ターゲット位置
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ data.GetComboMotion().GetComboMove().GetTargetPosition(),3 }, { 0,1,1,1 }, 8, 8);
+
+
+			// ロックオン半径
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.radius }, { 0,1,0,1 }, 8, 8);
+
+
+			// 方向
+			lineCommon->GetLineMeshData().AddLine(ownerPos, ownerPos + data.GetComboMotion().GetComboMove().GetDirection() * 10);
+
+		}
+#endif // _DEBUG
+	};
+
+
+
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboState.h"
+
+namespace Character {
+	class BaseCharacter; // 前方宣言
+}
+
+namespace Engine {
+	class GlobalVariables;
+	class LineCommon;
+}
+
+namespace Combo {
+
+	/// <summary>
+	/// コンボ用デバッグ
+	/// </summary>
+	class ComboDebug {
+	public:
+		// 初期化
+		void Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner);
+
+		// 更新
+		void Update(float dt);
+
+	private:
+		Character::BaseCharacter* owner = nullptr;
+		Engine::LineCommon* lineCommon = nullptr;
+	};
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.cpp
+============================================================
+#include "ComboEditor.h"
+
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+
+#include <cctype>
+
+namespace Combo {
+
+#pragma region コンボエディター
+
+	void Editor::Initialize(Engine::LineCommon* lineCommon,
+		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables,
+		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
+		this->comboSystem = comboSystem;
+		this->lineCommon = lineCommon;
+		this->globalVariables = globalVariables;
+		this->owner = owner;
+		this->effectSystem = effectSystem;
+
+		// コンボシステムからコンボエディターブロックを作成
+		ApplyComboEditorToSystem();
+	}
+
+	void Editor::Update(float dt) {
+#ifdef _DEBUG
+		ImGui::Begin("Comdo");
+		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
+		comboSystem->SertIsDebug(isComboEditorActive_);
+		DrawNodeManagement();
+		// リロード
+		if (ImGui::Button("Relord")) {
+			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+			// グローバルデータ設定
+			SetGlobalData();
+			// リロード
+			player->Reload();
+			// コンボエディター
+			ApplyComboEditorToSystem();
+		}
+
+		ImGui::Separator();
+		if (ImGui::Button("SaveComboName")) {
+			globalVariables->SaveFile(comboSystem->GetName());
+		}
+		ImGui::Separator();
+
+
+		// 全てセーブ
+		if (ImGui::Button("AllSave")) {
+			SetGlobalData();
+			for (auto& it : comboSystem->GetComboNodeStates()) {
+				globalVariables->SaveFile(it.first);
+			}
+		}
+		// セーブ
+		if (ImGui::Button("Save")) {
+			SetGlobalData();
+			for (auto& it : comboSystem->GetComboNodeStates()) {
+				if (it.first == selectedComboEditorBlockName_)
+					globalVariables->SaveFile(it.first);
+			}
+		}
+
+
+		if (isComboEditorActive_)
+			UpdateImGui(dt);
+
+
+
+		ImGui::End();
+#endif // _DEBUG
+	};
+
+	void Editor::DrawNodeManagement() {
+#ifdef _DEBUG
+		ImGui::SeparatorText("Combo Nodes");
+		ImGui::InputText("New Combo Name", newComboNameBuffer_.data(), newComboNameBuffer_.size());
+		ImGui::SameLine();
+		if (ImGui::Button("Add Combo")) {
+			AddComboNode();
+		}
+
+		if (!selectedComboEditorBlockName_.empty()) {
+			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
+			if (ImGui::Button("Rename Selected Combo")) {
+				pendingRenameComboName_ = selectedComboEditorBlockName_;
+				strncpy_s(renameComboNameBuffer_.data(), renameComboNameBuffer_.size(),
+					selectedComboEditorBlockName_.c_str(), _TRUNCATE);
+				ImGui::OpenPopup("Confirm Combo Rename");
+			}
+			if (ImGui::Button("Delete Selected Combo")) {
+				pendingDeleteComboName_ = selectedComboEditorBlockName_;
+				ImGui::OpenPopup("Confirm Combo Delete");
+			}
+		}
+
+		if (!nodeManagementMessage_.empty()) {
+			ImGui::TextWrapped("%s", nodeManagementMessage_.c_str());
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Combo Delete", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Delete combo '%s'?", pendingDeleteComboName_.c_str());
+			ImGui::TextWrapped("This removes it from the combo list and deletes its saved JSON data.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingDeleteComboName_.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Delete Permanently", ImVec2(160.0f, 0.0f))) {
+				DeleteComboNode(pendingDeleteComboName_);
+				pendingDeleteComboName_.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Combo Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Rename combo '%s'", pendingRenameComboName_.c_str());
+			ImGui::InputText("New Combo Name", renameComboNameBuffer_.data(), renameComboNameBuffer_.size());
+			ImGui::TextWrapped("This updates saved data, start routes, and all connections to this combo.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingRenameComboName_.clear();
+				renameComboNameBuffer_.fill('\0');
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Apply Rename", ImVec2(160.0f, 0.0f))) {
+				RenameComboNode(pendingRenameComboName_, renameComboNameBuffer_.data());
+				if (nodeManagementMessage_.rfind("Renamed combo:", 0) == 0) {
+					pendingRenameComboName_.clear();
+					renameComboNameBuffer_.fill('\0');
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::Separator();
+#endif
+	}
+
+	void Editor::AddComboNode() {
+		std::string comboName = newComboNameBuffer_.data();
+		if (comboName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return;
+		}
+		for (const unsigned char c : comboName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "A combo with that name already exists.";
+			return;
+		}
+		if (globalVariables->HasGroup(comboName)) {
+			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+			return;
+		}
+
+		comboSystem->CreateCombo(comboName);
+		globalVariables->SaveFile(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		ApplyComboEditorToSystem();
+		selectedComboEditorBlockName_ = comboName;
+		newComboNameBuffer_.fill('\0');
+		nodeManagementMessage_ = "Added and saved combo: " + comboName;
+	}
+
+	void Editor::RenameComboNode(const std::string& oldName, const std::string& newName) {
+		if (oldName.empty() || !globalVariables->HasKey(comboSystem->GetName(), oldName)) {
+			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+		if (newName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return;
+		}
+		if (oldName == newName) {
+			nodeManagementMessage_ = "Enter a different combo name.";
+			return;
+		}
+		for (const unsigned char c : newName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), newName) ||
+			globalVariables->HasGroup(newName)) {
+			nodeManagementMessage_ = "A combo or saved data with that name already exists.";
+			return;
+		}
+
+		SetGlobalData();
+		if (!globalVariables->RenameGroup(oldName, newName)) {
+			nodeManagementMessage_ = "Could not rename the saved combo data.";
+			return;
+		}
+
+		globalVariables->RemoveItem(comboSystem->GetName(), oldName);
+		globalVariables->SetValue(comboSystem->GetName(), newName, newName);
+		comboSystem->RenameComboReferences(oldName, newName);
+
+		for (const auto& node : comboSystem->GetComboNodeStates()) {
+			if (node.first != oldName) {
+				globalVariables->SaveFile(node.first);
+			}
+		}
+		globalVariables->SaveFile(newName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		globalVariables->RemoveSavedFile(oldName);
+
+		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+		if (player) {
+			player->Reload();
+		}
+		selectedComboEditorBlockName_ = newName;
+		ApplyComboEditorToSystem();
+		nodeManagementMessage_ = "Renamed combo: " + oldName + " -> " + newName;
+	}
+
+	void Editor::DeleteComboNode(const std::string& comboName) {
+		if (comboName.empty() || !globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+		if (globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName) {
+			nodeManagementMessage_ = "A configured start combo cannot be deleted because attacks must keep a valid entry point.";
+			return;
+		}
+
+		for (auto& node : comboSystem->GetComboNodeStates()) {
+			if (node.first == comboName) {
+				continue;
+			}
+			GlobalData& data = comboSystem->GetComboGlobalData(node.first);
+			bool changed = false;
+			auto clearTarget = [&](std::string& target) {
+				if (target == comboName) {
+					target.clear();
+					changed = true;
+				}
+			};
+			auto clearConditional = [&](GlobalConditionalConnection& targets) {
+				clearTarget(targets.groundMiss);
+				clearTarget(targets.groundHit);
+				clearTarget(targets.airMiss);
+				clearTarget(targets.airHit);
+			};
+			clearTarget(data.connection.lightAttack);
+			clearTarget(data.connection.heavyAttack);
+			clearTarget(data.connection.skill);
+			clearConditional(data.connection.lightCondition);
+			clearConditional(data.connection.heavyCondition);
+			clearConditional(data.connection.skillCondition);
+			if (changed) {
+				comboSystem->SetGlobalComboData(node.first, data);
+				globalVariables->SaveFile(node.first);
+			}
+		}
+
+		globalVariables->RemoveItem(comboSystem->GetName(), comboName);
+		globalVariables->RemoveGroup(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		const bool removedFile = globalVariables->RemoveSavedFile(comboName);
+
+		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+		if (player) {
+			player->Reload();
+		}
+		ApplyComboEditorToSystem();
+		nodeManagementMessage_ = removedFile
+			? "Deleted combo: " + comboName
+			: "Removed combo from the list, but its JSON file could not be deleted: " + comboName;
+	}
+
+	void Editor::UpdateImGui(float dt) {
+#ifdef _DEBUG
+
+		// 何もなければ何もしない
+		if (comboEditorBlocks_.empty()) return;
+
+		// 
+		Engine::ImGuiManager::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
+
+		ImGui::Separator();
+		ImGui::Text("Editing: %s", selectedComboEditorBlockName_.c_str());
+
+
+		// --- 選択されているブロックだけ表示 ---
+		for (auto& combo : comboEditorBlocks_) {
+			const std::string& name = combo.first;
+
+			// ★ ここがポイント：選択中だけ true
+			const bool nowChoice = (name == selectedComboEditorBlockName_);
+			combo.second.SetNowChoice(nowChoice);
+
+			// 選択中の1つだけ UpdateImGui 内部で描画される
+			combo.second.UpdateImGui(dt, isComboEditorActive_);
+		}
+#endif // _DEBUG
+	}
+
+	void Editor::ApplyComboEditorToSystem() {
+		// コンボエディターブロッククリア
+		comboEditorBlocks_.clear();
+		comboEditorBlockNames_.clear();
+
+		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
+		for (auto& comboState : comboSystem->GetComboNodeStates()) {
+			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.first, owner);
+		}
+		for (auto& combo : comboEditorBlocks_) {
+			combo.second.SetConectComboNames(comboEditorBlockNames_);
+		}
+
+		// コンボ再構築後、選択が消えてたら補正
+		if (!comboEditorBlocks_.empty()) {
+			if (selectedComboEditorBlockName_.empty() ||
+				comboEditorBlocks_.find(selectedComboEditorBlockName_) == comboEditorBlocks_.end()) {
+				selectedComboEditorBlockName_ = comboEditorBlocks_.begin()->first;
+			}
+		}
+		else {
+			selectedComboEditorBlockName_.clear();
+		}
+	}
+
+	void Editor::SetGlobalData() {
+
+		for (auto& it : comboSystem->GetComboNodeStates()) {
+
+			AttackSequence combo = comboEditorBlocks_[it.first].GetAttackSequence();
+			GlobalData& data = comboSystem->GetComboGlobalData(it.first);
+
+
+			// 条件
+			{
+				data.condition = comboEditorBlocks_[it.first].GetData().condition;
+				// 入力の時間
+				data.condition.stateInput.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
+				data.condition.stateInput.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
+				// キャンセル可能時間
+				data.condition.stateCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").startFrame);
+				data.condition.stateCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").endFrame);
+				// キャンセル可能時間(移動)
+				data.condition.stateMoveCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").startFrame);
+				data.condition.stateMoveCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").endFrame);
+				// コンボ移行時間
+				data.condition.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
+				// ステート終了時間
+				data.condition.stateEndTime = comboEditorBlocks_[it.first].GetMaxFrame();
+			}
+
+			// リアクション
+			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
+			// ヒットボックス生成時間
+			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
+			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
+			data.hitBox.windowStart = hitBoxStart;
+			data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
+
+			// 移動時間
+			data.move = comboEditorBlocks_[it.first].GetData().move;
+			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
+			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+
+
+			// アニメーションスピード
+			data.animation = comboEditorBlocks_[it.first].GetData().animation;
+
+			// カメラ
+			data.camera = comboEditorBlocks_[it.first].GetData().camera;
+			// エフェクト
+			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
+			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
+
+			// 接続
+			data.connection = comboEditorBlocks_[it.first].GetData().connection;
+			// 攻撃タイプと遠距離攻撃
+			data.type = comboEditorBlocks_[it.first].GetData().type;
+			data.range = comboEditorBlocks_[it.first].GetData().range;
+
+		}
+
+		comboSystem->SetGlobalComboDatas();
+	}
+
+	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner) {
+
+		// 既に存在する場合は追加しない
+		if (comboEditorBlocks_.find(comboName) != comboEditorBlocks_.end()) {
+			return;
+		}
+
+		// コンボエディターブロック作成
+		EditorBlock block;
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner, effectSystem);
+
+		// 名前リストに追加
+		comboEditorBlockNames_.push_back(comboName);
+
+		// マップに追加
+		comboEditorBlocks_[comboName] = block;
+	}
+
+#pragma endregion // コンボエディター
+
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h
+============================================================
+#pragma once
+#include "ComboEditorBlock.h"
+
+namespace Combo {
+	// コンボエディター
+	class Editor {
+	public:
+
+		// 初期化
+		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem,
+			Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner,
+			EffectSystem* effectSystem);
+		// 更新 
+		void Update(float dt);
+
+		// コンボエディターがアクティブか取得
+		bool IsActive() const { return isComboEditorActive_; }
+
+	private:
+		// 更新
+		void UpdateImGui(float dt);
+		// コンボエディターブロックをコンボシステムに適応
+		void ApplyComboEditorToSystem();
+		// グローバルデータ設定
+		void SetGlobalData();
+		// コンボノードの管理
+		void DrawNodeManagement();
+		void AddComboNode();
+		void RenameComboNode(const std::string& oldName, const std::string& newName);
+		void DeleteComboNode(const std::string& comboName);
+	private:
+		// コンボエディターブロック作成
+		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
+	private: // もらいもの
+		// コンボシステム
+		Combo::System* comboSystem = nullptr;
+		Engine::GlobalVariables* globalVariables = nullptr;
+		Engine::LineCommon* lineCommon = nullptr;
+		Character::BaseCharacter* owner = nullptr;
+		EffectSystem* effectSystem = nullptr;
+	private:
+		// コンボエディターブロックマップ
+		std::map<std::string, EditorBlock> comboEditorBlocks_;
+		// コンボエディターブロック名リスト
+		std::vector<std::string> comboEditorBlockNames_;
+
+
+		// 選択中のコンボエディターブロック名
+		std::string selectedComboEditorBlockName_;
+		std::array<char, 128> newComboNameBuffer_{};
+		std::array<char, 128> renameComboNameBuffer_{};
+		std::string pendingRenameComboName_;
+		std::string pendingDeleteComboName_;
+		std::string nodeManagementMessage_;
+
+		GlobalData data;
+
+		// コンボエディターがアクティブか
+		bool isComboEditorActive_ = true;
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditorBlock.cpp
+============================================================
+#include "ComboEditorBlock.h"
+
+
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <cctype>
+
+namespace Combo {
+
+#pragma region ComboEditorBlock
+
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon,
+		Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,
+		const std::string& stateName, Character::BaseCharacter* owner,
+		EffectSystem* effectSystem) {
+		this->globalVariables = globalVariables;	// 保存項目
+		this->lineCommon = lineCommon;
+		this->stateName = stateName;						// ステート
+		this->owner = owner;						// オーナー
+		this->comboSystem = comboSystem;			// コンボシステム
+		this->effectSystem = effectSystem;
+
+		// シーケンサー初期化
+		sequence_.ClearEvents();
+
+		// 最大フレーム設定
+		sequence_.SetFrameMax(maxFrame);
+
+		// コンボ名設定
+		comboName_ = "Combo_" + stateName;
+
+		// シーケンサーにコンボデータを適用させる
+		SequencerApplyToState();
+		// ステートのコンボデータ取得	
+		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
+		// ステートの時間設定
+		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+	}
+
+	void EditorBlock::UpdateImGui(float dt, bool isActive) {
+
+		auto state = comboSystem->GetComboNodeState(stateName);
+		// 選択中でなければ処理しない
+		if (!nowChoice_) return;
+		if (currentFrame == 0 && isPlaying && isActive) {
+			comboSystem->GetComboStateMachine()->SetRoot(state);
+		}
+		if (isActive)
+			state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+
+#ifdef _DEBUG
+
+		ImGui::Begin("Attack Editor");
+		ImGui::Separator();
+		ImGui::Text("Combo Name: %s", comboName_.c_str());
+		ImGui::Separator();
+
+		// 現在の時間
+		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
+
+		// シーケンサーの設定と表示
+		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
+
+		// アニメーション
+		ComboImGui::ApplyAnimationToState("アニメーション", isActive, currentFrame, maxFrame, data_.animation,
+			owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
+			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
+
+
+		// 終了条件
+		ImGuiEndConditionType();
+		// 攻撃種別と遠距離設定
+		ImGuiAttackType();
+		// 移動関係設定
+		ImGuiMove();
+		// リアクション設定
+		ImGuiReaction();
+		// ヒットボックス設定
+		ImGuiApplyHitBox();
+		// カメラ設定
+		ImGuiCamera();
+		// コンボ接続設定
+		ImGuiConnection();
+		// ステートのコンボデータ取得	
+		ComboData& comboData = state->Data();
+		// ステートの時間設定
+		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+		comboData.SetIsDebug(true);
+		ImGui::End();
+
+#endif // _DEBUG
+	}
+
+#pragma region ImGui
+
+	void EditorBlock::ImGuiApplyHitBox() {
+		if (ImGui::CollapsingHeader("ヒットボックス")) {
+
+			// 形状タイプ
+			static const char* HitBoxShapeTypeLabels[] = {
+				"OBB",
+				"AABB",
+				"Sphere"
+			};
+			Engine::ImGuiManager::Select("形状", HitBoxShapeTypeLabels, data_.hitBox.shapeType);
+
+
+			// 使用者タイプ
+			static const char* HitBoxUseTypeLabels[] = {
+				"プレイヤー",
+				"敵",
+				"その他",
+			};
+			Engine::ImGuiManager::Select("使用者", HitBoxUseTypeLabels, data_.hitBox.useType);
+
+
+			// ペアレント設定
+			Engine::ImGuiManager::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
+
+			// ヒットボックス出現条件
+			static const char* HitBoxSpawnTypeLabels[] = {
+				"時間経過",
+				"着地",
+				"空中",
+				"ボタンを離したら",
+			};
+			Engine::ImGuiManager::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType);
+
+			// 依存先タイプ
+			static const char* HitBoxParentTypeLabels[] = {
+				"親子付け",
+				"孤立",
+				"追従先からの孤立",
+				"ターゲットの位置",
+			};
+			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
+
+			// 影響タイプ
+			static const char* HitBoxHitEffectTypeLabels[] = {
+				"ダメージのみ",
+				"力の影響のみ",
+				"ダメージと力の影響",
+			};
+			Engine::ImGuiManager::Select("ヒットボックス影響", HitBoxHitEffectTypeLabels, data_.hitBox.hitEffectType);
+
+			// 生存タイプ
+			static const char* HitBoxLifetimeTypeLabels[] = {
+				"無期限",
+				"期限付き",
+			};
+			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
+
+
+			// タグタイプ
+			static const char* HitBoxTagTypeLabels[] = {
+				"何もなし",
+				"プレイヤー",
+				"敵",
+				"プレイヤー攻撃",
+				"敵攻撃",
+				"障害物(壁や床)",
+				"アイテム",
+				"プレイヤーによる影響",
+				"敵による影響"
+			};
+			Engine::ImGuiManager::Select("コライダー(タグ)", HitBoxTagTypeLabels, data_.hitBox.tag);
+
+			// レイヤタイプ
+			static const char* HitBoxLayerTypeLabels[] = {
+				"デフォルト",
+				"プレイヤー",
+				"敵",
+				"プレイヤー攻撃",
+				"敵攻撃",
+				"環境",
+				"全て",
+			};
+			Engine::ImGuiManager::Select("コライダー(レイヤー)", HitBoxLayerTypeLabels, data_.hitBox.layer);
+			Engine::ImGuiManager::Select("コライダー(マスク)", HitBoxLayerTypeLabels, data_.hitBox.mask);
+
+
+			// ヒット記録を使用
+			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
+			// オフセット
+			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
+			// サイズ
+			if (data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
+				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
+				ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
+			// 半径
+			if (data_.hitBox.shapeType == HitBox::ShapeType::kSphere)
+				ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
+
+		}
+	}
+
+	void EditorBlock::ImGuiEndConditionType() {
+		if (ImGui::CollapsingHeader("条件")) {
+			static const char* EndConditionTypeLabels[] = {
+			"着地したら",
+			"離したら",
+			"メータが空になったら",
+			"時間経過",
+			"当たったら",
+			"特殊ケース",
+			};
+			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
+
+			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");
+			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
+			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
+			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+		}
+	}
+
+	void EditorBlock::ImGuiAttackType() {
+		if (!ImGui::CollapsingHeader("攻撃種別")) {
+			return;
+		}
+
+		static const char* ComboTypeLabels[] = {
+			"移動のみ",
+			"近距離",
+			"遠距離",
+			"近距離 + 遠距離",
+		};
+		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
+
+		if (data_.type != Type::kRange && data_.type != Type::kMix) {
+			return;
+		}
+
+		ImGui::SeparatorText("遠距離攻撃設定");
+		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
+		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
+		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
+
+		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
+			data_.range.rangeWindowEnd = data_.range.rangeWindowStart;
+		}
+		if (data_.range.interval < 0.001f) {
+			data_.range.interval = 0.001f;
+		}
+		if (data_.range.count < 1) {
+			data_.range.count = 1;
+		}
+	}
+
+	void EditorBlock::ImGuiMove() {
+		if (ImGui::CollapsingHeader("移動関係")) {
+			static const char* MoveTypeLabels[] = {
+			"入力方向",
+			"ターゲットに向かって",
+			"前方",
+			"カメラ方向",
+			};
+			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
+
+			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
+			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
+
+			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
+			if (data_.move.localMoveVector.x >= 1.0f) {
+				data_.move.localMoveVector.x = 1.0f;
+			}
+			if (data_.move.localMoveVector.y >= 1.0f) {
+				data_.move.localMoveVector.y = 1.0f;
+			}
+			if (data_.move.localMoveVector.z >= 1.0f) {
+				data_.move.localMoveVector.z = 1.0f;
+			}
+			if (data_.move.localMoveVector.x <= -1.0f) {
+				data_.move.localMoveVector.x = -1.0f;
+			}
+			if (data_.move.localMoveVector.y <= -1.0f) {
+				data_.move.localMoveVector.y = -1.0f;
+			}
+			if (data_.move.localMoveVector.z <= -1.0f) {
+				data_.move.localMoveVector.z = -1.0f;
+			}
+			ImGui::Checkbox("ローカル移動ベクトルを正規化してから使うか", &data_.move.isNormalizeLocalMove);
+			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
+			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
+			ImGui::Checkbox("移動方向とキャラクターの向く方向を一致させるか", &data_.move.alignCharacterToMovement);
+
+			ImGui::Checkbox("重力", &data_.move.isGravity);
+			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
+			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
+
+			// ターゲットなら
+			if (data_.move.moveType == Combo::MoveType::kTraget) {
+				static const char* LockOnTypeLabels[] = {
+				"当てた相手",
+				"近い相手",
+				};
+				Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.move.lockOnData.type);
+				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				static const char* TargetMoveTypeLabels[] = {
+				"なし",
+				"移動",
+				"瞬間移動",
+				"補間移動"
+				};
+				Engine::ImGuiManager::Select("ターゲット移動タイプ", TargetMoveTypeLabels, data_.move.lockOnData.targetMoveType);
+				ImGui::SliderFloat("ターゲット接近距離半径", &data_.move.lockOnData.moveTargetRadius, 0.0f, 100.0f);
+
+			}
+		}
+	}
+
+	// リアクション設定
+	void EditorBlock::ImGuiReaction() {
+		if (ImGui::CollapsingHeader("リアクション")) {
+			static const char* HitReactionTypeLabels[] = {
+				"ノックバック",
+				"吹っ飛び",
+				"打ち上げ",
+				"壁バウンド"
+			};
+			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.type);
+
+			ImGui::SliderFloat("持続時間", &data_.hitReaction.duration, 0.0f, 5.0f, "%.2f");
+			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
+			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
+			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
+			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
+			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
+			data_.hitReaction.damageData.GetOne().SetDamage(damage);
+			ImGui::Checkbox("一回しかヒットストップしない", &data_.hitReaction.isSingleHitStop);
+
+			ImGui::SliderFloat("ヒットストップ時間(相手)", &data_.hitReaction.targetHitStopTime, 0.0f, 10.0f, "%.2f");
+			ImGui::SliderFloat("ヒットストップ時間(自分)", &data_.hitReaction.selfHitStopTime, 0.0f, 10.0f, "%.2f");
+
+			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
+			if (data_.hitReaction.type == HitReactionType::Launch) {
+				ImGui::SliderFloat("打ち上げ最大高度(命中位置基準)", &data_.hitReaction.launchMaxHeight, 0.0f, 100.0f, "%.2f");
+			}
+			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
+			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
+
+			DrawHitEffectEditor(data_.hitReaction, effectSystem->GetEffectGlobalDatas());
+		}
+	}
+
+	// カメラ設定
+	void  EditorBlock::ImGuiCamera() {
+		if (ImGui::CollapsingHeader("カメラ関係")) {
+			ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
+			ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
+			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation, 0.01f, 0.0f, 10.0f);
+
+			ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
+			ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
+			ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
+			ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration, 0.01f, 0.0f, 60.0f);
+			ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
+			ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
+
+		}
+	};
+
+	void EditorBlock::ImGuiConnection() {
+		if (!ImGui::CollapsingHeader("コンボ接続")) {
+			return;
+		}
+
+		auto drawConnection = [this](const char* label, std::string& target) {
+			const char* preview = target.empty() ? "なし" : target.c_str();
+			if (ImGui::BeginCombo(label, preview)) {
+				const bool noSelection = target.empty();
+				if (ImGui::Selectable("なし", noSelection)) {
+					target.clear();
+				}
+				if (noSelection) {
+					ImGui::SetItemDefaultFocus();
+				}
+				for (const std::string& comboName : conectComboNames_) {
+					const bool selected = target == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						target = comboName;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			};
+
+		auto drawInputConnections = [&](const char* inputLabel, std::string& defaultTarget,
+			GlobalConditionalConnection& conditionalTargets) {
+				ImGui::PushID(inputLabel);
+				if (ImGui::TreeNode(inputLabel)) {
+					drawConnection("標準の接続先", defaultTarget);
+					drawConnection("地上 / 未ヒット", conditionalTargets.groundMiss);
+					drawConnection("地上 / ヒット", conditionalTargets.groundHit);
+					drawConnection("空中 / 未ヒット", conditionalTargets.airMiss);
+					drawConnection("空中 / ヒット", conditionalTargets.airHit);
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			};
+
+		ImGui::TextWrapped("条件付き接続が未設定の場合は、標準の接続先が使用されます。");
+		drawInputConnections("弱攻撃入力", data_.connection.lightAttack, data_.connection.lightCondition);
+		drawInputConnections("強攻撃入力", data_.connection.heavyAttack, data_.connection.heavyCondition);
+		drawInputConnections("スキル入力", data_.connection.skill, data_.connection.skillCondition);
+	}
+
+	void EditorBlock::SequencerApplyToState() {
+
+		// ステートのコンボデータ取得	
+		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
+
+		// 移動データ
+		data_.move = comboData.GetComboMotion().GetComboMove().GetData();
+		// ヒットボックスデータ
+		data_.hitBox = comboData.GetComboHitBox().GetCollData().hitBoxData;
+		// リアクションデータ
+		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
+		// アニメーション
+		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
+		// 条件
+		data_.condition = comboData.GetComboCondition().GetData();
+		// カメラ
+		data_.camera = comboData.GetComboCamera().GetData();
+		// エフェクト
+		data_.effect = comboData.GetComboEffect().GetData();
+		// 接続
+		data_.connection = comboSystem->GetComboGlobalData(stateName).connection;
+		// 攻撃タイプと遠距離攻撃
+		data_.type = comboData.GetType();
+		data_.range = comboData.GetComboRange().GetData();
+		// シーケンサー適応
+		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
+	}
+
+	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction,
+		const std::map<std::string, EffectGlobalData>& effectDatas) {
+		ImGui::SeparatorText("ヒットエフェクト");
+		ImGui::Text("※エディタでリロードしてから保存してください");
+
+		int removeIndex = -1;
+
+		for (int i = 0; i < static_cast<int>(reaction.hitEffectNames.size()); ++i) {
+			ImGui::PushID(i);
+
+			HitEffectEntry& entry = reaction.hitEffectNames[i];
+
+			char slotBuffer[128]{};
+			char effectBuffer[128]{};
+
+			strncpy_s(slotBuffer, entry.slotName.c_str(), _TRUNCATE);
+			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
+
+			ImGui::InputText("スロット名", slotBuffer, sizeof(slotBuffer));
+			ImGui::InputText("エフェクト名", effectBuffer, sizeof(effectBuffer));
+
+			entry.slotName = slotBuffer;
+			entry.effectName = effectBuffer;
+
+			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
+				for (const auto& effectPair : effectDatas) {
+					const bool isSelected = (entry.effectName == effectPair.first);
+					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
+						entry.effectName = effectPair.first;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("削除")) {
+				removeIndex = i;
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+
+		if (removeIndex >= 0 && removeIndex < static_cast<int>(reaction.hitEffectNames.size())) {
+			reaction.hitEffectNames.erase(reaction.hitEffectNames.begin() + removeIndex);
+		}
+
+		if (ImGui::Button("ヒットエフェクト追加")) {
+			reaction.hitEffectNames.push_back(HitEffectEntry{
+				.slotName = "NewEffect",
+				.effectName = ""
+				});
+		}
+	}
+
+#pragma endregion // ImGui管理
+
+#pragma endregion // コンボ単位管理
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditorBlock.h
+============================================================
+#pragma once
+#include  "ComboImGui.h"
+#include <array>
+#include "map"
+#include "DirectXGame/engine/Effect/EffectGlovalData.h"
+
+namespace Engine {
+	class GlobalVariables;
+	class LineCommon;
+}
+// 前方宣言
+namespace Character {
+	class BaseCharacter;
+	class BasePlayer;
+}
+class EffectSystem;
+
+namespace Combo {
+	class EditorBlock {
+	public:
+		// 初期化
+		void Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables,
+			Combo::System* comboSystem, const std::string& stateName,
+			Character::BaseCharacter* owner, EffectSystem* effectSystem);
+		// 更新
+		void UpdateImGui(float dt, bool isActive);
+	public:
+		// エディタ上で選択中か設定
+		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
+		// コエディタ上で選択中か取得
+		bool GetNowChoice() const { return nowChoice_; }
+
+		// 接続可能なコンボ名リスト設定
+		void SetConectComboNames(const std::vector<std::string>& names) { conectComboNames_ = names; }
+
+
+		// シーケンサー取得
+		AttackSequence GetAttackSequence() const { return sequence_; }
+
+		// 最大フレーム取得
+		float GetMaxFrame() const { return ConvertUtility::FramesToSeconds(maxFrame); }
+
+		// データ取得
+		GlobalData GetData() const { return data_; }
+	private:
+		// ヒットボックス設定
+		void ImGuiApplyHitBox();
+		// 終了条件
+		void ImGuiEndConditionType();
+		// 攻撃種別と遠距離設定
+		void ImGuiAttackType();
+		// 移動関係設定
+		void ImGuiMove();
+		// リアクション設定
+		void ImGuiReaction();
+		// カメラ設定
+		void ImGuiCamera();
+		// コンボ接続設定
+		void ImGuiConnection();
+	private:
+		// シーケンサーの状態をステートに適応
+		void SequencerApplyToState();
+
+		void DrawHitEffectEditor(HitReactionData& reaction,
+			const std::map<std::string, EffectGlobalData>& effectDatas);
+
+	private: // 貰いもの
+		Engine::GlobalVariables* globalVariables = nullptr;
+		Engine::LineCommon* lineCommon = nullptr;
+		EffectSystem* effectSystem = nullptr;
+	private: // もらいもの
+		// 所有者
+		Character::BaseCharacter* owner = nullptr;
+		// コンボシステム
+		Combo::System* comboSystem = nullptr;
+		// 接続可能なコンボ名リスト
+		std::vector<std::string> conectComboNames_;
+	private:
+		// ノードステート
+		std::string stateName = "";
+		// シーケンサー
+		AttackSequence sequence_;
+	private:
+		// 現在のフレーム
+		int currentFrame = 0;
+		// 再生中か
+		bool isPlaying = true;
+		// ループ再生するか
+		bool loopPlay = true;
+		// 最初のフレーム
+		int firstFrame = 0;
+		// マックスフレーム(二十秒)
+		int maxFrame = 300;
+
+
+		int selected = -1;
+		bool expanded = true;
+		// コンボ名
+		std::string comboName_ = "Combo1";
+		// 今選択中か
+		bool nowChoice_ = false;
+		// コンボエディターがアクティブか
+		bool isComboEditorActive_ = true;
+	private:
+		// データ
+		GlobalData data_;
+	};
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboImGui.cpp
+============================================================
+#include "ComboImGui.h"
+#include <DirectXGame/engine/Animation/AnimationComponent.h>
+
+void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
+	int& currentFrame, int& firstFrame, int& maxFrame) {
+	// 現在のフレーム表示
+	if (isActive) {
+		ImGui::Checkbox("再生するか", &isPlaying);
+		ImGui::Checkbox("ループ再生", &loopPlay);
+		ImGui::Separator();
+		ImGui::Text("Current Frame: %d", currentFrame);
+	}
+	ImGui::DragInt("最大フレーム", &maxFrame);
+	ImGui::SliderInt("Current Frame", &currentFrame, 0, maxFrame);
+	// 最初フレーム設定
+	// 最初フレーム設定
+	ImGui::DragInt("firstFrame ", &firstFrame, 1.0f, 0, maxFrame);
+	// 最初のフレームが0未満にならないようにする
+	if (0 > firstFrame) {
+		firstFrame = 0;
+	}
+	ImGui::Separator();
+
+	if (isPlaying && isActive) {
+		currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
+	}
+
+	// 最大値に行ったら戻す
+	if (currentFrame >= sequence.GetFrameMax() && loopPlay) {
+		currentFrame = 0;
+	}
+	else if (currentFrame >= sequence.GetFrameMax()) {
+		currentFrame = sequence.GetFrameMax();
+	}
+}
+
+
+void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
+	bool isActive, int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
+	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
+
+	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
+		ImGui::SliderFloat("アニメーションスピード", &animationData.animationSpeed, 0.1f, 10.0f, "%.2f");
+		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.0f, 10.0f, "%.2f");
+		ImGui::Checkbox("アニメーションループ", &animationData.animationLoop);
+
+		float endTime = static_cast<float>(maxFrame) /60.0f;
+
+		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
+		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
+
+		// BeginComboでの選択
+		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
+	}
+
+	if (isActive) {
+		// ループ再生
+		animation->SetIsLoop(false);
+		// アニメーション設定
+		animation->SetAnimation(nowAnimationName, 0);
+		// ステートのアニメーション時間設定
+		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
+		animation->SetAnimationTime(animationTime);
+	}
+}
+
+
+#pragma region Sequence
+
+void Combo::ComboImGui::SequenceSettings(AttackSequence& sequence, int& currentFrame, int& firstFrame, int& maxFrame, bool& expanded, int& selected) {
+	// 最大フレーム設定
+	sequence.SetFrameMax(maxFrame);
+
+	// シーケンサー設定
+	if (ImGui::CollapsingHeader("シーケンサー")) {
+		ImGui::SliderFloat("Frame PixelWidthTarget",
+			&ImSequencer::g_framePixelWidthTarget,
+			1.0f, 40.0f, "%.1f px");
+		ImGui::SliderFloat("Frame PixelWidth",
+			&ImSequencer::g_framePixelWidth,
+			1.0f, 40.0f, "%.1f px");
+		ImGui::SliderInt("Frame LegendWidth",
+			&ImSequencer::g_legendWidth,
+			50, 500, "%d px");
+
+
+		// シーケンサー表示
+		ImGui::Separator();
+		ImSequencer::Sequencer(
+			&sequence,
+			&currentFrame,
+			&expanded,
+			&selected,
+			&firstFrame,
+			ImSequencer::SEQUENCER_EDIT_ALL |
+			ImSequencer::SEQUENCER_ADD |
+			ImSequencer::SEQUENCER_DEL
+		);
+		ImGui::Separator();
+	}
+}
+
+void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData& comboData, int& maxFrame) {
+
+	// コンボ入力可能時間
+	float inputStart = comboData.GetComboCondition().GetNextInputStart();
+	float inputEnd = comboData.GetComboCondition().GetNextInputEnd();
+
+	// コンボキャンセル時間
+	float cancelStart = comboData.GetComboCondition().GetCancelInputStart();
+	float cancelEnd = comboData.GetComboCondition().GetCancelInputEnd();
+	// コンボキャンセル時間
+	float cancelMoveStart = comboData.GetComboCondition().GetMoveCancelInputStart();
+	float cancelMoveEnd = comboData.GetComboCondition().GetMoveCancelInputEnd();
+
+
+
+	// コンボ移行時間
+	float nextComboTime = comboData.GetComboCondition().GetData().stateNextTime;
+	float endComboTime = comboData.GetComboCondition().GetData().stateEndTime;
+
+	// ヒットボックス生成時間
+	float hitBoxStart = comboData.GetComboHitBox().GetCollData().hitBoxData.windowStart;
+	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetCollData().hitBoxData.lifeTime;
+
+	// コンボ終了時間
+	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
+
+	// 移動時間
+	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.startTime;
+	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.endTime;
+
+	// トレイルエフェクト
+	float trailStart = comboData.GetComboEffect().GetData().trailEffectStartTime;
+	float trailEnd = trailStart + comboData.GetComboEffect().GetData().trailEffectLifeTime;
+
+	AddSequencerEvent(sequence,inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
+	AddSequencerEvent(sequence,cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");
+	AddSequencerEvent(sequence,cancelMoveStart, cancelMoveEnd, 0xFFFFFF00, "移動キャンセル可能時間");
+	AddSequencerEvent(sequence,nextComboTime, endComboTime, 0xFFFF0000, "コンボ移行開始時間");
+	AddSequencerEvent(sequence,hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
+	AddSequencerEvent(sequence,moveStart, moveEnd, 0xFF000000, "移動時間");
+	AddSequencerEvent(sequence,trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
+}
+
+void Combo::ComboImGui::AddSequencerEvent(AttackSequence& sequence, float startFrame, float endFrame, 
+	unsigned int color, const std::string& name) {
+	sequence.AddEvent({ ConvertUtility::SecondsToFrames(startFrame,60.0f) , ConvertUtility::SecondsToFrames(endFrame,60.0f), color, name });
+}
+
+#pragma endregion // シーケンサー
+
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboImGui.h
+============================================================
+#pragma once
+#include "ComboSequencer.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
+#include "DirectXGame/engine/Animation/Animation.h"
+
+namespace Combo {
+	class ComboImGui {
+	public:
+		// 現在の時間
+		static void CurrentFrame(float dt,bool isActive ,const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
+			int& currentFrame, int& firstFrame, int& maxFrame);
+
+		// アニメーション設定と表示
+		static void ApplyAnimationToState(const std::string& name, bool isActive, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
+			Engine::AnimationComponent* animation,const std::string& nowAnimationName);
+	public: // シーケンサー
+		// シーケンサー設定と表示
+		static void SequenceSettings(AttackSequence& sequence, int& currentFrame, int& firstFrame, int& maxFrame,
+			bool& expanded, int& selected);
+
+		// シーケンサー適応
+		static void SequencerApplyToState(AttackSequence& sequence, ComboData& comboData, int& maxFrame);
+	private:
+		// シーケンサー追加
+		static void AddSequencerEvent(AttackSequence& sequence,float startFrame, float endFrame, 
+			unsigned int color, const std::string& name);
+	};
+
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboSequencer.h
+============================================================
+#pragma once
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+
+// イベント構造体
+struct AttackEvent {
+	int startFrame;
+	int endFrame;
+	unsigned int color;
+	std::string name;
+};
+
+//  攻撃シーケンス
+class AttackSequence : public ImSequencer::SequenceInterface {
+public:
+	
+	// 最小フレーム
+	int GetFrameMin() const override { return 0; }		
+	// 全体フレーム幅
+	int GetFrameMax() const override { return maxFrame_; }
+	// アイテム数
+	int GetItemCount() const override { return (int)events.size(); }	
+
+	// 開始フレーム、終了フレーム、タイプ、色を返す
+	void Get(int index, int** start, int** end, int* type, unsigned int* color) override {
+		if (start) *start = &events[index].startFrame;
+		if (end)   *end = &events[index].endFrame;
+		if (type)  *type = 0;
+		if (color) *color = events[index].color;
+	}
+
+	// アイテムのラベルを返す
+	const char* GetItemLabel(int index) const override {
+		return events[index].name.c_str();
+	}
+
+	// [+] 追加ボタンで呼ばれる処理
+	void Add(int /*type*/) override {
+		events.push_back({ 0, 10, 0xFF00FF00, "NewEvent" });
+	}
+
+	// [-] 削除ボタンで呼ばれる処理
+	void Del(int index) override {
+		events.erase(events.begin() + index);
+	}
+
+	// 複製ボタンで呼ばれる処理
+	void Duplicate(int index) override {
+		events.push_back(events[index]);
+	}
+
+	// イベントの追加
+	void AddEvent(const AttackEvent& event) {
+		events.push_back(event);
+	}
+
+	// イベントのクリア
+	void ClearEvents() {
+		events.clear();
+	}
+
+public: // 編集系
+	// 最大フレーム設定
+	void  SetFrameMax(int frame) { maxFrame_ = frame; }
+
+public: // 取得系
+
+	// イベント一覧取得
+	const std::vector<AttackEvent>& GetEvents() const {
+		return events;
+	}
+
+	// イベント取得
+	const AttackEvent& GetEvent(int index) const {
+		return events[index];
+	}
+
+	// 名前でイベント取得
+	const AttackEvent& GetEvent(const std::string name) const {
+		// / 名前で検索
+		for(int i = 0; i < static_cast<int>(events.size()); ++i) {
+			if (events[i].name == name) {
+				return events[i];
+			}
+		}
+
+		/// 見つからなかった場合は空のイベントを返す
+		return events[0];
+	}
+
+	// イベント名取得
+	std::string GetEventName(int index) const {
+		if (index >= 0 && index < static_cast<int>(events.size())) {
+			return events[index].name;
+		}
+		return "";
+	}
+
+
+private:
+	// イベント一覧
+	std::vector<AttackEvent> events;
+	// 最大フレーム
+	int maxFrame_ = 300;
+
 };
 
 
@@ -31385,7 +31408,7 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
-#include <DirectXGame/application/base/Attack/Combo//Base/ComboEditor.h>
+#include <DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h>
 
 class CharacterDebugScene : public Engine::BaseScene {
 public:
@@ -74840,8 +74863,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboImGui.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp" />
@@ -74852,7 +74876,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\HitBox\ComboHitBox.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMotion.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboConditionFunction.cpp" />
@@ -75260,8 +75284,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboImGui.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h" />
@@ -75272,8 +75297,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\HitBox\ComboHitBox.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMotion.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSequencer.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboSequencer.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboConditionFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboEndCondition.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.h" />
@@ -75642,7 +75667,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -76480,7 +76504,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp">
@@ -76525,7 +76549,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp">
@@ -76603,7 +76627,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Character\Base\BaseCharacter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboImGui.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp">
@@ -76697,6 +76721,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77631,7 +77658,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapItem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSequencer.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboSequencer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\scene\CharacterDebugScene.h">
@@ -77652,7 +77679,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Material\MaterialInstance.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h">
@@ -77718,7 +77745,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.h">
@@ -77811,7 +77838,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboImGui.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\scene\CustomScene.h">
@@ -77928,6 +77955,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -77935,7 +77965,6 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
-
 
 ============================================================
 File Path: project/main.cpp
