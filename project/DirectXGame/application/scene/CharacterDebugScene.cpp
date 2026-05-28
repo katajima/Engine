@@ -82,24 +82,6 @@ void CharacterDebugScene::Initialize()
 	bulletManager_->Initialize(GetEntityManager(),GetGlobalVariables(), nullptr);
 	bulletManager_->SetEffect(effect_.get());
 
-	// 弾スポーン
-	bulletSpawn_ = std::make_unique<BulletSpawn>();
-	bulletSpawn_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), nullptr, effect_.get(), bulletManager_.get());
-
-	param.name = "test";
-	param.modelName = "AnimatedCube.gltf";
-	param.maxLifeTime = 5.0f;
-	param.speed = 10.0f;
-	param.gravityScale = 0.1f;
-	param.moveType = Projectile::ProjectileMoveType::Homing;
-	param.enableHoming = true;
-	param.homingRange = 50.0f;
-	param.homingStrength = 5.0f;
-
-	spawnInfo.position = { 10,2,-40 };
-	spawnInfo.direction = { -1,0,0 };
-	spawnInfo.scale = { 0.5f,0.5f,0.5f };
-
 	// ヒットボックスシステム初期化
 	hitBoxSystem_ = std::make_unique<HitBox::System>();
 	hitBoxSystem_->Initialize(GetEntityManager());
@@ -125,8 +107,6 @@ void CharacterDebugScene::Initialize()
 	else {
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
-
-	spawnInfo.target = characterManager_->GetPlayer();
 
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
@@ -168,6 +148,11 @@ void CharacterDebugScene::Initialize()
 	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), 
 		characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), 
 		GetGlobalVariables(), characterManager_->GetPlayer(),effect_.get());
+
+	// 弾デバッグ初期化
+	projectileDebug_ = std::make_unique<Projectile::ProjectileDebug>();
+	projectileDebug_->Initialize(GetEntityManager(), GetGlobalVariables(), effect_.get(),
+		bulletManager_.get(), characterManager_->GetPlayer());
 }
 
 void CharacterDebugScene::Finalize(){
@@ -184,6 +169,8 @@ void CharacterDebugScene::Update(){
 
 	// コンボエディター更新
 	comboEditor_->Update(GetTime());
+	// 弾デバッグ更新
+	projectileDebug_->Update();
 
 	// インプットマネージャー更新
 	inputManager_->Update(GetTime());
@@ -193,13 +180,6 @@ void CharacterDebugScene::Update(){
 	if (this->iCommand_) {
 		iCommand_->Exec(*characterManager_->GetPlayer());
 	}
-
-	interval_ += GetTime();
-	if (interval_ >= intervalMax_) {
-		interval_ = 0.0f;
-		//bulletSpawn_->GenerateProjectile(spawnInfo, param);
-	}
-
 
 	// 調整項目
 	ApplyGlobalVariables();

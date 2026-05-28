@@ -25,6 +25,10 @@ public:
 	void GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
 		const Projectile::ProjectileParam& param, Character::BaseCharacter* target = nullptr);
 
+	// エディターに保存された定義名から発射物を生成
+	bool GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+		const std::string& definitionName, Character::BaseCharacter* target = nullptr);
+
 private:
 	Character::BaseCharacter* owner = nullptr;
 	BulletManager* bulletManager = nullptr;

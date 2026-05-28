@@ -759,6 +759,9 @@
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -961,6 +964,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp">
@@ -2169,6 +2175,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.h">

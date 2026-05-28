@@ -2,6 +2,7 @@
 // 
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
+#include "DirectXGame/application/base/Bullet/Base/ProjectileEditor.h"
 
 // 前方宣言
 namespace Character {
@@ -44,6 +45,12 @@ public:
 	// 発射物の追加
 	void AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile);
 
+	// エディターで管理している発射物パラメータを取得
+	const Projectile::ProjectileParam* FindProjectileParam(const std::string& definitionName) const;
+	const std::map<std::string, Projectile::ProjectileParam>& GetProjectileDefinitions() const {
+		return projectileEditor_.GetDefinitions();
+	}
+
 public: // 取得or設定
 	// 弾リストを取得
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
@@ -60,6 +67,9 @@ private:
 
 	// 発射物
 	std::list<std::unique_ptr<Projectile::BaseProjectile>> projectiles_;
+
+	// 発射物定義の編集・保存
+	Projectile::ProjectileEditor projectileEditor_;
 
 private:
 	EffectSystem* effect = nullptr;								// 演出

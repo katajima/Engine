@@ -26,8 +26,7 @@ Engine::Object3d::Object3d() = default;
 
 Engine::Object3d::~Object3d() = default;
 
-void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType)
-{
+void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType) {
 	this->entityManager = entityManager;														// エンティティ3d
 	this->object3dCommon = entityManager->GetObject3dCommon();								// オブジェクト共通クラス
 	this->skinningConmmon = entityManager->GetSkinningConmmon();								// スキニング共通クラス

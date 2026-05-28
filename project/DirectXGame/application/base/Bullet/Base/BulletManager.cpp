@@ -1,4 +1,5 @@
 #include "BulletManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
 
@@ -17,10 +18,15 @@ void BulletManager::Initialize(Engine::EntityManager* entityManager,  Engine::Gl
 	this->entityManager = entityManager;	// エンティティ
 	this->globalVariables = globalVariables;	// 保存項目
 	this->camera = camera;					// カメラ
+	// 発射物エディターはModelManagerのロード済みモデル名を参照してモデルを選択する。
+	projectileEditor_.Initialize(entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager());
 }
 
 void BulletManager::Update()
 {
+	// 弾定義の編集・保存はBulletManager側で常時受け付ける。
+	projectileEditor_.Update();
+
 	// 各弾更新
 	for (auto& bullet : bullets_) {
 		bullet->Update();
@@ -91,4 +97,9 @@ void BulletManager::AddBullet(std::unique_ptr<BaseBullet> bullet){
 void BulletManager::AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile) {
 	// 格納
 	projectiles_.push_back(std::move(projectile));
+}
+
+const Projectile::ProjectileParam* BulletManager::FindProjectileParam(const std::string& definitionName) const {
+	// BulletSpawnなど、生成側から定義名でProjectileParamを解決するための窓口。
+	return projectileEditor_.Find(definitionName);
 }

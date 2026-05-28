@@ -66,8 +66,27 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 void BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
 	const Projectile::ProjectileParam& param, Character::BaseCharacter* target) {
 	std::unique_ptr<Projectile::BaseProjectile> projectile = std::make_unique<Projectile::BaseProjectile>();
+	Projectile::ProjectileSpawnInfo resolvedSpawnInfo = spawnInfo;
+	// 呼び出し側でtargetだけ差し替えたい場合に、生成情報へ反映してから渡す。
+	if (target) {
+		resolvedSpawnInfo.target = target;
+	}
 	// 初期化
-	projectile->Initialize(entityManager, globalVariables, effect, spawnInfo, param); // 初期化
+	projectile->Initialize(entityManager, globalVariables, effect, resolvedSpawnInfo, param); // 初期化
 	// 追加
 	bulletManager->AddProjectile(std::move(projectile));
+}
+
+bool BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+	const std::string& definitionName, Character::BaseCharacter* target) {
+	if (!bulletManager) {
+		return false;
+	}
+	// ProjectileEditorで保存した定義名から実際のProjectileParamを取得する。
+	const Projectile::ProjectileParam* param = bulletManager->FindProjectileParam(definitionName);
+	if (!param) {
+		return false;
+	}
+	GenerateProjectile(spawnInfo, *param, target);
+	return true;
 }

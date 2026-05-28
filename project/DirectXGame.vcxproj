@@ -143,6 +143,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
@@ -570,6 +572,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletData.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />

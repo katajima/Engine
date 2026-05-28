@@ -11,7 +11,6 @@
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
-#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include <DirectXGame/application/base/Attack/AttackController.h>
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
@@ -27,6 +26,7 @@
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h>
+#include <DirectXGame/application/base/Bullet/Base/Debug/ProjectileDebug.h>
 
 class CharacterDebugScene : public Engine::BaseScene {
 public:
@@ -102,13 +102,6 @@ private:
 	std::unique_ptr<HitBox::System> hitBoxSystem_;
 
 
-	// 弾スポーン
-	std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
-	// 
-	float interval_ = 0.0f;
-	float intervalMax_ = 1.0f;
-	Projectile::ProjectileParam param{};
-	Projectile::ProjectileSpawnInfo spawnInfo{};
 	Character::EnemyType enemyType = Character::EnemyType::kSmallMelee;
 	Vector3 enemyPos{};
 	uint32_t tagNumber = 0;
@@ -126,4 +119,6 @@ private:
 private:
 	// コンボエディター
 	std::unique_ptr<Combo::Editor> comboEditor_;
+	// 弾デバッグ
+	std::unique_ptr<Projectile::ProjectileDebug> projectileDebug_;
 };

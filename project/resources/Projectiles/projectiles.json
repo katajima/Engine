@@ -1,0 +1,38 @@
+{
+    "projectiles": {
+        "aaa": {
+            "collisionLayer": 4294967295,
+            "collisionMask": 4294967295,
+            "collisionTag": 0,
+            "damage": 0.0,
+            "enableGravity": false,
+            "enableHoming": false,
+            "explosionDamage": 0.0,
+            "explosionEffectName": "",
+            "explosionLifeTime": 0.0,
+            "explosionRadius": 0.0,
+            "generateTrailEffect": false,
+            "gravityScale": 1.0,
+            "hitEffectName": "",
+            "hitSoundName": "",
+            "hitType": 0,
+            "homingRange": 0.0,
+            "homingStrength": 0.0,
+            "isPierce": false,
+            "maxBounceCount": 0,
+            "maxLifeTime": 5.0,
+            "maxPierceCount": 0,
+            "modelName": "gear.obj",
+            "moveEffectName": "",
+            "moveEffectSpreadScale": 1.0,
+            "moveType": 0,
+            "name": "aaa",
+            "radius": 0.5,
+            "spawnSoundName": "",
+            "speed": 10.0,
+            "textureName": "",
+            "trailEffectLifeTime": 0.0,
+            "type": 0
+        }
+    }
+}

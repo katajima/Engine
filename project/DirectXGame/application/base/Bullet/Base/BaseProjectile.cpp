@@ -141,13 +141,11 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		}
 		data_.hitBoxData.useType = useType;
 
-		auto* selfComponent = static_cast<Engine::ColliderComponent*>(self->owner);
-		Character::BaseCharacter* owner = nullptr;
-		if (self->tag == CollisionTag::Player || self->tag == CollisionTag::Enemy) {
-			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
-		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(owner, data_,&objectComponent_->GetWorldTransform());
+		// デバッグ生成などで所有者が無い場合は、爆発判定だけをスキップして落ちないようにする。
+		if (owner) {
+			owner->GetHitBoxSystem()->AddLifeTimeHitBox(owner, data_, &objectComponent_->GetWorldTransform());
+		}
 	}
 
 	switch (other->tag) {
@@ -231,7 +229,13 @@ void Projectile::BaseProjectile::UpdateMovement(float dt) {
 		Straight(dt, GetWorldTransform(), direction, param_.speed);
 		break;
 	case ProjectileMoveType::Homing: // ホーミング
-		Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, direction, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
+		// ターゲット未設定のホーミング弾は、直線弾として扱って安全に動かす。
+		if (target) {
+			Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, direction, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
+		}
+		else {
+			Straight(dt, GetWorldTransform(), direction, param_.speed);
+		}
 		break;
 	case ProjectileMoveType::Parabola: // 放物線
 		Parabola(dt, GetWorldTransform(), objectComponent_->GetRigidBodyComponent(), direction, velocity, param_.speed, param_.gravityScale);
