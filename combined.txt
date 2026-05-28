@@ -104,7 +104,12 @@
     └── └── └── └── └── ├── BulletManager.h
     └── └── └── └── └── ├── BulletSpawn.cpp
     └── └── └── └── └── ├── BulletSpawn.h
+    └── └── └── └── └── ├── Debug/
+    └── └── └── └── └── └── ├── ProjectileDebug.cpp
+    └── └── └── └── └── └── └── ProjectileDebug.h
     └── └── └── └── └── ├── ProjectileData.h
+    └── └── └── └── └── ├── ProjectileEditor.cpp
+    └── └── └── └── └── ├── ProjectileEditor.h
     └── └── └── └── └── ├── ProjectileFunction.cpp
     └── └── └── └── └── └── ProjectileFunction.h
     └── └── └── └── ├── EnemyBullet.cpp
@@ -9362,13 +9367,11 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		}
 		data_.hitBoxData.useType = useType;
 
-		auto* selfComponent = static_cast<Engine::ColliderComponent*>(self->owner);
-		Character::BaseCharacter* owner = nullptr;
-		if (self->tag == CollisionTag::Player || self->tag == CollisionTag::Enemy) {
-			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
-		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(owner, data_,&objectComponent_->GetWorldTransform());
+		// デバッグ生成などで所有者が無い場合は、爆発判定だけをスキップして落ちないようにする。
+		if (owner) {
+			owner->GetHitBoxSystem()->AddLifeTimeHitBox(owner, data_, &objectComponent_->GetWorldTransform());
+		}
 	}
 
 	switch (other->tag) {
@@ -9452,7 +9455,13 @@ void Projectile::BaseProjectile::UpdateMovement(float dt) {
 		Straight(dt, GetWorldTransform(), direction, param_.speed);
 		break;
 	case ProjectileMoveType::Homing: // ホーミング
-		Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, direction, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
+		// ターゲット未設定のホーミング弾は、直線弾として扱って安全に動かす。
+		if (target) {
+			Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, direction, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
+		}
+		else {
+			Straight(dt, GetWorldTransform(), direction, param_.speed);
+		}
 		break;
 	case ProjectileMoveType::Parabola: // 放物線
 		Parabola(dt, GetWorldTransform(), objectComponent_->GetRigidBodyComponent(), direction, velocity, param_.speed, param_.gravityScale);
@@ -9653,6 +9662,7 @@ private:
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletManager.cpp
 ============================================================
 #include "BulletManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
 
@@ -9671,10 +9681,15 @@ void BulletManager::Initialize(Engine::EntityManager* entityManager,  Engine::Gl
 	this->entityManager = entityManager;	// エンティティ
 	this->globalVariables = globalVariables;	// 保存項目
 	this->camera = camera;					// カメラ
+	// 発射物エディターはModelManagerのロード済みモデル名を参照してモデルを選択する。
+	projectileEditor_.Initialize(entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager());
 }
 
 void BulletManager::Update()
 {
+	// 弾定義の編集・保存はBulletManager側で常時受け付ける。
+	projectileEditor_.Update();
+
 	// 各弾更新
 	for (auto& bullet : bullets_) {
 		bullet->Update();
@@ -9747,6 +9762,11 @@ void BulletManager::AddProjectile(std::unique_ptr<Projectile::BaseProjectile> pr
 	projectiles_.push_back(std::move(projectile));
 }
 
+const Projectile::ProjectileParam* BulletManager::FindProjectileParam(const std::string& definitionName) const {
+	// BulletSpawnなど、生成側から定義名でProjectileParamを解決するための窓口。
+	return projectileEditor_.Find(definitionName);
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletManager.h
@@ -9755,6 +9775,7 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BulletManager.h
 // 
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
+#include "DirectXGame/application/base/Bullet/Base/ProjectileEditor.h"
 
 // 前方宣言
 namespace Character {
@@ -9797,6 +9818,12 @@ public:
 	// 発射物の追加
 	void AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile);
 
+	// エディターで管理している発射物パラメータを取得
+	const Projectile::ProjectileParam* FindProjectileParam(const std::string& definitionName) const;
+	const std::map<std::string, Projectile::ProjectileParam>& GetProjectileDefinitions() const {
+		return projectileEditor_.GetDefinitions();
+	}
+
 public: // 取得or設定
 	// 弾リストを取得
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
@@ -9813,6 +9840,9 @@ private:
 
 	// 発射物
 	std::list<std::unique_ptr<Projectile::BaseProjectile>> projectiles_;
+
+	// 発射物定義の編集・保存
+	Projectile::ProjectileEditor projectileEditor_;
 
 private:
 	EffectSystem* effect = nullptr;								// 演出
@@ -9893,10 +9923,29 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 void BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
 	const Projectile::ProjectileParam& param, Character::BaseCharacter* target) {
 	std::unique_ptr<Projectile::BaseProjectile> projectile = std::make_unique<Projectile::BaseProjectile>();
+	Projectile::ProjectileSpawnInfo resolvedSpawnInfo = spawnInfo;
+	// 呼び出し側でtargetだけ差し替えたい場合に、生成情報へ反映してから渡す。
+	if (target) {
+		resolvedSpawnInfo.target = target;
+	}
 	// 初期化
-	projectile->Initialize(entityManager, globalVariables, effect, spawnInfo, param); // 初期化
+	projectile->Initialize(entityManager, globalVariables, effect, resolvedSpawnInfo, param); // 初期化
 	// 追加
 	bulletManager->AddProjectile(std::move(projectile));
+}
+
+bool BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+	const std::string& definitionName, Character::BaseCharacter* target) {
+	if (!bulletManager) {
+		return false;
+	}
+	// ProjectileEditorで保存した定義名から実際のProjectileParamを取得する。
+	const Projectile::ProjectileParam* param = bulletManager->FindProjectileParam(definitionName);
+	if (!param) {
+		return false;
+	}
+	GenerateProjectile(spawnInfo, *param, target);
+	return true;
 }
 
 
@@ -9930,6 +9979,10 @@ public:
 	void GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
 		const Projectile::ProjectileParam& param, Character::BaseCharacter* target = nullptr);
 
+	// エディターに保存された定義名から発射物を生成
+	bool GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+		const std::string& definitionName, Character::BaseCharacter* target = nullptr);
+
 private:
 	Character::BaseCharacter* owner = nullptr;
 	BulletManager* bulletManager = nullptr;
@@ -9941,6 +9994,107 @@ private:
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
 	Engine::EntityManager* entityManager = nullptr;	// 3dオブジェクト管理
 };
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/Debug/ProjectileDebug.cpp
+============================================================
+#include "ProjectileDebug.h"
+
+#include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include "DirectXGame/engine/Base/Imgui/ImGuiManager.h"
+
+void Projectile::ProjectileDebug::Initialize(Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables, EffectSystem* effectSystem,
+	BulletManager* bulletManager, Character::BaseCharacter* target) {
+	bulletManager_ = bulletManager;
+
+	// デバッグ用の独立したBulletSpawnを用意し、選択した定義からBaseProjectileを生成する。
+	bulletSpawn_ = std::make_unique<BulletSpawn>();
+	bulletSpawn_->Initialize(nullptr, entityManager, globalVariables, nullptr, effectSystem, bulletManager);
+
+	// CharacterDebugSceneで試しやすい初期位置。以後はImGuiから調整する。
+	spawnInfo_.position = { 10.0f, 2.0f, -40.0f };
+	spawnInfo_.direction = { -1.0f, 0.0f, 0.0f };
+	spawnInfo_.scale = { 0.5f, 0.5f, 0.5f };
+	spawnInfo_.target = target;
+}
+
+void Projectile::ProjectileDebug::Update() {
+#ifdef _DEBUG
+	ImGui::Begin("Projectile Debug");
+
+	const auto& definitions = bulletManager_->GetProjectileDefinitions();
+	if (definitions.empty()) {
+		ImGui::TextDisabled("Projectile Editor で定義を追加してください。");
+		ImGui::End();
+		return;
+	}
+
+	// 選択中の定義が削除・リロードで消えた場合は、先頭の定義へ戻す。
+	if (selectedDefinitionName_.empty() || !definitions.contains(selectedDefinitionName_)) {
+		selectedDefinitionName_ = definitions.begin()->first;
+	}
+
+	Engine::ImGuiManager::Select("Projectile Definition", selectedDefinitionName_, definitions);
+	ImGui::DragFloat3("Position", &spawnInfo_.position.x, 0.1f);
+	ImGui::DragFloat3("Direction", &spawnInfo_.direction.x, 0.01f);
+	ImGui::DragFloat3("Scale", &spawnInfo_.scale.x, 0.01f, 0.01f);
+	if (ImGui::Button("Spawn Projectile")) {
+		// 弾定義名からProjectileParamを引いて生成するため、シーン側は詳細を知らなくてよい。
+		bulletSpawn_->GenerateProjectile(spawnInfo_, selectedDefinitionName_, spawnInfo_.target);
+	}
+
+	ImGui::End();
+#endif
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/Debug/ProjectileDebug.h
+============================================================
+#pragma once
+
+#include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
+
+#include <memory>
+#include <string>
+
+class BulletManager;
+class EffectSystem;
+
+namespace Engine {
+	class EntityManager;
+	class GlobalVariables;
+}
+
+namespace Projectile {
+
+	/// <summary>
+	/// ProjectileEditorで作成した弾定義を使って、デバッグ用に試射するクラス。
+	/// CharacterDebugSceneから弾の生成処理を分離するために持つ。
+	/// </summary>
+	class ProjectileDebug {
+	public:
+		// 試射に必要な生成器とターゲット情報を設定する
+		void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
+			EffectSystem* effectSystem, BulletManager* bulletManager, Character::BaseCharacter* target);
+		// ImGui上で発射位置や定義を編集し、任意タイミングで試射する
+		void Update();
+
+	private:
+		// デバッグ試射用の発射処理。通常のキャラクター所有のBulletSpawnとは分けて扱う。
+		std::unique_ptr<BulletSpawn> bulletSpawn_;
+		// ProjectileEditorが持つ定義一覧を参照するための管理クラス
+		BulletManager* bulletManager_ = nullptr;
+		// デバッグ試射時の出現情報
+		ProjectileSpawnInfo spawnInfo_{};
+		// ImGuiで現在選択している弾定義名
+		std::string selectedDefinitionName_;
+	};
+
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/ProjectileData.h
@@ -10075,6 +10229,410 @@ namespace Projectile {
 
 }
 
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/ProjectileEditor.cpp
+============================================================
+#include "ProjectileEditor.h"
+
+#include "DirectXGame/engine/3d/Model/ModelManager.h"
+#include "imgui.h"
+
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <json.hpp>
+
+namespace {
+
+	using json = nlohmann::json;
+
+	template <typename T>
+	T GetValue(const json& object, const char* key, const T& defaultValue) {
+		const auto it = object.find(key);
+		// 古いJSONに新しい項目が無い場合でも、既定値で読み込めるようにする。
+		return it == object.end() ? defaultValue : it->get<T>();
+	}
+
+	json ToJson(const Projectile::ProjectileParam& param) {
+		// enumはJSON上では整数として保存し、読み込み時に元の型へ戻す。
+		return {
+			{ "name", param.name },
+			{ "modelName", param.modelName },
+			{ "textureName", param.textureName },
+			{ "spawnSoundName", param.spawnSoundName },
+			{ "hitSoundName", param.hitSoundName },
+			{ "moveEffectName", param.moveEffectName },
+			{ "moveEffectSpreadScale", param.moveEffectSpreadScale },
+			{ "hitEffectName", param.hitEffectName },
+			{ "explosionEffectName", param.explosionEffectName },
+			{ "speed", param.speed },
+			{ "maxLifeTime", param.maxLifeTime },
+			{ "radius", param.radius },
+			{ "damage", param.damage },
+			{ "type", static_cast<int>(param.type) },
+			{ "moveType", static_cast<int>(param.moveType) },
+			{ "hitType", static_cast<int>(param.hitType) },
+			{ "collisionTag", static_cast<int>(param.collisionTag) },
+			{ "collisionLayer", static_cast<uint32_t>(param.collisionLayer) },
+			{ "collisionMask", param.collisionMask },
+			{ "isPierce", param.isPierce },
+			{ "maxPierceCount", param.maxPierceCount },
+			{ "maxBounceCount", param.maxBounceCount },
+			{ "enableGravity", param.enableGravity },
+			{ "gravityScale", param.gravityScale },
+			{ "enableHoming", param.enableHoming },
+			{ "homingStrength", param.homingStrength },
+			{ "homingRange", param.homingRange },
+			{ "explosionLifeTime", param.explosionLifeTime },
+			{ "explosionRadius", param.explosionRadius },
+			{ "explosionDamage", param.explosionDamage },
+			{ "generateTrailEffect", param.generateTrailEffect },
+			{ "trailEffectLifeTime", param.trailEffectLifeTime },
+		};
+	}
+
+	Projectile::ProjectileParam FromJson(const json& object) {
+		Projectile::ProjectileParam param{};
+		param.name = GetValue(object, "name", param.name);
+		param.modelName = GetValue(object, "modelName", param.modelName);
+		param.textureName = GetValue(object, "textureName", param.textureName);
+		param.spawnSoundName = GetValue(object, "spawnSoundName", param.spawnSoundName);
+		param.hitSoundName = GetValue(object, "hitSoundName", param.hitSoundName);
+		param.moveEffectName = GetValue(object, "moveEffectName", param.moveEffectName);
+		param.moveEffectSpreadScale = GetValue(object, "moveEffectSpreadScale", param.moveEffectSpreadScale);
+		param.hitEffectName = GetValue(object, "hitEffectName", param.hitEffectName);
+		param.explosionEffectName = GetValue(object, "explosionEffectName", param.explosionEffectName);
+		param.speed = GetValue(object, "speed", param.speed);
+		param.maxLifeTime = GetValue(object, "maxLifeTime", param.maxLifeTime);
+		param.radius = GetValue(object, "radius", param.radius);
+		param.damage = GetValue(object, "damage", param.damage);
+		param.type = static_cast<Projectile::Type>(GetValue(object, "type", static_cast<int>(param.type)));
+		param.moveType = static_cast<Projectile::ProjectileMoveType>(
+			GetValue(object, "moveType", static_cast<int>(param.moveType)));
+		param.hitType = static_cast<Projectile::ProjectileHitType>(
+			GetValue(object, "hitType", static_cast<int>(param.hitType)));
+		param.collisionTag = static_cast<CollisionTag>(
+			GetValue(object, "collisionTag", static_cast<int>(param.collisionTag)));
+		param.collisionLayer = static_cast<CollisionLayer>(
+			GetValue(object, "collisionLayer", static_cast<uint32_t>(param.collisionLayer)));
+		param.collisionMask = GetValue(object, "collisionMask", param.collisionMask);
+		param.isPierce = GetValue(object, "isPierce", param.isPierce);
+		param.maxPierceCount = GetValue(object, "maxPierceCount", param.maxPierceCount);
+		param.maxBounceCount = GetValue(object, "maxBounceCount", param.maxBounceCount);
+		param.enableGravity = GetValue(object, "enableGravity", param.enableGravity);
+		param.gravityScale = GetValue(object, "gravityScale", param.gravityScale);
+		param.enableHoming = GetValue(object, "enableHoming", param.enableHoming);
+		param.homingStrength = GetValue(object, "homingStrength", param.homingStrength);
+		param.homingRange = GetValue(object, "homingRange", param.homingRange);
+		param.explosionLifeTime = GetValue(object, "explosionLifeTime", param.explosionLifeTime);
+		param.explosionRadius = GetValue(object, "explosionRadius", param.explosionRadius);
+		param.explosionDamage = GetValue(object, "explosionDamage", param.explosionDamage);
+		param.generateTrailEffect = GetValue(object, "generateTrailEffect", param.generateTrailEffect);
+		param.trailEffectLifeTime = GetValue(object, "trailEffectLifeTime", param.trailEffectLifeTime);
+		return param;
+	}
+
+	void EditString(const char* label, std::string& value) {
+		// ImGui::InputTextは固定長バッファを要求するため、std::stringとの橋渡しを行う。
+		std::array<char, 256> buffer{};
+		strncpy_s(buffer.data(), buffer.size(), value.c_str(), _TRUNCATE);
+		if (ImGui::InputText(label, buffer.data(), buffer.size())) {
+			value = buffer.data();
+		}
+	}
+
+}
+
+void Projectile::ProjectileEditor::Initialize(Engine::ModelManager* modelManager) {
+	modelManager_ = modelManager;
+	Load();
+}
+
+void Projectile::ProjectileEditor::Update() {
+#ifdef _DEBUG
+	ImGui::Begin("Projectile Editor");
+
+	ImGui::InputText("New Definition", newDefinitionName_.data(), newDefinitionName_.size());
+	ImGui::SameLine();
+	if (ImGui::Button("Add")) {
+		AddDefinition();
+	}
+
+	const char* preview = selectedDefinitionName_.empty() ? "<none>" : selectedDefinitionName_.c_str();
+	if (ImGui::BeginCombo("Definition", preview)) {
+		for (const auto& [name, _] : definitions_) {
+			const bool selected = name == selectedDefinitionName_;
+			if (ImGui::Selectable(name.c_str(), selected)) {
+				selectedDefinitionName_ = name;
+			}
+			if (selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	if (!selectedDefinitionName_.empty()) {
+		auto it = definitions_.find(selectedDefinitionName_);
+		if (it != definitions_.end()) {
+			ImGui::SameLine();
+			if (ImGui::Button("Delete")) {
+				ImGui::OpenPopup("Delete Projectile Definition");
+			}
+			if (ImGui::BeginPopupModal("Delete Projectile Definition", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+				ImGui::Text("Delete definition '%s'?", selectedDefinitionName_.c_str());
+				if (ImGui::Button("Cancel")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Delete Permanently")) {
+					DeleteSelected();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
+			// 削除後はイテレータが無効になるため、選択名から取り直す。
+			it = definitions_.find(selectedDefinitionName_);
+			if (it != definitions_.end()) {
+				ImGui::SeparatorText("Parameters");
+				DrawParamEditor(it->second);
+			}
+		}
+	}
+
+	ImGui::Separator();
+	if (ImGui::Button("Save JSON")) {
+		Save();
+		message_ = "Saved: " + filePath_;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Reload JSON")) {
+		Load();
+		message_ = "Reloaded: " + filePath_;
+	}
+	if (!message_.empty()) {
+		ImGui::TextWrapped("%s", message_.c_str());
+	}
+	ImGui::End();
+#endif
+}
+
+const Projectile::ProjectileParam* Projectile::ProjectileEditor::Find(const std::string& definitionName) const {
+	const auto it = definitions_.find(definitionName);
+	return it == definitions_.end() ? nullptr : &it->second;
+}
+
+void Projectile::ProjectileEditor::AddDefinition() {
+	const std::string name = newDefinitionName_.data();
+	if (name.empty()) {
+		message_ = "Definition name is required.";
+		return;
+	}
+	if (definitions_.contains(name)) {
+		message_ = "A definition with that name already exists.";
+		return;
+	}
+
+	ProjectileParam param{};
+	param.name = name;
+	if (modelManager_ && !modelManager_->GetModel().empty()) {
+		// 新規作成時はロード済みモデルの先頭を仮設定し、空モデルでの生成を避ける。
+		param.modelName = modelManager_->GetModel().begin()->first;
+	}
+	param.maxLifeTime = 5.0f;
+	param.speed = 10.0f;
+	definitions_[name] = param;
+	selectedDefinitionName_ = name;
+	newDefinitionName_.fill('\0');
+	message_ = "Added definition: " + name;
+}
+
+void Projectile::ProjectileEditor::DeleteSelected() {
+	definitions_.erase(selectedDefinitionName_);
+	if (definitions_.empty()) {
+		selectedDefinitionName_.clear();
+	}
+	else {
+		selectedDefinitionName_ = definitions_.begin()->first;
+	}
+	message_ = "Deleted definition. Save JSON to persist the change.";
+}
+
+void Projectile::ProjectileEditor::DrawParamEditor(ProjectileParam& param) {
+	EditString("Object Name", param.name);
+	const char* modelPreview = param.modelName.empty() ? "<none>" : param.modelName.c_str();
+	if (ImGui::BeginCombo("Model", modelPreview)) {
+		if (modelManager_) {
+			// ModelManagerにロード済みのモデル名のみ選ばせる。
+			for (const auto& [modelName, _] : modelManager_->GetModel()) {
+				const bool selected = param.modelName == modelName;
+				if (ImGui::Selectable(modelName.c_str(), selected)) {
+					param.modelName = modelName;
+				}
+				if (selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+		}
+		ImGui::EndCombo();
+	}
+	EditString("Texture", param.textureName);
+	EditString("Spawn Sound", param.spawnSoundName);
+	EditString("Hit Sound", param.hitSoundName);
+
+	ImGui::SeparatorText("Effects");
+	EditString("Move Effect", param.moveEffectName);
+	ImGui::DragFloat("Move Effect Spread", &param.moveEffectSpreadScale, 0.01f, 0.0f);
+	EditString("Hit Effect", param.hitEffectName);
+	EditString("Explosion Effect", param.explosionEffectName);
+	ImGui::Checkbox("Generate Trail", &param.generateTrailEffect);
+	ImGui::DragFloat("Trail Lifetime", &param.trailEffectLifeTime, 0.01f, 0.0f);
+
+	ImGui::SeparatorText("General");
+	ImGui::DragFloat("Speed", &param.speed, 0.1f, 0.0f);
+	ImGui::DragFloat("Lifetime", &param.maxLifeTime, 0.01f, 0.0f);
+	ImGui::DragFloat("Radius", &param.radius, 0.01f, 0.0f);
+	ImGui::DragFloat("Damage", &param.damage, 0.1f, 0.0f);
+
+	static const char* typeLabels[] = { "Normal", "Homing", "Laser", "Shotgun", "Rapid", "Penetration" };
+	static const char* moveLabels[] = { "Straight", "Homing", "Parabola", "Stay" };
+	static const char* hitLabels[] = { "Destroy", "Penetrate", "Explode", "Bounce" };
+	static const char* tagLabels[] = { "None", "Player", "Enemy", "PlayerAttack", "EnemyAttack", "Wall", "Item", "PlayerEffect", "EnemyEffect" };
+
+	int type = static_cast<int>(param.type);
+	int moveType = static_cast<int>(param.moveType);
+	int hitType = static_cast<int>(param.hitType);
+	int collisionTag = static_cast<int>(param.collisionTag);
+	if (ImGui::Combo("Type", &type, typeLabels, IM_ARRAYSIZE(typeLabels))) {
+		param.type = static_cast<Type>(type);
+	}
+	if (ImGui::Combo("Movement", &moveType, moveLabels, IM_ARRAYSIZE(moveLabels))) {
+		param.moveType = static_cast<ProjectileMoveType>(moveType);
+	}
+	if (ImGui::Combo("On Hit", &hitType, hitLabels, IM_ARRAYSIZE(hitLabels))) {
+		param.hitType = static_cast<ProjectileHitType>(hitType);
+	}
+	if (ImGui::Combo("Collision Tag", &collisionTag, tagLabels, IM_ARRAYSIZE(tagLabels))) {
+		param.collisionTag = static_cast<CollisionTag>(collisionTag);
+	}
+
+	uint32_t layer = static_cast<uint32_t>(param.collisionLayer);
+	ImGui::InputScalar("Collision Layer Bits", ImGuiDataType_U32, &layer);
+	param.collisionLayer = static_cast<CollisionLayer>(layer);
+	ImGui::InputScalar("Collision Mask Bits", ImGuiDataType_U32, &param.collisionMask);
+
+	ImGui::SeparatorText("Hit Behavior");
+	ImGui::Checkbox("Pierce", &param.isPierce);
+	ImGui::DragInt("Max Pierce Count", &param.maxPierceCount, 1.0f, 0);
+	ImGui::DragInt("Max Bounce Count", &param.maxBounceCount, 1.0f, 0);
+
+	ImGui::SeparatorText("Movement Details");
+	ImGui::Checkbox("Gravity", &param.enableGravity);
+	ImGui::DragFloat("Gravity Scale", &param.gravityScale, 0.01f);
+	ImGui::Checkbox("Homing", &param.enableHoming);
+	ImGui::DragFloat("Homing Strength", &param.homingStrength, 0.01f, 0.0f);
+	ImGui::DragFloat("Homing Range", &param.homingRange, 0.1f, 0.0f);
+
+	ImGui::SeparatorText("Explosion");
+	ImGui::DragFloat("Explosion Lifetime", &param.explosionLifeTime, 0.01f, 0.0f);
+	ImGui::DragFloat("Explosion Radius", &param.explosionRadius, 0.01f, 0.0f);
+	ImGui::DragFloat("Explosion Damage", &param.explosionDamage, 0.1f, 0.0f);
+}
+
+void Projectile::ProjectileEditor::Save() const {
+	json root = json::object();
+	root["projectiles"] = json::object();
+	for (const auto& [name, param] : definitions_) {
+		root["projectiles"][name] = ToJson(param);
+	}
+
+	const std::filesystem::path path(filePath_);
+	// resources/Projectilesが無い初回保存でも、そのまま書き出せるようにする。
+	std::filesystem::create_directories(path.parent_path());
+	std::ofstream stream(path);
+	if (stream) {
+		stream << std::setw(4) << root << std::endl;
+	}
+}
+
+void Projectile::ProjectileEditor::Load() {
+	definitions_.clear();
+
+	std::ifstream stream(filePath_);
+	if (stream) {
+		json root;
+		stream >> root;
+		const auto it = root.find("projectiles");
+		if (it != root.end() && it->is_object()) {
+			for (const auto& [name, object] : it->items()) {
+				definitions_[name] = FromJson(object);
+			}
+		}
+	}
+
+	if (!definitions_.empty()) {
+		if (!definitions_.contains(selectedDefinitionName_)) {
+			// 初回ロードや削除後のロードでは、存在する定義を自動選択する。
+			selectedDefinitionName_ = definitions_.begin()->first;
+		}
+	}
+	else {
+		selectedDefinitionName_.clear();
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/ProjectileEditor.h
+============================================================
+#pragma once
+
+#include "ProjectileData.h"
+
+#include <array>
+#include <map>
+#include <string>
+
+namespace Engine {
+	class ModelManager;
+}
+
+namespace Projectile {
+
+	/// <summary>
+	/// BaseProjectileで使うProjectileParamを編集・追加・削除・JSON保存するデバッグエディター。
+	/// </summary>
+	class ProjectileEditor {
+	public:
+		// ModelManagerのロード済みモデル名を、モデル選択コンボの候補として使う
+		void Initialize(Engine::ModelManager* modelManager);
+		void Update();
+
+		// 保存済み定義名から生成用パラメータを取得する
+		const ProjectileParam* Find(const std::string& definitionName) const;
+		const std::map<std::string, ProjectileParam>& GetDefinitions() const { return definitions_; }
+
+	private:
+		void AddDefinition();
+		void DeleteSelected();
+		void DrawParamEditor(ProjectileParam& param);
+		void Save() const;
+		void Load();
+
+		std::map<std::string, ProjectileParam> definitions_;
+		std::string selectedDefinitionName_;
+		std::array<char, 128> newDefinitionName_{};
+		std::string message_;
+
+		// モデル名の手入力を避け、ロード済みモデル一覧から選ばせるために保持する。
+		Engine::ModelManager* modelManager_ = nullptr;
+		const std::string filePath_ = "resources/Projectiles/projectiles.json";
+	};
+
+}
 
 
 ============================================================
@@ -31018,24 +31576,6 @@ void CharacterDebugScene::Initialize()
 	bulletManager_->Initialize(GetEntityManager(),GetGlobalVariables(), nullptr);
 	bulletManager_->SetEffect(effect_.get());
 
-	// 弾スポーン
-	bulletSpawn_ = std::make_unique<BulletSpawn>();
-	bulletSpawn_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), nullptr, effect_.get(), bulletManager_.get());
-
-	param.name = "test";
-	param.modelName = "AnimatedCube.gltf";
-	param.maxLifeTime = 5.0f;
-	param.speed = 10.0f;
-	param.gravityScale = 0.1f;
-	param.moveType = Projectile::ProjectileMoveType::Homing;
-	param.enableHoming = true;
-	param.homingRange = 50.0f;
-	param.homingStrength = 5.0f;
-
-	spawnInfo.position = { 10,2,-40 };
-	spawnInfo.direction = { -1,0,0 };
-	spawnInfo.scale = { 0.5f,0.5f,0.5f };
-
 	// ヒットボックスシステム初期化
 	hitBoxSystem_ = std::make_unique<HitBox::System>();
 	hitBoxSystem_->Initialize(GetEntityManager());
@@ -31061,8 +31601,6 @@ void CharacterDebugScene::Initialize()
 	else {
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
-
-	spawnInfo.target = characterManager_->GetPlayer();
 
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
@@ -31104,6 +31642,11 @@ void CharacterDebugScene::Initialize()
 	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), 
 		characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), 
 		GetGlobalVariables(), characterManager_->GetPlayer(),effect_.get());
+
+	// 弾デバッグ初期化
+	projectileDebug_ = std::make_unique<Projectile::ProjectileDebug>();
+	projectileDebug_->Initialize(GetEntityManager(), GetGlobalVariables(), effect_.get(),
+		bulletManager_.get(), characterManager_->GetPlayer());
 }
 
 void CharacterDebugScene::Finalize(){
@@ -31120,6 +31663,8 @@ void CharacterDebugScene::Update(){
 
 	// コンボエディター更新
 	comboEditor_->Update(GetTime());
+	// 弾デバッグ更新
+	projectileDebug_->Update();
 
 	// インプットマネージャー更新
 	inputManager_->Update(GetTime());
@@ -31129,13 +31674,6 @@ void CharacterDebugScene::Update(){
 	if (this->iCommand_) {
 		iCommand_->Exec(*characterManager_->GetPlayer());
 	}
-
-	interval_ += GetTime();
-	if (interval_ >= intervalMax_) {
-		interval_ = 0.0f;
-		//bulletSpawn_->GenerateProjectile(spawnInfo, param);
-	}
-
 
 	// 調整項目
 	ApplyGlobalVariables();
@@ -31277,7 +31815,6 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
-#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include <DirectXGame/application/base/Attack/AttackController.h>
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
@@ -31293,6 +31830,7 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h>
+#include <DirectXGame/application/base/Bullet/Base/Debug/ProjectileDebug.h>
 
 class CharacterDebugScene : public Engine::BaseScene {
 public:
@@ -31368,13 +31906,6 @@ private:
 	std::unique_ptr<HitBox::System> hitBoxSystem_;
 
 
-	// 弾スポーン
-	std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
-	// 
-	float interval_ = 0.0f;
-	float intervalMax_ = 1.0f;
-	Projectile::ProjectileParam param{};
-	Projectile::ProjectileSpawnInfo spawnInfo{};
 	Character::EnemyType enemyType = Character::EnemyType::kSmallMelee;
 	Vector3 enemyPos{};
 	uint32_t tagNumber = 0;
@@ -31392,6 +31923,8 @@ private:
 private:
 	// コンボエディター
 	std::unique_ptr<Combo::Editor> comboEditor_;
+	// 弾デバッグ
+	std::unique_ptr<Projectile::ProjectileDebug> projectileDebug_;
 };
 
 
@@ -36496,8 +37029,7 @@ Engine::Object3d::Object3d() = default;
 
 Engine::Object3d::~Object3d() = default;
 
-void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType)
-{
+void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType) {
 	this->entityManager = entityManager;														// エンティティ3d
 	this->object3dCommon = entityManager->GetObject3dCommon();								// オブジェクト共通クラス
 	this->skinningConmmon = entityManager->GetSkinningConmmon();								// スキニング共通クラス
@@ -74779,6 +75311,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
@@ -75206,6 +75740,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletData.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
@@ -75549,6 +76085,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
+
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -76314,6 +76851,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -76516,6 +77056,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp">
@@ -77726,6 +78269,12 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\Debug\ProjectileDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -77841,6 +78390,7 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
+
 
 ============================================================
 File Path: project/main.cpp
