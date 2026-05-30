@@ -1,189 +1,238 @@
 #include "PostEffectBlock.h"
 
-#include "DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
-#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
-#include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
+#include <algorithm>
+
+#include "DirectXGame/engine/Offscreen/PostEffect.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
-#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/ScissorRect/ScissorRect.h"
 #include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
+#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 
-
-#include"imgui.h"
-
-// 初期化
-void Engine::PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon,
-	DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, 
-	const std::string name, PostEffectBlockType type)
+void Engine::PostEffectPass::Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,
+	RtvManager* rtvManager, RenderingCommon* renderingCommon,
+	DepthStencil* depthStencil, Barrier* barrier,
+	ScissorRect* scissorRect, ViewPort* viewPort,
+	const std::string& name, PostEffectType type)
 {
-	this->dxgiDevice = DXGIDevice;				// デバイス
-	this->command = command;						// コマンド
-	this->srvManager = srvManager;				// SRV管理
-	this->rtvManager = rtvManager;				// RTV管理
-	this->renderingCommon = renderingCommon;		// レンダリング共通クラス
-	this->depthStencil = depthStencil;			// デプスステンシル
-	this->barrier = barrier;						// バリア
-	this->scissorRect = scissorRect;				// シザー
-	this->viewPort = viewPort;					// ビューポート
+	name_ = name;
+	type_ = type;
+	command_ = command;
+	depthStencil_ = depthStencil;
+	barrier_ = barrier;
+	scissorRect_ = scissorRect;
+	viewPort_ = viewPort;
 
-	name_ = name;	// 名前
-
-	// タイプに応じて各ポストエフェクトを追加する処理
-	switch (type)
-	{
-	case PostEffectBlockType::kCopy:
-		AddRenderTexture("Copy_" + name, Engine::PostEffectType::kCopy);
-		break;
-	case PostEffectBlockType::kGrayScale:
-		AddRenderTexture("GrayScale_" + name, ::Engine::PostEffectType::kGrayScale);
-		break;
-	case PostEffectBlockType::kSepia:
-		AddRenderTexture("Sepia_" + name, Engine::PostEffectType::kSepia);
-		break;
-	case PostEffectBlockType::kVignette:
-		AddRenderTexture("Vignette_" + name, Engine::PostEffectType::kVignette);
-		break;
-	case PostEffectBlockType::kSmoothing:
-		AddRenderTexture("Smoothing_" + name, Engine::PostEffectType::kSmoothing);
-		break;
-	case PostEffectBlockType::kGaussian:
-		AddRenderTexture("Gaussian_" + name, Engine::PostEffectType::kGaussian);
-		break;
-	case PostEffectBlockType::kOitline:
-		AddRenderTexture("Oitline_" + name, Engine::PostEffectType::kOitline);
-		break;
-	case PostEffectBlockType::kRadialBlur:
-		AddRenderTexture("RadialBlur_" + name, Engine::PostEffectType::kRadialBlur);
-		break;
-	case PostEffectBlockType::kDissovle:
-		AddRenderTexture("Dissovle_" + name, Engine::PostEffectType::kDissovle);
-		break;
-	case PostEffectBlockType::kRandom:
-		AddRenderTexture("Random_" + name, Engine::PostEffectType::kRandom);
-		break;
-	case PostEffectBlockType::kBloom:
-		AddRenderTexture("BrightPassFilter" + name, Engine::PostEffectType::kBloom);
-		AddRenderTexture("Gaussian" + name, Engine::PostEffectType::kGaussian);
-		AddRenderTexture("BloomCombine" + name, Engine::PostEffectType::kBloomCombin);
-		GetRenderTextures(2)->SetOtherSrvIndex(GetRenderTextures(0)->GetSrvIndex());
-
-		break;
-	}
-
-
+	renderTexture_ = std::make_unique<RenderTexture>();
+	renderTexture_->Initialize(dxgiDevice, command, srvManager, rtvManager, renderingCommon, name, type);
 }
 
-// 更新
-void Engine::PostEffectBlock::Update(Camera* camera)
+void Engine::PostEffectPass::Update(Camera* camera)
 {
-	if (!renderTextures_.empty()) {
-		for (auto& renderTexture : renderTextures_) {
-			renderTexture->SetCamera(camera);
-			renderTexture->Update();
-		}
-
-#ifdef _DEBUG
-	// レンダーテクスチャ
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader(name_.c_str())) {
-		ImGui::Checkbox("use",&use_);
-		int index = static_cast<int>(index_);
-		ImGui::DragInt("index", &index);
-		if (index <= 0) {
-			index = 0;
-		}
-		index_ = static_cast<uint32_t>(index);
-		for (auto& renderTexture : renderTextures_) {
-			renderTexture->Update();
-		}
-	}
-	ImGui::End();
-#endif // _DEBUG
-	}
-}
-
-// 追加
-void Engine::PostEffectBlock::AddRenderTexture(const std::string name, PostEffectType type)
-{
-	auto renderTexture = std::make_unique<RenderTexture>();
-	renderTexture->Initialize(dxgiDevice, command, srvManager, rtvManager, renderingCommon, name, type);
-	
-	renderTextures_.push_back(std::move(renderTexture));
-}
-
-void Engine::PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* sourceRT)
-{
-
-	PreDraw(targetRT);
-
-	// レンダーテクスチャ(コピー)
-	sourceRT->Draw();
-
-
-	PostDraw(targetRT);
-}
-
-void Engine::PostEffectBlock::DrawEffectBlock(RenderTexture* inputTexture)
-{
-	if (renderTextures_.empty()) return;
-
-	if (renderTextures_.size() == 1) {
-		// 入力テクスチャを最初のレンダーターゲットに書き込む（処理なしコピー）
-		DrawRenderTexture(renderTextures_[0].get(), inputTexture);
+	if (!renderTexture_) {
 		return;
 	}
-	else {
-		// 最初の入力
-		DrawRenderTexture(renderTextures_[0].get(), inputTexture);
 
-		// 2番目以降でチェーン処理
-		for (size_t i = 0; i < renderTextures_.size() - 1; ++i){
-			DrawRenderTexture(renderTextures_[i + 1].get(), renderTextures_[i].get());
+	renderTexture_->SetCamera(camera);
+	renderTexture_->Update();
+}
+
+void Engine::PostEffectPass::Draw(RenderTexture* inputTexture)
+{
+	if (!renderTexture_ || !inputTexture) {
+		return;
+	}
+
+	// このPassの出力先へ切り替えて、入力テクスチャを現在のエフェクトで描画する。
+	PreDraw();
+	inputTexture->Draw();
+	PostDraw();
+}
+
+Engine::PostEffectData* Engine::PostEffectPass::GetPostEffectData()
+{
+	if (!renderTexture_) {
+		return nullptr;
+	}
+	return renderTexture_->GetPostEffectData();
+}
+
+void Engine::PostEffectPass::PreDraw()
+{
+	// ポストエフェクトは画面全体の2D描画なので、深度は使わずRTVだけを設定する。
+	barrier_->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture_->GetRTVHandle();
+	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+
+	float clearColor[] = {
+		renderTexture_->GetClearColor().x,
+		renderTexture_->GetClearColor().y,
+		renderTexture_->GetClearColor().z,
+		renderTexture_->GetClearColor().w
+	};
+	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	viewPort_->SettingViewport();
+	scissorRect_->SettingScissorRect();
+}
+
+void Engine::PostEffectPass::PostDraw()
+{
+	barrier_->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+}
+
+void Engine::PostEffectPipeline::Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,
+	RtvManager* rtvManager, RenderingCommon* renderingCommon,
+	DepthStencil* depthStencil, Barrier* barrier,
+	ScissorRect* scissorRect, ViewPort* viewPort)
+{
+	dxgiDevice_ = dxgiDevice;
+	command_ = command;
+	srvManager_ = srvManager;
+	rtvManager_ = rtvManager;
+	renderingCommon_ = renderingCommon;
+	depthStencil_ = depthStencil;
+	barrier_ = barrier;
+	scissorRect_ = scissorRect;
+	viewPort_ = viewPort;
+}
+
+Engine::PostEffectPass* Engine::PostEffectPipeline::AddPass(const std::string& name, PostEffectType type, bool use)
+{
+	return CreatePass(name, type, use);
+}
+
+Engine::PostEffectPass* Engine::PostEffectPipeline::AddEffect(const std::string& name, PostEffectBlockType type, bool use)
+{
+	switch (type) {
+	case PostEffectBlockType::kCopy:
+		return AddPass("Copy_" + name, PostEffectType::kCopy, use);
+	case PostEffectBlockType::kGrayScale:
+		return AddPass("GrayScale_" + name, PostEffectType::kGrayScale, use);
+	case PostEffectBlockType::kSepia:
+		return AddPass("Sepia_" + name, PostEffectType::kSepia, use);
+	case PostEffectBlockType::kVignette:
+		return AddPass("Vignette_" + name, PostEffectType::kVignette, use);
+	case PostEffectBlockType::kSmoothing:
+		return AddPass("Smoothing_" + name, PostEffectType::kSmoothing, use);
+	case PostEffectBlockType::kGaussian:
+		return AddPass("Gaussian_" + name, PostEffectType::kGaussian, use);
+	case PostEffectBlockType::kOitline:
+		return AddPass("Outline_" + name, PostEffectType::kOitline, use);
+	case PostEffectBlockType::kRadialBlur:
+		return AddPass("RadialBlur_" + name, PostEffectType::kRadialBlur, use);
+	case PostEffectBlockType::kDissovle:
+		return AddPass("Dissovle_" + name, PostEffectType::kDissovle, use);
+	case PostEffectBlockType::kRandom:
+		return AddPass("Random_" + name, PostEffectType::kRandom, use);
+	case PostEffectBlockType::kBloom:
+		AddBloom(name, use);
+		return passes_.empty() ? nullptr : passes_.back().get();
+	default:
+		return nullptr;
+	}
+}
+
+void Engine::PostEffectPipeline::AddBloom(const std::string& name, bool use)
+{
+	// BloomCombineは直前のGaussian結果に加えて、最初のBrightPass結果も参照する。
+	PostEffectPass* brightPass = AddPass("BrightPass_" + name, PostEffectType::kBloom, use);
+	AddPass("Gaussian_" + name, PostEffectType::kGaussian, use);
+	PostEffectPass* combine = AddPass("BloomCombine_" + name, PostEffectType::kBloomCombin, use);
+	if (combine) {
+		combine->SetOtherInputPass(brightPass);
+	}
+}
+
+void Engine::PostEffectPipeline::Clear()
+{
+	passes_.clear();
+}
+
+void Engine::PostEffectPipeline::Update(Camera* camera)
+{
+	for (auto& pass : passes_) {
+		pass->Update(camera);
+	}
+}
+
+Engine::RenderTexture* Engine::PostEffectPipeline::Execute(RenderTexture* sourceTexture)
+{
+	if (!sourceTexture) {
+		return nullptr;
+	}
+
+	std::sort(passes_.begin(), passes_.end(),
+		[](const std::unique_ptr<PostEffectPass>& a, const std::unique_ptr<PostEffectPass>& b) {
+			return a->GetIndex() < b->GetIndex();
+		});
+
+	RenderTexture* currentTexture = sourceTexture;
+	for (size_t i = 0; i < passes_.size(); ++i) {
+		PostEffectPass* pass = passes_[i].get();
+		pass->SetIndex(static_cast<uint32_t>(i));
+
+		if (!pass->GetUse()) {
+			continue;
 		}
 
+		// 複数入力パス用に、追加で参照するSRVを描画直前に更新する。
+		PostEffectPass* otherInputPass = pass->GetOtherInputPass();
+		if (otherInputPass) {
+			RenderTexture* otherTexture = otherInputPass->GetRenderTexture();
+			if (otherTexture) {
+				pass->GetRenderTexture()->SetOtherSrvIndex(otherTexture->GetSrvIndex());
+			}
+		}
 
+		pass->Draw(currentTexture);
+		currentTexture = pass->GetRenderTexture();
 	}
-	
+
+	return currentTexture;
 }
 
-void Engine::PostEffectBlock::ConnectBlock(RenderTexture* input)
+Engine::PostEffectPass* Engine::PostEffectPipeline::GetPass(size_t index)
 {
-	DrawEffectBlock(input);
+	if (index >= passes_.size()) {
+		return nullptr;
+	}
+	return passes_[index].get();
 }
 
-
-// Pre
-void Engine::PostEffectBlock::PreDraw(RenderTexture* renderTexture)
+Engine::PostEffectPass* Engine::PostEffectPipeline::FindPass(const std::string& name)
 {
-	// レンダーターゲット
-	barrier->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	//barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
-	//// 描画先の設定
-	// 描画先のRTVとDSVを設定する
-	// このポストエフェクトでは深度バッファを使用しないため、DSVは設定しない
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRTVHandle();
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
-	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
-
-
-	//// レンダーターゲットと深度バッファをクリア
-	float clearColor[] = { renderTexture->GetClearColor().x,  renderTexture->GetClearColor().y, renderTexture->GetClearColor().z,  renderTexture->GetClearColor().w }; // 任意のクリアカラー（赤）
-	command->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-	//
-	viewPort->SettingViewport();
-	scissorRect->SettingScissorRect();
+	for (auto& pass : passes_) {
+		if (pass->GetName() == name) {
+			return pass.get();
+		}
+	}
+	return nullptr;
 }
 
-// Post
-void Engine::PostEffectBlock::PostDraw(RenderTexture* renderTexture)
+std::vector<Engine::PostEffectPass*> Engine::PostEffectPipeline::GetPasses()
 {
-	// レンダーターゲット
-	barrier->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	std::vector<PostEffectPass*> rawPtrs;
+	rawPtrs.reserve(passes_.size());
+	for (auto& pass : passes_) {
+		rawPtrs.push_back(pass.get());
+	}
+	return rawPtrs;
+}
 
-	//barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+Engine::PostEffectPass* Engine::PostEffectPipeline::CreatePass(const std::string& name, PostEffectType type, bool use)
+{
+	auto pass = std::make_unique<PostEffectPass>();
+	pass->Initialize(dxgiDevice_, command_, srvManager_, rtvManager_, renderingCommon_,
+		depthStencil_, barrier_, scissorRect_, viewPort_, name, type);
+	pass->SetUse(use);
+	pass->SetIndex(static_cast<uint32_t>(passes_.size()));
+
+	PostEffectPass* result = pass.get();
+	passes_.push_back(std::move(pass));
+	return result;
 }

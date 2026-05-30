@@ -11,11 +11,13 @@ using namespace Microsoft::WRL;
 #include<dxgi1_6.h>
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
+#include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 
 // 前方宣言
 namespace Engine {
 	class PostEffectManager;
-	class PostEffectBlock;
+	class PostEffectPipeline;
+	class PostEffectPass;
 	class DirectXCommon;
 	class Input;
 	class CameraCommon;
@@ -96,9 +98,11 @@ namespace Engine {
 		// レンダーテクスチャ追加
 		void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
 		// ポストエフェクトをクリア
-		void Clear() { effectBlocks_.clear(); }
-		// ポストエフェクトのブロック取得
-		std::vector<Engine::PostEffectBlock*> GetPostEffectBlocks();
+		void Clear();
+		// ポストエフェクトのパス取得
+		PostEffectPass* GetPostEffectPass(size_t index);
+		// ポストエフェクトパイプライン取得
+		PostEffectPipeline* GetPostEffectPipeline() { return postEffectPipeline_.get(); }
 		// ポストエフェクトマネージャー取得
 		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
 	private: // デバッグ
@@ -117,7 +121,7 @@ namespace Engine {
 		Matrix4x4 projectionMatrix_;
 		Matrix4x4 viewProjectionMatrix_;
 	private:// ポストエフェクト
-		std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
+		std::unique_ptr<PostEffectPipeline> postEffectPipeline_;
 	private: // GPU
 		// GPUデータ
 		struct DataGPU {

@@ -54,13 +54,13 @@ namespace Engine {
 		void Update(Camera* camera);
 
 
-		// ポストエフェクトブロック追加
-		void AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks);
+		// ポストエフェクトパイプライン追加
+		void AddPipeline(PostEffectPipeline* pipeline);
 
 		// 最終レンダーテクスチャ取得
 		RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get(); };
 
-		// ポストエフェクトブロッククリア
+		// ポストエフェクトパイプラインクリア
 		void ClearPostEffectBlock();
 		// ImGui使用時の計算処理
 		void RenderImGui();
@@ -102,7 +102,7 @@ namespace Engine {
 		std::unique_ptr<RenderTexture> renderTexture_;
 		std::unique_ptr<RenderTexture> renderTextureEnd_;
 
-		std::vector<PostEffectBlock*> effectBlocks_;
+		std::vector<PostEffectPipeline*> pipelines_;
 
 		uint32_t indexCount_ = 0;
 

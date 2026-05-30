@@ -18,9 +18,9 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	// カメラ回転設定
 	uniqueCamera_->SetRotate(provisionalData_.rotate);
 	uniqueCamera_->AddEffectBlock("bloom", Engine::PostEffectBlockType::kBloom);
-	uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
-	uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
-	uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
+	uniqueCamera_->GetPostEffectPass(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
+	uniqueCamera_->GetPostEffectPass(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
+	uniqueCamera_->GetPostEffectPass(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
 
 	// 操作
 	controller = std::make_unique<CameraController>();
@@ -35,7 +35,7 @@ void FollowCamera::Update() {
 	controller->SetLockOnTarget(target);
 	// カメラを使っているなら
 	if (useCamera) {
-		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
+		uniqueCamera_->GetPostEffectManager()->AddPipeline(uniqueCamera_->GetPostEffectPipeline());
 	}
 	controller->Update(Engine::MyGame::GameTime());
 	// カメラ更新

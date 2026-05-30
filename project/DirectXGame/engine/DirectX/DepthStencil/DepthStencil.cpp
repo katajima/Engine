@@ -92,8 +92,7 @@ void Engine::DepthStencil::CreateDepthStencilView()
 	);
 
 	srvIndex_ = srvManager->Allocate();
-	srvIndex_ = srvManager->Allocate();
-
+	
 	// SRVを作成
 	DirectX::TexMetadata matadata{};
 	matadata.format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;

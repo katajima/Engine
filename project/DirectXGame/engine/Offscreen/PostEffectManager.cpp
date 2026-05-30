@@ -112,32 +112,16 @@ void Engine::PostEffectManager::PostDraw2dOffscreen()
 
 void Engine::PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 {
-
 	RenderTexture* previousTexture = renderTexture_.get();
 
-
-	std::sort(effectBlocks_.begin(), effectBlocks_.end(),
-		[](const PostEffectBlock* a, const PostEffectBlock* b) {
-			return a->GetIndex() < b->GetIndex();
-		});
-
-	// インデックスを再設定（連番にする）
-	for (size_t i = 0; i < effectBlocks_.size(); ++i) {
-		effectBlocks_[i]->SetIndex(static_cast<int>(i));
-	}
-
-
-	for (size_t i = 0; i < effectBlocks_.size(); ++i) {
-		auto& current = effectBlocks_[i];
-		// 無効なブロックはスキップ
-		if (!current->GetUse()) {
+	for (PostEffectPipeline* pipeline : pipelines_) {
+		if (!pipeline) {
 			continue;
 		}
-		// 有効なブロックに描画させる
-		current->DrawEffectBlock(previousTexture);
-
-		// 次のブロックの入力用に更新
-		previousTexture = current->GetEndRenderTexture();
+		RenderTexture* result = pipeline->Execute(previousTexture);
+		if (result) {
+			previousTexture = result;
+		}
 	}
 
 	PreDraw2dOffscreen();
@@ -154,23 +138,25 @@ void Engine::PostEffectManager::Update(Camera* camera)
 	renderingCommon->SetCamera(camera);
 	renderTexture_->SetCamera(camera);
 	renderTexture_->Update();
-	for (auto& effect : effectBlocks_) {
-		effect->Update(camera);
+	for (auto& pipeline : pipelines_) {
+		if (pipeline) {
+			pipeline->Update(camera);
+		}
 	}
 }
 
 
 
-void Engine::PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks)
+void Engine::PostEffectManager::AddPipeline(PostEffectPipeline* pipeline)
 {
-	for (auto& effect : effectBlocks) {
-		effectBlocks_.push_back(effect);
+	if (pipeline) {
+		pipelines_.push_back(pipeline);
 	}
 }
 
 void Engine::PostEffectManager::ClearPostEffectBlock()
 {
-	effectBlocks_.clear();
+	pipelines_.clear();
 }
 
 void Engine::PostEffectManager::RenderImGui()

@@ -31,6 +31,10 @@ void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 	postEffectManager = dxCommon->GetPostEffectManager();	// ポストエフェクト管理クラス
 	input = cameraCommon->GetInput();		// インプット
 
+	postEffectPipeline_ = std::make_unique<PostEffectPipeline>();
+	postEffectPipeline_->Initialize(dxCommon->GetDXGIDevice(), dxCommon->GetCommand(), dxCommon->GetSrvManager(), dxCommon->GetRtvManager(),
+		dxCommon->GetRenderingCommon(), dxCommon->GetDepthStencil(), dxCommon->GetBarrier(), dxCommon->GetScissorRect(), dxCommon->GetViewPort());
+
 	// リソース生成
 	resource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
 	//書き込むためのアドレスを取得
@@ -152,23 +156,25 @@ Vector3 Engine::Camera::GetForward() const {
 
 void Engine::Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
 {
-	auto effectBlock = std::make_unique<Engine::PostEffectBlock>();
-	effectBlock->Intialize(dxCommon->GetDXGIDevice(), dxCommon->GetCommand(), dxCommon->GetSrvManager(), dxCommon->GetRtvManager(),
-		dxCommon->GetRenderingCommon(), dxCommon->GetDepthStencil(), dxCommon->GetBarrier(), dxCommon->GetScissorRect(), dxCommon->GetViewPort(), name, type);
-	effectBlock->SetUse(use);			// 使うか
-	effectBlock->SetIndex(0); // 順番
-	effectBlocks_.push_back(std::move(effectBlock));
-	//indexCount_++; // 加算
+	if (!postEffectPipeline_) {
+		return;
+	}
+	postEffectPipeline_->AddEffect(name, type, use);
 }
 
-std::vector<Engine::PostEffectBlock*> Engine::Camera::GetPostEffectBlocks()
+void Engine::Camera::Clear()
 {
-	std::vector<PostEffectBlock*> rawPtrs;
-	rawPtrs.reserve(effectBlocks_.size());
-	for (auto& block : effectBlocks_) {
-		rawPtrs.push_back(block.get());
+	if (postEffectPipeline_) {
+		postEffectPipeline_->Clear();
 	}
-	return rawPtrs;
+}
+
+Engine::PostEffectPass* Engine::Camera::GetPostEffectPass(size_t index)
+{
+	if (!postEffectPipeline_) {
+		return nullptr;
+	}
+	return postEffectPipeline_->GetPass(index);
 }
 
 #pragma endregion // ポストエフェクト

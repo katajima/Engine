@@ -25,7 +25,7 @@ void FixedCamera::Update()
 {
 	// カメラを使っているなら
 	if (useCamera) {
-		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
+		uniqueCamera_->GetPostEffectManager()->AddPipeline(uniqueCamera_->GetPostEffectPipeline());
 	}
 #ifdef _DEBUG
 	// デバッグラインを表示
