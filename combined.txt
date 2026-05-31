@@ -633,6 +633,10 @@
     └──     └──     ├── TrailEffect.h
     └──     └──     ├── TrailEffectManager.cpp
     └──     └──     └── TrailEffectManager.h
+    └──     ├── Entity/
+    └──     └── ├── Entity.h
+    └──     └── ├── ModelEntity.h
+    └──     └── └── PrimitiveEntity.h
     └──     ├── Light/
     └──     └── ├── LightCommon.cpp
     └──     └── ├── LightCommon.h
@@ -10779,9 +10783,9 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
-	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), { 0,provisionalData_.trailWidth,0 }, { 0,-provisionalData_.trailWidth,0 }); // トレイル設定
+	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), { 0,provisionalData_.trailWidth,0 }, { 0,-provisionalData_.trailWidth,0 }); // トレイル設定
 	object_->Update();	// オブジェクト更新
-	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
+	//object_->isEmitTrailEffect = false;	// トレイルの出現しないように
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	object_->SetIsDraw(true);			// 描画する
 	
@@ -10844,7 +10848,7 @@ void EnemyBullet::Update()
 {
 	// 時間が初期値出なければ
 	if (timer_ != 0.0f) {
-		object_->isEmitTrailEffect = true;
+	//	object_->isEmitTrailEffect = true;
 	}
 	// 時間更新
 	timer_ += GetTimer();
@@ -10957,9 +10961,9 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
-	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
+	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->Update();	// オブジェクト更新
-	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
+	//object_->isEmitTrailEffect = false;	// トレイルの出現しないように
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	object_->SetIsDraw(true);			// 描画する
 
@@ -11030,7 +11034,7 @@ void PlayerBullet::Update() {
 
 	// 時間が初期値出なければ
 	if (timer_ != 0.0f) {
-		object_->isEmitTrailEffect = true;
+	//	object_->isEmitTrailEffect = true;
 	}
 	// 時間更新
 	timer_ += GetTimer();
@@ -11154,8 +11158,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	// 基盤の初期化
 	BaseInitialize(entityManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
-	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
-	object_->isEmitTrailEffect = false; // トレイルを出現させない
+	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
+	//object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	
@@ -11398,7 +11402,7 @@ void PlayerRangeBombingBullet::Update() {
 
 	// トレイル発生
 	if (trailTime_ > 0.0f) {
-		object_->isEmitTrailEffect = true;
+		//object_->isEmitTrailEffect = true;
 	}
 	trailTime_ = 1;
 
@@ -37047,6 +37051,7 @@ void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType 
 
 
 	name = "object" + std::to_string(object3dCommon->GetObjectCount());
+	name_ = name;
 
 	// 位置初期化
 	transformation = std::make_unique<Transfomation>();
@@ -37085,14 +37090,6 @@ void Engine::Object3d::InitColliderComponent()
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 	isColliderComponenyUpdate_ = true;
-}
-
-void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
-{
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
-	trailEffect_->SetCamera(defaltCamera);
-	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
 }
 
 void Engine::Object3d::InitAnimationComponent() {
@@ -37189,18 +37186,15 @@ void Engine::Object3d::Update()
 		break;
 	}
 
-	
-	// トレイル
-	if (trailEffect_) {
-		trailEffect_->SetIsEmit(isEmitTrailEffect);
-		trailEffect_->Update();
-	}
-
 	// コライダー
 	if (colliderComponent_) {
 		if (isColliderComponenyUpdate_) {
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
+	}
+	if (trailEffect_) {
+		trailEffect_->SetIsEmit(isEmitTrailEffect);
+		trailEffect_->Update();
 	}
 	direWorldTransform_.Update();
 
@@ -37238,10 +37232,18 @@ void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
 void Engine::Object3d::DrawTrailEffect()
 {
 	if (trailEffect_) {
-		// トレイルエフェクトの描画
 		trailEffect_->Draw();
 	}
 }
+
+void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+{
+	trailEffect_ = std::make_unique<TrailEffect>();
+	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->SetCamera(defaltCamera);
+	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
+}
+
 
 void Engine::Object3d::DebugImguiSkin()
 {
@@ -37270,9 +37272,18 @@ void  Engine::Object3d::SetIsRigidUpdate(bool isRigidUpdate) { isRigidUpdate_ = 
 // カメラ設定
 void  Engine::Object3d::SetCamera(Camera* camera) { this->individualCamera = camera; }
 // 名前設定
-void  Engine::Object3d::SetName(const std::string& name) { this->name = name; }
+void Engine::Object3d::SetName(const std::string& name)
+{
+	this->name = name;
+	name_ = name;
+}
+const std::string& Engine::Object3d::GetName() const { return name; }
 // タグ設定
-void  Engine::Object3d::SetNameTag(const std::string& name) { nameTag = name; }
+void Engine::Object3d::SetNameTag(const std::string& name)
+{
+	nameTag = name;
+	nameTag_ = name;
+}
 // プリミティブ形状
 void  Engine::Object3d::SetPrimitive(std::unique_ptr< Engine::BasePrimitive> primitive) { renderComponent_->SetPrimitive(std::move(primitive)); };
 // スカイボックス
@@ -37296,11 +37307,11 @@ Engine::SkyBox* Engine::Object3d::GetSkyBox() const { return renderComponent_->G
 // マテリアルインスタンス取得
 std::vector<MaterialInstance>& Engine::Object3d::GetMaterialInstance() { return renderComponent_->GetMaterialInstance(); }
 // タグ取得
-std::string  Engine::Object3d::GetNameTag() const { return nameTag; }
+const std::string& Engine::Object3d::GetNameTag() const { return nameTag; }
 // 描画するか設定
 void  Engine::Object3d::SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
 // 削除する
-void Engine::Object3d::IsDelete() { isDelete = true; }
+void Engine::Object3d::IsDelete() { isDelete = true; isDelete_ = true; }
 // 削除されているか取得
 bool Engine::Object3d::GetIsDelete() const { return isDelete; }
 // オブジェクトに使われているモデルの透明度取得
@@ -37321,6 +37332,8 @@ Vector3 Engine::Object3d::GetWorldPosition() const { return transformComponent_-
 Vector3 Engine::Object3d::GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition(); };
 // ワールド座標
 Engine::WorldTransform& Engine::Object3d::GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
+Engine::WorldTransform* Engine::Object3d::GetWorldTransformPtr() { return &transformComponent_->GetWorldTransform(); }
+const Engine::WorldTransform* Engine::Object3d::GetWorldTransformPtr() const { return &transformComponent_->GetWorldTransform(); }
 // 座標更新
 void Engine::Object3d::UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
 // 向いている方向
@@ -37403,6 +37416,7 @@ File Path: project/DirectXGame/engine/3d/Object/Object3d.h
 ============================================================
 #pragma once
 #include"DirectXGame/engine/struct/Light.h"
+#include "DirectXGame/engine/Entity/Entity.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
@@ -37436,7 +37450,7 @@ namespace Engine {
 	/// <summary>
 	/// オブジェクトクラス
 	/// </summary>
-	class Object3d
+	class Object3d : public Entity
 	{
 	public:
 		Object3d();
@@ -37445,32 +37459,15 @@ namespace Engine {
 		// 初期化
 		void Initialize(EntityManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		// 更新
-		void Update();
+		void Update() override;
 
 		// 物理更新
-		void RigidBodyUpdate();
+		void RigidBodyUpdate() override;
 
 		// 描画通常
-		void Draw();
+		void Draw() override;
 		// シャドウマップ用の深度描画
-		void DrawShadowMap(ShadowMap* shadowMap);
-
-		// トレイルエフェクト描画
-		void DrawTrailEffect();
-
-		/// <summary>
-		/// トレイルエフェクトを使うときの設定
-		/// </summary>
-		/// <param name="tex">tテクスチャ設定</param>
-		/// <param name="maxTime">トレイルの生存時間</param>
-		/// <param name="color">色</param>
-		/// <param name="offsetStr">トレイルのオフセットの位置始点</param>
-		/// <param name="offsetEnd">トレイルのオフセットの位置終点</param>
-		void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
-
-		// トレイルを出すかの設定
-		void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
-
+		void DrawShadowMap(ShadowMap* shadowMap) override;
 	public:// セッター
 		// モデル設定(モデル)
 		void SetModel(Model* model);
@@ -37479,9 +37476,10 @@ namespace Engine {
 		// カメラ設定
 		void SetCamera(Camera* camera);
 		// 名前設定
-		void SetName(const std::string& name);
+		void SetName(const std::string& name) override;
+		const std::string& GetName() const override;
 		// タグ設定
-		void SetNameTag(const std::string& name);
+		void SetNameTag(const std::string& name) override;
 		// プリミティブ形状
 		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive);
 		// スカイボックス
@@ -37506,17 +37504,21 @@ namespace Engine {
 		std::vector<MaterialInstance>& GetMaterialInstance();
 
 		// タグ取得
-		std::string GetNameTag() const;
+		const std::string& GetNameTag() const override;
 		// 描画するか設定
 		void SetIsDraw(bool is);
 		// モデルのデバッグ用ImGui
 		void DebugImguiModel();
 		// スキンモデルのデバッグ用
 		void DebugImguiSkin();
+		// トレイルエフェクト設定
+		void UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd);
+		// トレイルエフェクト描画
+		void DrawTrailEffect();
 		// 削除する
-		void IsDelete();
+		void IsDelete() override;
 		// 削除されているか取得
-		bool GetIsDelete() const;
+		bool GetIsDelete() const override;
 		// オブジェクトに使われているモデルの透明度取得
 		float GetAlpha();
 
@@ -37590,6 +37592,8 @@ namespace Engine {
 		Vector3 GetPreWorldPosition() const;
 		// ワールド座標
 		WorldTransform& GetWorldTransform();
+		WorldTransform* GetWorldTransformPtr() override;
+		const WorldTransform* GetWorldTransformPtr() const override;
 		// 座標更新
 		void UpdateWorldTransform();
 		// 向いている方向
@@ -37626,9 +37630,6 @@ namespace Engine {
 		RenderComponent* GetRenderComponent();
 
 	public:
-		//
-		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
-		// trailエフェクトを使用するかのフラグ
 		bool isEmitTrailEffect = false;
 		//
 		bool isRigidUpdate_ = true;
@@ -37644,6 +37645,7 @@ namespace Engine {
 		WorldTransform direWorldTransform_;
 		Vector3 direction_ = {};
 	private:
+		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 		Object3dCommon*		object3dCommon = nullptr;
 		SkinningConmmon*	skinningConmmon = nullptr;
 		ImGuiManager*		imGuiManager = nullptr;
@@ -59432,6 +59434,136 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Entity/Entity.h
+============================================================
+#pragma once
+
+#include <string>
+
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+
+namespace Engine {
+	class ShadowMap;
+
+	/// <summary>
+	/// EntityManagerが一括管理するための共通基底クラス。
+	/// </summary>
+	class Entity {
+	public:
+		virtual ~Entity() = default;
+
+		// 物理や入力など、描画用更新の前に進めたい処理。
+		virtual void RigidBodyUpdate() {}
+		// 毎フレーム更新。
+		virtual void Update() {}
+		// 通常描画。
+		virtual void Draw() {}
+		// シャドウマップ用の深度描画。不要なEntityは何もしない。
+		virtual void DrawShadowMap(ShadowMap*) {}
+	public:
+		// 削除フラグ取得
+		virtual bool GetIsDelete() const { return isDelete_; }
+		// 削除フラグ設定
+		virtual void IsDelete() { isDelete_ = true; }
+
+		// 名前取得
+		virtual const std::string& GetName() const { return name_; }
+		// 名前設定
+		virtual void SetName(const std::string& name) { name_ = name; }
+		// タグ取得
+		virtual const std::string& GetNameTag() const { return nameTag_; }
+		// タグ設定
+		virtual void SetNameTag(const std::string& name) { nameTag_ = name; }
+		// ワールド変換のポインタ取得。必要なEntityはオーバーライドして返す。
+		virtual WorldTransform* GetWorldTransformPtr() { return nullptr; }
+		// ワールド変換のポインタ取得(定数)。必要なEntityはオーバーライドして返す。
+		virtual const WorldTransform* GetWorldTransformPtr() const { return nullptr; }
+
+	protected:
+		// 名前
+		std::string name_{};
+		// タグ
+		std::string nameTag_{};
+		// 削除フラグ
+		bool isDelete_ = false;
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Entity/ModelEntity.h
+============================================================
+#pragma once
+
+#include "DirectXGame/engine/3d/Object/Object3d.h"
+
+namespace Engine {
+	/// <summary>
+	/// 通常モデル用Entity。既存Object3dの設定済み派生として扱う。
+	/// </summary>
+	class ModelEntity : public Object3d {
+	public:
+		void Initialize(EntityManager* entityManager, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
+		{
+			Object3d::Initialize(entityManager, ObjectModelType::kNormal, rasterizerType);
+		}
+	};
+
+	/// <summary>
+	/// スカイボックス用Entity。
+	/// </summary>
+	class SkyBoxEntity : public Object3d {
+	public:
+		void Initialize(EntityManager* entityManager, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
+		{
+			Object3d::Initialize(entityManager, ObjectModelType::kSkyBox, rasterizerType);
+		}
+	};
+
+	/// <summary>
+	/// Ocean用Entity。
+	/// </summary>
+	class OceanEntity : public Object3d {
+	public:
+		void Initialize(EntityManager* entityManager, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
+		{
+			Object3d::Initialize(entityManager, ObjectModelType::kOcean, rasterizerType);
+		}
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Entity/PrimitiveEntity.h
+============================================================
+#pragma once
+
+#include "DirectXGame/engine/3d/Object/Object3d.h"
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+
+namespace Engine {
+	class PrimitiveCommon;
+
+	/// <summary>
+	/// プリミティブ用Entity。形状Tを内部で生成してObject3dへ渡す。
+	/// </summary>
+	template<typename T>
+	class PrimitiveEntity : public Object3d {
+	public:
+		void Initialize(EntityManager* entityManager, PrimitiveCommon* primitiveCommon, const std::string& texturePath,
+			PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
+		{
+			Object3d::Initialize(entityManager, ObjectModelType::kPrimitive, rasterizerType);
+
+			auto primitive = std::make_unique<T>();
+			primitive->Initialize(primitiveCommon, texturePath);
+			SetPrimitive(std::move(primitive));
+		}
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/engine/Light/LightCommon.cpp
 ============================================================
 #include "LightCommon.h"
@@ -61217,12 +61349,12 @@ void Engine::EntityManager::UpdateImgui()
 	static int selectedIndex_ = -1;
 
 	int openedIndex = -1;
-	for (size_t i = 0; i < object3d.size(); ++i) {
-		auto& entity = object3d[i];
+	for (size_t i = 0; i < entities_.size(); ++i) {
+		auto& entity = entities_[i];
 
 		// 強制的に一つだけ開くように設定
 		ImGui::SetNextItemOpen(i == selectedIndex_, ImGuiCond_Always);
-		if (ImGui::TreeNode(object3d[i]->name.c_str())) {
+		if (ImGui::TreeNode(entity->GetName().c_str())) {
 			openedIndex = static_cast<int>(i);  // 開いているインデックスを記録
 			selectedIndex_ = openedIndex;
 			ImGui::TreePop();
@@ -61231,8 +61363,12 @@ void Engine::EntityManager::UpdateImgui()
 	ImGui::End();
 
 	ImGui::Begin("Object Properties");
-	if (openedIndex >= 0 && openedIndex < static_cast<int>(object3d.size())) {
-		auto& entity = object3d[openedIndex];
+	if (openedIndex >= 0 && openedIndex < static_cast<int>(entities_.size())) {
+		Object3d* entity = dynamic_cast<Object3d*>(entities_[openedIndex].get());
+		if (!entity) {
+			ImGui::End();
+			return;
+		}
 		ImGui::Text(entity->name.c_str());
 		ImGui::Separator();
 		std::string objectTypeName = "ObjectType : " + entity->GetRenderComponent()->GetObjectTypeName();
@@ -61369,43 +61505,44 @@ void Engine::EntityManager::Update()
 	object3dInstansManager_->Update();
 
 	// オブジェクトが消えたときの処理
-	object3d.erase(
-		std::remove_if(object3d.begin(), object3d.end(),
-			[](const std::unique_ptr<Object3d>& object) {
+	entities_.erase(
+		std::remove_if(entities_.begin(), entities_.end(),
+			[](const std::unique_ptr<Entity>& object) {
 				return object->GetIsDelete();
 			}),
-		object3d.end());
+		entities_.end());
 
 
 	// オブジェクトの更新
-	for (auto& object : object3d) {
+	for (auto& object : entities_) {
 		if (object) {
 			// 物理更新
 			object->RigidBodyUpdate();
 		}
 	}
 
-	for (auto& object : object3d) {
+	for (auto& entity : entities_) {
+		Object3d* object = dynamic_cast<Object3d*>(entity.get());
 		if (object) {
 			// 更新
 			object->Update();
 			// オブジェクトの描画順決定
 			switch (object->GetRenderComponent()->GetObjectDrawType()) {
 			case ObjectDrawType::kTranslucent01:
-				transparentObjects01.push_back(object.get());
+				transparentObjects01.push_back(object);
 				break;
 			case ObjectDrawType::kTranslucent02:
-				transparentObjects02.push_back(object.get());
+				transparentObjects02.push_back(object);
 				break;
 			case ObjectDrawType::kTranslucent03:
-				transparentObjects03.push_back(object.get());
+				transparentObjects03.push_back(object);
 				break;
 			case ObjectDrawType::kOpaque:
 				if (object->GetAlpha() < 1.0f) {
-					transparentObjects01.push_back(object.get());
+					transparentObjects01.push_back(object);
 				}
 				else {
-					opaqueObjects.push_back(object.get());
+					opaqueObjects.push_back(object);
 				}
 				break;
 			}
@@ -61415,7 +61552,7 @@ void Engine::EntityManager::Update()
 
 void Engine::EntityManager::ObjectClean()
 {
-	object3d.clear();
+	entities_.clear();
 }
 
 void Engine::EntityManager::ObjectDraw()
@@ -61450,21 +61587,22 @@ void Engine::EntityManager::ObjectDraw()
 	}
 	transparentObjects03.clear();
 
-
-	// トレイルエフェクト
-	for (auto& object : object3d) {
-		object->DrawTrailEffect();
+	// トレイルは本体描画後にまとめて描画する。
+	for (auto& entity : entities_) {
+		Object3d* object = dynamic_cast<Object3d*>(entity.get());
+		if (object) {
+			object->DrawTrailEffect();
+		}
 	}
-
 }
 
 void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
 {
 	object3dInstansManager_->DrawShadowMap(shadowMap);
 
-	for (auto& object : object3d) {
-		if (object) {
-			object->DrawShadowMap(shadowMap);
+	for (auto& entity : entities_) {
+		if (entity) {
+			entity->DrawShadowMap(shadowMap);
 		}
 	}
 }
@@ -61499,6 +61637,9 @@ File Path: project/DirectXGame/engine/Manager/Entity/EntityManager.h
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 #include <DirectXGame/engine/Effect/Primitive/Primitive.h>
+#include "DirectXGame/engine/Entity/Entity.h"
+#include "DirectXGame/engine/Entity/ModelEntity.h"
+#include "DirectXGame/engine/Entity/PrimitiveEntity.h"
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 
 
@@ -61546,14 +61687,41 @@ namespace Engine {
 	public: //セッター
 		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
 		Object3d* CreateObject3D(const std::string& name, ObjectModelType type, const Vector3& pos, Engine::Camera* camera) {
-			auto object = std::make_unique<Object3d>();
-			object->Initialize(this, type);
+			std::unique_ptr<Object3d> object;
+			switch (type)
+			{
+			case ObjectModelType::kNormal:	// モデル描画オブジェクト
+			{
+				auto modelEntity = std::make_unique<ModelEntity>();
+				modelEntity->Initialize(this);
+				object = std::move(modelEntity);
+				break;
+			}
+			case ObjectModelType::kSkyBox:	// スカイボックス描画オブジェクト
+			{
+				auto skyBoxEntity = std::make_unique<SkyBoxEntity>();
+				skyBoxEntity->Initialize(this);
+				object = std::move(skyBoxEntity);
+				break;
+			}
+			case ObjectModelType::kOcean:	// 波描画オブジェクト
+			{
+				auto oceanEntity = std::make_unique<OceanEntity>();
+				oceanEntity->Initialize(this);
+				object = std::move(oceanEntity);
+				break;
+			}
+			default:
+				object = std::make_unique<Object3d>();
+				object->Initialize(this, type);
+				break;
+			}
 			object->SetName(name);
 			object->GetWorldTransform().translate_ = pos;
 			object->SetCamera(camera);
 
 			Object3d* raw = object.get();
-			object3d.push_back(std::move(object));
+			entities_.push_back(std::move(object));
 			return raw;
 		}
 		// オブジェクト3D生成(プリミティブ)
@@ -61563,25 +61731,19 @@ namespace Engine {
 			Camera* camera,
 			PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
 		{
-			// プリミティブ生成
-			std::unique_ptr<BasePrimitive> primitive = std::make_unique<T>();
-			primitive->Initialize(GetPrimitiveCommon(), texturePath);
-
-			// Object3d 生成
-			auto object = std::make_unique<Object3d>();
-			object->Initialize(this, ObjectModelType::kPrimitive, rasterizerType);
+			auto object = std::make_unique<PrimitiveEntity<T>>();
+			object->Initialize(this, GetPrimitiveCommon(), texturePath, rasterizerType);
 			object->SetName(name);
 			object->SetCamera(camera);
-			object->SetPrimitive(std::move(primitive)); // 所有権を渡す
 
 			Object3d* raw = object.get();
-			object3d.push_back(std::move(object));
+			entities_.push_back(std::move(object));
 			return raw;
 		}
 
 		// タグでの削除
 		void EraseObject3DByTag(const std::string& tag) {
-			std::erase_if(object3d, [&](const std::unique_ptr<Object3d>& o) {
+			std::erase_if(entities_, [&](const std::unique_ptr<Entity>& o) {
 				return  o->GetNameTag() == tag;
 				});
 		}
@@ -61613,7 +61775,7 @@ namespace Engine {
 
 
 	private:
-		std::vector<std::unique_ptr<Object3d>> object3d;
+		std::vector<std::unique_ptr<Entity>> entities_;
 
 		std::vector<Object3d*> opaqueObjects;
 		std::vector<Object3d*> transparentObjects01;
@@ -76590,6 +76752,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h" />
     <ClInclude Include="DirectXGame\engine\input\GamePad.h" />
     <ClInclude Include="DirectXGame\engine\Line\CreateLine.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\Entity\Entity.h" />
     <ClInclude Include="DirectXGame\engine\Material\MaterialInstance.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h" />
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h" />
@@ -76773,6 +76936,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\3d\Model\Model.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\Entity.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\ModelEntity.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\PrimitiveEntity.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h" />
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h" />
@@ -78045,6 +78211,15 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h">
       <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Entity\Entity.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Entity\ModelEntity.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Entity\PrimitiveEntity.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h">
       <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
@@ -79096,6 +79271,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Entity\Entity.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
