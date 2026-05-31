@@ -29,15 +29,6 @@
 
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 
-// そーと用構造体
-struct SortResult {
-	Engine::Object3d* ptr;
-	Engine::ObjectDrawType drawType;
-	float alpha;
-	bool isSkin;
-};
-
-
 namespace Engine {
 	// 前方宣言
 	class DirectXCommon;
@@ -161,10 +152,9 @@ namespace Engine {
 	private:
 		std::vector<std::unique_ptr<Entity>> entities_;
 
+		// Update時に毎フレーム作り直す描画キュー。順番はカメラ奥行きから自動で決める。
 		std::vector<Object3d*> opaqueObjects;
-		std::vector<Object3d*> transparentObjects01;
-		std::vector<Object3d*> transparentObjects02;
-		std::vector<Object3d*> transparentObjects03;
+		std::vector<Object3d*> transparentObjects;
 
 	private:
 		// DirectX

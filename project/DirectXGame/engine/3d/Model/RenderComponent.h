@@ -15,12 +15,12 @@ namespace Engine {
 		kOcean,		// 波を描画するオブジェクト
 	};
 
-	// 描画する順番
+	// 描画属性
 	enum class ObjectDrawType {
-		kOpaque,		// 不透明
-		kTranslucent01,	// 半透明最前
-		kTranslucent02,	// 半透明中
-		kTranslucent03,	// 半透明最後
+		kOpaque,		// 不透明。alpha が 1 未満なら EntityManager 側で自動的に半透明扱いにする
+		kTranslucent01,	// 半透明指定(互換用)。実際の描画順はカメラ奥行きで自動ソートする
+		kTranslucent02,	// 半透明指定(互換用)
+		kTranslucent03,	// 半透明指定(互換用)
 	};
 
 	// 前方宣言

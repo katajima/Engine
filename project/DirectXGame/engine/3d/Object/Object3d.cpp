@@ -8,6 +8,7 @@
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/engine/Animation/Animation.h"
+#include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
@@ -306,6 +307,18 @@ void Engine::Object3d::IsDelete() { isDelete = true; isDelete_ = true; }
 bool Engine::Object3d::GetIsDelete() const { return isDelete; }
 // オブジェクトに使われているモデルの透明度取得
 float Engine::Object3d::GetAlpha() { return renderComponent_->GetAlpha(); };
+
+float Engine::Object3d::GetCameraSortDepth() const
+{
+	Camera* camera = isIndividualCamera_ ? individualCamera : defaltCamera;
+	if (!camera) {
+		return 0.0f;
+	}
+
+	// カメラ前方向への射影値を使うと、カメラの向きが変わっても前後関係を同じ基準で並べられる。
+	const Vector3 toObject = GetWorldPosition() - camera->GetTranslate();
+	return Dot(toObject, camera->GetForward());
+}
 
 // Object3d内でコライダーコンポーネントを更新するか
 void Engine::Object3d::SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };

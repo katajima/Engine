@@ -105,6 +105,8 @@ namespace Engine {
 		bool GetIsDelete() const override;
 		// オブジェクトに使われているモデルの透明度取得
 		float GetAlpha();
+		// 描画順自動ソート用に、使用中カメラの前方向へ投影した奥行きを取得
+		float GetCameraSortDepth() const;
 
 	private:
 		// カメラ

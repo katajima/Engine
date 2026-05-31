@@ -1,10 +1,39 @@
 #include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include <algorithm>
 
 using namespace Engine;
 
 std::mutex mutex;  // グローバルやスコープ内に必要
+
+namespace {
+	bool IsTransparentObject(Engine::Object3d* object)
+	{
+		if (!object) {
+			return false;
+		}
+
+		const Engine::ObjectDrawType drawType = object->GetRenderComponent()->GetObjectDrawType();
+		return drawType != Engine::ObjectDrawType::kOpaque || object->GetAlpha() < 1.0f;
+	}
+
+	void SortFrontToBack(std::vector<Engine::Object3d*>& objects)
+	{
+		// 不透明は手前から描くと、深度テストで後ろのピクセル処理を減らしやすい。
+		std::sort(objects.begin(), objects.end(), [](const Engine::Object3d* left, const Engine::Object3d* right) {
+			return left->GetCameraSortDepth() < right->GetCameraSortDepth();
+			});
+	}
+
+	void SortBackToFront(std::vector<Engine::Object3d*>& objects)
+	{
+		// 半透明は深度書き込みとブレンドの都合で、カメラから遠い順に描く。
+		std::sort(objects.begin(), objects.end(), [](const Engine::Object3d* left, const Engine::Object3d* right) {
+			return left->GetCameraSortDepth() > right->GetCameraSortDepth();
+			});
+	}
+}
 
 void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 {
@@ -235,6 +264,8 @@ void Engine::EntityManager::Update()
 			}),
 		entities_.end());
 
+	opaqueObjects.clear();
+	transparentObjects.clear();
 
 	// オブジェクトの更新
 	for (auto& object : entities_) {
@@ -249,28 +280,18 @@ void Engine::EntityManager::Update()
 		if (object) {
 			// 更新
 			object->Update();
-			// オブジェクトの描画順決定
-			switch (object->GetRenderComponent()->GetObjectDrawType()) {
-			case ObjectDrawType::kTranslucent01:
-				transparentObjects01.push_back(object);
-				break;
-			case ObjectDrawType::kTranslucent02:
-				transparentObjects02.push_back(object);
-				break;
-			case ObjectDrawType::kTranslucent03:
-				transparentObjects03.push_back(object);
-				break;
-			case ObjectDrawType::kOpaque:
-				if (object->GetAlpha() < 1.0f) {
-					transparentObjects01.push_back(object);
-				}
-				else {
-					opaqueObjects.push_back(object);
-				}
-				break;
+			// ObjectDrawTypeは透明/不透明の判定にだけ使い、実際の描画順はカメラ奥行きで自動ソートする。
+			if (IsTransparentObject(object)) {
+				transparentObjects.push_back(object);
+			}
+			else {
+				opaqueObjects.push_back(object);
 			}
 		}
 	}
+
+	SortFrontToBack(opaqueObjects);
+	SortBackToFront(transparentObjects);
 }
 
 void Engine::EntityManager::ObjectClean()
@@ -287,28 +308,14 @@ void Engine::EntityManager::ObjectDraw()
 	for (auto& object : opaqueObjects) {
 		object->Draw();
 	}
-	opaqueObjects.clear();
 
 
 	object3dInstansManager_->DrawTransparency();
 
-	// 半透明最初
-	for (auto& object : transparentObjects01) {
+	// 半透明
+	for (auto& object : transparentObjects) {
 		object->Draw();
 	}
-	transparentObjects01.clear();
-
-	// 半透明中盤
-	for (auto& object : transparentObjects02) {
-		object->Draw();
-	}
-	transparentObjects02.clear();
-
-	// 半透明最後
-	for (auto& object : transparentObjects03) {
-		object->Draw();
-	}
-	transparentObjects03.clear();
 
 	// トレイルは本体描画後にまとめて描画する。
 	for (auto& entity : entities_) {
