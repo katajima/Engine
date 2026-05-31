@@ -571,6 +571,9 @@
     └──     └── ├── ScissorRect/
     └──     └── └── ├── ScissorRect.cpp
     └──     └── └── └── ScissorRect.h
+    └──     └── ├── ShadowMap/
+    └──     └── └── ├── ShadowMap.cpp
+    └──     └── └── └── ShadowMap.h
     └──     └── ├── SwapChain/
     └──     └── └── ├── SwapChain.cpp
     └──     └── └── └── SwapChain.h
@@ -13949,8 +13952,6 @@ namespace Character {
 	Engine::ColliderComponent* BaseCharacter::GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
 	ObjectComponent* BaseCharacter::GetObjectComponent() { return objectComponent_.get(); }
-	// オブジェクト3d取得
-	ObjectComponent* BaseCharacter::GetObjectComponentShadow() { return objectComponentShadow_.get(); }
 	// ワールド変換取得
 	Engine::WorldTransform& BaseCharacter::GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	//
@@ -14079,8 +14080,6 @@ namespace Character {
 		Engine::ColliderComponent* GetColliderComponent();
 		// オブジェクト3d取得
 		ObjectComponent* GetObjectComponent();
-		// オブジェクト3d取得
-		ObjectComponent* GetObjectComponentShadow();
 		// ワールド変換取得
 		Engine::WorldTransform& GetWorldTransform();
 		// ワールド変換取得
@@ -14142,8 +14141,6 @@ namespace Character {
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
-		// 影用オブジェクトコンポーネント
-		std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 		// スペシャル攻撃
 		std::unique_ptr<BaseSpecial> special_ = nullptr;
 		// 武器
@@ -15004,7 +15001,6 @@ namespace Character {
 		enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
 		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
 		enemy->GetObjectComponent()->Update();	// ワールド行列更新
-		enemy->GetObjectComponentShadow()->Update();	// ワールド行列更新
 		character_.push_back(std::move(enemy));
 		characterCount_++;
 		return characterCount_ - 1; // 生成した敵のタグ番号を返す
@@ -15044,7 +15040,6 @@ namespace Character {
 				character->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
 				character->Delete();
 				character->GetObjectComponent()->GetWorldTransform().scale_ = 0.0f;
-				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = 0.0f;;
 			}
 		}
 	}
@@ -15310,10 +15305,8 @@ void DeathSystem::Update(float dt){
 		if (!owner->GetAlive()) {
 			owner->Delete();	// キャラクター削除
 			owner->GetObjectComponent()->IsDelete();	// オブジェクトコンポーネント削除
-			owner->GetObjectComponentShadow()->IsDelete();
 			owner->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
 			owner->GetObjectComponent()->SetIsDraw(false);	// 描画しない	
-			owner->GetObjectComponentShadow()->SetIsDraw(false);	// 描画しない	
 		}
 	}
 
@@ -17748,22 +17741,6 @@ namespace Character {
 		weapon_->GetWorldTransform().translate_ = pos;
 	}
 
-
-	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName, float shadowSize)
-	{
-		// オブジェクトコンポーネント追加
-		objectComponentShadow_ = std::make_unique<ObjectComponent>();
-		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
-		objectComponentShadow_->SetIsDraw(false);
-		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
-		objectComponentShadow_->SetInstancingSRT({ shadowSize,shadowSize,shadowSize }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
-		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-		objectComponentShadow_->Update();
-	}
-
-
 	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 		const std::string& modelName, const std::string& charaName, float colliderRadius, float shadowSize) {
@@ -17863,9 +17840,6 @@ namespace Character {
 
 		// ウェーブ終了時の退場演出ステート
 		waveExitState_ = std::make_unique<EnemyWaveExitState>();
-
-		// 丸影用オブジェクトコンポーネント初期化
-		InitShadowObjectComponent(charaName, shadowSize);
 	}
 
 	void BaseEnemy::Update() {
@@ -17883,7 +17857,6 @@ namespace Character {
 			return;
 		}
 
-		objectComponentShadow_->SetIsDraw(true);
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
@@ -17907,11 +17880,6 @@ namespace Character {
 		worldCollider_->Update();
 		// コライダーコンポーネント更新
 		objectComponent_->GetColliderComponent()->UpdateAll(*worldCollider_.get());
-
-		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
-		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
-
 		// 死亡システム更新
 		deathSystem_->Update(ctx.dt);
 		// ステート
@@ -17921,8 +17889,7 @@ namespace Character {
 		if(weapon_)
 		weapon_->Update();
 
-		// 影更新
-		objectComponentShadow_->Update();
+		
 	}
 
 	void BaseEnemy::InitializeBaseEnemyAddItem() {
@@ -18112,9 +18079,6 @@ namespace Character {
 		void InitializeBaseEnemyAddItem();
 		// 更新保存項目
 		void UpdateBaseEnemyGetValue();
-		//
-		void InitShadowObjectComponent(const std::string& charaName, float shadowSize = 1.0f);
-
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
@@ -18194,7 +18158,6 @@ namespace Character {
 		elapsedTime_ = 0.0f;
 		duration_ = (std::max)(duration, 0.1f);
 		startScale_ = enemy->GetObjectComponent()->GetWorldTransform().scale_;
-		startShadowScale_ = enemy->GetObjectComponentShadow()->GetWorldTransform().scale_;
 		startHeight_ = enemy->GetObjectComponent()->GetWorldTransform().translate_.y;
 	}
 
@@ -18214,13 +18177,6 @@ namespace Character {
 		world.translate_.y = startHeight_ - eased * 1.5f;
 		enemy->GetObjectComponent()->SetColor({ 1.0f, 1.0f, 1.0f, remain });
 		enemy->GetObjectComponent()->Update();
-
-		// 本体より少し早く影を小さくし、地面へ吸い込まれる印象を支える
-		Engine::WorldTransform& shadow = enemy->GetObjectComponentShadow()->GetWorldTransform();
-		shadow.scale_ = startShadowScale_ * remain;
-		enemy->GetObjectComponentShadow()->SetColor({ 0.0f, 0.0f, 0.0f, remain });
-		enemy->GetObjectComponentShadow()->Update();
-
 		if (progress < 1.0f) {
 			return;
 		}
@@ -18229,9 +18185,7 @@ namespace Character {
 		enemy->SetAlive(false);
 		enemy->Delete();
 		enemy->GetObjectComponent()->IsDelete();
-		enemy->GetObjectComponentShadow()->IsDelete();
 		enemy->GetObjectComponent()->SetIsDraw(false);
-		enemy->GetObjectComponentShadow()->SetIsDraw(false);
 	}
 }
 
@@ -18265,7 +18219,6 @@ namespace Character {
 		float elapsedTime_ = 0.0f;			// 退場開始からの時間
 		float duration_ = 1.2f;				// 退場に要する時間
 		Vector3 startScale_{ 1.0f, 1.0f, 1.0f };	// 開始時のモデルサイズ
-		Vector3 startShadowScale_{ 1.0f, 1.0f, 1.0f };	// 開始時の影サイズ
 		float startHeight_ = 0.0f;			// 開始時の高さ
 	};
 }
@@ -18292,10 +18245,6 @@ namespace Character {
 
 		moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
 
-
-		objectComponentShadow_->GetWorldTransform().scale_ = { 5.0f,5.0f ,5.0f };
-
-		
 		// パラメーター初期化
 		Parameters()->HP.Initiaize(hp, 0, hp, 0);
 		Parameters()->strength = 10.0f;
@@ -21665,16 +21614,6 @@ namespace Character {
 		// コンテキストシステム
 		contextSystem_ = std::make_unique<CharacterContextSystem>();
 		contextSystem_->Initialize(this, inputSystem);
-
-		// オブジェクトコンポーネント追加
-		objectComponentShadow_ = std::make_unique<ObjectComponent>();
-		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
-
-		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
-		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-
 		// キャラクター行動ステート初期化
 		InitStateMachine();
 	}
@@ -21796,12 +21735,6 @@ namespace Character {
 
 		// サブ武器更新
 		subWeapon_->Update();
-
-
-		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
-		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
-		objectComponentShadow_->Update();
 
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),
@@ -36497,6 +36430,7 @@ File Path: project/DirectXGame/engine/3d/Model/RenderComponent.cpp
 #include "DirectXGame/engine/3d/Model/ModelCommon.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelData.h"
+#include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 
 Engine::RenderComponent::~RenderComponent() = default;
 Engine::RenderComponent::RenderComponent() = default;
@@ -36690,6 +36624,61 @@ void Engine::RenderComponent::Draw()
 	}
 }
 
+void Engine::RenderComponent::DrawShadowMap(ShadowMap* shadowMap)
+{
+	if (!isDraw) return;
+	// シャドウマップはモデルの深度だけを書き込む。Primitive/SkyBox/Oceanはここでは対象外。
+	if (!model) return;
+
+	switch (objectType_)
+	{
+	case ObjectModelType::kNormal:
+	case ObjectModelType::kAnimation:
+		// シャドウパスでは色やテクスチャは使わず、ライト視点の深度だけを書き込む。
+		entityManager->GetObject3dCommon()->DrawShadowMapSetting();
+		transfomation->GetCommandList(0);
+		shadowMap->SetGraphicsRootConstantBufferView(1);
+
+		for (auto& mesh : model->GetModelData().mesh) {
+			if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
+				continue;
+			}
+
+			mesh->GetCommandList();
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+				GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
+		}
+		break;
+	case ObjectModelType::kSkinning:
+		// スキニングはCSで変形済み頂点を作ってから、その頂点をシャドウマップへ描画する。
+		ObjectSkinningTypeDiscrimination(PSOType::ShadowMap);
+		transfomation->GetCommandList(0);
+		shadowMap->SetGraphicsRootConstantBufferView(1);
+
+		for (auto& mesh : model->GetModelData().mesh) {
+			if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
+				continue;
+			}
+
+			mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+				GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
+
+			D3D12_RESOURCE_BARRIER barrier{};
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 float Engine::RenderComponent::GetAlpha()
 {
 	// モデルごとの透明度取得
@@ -36764,6 +36753,8 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 
 void Engine::RenderComponent::DrawSetting()
 {
+	ShadowMap* shadowMap = entityManager->GetObject3dCommon()->GetDxCommon()->GetShadowMap();
+
 	// ライト
 	entityManager->GetLightManager()->DrawLight();
 
@@ -36773,16 +36764,25 @@ void Engine::RenderComponent::DrawSetting()
 
 	// カメラ
 	camera->GetCommandList(4);
+
+	// 通常描画でライト視点の深度を参照し、平行光源の影を計算する。
+	shadowMap->SetGraphicsRootDescriptorTable(11);
+	shadowMap->SetGraphicsRootConstantBufferView(12);
 }
 
 void Engine::RenderComponent::DrawSettingSkin()
 {
+	ShadowMap* shadowMap = entityManager->GetObject3dCommon()->GetDxCommon()->GetShadowMap();
+
 	// ライト
 	entityManager->GetLightManager()->DrawLight();
 	// 位置
 	transfomation->GetCommandList(1);
 	// カメラ
 	camera->GetCommandList(4);
+	// スキニングモデルも通常モデルと同じシャドウマップを参照する。
+	shadowMap->SetGraphicsRootDescriptorTable(10);
+	shadowMap->SetGraphicsRootConstantBufferView(11);
 }
 
 void Engine::RenderComponent::DrawSettingOcean()
@@ -36875,6 +36875,7 @@ namespace Engine {
 	class Ocean;
 	class Transfomation;
 	class EntityManager;
+	class ShadowMap;
 
 	/// <summary>
 	/// 描画に関するコンポーネントクラス
@@ -36898,6 +36899,8 @@ namespace Engine {
 
 		// 描画
 		void Draw();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 		// カメラ設定
 		void SetCamera(Camera* camera) { this->camera = camera; }
@@ -37225,6 +37228,13 @@ void Engine::Object3d::Draw()
 	renderComponent_->Draw();
 }
 
+void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
+{
+	if (isDelete) return;
+
+	renderComponent_->DrawShadowMap(shadowMap);
+}
+
 void Engine::Object3d::DrawTrailEffect()
 {
 	if (trailEffect_) {
@@ -37387,6 +37397,7 @@ Vector2 Engine::ScreenPosition(const Engine::WorldTransform world, Engine::Camer
 	return Vector2{ screenPos.x, screenPos.y };
 }
 
+
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/Object3d.h
 ============================================================
@@ -37414,6 +37425,7 @@ namespace Engine {
 	class EffectManager;
 	class TransformComponent;
 	class RenderComponent;
+	class ShadowMap;
 
 	class TrailEffect;
 	class Camera;
@@ -37440,6 +37452,8 @@ namespace Engine {
 
 		// 描画通常
 		void Draw();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 		// トレイルエフェクト描画
 		void DrawTrailEffect();
@@ -37660,18 +37674,20 @@ void Engine::Object3dCommon::Initialize(DirectXCommon* dxCommon)
 
 	// パイプライン生成
 	CreateGraphicsPipeline();
+	CreateShadowMapPipeline();
 }
 
 void Engine::Object3dCommon::CreateGraphicsPipeline()
 {
-	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[4], 4, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[11] = {};
+	D3D12_ROOT_PARAMETER rootParameters[13] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -37695,13 +37711,29 @@ void Engine::Object3dCommon::CreateGraphicsPipeline()
 	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// シャドウマップ (t4) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[11], descriptorRange[4], D3D12_SHADER_VISIBILITY_PIXEL);
+	// シャドウ行列などのデータ (b6) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[12], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	D3D12_STATIC_SAMPLER_DESC staticSamplers2[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
-	PSOFanction::SetSampler(staticSamplers2[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].MipLODBias = 0.0f;
+	staticSamplers[1].MaxAnisotropy = 1;
+	// 現在深度-bias <= 保存済み深度ならライトが届いている。D3Dの深度シャドウではLESS_EQUALを使う。
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	staticSamplers[1].MinLOD = 0.0f;
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[1].ShaderRegister = 1;
+	staticSamplers[1].RegisterSpace = 0;
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 #pragma region BlendState
 
@@ -37807,6 +37839,31 @@ void Engine::Object3dCommon::CreateGraphicsPipeline()
 		, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendAlpha, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 }
 
+void Engine::Object3dCommon::CreateShadowMapPipeline()
+{
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	D3D12_BLEND_DESC blendDesc{};
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMap.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");
+	psoManager_->SetRenderTargetFormats(0, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_D32_FLOAT);
+	psoManager_->CreatePso(PSOType::ShadowMap, rootParameters, _countof(rootParameters), nullptr, 0,
+		D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3d.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3d.PS.hlsl");
+	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
+}
+
 
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/Object3dCommon.h
@@ -37829,6 +37886,8 @@ namespace Engine {
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// 描画設定
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
+		// シャドウマップ描画設定
+		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
 		// デフォルトカメラ設定
 		void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 		// デフォルトカメラ取得
@@ -37842,6 +37901,8 @@ namespace Engine {
 	private:
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
+		// シャドウマップ用パイプラインの作成
+		void CreateShadowMapPipeline();
 	private:// メンバ変数
 		DirectXCommon* dxCommon = nullptr;
 		// カメラ
@@ -37863,6 +37924,7 @@ File Path: project/DirectXGame/engine/3d/Object/Object3dInstansManager.cpp
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
+#include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -37887,6 +37949,7 @@ void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 	
 	// パイプライン生成
 	CreateGraphicsPipeline();
+	CreateShadowMapPipeline();
 }
 
 
@@ -38007,6 +38070,8 @@ void Engine::Object3dInstansManager::Draw() {
 		group.mesh->material->GetCommandListTexture(2, 7, 8);
 
 		camera_->GetCommandList(4);
+		dxCommon->GetShadowMap()->SetGraphicsRootDescriptorTable(11);
+		dxCommon->GetShadowMap()->SetGraphicsRootConstantBufferView(12);
 
 		// インスタンシングデータのSRVのDescriptorTableを設定
 		commandList->SetGraphicsRootDescriptorTable(
@@ -38046,6 +38111,8 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 		group.mesh->material->GetCommandListTexture(2, 7, 8);
 
 		camera_->GetCommandList(4);
+		dxCommon->GetShadowMap()->SetGraphicsRootDescriptorTable(11);
+		dxCommon->GetShadowMap()->SetGraphicsRootConstantBufferView(12);
 
 		// インスタンシングデータのSRVのDescriptorTableを設定
 		commandList->SetGraphicsRootDescriptorTable(
@@ -38063,6 +38130,32 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 		commandList->DrawIndexedInstanced(
 			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0,
 			0);
+	}
+}
+
+void Engine::Object3dInstansManager::DrawShadowMap(ShadowMap* shadowMap)
+{
+	auto commandList = dxCommon->GetCommandList();
+
+	commandList->SetPipelineState(shadowGraphicsPipelineState.Get());
+	commandList->SetGraphicsRootSignature(shadowRootSignature.Get());
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	shadowMap->SetGraphicsRootConstantBufferView(1);
+
+	for (auto& pair : objectGroups) {
+		ObjectGroup& group = pair.second;
+		if (group.instanceCount == 0) {
+			continue;
+		}
+
+		// インスタンシング用のワールド行列をライト視点の深度描画でも再利用する。
+		commandList->SetGraphicsRootDescriptorTable(0, group.instancingSrvHandleGPU);
+
+		group.mesh->GetCommandList();
+
+		uint32_t instanceCount = (std::min)(group.instanceCount, kNumMaxInstance);
+		commandList->DrawIndexedInstanced(
+			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0, 0);
 	}
 }
 
@@ -38419,16 +38512,17 @@ Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::Gro
 
 
 void Engine::Object3dInstansManager::CreateRootSignature() {
-	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[6] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[4],	0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 4, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[5], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
 
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[11] = {};
+	D3D12_ROOT_PARAMETER rootParameters[13] = {};
 
 	//CD3DX12_ROOT_PARAMETER 
 
@@ -38454,11 +38548,29 @@ void Engine::Object3dInstansManager::CreateRootSignature() {
 	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// シャドウマップ (t0) をピクセルシェーダで使用する。頂点用t0とはShaderVisibilityで分離する。
+	PSOFanction::SetRootParameter(rootParameters[11], descriptorRange[5], D3D12_SHADER_VISIBILITY_PIXEL);
+	// シャドウ行列などのデータ (b6) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[12], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0,D3D12_FILTER_MIN_MAG_MIP_LINEAR,D3D12_SHADER_VISIBILITY_PIXEL); // バイリニアフィルタ
+	staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].MipLODBias = 0.0f;
+	staticSamplers[1].MaxAnisotropy = 1;
+	// 現在深度-bias <= 保存済み深度ならライトが届いている。D3Dの深度シャドウではLESS_EQUALを使う。
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	staticSamplers[1].MinLOD = 0.0f;
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[1].ShaderRegister = 1;
+	staticSamplers[1].RegisterSpace = 0;
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	// ルートシグネチャ作成
@@ -38521,6 +38633,37 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState[5],
 		blendDesc, depthStencilDesc,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+}
+
+void Engine::Object3dInstansManager::CreateShadowMapPipeline()
+{
+	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	PSOFanction::SetRootParameter(rootParameters[0], descriptorRange[0], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	psoManager_->SetRootSignature(shadowRootSignature, rootParameters, _countof(rootParameters), nullptr, 0);
+
+	D3D12_BLEND_DESC shadowBlendDesc{};
+	shadowBlendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMapInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");
+	psoManager_->SetRenderTargetFormats(0, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_D32_FLOAT);
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(shadowRootSignature, shadowGraphicsPipelineState, shadowBlendDesc,
+		depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3dInstans.PS.hlsl");
+	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
 }
 
 #pragma region Blend
@@ -38616,6 +38759,8 @@ struct MapId {
 
 
 namespace Engine {
+	class ShadowMap;
+
 	// オブジェクトインスタンシングクラス(大量描画用)
 	class Object3dInstansManager
 	{
@@ -38681,6 +38826,8 @@ namespace Engine {
 
 		// 描画
 		void DrawTransparency();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 
 		// 描画準備
@@ -38736,6 +38883,8 @@ namespace Engine {
 		void CreateRootSignature();
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
+		// シャドウマップ用パイプラインの作成
+		void CreateShadowMapPipeline();
 		// ブレンドモード設定(加算)
 		void BlendAdd();
 		// ブレンドモード設定(減算)
@@ -38778,8 +38927,10 @@ namespace Engine {
 		D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 		////ルートシグネチャ
 		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
+		Microsoft::WRL::ComPtr < ID3D12RootSignature> shadowRootSignature;
 		//// グラフィックスパイプラインステート
 		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[6];
+		Microsoft::WRL::ComPtr < ID3D12PipelineState> shadowGraphicsPipelineState;
 
 
 
@@ -47637,6 +47788,7 @@ void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 
 	renderingCommon_->Initialize(this);
 	barrier_->Initialize(command_.get()); // バリア
+	shadowMap_->Initialize(this); // シャドウマップ
 
 
 	swapChain_->Initialize(winApp, DXGIDevice_.get(), command_.get(), rtvManager_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get(), fence_.get()); // スワップチェーン
@@ -47697,6 +47849,14 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 
 void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
+	// 通常描画の前にライト視点の深度を書き出して、影判定に使えるようにする。
+	shadowMap_->Update(entity3DManager);
+	// インスタンシングとスキニングのシャドウ描画ではSRVを参照するため、通常描画前でもヒープを束縛しておく。
+	GetSrvManager()->PreDraw();
+	shadowMap_->PreDraw();
+	entity3DManager->DrawShadowMap(shadowMap_.get());
+	shadowMap_->PostDraw();
+
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
 
@@ -47704,6 +47864,16 @@ void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* enti
 
 	// スワップチェーン
 	PassSwap(sceneManager, postEffectManager_->GetEndRenderTexture());
+}
+
+void Engine::DirectXCommon::RenderShadowMapDebugImGui()
+{
+#ifdef _DEBUG
+	if (!shadowMap_) {
+		return;
+	}
+	shadowMap_->RenderDebugImGui();
+#endif // _DEBUG
 }
 
 void Engine::DirectXCommon::Draw3D2D(SceneManager* sceneManager, EntityManager* entity3DManager)
@@ -47796,6 +47966,7 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 
 }
 
+
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/Common/DirectXCommon.h
 ============================================================
@@ -47830,6 +48001,7 @@ File Path: project/DirectXGame/engine/DirectX/Common/DirectXCommon.h
 #include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
+#include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 #include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
@@ -47867,6 +48039,8 @@ namespace Engine {
 		void Update(SceneManager* sceneManager, EntityManager* entity3DManager);
 		// 描画
 		void Draw(SceneManager* sceneManager, EntityManager* entity3DManager);
+		// シャドウマップのデバッグ表示
+		void RenderShadowMapDebugImGui();
 
 	private:
 		// シーンの画面を書き出す
@@ -47912,6 +48086,8 @@ namespace Engine {
 		RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
 		// デプスステンシル取得
 		DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
+		// シャドウマップ取得
+		ShadowMap* GetShadowMap() { return shadowMap_.get(); }
 		// バリア取得
 		Barrier* GetBarrier() { return barrier_.get(); }
 		// ポストエフェクトマネージャー取得
@@ -47937,6 +48113,7 @@ namespace Engine {
 		std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
 		std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
 		std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
+		std::unique_ptr<ShadowMap> shadowMap_ = std::make_unique<ShadowMap>();				     // シャドウマップ
 		std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
 		std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 		std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
@@ -47950,6 +48127,7 @@ namespace Engine {
 		std::chrono::steady_clock::time_point reference_;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/D3DResourceLeakchecker/D3DResourceLeakchecker.cpp
@@ -49585,6 +49763,407 @@ namespace Engine {
 	private:
 		// コマンドのインスタンスを受け取る箱
 		Command* command = nullptr;
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/DirectX/ShadowMap/ShadowMap.cpp
+============================================================
+#include "ShadowMap.h"
+
+#include <algorithm>
+#include <cassert>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+
+#include "externals/imgui/imgui.h"
+#include <json.hpp>
+#include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
+#include "DirectXGame/engine/Light/Lights.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/Manager/SRV/SrvManager.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
+
+Engine::ShadowMap::~ShadowMap() = default;
+
+void Engine::ShadowMap::Initialize(DirectXCommon* dxCommon)
+{
+	dxgiDevice_ = dxCommon->GetDXGIDevice();
+	command_ = dxCommon->GetCommand();
+	srvManager_ = dxCommon->GetSrvManager();
+	barrier_ = dxCommon->GetBarrier();
+
+	shadowData_ = std::make_unique<ConstantBuffer<ShadowData>>();
+	shadowData_->CreateBuffer(dxCommon);
+	LoadSettings();
+	shadowData_->Data()->lightDirection = Normalize(Vector3{ 0.0f, -1.0f, 0.0f });
+	ApplySettingsToBuffer();
+	shadowData_->Data()->lightViewProjection = CreateLightViewProjection(shadowData_->Data()->lightDirection);
+
+	CreateResource();
+	CreateDescriptors();
+	barrier_->RegisterInitialState(resource_.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+}
+
+void Engine::ShadowMap::Update(EntityManager* entityManager)
+{
+	Vector3 direction = { 0.0f, -1.0f, 0.0f };
+	if (entityManager && entityManager->GetLightManager()) {
+		for (const auto& light : entityManager->GetLightManager()->GetLights()) {
+			if (light && light->GetType() == Lights::Type::Directional) {
+				const auto* directional = static_cast<const DirectionalLight*>(light.get());
+				if (directional->directional.isLight) {
+					direction = directional->directional.direction;
+					break;
+				}
+			}
+		}
+	}
+
+	// ライト方向がゼロに近い場合はビュー行列を作れないので、真下方向をフォールバックにする。
+	if (direction.LengthSq() <= 0.0001f) {
+		direction = { 0.0f, -1.0f, 0.0f };
+	}
+
+	shadowData_->Data()->lightDirection = Normalize(direction);
+	ApplySettingsToBuffer();
+	shadowData_->Data()->lightViewProjection = CreateLightViewProjection(shadowData_->Data()->lightDirection);
+}
+
+void Engine::ShadowMap::PreDraw()
+{
+	barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+	D3D12_VIEWPORT viewport{};
+	viewport.Width = static_cast<float>(kShadowMapWidth);
+	viewport.Height = static_cast<float>(kShadowMapHeight);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	command_->GetList()->RSSetViewports(1, &viewport);
+
+	D3D12_RECT scissor{};
+	scissor.right = static_cast<LONG>(kShadowMapWidth);
+	scissor.bottom = static_cast<LONG>(kShadowMapHeight);
+	command_->GetList()->RSSetScissorRects(1, &scissor);
+
+	command_->GetList()->OMSetRenderTargets(0, nullptr, false, &dsvHandle_);
+	command_->GetList()->ClearDepthStencilView(dsvHandle_, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+}
+
+void Engine::ShadowMap::PostDraw()
+{
+	barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+}
+
+void Engine::ShadowMap::SetGraphicsRootDescriptorTable(UINT rootParameterIndex)
+{
+	command_->GetList()->SetGraphicsRootDescriptorTable(rootParameterIndex, srvHandleGPU_);
+}
+
+void Engine::ShadowMap::SetGraphicsRootConstantBufferView(UINT rootParameterIndex)
+{
+	shadowData_->SetGraphicsRootConstantBufferView(rootParameterIndex);
+}
+
+const Matrix4x4& Engine::ShadowMap::GetLightViewProjection() const
+{
+	return shadowData_->Data()->lightViewProjection;
+}
+
+void Engine::ShadowMap::RenderDebugImGui()
+{
+#ifdef _DEBUG
+	ImGui::Begin("ShadowMap Debug");
+
+	bool isChanged = false;
+	static float previewSize = 320.0f;
+	ImGui::SliderFloat("Preview Size", &previewSize, 128.0f, 768.0f);
+	ImGui::Text("Depth: black = near, white = far");
+	ImGui::Text("Size: %u x %u", kShadowMapWidth, kShadowMapHeight);
+
+	// シャドウの見た目を実行中に調整する。変更は次のシャドウパスから反映される。
+	isChanged |= ImGui::DragFloat("Bias", &settings_.bias, 0.0001f, 0.0f, 0.05f, "%.5f");
+	isChanged |= ImGui::SliderFloat("Shadow Min", &settings_.shadowMin, 0.0f, 1.0f);
+	isChanged |= ImGui::SliderFloat("PCF Radius", &settings_.pcfRadius, 0.0f, 4.0f);
+	isChanged |= ImGui::DragFloat("Ortho Half Size", &settings_.orthographicHalfSize, 0.5f, 5.0f, 300.0f);
+	isChanged |= ImGui::DragFloat("Light Distance", &settings_.lightDistance, 0.5f, 5.0f, 300.0f);
+	isChanged |= ImGui::DragFloat("Near Clip", &settings_.nearClip, 0.01f, 0.01f, 50.0f);
+	isChanged |= ImGui::DragFloat("Far Clip", &settings_.farClip, 0.5f, 10.0f, 500.0f);
+
+	if (isChanged) {
+		ClampSettings();
+		ApplySettingsToBuffer();
+		shadowData_->Data()->lightViewProjection = CreateLightViewProjection(shadowData_->Data()->lightDirection);
+	}
+
+	if (ImGui::Button("Save Shadow Settings")) {
+		SaveSettings();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load Shadow Settings")) {
+		LoadSettings();
+		ApplySettingsToBuffer();
+		shadowData_->Data()->lightViewProjection = CreateLightViewProjection(shadowData_->Data()->lightDirection);
+	}
+
+	ImTextureID shadowTexture = (ImTextureID)(srvHandleGPU_.ptr);
+	ImGui::Image(shadowTexture, ImVec2(previewSize, previewSize));
+
+	ImGui::End();
+#endif // _DEBUG
+}
+
+void Engine::ShadowMap::CreateResource()
+{
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDesc.Width = kShadowMapWidth;
+	resourceDesc.Height = kShadowMapHeight;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	D3D12_CLEAR_VALUE clearValue{};
+	clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+	clearValue.DepthStencil.Depth = 1.0f;
+
+	HRESULT hr = dxgiDevice_->GetDevice()->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		&clearValue,
+		IID_PPV_ARGS(&resource_));
+	assert(SUCCEEDED(hr));
+}
+
+void Engine::ShadowMap::CreateDescriptors()
+{
+	dsvHeap_ = dxgiDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	dsvHandle_ = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	dxgiDevice_->GetDevice()->CreateDepthStencilView(resource_.Get(), &dsvDesc, dsvHandle_);
+
+	srvIndex_ = srvManager_->Allocate();
+	srvHandleCPU_ = srvManager_->GetCPUDescriptorHandle(srvIndex_);
+	srvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvIndex_);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	// ImGuiで表示したときにも深度値がグレースケールに見えるよう、R成分をRGBへ複製する。
+	srvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+		D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+		D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+		D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+		D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
+	srvDesc.Texture2D.MipLevels = 1;
+	dxgiDevice_->GetDevice()->CreateShaderResourceView(resource_.Get(), &srvDesc, srvHandleCPU_);
+}
+
+Matrix4x4 Engine::ShadowMap::CreateLightViewProjection(const Vector3& direction) const
+{
+	Vector3 lightDirection = Normalize(direction);
+	Vector3 lightPosition = lightDirection * -settings_.lightDistance;
+	Vector3 zAxis = Normalize(Vector3{ 0.0f, 0.0f, 0.0f } - lightPosition);
+	Vector3 up = std::abs(zAxis.y) > 0.98f ? Vector3{ 0.0f, 0.0f, 1.0f } : Vector3{ 0.0f, 1.0f, 0.0f };
+	Vector3 xAxis = Normalize(Cross(up, zAxis));
+	Vector3 yAxis = Cross(zAxis, xAxis);
+
+	Matrix4x4 lightWorld = MakeIdentity4x4();
+	lightWorld.m[0][0] = xAxis.x;
+	lightWorld.m[0][1] = xAxis.y;
+	lightWorld.m[0][2] = xAxis.z;
+	lightWorld.m[1][0] = yAxis.x;
+	lightWorld.m[1][1] = yAxis.y;
+	lightWorld.m[1][2] = yAxis.z;
+	lightWorld.m[2][0] = zAxis.x;
+	lightWorld.m[2][1] = zAxis.y;
+	lightWorld.m[2][2] = zAxis.z;
+	lightWorld.m[3][0] = lightPosition.x;
+	lightWorld.m[3][1] = lightPosition.y;
+	lightWorld.m[3][2] = lightPosition.z;
+
+	Matrix4x4 view = Inverse(lightWorld);
+	// 深度シャドウは通常のD3D深度(near=0, far=1)で比較するため、Zが反転しない正射影行列を使う。
+	const float halfSize = settings_.orthographicHalfSize;
+	Matrix4x4 projection = MakeOrthographicMatrix(-halfSize, halfSize, halfSize, -halfSize, settings_.nearClip, settings_.farClip);
+	return Multiply(view, projection);
+}
+
+void Engine::ShadowMap::ApplySettingsToBuffer()
+{
+	ClampSettings();
+	shadowData_->Data()->bias = settings_.bias;
+	shadowData_->Data()->shadowMin = settings_.shadowMin;
+	shadowData_->Data()->pcfRadius = settings_.pcfRadius;
+	shadowData_->Data()->padding0 = 0.0f;
+	shadowData_->Data()->padding1 = 0.0f;
+}
+
+void Engine::ShadowMap::ClampSettings()
+{
+	settings_.bias = std::clamp(settings_.bias, 0.0f, 0.05f);
+	settings_.shadowMin = std::clamp(settings_.shadowMin, 0.0f, 1.0f);
+	settings_.pcfRadius = std::clamp(settings_.pcfRadius, 0.0f, 4.0f);
+	settings_.orthographicHalfSize = std::clamp(settings_.orthographicHalfSize, 5.0f, 300.0f);
+	settings_.lightDistance = std::clamp(settings_.lightDistance, 5.0f, 300.0f);
+	settings_.nearClip = std::clamp(settings_.nearClip, 0.01f, 50.0f);
+	settings_.farClip = (std::max)(settings_.farClip, settings_.nearClip + 1.0f);
+}
+
+void Engine::ShadowMap::LoadSettings()
+{
+	std::ifstream ifs(kSettingsFilePath);
+	if (!ifs) {
+		ClampSettings();
+		return;
+	}
+
+	nlohmann::json root{};
+	ifs >> root;
+	const auto& group = root.value(kSettingsGroupName, nlohmann::json::object());
+	settings_.bias = group.value("Bias", settings_.bias);
+	settings_.shadowMin = group.value("ShadowMin", settings_.shadowMin);
+	settings_.pcfRadius = group.value("PcfRadius", settings_.pcfRadius);
+	settings_.orthographicHalfSize = group.value("OrthographicHalfSize", settings_.orthographicHalfSize);
+	settings_.lightDistance = group.value("LightDistance", settings_.lightDistance);
+	settings_.nearClip = group.value("NearClip", settings_.nearClip);
+	settings_.farClip = group.value("FarClip", settings_.farClip);
+	ClampSettings();
+}
+
+void Engine::ShadowMap::SaveSettings() const
+{
+	std::filesystem::create_directories(std::filesystem::path(kSettingsFilePath).parent_path());
+
+	nlohmann::json root{};
+	root[kSettingsGroupName]["Bias"] = settings_.bias;
+	root[kSettingsGroupName]["ShadowMin"] = settings_.shadowMin;
+	root[kSettingsGroupName]["PcfRadius"] = settings_.pcfRadius;
+	root[kSettingsGroupName]["OrthographicHalfSize"] = settings_.orthographicHalfSize;
+	root[kSettingsGroupName]["LightDistance"] = settings_.lightDistance;
+	root[kSettingsGroupName]["NearClip"] = settings_.nearClip;
+	root[kSettingsGroupName]["FarClip"] = settings_.farClip;
+
+	std::ofstream ofs(kSettingsFilePath);
+	ofs << std::setw(4) << root << std::endl;
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h
+============================================================
+#pragma once
+
+#include <cstdint>
+#include <memory>
+#include <wrl.h>
+
+#include <d3d12.h>
+
+#include "DirectXGame/engine/struct/Matrix4x4.h"
+#include "DirectXGame/engine/struct/Vector3.h"
+
+namespace Engine {
+	template<class Type>
+	class ConstantBuffer;
+
+	class DXGIDevice;
+	class Command;
+	class SrvManager;
+	class Barrier;
+	class DirectXCommon;
+	class EntityManager;
+
+	class ShadowMap {
+	public:
+		struct ShadowData {
+			Matrix4x4 lightViewProjection;
+			Vector3 lightDirection;
+			float bias;
+			float shadowMin;
+			float pcfRadius;
+			float padding0;
+			float padding1;
+		};
+
+		struct Settings {
+			float bias = 0.0025f;
+			float shadowMin = 0.35f;
+			float pcfRadius = 1.0f;
+			float orthographicHalfSize = 80.0f;
+			float lightDistance = 80.0f;
+			float nearClip = 0.1f;
+			float farClip = 200.0f;
+		};
+
+		~ShadowMap();
+
+		void Initialize(DirectXCommon* dxCommon);
+		void Update(EntityManager* entityManager);
+
+		void PreDraw();
+		void PostDraw();
+
+		void SetGraphicsRootDescriptorTable(UINT rootParameterIndex);
+		void SetGraphicsRootConstantBufferView(UINT rootParameterIndex);
+		void RenderDebugImGui();
+
+		ID3D12Resource* GetResource() const { return resource_.Get(); }
+		D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() const { return dsvHandle_; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle() const { return srvHandleGPU_; }
+		const Matrix4x4& GetLightViewProjection() const;
+		const Settings& GetSettings() const { return settings_; }
+		Settings& GetSettings() { return settings_; }
+
+		uint32_t GetWidth() const { return kShadowMapWidth; }
+		uint32_t GetHeight() const { return kShadowMapHeight; }
+
+	private:
+		void CreateResource();
+		void CreateDescriptors();
+		Matrix4x4 CreateLightViewProjection(const Vector3& direction) const;
+		void ApplySettingsToBuffer();
+		void ClampSettings();
+		void LoadSettings();
+		void SaveSettings() const;
+
+	private:
+		static constexpr uint32_t kShadowMapWidth = 2048;
+		static constexpr uint32_t kShadowMapHeight = 2048;
+		static constexpr const char* kSettingsGroupName = "ShadowMap";
+		static constexpr const char* kSettingsFilePath = "resources/GlobalVariables/ShadowMap.json";
+
+		DXGIDevice* dxgiDevice_ = nullptr;
+		Command* command_ = nullptr;
+		SrvManager* srvManager_ = nullptr;
+		Barrier* barrier_ = nullptr;
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle_{};
+		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_{};
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};
+		uint32_t srvIndex_ = 0;
+
+		std::unique_ptr<ConstantBuffer<ShadowData>> shadowData_;
+		Settings settings_{};
 	};
 }
 
@@ -60879,6 +61458,17 @@ void Engine::EntityManager::ObjectDraw()
 
 }
 
+void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
+{
+	object3dInstansManager_->DrawShadowMap(shadowMap);
+
+	for (auto& object : object3d) {
+		if (object) {
+			object->DrawShadowMap(shadowMap);
+		}
+	}
+}
+
 
 
 
@@ -60926,6 +61516,7 @@ struct SortResult {
 namespace Engine {
 	// 前方宣言
 	class DirectXCommon;
+	class ShadowMap;
 
 	/// <summary>
 	/// エンティティマネージャー
@@ -60949,6 +61540,8 @@ namespace Engine {
 		void ObjectClean();
 		// オブジェクト描画
 		void ObjectDraw();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 	public: //セッター
 		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
@@ -64748,6 +65341,7 @@ void Engine::MyGame::Update()
 
 #ifdef _DEBUG
 	dxCommon_->GetPostEffectManager()->RenderImGui();
+	dxCommon_->RenderShadowMapDebugImGui();
 #endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon_->GetImGuiManager()->End();
@@ -67463,8 +68057,10 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc_;// RasterizerState
 
 	//書き込むRTVの情報
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
-	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	graphicsPipelineStateDesc.NumRenderTargets = numRenderTargets_;
+	if (numRenderTargets_ > 0) {
+		graphicsPipelineStateDesc.RTVFormats[0] = rtvFormat_;
+	}
 
 	//利用するトロポジ(形状)のタイプ。三角形
 	graphicsPipelineStateDesc.PrimitiveTopologyType = topologyType;
@@ -67475,7 +68071,7 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 
 	// DepthStencilの設定
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	graphicsPipelineStateDesc.DSVFormat = dsvFormat_;
 
 	
 	hr = dxgiDevice->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
@@ -67548,6 +68144,13 @@ void Engine::PSOManager::SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE
 
 	//三角形の中を塗りつぶす
 	rasterizerDesc_.FillMode = fill;
+}
+
+void Engine::PSOManager::SetRenderTargetFormats(UINT numRenderTargets, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat)
+{
+	numRenderTargets_ = numRenderTargets;
+	rtvFormat_ = rtvFormat;
+	dsvFormat_ = dsvFormat;
 }
 
 void Engine::PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology) {
@@ -67623,6 +68226,8 @@ namespace Engine {
 		void SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func);
 		// ラスタライザ設定
 		void SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill);
+		// RTV/DSV形式設定
+		void SetRenderTargetFormats(UINT numRenderTargets, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat);
 		// 描画準備
 		void DrawSetting(PSOType type, D3D12_PRIMITIVE_TOPOLOGY topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -67678,6 +68283,9 @@ namespace Engine {
 
 		D3D12_DEPTH_STENCIL_DESC depthStencilDesc_{};
 		D3D12_RASTERIZER_DESC rasterizerDesc_{};
+		UINT numRenderTargets_ = 1;
+		DXGI_FORMAT rtvFormat_ = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		DXGI_FORMAT dsvFormat_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 
 		ShaderFile shderFile_;
@@ -67726,6 +68334,7 @@ namespace Engine {
 		NoUvInterpolation_MODE_WIREFRAME_NONE,	// UV補間なしワイヤーフレーム(カリングなし)
 
 		Transparent,							// 透明物
+		ShadowMap,								// シャドウマップ用の深度描画
 	};
 
 
@@ -67766,6 +68375,7 @@ namespace Engine {
 	};
 }
 
+
 ============================================================
 File Path: project/DirectXGame/engine/Skinning/Skinning.cpp
 ============================================================
@@ -67786,6 +68396,7 @@ void Engine::SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 
 	// パイプライン生成
 	CreateGraphicsPipeline();
+	CreateShadowMapPipeline();
 }
 
 void Engine::SkinningConmmon::CreateRootSignature()
@@ -67814,14 +68425,15 @@ void Engine::SkinningConmmon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 
-	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[4], 4, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[10] = {};
+	D3D12_ROOT_PARAMETER rootParameters[12] = {};
 
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
@@ -67844,13 +68456,32 @@ void Engine::SkinningConmmon::CreateGraphicsPipeline()
 	PSOFanction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t3) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
+	// シャドウマップ (t4) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[10], descriptorRange[4], D3D12_SHADER_VISIBILITY_PIXEL);
+	// シャドウ行列などのデータ (b6) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[11], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	D3D12_STATIC_SAMPLER_DESC staticSamplers2[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers2[2] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 	PSOFanction::SetSampler(staticSamplers2[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].MipLODBias = 0.0f;
+	staticSamplers[1].MaxAnisotropy = 1;
+	// 現在深度-bias <= 保存済み深度ならライトが届いている。D3Dの深度シャドウではLESS_EQUALを使う。
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	staticSamplers[1].MinLOD = 0.0f;
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[1].ShaderRegister = 1;
+	staticSamplers[1].RegisterSpace = 0;
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	staticSamplers2[1] = staticSamplers[1];
 
 #pragma region BlendState
 
@@ -67923,6 +68554,31 @@ void Engine::SkinningConmmon::CreateGraphicsPipeline()
 	csPsoManager_->ComputePipelineState();
 }
 
+void Engine::SkinningConmmon::CreateShadowMapPipeline()
+{
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	D3D12_BLEND_DESC blendDesc{};
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMap.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");
+	psoManager_->SetRenderTargetFormats(0, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_D32_FLOAT);
+	psoManager_->CreatePso(PSOType::ShadowMap, rootParameters, _countof(rootParameters), nullptr, 0,
+		D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Skining/NewSkinning.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Skining/SkinningObject3d.PS.hlsl");
+	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
+}
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Skinning/Skinning.h
@@ -67947,6 +68603,8 @@ namespace Engine {
 
 		// 描画前準備
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type); }
+		// シャドウマップ描画前準備
+		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap); }
 
 		// 計算前準備
 		void DrawComputeSetting() { csPsoManager_->PreComputePSRS(); }
@@ -67963,6 +68621,8 @@ namespace Engine {
 		void CreateRootSignature();
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
+		// シャドウマップ用パイプラインの作成
+		void CreateShadowMapPipeline();
 
 
 	private:// メンバ変数
@@ -75517,6 +76177,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\Fence\Fence.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.cpp" />
+    <ClCompile Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp" />
@@ -76005,6 +76666,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\ConstantBuffer.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\StructuredBuffer.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h" />
@@ -76749,6 +77411,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp">
@@ -77513,6 +78178,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h">
