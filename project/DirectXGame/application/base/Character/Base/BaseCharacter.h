@@ -114,8 +114,6 @@ namespace Character {
 		Engine::ColliderComponent* GetColliderComponent();
 		// オブジェクト3d取得
 		ObjectComponent* GetObjectComponent();
-		// オブジェクト3d取得
-		ObjectComponent* GetObjectComponentShadow();
 		// ワールド変換取得
 		Engine::WorldTransform& GetWorldTransform();
 		// ワールド変換取得
@@ -177,8 +175,6 @@ namespace Character {
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
-		// 影用オブジェクトコンポーネント
-		std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 		// スペシャル攻撃
 		std::unique_ptr<BaseSpecial> special_ = nullptr;
 		// 武器

@@ -29,6 +29,7 @@
 #include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
+#include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 #include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
@@ -66,6 +67,8 @@ namespace Engine {
 		void Update(SceneManager* sceneManager, EntityManager* entity3DManager);
 		// 描画
 		void Draw(SceneManager* sceneManager, EntityManager* entity3DManager);
+		// シャドウマップのデバッグ表示
+		void RenderShadowMapDebugImGui();
 
 	private:
 		// シーンの画面を書き出す
@@ -111,6 +114,8 @@ namespace Engine {
 		RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
 		// デプスステンシル取得
 		DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
+		// シャドウマップ取得
+		ShadowMap* GetShadowMap() { return shadowMap_.get(); }
 		// バリア取得
 		Barrier* GetBarrier() { return barrier_.get(); }
 		// ポストエフェクトマネージャー取得
@@ -136,6 +141,7 @@ namespace Engine {
 		std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
 		std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
 		std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
+		std::unique_ptr<ShadowMap> shadowMap_ = std::make_unique<ShadowMap>();				     // シャドウマップ
 		std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
 		std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 		std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング

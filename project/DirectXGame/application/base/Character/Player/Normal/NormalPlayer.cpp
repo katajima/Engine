@@ -125,16 +125,6 @@ namespace Character {
 		// コンテキストシステム
 		contextSystem_ = std::make_unique<CharacterContextSystem>();
 		contextSystem_->Initialize(this, inputSystem);
-
-		// オブジェクトコンポーネント追加
-		objectComponentShadow_ = std::make_unique<ObjectComponent>();
-		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
-
-		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
-		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-
 		// キャラクター行動ステート初期化
 		InitStateMachine();
 	}
@@ -256,12 +246,6 @@ namespace Character {
 
 		// サブ武器更新
 		subWeapon_->Update();
-
-
-		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
-		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
-		objectComponentShadow_->Update();
 
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),

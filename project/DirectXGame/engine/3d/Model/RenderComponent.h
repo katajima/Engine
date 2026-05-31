@@ -29,6 +29,7 @@ namespace Engine {
 	class Ocean;
 	class Transfomation;
 	class EntityManager;
+	class ShadowMap;
 
 	/// <summary>
 	/// 描画に関するコンポーネントクラス
@@ -52,6 +53,8 @@ namespace Engine {
 
 		// 描画
 		void Draw();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 		// カメラ設定
 		void SetCamera(Camera* camera) { this->camera = camera; }

@@ -20,6 +20,7 @@ namespace Engine {
 		NoUvInterpolation_MODE_WIREFRAME_NONE,	// UV補間なしワイヤーフレーム(カリングなし)
 
 		Transparent,							// 透明物
+		ShadowMap,								// シャドウマップ用の深度描画
 	};
 
 

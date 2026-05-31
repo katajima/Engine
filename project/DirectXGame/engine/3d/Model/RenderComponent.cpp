@@ -8,6 +8,7 @@
 #include "DirectXGame/engine/3d/Model/ModelCommon.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelData.h"
+#include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 
 Engine::RenderComponent::~RenderComponent() = default;
 Engine::RenderComponent::RenderComponent() = default;
@@ -201,6 +202,61 @@ void Engine::RenderComponent::Draw()
 	}
 }
 
+void Engine::RenderComponent::DrawShadowMap(ShadowMap* shadowMap)
+{
+	if (!isDraw) return;
+	// シャドウマップはモデルの深度だけを書き込む。Primitive/SkyBox/Oceanはここでは対象外。
+	if (!model) return;
+
+	switch (objectType_)
+	{
+	case ObjectModelType::kNormal:
+	case ObjectModelType::kAnimation:
+		// シャドウパスでは色やテクスチャは使わず、ライト視点の深度だけを書き込む。
+		entityManager->GetObject3dCommon()->DrawShadowMapSetting();
+		transfomation->GetCommandList(0);
+		shadowMap->SetGraphicsRootConstantBufferView(1);
+
+		for (auto& mesh : model->GetModelData().mesh) {
+			if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
+				continue;
+			}
+
+			mesh->GetCommandList();
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+				GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
+		}
+		break;
+	case ObjectModelType::kSkinning:
+		// スキニングはCSで変形済み頂点を作ってから、その頂点をシャドウマップへ描画する。
+		ObjectSkinningTypeDiscrimination(PSOType::ShadowMap);
+		transfomation->GetCommandList(0);
+		shadowMap->SetGraphicsRootConstantBufferView(1);
+
+		for (auto& mesh : model->GetModelData().mesh) {
+			if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
+				continue;
+			}
+
+			mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+				GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
+
+			D3D12_RESOURCE_BARRIER barrier{};
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 float Engine::RenderComponent::GetAlpha()
 {
 	// モデルごとの透明度取得
@@ -275,6 +331,8 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 
 void Engine::RenderComponent::DrawSetting()
 {
+	ShadowMap* shadowMap = entityManager->GetObject3dCommon()->GetDxCommon()->GetShadowMap();
+
 	// ライト
 	entityManager->GetLightManager()->DrawLight();
 
@@ -284,16 +342,25 @@ void Engine::RenderComponent::DrawSetting()
 
 	// カメラ
 	camera->GetCommandList(4);
+
+	// 通常描画でライト視点の深度を参照し、平行光源の影を計算する。
+	shadowMap->SetGraphicsRootDescriptorTable(11);
+	shadowMap->SetGraphicsRootConstantBufferView(12);
 }
 
 void Engine::RenderComponent::DrawSettingSkin()
 {
+	ShadowMap* shadowMap = entityManager->GetObject3dCommon()->GetDxCommon()->GetShadowMap();
+
 	// ライト
 	entityManager->GetLightManager()->DrawLight();
 	// 位置
 	transfomation->GetCommandList(1);
 	// カメラ
 	camera->GetCommandList(4);
+	// スキニングモデルも通常モデルと同じシャドウマップを参照する。
+	shadowMap->SetGraphicsRootDescriptorTable(10);
+	shadowMap->SetGraphicsRootConstantBufferView(11);
 }
 
 void Engine::RenderComponent::DrawSettingOcean()

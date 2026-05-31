@@ -10,18 +10,20 @@ void Engine::Object3dCommon::Initialize(DirectXCommon* dxCommon)
 
 	// パイプライン生成
 	CreateGraphicsPipeline();
+	CreateShadowMapPipeline();
 }
 
 void Engine::Object3dCommon::CreateGraphicsPipeline()
 {
-	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[4], 4, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[11] = {};
+	D3D12_ROOT_PARAMETER rootParameters[13] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -45,13 +47,29 @@ void Engine::Object3dCommon::CreateGraphicsPipeline()
 	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// シャドウマップ (t4) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[11], descriptorRange[4], D3D12_SHADER_VISIBILITY_PIXEL);
+	// シャドウ行列などのデータ (b6) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[12], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	D3D12_STATIC_SAMPLER_DESC staticSamplers2[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
-	PSOFanction::SetSampler(staticSamplers2[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].MipLODBias = 0.0f;
+	staticSamplers[1].MaxAnisotropy = 1;
+	// 現在深度-bias <= 保存済み深度ならライトが届いている。D3Dの深度シャドウではLESS_EQUALを使う。
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	staticSamplers[1].MinLOD = 0.0f;
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[1].ShaderRegister = 1;
+	staticSamplers[1].RegisterSpace = 0;
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 #pragma region BlendState
 
@@ -155,4 +173,29 @@ void Engine::Object3dCommon::CreateGraphicsPipeline()
 	//  UV補間背面カリング
 	psoManager_->CreatePso(PSOType::Transparent, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
 		, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendAlpha, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+}
+
+void Engine::Object3dCommon::CreateShadowMapPipeline()
+{
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	D3D12_BLEND_DESC blendDesc{};
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMap.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");
+	psoManager_->SetRenderTargetFormats(0, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_D32_FLOAT);
+	psoManager_->CreatePso(PSOType::ShadowMap, rootParameters, _countof(rootParameters), nullptr, 0,
+		D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3d.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3d.PS.hlsl");
+	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
 }

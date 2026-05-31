@@ -99,9 +99,6 @@ namespace Character {
 		void InitializeBaseEnemyAddItem();
 		// 更新保存項目
 		void UpdateBaseEnemyGetValue();
-		//
-		void InitShadowObjectComponent(const std::string& charaName, float shadowSize = 1.0f);
-
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID

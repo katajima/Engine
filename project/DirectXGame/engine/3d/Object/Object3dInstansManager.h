@@ -36,6 +36,8 @@ struct MapId {
 
 
 namespace Engine {
+	class ShadowMap;
+
 	// オブジェクトインスタンシングクラス(大量描画用)
 	class Object3dInstansManager
 	{
@@ -101,6 +103,8 @@ namespace Engine {
 
 		// 描画
 		void DrawTransparency();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 
 		// 描画準備
@@ -156,6 +160,8 @@ namespace Engine {
 		void CreateRootSignature();
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
+		// シャドウマップ用パイプラインの作成
+		void CreateShadowMapPipeline();
 		// ブレンドモード設定(加算)
 		void BlendAdd();
 		// ブレンドモード設定(減算)
@@ -198,8 +204,10 @@ namespace Engine {
 		D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 		////ルートシグネチャ
 		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
+		Microsoft::WRL::ComPtr < ID3D12RootSignature> shadowRootSignature;
 		//// グラフィックスパイプラインステート
 		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[6];
+		Microsoft::WRL::ComPtr < ID3D12PipelineState> shadowGraphicsPipelineState;
 
 
 

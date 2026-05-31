@@ -23,7 +23,9 @@ Texture2D<float4> gTexture : register(t0);
 Texture2D<float4> g_Normalmap : register(t1); // t1レジスタにバインドされる法線マップデータ
 Texture2D<float4> g_Specularmap : register(t2); // t2レジスタにバインドされるスペキュラーマップデータ
 Texture2D<float4> g_aoMap : register(t3); // t3レジスタにバインドされるスペキュラーマップデータ
+Texture2D<float> gShadowMap : register(t4);
 SamplerState sSampler : register(s0);
+SamplerComparisonState sShadowSampler : register(s1);
 
 static const int kMaxLight = 3;
 
@@ -94,6 +96,17 @@ struct SpotLights
 };
 ConstantBuffer<SpotLights> gSpotLight : register(b4);
 
+struct ShadowData
+{
+    float4x4 lightViewProjection;
+    float3 lightDirection;
+    float bias;
+    float shadowMin;
+    float pcfRadius;
+    float padding0;
+    float padding1;
+};
+ConstantBuffer<ShadowData> gShadowData : register(b6);
 
 
 
@@ -108,6 +121,39 @@ struct PixelShaderOutput
     
 };
 
+
+float CalculateDepthShadow(float3 worldPosition, float3 normal)
+{
+    float4 shadowPosition = mul(float4(worldPosition, 1.0f), gShadowData.lightViewProjection);
+    float3 projection = shadowPosition.xyz / shadowPosition.w;
+    float2 shadowUV = projection.xy * float2(0.5f, -0.5f) + 0.5f;
+
+    // ライトのシャドウ範囲外は影なし扱いにして、範囲外サンプルの黒化を防ぐ。
+    if (shadowUV.x < 0.0f || shadowUV.x > 1.0f || shadowUV.y < 0.0f || shadowUV.y > 1.0f ||
+        projection.z < 0.0f || projection.z > 1.0f)
+    {
+        return 1.0f;
+    }
+
+    // 面がライトに対して浅い角度になるほど深度誤差が出やすいので、傾きに応じてバイアスを増やす。
+    float ndotl = saturate(dot(normalize(normal), -normalize(gShadowData.lightDirection)));
+    float depthBias = max(0.0005f, gShadowData.bias * (1.0f - ndotl));
+
+    // 深度シャドウを3x3 PCFで比較して、セルフシャドウのジャギーを軽減する。
+    float2 texelSize = float2(1.0f / 2048.0f, 1.0f / 2048.0f) * gShadowData.pcfRadius;
+    float shadow = 0.0f;
+    [unroll]
+    for (int y = -1; y <= 1; ++y)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; ++x)
+        {
+            shadow += gShadowMap.SampleCmpLevelZero(sShadowSampler, shadowUV + float2(x, y) * texelSize, projection.z - depthBias);
+        }
+    }
+    shadow /= 9.0f;
+    return lerp(gShadowData.shadowMin, 1.0f, shadow);
+}
 
 
 
@@ -316,6 +362,7 @@ PixelShaderOutput main(PixelShaderInput input)
         float3 allDire = (diffuseDirectionalLight + specularDirectionalLight);
         float3 allPoint = (diffusePointLight + specularPointLight);
         float3 allSpot = (diffuseSpotLight + specularSpotLight);
+        allDire *= CalculateDepthShadow(input.worldPosition, normal);
         if (gMaterial.useLig != 0)
         {
           

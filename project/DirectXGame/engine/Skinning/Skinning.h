@@ -18,6 +18,8 @@ namespace Engine {
 
 		// 描画前準備
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type); }
+		// シャドウマップ描画前準備
+		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap); }
 
 		// 計算前準備
 		void DrawComputeSetting() { csPsoManager_->PreComputePSRS(); }
@@ -34,6 +36,8 @@ namespace Engine {
 		void CreateRootSignature();
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
+		// シャドウマップ用パイプラインの作成
+		void CreateShadowMapPipeline();
 
 
 	private:// メンバ変数

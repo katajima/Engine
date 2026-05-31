@@ -222,6 +222,13 @@ void Engine::Object3d::Draw()
 	renderComponent_->Draw();
 }
 
+void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
+{
+	if (isDelete) return;
+
+	renderComponent_->DrawShadowMap(shadowMap);
+}
+
 void Engine::Object3d::DrawTrailEffect()
 {
 	if (trailEffect_) {

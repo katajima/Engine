@@ -181,7 +181,6 @@ namespace Character {
 		enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
 		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
 		enemy->GetObjectComponent()->Update();	// ワールド行列更新
-		enemy->GetObjectComponentShadow()->Update();	// ワールド行列更新
 		character_.push_back(std::move(enemy));
 		characterCount_++;
 		return characterCount_ - 1; // 生成した敵のタグ番号を返す
@@ -221,7 +220,6 @@ namespace Character {
 				character->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
 				character->Delete();
 				character->GetObjectComponent()->GetWorldTransform().scale_ = 0.0f;
-				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = 0.0f;;
 			}
 		}
 	}

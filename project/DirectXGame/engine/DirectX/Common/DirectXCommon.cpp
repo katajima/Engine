@@ -38,6 +38,7 @@ void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 
 	renderingCommon_->Initialize(this);
 	barrier_->Initialize(command_.get()); // バリア
+	shadowMap_->Initialize(this); // シャドウマップ
 
 
 	swapChain_->Initialize(winApp, DXGIDevice_.get(), command_.get(), rtvManager_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get(), fence_.get()); // スワップチェーン
@@ -98,6 +99,14 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 
 void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
+	// 通常描画の前にライト視点の深度を書き出して、影判定に使えるようにする。
+	shadowMap_->Update(entity3DManager);
+	// インスタンシングとスキニングのシャドウ描画ではSRVを参照するため、通常描画前でもヒープを束縛しておく。
+	GetSrvManager()->PreDraw();
+	shadowMap_->PreDraw();
+	entity3DManager->DrawShadowMap(shadowMap_.get());
+	shadowMap_->PostDraw();
+
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
 
@@ -105,6 +114,16 @@ void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* enti
 
 	// スワップチェーン
 	PassSwap(sceneManager, postEffectManager_->GetEndRenderTexture());
+}
+
+void Engine::DirectXCommon::RenderShadowMapDebugImGui()
+{
+#ifdef _DEBUG
+	if (!shadowMap_) {
+		return;
+	}
+	shadowMap_->RenderDebugImGui();
+#endif // _DEBUG
 }
 
 void Engine::DirectXCommon::Draw3D2D(SceneManager* sceneManager, EntityManager* entity3DManager)

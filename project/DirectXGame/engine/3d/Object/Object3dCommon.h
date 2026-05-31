@@ -16,6 +16,8 @@ namespace Engine {
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// 描画設定
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
+		// シャドウマップ描画設定
+		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
 		// デフォルトカメラ設定
 		void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 		// デフォルトカメラ取得
@@ -29,6 +31,8 @@ namespace Engine {
 	private:
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
+		// シャドウマップ用パイプラインの作成
+		void CreateShadowMapPipeline();
 	private:// メンバ変数
 		DirectXCommon* dxCommon = nullptr;
 		// カメラ

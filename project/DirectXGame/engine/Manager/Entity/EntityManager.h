@@ -38,6 +38,7 @@ struct SortResult {
 namespace Engine {
 	// 前方宣言
 	class DirectXCommon;
+	class ShadowMap;
 
 	/// <summary>
 	/// エンティティマネージャー
@@ -61,6 +62,8 @@ namespace Engine {
 		void ObjectClean();
 		// オブジェクト描画
 		void ObjectDraw();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 	public: //セッター
 		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)

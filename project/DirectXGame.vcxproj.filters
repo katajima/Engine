@@ -612,6 +612,9 @@
     <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
@@ -1374,6 +1377,9 @@
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h">

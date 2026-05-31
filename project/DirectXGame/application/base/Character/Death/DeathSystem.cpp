@@ -19,10 +19,8 @@ void DeathSystem::Update(float dt){
 		if (!owner->GetAlive()) {
 			owner->Delete();	// キャラクター削除
 			owner->GetObjectComponent()->IsDelete();	// オブジェクトコンポーネント削除
-			owner->GetObjectComponentShadow()->IsDelete();
 			owner->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
 			owner->GetObjectComponent()->SetIsDraw(false);	// 描画しない	
-			owner->GetObjectComponentShadow()->SetIsDraw(false);	// 描画しない	
 		}
 	}
 

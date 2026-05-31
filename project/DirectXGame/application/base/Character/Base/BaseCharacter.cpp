@@ -96,8 +96,6 @@ namespace Character {
 	Engine::ColliderComponent* BaseCharacter::GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
 	ObjectComponent* BaseCharacter::GetObjectComponent() { return objectComponent_.get(); }
-	// オブジェクト3d取得
-	ObjectComponent* BaseCharacter::GetObjectComponentShadow() { return objectComponentShadow_.get(); }
 	// ワールド変換取得
 	Engine::WorldTransform& BaseCharacter::GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	//

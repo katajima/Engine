@@ -129,6 +129,7 @@ void Engine::MyGame::Update()
 
 #ifdef _DEBUG
 	dxCommon_->GetPostEffectManager()->RenderImGui();
+	dxCommon_->RenderShadowMapDebugImGui();
 #endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon_->GetImGuiManager()->End();

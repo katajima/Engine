@@ -302,6 +302,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\Fence\Fence.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.cpp" />
+    <ClCompile Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp" />
@@ -790,6 +791,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\ConstantBuffer.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\StructuredBuffer.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h" />

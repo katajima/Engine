@@ -24,7 +24,6 @@ namespace Character {
 		float elapsedTime_ = 0.0f;			// 退場開始からの時間
 		float duration_ = 1.2f;				// 退場に要する時間
 		Vector3 startScale_{ 1.0f, 1.0f, 1.0f };	// 開始時のモデルサイズ
-		Vector3 startShadowScale_{ 1.0f, 1.0f, 1.0f };	// 開始時の影サイズ
 		float startHeight_ = 0.0f;			// 開始時の高さ
 	};
 }

@@ -22,6 +22,7 @@ namespace Engine {
 	class EffectManager;
 	class TransformComponent;
 	class RenderComponent;
+	class ShadowMap;
 
 	class TrailEffect;
 	class Camera;
@@ -48,6 +49,8 @@ namespace Engine {
 
 		// 描画通常
 		void Draw();
+		// シャドウマップ用の深度描画
+		void DrawShadowMap(ShadowMap* shadowMap);
 
 		// トレイルエフェクト描画
 		void DrawTrailEffect();

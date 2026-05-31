@@ -15,7 +15,6 @@ namespace Character {
 		elapsedTime_ = 0.0f;
 		duration_ = (std::max)(duration, 0.1f);
 		startScale_ = enemy->GetObjectComponent()->GetWorldTransform().scale_;
-		startShadowScale_ = enemy->GetObjectComponentShadow()->GetWorldTransform().scale_;
 		startHeight_ = enemy->GetObjectComponent()->GetWorldTransform().translate_.y;
 	}
 
@@ -35,13 +34,6 @@ namespace Character {
 		world.translate_.y = startHeight_ - eased * 1.5f;
 		enemy->GetObjectComponent()->SetColor({ 1.0f, 1.0f, 1.0f, remain });
 		enemy->GetObjectComponent()->Update();
-
-		// 本体より少し早く影を小さくし、地面へ吸い込まれる印象を支える
-		Engine::WorldTransform& shadow = enemy->GetObjectComponentShadow()->GetWorldTransform();
-		shadow.scale_ = startShadowScale_ * remain;
-		enemy->GetObjectComponentShadow()->SetColor({ 0.0f, 0.0f, 0.0f, remain });
-		enemy->GetObjectComponentShadow()->Update();
-
 		if (progress < 1.0f) {
 			return;
 		}
@@ -50,8 +42,6 @@ namespace Character {
 		enemy->SetAlive(false);
 		enemy->Delete();
 		enemy->GetObjectComponent()->IsDelete();
-		enemy->GetObjectComponentShadow()->IsDelete();
 		enemy->GetObjectComponent()->SetIsDraw(false);
-		enemy->GetObjectComponentShadow()->SetIsDraw(false);
 	}
 }

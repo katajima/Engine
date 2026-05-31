@@ -313,5 +313,16 @@ void Engine::EntityManager::ObjectDraw()
 
 }
 
+void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
+{
+	object3dInstansManager_->DrawShadowMap(shadowMap);
+
+	for (auto& object : object3d) {
+		if (object) {
+			object->DrawShadowMap(shadowMap);
+		}
+	}
+}
+
 
 

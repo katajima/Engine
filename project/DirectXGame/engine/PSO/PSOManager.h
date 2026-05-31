@@ -39,6 +39,8 @@ namespace Engine {
 		void SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func);
 		// ラスタライザ設定
 		void SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill);
+		// RTV/DSV形式設定
+		void SetRenderTargetFormats(UINT numRenderTargets, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat);
 		// 描画準備
 		void DrawSetting(PSOType type, D3D12_PRIMITIVE_TOPOLOGY topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -94,6 +96,9 @@ namespace Engine {
 
 		D3D12_DEPTH_STENCIL_DESC depthStencilDesc_{};
 		D3D12_RASTERIZER_DESC rasterizerDesc_{};
+		UINT numRenderTargets_ = 1;
+		DXGI_FORMAT rtvFormat_ = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		DXGI_FORMAT dsvFormat_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 
 		ShaderFile shderFile_;

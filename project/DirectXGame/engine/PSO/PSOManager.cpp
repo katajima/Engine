@@ -122,8 +122,10 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc_;// RasterizerState
 
 	//書き込むRTVの情報
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
-	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	graphicsPipelineStateDesc.NumRenderTargets = numRenderTargets_;
+	if (numRenderTargets_ > 0) {
+		graphicsPipelineStateDesc.RTVFormats[0] = rtvFormat_;
+	}
 
 	//利用するトロポジ(形状)のタイプ。三角形
 	graphicsPipelineStateDesc.PrimitiveTopologyType = topologyType;
@@ -134,7 +136,7 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 
 	// DepthStencilの設定
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	graphicsPipelineStateDesc.DSVFormat = dsvFormat_;
 
 	
 	hr = dxgiDevice->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
@@ -207,6 +209,13 @@ void Engine::PSOManager::SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE
 
 	//三角形の中を塗りつぶす
 	rasterizerDesc_.FillMode = fill;
+}
+
+void Engine::PSOManager::SetRenderTargetFormats(UINT numRenderTargets, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat)
+{
+	numRenderTargets_ = numRenderTargets;
+	rtvFormat_ = rtvFormat;
+	dsvFormat_ = dsvFormat;
 }
 
 void Engine::PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology) {

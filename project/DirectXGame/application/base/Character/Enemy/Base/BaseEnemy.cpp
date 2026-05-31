@@ -56,22 +56,6 @@ namespace Character {
 		weapon_->GetWorldTransform().translate_ = pos;
 	}
 
-
-	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName, float shadowSize)
-	{
-		// オブジェクトコンポーネント追加
-		objectComponentShadow_ = std::make_unique<ObjectComponent>();
-		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
-		objectComponentShadow_->SetIsDraw(false);
-		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
-		objectComponentShadow_->SetInstancingSRT({ shadowSize,shadowSize,shadowSize }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
-		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-		objectComponentShadow_->Update();
-	}
-
-
 	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 		const std::string& modelName, const std::string& charaName, float colliderRadius, float shadowSize) {
@@ -171,9 +155,6 @@ namespace Character {
 
 		// ウェーブ終了時の退場演出ステート
 		waveExitState_ = std::make_unique<EnemyWaveExitState>();
-
-		// 丸影用オブジェクトコンポーネント初期化
-		InitShadowObjectComponent(charaName, shadowSize);
 	}
 
 	void BaseEnemy::Update() {
@@ -191,7 +172,6 @@ namespace Character {
 			return;
 		}
 
-		objectComponentShadow_->SetIsDraw(true);
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
@@ -215,11 +195,6 @@ namespace Character {
 		worldCollider_->Update();
 		// コライダーコンポーネント更新
 		objectComponent_->GetColliderComponent()->UpdateAll(*worldCollider_.get());
-
-		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
-		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
-
 		// 死亡システム更新
 		deathSystem_->Update(ctx.dt);
 		// ステート
@@ -229,8 +204,7 @@ namespace Character {
 		if(weapon_)
 		weapon_->Update();
 
-		// 影更新
-		objectComponentShadow_->Update();
+		
 	}
 
 	void BaseEnemy::InitializeBaseEnemyAddItem() {

@@ -1,0 +1,11 @@
+{
+    "ShadowMap": {
+        "Bias": 0.0025,
+        "FarClip": 200.0,
+        "LightDistance": 80.0,
+        "NearClip": 0.1,
+        "OrthographicHalfSize": 80.0,
+        "PcfRadius": 1.0,
+        "ShadowMin": 0.35
+    }
+}

@@ -4,6 +4,7 @@
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
+#include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -28,6 +29,7 @@ void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 	
 	// パイプライン生成
 	CreateGraphicsPipeline();
+	CreateShadowMapPipeline();
 }
 
 
@@ -148,6 +150,8 @@ void Engine::Object3dInstansManager::Draw() {
 		group.mesh->material->GetCommandListTexture(2, 7, 8);
 
 		camera_->GetCommandList(4);
+		dxCommon->GetShadowMap()->SetGraphicsRootDescriptorTable(11);
+		dxCommon->GetShadowMap()->SetGraphicsRootConstantBufferView(12);
 
 		// インスタンシングデータのSRVのDescriptorTableを設定
 		commandList->SetGraphicsRootDescriptorTable(
@@ -187,6 +191,8 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 		group.mesh->material->GetCommandListTexture(2, 7, 8);
 
 		camera_->GetCommandList(4);
+		dxCommon->GetShadowMap()->SetGraphicsRootDescriptorTable(11);
+		dxCommon->GetShadowMap()->SetGraphicsRootConstantBufferView(12);
 
 		// インスタンシングデータのSRVのDescriptorTableを設定
 		commandList->SetGraphicsRootDescriptorTable(
@@ -204,6 +210,32 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 		commandList->DrawIndexedInstanced(
 			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0,
 			0);
+	}
+}
+
+void Engine::Object3dInstansManager::DrawShadowMap(ShadowMap* shadowMap)
+{
+	auto commandList = dxCommon->GetCommandList();
+
+	commandList->SetPipelineState(shadowGraphicsPipelineState.Get());
+	commandList->SetGraphicsRootSignature(shadowRootSignature.Get());
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	shadowMap->SetGraphicsRootConstantBufferView(1);
+
+	for (auto& pair : objectGroups) {
+		ObjectGroup& group = pair.second;
+		if (group.instanceCount == 0) {
+			continue;
+		}
+
+		// インスタンシング用のワールド行列をライト視点の深度描画でも再利用する。
+		commandList->SetGraphicsRootDescriptorTable(0, group.instancingSrvHandleGPU);
+
+		group.mesh->GetCommandList();
+
+		uint32_t instanceCount = (std::min)(group.instanceCount, kNumMaxInstance);
+		commandList->DrawIndexedInstanced(
+			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0, 0);
 	}
 }
 
@@ -560,16 +592,17 @@ Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::Gro
 
 
 void Engine::Object3dInstansManager::CreateRootSignature() {
-	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[6] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[4],	0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 4, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[5], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
 
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[11] = {};
+	D3D12_ROOT_PARAMETER rootParameters[13] = {};
 
 	//CD3DX12_ROOT_PARAMETER 
 
@@ -595,11 +628,29 @@ void Engine::Object3dInstansManager::CreateRootSignature() {
 	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// シャドウマップ (t0) をピクセルシェーダで使用する。頂点用t0とはShaderVisibilityで分離する。
+	PSOFanction::SetRootParameter(rootParameters[11], descriptorRange[5], D3D12_SHADER_VISIBILITY_PIXEL);
+	// シャドウ行列などのデータ (b6) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[12], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0,D3D12_FILTER_MIN_MAG_MIP_LINEAR,D3D12_SHADER_VISIBILITY_PIXEL); // バイリニアフィルタ
+	staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].MipLODBias = 0.0f;
+	staticSamplers[1].MaxAnisotropy = 1;
+	// 現在深度-bias <= 保存済み深度ならライトが届いている。D3Dの深度シャドウではLESS_EQUALを使う。
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	staticSamplers[1].MinLOD = 0.0f;
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[1].ShaderRegister = 1;
+	staticSamplers[1].RegisterSpace = 0;
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	// ルートシグネチャ作成
@@ -662,6 +713,37 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState[5],
 		blendDesc, depthStencilDesc,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+}
+
+void Engine::Object3dInstansManager::CreateShadowMapPipeline()
+{
+	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	PSOFanction::SetRootParameter(rootParameters[0], descriptorRange[0], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	psoManager_->SetRootSignature(shadowRootSignature, rootParameters, _countof(rootParameters), nullptr, 0);
+
+	D3D12_BLEND_DESC shadowBlendDesc{};
+	shadowBlendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMapInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");
+	psoManager_->SetRenderTargetFormats(0, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_D32_FLOAT);
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(shadowRootSignature, shadowGraphicsPipelineState, shadowBlendDesc,
+		depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3dInstans.PS.hlsl");
+	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
 }
 
 #pragma region Blend
