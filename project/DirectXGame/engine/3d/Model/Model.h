@@ -12,6 +12,7 @@
 #include<span>
 #include <iostream>
 #include <memory>
+#include <mutex>
 
 
 #include "DirectXGame/engine/Utility/TimerUtility.h"
@@ -38,6 +39,7 @@ namespace Engine {
 		/// <param name="filename">ファイル名(モデルの名前(objやgltf))</param>
 		/// <param name="file">ファイル名(resources/models以降にファイルがあるならモデルの入っているファイル名を)</param>
 		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
+		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, std::mutex* gpuResourceMutex);
 
 		// 通常描画
 		void Draw();
@@ -68,7 +70,7 @@ namespace Engine {
 		// 読み込んだモデルからモデルデータ生成
 		// ディレクトリパス
 		// ファイル名
-		ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
+		ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename, std::mutex* gpuResourceMutex = nullptr);
 
 
 	};

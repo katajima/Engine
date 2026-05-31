@@ -129,7 +129,7 @@ namespace Engine {
 		UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
 
 		// 最大パーティクル量
-		const uint32_t kNumMaxInstance = 1024 * 4;
+		const uint32_t kNumMaxInstance = 1024 * 2;
 
 		// フィールド関係
 		std::vector<Field::FieldEffect*> fieldEffect_;

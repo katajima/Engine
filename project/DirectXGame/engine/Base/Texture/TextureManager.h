@@ -9,6 +9,7 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include <filesystem>
+#include <mutex>
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -78,6 +79,7 @@ namespace Engine {
 
 		//テクスチャデータ
 		std::unordered_map<std::string, TextureData> textureDatas;
+		mutable std::mutex textureMutex_;
 
 		static uint32_t kSRVIndexTop;
 

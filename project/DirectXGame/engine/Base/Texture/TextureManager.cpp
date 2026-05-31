@@ -20,6 +20,7 @@ void Engine::TextureManager::Initialize(Command* command, DXGIDevice* dxgiDevice
 
 
 void Engine::TextureManager::LoadTexture(const std::string& filePath) {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	debugTimerTex_.StartTimer();
 
 	// 読み込み済みテクスチャを検索
@@ -159,6 +160,7 @@ void Engine::TextureManager::LoadAllTexturesInDirectory(const std::string& direc
 
 uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	//読み込み済みテクスチャを検索
 	auto it = textureDatas.find(filePath);
 	if (it != textureDatas.end()) {
@@ -170,6 +172,7 @@ uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& fi
 
 D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	// 範囲外指定チェック
 	auto it = textureDatas.find(filePath);
 	if (it != textureDatas.end()) {
@@ -182,6 +185,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::s
 
 const DirectX::TexMetadata& Engine::TextureManager::GetMataData(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	// 範囲外指定チェック
 	auto it = textureDatas.find(filePath);
 	assert(it != textureDatas.end() && "Texture file path not found");

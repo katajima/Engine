@@ -12,6 +12,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include<map>
 #include <memory>
+#include <unordered_set>
 
 #include <future>       // 追加：非同期処理用
 #include <mutex>        // 追加：排他制御用
@@ -56,6 +57,9 @@ namespace Engine {
 		// モデル検索
 		Model* FindModel(const std::string& filePath);
 
+		// 非同期読み込み中、または完了待ちのモデルがあるか
+		bool IsLoading() const;
+
 		// モデル全取得
 		const std::map<std::string, std::unique_ptr<Model>>& GetModel() const { return models; }
 
@@ -64,12 +68,15 @@ namespace Engine {
 
 	private:
 		std::map<std::string, std::unique_ptr<Model>> models;
+		std::unordered_set<std::string> loadingModelKeys_;
 
 		// 非同期読み込みで管理するfutureのリスト
 		std::vector<std::future<void>> loadingFutures_;
 
 		// 排他制御
-		std::mutex modelsMutex_;  // modelsへの書き込みを守るmutex
+		mutable std::mutex modelsMutex_;  // modelsへの読み書きとloadingModelKeys_を守るmutex
+		mutable std::mutex futuresMutex_; // loadingFutures_への追加/完了待ちを守るmutex
+		std::mutex gpuResourceMutex_;     // コマンドリスト/SRV/テクスチャなどGPU側共有リソースを守るmutex
 
 	private:
 		Command* command;

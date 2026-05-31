@@ -20,23 +20,23 @@ void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
 {
-
-	std::string file = filePath;
-	if (dire != "") {
-		file = dire + filePath;
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		// 読み込み済みモデルを検索
+		if (models.contains(filePath)) {
+			return;
+		}
 	}
 
-
-	// 読み込み済みモデルを検索
-	if (models.contains(file)) {
-		return;
-	}
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire);
+	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
 
-	// モデルをmapコンテナに格納
-	models.insert(std::make_pair(filePath, std::move(model)));
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		// モデルをmapコンテナに格納
+		models.insert(std::make_pair(filePath, std::move(model)));
+	}
 }
 
 void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
@@ -44,37 +44,43 @@ void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std
 	// すでにロード済みかロックを使って確認
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
-		if (models.contains(filePath)) {
+		if (models.contains(filePath) || loadingModelKeys_.contains(filePath)) {
 			return;
 		}
+		loadingModelKeys_.insert(filePath);
 	}
 
 	// 非同期に読み込み開始
-	loadingFutures_.push_back(std::async(std::launch::async, [this, filePath, dire]() {
+	std::future<void> future = std::async(std::launch::async, [this, filePath, dire]() {
 		std::unique_ptr<Model> model = std::make_unique<Model>();
-		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire);
-
-		// GPUにリソース記録が終わったあと、必ずキックして完了を待つ（非同期内）
-		auto* command = dxCommon->GetCommand();
-		command->KickCommand();
-		dxCommon->GetFence()->WaitGPU();
-		command->ResetCommand();
+		// Assimp解析は各スレッドで進め、GPU共有リソースだけModel内部で短くロックする。
+		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
 
 		{
 			std::lock_guard<std::mutex> lock(modelsMutex_);
 			models.insert(std::make_pair(filePath, std::move(model)));
+			loadingModelKeys_.erase(filePath);
 		}
-		}));
+		});
+
+	std::lock_guard<std::mutex> lock(futuresMutex_);
+	loadingFutures_.push_back(std::move(future));
 }
 
 void Engine::ModelManager::WaitAllLoadFinished()
 {
-	for (auto& fut : loadingFutures_) {
+	std::vector<std::future<void>> futures;
+	{
+		std::lock_guard<std::mutex> lock(futuresMutex_);
+		futures.swap(loadingFutures_);
+	}
+
+	for (auto& fut : futures) {
 		fut.get();  // 完了待ち
 	}
-	loadingFutures_.clear();
 
-	
+	// 非同期ロード中に各スレッドが記録したGPU転送を、最後にまとめて実行して完了を待つ。
+	std::lock_guard<std::mutex> lock(gpuResourceMutex_);
 	auto* command = dxCommon->GetCommand();
 	command->KickCommand();            // Close & ExecuteCommandLists
 	dxCommon->GetFence()->WaitGPU();  // 完了待ち
@@ -83,6 +89,7 @@ void Engine::ModelManager::WaitAllLoadFinished()
 
 Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(modelsMutex_);
 	// 読み込み済みモデルを検索
 	if (models.contains(filePath)) {
 		// 読み込みモデルを戻り値としてreturn
@@ -91,4 +98,10 @@ Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 
 	// ファイル名一致なし
 	return nullptr;
+}
+
+bool Engine::ModelManager::IsLoading() const
+{
+	std::lock_guard<std::mutex> futureLock(futuresMutex_);
+	return !loadingFutures_.empty();
 }

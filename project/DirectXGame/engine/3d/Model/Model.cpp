@@ -14,6 +14,11 @@
 
 void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
+	Initialize(dxCommon, modelCommon, directorypath, filename, file, nullptr);
+}
+
+void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, std::mutex* gpuResourceMutex)
+{
 	this->modelCommon = modelCommon;					// モデル共通クラス
 	this->dxCommon = dxCommon;						// DX共通クラス
 	this->srvManager = modelCommon->GetSrvManager();// SRV管理クラス
@@ -26,7 +31,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 	}
 
 	// モデル読み込み
-	modelData = LoadOdjFileAssimpAmime(dire, filename);
+	modelData = LoadOdjFileAssimpAmime(dire, filename, gpuResourceMutex);
 
 	// メッシュ状にライン生成
 	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->GetIndices());
@@ -43,7 +48,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 		CreateModel::CreateSkeleton(modelData);
 
 		// スキンクラスター生成
-		CreateModel::CreateSkinCluster(modelData, modelCommon);
+		CreateModel::CreateSkinCluster(modelData, modelCommon, gpuResourceMutex);
 
 		auto it = modelData.animations.find(modelData.currentAnimName);
 		if (it != modelData.animations.end()) {
@@ -53,7 +58,13 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 
 	// マテリアル読み込み
 	for (auto& mesh : modelData.mesh) {
-		mesh->material->LoadTex();
+		if (gpuResourceMutex) {
+			std::lock_guard<std::mutex> lock(*gpuResourceMutex);
+			mesh->material->LoadTex();
+		}
+		else {
+			mesh->material->LoadTex();
+		}
 	};
 
 
@@ -108,7 +119,7 @@ float Engine::Model::GetMaterialAlpha()
 	return a;
 }
 
-Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
+Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename, std::mutex* gpuResourceMutex) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
 
@@ -133,7 +144,7 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode, modelData.meshOffsetMap);
 
 	// メッシュ読み込み
-	LoadModel::LoadMesh(scene, modelData, dxCommon);
+	LoadModel::LoadMesh(scene, modelData, dxCommon, gpuResourceMutex);
 	// Assimp読み込みやメッシュ生成
 
 	timer_.EndTimer();
@@ -142,7 +153,7 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	LoadModel::LoadBone(scene, modelData, dxCommon);
 
 	// マテリアル読み込み
-	LoadModel::LoadMaterial(scene, modelData, dxCommon, directoryPath);
+	LoadModel::LoadMaterial(scene, modelData, dxCommon, directoryPath, gpuResourceMutex);
 
 	timer_.EndTimer();
 

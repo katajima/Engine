@@ -4,7 +4,7 @@
 #pragma region Laod
 
 // メッシュ読み込み
-void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
+void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, std::mutex* gpuResourceMutex)
 {
 	uint32_t vertexOffset = 0;
 
@@ -89,7 +89,13 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		}
 
 		vertexOffset += mesh->mNumVertices; // ★次メッシュの頂点オフセット更新
-		pMesh->Initialize(dxCommon);
+		if (gpuResourceMutex) {
+			std::lock_guard<std::mutex> lock(*gpuResourceMutex);
+			pMesh->Initialize(dxCommon);
+		}
+		else {
+			pMesh->Initialize(dxCommon);
+		}
 
 		modelData.mesh.push_back(std::move(pMesh));
 
@@ -140,7 +146,7 @@ void Engine::LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, Dir
 
 
 // マテリアル読み込み
-void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath)
+void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath, std::mutex* gpuResourceMutex)
 {
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -155,7 +161,13 @@ void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData,
 
 		// メッシュに対するマテリアル作成
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
-		pMaterial->Initialize(dxCommon);
+		if (gpuResourceMutex) {
+			std::lock_guard<std::mutex> lock(*gpuResourceMutex);
+			pMaterial->Initialize(dxCommon);
+		}
+		else {
+			pMaterial->Initialize(dxCommon);
+		}
 
 		// Diffuse
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
@@ -344,8 +356,13 @@ void Engine::CreateModel::CreateSkeleton(ModelData& modelData)
 	AnimationFunction::UpdateSkeleton(modelData.skeleton);
 }
 
-void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon)
+void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon, std::mutex* gpuResourceMutex)
 {
+	std::unique_lock<std::mutex> gpuLock;
+	if (gpuResourceMutex) {
+		gpuLock = std::unique_lock<std::mutex>(*gpuResourceMutex);
+	}
+
 	for (size_t meshIndex = 0; meshIndex < modelData.mesh.size(); ++meshIndex) {
 		auto& mesh = modelData.mesh[meshIndex];
 		if (!mesh || !mesh->skinCluster) continue; // 未設定ならスキップ

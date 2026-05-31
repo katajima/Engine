@@ -373,14 +373,14 @@ void Engine::MyGame::LoadModel()
 	/// <summary>
 	/// テスト用フリーモデル
 	/// </summary>
-	modelManager->LoadModel("multiMaterial.obj", "TestModel/multiMaterial");
-	modelManager->LoadModel("multiMaterial.gltf", "TestModel/multiMaterial");
-	modelManager->LoadModel("multiMesh.obj", "TestModel/multiMesh");
-	modelManager->LoadModel("plane.obj", "TestModel/plane");
-	modelManager->LoadModel("AnimatedCube.gltf", "TestModel/AnimatedCube");
-	modelManager->LoadModel("axis.obj", "TestModel/axis");
-	modelManager->LoadModel("teapot.obj", "TestModel/teapot");
-	modelManager->LoadModel("stair.obj", "TestModel");			// 階段
+	modelManager->LoadModelAsync("multiMaterial.obj", "TestModel/multiMaterial");
+	modelManager->LoadModelAsync("multiMaterial.gltf", "TestModel/multiMaterial");
+	modelManager->LoadModelAsync("multiMesh.obj", "TestModel/multiMesh");
+	modelManager->LoadModelAsync("plane.obj", "TestModel/plane");
+	modelManager->LoadModelAsync("AnimatedCube.gltf", "TestModel/AnimatedCube");
+	modelManager->LoadModelAsync("axis.obj", "TestModel/axis");
+	modelManager->LoadModelAsync("teapot.obj", "TestModel/teapot");
+	modelManager->LoadModelAsync("stair.obj", "TestModel");			// 階段
 
 
 
@@ -388,89 +388,92 @@ void Engine::MyGame::LoadModel()
 	/// 乗り物
 	/// </summary>
 
-	modelManager->LoadModel("train.gltf",	"Vehicle/train");
-	modelManager->LoadModel("ship.gltf",	"Vehicle/ship");
+	modelManager->LoadModelAsync("train.gltf",	"Vehicle/train");
+	modelManager->LoadModelAsync("ship.gltf",	"Vehicle/ship");
 
-	modelManager->LoadModel("TrackCarBody.obj", "Vehicle/track");
-	modelManager->LoadModel("TrackCarTire.obj", "Vehicle/track");
-	modelManager->LoadModel("scrapBox.obj", "Vehicle/track");
+	modelManager->LoadModelAsync("TrackCarBody.obj", "Vehicle/track");
+	modelManager->LoadModelAsync("TrackCarTire.obj", "Vehicle/track");
+	modelManager->LoadModelAsync("scrapBox.obj", "Vehicle/track");
 
 
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModel("renga.gltf", "stage/renga");				// 地形
-	modelManager->LoadModel("Ground.obj", "stage/Ground");				// 地形
-	modelManager->LoadModel("coast.gltf", "stage/terrain/coast");		// 地形
-	modelManager->LoadModel("black.obj", "stage/terrain/black");		// 地形(底)
-	modelManager->LoadModel("terrain.obj", "stage/terrain/terrain");	// 地形
-	modelManager->LoadModel("rail.obj", "stage/rail");					// 線路
+	modelManager->LoadModelAsync("renga.gltf", "stage/renga");				// 地形
+	modelManager->LoadModelAsync("Ground.obj", "stage/Ground");				// 地形
+	modelManager->LoadModelAsync("coast.gltf", "stage/terrain/coast");		// 地形
+	modelManager->LoadModelAsync("black.obj", "stage/terrain/black");		// 地形(底)
+	modelManager->LoadModelAsync("terrain.obj", "stage/terrain/terrain");	// 地形
+	modelManager->LoadModelAsync("rail.obj", "stage/rail");					// 線路
 
 
 	/// <summary>
 	/// 建物
 	/// </summary>
-	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
-	modelManager->LoadModel("Missile.gltf", "stage/Missile"); // ミサイル発射台
+	modelManager->LoadModelAsync("stage.gltf", "stage"); // ステージ
+	modelManager->LoadModelAsync("Missile.gltf", "stage/Missile"); // ミサイル発射台
 
 
-	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
-	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
-	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
-	modelManager->LoadModel("testField.obj", "stage/test"); // フィールド()
+	modelManager->LoadModelAsync("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
+	modelManager->LoadModelAsync("field.obj", "stage/Field"); // フィールド()
+	modelManager->LoadModelAsync("hasira.obj", "stage/objects"); // 柱()
+	modelManager->LoadModelAsync("testField.obj", "stage/test"); // フィールド()
 
 
-	modelManager->LoadModel("Stone.obj", "stage/Title/Stone"); // フィールド()
-	modelManager->LoadModel("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)
+	modelManager->LoadModelAsync("Stone.obj", "stage/Title/Stone"); // フィールド()
+	modelManager->LoadModelAsync("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)
 
 
 	/// <summary>
 	/// プレイヤー
 	/// </summary>
-	modelManager->LoadModel("player_bullet.obj", "Bullet/player_bullet");	// プレイヤー弾
-	modelManager->LoadModel("cartridge.obj", "Bullet/player_bullet");	// プレイヤー弾
+	modelManager->LoadModelAsync("player_bullet.obj", "Bullet/player_bullet");	// プレイヤー弾
+	modelManager->LoadModelAsync("cartridge.obj", "Bullet/player_bullet");	// プレイヤー弾
 
-	modelManager->LoadModel("Sword.obj", "Weapon/Sword");				// プレイヤー武器
-	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
+	modelManager->LoadModelAsync("Sword.obj", "Weapon/Sword");				// プレイヤー武器
+	modelManager->LoadModelAsync("bulletWeapon.obj", "Weapon");
 
-	modelManager->LoadModel("origin.gltf", "Character/Player");		// プレイヤー
-	modelManager->LoadModel("testCharacter.gltf", "Character/Player");	// プレイヤー
+	modelManager->LoadModelAsync("origin.gltf", "Character/Player");		// プレイヤー
+	modelManager->LoadModelAsync("testCharacter.gltf", "Character/Player");	// プレイヤー
 
-	modelManager->LoadModel("point.obj", "special");			// ポイント
+	modelManager->LoadModelAsync("point.obj", "special");			// ポイント
 
 	/// <summary>
 	/// スプラップ
 	/// </summary>
-	modelManager->LoadModel("basis.obj", "Scrap/Basis"); // スクラップ（基盤）
-	modelManager->LoadModel("gear.obj", "Scrap/Gear"); // スクラップ（歯車）
-	modelManager->LoadModel("ironRod.obj", "Scrap/IronRod"); // スクラップ（鉄の棒）
-	modelManager->LoadModel("screw.obj", "Scrap/Screw"); // スクラップ（ねじ）
-	modelManager->LoadModel("tire.obj", "Scrap/Tire"); // スクラップ（タイヤ）
+	modelManager->LoadModelAsync("basis.obj", "Scrap/Basis"); // スクラップ（基盤）
+	modelManager->LoadModelAsync("gear.obj", "Scrap/Gear"); // スクラップ（歯車）
+	modelManager->LoadModelAsync("ironRod.obj", "Scrap/IronRod"); // スクラップ（鉄の棒）
+	modelManager->LoadModelAsync("screw.obj", "Scrap/Screw"); // スクラップ（ねじ）
+	modelManager->LoadModelAsync("tire.obj", "Scrap/Tire"); // スクラップ（タイヤ）
 
 
 	/// <summary>
 	/// 敵
 	/// </summary>
 
-	modelManager->LoadModel("enemy.obj",		"Character/enemyAll/enemy"); // 的
-	modelManager->LoadModel("enemy.gltf",		"Character/enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemy2.obj",		"Character/enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemyTire.obj",	"Character/enemyAll/tire"); // タイヤ
-	modelManager->LoadModel("enemyDuct.obj",	"Character/enemyAll/duct"); // ダクト
-	modelManager->LoadModel("enemyPlank.obj",	"Character/enemyAll/plank"); // 鋼板
-	modelManager->LoadModel("enemyGear.obj",	"Character/enemyAll/gear"); // 歯車
-	modelManager->LoadModel("enemyFence.obj",	"Character/enemyAll/fence"); // 柵
+	modelManager->LoadModelAsync("enemy.obj",		"Character/enemyAll/enemy"); // 的
+	modelManager->LoadModelAsync("enemy.gltf",		"Character/enemyAll/enemy2"); // 本体
+	modelManager->LoadModelAsync("enemy2.obj",		"Character/enemyAll/enemy2"); // 本体
+	modelManager->LoadModelAsync("enemyTire.obj",	"Character/enemyAll/tire"); // タイヤ
+	modelManager->LoadModelAsync("enemyDuct.obj",	"Character/enemyAll/duct"); // ダクト
+	modelManager->LoadModelAsync("enemyPlank.obj",	"Character/enemyAll/plank"); // 鋼板
+	modelManager->LoadModelAsync("enemyGear.obj",	"Character/enemyAll/gear"); // 歯車
+	modelManager->LoadModelAsync("enemyFence.obj",	"Character/enemyAll/fence"); // 柵
 
 
-	modelManager->LoadModel("enemyBullet.gltf", "Character/enemyAll/enemyBullet"); // 本体
+	modelManager->LoadModelAsync("enemyBullet.gltf", "Character/enemyAll/enemyBullet"); // 本体
 
 
 
-	modelManager->LoadModel("enemyBodySG01.obj",		"Character/enemy/enemySG01"); // 本体
-	modelManager->LoadModel("enemyWeaponSG01.obj",		"Character/enemy/enemySG01"); // 武器
+	modelManager->LoadModelAsync("enemyBodySG01.obj",		"Character/enemy/enemySG01"); // 本体
+	modelManager->LoadModelAsync("enemyWeaponSG01.obj",		"Character/enemy/enemySG01"); // 武器
 
-	modelManager->LoadModel("enemyBodySS01.obj",		"Character/enemy/enemySS01"); // 本体
-	modelManager->LoadModel("enemyPropellerSS01.obj",	"Character/enemy/enemySS01"); // プロペラ
-	modelManager->LoadModel("enemyMuzzleSS01.obj",		"Character/enemy/enemySS01"); // 武器
+	modelManager->LoadModelAsync("enemyBodySS01.obj",		"Character/enemy/enemySS01"); // 本体
+	modelManager->LoadModelAsync("enemyPropellerSS01.obj",	"Character/enemy/enemySS01"); // プロペラ
+	modelManager->LoadModelAsync("enemyMuzzleSS01.obj",		"Character/enemy/enemySS01"); // 武器
 	
+
+	// ここまでに投げた非同期モデル読み込みを待ち、GPU転送もまとめて完了させる。
+	modelManager->WaitAllLoadFinished();
 }

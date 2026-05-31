@@ -17,6 +17,7 @@
 #include<vector>
 #include<format>
 #include<span>
+#include <mutex>
 
 // assimp
 #include <assimp/Importer.hpp>
@@ -59,13 +60,13 @@ namespace Engine {
 	namespace LoadModel {
 
 		// メッシュ読み込み
-		void LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon);
+		void LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, std::mutex* gpuResourceMutex = nullptr);
 
 		// ボーン読み込み
 		void LoadBone(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon);
 
 		// マテリアル読み込み
-		void LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath);
+		void LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath, std::mutex* gpuResourceMutex = nullptr);
 
 		// アニメーション読み込み
 		void LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename);
@@ -87,7 +88,7 @@ namespace Engine {
 		void CreateSkeleton(ModelData& modelData);
 
 		// スキンクラスター生成
-		void CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon);
+		void CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon, std::mutex* gpuResourceMutex = nullptr);
 
 		// ジョイント生成
 		int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
