@@ -715,6 +715,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h" />
     <ClInclude Include="DirectXGame\engine\input\GamePad.h" />
     <ClInclude Include="DirectXGame\engine\Line\CreateLine.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\Entity\Entity.h" />
     <ClInclude Include="DirectXGame\engine\Material\MaterialInstance.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h" />
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h" />
@@ -898,6 +899,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\3d\Model\Model.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\Entity.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\ModelEntity.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\PrimitiveEntity.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h" />
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h" />

@@ -14,9 +14,9 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
-	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), { 0,provisionalData_.trailWidth,0 }, { 0,-provisionalData_.trailWidth,0 }); // トレイル設定
+	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), { 0,provisionalData_.trailWidth,0 }, { 0,-provisionalData_.trailWidth,0 }); // トレイル設定
 	object_->Update();	// オブジェクト更新
-	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
+	//object_->isEmitTrailEffect = false;	// トレイルの出現しないように
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	object_->SetIsDraw(true);			// 描画する
 	
@@ -79,7 +79,7 @@ void EnemyBullet::Update()
 {
 	// 時間が初期値出なければ
 	if (timer_ != 0.0f) {
-		object_->isEmitTrailEffect = true;
+	//	object_->isEmitTrailEffect = true;
 	}
 	// 時間更新
 	timer_ += GetTimer();

@@ -41,6 +41,7 @@ void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType 
 
 
 	name = "object" + std::to_string(object3dCommon->GetObjectCount());
+	name_ = name;
 
 	// 位置初期化
 	transformation = std::make_unique<Transfomation>();
@@ -79,14 +80,6 @@ void Engine::Object3d::InitColliderComponent()
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 	isColliderComponenyUpdate_ = true;
-}
-
-void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
-{
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
-	trailEffect_->SetCamera(defaltCamera);
-	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
 }
 
 void Engine::Object3d::InitAnimationComponent() {
@@ -183,18 +176,15 @@ void Engine::Object3d::Update()
 		break;
 	}
 
-	
-	// トレイル
-	if (trailEffect_) {
-		trailEffect_->SetIsEmit(isEmitTrailEffect);
-		trailEffect_->Update();
-	}
-
 	// コライダー
 	if (colliderComponent_) {
 		if (isColliderComponenyUpdate_) {
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
+	}
+	if (trailEffect_) {
+		trailEffect_->SetIsEmit(isEmitTrailEffect);
+		trailEffect_->Update();
 	}
 	direWorldTransform_.Update();
 
@@ -232,10 +222,18 @@ void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
 void Engine::Object3d::DrawTrailEffect()
 {
 	if (trailEffect_) {
-		// トレイルエフェクトの描画
 		trailEffect_->Draw();
 	}
 }
+
+void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+{
+	trailEffect_ = std::make_unique<TrailEffect>();
+	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->SetCamera(defaltCamera);
+	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
+}
+
 
 void Engine::Object3d::DebugImguiSkin()
 {
@@ -264,9 +262,18 @@ void  Engine::Object3d::SetIsRigidUpdate(bool isRigidUpdate) { isRigidUpdate_ = 
 // カメラ設定
 void  Engine::Object3d::SetCamera(Camera* camera) { this->individualCamera = camera; }
 // 名前設定
-void  Engine::Object3d::SetName(const std::string& name) { this->name = name; }
+void Engine::Object3d::SetName(const std::string& name)
+{
+	this->name = name;
+	name_ = name;
+}
+const std::string& Engine::Object3d::GetName() const { return name; }
 // タグ設定
-void  Engine::Object3d::SetNameTag(const std::string& name) { nameTag = name; }
+void Engine::Object3d::SetNameTag(const std::string& name)
+{
+	nameTag = name;
+	nameTag_ = name;
+}
 // プリミティブ形状
 void  Engine::Object3d::SetPrimitive(std::unique_ptr< Engine::BasePrimitive> primitive) { renderComponent_->SetPrimitive(std::move(primitive)); };
 // スカイボックス
@@ -290,11 +297,11 @@ Engine::SkyBox* Engine::Object3d::GetSkyBox() const { return renderComponent_->G
 // マテリアルインスタンス取得
 std::vector<MaterialInstance>& Engine::Object3d::GetMaterialInstance() { return renderComponent_->GetMaterialInstance(); }
 // タグ取得
-std::string  Engine::Object3d::GetNameTag() const { return nameTag; }
+const std::string& Engine::Object3d::GetNameTag() const { return nameTag; }
 // 描画するか設定
 void  Engine::Object3d::SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
 // 削除する
-void Engine::Object3d::IsDelete() { isDelete = true; }
+void Engine::Object3d::IsDelete() { isDelete = true; isDelete_ = true; }
 // 削除されているか取得
 bool Engine::Object3d::GetIsDelete() const { return isDelete; }
 // オブジェクトに使われているモデルの透明度取得
@@ -315,6 +322,8 @@ Vector3 Engine::Object3d::GetWorldPosition() const { return transformComponent_-
 Vector3 Engine::Object3d::GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition(); };
 // ワールド座標
 Engine::WorldTransform& Engine::Object3d::GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
+Engine::WorldTransform* Engine::Object3d::GetWorldTransformPtr() { return &transformComponent_->GetWorldTransform(); }
+const Engine::WorldTransform* Engine::Object3d::GetWorldTransformPtr() const { return &transformComponent_->GetWorldTransform(); }
 // 座標更新
 void Engine::Object3d::UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
 // 向いている方向

@@ -1244,6 +1244,15 @@
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h">
       <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Entity\Entity.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Entity\ModelEntity.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Entity\PrimitiveEntity.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h">
       <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
@@ -2295,6 +2304,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Entity\Entity.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

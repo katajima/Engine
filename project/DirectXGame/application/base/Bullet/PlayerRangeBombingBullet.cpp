@@ -26,8 +26,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	// 基盤の初期化
 	BaseInitialize(entityManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
-	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
-	object_->isEmitTrailEffect = false; // トレイルを出現させない
+	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
+	//object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	
@@ -270,7 +270,7 @@ void PlayerRangeBombingBullet::Update() {
 
 	// トレイル発生
 	if (trailTime_ > 0.0f) {
-		object_->isEmitTrailEffect = true;
+		//object_->isEmitTrailEffect = true;
 	}
 	trailTime_ = 1;
 

@@ -72,12 +72,12 @@ void Engine::EntityManager::UpdateImgui()
 	static int selectedIndex_ = -1;
 
 	int openedIndex = -1;
-	for (size_t i = 0; i < object3d.size(); ++i) {
-		auto& entity = object3d[i];
+	for (size_t i = 0; i < entities_.size(); ++i) {
+		auto& entity = entities_[i];
 
 		// 強制的に一つだけ開くように設定
 		ImGui::SetNextItemOpen(i == selectedIndex_, ImGuiCond_Always);
-		if (ImGui::TreeNode(object3d[i]->name.c_str())) {
+		if (ImGui::TreeNode(entity->GetName().c_str())) {
 			openedIndex = static_cast<int>(i);  // 開いているインデックスを記録
 			selectedIndex_ = openedIndex;
 			ImGui::TreePop();
@@ -86,8 +86,12 @@ void Engine::EntityManager::UpdateImgui()
 	ImGui::End();
 
 	ImGui::Begin("Object Properties");
-	if (openedIndex >= 0 && openedIndex < static_cast<int>(object3d.size())) {
-		auto& entity = object3d[openedIndex];
+	if (openedIndex >= 0 && openedIndex < static_cast<int>(entities_.size())) {
+		Object3d* entity = dynamic_cast<Object3d*>(entities_[openedIndex].get());
+		if (!entity) {
+			ImGui::End();
+			return;
+		}
 		ImGui::Text(entity->name.c_str());
 		ImGui::Separator();
 		std::string objectTypeName = "ObjectType : " + entity->GetRenderComponent()->GetObjectTypeName();
@@ -224,43 +228,44 @@ void Engine::EntityManager::Update()
 	object3dInstansManager_->Update();
 
 	// オブジェクトが消えたときの処理
-	object3d.erase(
-		std::remove_if(object3d.begin(), object3d.end(),
-			[](const std::unique_ptr<Object3d>& object) {
+	entities_.erase(
+		std::remove_if(entities_.begin(), entities_.end(),
+			[](const std::unique_ptr<Entity>& object) {
 				return object->GetIsDelete();
 			}),
-		object3d.end());
+		entities_.end());
 
 
 	// オブジェクトの更新
-	for (auto& object : object3d) {
+	for (auto& object : entities_) {
 		if (object) {
 			// 物理更新
 			object->RigidBodyUpdate();
 		}
 	}
 
-	for (auto& object : object3d) {
+	for (auto& entity : entities_) {
+		Object3d* object = dynamic_cast<Object3d*>(entity.get());
 		if (object) {
 			// 更新
 			object->Update();
 			// オブジェクトの描画順決定
 			switch (object->GetRenderComponent()->GetObjectDrawType()) {
 			case ObjectDrawType::kTranslucent01:
-				transparentObjects01.push_back(object.get());
+				transparentObjects01.push_back(object);
 				break;
 			case ObjectDrawType::kTranslucent02:
-				transparentObjects02.push_back(object.get());
+				transparentObjects02.push_back(object);
 				break;
 			case ObjectDrawType::kTranslucent03:
-				transparentObjects03.push_back(object.get());
+				transparentObjects03.push_back(object);
 				break;
 			case ObjectDrawType::kOpaque:
 				if (object->GetAlpha() < 1.0f) {
-					transparentObjects01.push_back(object.get());
+					transparentObjects01.push_back(object);
 				}
 				else {
-					opaqueObjects.push_back(object.get());
+					opaqueObjects.push_back(object);
 				}
 				break;
 			}
@@ -270,7 +275,7 @@ void Engine::EntityManager::Update()
 
 void Engine::EntityManager::ObjectClean()
 {
-	object3d.clear();
+	entities_.clear();
 }
 
 void Engine::EntityManager::ObjectDraw()
@@ -305,21 +310,22 @@ void Engine::EntityManager::ObjectDraw()
 	}
 	transparentObjects03.clear();
 
-
-	// トレイルエフェクト
-	for (auto& object : object3d) {
-		object->DrawTrailEffect();
+	// トレイルは本体描画後にまとめて描画する。
+	for (auto& entity : entities_) {
+		Object3d* object = dynamic_cast<Object3d*>(entity.get());
+		if (object) {
+			object->DrawTrailEffect();
+		}
 	}
-
 }
 
 void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
 {
 	object3dInstansManager_->DrawShadowMap(shadowMap);
 
-	for (auto& object : object3d) {
-		if (object) {
-			object->DrawShadowMap(shadowMap);
+	for (auto& entity : entities_) {
+		if (entity) {
+			entity->DrawShadowMap(shadowMap);
 		}
 	}
 }

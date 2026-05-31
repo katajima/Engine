@@ -21,6 +21,9 @@
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 #include <DirectXGame/engine/Effect/Primitive/Primitive.h>
+#include "DirectXGame/engine/Entity/Entity.h"
+#include "DirectXGame/engine/Entity/ModelEntity.h"
+#include "DirectXGame/engine/Entity/PrimitiveEntity.h"
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 
 
@@ -68,14 +71,41 @@ namespace Engine {
 	public: //セッター
 		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
 		Object3d* CreateObject3D(const std::string& name, ObjectModelType type, const Vector3& pos, Engine::Camera* camera) {
-			auto object = std::make_unique<Object3d>();
-			object->Initialize(this, type);
+			std::unique_ptr<Object3d> object;
+			switch (type)
+			{
+			case ObjectModelType::kNormal:	// モデル描画オブジェクト
+			{
+				auto modelEntity = std::make_unique<ModelEntity>();
+				modelEntity->Initialize(this);
+				object = std::move(modelEntity);
+				break;
+			}
+			case ObjectModelType::kSkyBox:	// スカイボックス描画オブジェクト
+			{
+				auto skyBoxEntity = std::make_unique<SkyBoxEntity>();
+				skyBoxEntity->Initialize(this);
+				object = std::move(skyBoxEntity);
+				break;
+			}
+			case ObjectModelType::kOcean:	// 波描画オブジェクト
+			{
+				auto oceanEntity = std::make_unique<OceanEntity>();
+				oceanEntity->Initialize(this);
+				object = std::move(oceanEntity);
+				break;
+			}
+			default:
+				object = std::make_unique<Object3d>();
+				object->Initialize(this, type);
+				break;
+			}
 			object->SetName(name);
 			object->GetWorldTransform().translate_ = pos;
 			object->SetCamera(camera);
 
 			Object3d* raw = object.get();
-			object3d.push_back(std::move(object));
+			entities_.push_back(std::move(object));
 			return raw;
 		}
 		// オブジェクト3D生成(プリミティブ)
@@ -85,25 +115,19 @@ namespace Engine {
 			Camera* camera,
 			PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
 		{
-			// プリミティブ生成
-			std::unique_ptr<BasePrimitive> primitive = std::make_unique<T>();
-			primitive->Initialize(GetPrimitiveCommon(), texturePath);
-
-			// Object3d 生成
-			auto object = std::make_unique<Object3d>();
-			object->Initialize(this, ObjectModelType::kPrimitive, rasterizerType);
+			auto object = std::make_unique<PrimitiveEntity<T>>();
+			object->Initialize(this, GetPrimitiveCommon(), texturePath, rasterizerType);
 			object->SetName(name);
 			object->SetCamera(camera);
-			object->SetPrimitive(std::move(primitive)); // 所有権を渡す
 
 			Object3d* raw = object.get();
-			object3d.push_back(std::move(object));
+			entities_.push_back(std::move(object));
 			return raw;
 		}
 
 		// タグでの削除
 		void EraseObject3DByTag(const std::string& tag) {
-			std::erase_if(object3d, [&](const std::unique_ptr<Object3d>& o) {
+			std::erase_if(entities_, [&](const std::unique_ptr<Entity>& o) {
 				return  o->GetNameTag() == tag;
 				});
 		}
@@ -135,7 +159,7 @@ namespace Engine {
 
 
 	private:
-		std::vector<std::unique_ptr<Object3d>> object3d;
+		std::vector<std::unique_ptr<Entity>> entities_;
 
 		std::vector<Object3d*> opaqueObjects;
 		std::vector<Object3d*> transparentObjects01;

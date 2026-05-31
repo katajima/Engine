@@ -1,5 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/struct/Light.h"
+#include "DirectXGame/engine/Entity/Entity.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
@@ -33,7 +34,7 @@ namespace Engine {
 	/// <summary>
 	/// オブジェクトクラス
 	/// </summary>
-	class Object3d
+	class Object3d : public Entity
 	{
 	public:
 		Object3d();
@@ -42,32 +43,15 @@ namespace Engine {
 		// 初期化
 		void Initialize(EntityManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		// 更新
-		void Update();
+		void Update() override;
 
 		// 物理更新
-		void RigidBodyUpdate();
+		void RigidBodyUpdate() override;
 
 		// 描画通常
-		void Draw();
+		void Draw() override;
 		// シャドウマップ用の深度描画
-		void DrawShadowMap(ShadowMap* shadowMap);
-
-		// トレイルエフェクト描画
-		void DrawTrailEffect();
-
-		/// <summary>
-		/// トレイルエフェクトを使うときの設定
-		/// </summary>
-		/// <param name="tex">tテクスチャ設定</param>
-		/// <param name="maxTime">トレイルの生存時間</param>
-		/// <param name="color">色</param>
-		/// <param name="offsetStr">トレイルのオフセットの位置始点</param>
-		/// <param name="offsetEnd">トレイルのオフセットの位置終点</param>
-		void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
-
-		// トレイルを出すかの設定
-		void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
-
+		void DrawShadowMap(ShadowMap* shadowMap) override;
 	public:// セッター
 		// モデル設定(モデル)
 		void SetModel(Model* model);
@@ -76,9 +60,10 @@ namespace Engine {
 		// カメラ設定
 		void SetCamera(Camera* camera);
 		// 名前設定
-		void SetName(const std::string& name);
+		void SetName(const std::string& name) override;
+		const std::string& GetName() const override;
 		// タグ設定
-		void SetNameTag(const std::string& name);
+		void SetNameTag(const std::string& name) override;
 		// プリミティブ形状
 		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive);
 		// スカイボックス
@@ -103,17 +88,21 @@ namespace Engine {
 		std::vector<MaterialInstance>& GetMaterialInstance();
 
 		// タグ取得
-		std::string GetNameTag() const;
+		const std::string& GetNameTag() const override;
 		// 描画するか設定
 		void SetIsDraw(bool is);
 		// モデルのデバッグ用ImGui
 		void DebugImguiModel();
 		// スキンモデルのデバッグ用
 		void DebugImguiSkin();
+		// トレイルエフェクト設定
+		void UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd);
+		// トレイルエフェクト描画
+		void DrawTrailEffect();
 		// 削除する
-		void IsDelete();
+		void IsDelete() override;
 		// 削除されているか取得
-		bool GetIsDelete() const;
+		bool GetIsDelete() const override;
 		// オブジェクトに使われているモデルの透明度取得
 		float GetAlpha();
 
@@ -187,6 +176,8 @@ namespace Engine {
 		Vector3 GetPreWorldPosition() const;
 		// ワールド座標
 		WorldTransform& GetWorldTransform();
+		WorldTransform* GetWorldTransformPtr() override;
+		const WorldTransform* GetWorldTransformPtr() const override;
 		// 座標更新
 		void UpdateWorldTransform();
 		// 向いている方向
@@ -223,9 +214,6 @@ namespace Engine {
 		RenderComponent* GetRenderComponent();
 
 	public:
-		//
-		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
-		// trailエフェクトを使用するかのフラグ
 		bool isEmitTrailEffect = false;
 		//
 		bool isRigidUpdate_ = true;
@@ -241,6 +229,7 @@ namespace Engine {
 		WorldTransform direWorldTransform_;
 		Vector3 direction_ = {};
 	private:
+		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 		Object3dCommon*		object3dCommon = nullptr;
 		SkinningConmmon*	skinningConmmon = nullptr;
 		ImGuiManager*		imGuiManager = nullptr;
