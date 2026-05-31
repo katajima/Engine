@@ -2653,7 +2653,7 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
-		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+		owner->GetWeapon()->SetTrailEmit(false);
 		if (ctx.inputData.jumpTrigger) {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump); 
 		}
@@ -5506,7 +5506,7 @@ namespace Combo {
 		// 武器情報取得
 		weapon = owner->GetWeapon();
 		// トレイル終了
-		weapon->GetObject3D()->isEmitTrailEffect = false;
+		weapon->SetTrailEmit(false);
 	}
 
 	// 更新
@@ -5515,18 +5515,19 @@ namespace Combo {
 		bool isTrail = false;
 		if (IsEffectTrail(timer)) { isTrail = true; }
 		// トレイルを出すか設定
-		weapon->GetObject3D()->isEmitTrailEffect = isTrail;
+		weapon->SetTrailEmit(isTrail);
 	}
 
 	// 終了
 	void ComboEffect::Exit(Character::BaseCharacter* owner) {
 		// トレイル終了
-		weapon->GetObject3D()->isEmitTrailEffect = false;
+		weapon->SetTrailEmit(false);
 	}
 
 #pragma endregion //コンボエフェクト
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h
@@ -21923,7 +21924,7 @@ namespace Character {
 	void PlayerStateIdle::Update(const CharacterContext& ctx) {
 		BaseWeapon* weapon = character->GetWeapon();
 		BaseSpecial* special = character->GetSpecial();
-		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+		character->GetWeapon()->SetTrailEmit(false);
 
 
 		// 武器描画 
@@ -30356,6 +30357,7 @@ File Path: project/DirectXGame/application/base/Weapon/Base/BaseWeapon.cpp
 #include "BaseWeapon.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 BaseWeapon::BaseWeapon() = default;
 
@@ -30372,6 +30374,17 @@ Engine::Object3d* BaseWeapon::GetObject3D() { return objectComponent_->GetObject
 Engine::WorldTransform& BaseWeapon::GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 // 弾管理クラス設定
 void BaseWeapon::SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
+// 武器に紐づくトレイルを設定
+void BaseWeapon::SetTrailEffect(Engine::TrailEffect* trailEffect) { trailEffect_ = trailEffect; }
+// 武器に紐づくトレイルを取得
+Engine::TrailEffect* BaseWeapon::GetTrailEffect() { return trailEffect_; }
+// トレイル発生のON/OFF
+void BaseWeapon::SetTrailEmit(bool isEmit)
+{
+	if (trailEffect_) {
+		trailEffect_->SetIsEmit(isEmit);
+	}
+}
 
 RangedWeapon::~RangedWeapon() = default;
 
@@ -30405,6 +30418,7 @@ namespace Engine {
 	class WorldTransform;
 	class Camera;
 	class ColliderComponent;
+	class TrailEffect;
 }
 namespace HitBox {
 	class HitBoxInstance;
@@ -30439,6 +30453,12 @@ public:
 	Engine::WorldTransform& GetWorldTransform();
 	// 弾管理クラス設定
 	void SetBulletManager(BulletManager* bulletManager);
+	// 武器に紐づくトレイルを設定
+	void SetTrailEffect(Engine::TrailEffect* trailEffect);
+	// 武器に紐づくトレイルを取得
+	Engine::TrailEffect* GetTrailEffect();
+	// トレイル発生のON/OFF
+	void SetTrailEmit(bool isEmit);
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
 	const Character::BaseCharacter* target = nullptr;			// ターゲット
@@ -30451,6 +30471,7 @@ protected:
 	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
+	Engine::TrailEffect* trailEffect_ = nullptr;			// EntityManagerが所有するトレイルへの参照
 	InputSystem* inputSystem = nullptr;					// 入力(使わないならnullptr)
 };
 
@@ -30494,6 +30515,7 @@ public:
 protected:
 	RangedWeaponData rengedData_; // 遠距離武器データ
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Base/RangedWeapons.h
@@ -31338,6 +31360,7 @@ File Path: project/DirectXGame/application/base/Weapon/Player/PlayerWeapon.cpp
 ============================================================
 #include "PlayerWeapon.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
@@ -31350,10 +31373,11 @@ void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	objectComponent_->Initialize(entityManager, globalVariables, "PlayerWeapon", "Sword.obj", false, false, this);
 	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
 
-	// トレイルエフェクト設定
-	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, provisionalData_.color,
+	// トレイルはObject3dに所有させず、EntityManager管理の独立Entityとして生成する。
+	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/Image.png", provisionalData_.trailLifeTime,
+		GetObject3D()->GetWorldTransform(), camera, provisionalData_.color,
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMin(),
-		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax());
+		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax()));
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
 	// スケール
@@ -37084,7 +37108,6 @@ File Path: project/DirectXGame/engine/3d/Object/Object3d.cpp
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
-#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #pragma region Init
 
@@ -37248,10 +37271,6 @@ void Engine::Object3d::Update()
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
 	}
-	if (trailEffect_) {
-		trailEffect_->SetIsEmit(isEmitTrailEffect);
-		trailEffect_->Update();
-	}
 	direWorldTransform_.Update();
 
 	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(), GetWorldPosition()).Normalize();
@@ -37284,22 +37303,6 @@ void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
 
 	renderComponent_->DrawShadowMap(shadowMap);
 }
-
-void Engine::Object3d::DrawTrailEffect()
-{
-	if (trailEffect_) {
-		trailEffect_->Draw();
-	}
-}
-
-void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
-{
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
-	trailEffect_->SetCamera(defaltCamera);
-	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
-}
-
 
 void Engine::Object3d::DebugImguiSkin()
 {
@@ -37489,6 +37492,7 @@ File Path: project/DirectXGame/engine/3d/Object/Object3d.h
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <future>
+#include <cstdint>
 
 // 前方宣言
 
@@ -37509,7 +37513,6 @@ namespace Engine {
 	class RenderComponent;
 	class ShadowMap;
 
-	class TrailEffect;
 	class Camera;
 	class Ocean;
 	class SkyBox;
@@ -37579,10 +37582,6 @@ namespace Engine {
 		void DebugImguiModel();
 		// スキンモデルのデバッグ用
 		void DebugImguiSkin();
-		// トレイルエフェクト設定
-		void UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd);
-		// トレイルエフェクト描画
-		void DrawTrailEffect();
 		// 削除する
 		void IsDelete() override;
 		// 削除されているか取得
@@ -37700,7 +37699,6 @@ namespace Engine {
 		RenderComponent* GetRenderComponent();
 
 	public:
-		bool isEmitTrailEffect = false;
 		//
 		bool isRigidUpdate_ = true;
 
@@ -37715,7 +37713,6 @@ namespace Engine {
 		WorldTransform direWorldTransform_;
 		Vector3 direction_ = {};
 	private:
-		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 		Object3dCommon*		object3dCommon = nullptr;
 		SkinningConmmon*	skinningConmmon = nullptr;
 		ImGuiManager*		imGuiManager = nullptr;
@@ -49324,6 +49321,7 @@ File Path: project/DirectXGame/engine/DirectX/Resource/IndexBufferResource.h
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
+#include<algorithm>
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -49340,16 +49338,19 @@ namespace Engine {
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> index, size_t num = 1)
 		{
 			this->dxCommon = dxCommon;	// DX共通クラス
+			const size_t bufferCount = (std::max)(size_t{ 1 }, num);
 
 			// リソース生成
-			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
+			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * bufferCount);
 
 			// データ
 			data_ = nullptr;
 
 			// リソースを書き込むためのアドレス取得
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
-			std::memcpy(Data(), index.data(), sizeof(Type) * num);
+			if (!index.empty()) {
+				std::memcpy(Data(), index.data(), sizeof(Type) * index.size());
+			}
 			resource_->Unmap(0, nullptr);
 			// リソースの先頭のアドレスを作成する
 			bufferView.BufferLocation = resource_->GetGPUVirtualAddress();
@@ -49361,7 +49362,7 @@ namespace Engine {
 		void UpdateBuffer(std::vector<Type> index) {
 			if (resource_) {
 				// バッファサイズを確認
-				size_t requiredSize = sizeof(uint32_t) * index.size();
+				size_t requiredSize = sizeof(Type) * (std::max)(size_t{ 1 }, index.size());
 				D3D12_RESOURCE_DESC desc = resource_->GetDesc();
 				if (requiredSize > desc.Width) {
 					// バッファが不足している場合、再割り当て
@@ -49386,7 +49387,9 @@ namespace Engine {
 				// データのコピー
 				Type* data;
 				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data));
-				memcpy(data, index.data(), requiredSize);
+				if (!index.empty()) {
+					memcpy(data, index.data(), sizeof(Type) * index.size());
+				}
 				resource_->Unmap(0, nullptr);
 			}
 		}
@@ -49415,6 +49418,7 @@ namespace Engine {
 
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/Resource/StructuredBuffer.h
@@ -50720,6 +50724,14 @@ void Engine::EffectComponent::AddTrailEffect(const std::string name, const std::
 
 }
 
+void Engine::EffectComponent::AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, const TrailSettings& settings, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+{
+	AddTrailEffect(name, tex, maxTime, parent, color, offsetStr, offsetEnd);
+	if (TrailEffect* trail = GetTrailEffect(name)) {
+		trail->SetSettings(settings);
+	}
+}
+
 void Engine::EffectComponent::AddPrimitive(const std::string& name, const std::string tex, ShapeParameter::ShapeType type)
 {
 	// 既に同じtypeとnameのプリミティブが存在する場合はreturn
@@ -50863,6 +50875,7 @@ void Engine::EffectComponent::DrawEffect() {
 	}
 }
 
+
 ============================================================
 File Path: project/DirectXGame/engine/Effect/EffectComponent.h
 ============================================================
@@ -50953,6 +50966,8 @@ namespace Engine {
 	public: // トレイルエフェクト
 		// 追加
 		void AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
+		// 合成設定付きで追加
+		void AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, const TrailSettings& settings, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
 		// 削除
 		void RemoveTrailEffect(const std::string& name) { trails_.erase(name); };
 		// 削除
@@ -59123,26 +59138,80 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Effect/Trail/TrailEffect.cpp
 ============================================================
 #include "TrailEffect.h"
-#include "DirectXGame/engine/3d/Object/Object3d.h"
+
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/engine/Math/LineCurveMath.h"
+
+#include <algorithm>
+#include <cmath>
+
+namespace {
+	constexpr size_t kVerticesPerSegment = 6;
+
+	VertexData MakeTrailVertex(const Vector3& position, const Vector2& uv)
+	{
+		return {
+			.position = { position.x, position.y, position.z, 1.0f },
+			.texcoord = uv,
+			.normal = { 0.0f, 0.0f, 1.0f },
+			.tangent = {}
+		};
+	}
+
+	bool DebugFeatureCheckbox(const char* label, Engine::TrailFeature feature, Engine::TrailSettings& settings)
+	{
+		bool enabled = (settings.features & feature) != Engine::TrailFeature::None;
+		if (!ImGui::Checkbox(label, &enabled)) {
+			return false;
+		}
+
+		const uint32_t current = static_cast<uint32_t>(settings.features);
+		const uint32_t mask = static_cast<uint32_t>(feature);
+		settings.features = static_cast<Engine::TrailFeature>(enabled ? (current | mask) : (current & ~mask));
+		return true;
+	}
+
+	void AppendTrailQuad(std::vector<VertexData>& vertices,
+		const Vector3& currentStart,
+		const Vector3& currentEnd,
+		const Vector3& previousStart,
+		const Vector3& previousEnd,
+		float currentU,
+		float previousU)
+	{
+		const Vector2 uvCurrentTop = { currentU, 0.0f };
+		const Vector2 uvCurrentBottom = { currentU, 1.0f };
+		const Vector2 uvPreviousTop = { previousU, 0.0f };
+		const Vector2 uvPreviousBottom = { previousU, 1.0f };
+
+		vertices.push_back(MakeTrailVertex(currentStart, uvCurrentTop));
+		vertices.push_back(MakeTrailVertex(previousStart, uvPreviousTop));
+		vertices.push_back(MakeTrailVertex(currentEnd, uvCurrentBottom));
+		vertices.push_back(MakeTrailVertex(currentEnd, uvCurrentBottom));
+		vertices.push_back(MakeTrailVertex(previousStart, uvPreviousTop));
+		vertices.push_back(MakeTrailVertex(previousEnd, uvPreviousBottom));
+	}
+}
 
 void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::string& tex,float maxtime  ,const Color color)
 {
 	// エフェクト管理クラス
 	this->effectManager = effectManager;
+	lifeTime_ = (std::max)(maxtime, 0.01f);
+	timer = lifeTime_;
+	baseColor_ = color;
+	settings_.features = TrailFeature::Ribbon;
+	settings_.minEmitDistance = minEmitDistance_;
+	settings_.maxSegmentCount = maxSegmentCount_;
 
-	// メッシュ生成
+	// メッシュ生成。最大セグメント分のバッファを先に確保し、更新時の再確保を減らす。
 	mesh = std::make_unique<ModelMesh>();
-	mesh->vertices.push_back({ 0,0,0 });
-	mesh->SetIndice(1);
+	mesh->vertices.resize(maxSegmentCount_ * kVerticesPerSegment);
 	mesh->Initialize(effectManager->GetDxCommon());
-	mesh->ClearIndices();
 	mesh->vertices.clear();
-	mesh->SetMaxTime(maxtime);
-
-	// 生存時間設定
-	timer = maxtime;
+	mesh->ClearIndices();
+	mesh->SetMaxTime(lifeTime_);
 
 	// マテリアル初期化
 	material = std::make_unique<Material>();
@@ -59154,81 +59223,63 @@ void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::st
 	transfomation = std::make_unique<Transfomation>();
 	transfomation->Initialize(effectManager->GetDxCommon());
 
-
 	parentTransform_.Identity();
 	mat_.Identity();
 }
 
 void Engine::TrailEffect::Update()
 {
-	material->GPUData();
 	worldtransformTstr_.Update();
 	worldtransformTend_.Update();
 
-	Vector3 str = worldtransformTstr_.worldMat_.GetWorldPosition();
-	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
-	Vector3 strPre = worldtransformTstr_.worldPreMat_.GetWorldPosition();
-	Vector3 endPre = worldtransformTend_.worldPreMat_.GetWorldPosition();
+	const Vector3 start = worldtransformTstr_.worldMat_.GetWorldPosition();
+	const Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
+	const float deltaTime = MyGame::GameTime();
 
-
-
-
-	Vector3 leftTop = { str.x , str.y , str.z };
-	Vector3 leftBottom = { end.x , end.y , end.z };
-	Vector3 rightTop = { strPre.x , strPre.y , strPre.z };
-	Vector3 rightBottom = { endPre.x , endPre.y , endPre.z };
-
-	//　出すなら二枚の三角ポリゴンを 
-	if (flag_) {
-		mesh->vertices.push_back({ .position = {leftTop.x, leftTop.y, leftTop.z, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 左上
-		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 右上
-		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
-		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
-		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f} ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 右上
-		mesh->vertices.push_back({ .position = {rightBottom.x, rightBottom.y, rightBottom.z, 1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
-
-		// タイマーの初期化
-		for (int i = 0; i < 6; ++i) {
-			mesh->SetVerticesTimer({ 0.0f });
-		}
+	// 発生していない間も最後の座標は追従させ、再発生時に長い帯が一気に伸びるのを防ぐ。
+	if (flag_ && HasFeature(TrailFeature::Ribbon)) {
+		EmitSegment(start, end);
+	}
+	else {
+		lastStart_ = start;
+		lastEnd_ = end;
+		hasLastSample_ = true;
 	}
 
-
-	// タイマーの更新
-	for (size_t i = 0; i < mesh->GetVerticesTimer().size(); ++i) {
-		mesh->AddVerticeTimer(static_cast<int>(i), MyGame::GameTime()); // 例としてフレーム時間を加算 (60FPSの想定)
+	for (TrailSegment& segment : segments_) {
+		segment.age += deltaTime;
 	}
 
-
-	// 時間が経過した頂点を削除
-	while (!mesh->GetVerticesTimer().empty() && mesh->GetVerticesTimer().front() >= mesh->GetMaxTime()) {
-		mesh->vertices.erase(mesh->vertices.begin());
-		mesh->EraseVerticeTimer();
+	const size_t oldCount = segments_.size();
+	while (!segments_.empty() && segments_.front().age >= lifeTime_) {
+		segments_.pop_front();
+	}
+	if (oldCount != segments_.size()) {
+		meshDirty_ = true;
 	}
 
+	if (meshDirty_) {
+		RebuildMesh();
+		mesh->UpdateVertexBuffer();
+		meshDirty_ = false;
+	}
 
-
-
-	// 頂点バッファビューを更新
-	mesh->UpdateVertexBuffer();
-
-
-
-
+	// トレイルは頂点側がワールド座標なので、行列は単位行列として扱う。
 	parentTransform_ = MakeAffineMatrix({ 1,1,1 }, Vector3{ 0,0,0 }, { 0,0,0 });
-
-	// 位置データ
 	transfomation->Update(camera_, parentTransform_);
+
+	material->GetMaterialInstance().color = baseColor_;
+	UpdateComposableModules(deltaTime);
+	material->GPUData();
 }
 
 void Engine::TrailEffect::Draw()
 {
 	// 頂点があるなら
-	if (mesh->vertices.size() != 0) {
-		
+	if (!mesh->vertices.empty()) {
 		// 描画前準備
 		effectManager->GetTrailEffectCommon()->DrawCommonSetting();
-		
+
 		// 位置
 		transfomation->GetCommandList(1);
 
@@ -59241,13 +59292,282 @@ void Engine::TrailEffect::Draw()
 		// メッシュ
 		mesh->GetCommandList();
 
-		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		effectManager->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()), 1, 0, 0);
-
 	}
 }
 
+void Engine::TrailEffect::UpdateImgui()
+{
+#ifdef _DEBUG
+	if (!ImGui::CollapsingHeader("Trail Debug")) {
+		return;
+	}
 
+	TrailSettings debugSettings = settings_;
+	bool changedSettings = false;
+
+	ImGui::Text("Runtime State");
+	ImGui::Checkbox("Emit", &flag_);
+	ImGui::Text("Segments : %d", static_cast<int>(segments_.size()));
+	ImGui::Text("Vertices : %d", mesh ? static_cast<int>(mesh->vertices.size()) : 0);
+	ImGui::Text("Dirty    : %s", meshDirty_ ? "true" : "false");
+
+	if (ImGui::Button("Clear Trail")) {
+		segments_.clear();
+		if (mesh) {
+			mesh->vertices.clear();
+			mesh->UpdateVertexBuffer();
+		}
+		meshDirty_ = false;
+	}
+
+	ImGui::Separator();
+	ImGui::Text("Features");
+	changedSettings |= DebugFeatureCheckbox("Ribbon", TrailFeature::Ribbon, debugSettings);
+	changedSettings |= DebugFeatureCheckbox("AfterImage", TrailFeature::AfterImage, debugSettings);
+	changedSettings |= DebugFeatureCheckbox("Mesh Trail", TrailFeature::Mesh, debugSettings);
+	changedSettings |= DebugFeatureCheckbox("Particle Trail", TrailFeature::Particle, debugSettings);
+	changedSettings |= DebugFeatureCheckbox("UV Scroll", TrailFeature::UVScroll, debugSettings);
+	changedSettings |= DebugFeatureCheckbox("Distortion", TrailFeature::Distortion, debugSettings);
+	changedSettings |= DebugFeatureCheckbox("Dissolve", TrailFeature::Dissolve, debugSettings);
+
+	ImGui::Separator();
+	ImGui::Text("Ribbon");
+	float lifeTime = lifeTime_;
+	if (ImGui::DragFloat("Life Time", &lifeTime, 0.01f, 0.01f, 10.0f)) {
+		lifeTime_ = (std::max)(lifeTime, 0.01f);
+		timer = lifeTime_;
+		if (mesh) {
+			mesh->SetMaxTime(lifeTime_);
+		}
+		meshDirty_ = true;
+	}
+	changedSettings |= ImGui::DragFloat("Min Emit Distance", &debugSettings.minEmitDistance, 0.001f, 0.0f, 10.0f);
+	changedSettings |= ImGui::Checkbox("Use Spline", &debugSettings.useSpline);
+
+	if (ImGui::DragInt("Spline Subdivision", &debugSettings.splineSubdivision, 1.0f, 1, 16)) {
+		debugSettings.splineSubdivision = std::clamp(debugSettings.splineSubdivision, 1, 16);
+		changedSettings = true;
+	}
+
+	int maxSegmentCount = static_cast<int>(debugSettings.maxSegmentCount);
+	if (ImGui::DragInt("Max Segment Count", &maxSegmentCount, 1.0f, 1, 2048)) {
+		debugSettings.maxSegmentCount = static_cast<size_t>((std::max)(1, maxSegmentCount));
+		changedSettings = true;
+	}
+
+	ImGui::ColorEdit4("Color", &baseColor_.r);
+
+	ImGui::Separator();
+	ImGui::Text("UV Scroll");
+	changedSettings |= ImGui::DragFloat2("UV Scroll Speed", &debugSettings.uvScrollSpeed.x, 0.01f);
+	ImGui::Text("UV Offset : %.3f, %.3f", uvScrollOffset_.x, uvScrollOffset_.y);
+
+	ImGui::Separator();
+	ImGui::Text("Dissolve");
+	changedSettings |= ImGui::DragFloat("Dissolve Speed", &debugSettings.dissolveSpeed, 0.01f, 0.0f, 100.0f);
+	changedSettings |= ImGui::DragFloat("Dissolve Clip Min", &debugSettings.dissolveAlphaClipMin, 0.01f, 0.0f, 1.0f);
+	changedSettings |= ImGui::DragFloat("Dissolve Clip Max", &debugSettings.dissolveAlphaClipMax, 0.01f, 0.0f, 1.0f);
+
+	ImGui::Separator();
+	ImGui::Text("Reserved Modules");
+	changedSettings |= ImGui::DragInt("AfterImage Count", &debugSettings.afterImageCount, 1.0f, 0, 64);
+	changedSettings |= ImGui::DragFloat("Mesh Trail Interval", &debugSettings.meshTrailInterval, 0.001f, 0.0f, 10.0f);
+	changedSettings |= ImGui::DragFloat("Particle Emit Interval", &debugSettings.particleEmitInterval, 0.001f, 0.0f, 10.0f);
+	changedSettings |= ImGui::DragFloat("Distortion Strength", &debugSettings.distortionStrength, 0.01f, 0.0f, 100.0f);
+
+	if (changedSettings) {
+		// デバッグ値は保存せず、その場のTrailSettingsだけに反映する。
+		SetSettings(debugSettings);
+	}
+#endif // _DEBUG
+}
+
+void Engine::TrailEffect::SetQuality(float minEmitDistance, size_t maxSegmentCount)
+{
+	minEmitDistance_ = (std::max)(0.0f, minEmitDistance);
+	maxSegmentCount_ = (std::max)(size_t{ 1 }, maxSegmentCount);
+	settings_.minEmitDistance = minEmitDistance_;
+	settings_.maxSegmentCount = maxSegmentCount_;
+
+	while (segments_.size() > maxSegmentCount_) {
+		segments_.pop_front();
+	}
+	meshDirty_ = true;
+}
+
+void Engine::TrailEffect::SetSettings(const TrailSettings& settings)
+{
+	settings_ = settings;
+	settings_.splineSubdivision = std::clamp(settings_.splineSubdivision, 1, 16);
+	SetQuality(settings_.minEmitDistance, settings_.maxSegmentCount);
+	dissolveTime_ = 0.0f;
+	uvScrollOffset_ = {};
+}
+
+void Engine::TrailEffect::AddFeature(TrailFeature feature)
+{
+	settings_.features |= feature;
+}
+
+void Engine::TrailEffect::RemoveFeature(TrailFeature feature)
+{
+	const uint32_t current = static_cast<uint32_t>(settings_.features);
+	const uint32_t remove = static_cast<uint32_t>(feature);
+	settings_.features = static_cast<TrailFeature>(current & ~remove);
+}
+
+bool Engine::TrailEffect::HasFeature(TrailFeature feature) const
+{
+	return (settings_.features & feature) != TrailFeature::None;
+}
+
+void Engine::TrailEffect::EmitSegment(const Vector3& start, const Vector3& end)
+{
+	if (!hasLastSample_) {
+		lastStart_ = start;
+		lastEnd_ = end;
+		hasLastSample_ = true;
+		return;
+	}
+
+	// 微小移動では頂点を増やさない。手ぶれのような細かい揺れも抑えられる。
+	const float movedStart = Length(start - lastStart_);
+	const float movedEnd = Length(end - lastEnd_);
+	if (movedStart < minEmitDistance_ && movedEnd < minEmitDistance_) {
+		return;
+	}
+
+	segments_.push_back({
+		.start = start,
+		.end = end,
+		.prevStart = lastStart_,
+		.prevEnd = lastEnd_,
+		.age = 0.0f
+		});
+
+	while (segments_.size() > maxSegmentCount_) {
+		segments_.pop_front();
+	}
+
+	lastStart_ = start;
+	lastEnd_ = end;
+	meshDirty_ = true;
+}
+
+void Engine::TrailEffect::RebuildMesh()
+{
+	mesh->vertices.clear();
+	mesh->vertices.reserve(segments_.size() * kVerticesPerSegment);
+
+	if (segments_.empty()) {
+		return;
+	}
+
+	if (settings_.useSpline && segments_.size() >= 3) {
+		RebuildSplineMesh();
+	}
+	else {
+		RebuildLinearMesh();
+	}
+}
+
+void Engine::TrailEffect::RebuildLinearMesh()
+{
+	const float invLifeTime = 1.0f / lifeTime_;
+	for (const TrailSegment& segment : segments_) {
+		const float ageRate = std::clamp(segment.age * invLifeTime, 0.0f, 1.0f);
+		const float nextAgeRate = std::clamp(ageRate + (1.0f / static_cast<float>((std::max)(size_t{ 1 }, segments_.size()))), 0.0f, 1.0f);
+
+		// 1セグメントを必ず2三角形単位で生成し、寿命削除で三角形が崩れないようにする。
+		AppendTrailQuad(mesh->vertices, segment.start, segment.end, segment.prevStart, segment.prevEnd, ageRate, nextAgeRate);
+	}
+}
+
+void Engine::TrailEffect::RebuildSplineMesh()
+{
+	std::vector<Vector3> startRail;
+	std::vector<Vector3> endRail;
+	startRail.reserve(segments_.size() + 1);
+	endRail.reserve(segments_.size() + 1);
+
+	// start側/end側を別々の制御点列として補間し、同じtで結ぶことで滑らかな帯にする。
+	startRail.push_back(segments_.front().prevStart);
+	endRail.push_back(segments_.front().prevEnd);
+	for (const TrailSegment& segment : segments_) {
+		startRail.push_back(segment.start);
+		endRail.push_back(segment.end);
+	}
+
+	if (startRail.size() < 4 || endRail.size() < 4) {
+		RebuildLinearMesh();
+		return;
+	}
+
+	const int subdivision = std::clamp(settings_.splineSubdivision, 1, 16);
+	const size_t sampleCount = ((startRail.size() - 1) * static_cast<size_t>(subdivision)) + 1;
+	if (sampleCount < 2) {
+		return;
+	}
+
+	std::vector<Vector3> sampledStart;
+	std::vector<Vector3> sampledEnd;
+	sampledStart.reserve(sampleCount);
+	sampledEnd.reserve(sampleCount);
+
+	for (size_t i = 0; i < sampleCount; ++i) {
+		const float t = static_cast<float>(i) / static_cast<float>(sampleCount - 1);
+		sampledStart.push_back(CatmullRom(startRail, t));
+		sampledEnd.push_back(CatmullRom(endRail, t));
+	}
+
+	for (size_t i = 1; i < sampleCount; ++i) {
+		const float currentU = static_cast<float>(i) / static_cast<float>(sampleCount - 1);
+		const float previousU = static_cast<float>(i - 1) / static_cast<float>(sampleCount - 1);
+		AppendTrailQuad(mesh->vertices,
+			sampledStart[i],
+			sampledEnd[i],
+			sampledStart[i - 1],
+			sampledEnd[i - 1],
+			currentU,
+			previousU);
+	}
+}
+
+void Engine::TrailEffect::UpdateUvScroll(float deltaTime)
+{
+	uvScrollOffset_.x += settings_.uvScrollSpeed.x * deltaTime;
+	uvScrollOffset_.y += settings_.uvScrollSpeed.y * deltaTime;
+
+	MaterialInstance& materialInstance = material->GetMaterialInstance();
+	materialInstance.transform.translate.x = uvScrollOffset_.x;
+	materialInstance.transform.translate.y = uvScrollOffset_.y;
+}
+
+void Engine::TrailEffect::UpdateDissolve(float deltaTime)
+{
+	dissolveTime_ += deltaTime * settings_.dissolveSpeed;
+	const float dissolveRate = std::clamp(std::fmod(dissolveTime_, lifeTime_) / lifeTime_, 0.0f, 1.0f);
+
+	MaterialInstance& materialInstance = material->GetMaterialInstance();
+	materialInstance.alphaClipping_ =
+		settings_.dissolveAlphaClipMin +
+		(settings_.dissolveAlphaClipMax - settings_.dissolveAlphaClipMin) * dissolveRate;
+}
+
+void Engine::TrailEffect::UpdateComposableModules(float deltaTime)
+{
+	// Ribbonはジオメトリ生成、UVScroll/Dissolveはマテリアル操作として合成する。
+	if (HasFeature(TrailFeature::UVScroll)) {
+		UpdateUvScroll(deltaTime);
+	}
+	if (HasFeature(TrailFeature::Dissolve)) {
+		UpdateDissolve(deltaTime);
+	}
+
+	// AfterImage/Mesh/Particle/Distortionは同じ設定構造でONにできるよう入口を用意している。
+	// 実際の描画先はモデルスナップショット、パーティクル、ポストエフェクト側に接続して拡張する。
+}
 
 
 ============================================================
@@ -59261,11 +59581,14 @@ File Path: project/DirectXGame/engine/Effect/Trail/TrailEffect.h
 #include<list>
 #include<string>
 #include<vector>
+#include<deque>
 #include<format>
+#include<cstdint>
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/Entity/Entity.h"
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
@@ -59278,19 +59601,66 @@ namespace Engine {
 	// 前方宣言
 	class EffectManager;
 
+	enum class TrailFeature : uint32_t {
+		None = 0,
+		Ribbon = 1 << 0,
+		AfterImage = 1 << 1,
+		Mesh = 1 << 2,
+		Particle = 1 << 3,
+		UVScroll = 1 << 4,
+		Distortion = 1 << 5,
+		Dissolve = 1 << 6,
+	};
+
+	inline TrailFeature operator|(TrailFeature lhs, TrailFeature rhs)
+	{
+		return static_cast<TrailFeature>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+	}
+
+	inline TrailFeature operator&(TrailFeature lhs, TrailFeature rhs)
+	{
+		return static_cast<TrailFeature>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+	}
+
+	inline TrailFeature& operator|=(TrailFeature& lhs, TrailFeature rhs)
+	{
+		lhs = lhs | rhs;
+		return lhs;
+	}
+
+	struct TrailSettings {
+		TrailFeature features = TrailFeature::Ribbon;
+		float minEmitDistance = 0.03f;
+		size_t maxSegmentCount = 128;
+		bool useSpline = true;
+		int splineSubdivision = 4;
+
+		Vector2 uvScrollSpeed = { 0.0f, 0.0f };
+		float dissolveSpeed = 1.0f;
+		float dissolveAlphaClipMin = 0.0f;
+		float dissolveAlphaClipMax = 0.85f;
+
+		int afterImageCount = 4;
+		float meshTrailInterval = 0.03f;
+		float particleEmitInterval = 0.02f;
+		float distortionStrength = 0.0f;
+	};
+
 	/// <summary>
 	/// トレイルエフェクトクラス
 	/// </summary>
-	class TrailEffect
+	class TrailEffect : public Entity
 	{
 	public:
 
 		// 初期化
 		void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
 		// 更新
-		void Update();
+		void Update() override;
 		// 描画
-		void Draw();
+		void Draw() override;
+		// デバッグ表示。保存はせず、実行中の調整と状態確認だけを行う。
+		void UpdateImgui();
 		// カメラ設定
 		void SetCamera(Camera* camera) { camera_ = camera; };
 		// トレイルのオフセット設定
@@ -59312,16 +59682,42 @@ namespace Engine {
 		void SetTimer(float t) { timer = t; }
 		// 発生時間を取得
 		float GetTimer() const { return timer; }
+		// トレイルの品質設定。細かい動きを捨てる距離と、保持する最大セグメント数を指定する。
+		void SetQuality(float minEmitDistance, size_t maxSegmentCount);
+		// 複数のトレイル機能をまとめて設定する
+		void SetSettings(const TrailSettings& settings);
+		const TrailSettings& GetSettings() const { return settings_; }
+		// 既存トレイルへ機能を足し引きする
+		void AddFeature(TrailFeature feature);
+		void RemoveFeature(TrailFeature feature);
+		bool HasFeature(TrailFeature feature) const;
 
 
 		// 行列設定
 		void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
 		// メッシュ取得
 		ModelMesh* GetMesh() const { return mesh.get(); }
+		size_t GetSegmentCount() const { return segments_.size(); }
 
 		std::unique_ptr<ModelMesh> mesh;
 
 	private:
+		struct TrailSegment {
+			Vector3 start;
+			Vector3 end;
+			Vector3 prevStart;
+			Vector3 prevEnd;
+			float age = 0.0f;
+		};
+
+		void EmitSegment(const Vector3& start, const Vector3& end);
+		void RebuildMesh();
+		void RebuildLinearMesh();
+		void RebuildSplineMesh();
+		void UpdateUvScroll(float deltaTime);
+		void UpdateDissolve(float deltaTime);
+		void UpdateComposableModules(float deltaTime);
+
 		// 頂点データ
 		struct VertexData {
 			Vector4 position;
@@ -59341,6 +59737,18 @@ namespace Engine {
 		Vector3 velocity_; // 速度
 
 		float timer = 0;
+		float lifeTime_ = 0.2f;
+		float minEmitDistance_ = 0.03f;
+		size_t maxSegmentCount_ = 128;
+		TrailSettings settings_{};
+		float dissolveTime_ = 0.0f;
+		Vector2 uvScrollOffset_ = {};
+		bool hasLastSample_ = false;
+		bool meshDirty_ = true;
+		Vector3 lastStart_{};
+		Vector3 lastEnd_{};
+		Color baseColor_ = { 1,1,1,1 };
+		std::deque<TrailSegment> segments_;
 
 	private:
 		EffectManager* effectManager = nullptr;
@@ -59434,8 +59842,8 @@ void Engine::TrailEffectCommon::CreateGraphicsPipeline()
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
-	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	// 半透明の帯同士が深度を書いて欠けないよう、テストだけ行って書き込みはしない。
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
@@ -61355,6 +61763,7 @@ File Path: project/DirectXGame/engine/Manager/Entity/EntityManager.cpp
 #include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 #include <algorithm>
 
 using namespace Engine;
@@ -61472,6 +61881,11 @@ void Engine::EntityManager::UpdateImgui()
 	if (openedIndex >= 0 && openedIndex < static_cast<int>(entities_.size())) {
 		Object3d* entity = dynamic_cast<Object3d*>(entities_[openedIndex].get());
 		if (!entity) {
+			if (TrailEffect* trail = dynamic_cast<TrailEffect*>(entities_[openedIndex].get())) {
+				ImGui::Text(trail->GetName().c_str());
+				ImGui::Separator();
+				trail->UpdateImgui();
+			}
 			ImGui::End();
 			return;
 		}
@@ -61596,13 +62010,32 @@ void Engine::EntityManager::UpdateImgui()
 			}
 		}
 
-
 	}
 
 	ImGui::End();
 
 #endif // _DEBUG
 
+}
+
+TrailEffect* Engine::EntityManager::CreateTrailEffect(const std::string& name,
+	const std::string& tex,
+	float maxTime,
+	WorldTransform& parent,
+	Camera* camera,
+	Color color,
+	Vector3 offsetStr,
+	Vector3 offsetEnd)
+{
+	auto trail = std::make_unique<TrailEffect>();
+	trail->SetName(name);
+	trail->Initialize(effectManager_.get(), tex, maxTime, color);
+	trail->SetCamera(camera);
+	trail->SetOffset(offsetStr, offsetEnd, parent);
+
+	TrailEffect* raw = trail.get();
+	entities_.push_back(std::move(trail));
+	return raw;
 }
 
 void Engine::EntityManager::Update()
@@ -61630,10 +62063,15 @@ void Engine::EntityManager::Update()
 	}
 
 	for (auto& entity : entities_) {
+		if (!entity) {
+			continue;
+		}
+
+		// Entityは種類に関係なく自分の更新責務を進める。
+		entity->Update();
+
 		Object3d* object = dynamic_cast<Object3d*>(entity.get());
 		if (object) {
-			// 更新
-			object->Update();
 			// ObjectDrawTypeは透明/不透明の判定にだけ使い、実際の描画順はカメラ奥行きで自動ソートする。
 			if (IsTransparentObject(object)) {
 				transparentObjects.push_back(object);
@@ -61671,11 +62109,10 @@ void Engine::EntityManager::ObjectDraw()
 		object->Draw();
 	}
 
-	// トレイルは本体描画後にまとめて描画する。
+	// Object3d以外の描画Entityは、本体描画後にまとめて描画する。
 	for (auto& entity : entities_) {
-		Object3d* object = dynamic_cast<Object3d*>(entity.get());
-		if (object) {
-			object->DrawTrailEffect();
+		if (entity && !dynamic_cast<Object3d*>(entity.get())) {
+			entity->Draw();
 		}
 	}
 }
@@ -61733,6 +62170,7 @@ namespace Engine {
 	// 前方宣言
 	class DirectXCommon;
 	class ShadowMap;
+	class TrailEffect;
 
 	/// <summary>
 	/// エンティティマネージャー
@@ -61799,6 +62237,15 @@ namespace Engine {
 			entities_.push_back(std::move(object));
 			return raw;
 		}
+		// トレイル生成。Object3dには所有させず、独立したEntityとして管理する。
+		TrailEffect* CreateTrailEffect(const std::string& name,
+			const std::string& tex,
+			float maxTime,
+			WorldTransform& parent,
+			Camera* camera,
+			Color color = { 1,1,1,1 },
+			Vector3 offsetStr = { 0,0.5f,0 },
+			Vector3 offsetEnd = { 0,-0.5f,0 });
 		// オブジェクト3D生成(プリミティブ)
 		template<typename T>
 		Object3d* CreatePrimitiveObject3D(const std::string& name,
