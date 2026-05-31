@@ -36865,12 +36865,12 @@ namespace Engine {
 		kOcean,		// 波を描画するオブジェクト
 	};
 
-	// 描画する順番
+	// 描画属性
 	enum class ObjectDrawType {
-		kOpaque,		// 不透明
-		kTranslucent01,	// 半透明最前
-		kTranslucent02,	// 半透明中
-		kTranslucent03,	// 半透明最後
+		kOpaque,		// 不透明。alpha が 1 未満なら EntityManager 側で自動的に半透明扱いにする
+		kTranslucent01,	// 半透明指定(互換用)。実際の描画順はカメラ奥行きで自動ソートする
+		kTranslucent02,	// 半透明指定(互換用)
+		kTranslucent03,	// 半透明指定(互換用)
 	};
 
 	// 前方宣言
@@ -37018,6 +37018,7 @@ File Path: project/DirectXGame/engine/3d/Object/Object3d.cpp
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/engine/Animation/Animation.h"
+#include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
@@ -37317,6 +37318,18 @@ bool Engine::Object3d::GetIsDelete() const { return isDelete; }
 // オブジェクトに使われているモデルの透明度取得
 float Engine::Object3d::GetAlpha() { return renderComponent_->GetAlpha(); };
 
+float Engine::Object3d::GetCameraSortDepth() const
+{
+	Camera* camera = isIndividualCamera_ ? individualCamera : defaltCamera;
+	if (!camera) {
+		return 0.0f;
+	}
+
+	// カメラ前方向への射影値を使うと、カメラの向きが変わっても前後関係を同じ基準で並べられる。
+	const Vector3 toObject = GetWorldPosition() - camera->GetTranslate();
+	return Dot(toObject, camera->GetForward());
+}
+
 // Object3d内でコライダーコンポーネントを更新するか
 void Engine::Object3d::SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
 // コライダーコンポーネントを取得
@@ -37521,6 +37534,8 @@ namespace Engine {
 		bool GetIsDelete() const override;
 		// オブジェクトに使われているモデルの透明度取得
 		float GetAlpha();
+		// 描画順自動ソート用に、使用中カメラの前方向へ投影した奥行きを取得
+		float GetCameraSortDepth() const;
 
 	private:
 		// カメラ
@@ -61278,10 +61293,39 @@ File Path: project/DirectXGame/engine/Manager/Entity/EntityManager.cpp
 #include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include <algorithm>
 
 using namespace Engine;
 
 std::mutex mutex;  // グローバルやスコープ内に必要
+
+namespace {
+	bool IsTransparentObject(Engine::Object3d* object)
+	{
+		if (!object) {
+			return false;
+		}
+
+		const Engine::ObjectDrawType drawType = object->GetRenderComponent()->GetObjectDrawType();
+		return drawType != Engine::ObjectDrawType::kOpaque || object->GetAlpha() < 1.0f;
+	}
+
+	void SortFrontToBack(std::vector<Engine::Object3d*>& objects)
+	{
+		// 不透明は手前から描くと、深度テストで後ろのピクセル処理を減らしやすい。
+		std::sort(objects.begin(), objects.end(), [](const Engine::Object3d* left, const Engine::Object3d* right) {
+			return left->GetCameraSortDepth() < right->GetCameraSortDepth();
+			});
+	}
+
+	void SortBackToFront(std::vector<Engine::Object3d*>& objects)
+	{
+		// 半透明は深度書き込みとブレンドの都合で、カメラから遠い順に描く。
+		std::sort(objects.begin(), objects.end(), [](const Engine::Object3d* left, const Engine::Object3d* right) {
+			return left->GetCameraSortDepth() > right->GetCameraSortDepth();
+			});
+	}
+}
 
 void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 {
@@ -61512,6 +61556,8 @@ void Engine::EntityManager::Update()
 			}),
 		entities_.end());
 
+	opaqueObjects.clear();
+	transparentObjects.clear();
 
 	// オブジェクトの更新
 	for (auto& object : entities_) {
@@ -61526,28 +61572,18 @@ void Engine::EntityManager::Update()
 		if (object) {
 			// 更新
 			object->Update();
-			// オブジェクトの描画順決定
-			switch (object->GetRenderComponent()->GetObjectDrawType()) {
-			case ObjectDrawType::kTranslucent01:
-				transparentObjects01.push_back(object);
-				break;
-			case ObjectDrawType::kTranslucent02:
-				transparentObjects02.push_back(object);
-				break;
-			case ObjectDrawType::kTranslucent03:
-				transparentObjects03.push_back(object);
-				break;
-			case ObjectDrawType::kOpaque:
-				if (object->GetAlpha() < 1.0f) {
-					transparentObjects01.push_back(object);
-				}
-				else {
-					opaqueObjects.push_back(object);
-				}
-				break;
+			// ObjectDrawTypeは透明/不透明の判定にだけ使い、実際の描画順はカメラ奥行きで自動ソートする。
+			if (IsTransparentObject(object)) {
+				transparentObjects.push_back(object);
+			}
+			else {
+				opaqueObjects.push_back(object);
 			}
 		}
 	}
+
+	SortFrontToBack(opaqueObjects);
+	SortBackToFront(transparentObjects);
 }
 
 void Engine::EntityManager::ObjectClean()
@@ -61564,28 +61600,14 @@ void Engine::EntityManager::ObjectDraw()
 	for (auto& object : opaqueObjects) {
 		object->Draw();
 	}
-	opaqueObjects.clear();
 
 
 	object3dInstansManager_->DrawTransparency();
 
-	// 半透明最初
-	for (auto& object : transparentObjects01) {
+	// 半透明
+	for (auto& object : transparentObjects) {
 		object->Draw();
 	}
-	transparentObjects01.clear();
-
-	// 半透明中盤
-	for (auto& object : transparentObjects02) {
-		object->Draw();
-	}
-	transparentObjects02.clear();
-
-	// 半透明最後
-	for (auto& object : transparentObjects03) {
-		object->Draw();
-	}
-	transparentObjects03.clear();
 
 	// トレイルは本体描画後にまとめて描画する。
 	for (auto& entity : entities_) {
@@ -61644,15 +61666,6 @@ File Path: project/DirectXGame/engine/Manager/Entity/EntityManager.h
 
 
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
-
-// そーと用構造体
-struct SortResult {
-	Engine::Object3d* ptr;
-	Engine::ObjectDrawType drawType;
-	float alpha;
-	bool isSkin;
-};
-
 
 namespace Engine {
 	// 前方宣言
@@ -61777,10 +61790,9 @@ namespace Engine {
 	private:
 		std::vector<std::unique_ptr<Entity>> entities_;
 
+		// Update時に毎フレーム作り直す描画キュー。順番はカメラ奥行きから自動で決める。
 		std::vector<Object3d*> opaqueObjects;
-		std::vector<Object3d*> transparentObjects01;
-		std::vector<Object3d*> transparentObjects02;
-		std::vector<Object3d*> transparentObjects03;
+		std::vector<Object3d*> transparentObjects;
 
 	private:
 		// DirectX
