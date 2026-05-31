@@ -35321,6 +35321,11 @@ File Path: project/DirectXGame/engine/3d/Model/Model.cpp
 
 void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
+	Initialize(dxCommon, modelCommon, directorypath, filename, file, nullptr);
+}
+
+void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, std::mutex* gpuResourceMutex)
+{
 	this->modelCommon = modelCommon;					// モデル共通クラス
 	this->dxCommon = dxCommon;						// DX共通クラス
 	this->srvManager = modelCommon->GetSrvManager();// SRV管理クラス
@@ -35333,7 +35338,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 	}
 
 	// モデル読み込み
-	modelData = LoadOdjFileAssimpAmime(dire, filename);
+	modelData = LoadOdjFileAssimpAmime(dire, filename, gpuResourceMutex);
 
 	// メッシュ状にライン生成
 	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->GetIndices());
@@ -35350,7 +35355,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 		CreateModel::CreateSkeleton(modelData);
 
 		// スキンクラスター生成
-		CreateModel::CreateSkinCluster(modelData, modelCommon);
+		CreateModel::CreateSkinCluster(modelData, modelCommon, gpuResourceMutex);
 
 		auto it = modelData.animations.find(modelData.currentAnimName);
 		if (it != modelData.animations.end()) {
@@ -35360,7 +35365,13 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 
 	// マテリアル読み込み
 	for (auto& mesh : modelData.mesh) {
-		mesh->material->LoadTex();
+		if (gpuResourceMutex) {
+			std::lock_guard<std::mutex> lock(*gpuResourceMutex);
+			mesh->material->LoadTex();
+		}
+		else {
+			mesh->material->LoadTex();
+		}
 	};
 
 
@@ -35415,7 +35426,7 @@ float Engine::Model::GetMaterialAlpha()
 	return a;
 }
 
-Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
+Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename, std::mutex* gpuResourceMutex) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
 
@@ -35440,7 +35451,7 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode, modelData.meshOffsetMap);
 
 	// メッシュ読み込み
-	LoadModel::LoadMesh(scene, modelData, dxCommon);
+	LoadModel::LoadMesh(scene, modelData, dxCommon, gpuResourceMutex);
 	// Assimp読み込みやメッシュ生成
 
 	timer_.EndTimer();
@@ -35449,12 +35460,13 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	LoadModel::LoadBone(scene, modelData, dxCommon);
 
 	// マテリアル読み込み
-	LoadModel::LoadMaterial(scene, modelData, dxCommon, directoryPath);
+	LoadModel::LoadMaterial(scene, modelData, dxCommon, directoryPath, gpuResourceMutex);
 
 	timer_.EndTimer();
 
 	return modelData;
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/Model.h
@@ -35473,6 +35485,7 @@ File Path: project/DirectXGame/engine/3d/Model/Model.h
 #include<span>
 #include <iostream>
 #include <memory>
+#include <mutex>
 
 
 #include "DirectXGame/engine/Utility/TimerUtility.h"
@@ -35499,6 +35512,7 @@ namespace Engine {
 		/// <param name="filename">ファイル名(モデルの名前(objやgltf))</param>
 		/// <param name="file">ファイル名(resources/models以降にファイルがあるならモデルの入っているファイル名を)</param>
 		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
+		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, std::mutex* gpuResourceMutex);
 
 		// 通常描画
 		void Draw();
@@ -35529,11 +35543,12 @@ namespace Engine {
 		// 読み込んだモデルからモデルデータ生成
 		// ディレクトリパス
 		// ファイル名
-		ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
+		ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename, std::mutex* gpuResourceMutex = nullptr);
 
 
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/ModelCommon.cpp
@@ -35593,7 +35608,7 @@ File Path: project/DirectXGame/engine/3d/Model/ModelData.cpp
 #pragma region Laod
 
 // メッシュ読み込み
-void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
+void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, std::mutex* gpuResourceMutex)
 {
 	uint32_t vertexOffset = 0;
 
@@ -35678,7 +35693,13 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		}
 
 		vertexOffset += mesh->mNumVertices; // ★次メッシュの頂点オフセット更新
-		pMesh->Initialize(dxCommon);
+		if (gpuResourceMutex) {
+			std::lock_guard<std::mutex> lock(*gpuResourceMutex);
+			pMesh->Initialize(dxCommon);
+		}
+		else {
+			pMesh->Initialize(dxCommon);
+		}
 
 		modelData.mesh.push_back(std::move(pMesh));
 
@@ -35729,7 +35750,7 @@ void Engine::LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, Dir
 
 
 // マテリアル読み込み
-void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath)
+void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath, std::mutex* gpuResourceMutex)
 {
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -35744,7 +35765,13 @@ void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData,
 
 		// メッシュに対するマテリアル作成
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
-		pMaterial->Initialize(dxCommon);
+		if (gpuResourceMutex) {
+			std::lock_guard<std::mutex> lock(*gpuResourceMutex);
+			pMaterial->Initialize(dxCommon);
+		}
+		else {
+			pMaterial->Initialize(dxCommon);
+		}
 
 		// Diffuse
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
@@ -35933,8 +35960,13 @@ void Engine::CreateModel::CreateSkeleton(ModelData& modelData)
 	AnimationFunction::UpdateSkeleton(modelData.skeleton);
 }
 
-void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon)
+void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon, std::mutex* gpuResourceMutex)
 {
+	std::unique_lock<std::mutex> gpuLock;
+	if (gpuResourceMutex) {
+		gpuLock = std::unique_lock<std::mutex>(*gpuResourceMutex);
+	}
+
 	for (size_t meshIndex = 0; meshIndex < modelData.mesh.size(); ++meshIndex) {
 		auto& mesh = modelData.mesh[meshIndex];
 		if (!mesh || !mesh->skinCluster) continue; // 未設定ならスキップ
@@ -36123,6 +36155,7 @@ void Engine::DebugModel::ImguiModel(ModelData& modelData)
 
 #pragma endregion // デバッグ系
 
+
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/ModelData.h
 ============================================================
@@ -36145,6 +36178,7 @@ File Path: project/DirectXGame/engine/3d/Model/ModelData.h
 #include<vector>
 #include<format>
 #include<span>
+#include <mutex>
 
 // assimp
 #include <assimp/Importer.hpp>
@@ -36187,13 +36221,13 @@ namespace Engine {
 	namespace LoadModel {
 
 		// メッシュ読み込み
-		void LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon);
+		void LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, std::mutex* gpuResourceMutex = nullptr);
 
 		// ボーン読み込み
 		void LoadBone(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon);
 
 		// マテリアル読み込み
-		void LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath);
+		void LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath, std::mutex* gpuResourceMutex = nullptr);
 
 		// アニメーション読み込み
 		void LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename);
@@ -36215,7 +36249,7 @@ namespace Engine {
 		void CreateSkeleton(ModelData& modelData);
 
 		// スキンクラスター生成
-		void CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon);
+		void CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon, std::mutex* gpuResourceMutex = nullptr);
 
 		// ジョイント生成
 		int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
@@ -36260,23 +36294,23 @@ void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
 {
-
-	std::string file = filePath;
-	if (dire != "") {
-		file = dire + filePath;
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		// 読み込み済みモデルを検索
+		if (models.contains(filePath)) {
+			return;
+		}
 	}
 
-
-	// 読み込み済みモデルを検索
-	if (models.contains(file)) {
-		return;
-	}
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire);
+	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
 
-	// モデルをmapコンテナに格納
-	models.insert(std::make_pair(filePath, std::move(model)));
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		// モデルをmapコンテナに格納
+		models.insert(std::make_pair(filePath, std::move(model)));
+	}
 }
 
 void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
@@ -36284,37 +36318,43 @@ void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std
 	// すでにロード済みかロックを使って確認
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
-		if (models.contains(filePath)) {
+		if (models.contains(filePath) || loadingModelKeys_.contains(filePath)) {
 			return;
 		}
+		loadingModelKeys_.insert(filePath);
 	}
 
 	// 非同期に読み込み開始
-	loadingFutures_.push_back(std::async(std::launch::async, [this, filePath, dire]() {
+	std::future<void> future = std::async(std::launch::async, [this, filePath, dire]() {
 		std::unique_ptr<Model> model = std::make_unique<Model>();
-		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire);
-
-		// GPUにリソース記録が終わったあと、必ずキックして完了を待つ（非同期内）
-		auto* command = dxCommon->GetCommand();
-		command->KickCommand();
-		dxCommon->GetFence()->WaitGPU();
-		command->ResetCommand();
+		// Assimp解析は各スレッドで進め、GPU共有リソースだけModel内部で短くロックする。
+		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
 
 		{
 			std::lock_guard<std::mutex> lock(modelsMutex_);
 			models.insert(std::make_pair(filePath, std::move(model)));
+			loadingModelKeys_.erase(filePath);
 		}
-		}));
+		});
+
+	std::lock_guard<std::mutex> lock(futuresMutex_);
+	loadingFutures_.push_back(std::move(future));
 }
 
 void Engine::ModelManager::WaitAllLoadFinished()
 {
-	for (auto& fut : loadingFutures_) {
+	std::vector<std::future<void>> futures;
+	{
+		std::lock_guard<std::mutex> lock(futuresMutex_);
+		futures.swap(loadingFutures_);
+	}
+
+	for (auto& fut : futures) {
 		fut.get();  // 完了待ち
 	}
-	loadingFutures_.clear();
 
-	
+	// 非同期ロード中に各スレッドが記録したGPU転送を、最後にまとめて実行して完了を待つ。
+	std::lock_guard<std::mutex> lock(gpuResourceMutex_);
 	auto* command = dxCommon->GetCommand();
 	command->KickCommand();            // Close & ExecuteCommandLists
 	dxCommon->GetFence()->WaitGPU();  // 完了待ち
@@ -36323,6 +36363,7 @@ void Engine::ModelManager::WaitAllLoadFinished()
 
 Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(modelsMutex_);
 	// 読み込み済みモデルを検索
 	if (models.contains(filePath)) {
 		// 読み込みモデルを戻り値としてreturn
@@ -36331,6 +36372,12 @@ Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 
 	// ファイル名一致なし
 	return nullptr;
+}
+
+bool Engine::ModelManager::IsLoading() const
+{
+	std::lock_guard<std::mutex> futureLock(futuresMutex_);
+	return !loadingFutures_.empty();
 }
 
 
@@ -36351,6 +36398,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include<map>
 #include <memory>
+#include <unordered_set>
 
 #include <future>       // 追加：非同期処理用
 #include <mutex>        // 追加：排他制御用
@@ -36395,6 +36443,9 @@ namespace Engine {
 		// モデル検索
 		Model* FindModel(const std::string& filePath);
 
+		// 非同期読み込み中、または完了待ちのモデルがあるか
+		bool IsLoading() const;
+
 		// モデル全取得
 		const std::map<std::string, std::unique_ptr<Model>>& GetModel() const { return models; }
 
@@ -36403,12 +36454,15 @@ namespace Engine {
 
 	private:
 		std::map<std::string, std::unique_ptr<Model>> models;
+		std::unordered_set<std::string> loadingModelKeys_;
 
 		// 非同期読み込みで管理するfutureのリスト
 		std::vector<std::future<void>> loadingFutures_;
 
 		// 排他制御
-		std::mutex modelsMutex_;  // modelsへの書き込みを守るmutex
+		mutable std::mutex modelsMutex_;  // modelsへの読み書きとloadingModelKeys_を守るmutex
+		mutable std::mutex futuresMutex_; // loadingFutures_への追加/完了待ちを守るmutex
+		std::mutex gpuResourceMutex_;     // コマンドリスト/SRV/テクスチャなどGPU側共有リソースを守るmutex
 
 	private:
 		Command* command;
@@ -36420,6 +36474,7 @@ namespace Engine {
 
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/RenderComponent.cpp
@@ -42555,6 +42610,7 @@ void Engine::TextureManager::Initialize(Command* command, DXGIDevice* dxgiDevice
 
 
 void Engine::TextureManager::LoadTexture(const std::string& filePath) {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	debugTimerTex_.StartTimer();
 
 	// 読み込み済みテクスチャを検索
@@ -42694,6 +42750,7 @@ void Engine::TextureManager::LoadAllTexturesInDirectory(const std::string& direc
 
 uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	//読み込み済みテクスチャを検索
 	auto it = textureDatas.find(filePath);
 	if (it != textureDatas.end()) {
@@ -42705,6 +42762,7 @@ uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& fi
 
 D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	// 範囲外指定チェック
 	auto it = textureDatas.find(filePath);
 	if (it != textureDatas.end()) {
@@ -42717,6 +42775,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::s
 
 const DirectX::TexMetadata& Engine::TextureManager::GetMataData(const std::string& filePath)
 {
+	std::lock_guard<std::mutex> lock(textureMutex_);
 	// 範囲外指定チェック
 	auto it = textureDatas.find(filePath);
 	assert(it != textureDatas.end() && "Texture file path not found");
@@ -42806,6 +42865,7 @@ File Path: project/DirectXGame/engine/Base/Texture/TextureManager.h
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include <filesystem>
+#include <mutex>
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -42875,6 +42935,7 @@ namespace Engine {
 
 		//テクスチャデータ
 		std::unordered_map<std::string, TextureData> textureDatas;
+		mutable std::mutex textureMutex_;
 
 		static uint32_t kSRVIndexTop;
 
@@ -42886,6 +42947,7 @@ namespace Engine {
 
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Base/WinApp/WinApp.cpp
@@ -53424,7 +53486,7 @@ namespace Engine {
 		UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
 
 		// 最大パーティクル量
-		const uint32_t kNumMaxInstance = 1024 * 4;
+		const uint32_t kNumMaxInstance = 1024 * 2;
 
 		// フィールド関係
 		std::vector<Field::FieldEffect*> fieldEffect_;
@@ -65759,14 +65821,14 @@ void Engine::MyGame::LoadModel()
 	/// <summary>
 	/// テスト用フリーモデル
 	/// </summary>
-	modelManager->LoadModel("multiMaterial.obj", "TestModel/multiMaterial");
-	modelManager->LoadModel("multiMaterial.gltf", "TestModel/multiMaterial");
-	modelManager->LoadModel("multiMesh.obj", "TestModel/multiMesh");
-	modelManager->LoadModel("plane.obj", "TestModel/plane");
-	modelManager->LoadModel("AnimatedCube.gltf", "TestModel/AnimatedCube");
-	modelManager->LoadModel("axis.obj", "TestModel/axis");
-	modelManager->LoadModel("teapot.obj", "TestModel/teapot");
-	modelManager->LoadModel("stair.obj", "TestModel");			// 階段
+	modelManager->LoadModelAsync("multiMaterial.obj", "TestModel/multiMaterial");
+	modelManager->LoadModelAsync("multiMaterial.gltf", "TestModel/multiMaterial");
+	modelManager->LoadModelAsync("multiMesh.obj", "TestModel/multiMesh");
+	modelManager->LoadModelAsync("plane.obj", "TestModel/plane");
+	modelManager->LoadModelAsync("AnimatedCube.gltf", "TestModel/AnimatedCube");
+	modelManager->LoadModelAsync("axis.obj", "TestModel/axis");
+	modelManager->LoadModelAsync("teapot.obj", "TestModel/teapot");
+	modelManager->LoadModelAsync("stair.obj", "TestModel");			// 階段
 
 
 
@@ -65774,91 +65836,94 @@ void Engine::MyGame::LoadModel()
 	/// 乗り物
 	/// </summary>
 
-	modelManager->LoadModel("train.gltf",	"Vehicle/train");
-	modelManager->LoadModel("ship.gltf",	"Vehicle/ship");
+	modelManager->LoadModelAsync("train.gltf",	"Vehicle/train");
+	modelManager->LoadModelAsync("ship.gltf",	"Vehicle/ship");
 
-	modelManager->LoadModel("TrackCarBody.obj", "Vehicle/track");
-	modelManager->LoadModel("TrackCarTire.obj", "Vehicle/track");
-	modelManager->LoadModel("scrapBox.obj", "Vehicle/track");
+	modelManager->LoadModelAsync("TrackCarBody.obj", "Vehicle/track");
+	modelManager->LoadModelAsync("TrackCarTire.obj", "Vehicle/track");
+	modelManager->LoadModelAsync("scrapBox.obj", "Vehicle/track");
 
 
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModel("renga.gltf", "stage/renga");				// 地形
-	modelManager->LoadModel("Ground.obj", "stage/Ground");				// 地形
-	modelManager->LoadModel("coast.gltf", "stage/terrain/coast");		// 地形
-	modelManager->LoadModel("black.obj", "stage/terrain/black");		// 地形(底)
-	modelManager->LoadModel("terrain.obj", "stage/terrain/terrain");	// 地形
-	modelManager->LoadModel("rail.obj", "stage/rail");					// 線路
+	modelManager->LoadModelAsync("renga.gltf", "stage/renga");				// 地形
+	modelManager->LoadModelAsync("Ground.obj", "stage/Ground");				// 地形
+	modelManager->LoadModelAsync("coast.gltf", "stage/terrain/coast");		// 地形
+	modelManager->LoadModelAsync("black.obj", "stage/terrain/black");		// 地形(底)
+	modelManager->LoadModelAsync("terrain.obj", "stage/terrain/terrain");	// 地形
+	modelManager->LoadModelAsync("rail.obj", "stage/rail");					// 線路
 
 
 	/// <summary>
 	/// 建物
 	/// </summary>
-	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
-	modelManager->LoadModel("Missile.gltf", "stage/Missile"); // ミサイル発射台
+	modelManager->LoadModelAsync("stage.gltf", "stage"); // ステージ
+	modelManager->LoadModelAsync("Missile.gltf", "stage/Missile"); // ミサイル発射台
 
 
-	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
-	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
-	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
-	modelManager->LoadModel("testField.obj", "stage/test"); // フィールド()
+	modelManager->LoadModelAsync("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
+	modelManager->LoadModelAsync("field.obj", "stage/Field"); // フィールド()
+	modelManager->LoadModelAsync("hasira.obj", "stage/objects"); // 柱()
+	modelManager->LoadModelAsync("testField.obj", "stage/test"); // フィールド()
 
 
-	modelManager->LoadModel("Stone.obj", "stage/Title/Stone"); // フィールド()
-	modelManager->LoadModel("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)
+	modelManager->LoadModelAsync("Stone.obj", "stage/Title/Stone"); // フィールド()
+	modelManager->LoadModelAsync("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)
 
 
 	/// <summary>
 	/// プレイヤー
 	/// </summary>
-	modelManager->LoadModel("player_bullet.obj", "Bullet/player_bullet");	// プレイヤー弾
-	modelManager->LoadModel("cartridge.obj", "Bullet/player_bullet");	// プレイヤー弾
+	modelManager->LoadModelAsync("player_bullet.obj", "Bullet/player_bullet");	// プレイヤー弾
+	modelManager->LoadModelAsync("cartridge.obj", "Bullet/player_bullet");	// プレイヤー弾
 
-	modelManager->LoadModel("Sword.obj", "Weapon/Sword");				// プレイヤー武器
-	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
+	modelManager->LoadModelAsync("Sword.obj", "Weapon/Sword");				// プレイヤー武器
+	modelManager->LoadModelAsync("bulletWeapon.obj", "Weapon");
 
-	modelManager->LoadModel("origin.gltf", "Character/Player");		// プレイヤー
-	modelManager->LoadModel("testCharacter.gltf", "Character/Player");	// プレイヤー
+	modelManager->LoadModelAsync("origin.gltf", "Character/Player");		// プレイヤー
+	modelManager->LoadModelAsync("testCharacter.gltf", "Character/Player");	// プレイヤー
 
-	modelManager->LoadModel("point.obj", "special");			// ポイント
+	modelManager->LoadModelAsync("point.obj", "special");			// ポイント
 
 	/// <summary>
 	/// スプラップ
 	/// </summary>
-	modelManager->LoadModel("basis.obj", "Scrap/Basis"); // スクラップ（基盤）
-	modelManager->LoadModel("gear.obj", "Scrap/Gear"); // スクラップ（歯車）
-	modelManager->LoadModel("ironRod.obj", "Scrap/IronRod"); // スクラップ（鉄の棒）
-	modelManager->LoadModel("screw.obj", "Scrap/Screw"); // スクラップ（ねじ）
-	modelManager->LoadModel("tire.obj", "Scrap/Tire"); // スクラップ（タイヤ）
+	modelManager->LoadModelAsync("basis.obj", "Scrap/Basis"); // スクラップ（基盤）
+	modelManager->LoadModelAsync("gear.obj", "Scrap/Gear"); // スクラップ（歯車）
+	modelManager->LoadModelAsync("ironRod.obj", "Scrap/IronRod"); // スクラップ（鉄の棒）
+	modelManager->LoadModelAsync("screw.obj", "Scrap/Screw"); // スクラップ（ねじ）
+	modelManager->LoadModelAsync("tire.obj", "Scrap/Tire"); // スクラップ（タイヤ）
 
 
 	/// <summary>
 	/// 敵
 	/// </summary>
 
-	modelManager->LoadModel("enemy.obj",		"Character/enemyAll/enemy"); // 的
-	modelManager->LoadModel("enemy.gltf",		"Character/enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemy2.obj",		"Character/enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemyTire.obj",	"Character/enemyAll/tire"); // タイヤ
-	modelManager->LoadModel("enemyDuct.obj",	"Character/enemyAll/duct"); // ダクト
-	modelManager->LoadModel("enemyPlank.obj",	"Character/enemyAll/plank"); // 鋼板
-	modelManager->LoadModel("enemyGear.obj",	"Character/enemyAll/gear"); // 歯車
-	modelManager->LoadModel("enemyFence.obj",	"Character/enemyAll/fence"); // 柵
+	modelManager->LoadModelAsync("enemy.obj",		"Character/enemyAll/enemy"); // 的
+	modelManager->LoadModelAsync("enemy.gltf",		"Character/enemyAll/enemy2"); // 本体
+	modelManager->LoadModelAsync("enemy2.obj",		"Character/enemyAll/enemy2"); // 本体
+	modelManager->LoadModelAsync("enemyTire.obj",	"Character/enemyAll/tire"); // タイヤ
+	modelManager->LoadModelAsync("enemyDuct.obj",	"Character/enemyAll/duct"); // ダクト
+	modelManager->LoadModelAsync("enemyPlank.obj",	"Character/enemyAll/plank"); // 鋼板
+	modelManager->LoadModelAsync("enemyGear.obj",	"Character/enemyAll/gear"); // 歯車
+	modelManager->LoadModelAsync("enemyFence.obj",	"Character/enemyAll/fence"); // 柵
 
 
-	modelManager->LoadModel("enemyBullet.gltf", "Character/enemyAll/enemyBullet"); // 本体
+	modelManager->LoadModelAsync("enemyBullet.gltf", "Character/enemyAll/enemyBullet"); // 本体
 
 
 
-	modelManager->LoadModel("enemyBodySG01.obj",		"Character/enemy/enemySG01"); // 本体
-	modelManager->LoadModel("enemyWeaponSG01.obj",		"Character/enemy/enemySG01"); // 武器
+	modelManager->LoadModelAsync("enemyBodySG01.obj",		"Character/enemy/enemySG01"); // 本体
+	modelManager->LoadModelAsync("enemyWeaponSG01.obj",		"Character/enemy/enemySG01"); // 武器
 
-	modelManager->LoadModel("enemyBodySS01.obj",		"Character/enemy/enemySS01"); // 本体
-	modelManager->LoadModel("enemyPropellerSS01.obj",	"Character/enemy/enemySS01"); // プロペラ
-	modelManager->LoadModel("enemyMuzzleSS01.obj",		"Character/enemy/enemySS01"); // 武器
+	modelManager->LoadModelAsync("enemyBodySS01.obj",		"Character/enemy/enemySS01"); // 本体
+	modelManager->LoadModelAsync("enemyPropellerSS01.obj",	"Character/enemy/enemySS01"); // プロペラ
+	modelManager->LoadModelAsync("enemyMuzzleSS01.obj",		"Character/enemy/enemySS01"); // 武器
 	
+
+	// ここまでに投げた非同期モデル読み込みを待ち、GPU転送もまとめて完了させる。
+	modelManager->WaitAllLoadFinished();
 }
 
 
