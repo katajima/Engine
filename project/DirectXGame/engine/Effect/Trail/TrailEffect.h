@@ -6,11 +6,14 @@
 #include<list>
 #include<string>
 #include<vector>
+#include<deque>
 #include<format>
+#include<cstdint>
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/Entity/Entity.h"
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
@@ -23,19 +26,66 @@ namespace Engine {
 	// 前方宣言
 	class EffectManager;
 
+	enum class TrailFeature : uint32_t {
+		None = 0,
+		Ribbon = 1 << 0,
+		AfterImage = 1 << 1,
+		Mesh = 1 << 2,
+		Particle = 1 << 3,
+		UVScroll = 1 << 4,
+		Distortion = 1 << 5,
+		Dissolve = 1 << 6,
+	};
+
+	inline TrailFeature operator|(TrailFeature lhs, TrailFeature rhs)
+	{
+		return static_cast<TrailFeature>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+	}
+
+	inline TrailFeature operator&(TrailFeature lhs, TrailFeature rhs)
+	{
+		return static_cast<TrailFeature>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+	}
+
+	inline TrailFeature& operator|=(TrailFeature& lhs, TrailFeature rhs)
+	{
+		lhs = lhs | rhs;
+		return lhs;
+	}
+
+	struct TrailSettings {
+		TrailFeature features = TrailFeature::Ribbon;
+		float minEmitDistance = 0.03f;
+		size_t maxSegmentCount = 128;
+		bool useSpline = true;
+		int splineSubdivision = 4;
+
+		Vector2 uvScrollSpeed = { 0.0f, 0.0f };
+		float dissolveSpeed = 1.0f;
+		float dissolveAlphaClipMin = 0.0f;
+		float dissolveAlphaClipMax = 0.85f;
+
+		int afterImageCount = 4;
+		float meshTrailInterval = 0.03f;
+		float particleEmitInterval = 0.02f;
+		float distortionStrength = 0.0f;
+	};
+
 	/// <summary>
 	/// トレイルエフェクトクラス
 	/// </summary>
-	class TrailEffect
+	class TrailEffect : public Entity
 	{
 	public:
 
 		// 初期化
 		void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
 		// 更新
-		void Update();
+		void Update() override;
 		// 描画
-		void Draw();
+		void Draw() override;
+		// デバッグ表示。保存はせず、実行中の調整と状態確認だけを行う。
+		void UpdateImgui();
 		// カメラ設定
 		void SetCamera(Camera* camera) { camera_ = camera; };
 		// トレイルのオフセット設定
@@ -57,16 +107,42 @@ namespace Engine {
 		void SetTimer(float t) { timer = t; }
 		// 発生時間を取得
 		float GetTimer() const { return timer; }
+		// トレイルの品質設定。細かい動きを捨てる距離と、保持する最大セグメント数を指定する。
+		void SetQuality(float minEmitDistance, size_t maxSegmentCount);
+		// 複数のトレイル機能をまとめて設定する
+		void SetSettings(const TrailSettings& settings);
+		const TrailSettings& GetSettings() const { return settings_; }
+		// 既存トレイルへ機能を足し引きする
+		void AddFeature(TrailFeature feature);
+		void RemoveFeature(TrailFeature feature);
+		bool HasFeature(TrailFeature feature) const;
 
 
 		// 行列設定
 		void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
 		// メッシュ取得
 		ModelMesh* GetMesh() const { return mesh.get(); }
+		size_t GetSegmentCount() const { return segments_.size(); }
 
 		std::unique_ptr<ModelMesh> mesh;
 
 	private:
+		struct TrailSegment {
+			Vector3 start;
+			Vector3 end;
+			Vector3 prevStart;
+			Vector3 prevEnd;
+			float age = 0.0f;
+		};
+
+		void EmitSegment(const Vector3& start, const Vector3& end);
+		void RebuildMesh();
+		void RebuildLinearMesh();
+		void RebuildSplineMesh();
+		void UpdateUvScroll(float deltaTime);
+		void UpdateDissolve(float deltaTime);
+		void UpdateComposableModules(float deltaTime);
+
 		// 頂点データ
 		struct VertexData {
 			Vector4 position;
@@ -86,6 +162,18 @@ namespace Engine {
 		Vector3 velocity_; // 速度
 
 		float timer = 0;
+		float lifeTime_ = 0.2f;
+		float minEmitDistance_ = 0.03f;
+		size_t maxSegmentCount_ = 128;
+		TrailSettings settings_{};
+		float dissolveTime_ = 0.0f;
+		Vector2 uvScrollOffset_ = {};
+		bool hasLastSample_ = false;
+		bool meshDirty_ = true;
+		Vector3 lastStart_{};
+		Vector3 lastEnd_{};
+		Color baseColor_ = { 1,1,1,1 };
+		std::deque<TrailSegment> segments_;
 
 	private:
 		EffectManager* effectManager = nullptr;

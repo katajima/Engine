@@ -109,7 +109,7 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
-		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+		owner->GetWeapon()->SetTrailEmit(false);
 		if (ctx.inputData.jumpTrigger) {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump); 
 		}

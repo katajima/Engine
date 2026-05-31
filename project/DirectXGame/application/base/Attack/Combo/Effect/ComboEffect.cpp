@@ -55,7 +55,7 @@ namespace Combo {
 		// 武器情報取得
 		weapon = owner->GetWeapon();
 		// トレイル終了
-		weapon->GetObject3D()->isEmitTrailEffect = false;
+		weapon->SetTrailEmit(false);
 	}
 
 	// 更新
@@ -64,13 +64,13 @@ namespace Combo {
 		bool isTrail = false;
 		if (IsEffectTrail(timer)) { isTrail = true; }
 		// トレイルを出すか設定
-		weapon->GetObject3D()->isEmitTrailEffect = isTrail;
+		weapon->SetTrailEmit(isTrail);
 	}
 
 	// 終了
 	void ComboEffect::Exit(Character::BaseCharacter* owner) {
 		// トレイル終了
-		weapon->GetObject3D()->isEmitTrailEffect = false;
+		weapon->SetTrailEmit(false);
 	}
 
 #pragma endregion //コンボエフェクト

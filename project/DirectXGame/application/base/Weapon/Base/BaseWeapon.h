@@ -22,6 +22,7 @@ namespace Engine {
 	class WorldTransform;
 	class Camera;
 	class ColliderComponent;
+	class TrailEffect;
 }
 namespace HitBox {
 	class HitBoxInstance;
@@ -56,6 +57,12 @@ public:
 	Engine::WorldTransform& GetWorldTransform();
 	// 弾管理クラス設定
 	void SetBulletManager(BulletManager* bulletManager);
+	// 武器に紐づくトレイルを設定
+	void SetTrailEffect(Engine::TrailEffect* trailEffect);
+	// 武器に紐づくトレイルを取得
+	Engine::TrailEffect* GetTrailEffect();
+	// トレイル発生のON/OFF
+	void SetTrailEmit(bool isEmit);
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
 	const Character::BaseCharacter* target = nullptr;			// ターゲット
@@ -68,6 +75,7 @@ protected:
 	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
+	Engine::TrailEffect* trailEffect_ = nullptr;			// EntityManagerが所有するトレイルへの参照
 	InputSystem* inputSystem = nullptr;					// 入力(使わないならnullptr)
 };
 

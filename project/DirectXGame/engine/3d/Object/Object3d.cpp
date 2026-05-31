@@ -19,7 +19,6 @@
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
-#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #pragma region Init
 
@@ -183,10 +182,6 @@ void Engine::Object3d::Update()
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
 	}
-	if (trailEffect_) {
-		trailEffect_->SetIsEmit(isEmitTrailEffect);
-		trailEffect_->Update();
-	}
 	direWorldTransform_.Update();
 
 	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(), GetWorldPosition()).Normalize();
@@ -219,22 +214,6 @@ void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
 
 	renderComponent_->DrawShadowMap(shadowMap);
 }
-
-void Engine::Object3d::DrawTrailEffect()
-{
-	if (trailEffect_) {
-		trailEffect_->Draw();
-	}
-}
-
-void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
-{
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
-	trailEffect_->SetCamera(defaltCamera);
-	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
-}
-
 
 void Engine::Object3d::DebugImguiSkin()
 {

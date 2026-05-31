@@ -33,6 +33,7 @@ namespace Engine {
 	// 前方宣言
 	class DirectXCommon;
 	class ShadowMap;
+	class TrailEffect;
 
 	/// <summary>
 	/// エンティティマネージャー
@@ -99,6 +100,15 @@ namespace Engine {
 			entities_.push_back(std::move(object));
 			return raw;
 		}
+		// トレイル生成。Object3dには所有させず、独立したEntityとして管理する。
+		TrailEffect* CreateTrailEffect(const std::string& name,
+			const std::string& tex,
+			float maxTime,
+			WorldTransform& parent,
+			Camera* camera,
+			Color color = { 1,1,1,1 },
+			Vector3 offsetStr = { 0,0.5f,0 },
+			Vector3 offsetEnd = { 0,-0.5f,0 });
 		// オブジェクト3D生成(プリミティブ)
 		template<typename T>
 		Object3d* CreatePrimitiveObject3D(const std::string& name,

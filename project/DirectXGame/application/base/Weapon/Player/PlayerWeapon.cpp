@@ -1,5 +1,6 @@
 #include "PlayerWeapon.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
@@ -12,10 +13,11 @@ void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	objectComponent_->Initialize(entityManager, globalVariables, "PlayerWeapon", "Sword.obj", false, false, this);
 	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
 
-	// トレイルエフェクト設定
-	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, provisionalData_.color,
+	// トレイルはObject3dに所有させず、EntityManager管理の独立Entityとして生成する。
+	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/Image.png", provisionalData_.trailLifeTime,
+		GetObject3D()->GetWorldTransform(), camera, provisionalData_.color,
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMin(),
-		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax());
+		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax()));
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
 	// スケール

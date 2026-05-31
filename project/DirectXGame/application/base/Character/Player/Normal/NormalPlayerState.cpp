@@ -15,7 +15,7 @@ namespace Character {
 	void PlayerStateIdle::Update(const CharacterContext& ctx) {
 		BaseWeapon* weapon = character->GetWeapon();
 		BaseSpecial* special = character->GetSpecial();
-		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+		character->GetWeapon()->SetTrailEmit(false);
 
 
 		// 武器描画 

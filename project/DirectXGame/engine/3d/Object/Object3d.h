@@ -5,6 +5,7 @@
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <future>
+#include <cstdint>
 
 // 前方宣言
 
@@ -25,7 +26,6 @@ namespace Engine {
 	class RenderComponent;
 	class ShadowMap;
 
-	class TrailEffect;
 	class Camera;
 	class Ocean;
 	class SkyBox;
@@ -95,10 +95,6 @@ namespace Engine {
 		void DebugImguiModel();
 		// スキンモデルのデバッグ用
 		void DebugImguiSkin();
-		// トレイルエフェクト設定
-		void UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd);
-		// トレイルエフェクト描画
-		void DrawTrailEffect();
 		// 削除する
 		void IsDelete() override;
 		// 削除されているか取得
@@ -216,7 +212,6 @@ namespace Engine {
 		RenderComponent* GetRenderComponent();
 
 	public:
-		bool isEmitTrailEffect = false;
 		//
 		bool isRigidUpdate_ = true;
 
@@ -231,7 +226,6 @@ namespace Engine {
 		WorldTransform direWorldTransform_;
 		Vector3 direction_ = {};
 	private:
-		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 		Object3dCommon*		object3dCommon = nullptr;
 		SkinningConmmon*	skinningConmmon = nullptr;
 		ImGuiManager*		imGuiManager = nullptr;

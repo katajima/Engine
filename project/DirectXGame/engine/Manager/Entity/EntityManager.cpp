@@ -1,6 +1,7 @@
 #include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 #include <algorithm>
 
 using namespace Engine;
@@ -118,6 +119,11 @@ void Engine::EntityManager::UpdateImgui()
 	if (openedIndex >= 0 && openedIndex < static_cast<int>(entities_.size())) {
 		Object3d* entity = dynamic_cast<Object3d*>(entities_[openedIndex].get());
 		if (!entity) {
+			if (TrailEffect* trail = dynamic_cast<TrailEffect*>(entities_[openedIndex].get())) {
+				ImGui::Text(trail->GetName().c_str());
+				ImGui::Separator();
+				trail->UpdateImgui();
+			}
 			ImGui::End();
 			return;
 		}
@@ -242,13 +248,32 @@ void Engine::EntityManager::UpdateImgui()
 			}
 		}
 
-
 	}
 
 	ImGui::End();
 
 #endif // _DEBUG
 
+}
+
+TrailEffect* Engine::EntityManager::CreateTrailEffect(const std::string& name,
+	const std::string& tex,
+	float maxTime,
+	WorldTransform& parent,
+	Camera* camera,
+	Color color,
+	Vector3 offsetStr,
+	Vector3 offsetEnd)
+{
+	auto trail = std::make_unique<TrailEffect>();
+	trail->SetName(name);
+	trail->Initialize(effectManager_.get(), tex, maxTime, color);
+	trail->SetCamera(camera);
+	trail->SetOffset(offsetStr, offsetEnd, parent);
+
+	TrailEffect* raw = trail.get();
+	entities_.push_back(std::move(trail));
+	return raw;
 }
 
 void Engine::EntityManager::Update()
@@ -276,10 +301,15 @@ void Engine::EntityManager::Update()
 	}
 
 	for (auto& entity : entities_) {
+		if (!entity) {
+			continue;
+		}
+
+		// Entityは種類に関係なく自分の更新責務を進める。
+		entity->Update();
+
 		Object3d* object = dynamic_cast<Object3d*>(entity.get());
 		if (object) {
-			// 更新
-			object->Update();
 			// ObjectDrawTypeは透明/不透明の判定にだけ使い、実際の描画順はカメラ奥行きで自動ソートする。
 			if (IsTransparentObject(object)) {
 				transparentObjects.push_back(object);
@@ -317,11 +347,10 @@ void Engine::EntityManager::ObjectDraw()
 		object->Draw();
 	}
 
-	// トレイルは本体描画後にまとめて描画する。
+	// Object3d以外の描画Entityは、本体描画後にまとめて描画する。
 	for (auto& entity : entities_) {
-		Object3d* object = dynamic_cast<Object3d*>(entity.get());
-		if (object) {
-			object->DrawTrailEffect();
+		if (entity && !dynamic_cast<Object3d*>(entity.get())) {
+			entity->Draw();
 		}
 	}
 }

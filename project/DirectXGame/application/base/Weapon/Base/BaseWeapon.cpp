@@ -1,6 +1,7 @@
 #include "BaseWeapon.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 BaseWeapon::BaseWeapon() = default;
 
@@ -17,6 +18,17 @@ Engine::Object3d* BaseWeapon::GetObject3D() { return objectComponent_->GetObject
 Engine::WorldTransform& BaseWeapon::GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 // 弾管理クラス設定
 void BaseWeapon::SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
+// 武器に紐づくトレイルを設定
+void BaseWeapon::SetTrailEffect(Engine::TrailEffect* trailEffect) { trailEffect_ = trailEffect; }
+// 武器に紐づくトレイルを取得
+Engine::TrailEffect* BaseWeapon::GetTrailEffect() { return trailEffect_; }
+// トレイル発生のON/OFF
+void BaseWeapon::SetTrailEmit(bool isEmit)
+{
+	if (trailEffect_) {
+		trailEffect_->SetIsEmit(isEmit);
+	}
+}
 
 RangedWeapon::~RangedWeapon() = default;
 

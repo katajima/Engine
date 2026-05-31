@@ -123,6 +123,14 @@ void Engine::EffectComponent::AddTrailEffect(const std::string name, const std::
 
 }
 
+void Engine::EffectComponent::AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, const TrailSettings& settings, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+{
+	AddTrailEffect(name, tex, maxTime, parent, color, offsetStr, offsetEnd);
+	if (TrailEffect* trail = GetTrailEffect(name)) {
+		trail->SetSettings(settings);
+	}
+}
+
 void Engine::EffectComponent::AddPrimitive(const std::string& name, const std::string tex, ShapeParameter::ShapeType type)
 {
 	// 既に同じtypeとnameのプリミティブが存在する場合はreturn

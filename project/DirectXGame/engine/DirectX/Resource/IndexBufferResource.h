@@ -3,6 +3,7 @@
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
+#include<algorithm>
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -19,16 +20,19 @@ namespace Engine {
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> index, size_t num = 1)
 		{
 			this->dxCommon = dxCommon;	// DX共通クラス
+			const size_t bufferCount = (std::max)(size_t{ 1 }, num);
 
 			// リソース生成
-			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
+			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * bufferCount);
 
 			// データ
 			data_ = nullptr;
 
 			// リソースを書き込むためのアドレス取得
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
-			std::memcpy(Data(), index.data(), sizeof(Type) * num);
+			if (!index.empty()) {
+				std::memcpy(Data(), index.data(), sizeof(Type) * index.size());
+			}
 			resource_->Unmap(0, nullptr);
 			// リソースの先頭のアドレスを作成する
 			bufferView.BufferLocation = resource_->GetGPUVirtualAddress();
@@ -40,7 +44,7 @@ namespace Engine {
 		void UpdateBuffer(std::vector<Type> index) {
 			if (resource_) {
 				// バッファサイズを確認
-				size_t requiredSize = sizeof(uint32_t) * index.size();
+				size_t requiredSize = sizeof(Type) * (std::max)(size_t{ 1 }, index.size());
 				D3D12_RESOURCE_DESC desc = resource_->GetDesc();
 				if (requiredSize > desc.Width) {
 					// バッファが不足している場合、再割り当て
@@ -65,7 +69,9 @@ namespace Engine {
 				// データのコピー
 				Type* data;
 				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data));
-				memcpy(data, index.data(), requiredSize);
+				if (!index.empty()) {
+					memcpy(data, index.data(), sizeof(Type) * index.size());
+				}
 				resource_->Unmap(0, nullptr);
 			}
 		}

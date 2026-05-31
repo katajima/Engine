@@ -85,6 +85,8 @@ namespace Engine {
 	public: // トレイルエフェクト
 		// 追加
 		void AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
+		// 合成設定付きで追加
+		void AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, const TrailSettings& settings, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
 		// 削除
 		void RemoveTrailEffect(const std::string& name) { trails_.erase(name); };
 		// 削除
