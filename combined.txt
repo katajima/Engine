@@ -8134,7 +8134,7 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.cpp
 namespace HitBox {
 
 	bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* otherColl) {
-		other = static_cast<Engine::ColliderComponent*>(otherColl->owner);
+		other = static_cast<Engine::ColliderComponent*>(otherColl->GetOwner());
 		this->otherColl = otherColl;
 		if (!other) return false;
 
@@ -8164,7 +8164,7 @@ namespace HitBox {
 	}
 
 	void HitBoxFunction::UpdateTypePlayer() {
-		if (otherColl->tag != CollisionTag::Enemy) return;
+		if (otherColl->GetTag() != CollisionTag::Enemy) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
@@ -8190,7 +8190,7 @@ namespace HitBox {
 	}
 
 	void HitBoxFunction::UpdateTypeEnemy() {
-		if (otherColl->tag != CollisionTag::Player) return;
+		if (otherColl->GetTag() != CollisionTag::Player) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
@@ -8523,16 +8523,17 @@ namespace HitBox {
 		}
 		// デバック用表示
 		if (isLine) {
-			coll->isDebugLine = true;
+			coll->SetIsDebugLine(true);
 		}
 
-		coll->tag = tag;			// タグ設定
-		coll->layer = layer;		// レイヤー設定
-		coll->collisionMask = (1 << static_cast<uint32_t>(mask));	// マスク設定
+		coll->SetTag(tag);			// タグ設定
+		coll->SetLayer(layer);		// レイヤー設定
+		coll->SetCollisionMask((1 << static_cast<uint32_t>(mask)));	// マスク設定
 
 		return std::move(coll);
 	}
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/Hitbox.cpp
@@ -8578,7 +8579,7 @@ namespace HitBox {
 
 			// 当たったコライダーによって相手に送るデータを決め転送
 			for (auto& data : colliders_) {
-				if (self->id == data.second.colliderID) {
+				if (self->GetId() == data.second.colliderID) {
 					hitBoxFunction_->SetData(data.second.reactionData);
 					break;
 				}
@@ -8610,7 +8611,7 @@ namespace HitBox {
 		ColliderData data;
 		data.colliderID = colliderComponent_->AddCollider(std::move(collider));
 		data.collider = colliderComponent_->FindColliderById(data.colliderID);
-		data.collider->isDebugLine = true;
+		data.collider->SetIsDebugLine(true);
 
 		worldTransform_.Update();
 
@@ -8631,14 +8632,14 @@ namespace HitBox {
 	void HitBoxInstance::Enable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Enable();
-			colliderData.second.collider->lineColor = color;
+			colliderData.second.collider->SetLineColor(color);
 		}
 	};
 	// 無効化
 	void HitBoxInstance::Disable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Disable();
-			colliderData.second.collider->lineColor = color;
+			colliderData.second.collider->SetLineColor(color);
 		}
 	};
 
@@ -8910,7 +8911,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Response/Response.cpp
 ============================================================
-#include "Response.h"
+﻿#include "Response.h"
 #include <DirectXGame/application/base/Object/ObjectComponent.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -8920,7 +8921,7 @@ File Path: project/DirectXGame/application/base/Attack/Response/Response.cpp
 
 void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)
 {
-	if (other->tag == tag) {
+	if (other->GetTag() == tag) {
 		Vector3 pushVec{};
 		if (self->ResolveCollision(*other, pushVec)) {
 			pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
@@ -8928,11 +8929,11 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 			// リアクション移動システムがあるなら
 			if (moveRequestSystem) {
 				MoveRequest request;
-				if (other->isStatic) {
+				if (other->IsStatic()) {
 					// 相手が動かないなら自分だけ押し戻す
 					request.velocity = pushVec;
 				}
-				else if (self->isStatic) {
+				else if (self->IsStatic()) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
@@ -8947,13 +8948,13 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 }
 
 void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
-	if (other->tag == CollisionTag::Wall) {
+	if (other->GetTag() == CollisionTag::Wall) {
 		Vector3 pushVec{};
 		if (self->ResolveCollision(*other, pushVec)) {
 			// リアクション移動システムがあるなら
 			if (moveRequestSystem) {
 				MoveRequest request;
-				if (other->isStatic) {
+				if (other->IsStatic()) {
 					// 相手が動かないなら自分だけ押し戻す
 					request.velocity = pushVec;
 				}
@@ -8961,7 +8962,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
 					request.velocity = pushVec * halfSize;
 				}
-				if (other->tag == CollisionTag::Wall) {
+				if (other->GetTag() == CollisionTag::Wall) {
 					if (pushVec.Normalize().y >= 0.7f) {
 						request.isLanding = true;
 					}
@@ -8970,7 +8971,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 					}
 				}
 
-				request.groundHeight = request.velocity.y + other->centerWorld.y;
+				request.groundHeight = request.velocity.y + other->GetCenterWorld().y;
 				moveRequestSystem->SetRequest(request);
 				return;
 			}
@@ -8979,10 +8980,10 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 }
 
 void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
-	if (other->tag == CollisionTag::PlayerEffect) {
+	if (other->GetTag() == CollisionTag::PlayerEffect) {
 		Vector3 pushVec{};
-		Vector3 otherPos = other->centerWorld;
-		Vector3 selfPos = self->centerWorld;
+		Vector3 otherPos = other->GetCenterWorld();
+		Vector3 selfPos = self->GetCenterWorld();
 		Vector3 dire = Normalize(otherPos - selfPos);
 
 		// リアクション移動システムがあるなら
@@ -9276,7 +9277,7 @@ void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManag
 
 
 	objectComponent_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (isAlive_ == false) return;
 		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
@@ -9331,18 +9332,18 @@ void Projectile::BaseProjectile::CreateCollision() {
 	if (param_.type == Type::Laser) {
 		// レーザーの場合は細長いカプセルコライダなども考えられるが、ここでは簡略化して球で設定
 		auto capsule = std::make_unique<Engine::CapsuleCollider>();
-		capsule->tag = param_.collisionTag;				// タグ設定
-		capsule->layer = param_.collisionLayer;			// レイヤー設定
-		capsule->collisionMask = param_.collisionMask;	// マスク設定
+		capsule->SetTag(param_.collisionTag);				// タグ設定
+		capsule->SetLayer(param_.collisionLayer);			// レイヤー設定
+		capsule->SetCollisionMask(param_.collisionMask);	// マスク設定
 		capsule->capsule.radius = param_.radius;			// 半径を適宜設定
 		capsule->Enable();								// 判定有効
 		objectComponent_->GetColliderComponent()->AddCollider(std::move(capsule));	// コライダーコンポーネントにコライダ追加
 	}
 	else {
 		auto sphere = std::make_unique<Engine::SphereCollider>();
-		sphere->tag = param_.collisionTag;				// タグ設定
-		sphere->layer = param_.collisionLayer;			// レイヤー設定
-		sphere->collisionMask = param_.collisionMask;	// マスク設定
+		sphere->SetTag(param_.collisionTag);				// タグ設定
+		sphere->SetLayer(param_.collisionLayer);			// レイヤー設定
+		sphere->SetCollisionMask(param_.collisionMask);	// マスク設定
 		sphere->radius = param_.radius;					// 半径を適宜設定
 		sphere->Enable();								// 判定有効
 		objectComponent_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
@@ -9367,10 +9368,10 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.hitBoxData.offset = {};
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
-		if (CollisionTag::Player == self->tag) {
+		if (CollisionTag::Player == self->GetTag()) {
 			useType = HitBox::UseType::kPlayer;
 		}
-		else if (CollisionTag::Enemy == self->tag) {
+		else if (CollisionTag::Enemy == self->GetTag()) {
 			useType = HitBox::UseType::kEnemy;
 		}
 		data_.hitBoxData.useType = useType;
@@ -9382,7 +9383,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		}
 	}
 
-	switch (other->tag) {
+	switch (other->GetTag()) {
 	case CollisionTag::Player:
 	{
 		// プレイヤー
@@ -10792,9 +10793,9 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 	
 	// コライダ設定(球)
 	auto sphere = std::make_unique<Engine::SphereCollider>();
-	sphere->tag = CollisionTag::EnemyAttack;		// タグ設定
-	sphere->layer = CollisionLayer::EnemyAttack;	// レイヤー設定
-	sphere->collisionMask = static_cast<uint32_t>(CollisionLayer::Player);// マスク設定
+	sphere->SetTag(CollisionTag::EnemyAttack);		// タグ設定
+	sphere->SetLayer(CollisionLayer::EnemyAttack);	// レイヤー設定
+	sphere->SetCollisionMask(static_cast<uint32_t>(CollisionLayer::Player));// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable();	// 判定有効
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
@@ -10810,8 +10811,8 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 
 	// 衝突時のコールバック登録
 	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
-		if (!otherComponent || other->tag != CollisionTag::Player) return;
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
+		if (!otherComponent || other->GetTag() != CollisionTag::Player) return;
 		if (isAlive_ == false) return;
 		// 敵
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());
@@ -10894,6 +10895,7 @@ void EnemyBullet::Final() {
 	}
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/EnemyBullet.h
 ============================================================
@@ -10971,9 +10973,9 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 
 	// コライダ設定(球)
 	auto sphere = std::make_unique<Engine::SphereCollider>();
-	sphere->tag = CollisionTag::PlayerAttack;		// タグ設定
-	sphere->layer = CollisionLayer::PlayerAttack;	// レイヤー設定
-	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));// マスク設定
+	sphere->SetTag(CollisionTag::PlayerAttack);		// タグ設定
+	sphere->SetLayer(CollisionLayer::PlayerAttack);	// レイヤー設定
+	sphere->SetCollisionMask((1 << static_cast<uint32_t>(CollisionLayer::Enemy)));// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable();	// 判定有効
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
@@ -10989,8 +10991,8 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 
 	// 衝突時のコールバック登録
 	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
-		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
+		if (!otherComponent || other->GetTag() != CollisionTag::Enemy) return;
 		if (isAlive_ == false) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
@@ -11172,9 +11174,9 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 
 	// コライダ設定
 	auto sphere = std::make_unique<Engine::SphereCollider>();
-	sphere->tag = CollisionTag::PlayerAttack;			// タグ設定
-	sphere->layer = CollisionLayer::PlayerAttack;		// レイヤー設定
-	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
+	sphere->SetTag(CollisionTag::PlayerAttack);			// タグ設定
+	sphere->SetLayer(CollisionLayer::PlayerAttack);		// レイヤー設定
+	sphere->SetCollisionMask((1 << static_cast<uint32_t>(CollisionLayer::Enemy)));	// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable(); // 初期状態では無効化
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダコンポーネントに追加	
@@ -11183,8 +11185,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 
 	// 衝突時のコールバック登録
 	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
-		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
+		if (!otherComponent || other->GetTag() != CollisionTag::Enemy) return;
 
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
@@ -17791,19 +17793,19 @@ namespace Character {
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->Enable();					// コライダ有効
-		sphere->tag = CollisionTag::Enemy;	// タグ設定
-		sphere->layer = CollisionLayer::ALL;// レイヤー設定
-		sphere->collisionMask = 0xFFFFFFFF;
+		sphere->SetTag(CollisionTag::Enemy);	// タグ設定
+		sphere->SetLayer(CollisionLayer::ALL);// レイヤー設定
+		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = colliderRadius; // 半径を適宜設定
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 		// コールバック登録（例：プレイヤーと衝突したらダメージ）
 		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 			// プレイヤーかチェック
-			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 			if (!otherComponent) return;
 
-			if (other->tag == CollisionTag::Enemy) {
+			if (other->GetTag() == CollisionTag::Enemy) {
 				//isStopping_ = true;
 			}
 
@@ -21552,11 +21554,11 @@ namespace Character {
 
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
-		sphere->tag = CollisionTag::Player;
-		sphere->layer = CollisionLayer::ALL;
-		sphere->collisionMask = 0xFFFFFFFF;
+		sphere->SetTag(CollisionTag::Player);
+		sphere->SetLayer(CollisionLayer::ALL);
+		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = 1.0f; // 半径を適宜設定
-		sphere->isDebugLine = true;
+		sphere->SetIsDebugLine(true);
 		sphere->Enable();
 		// コライダ追加
 		GetColliderComponent()->AddCollider(std::move(sphere));
@@ -21571,7 +21573,7 @@ namespace Character {
 
 		// 衝突時のコールバック登録
 		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 			if (!otherComponent) return;
 
 			uint32_t otherId = otherComponent->GetUniqueId();
@@ -27076,17 +27078,17 @@ void SpecalPoint::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 	// SphereColliderを追加
 	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->Enable();					// コライダ有効
-	sphere->tag = CollisionTag::Item;	// タグ設定
-	sphere->layer = CollisionLayer::Environment;// レイヤー設定
+	sphere->SetTag(CollisionTag::Item);	// タグ設定
+	sphere->SetLayer(CollisionLayer::Environment);// レイヤー設定
 	sphere->radius = 4.0f; // 半径を適宜設定
 	colliderComponent->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
 	colliderComponent->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 		// プレイヤーかチェック
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (!otherComponent) return;
-		if (other->tag != CollisionTag::Player) return;
+		if (other->GetTag() != CollisionTag::Player) return;
 			
 
 			objectComponent_->GetWorldTransform().scale_ = { 0,0,0 };
@@ -28457,7 +28459,7 @@ void StageColliderSystem::Initialize(Engine::LineCommon* lineCommon) {
 	colliderComponent_ = std::make_unique<Engine::ColliderComponent>();
 	colliderComponent_->SetLineCommon(lineCommon);
 	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (!otherComponent) return;
 		};
 }
@@ -28471,11 +28473,11 @@ void StageColliderSystem::CreateCollider() {
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];
 				triangleColl->triangle03 = triangle.vertices[2];
-				triangleColl->tag = CollisionTag::Wall;
-				triangleColl->layer = CollisionLayer::Environment;
-				triangleColl->collisionMask = 0xFFFFFFFF;
-				triangleColl->isStatic = true;
-				triangleColl->isDebugLine = false;
+				triangleColl->SetTag(CollisionTag::Wall);
+				triangleColl->SetLayer(CollisionLayer::Environment);
+				triangleColl->SetCollisionMask(0xFFFFFFFF);
+				triangleColl->SetIsStatic(true);
+				triangleColl->SetIsDebugLine(false);
 				triangleColl->isNormal = true;
 				colliderComponent_->AddCollider(std::move(triangleColl));
 			}
@@ -28496,17 +28498,18 @@ void StageColliderSystem::DebugImGui() {
 	ImGui::Begin("Collider");
 	if (ImGui::Button("isDebugLine")) {
 		for (auto& coll : colliderComponent_->GetAllColliders()) {
-			if (coll->isDebugLine) {
-				coll->isDebugLine = false;
+			if (coll->IsDebugLine()) {
+				coll->SetIsDebugLine(false);
 			}
 			else {
-				coll->isDebugLine = true;
+				coll->SetIsDebugLine(true);
 			}
 		}
 	}
 	ImGui::End();
 #endif // _DEBUG
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/StageColliderSystem.h
@@ -31374,7 +31377,7 @@ void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
 
 	// トレイルはObject3dに所有させず、EntityManager管理の独立Entityとして生成する。
-	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/Image.png", provisionalData_.trailLifeTime,
+	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds", provisionalData_.trailLifeTime,
 		GetObject3D()->GetWorldTransform(), camera, provisionalData_.color,
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMin(),
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax()));
@@ -42324,13 +42327,13 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 
 			// SphereColliderを追加
 			auto aabb = std::make_unique<Engine::AABBCollider>();
-			aabb->tag = CollisionTag::Wall;
+			aabb->SetTag(CollisionTag::Wall);
 			//sphere->layer = CollisionLayer::None;
-			aabb->collisionMask = 0xFFFFFFFF;
+			aabb->SetCollisionMask(0xFFFFFFFF);
 			//aabb->radius = objectData.size.x;
 			aabb->aabb.min = -((objectData.size) / 2)* objectData.scale;
 			aabb->aabb.max = ((objectData.size) / 2)* objectData.scale;
-			aabb->isStatic = true;
+			aabb->SetIsStatic(true);
 			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
 		}
 		// 座標 
@@ -44354,18 +44357,18 @@ File Path: project/DirectXGame/engine/Collider/3d/Collider.cpp
 
 void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// 球の中心位置と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld_ ,radius }, lineColor_, 8, 8);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld_ ,radius }, lineColor_, 8, 8);
 			}
 		}
 	}
@@ -44374,43 +44377,43 @@ void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCo
 
 bool Engine::SphereCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 	ColliderShapeType otherType = other.GetType();
 
 	// 球
 	if (otherType == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius });
+		return Collision::Detection::Check(Sphere{ centerWorld_ ,radius }, Sphere{ o.GetCenterWorld(), o.radius });
 	}
 
 	// AABB
 	else if (otherType == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
-		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld_ ,radius });
 	}
 
 	// カプセル
 	else if (otherType == ColliderShapeType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
-		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, o.capWorld_);
+		return Collision::Detection::Check(Sphere{ centerWorld_ ,radius }, o.capWorld_);
 	}
 
 	// OBB
 	else if (otherType == ColliderShapeType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
-		return Collision::Detection::Check(o.obb, Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(o.obb, Sphere{ centerWorld_ ,radius });
 	}
 
 	// Ray
 	else if (otherType == ColliderShapeType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
-		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld_ ,radius });
 	}
 
 	// 三角面
 	else if (otherType == ColliderShapeType::Triangle) {
 		auto& o = static_cast<const TriangleCollider&>(other);
-		bool is = Collision::Detection::Check(o.GetWorldTriangle(), Sphere{ centerWorld ,radius });
+		bool is = Collision::Detection::Check(o.GetWorldTriangle(), Sphere{ centerWorld_ ,radius });
 		return is;
 	}
 
@@ -44424,19 +44427,19 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& o = static_cast<const SphereCollider&>(other);
-		return Collision::Response::ReflectVelocity(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius }, outPushVec);
+		return Collision::Response::ReflectVelocity(Sphere{ centerWorld_ ,radius }, Sphere{ o.GetCenterWorld(), o.radius }, outPushVec);
 	}
 
 	// AABB
 	else if (other.GetType() == ColliderShapeType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 		Vector3 closest = {
-			std::clamp(centerWorld.x, o.minWorld.x, o.maxWorld.x),
-			std::clamp(centerWorld.y, o.minWorld.y, o.maxWorld.y),
-			std::clamp(centerWorld.z, o.minWorld.z, o.maxWorld.z)
+			std::clamp(centerWorld_.x, o.minWorld.x, o.maxWorld.x),
+			std::clamp(centerWorld_.y, o.minWorld.y, o.maxWorld.y),
+			std::clamp(centerWorld_.z, o.minWorld.z, o.maxWorld.z)
 		};
 
-		Vector3 diff = centerWorld - closest;
+		Vector3 diff = centerWorld_ - closest;
 		float distSq = diff.LengthSq();
 
 		if (distSq < radius * radius && distSq > 0.00001f) {
@@ -44453,8 +44456,8 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		const CapsuleCollider& o = static_cast<const CapsuleCollider&>(other);
 
 		// 球の中心とカプセルの線分の最近接点を求める
-		Vector3 closest = ClosestPoint::PointSegment(o.capsule.segment, centerWorld);
-		Vector3 diff = centerWorld - closest;
+		Vector3 closest = ClosestPoint::PointSegment(o.capsule.segment, centerWorld_);
+		Vector3 diff = centerWorld_ - closest;
 		float distSq = diff.LengthSq();
 		float radiusSum = radius + o.capsule.radius;
 
@@ -44473,7 +44476,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 
 		// 球の中心をOBBのローカル空間に変換
 		Matrix4x4 invMat = Inverse(OBB::MakeOBBMatrix(o.obb)); // OBBのワールド行列の逆行列
-		Vector3 localCenter = invMat.Transform(centerWorld);
+		Vector3 localCenter = invMat.Transform(centerWorld_);
 
 		// ローカルAABBとの最近接点
 		Vector3 localClosest = {
@@ -44484,7 +44487,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 
 		// ワールド空間に戻して差分・判定
 		Vector3 worldClosest = OBB::MakeOBBMatrix(o.obb).Transform(localClosest);
-		Vector3 diff = centerWorld - worldClosest;
+		Vector3 diff = centerWorld_ - worldClosest;
 		float distSq = diff.LengthSq();
 
 		if (distSq < radius * radius && distSq > 0.00001f) {
@@ -44500,7 +44503,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		const TriangleCollider& triangleColl = static_cast<const TriangleCollider&>(other);
 
 		const Triangle triangle = triangleColl.GetWorldTriangle();
-		const Vector3 sphereCenter = centerWorld;
+		const Vector3 sphereCenter = centerWorld_;
 		const float sphereRadius = radius;
 		const Vector3 a = triangle.vertices[0];
 		const Vector3 b = triangle.vertices[1];
@@ -44571,20 +44574,20 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 #pragma region AABB
 void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
-	minWorld = aabb.min + centerWorld;
-	maxWorld = aabb.max + centerWorld;
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
+	minWorld = aabb.min + centerWorld_;
+	maxWorld = aabb.max + centerWorld_;
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// AABBの最小・最大座標を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld_, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld_, lineColor_);
 			}
 		}
 	}
@@ -44594,12 +44597,12 @@ void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineComm
 
 bool Engine::AABBCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(AABB(minWorld, maxWorld), Sphere{ o.centerWorld ,o.radius });
+		return Collision::Detection::Check(AABB(minWorld, maxWorld), Sphere{ o.GetCenterWorld() ,o.radius });
 	}
 
 	// AABB
@@ -44634,15 +44637,15 @@ bool Engine::AABBCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		// AABBの最近接点を求める
-		Vector3 closestPoint = Vector3::Clamp(sphere.centerWorld, minWorld, maxWorld);
+		Vector3 closestPoint = Vector3::Clamp(sphere.GetCenterWorld(), minWorld, maxWorld);
 
-		Vector3 diff = sphere.centerWorld - closestPoint;
+		Vector3 diff = sphere.GetCenterWorld() - closestPoint;
 		float distSq = diff.LengthSq();
 		float radius = sphere.radius;
 
@@ -44719,20 +44722,20 @@ bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outP
 
 void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
-	capWorld_ = { Vector3{capsule.segment.origin + centerWorld},Vector3{capsule.segment.end + centerWorld},{capsule.radius} };
+	capWorld_ = { Vector3{capsule.segment.origin + centerWorld_},Vector3{capsule.segment.end + centerWorld_},{capsule.radius} };
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor_);
 			}
 		}
 	}
@@ -44742,13 +44745,13 @@ void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineC
 
 bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(Sphere{ {o.centerWorld} ,{o.radius} }, capWorld_);
+		return Collision::Detection::Check(Sphere{ {o.GetCenterWorld()} ,{o.radius} }, capWorld_);
 	}
 
 	// AABB
@@ -44774,7 +44777,7 @@ bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	if (other.GetType() == ColliderShapeType::Sphere) {
 	}
@@ -44793,26 +44796,26 @@ bool Engine::CapsuleCollider::ResolveCollision(const Collider& other, Vector3& o
 
 void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
-	obb.center = centerWorld;
+	obb.center = centerWorld_;
 	obb.orientations[0] = worldTransform.worldMat_.AxisRow(0).Normalize();
 	obb.orientations[1] = worldTransform.worldMat_.AxisRow(1).Normalize();
 	obb.orientations[2] = worldTransform.worldMat_.AxisRow(2).Normalize();
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
+		if (isDebugLine_) {
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
 			if (obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
 				// OBBのサイズを使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor_);
 			}
 		}
 	}
@@ -44822,12 +44825,12 @@ void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommo
 
 bool Engine::OBBCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(obb, Sphere{ o.centerWorld,o.radius });
+		return Collision::Detection::Check(obb, Sphere{ o.GetCenterWorld(),o.radius });
 	}
 
 	// AABB
@@ -44852,7 +44855,7 @@ bool Engine::OBBCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
@@ -44861,7 +44864,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 		Matrix4x4 invWorld = Inverse(obbWorld);
 
 		// 球の中心をOBBのローカル空間へ変換
-		Vector3 localCenter = invWorld.Transform(sphere.centerWorld);
+		Vector3 localCenter = invWorld.Transform(sphere.GetCenterWorld());
 
 		// OBBのローカルAABBで最近接点を求める
 		Vector3 localClosest = {
@@ -44872,7 +44875,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 
 		// ワールド空間に戻して判定
 		Vector3 worldClosest = obbWorld.Transform(localClosest);
-		Vector3 diff = sphere.centerWorld - worldClosest;
+		Vector3 diff = sphere.GetCenterWorld() - worldClosest;
 		float distSq = diff.LengthSq();
 
 		if (distSq < sphere.radius * sphere.radius && distSq > 0.00001f) {
@@ -44890,7 +44893,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 
 		// AABBを仮想球として扱う（近似）
 		SphereCollider tempSphere;
-		tempSphere.centerWorld = aabbCenter;
+		tempSphere.SetCenterWorld(aabbCenter);
 		tempSphere.radius = halfExtents.Length() * 0.5f;
 
 		return this->ResolveCollision(tempSphere, outPushVec); // 再帰的に使う
@@ -44899,7 +44902,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 		const CapsuleCollider& cap = static_cast<const CapsuleCollider&>(other);
 		Vector3 closest = ClosestPoint::PointSegment(cap.capsule.segment, obb.center); // OBB中心から最接近点
 		SphereCollider tempSphere;
-		tempSphere.centerWorld = closest;
+		tempSphere.SetCenterWorld(closest);
 		tempSphere.radius = cap.capsule.radius;
 
 		return this->ResolveCollision(tempSphere, outPushVec); // 再利用
@@ -44927,13 +44930,13 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 #pragma region Ray
 void Engine::RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
-	ray_.origin = centerWorld;
+	ray_.origin = centerWorld_;
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
+		if (isDebugLine_) {
 			lineCommon->GetDebugLineMeshData().AddLine(ray_.origin, ray_.origin + ray_.diff, { 1,1,1,1 });
 		}
 	}
@@ -44943,12 +44946,12 @@ void Engine::RayCollider::Update(const WorldTransform& worldTransform, LineCommo
 
 bool Engine::RayCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	else if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(ray_, Sphere{ o.centerWorld,o.radius });
+		return Collision::Detection::Check(ray_, Sphere{ o.GetCenterWorld(),o.radius });
 	}
 
 	// AABB
@@ -44973,7 +44976,7 @@ bool Engine::RayCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 	return false;
 }
 #pragma endregion
@@ -44981,17 +44984,17 @@ bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPu
 #pragma region Triangle
 
 void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon) {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineTriangle({ triangle01,triangle02 ,triangle03 }, worldTransform, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({ triangle01,triangle02 ,triangle03 }, worldTransform, lineColor_);
 			}
 		}
 	}
@@ -45000,12 +45003,12 @@ void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, Line
 
 bool Engine::TriangleCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	else if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(GetWorldTriangle(), Sphere{o.centerWorld,o.radius});
+		return Collision::Detection::Check(GetWorldTriangle(), Sphere{o.GetCenterWorld(),o.radius});
 	}
 
 	return false;
@@ -45018,7 +45021,7 @@ bool Engine::TriangleCollider::ResolveCollision(const Collider& other, Vector3& 
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		const Triangle triangle = GetWorldTriangle();
-		const Vector3 sphereCenter = sphere.centerWorld;
+		const Vector3 sphereCenter = sphere.GetCenterWorld();
 		const float sphereRadius = sphere.radius;
 
 		const Vector3 a = triangle.vertices[0];
@@ -45166,24 +45169,44 @@ namespace Engine {
 	class Collider
 	{
 	public:
-		ColliderComponent* owner = nullptr; // 通知先ポインタ
-		bool enabled = true;
-		bool isStatic = false;  // 動かさない
-		bool isDebugLine = false;// ライン描画するか
-		Vector4 lineColor = { 1,1,1,1 };	// ライン色
-
-		Vector3 centerWorld = { 0,0,0 };
-		CollisionLayer layer = CollisionLayer::ALL;
-		CollisionTag tag = CollisionTag::None; // タグ
-		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
-		uint32_t id = 0; // コライダーID（ユニーク）
-
 		// 判定有効
-		void Enable() { enabled = true; }
+		void Enable() { enabled_ = true; }
 		// 判定無効
-		void Disable() { enabled = false; }
+		void Disable() { enabled_ = false; }
 		// 判定効力取得
-		bool IsEnabled() const { return enabled; }
+		bool IsEnabled() const { return enabled_; }
+		void SetEnabled(bool enabled) { enabled_ = enabled; }
+
+		// 通知先コンポーネント
+		void SetOwner(ColliderComponent* owner) { owner_ = owner; }
+		ColliderComponent* GetOwner() const { return owner_; }
+
+		// 動かないコライダーか
+		void SetIsStatic(bool isStatic) { isStatic_ = isStatic; }
+		bool IsStatic() const { return isStatic_; }
+
+		// デバッグライン
+		void SetIsDebugLine(bool isDebugLine) { isDebugLine_ = isDebugLine; }
+		bool IsDebugLine() const { return isDebugLine_; }
+		void SetLineColor(const Vector4& color) { lineColor_ = color; }
+		const Vector4& GetLineColor() const { return lineColor_; }
+
+		// 衝突分類
+		void SetLayer(CollisionLayer layer) { layer_ = layer; }
+		CollisionLayer GetLayer() const { return layer_; }
+		void SetTag(CollisionTag tag) { tag_ = tag; }
+		CollisionTag GetTag() const { return tag_; }
+		void SetCollisionMask(uint32_t mask) { collisionMask_ = mask; }
+		uint32_t GetCollisionMask() const { return collisionMask_; }
+
+		// ID
+		void SetId(uint32_t id) { id_ = id; }
+		uint32_t GetId() const { return id_; }
+
+		// ワールド中心
+		void SetCenterWorld(const Vector3& centerWorld) { centerWorld_ = centerWorld; }
+		const Vector3& GetCenterWorld() const { return centerWorld_; }
+
 		// 更新
 		virtual void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) = 0;
 		// 判定
@@ -45197,8 +45220,20 @@ namespace Engine {
 		// 追加: このコライダーのワールド空間AABBを返す（Broad Phase用）
 		virtual AABB GetAABB() const {
 			// 基底は点AABB（派生でオーバーライド推奨）
-			return AABB{ centerWorld, centerWorld };
+			return AABB{ centerWorld_, centerWorld_ };
 		}
+	protected:
+		ColliderComponent* owner_ = nullptr; // 通知先ポインタ
+		bool enabled_ = true;
+		bool isStatic_ = false;  // 動かさない
+		bool isDebugLine_ = false;// ライン描画するか
+		Vector4 lineColor_ = { 1,1,1,1 };	// ライン色
+
+		Vector3 centerWorld_ = { 0,0,0 };
+		CollisionLayer layer_ = CollisionLayer::ALL;
+		CollisionTag tag_ = CollisionTag::None; // タグ
+		uint32_t collisionMask_ = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
+		uint32_t id_ = 0; // コライダーID（ユニーク）
 	};
 
 	// 球コライダークラス
@@ -45220,7 +45255,7 @@ namespace Engine {
 		// AABB取得
 		AABB GetAABB() const override {
 			Vector3 r{ radius, radius, radius };
-			return AABB{ centerWorld - r, centerWorld + r };
+			return AABB{ centerWorld_ - r, centerWorld_ + r };
 		}
 
 	};
@@ -45246,7 +45281,7 @@ namespace Engine {
 
 		// 三角面取得
 		Triangle GetWorldTriangle() const {
-			return Triangle{ triangle01 + centerWorld,triangle02 + centerWorld, triangle03 + centerWorld};
+			return Triangle{ triangle01 + centerWorld_,triangle02 + centerWorld_, triangle03 + centerWorld_};
 		}
 
 		AABB GetAABB() const override {
@@ -45464,7 +45499,7 @@ void ColliderComponent::UpdateByTag(const WorldTransform& worldTransform, Collis
 {
     // タグでの更新
     for (auto& entry : colliders) {
-        if (entry.collider->tag == tag) {
+        if (entry.collider->GetTag() == tag) {
             entry.collider->Update(worldTransform, lineCommon);
         }
     }
@@ -45497,8 +45532,8 @@ void ColliderComponent::CheckAndNotify(ColliderComponent& other)
 }
 
 uint32_t ColliderComponent::AddCollider(std::unique_ptr<Collider> collider) {
-    collider->owner = this;
-    collider->id = nextId_;
+    collider->SetOwner(this);
+    collider->SetId(nextId_);
     uint32_t id = nextId_++;
     colliders.push_back({ id, std::move(collider) });
     return id;
@@ -45507,14 +45542,14 @@ uint32_t ColliderComponent::AddCollider(std::unique_ptr<Collider> collider) {
 void ColliderComponent::SetOwner(ColliderComponent* newOwner){
     owner = newOwner;
     for (auto& entry : colliders) {
-        entry.collider->owner = newOwner;
+        entry.collider->SetOwner(newOwner);
     }
 }
 
 void ColliderComponent::SetEnableByTag(CollisionTag tag, bool enable) {
     for (auto& entry : colliders) {
-        if (entry.collider->tag == tag) {
-            entry.collider->enabled = enable;
+        if (entry.collider->GetTag() == tag) {
+            entry.collider->SetEnabled(enable);
         }
     }
 }
@@ -45522,10 +45557,11 @@ void ColliderComponent::SetEnableByTag(CollisionTag tag, bool enable) {
 void ColliderComponent::SetEnableById(uint32_t id, bool enable) {
     for (auto& entry : colliders) {
         if (entry.id == id) {
-            entry.collider->enabled = enable;
+            entry.collider->SetEnabled(enable);
         }
     }
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Collider/3d/ColliderComponent.h
@@ -45689,7 +45725,7 @@ namespace Engine {
         std::vector<Collider*> FindByTag(CollisionTag tag) const {
             std::vector<Collider*> results;
             for (const auto& entry : colliders) {
-                if (entry.collider->tag == tag) {
+                if (entry.collider->GetTag() == tag) {
                     results.push_back(entry.collider.get());
                 }
             }
@@ -46586,7 +46622,7 @@ void Engine::CollisionManager::BuildStaticSceneOctree()
 	debugTimer_.StartTimer();
 	for (auto* staticComp : staticColliders) {
 		for (auto* collider : staticComp->GetAllColliders()) {
-			if (collider->enabled) {
+			if (collider->IsEnabled()) {
 				octreeColliderStatic_->Insert(collider);
 			}
 		}
@@ -46600,7 +46636,7 @@ void Engine::CollisionManager::BuildDynamicSceneOctree() {
 	// 動的コライダーの登録
 	for (auto* staticComp : dynamicColliders) {
 		for (auto* collider : staticComp->GetAllColliders()) {
-			if (collider->enabled) {
+			if (collider->IsEnabled()) {
 				octreeCollider_->Insert(collider);
 			}
 		}
@@ -46644,11 +46680,11 @@ void Engine::CollisionManager::CheckAll() {
 void Engine::CollisionManager::CheckByLayer(ColliderComponent& a, ColliderComponent& b) {
 	for (auto* colA : a.GetAllColliders()) {
 		for (auto* colB : b.GetAllColliders()) {
-			if (!colA->enabled || !colB->enabled) continue;
+			if (!colA->IsEnabled() || !colB->IsEnabled()) continue;
 
 			// ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
-			if (!((1 << static_cast<uint32_t>(colB->layer)) & colA->collisionMask) ||
-				!((1 << static_cast<uint32_t>(colA->layer)) & colB->collisionMask)) {
+			if (!((1 << static_cast<uint32_t>(colB->GetLayer())) & colA->GetCollisionMask()) ||
+				!((1 << static_cast<uint32_t>(colA->GetLayer())) & colB->GetCollisionMask())) {
 				continue;
 			}
 
@@ -46711,7 +46747,7 @@ void Engine::CollisionManager::CheckDynamicVsDynamicMT()
 
 							const auto& colliders = colliderComp->GetAllColliders();
 							for (auto* collider : colliders) {
-								if (!collider || !collider->enabled) {
+								if (!collider || !collider->IsEnabled()) {
 									continue;
 								}
 
@@ -46724,7 +46760,7 @@ void Engine::CollisionManager::CheckDynamicVsDynamicMT()
 								octreeCollider_->Query(selfAabb, candidates);
 
 								for (auto* other : candidates) {
-									if (!other || !other->enabled) {
+									if (!other || !other->IsEnabled()) {
 										continue;
 									}
 
@@ -46739,7 +46775,7 @@ void Engine::CollisionManager::CheckDynamicVsDynamicMT()
 									}
 
 									// 同一owner 内の自己衝突はスキップ
-									if (collider->owner && other->owner && collider->owner == other->owner) {
+									if (collider->GetOwner() && other->GetOwner() && collider->GetOwner() == other->GetOwner()) {
 										continue;
 									}
 
@@ -46829,7 +46865,7 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 
 					const auto& colliders = colliderComp->GetAllColliders();
 					for (auto* collider : colliders) {
-						if (!collider || !collider->enabled) {
+						if (!collider || !collider->IsEnabled()) {
 							continue;
 						}
 
@@ -46842,7 +46878,7 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 						octreeColliderStatic_->Query(selfAabb, staticCandidates);
 
 						for (auto* other : staticCandidates) {
-							if (!other || !other->enabled) {
+							if (!other || !other->IsEnabled()) {
 								continue;
 							}
 
@@ -46850,7 +46886,7 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 								continue;
 							}
 
-							if (collider->owner && other->owner && collider->owner == other->owner) {
+							if (collider->GetOwner() && other->GetOwner() && collider->GetOwner() == other->GetOwner()) {
 								continue;
 							}
 
@@ -46885,11 +46921,11 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 }
 
 bool Engine::CollisionManager::CheckMask(Collider* a, Collider* b) const {
-	uint32_t aLayer = static_cast<uint32_t>(a->layer);
-	uint32_t bLayer = static_cast<uint32_t>(b->layer);
+	uint32_t aLayer = static_cast<uint32_t>(a->GetLayer());
+	uint32_t bLayer = static_cast<uint32_t>(b->GetLayer());
 
-	bool is = (bLayer & a->collisionMask) != 0;
-	bool is2 = (aLayer & b->collisionMask) != 0;
+	bool is = (bLayer & a->GetCollisionMask()) != 0;
+	bool is2 = (aLayer & b->GetCollisionMask()) != 0;
 
 	return is && is2;
 }
@@ -46906,7 +46942,7 @@ void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider*
 		}
 	}
 
-	ColliderComponent* otherComp = other->owner;
+	ColliderComponent* otherComp = other->GetOwner();
 	if (!otherComp) {
 		return;
 	}
@@ -47170,7 +47206,7 @@ File Path: project/DirectXGame/engine/Collider/Octree/Octree.cpp
 
 void Engine::OctreeCollider::Insert(Collider* collider)
 {
-	if (!collider || !collider->enabled) return;
+	if (!collider || !collider->IsEnabled()) return;
 	AABB aabb = collider->GetAABB();
 	InsertCollider(root.get(), collider, aabb);
 }
@@ -59096,6 +59132,7 @@ File Path: project/DirectXGame/engine/Effect/Trail/TrailEffect.cpp
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Math/LineCurveMath.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
 
 #include <algorithm>
 #include <cmath>
@@ -59225,6 +59262,10 @@ void Engine::TrailEffect::Update()
 	material->GetMaterialInstance().color = baseColor_;
 	UpdateComposableModules(deltaTime);
 	material->GPUData();
+
+	if (debugDraw_) {
+		DrawDebugLines();
+	}
 }
 
 void Engine::TrailEffect::Draw()
@@ -59274,6 +59315,15 @@ void Engine::TrailEffect::UpdateImgui()
 		}
 		meshDirty_ = false;
 	}
+
+	ImGui::Separator();
+	ImGui::Text("Debug Draw");
+	ImGui::Checkbox("Draw Trail Debug", &debugDraw_);
+	ImGui::BeginDisabled(!debugDraw_);
+	ImGui::Checkbox("Draw Rails", &debugDrawRails_);
+	ImGui::Checkbox("Draw Mesh Edges", &debugDrawMesh_);
+	ImGui::Checkbox("Draw Points", &debugDrawPoints_);
+	ImGui::EndDisabled();
 
 	ImGui::Separator();
 	ImGui::Text("Features");
@@ -59488,6 +59538,59 @@ void Engine::TrailEffect::RebuildSplineMesh()
 	}
 }
 
+void Engine::TrailEffect::DrawDebugLines()
+{
+#ifdef _DEBUG
+	if (!effectManager || !effectManager->GetLineCommon()) {
+		return;
+	}
+
+	LineMeshData& lines = effectManager->GetLineCommon()->GetDebugLineMeshData();
+
+	const Vector3 currentStart = worldtransformTstr_.worldMat_.GetWorldPosition();
+	const Vector3 currentEnd = worldtransformTend_.worldMat_.GetWorldPosition();
+
+	// 現在の発生断面は黄色で表示し、親やオフセットの位置ずれを確認しやすくする。
+	lines.AddLine(currentStart, currentEnd, { 1.0f, 1.0f, 0.0f, 1.0f });
+
+	if (debugDrawRails_) {
+		for (const TrailSegment& segment : segments_) {
+			lines.AddLine(segment.prevStart, segment.start, { 0.0f, 1.0f, 0.2f, 1.0f });
+			lines.AddLine(segment.prevEnd, segment.end, { 0.1f, 0.7f, 1.0f, 1.0f });
+			lines.AddLine(segment.start, segment.end, { 1.0f, 1.0f, 1.0f, 0.8f });
+		}
+	}
+
+	if (debugDrawMesh_ && mesh) {
+		for (size_t i = 0; i + 5 < mesh->vertices.size(); i += kVerticesPerSegment) {
+			const Vector3 currentTop = { mesh->vertices[i + 0].position.x, mesh->vertices[i + 0].position.y, mesh->vertices[i + 0].position.z };
+			const Vector3 previousTop = { mesh->vertices[i + 1].position.x, mesh->vertices[i + 1].position.y, mesh->vertices[i + 1].position.z };
+			const Vector3 currentBottom = { mesh->vertices[i + 2].position.x, mesh->vertices[i + 2].position.y, mesh->vertices[i + 2].position.z };
+			const Vector3 previousBottom = { mesh->vertices[i + 5].position.x, mesh->vertices[i + 5].position.y, mesh->vertices[i + 5].position.z };
+
+			lines.AddLine(previousTop, currentTop, { 1.0f, 0.2f, 1.0f, 1.0f });
+			lines.AddLine(previousBottom, currentBottom, { 1.0f, 0.2f, 1.0f, 1.0f });
+			lines.AddLine(currentTop, currentBottom, { 1.0f, 0.2f, 1.0f, 0.75f });
+		}
+	}
+
+	if (debugDrawPoints_) {
+		constexpr size_t kMaxDebugPoints = 128;
+		size_t pointCount = 0;
+		lines.AddLineSphere({ currentStart, 0.035f }, { 1.0f, 1.0f, 0.0f, 1.0f }, 4, 4);
+		lines.AddLineSphere({ currentEnd, 0.035f }, { 1.0f, 1.0f, 0.0f, 1.0f }, 4, 4);
+
+		for (const TrailSegment& segment : segments_) {
+			if (pointCount++ >= kMaxDebugPoints) {
+				break;
+			}
+			lines.AddLineSphere({ segment.start, 0.025f }, { 0.0f, 1.0f, 0.2f, 1.0f }, 4, 4);
+			lines.AddLineSphere({ segment.end, 0.025f }, { 0.1f, 0.7f, 1.0f, 1.0f }, 4, 4);
+		}
+	}
+#endif // _DEBUG
+}
+
 void Engine::TrailEffect::UpdateUvScroll(float deltaTime)
 {
 	uvScrollOffset_.x += settings_.uvScrollSpeed.x * deltaTime;
@@ -59614,7 +59717,7 @@ namespace Engine {
 		// 描画
 		void Draw() override;
 		// デバッグ表示。保存はせず、実行中の調整と状態確認だけを行う。
-		void UpdateImgui();
+		void UpdateImgui() override;
 		// カメラ設定
 		void SetCamera(Camera* camera) { camera_ = camera; };
 		// トレイルのオフセット設定
@@ -59668,6 +59771,7 @@ namespace Engine {
 		void RebuildMesh();
 		void RebuildLinearMesh();
 		void RebuildSplineMesh();
+		void DrawDebugLines();
 		void UpdateUvScroll(float deltaTime);
 		void UpdateDissolve(float deltaTime);
 		void UpdateComposableModules(float deltaTime);
@@ -59703,6 +59807,10 @@ namespace Engine {
 		Vector3 lastEnd_{};
 		Color baseColor_ = { 1,1,1,1 };
 		std::deque<TrailSegment> segments_;
+		bool debugDraw_ = false;
+		bool debugDrawRails_ = true;
+		bool debugDrawMesh_ = true;
+		bool debugDrawPoints_ = false;
 
 	private:
 		EffectManager* effectManager = nullptr;
@@ -59899,6 +60007,8 @@ namespace Engine {
 		virtual void Draw() {}
 		// シャドウマップ用の深度描画。不要なEntityは何もしない。
 		virtual void DrawShadowMap(ShadowMap*) {}
+		// Entity固有のデバッグUI。必要な派生クラスだけ実装する。
+		virtual void UpdateImgui() {}
 	public:
 		// 削除フラグ取得
 		virtual bool GetIsDelete() const { return isDelete_; }
@@ -61835,11 +61945,10 @@ void Engine::EntityManager::UpdateImgui()
 	if (openedIndex >= 0 && openedIndex < static_cast<int>(entities_.size())) {
 		Object3d* entity = dynamic_cast<Object3d*>(entities_[openedIndex].get());
 		if (!entity) {
-			if (TrailEffect* trail = dynamic_cast<TrailEffect*>(entities_[openedIndex].get())) {
-				ImGui::Text(trail->GetName().c_str());
-				ImGui::Separator();
-				trail->UpdateImgui();
-			}
+			// Object3dではないEntityは、自分自身のデバッグUIだけをEntityManagerへ公開する。
+			ImGui::Text(entities_[openedIndex]->GetName().c_str());
+			ImGui::Separator();
+			entities_[openedIndex]->UpdateImgui();
 			ImGui::End();
 			return;
 		}
@@ -61862,7 +61971,8 @@ void Engine::EntityManager::UpdateImgui()
 				for (auto& coll : entity->GetColliderComponent()->GetAllColliders()) {
 					nameColliderComponent = "Collider" + std::to_string(collIndex);
 					if (ImGui::CollapsingHeader(nameColliderComponent.c_str())) {
-						ImGui::InputFloat3("position", &coll->centerWorld.x);
+						Vector3 centerWorld = coll->GetCenterWorld();
+						ImGui::InputFloat3("position", &centerWorld.x);
 					}
 					collIndex++;
 				}
@@ -61946,13 +62056,6 @@ void Engine::EntityManager::UpdateImgui()
 					}
 				}
 			}
-
-			// プリミティブ形状なら
-			if (entity->GetPrimitive()) {
-				ImGui::Separator();
-			}
-
-
 
 			if (entity->GetOcean()) {
 				ImGui::Separator();
@@ -66043,6 +66146,10 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/effect/dust.dds");
 	textureManager->LoadTexture("resources/Texture/effect/hit.dds");
 	textureManager->LoadTexture("resources/Texture/effect/ring.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg90.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg180.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds");
 
 	// 煙
 	textureManager->LoadTexture("resources/Texture/smoke/no1.dds");
