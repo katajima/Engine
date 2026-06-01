@@ -40,18 +40,12 @@ void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType 
 	transformComponent_->Init();
 
 
-	name = "object" + std::to_string(object3dCommon->GetObjectCount());
-	name_ = name;
+	name_ = "object" + std::to_string(object3dCommon->GetObjectCount());
 
 	// 位置初期化
 	transformation = std::make_unique<Transfomation>();
 	transformation->Initialize(object3dCommon->GetDxCommon());
 
-
-	// 方向用トランスフォーム初期化
-	direWorldTransform_.Initialize();
-	direWorldTransform_.translate_.z = 1.0f;
-	direWorldTransform_.parent_ = &transformComponent_->GetWorldTransform();
 
 	defaltCamera = entityManager->GetObject3dCommon()->GetDefaltCamera();
 
@@ -99,7 +93,7 @@ void  Engine::Object3d::InitRigidBodyComponent() {
 
 void Engine::Object3d::Update()
 {
-	if (isDelete) return;
+	if (isDelete_) return;
 
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 
@@ -182,15 +176,11 @@ void Engine::Object3d::Update()
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
 	}
-	direWorldTransform_.Update();
-
-	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(), GetWorldPosition()).Normalize();
-
 }
 
 void Engine::Object3d::RigidBodyUpdate()
 {
-	if (isDelete) return;
+	if (isDelete_) return;
 	// 物理
 	if (rigidBodyComponent_ && isRigidUpdate_) {
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
@@ -203,14 +193,14 @@ void Engine::Object3d::RigidBodyUpdate()
 
 void Engine::Object3d::Draw()
 {
-	if (isDelete) return;
+	if (isDelete_) return;
 
 	renderComponent_->Draw();
 }
 
 void Engine::Object3d::DrawShadowMap(ShadowMap* shadowMap)
 {
-	if (isDelete) return;
+	if (isDelete_) return;
 
 	renderComponent_->DrawShadowMap(shadowMap);
 }
@@ -241,19 +231,6 @@ void  Engine::Object3d::SetIsRigidUpdate(bool isRigidUpdate) { isRigidUpdate_ = 
 
 // カメラ設定
 void  Engine::Object3d::SetCamera(Camera* camera) { this->individualCamera = camera; }
-// 名前設定
-void Engine::Object3d::SetName(const std::string& name)
-{
-	this->name = name;
-	name_ = name;
-}
-const std::string& Engine::Object3d::GetName() const { return name; }
-// タグ設定
-void Engine::Object3d::SetNameTag(const std::string& name)
-{
-	nameTag = name;
-	nameTag_ = name;
-}
 // プリミティブ形状
 void  Engine::Object3d::SetPrimitive(std::unique_ptr< Engine::BasePrimitive> primitive) { renderComponent_->SetPrimitive(std::move(primitive)); };
 // スカイボックス
@@ -276,14 +253,8 @@ Engine::Ocean* Engine::Object3d::GetOcean() const { return renderComponent_->Get
 Engine::SkyBox* Engine::Object3d::GetSkyBox() const { return renderComponent_->GetSkyBox(); }
 // マテリアルインスタンス取得
 std::vector<MaterialInstance>& Engine::Object3d::GetMaterialInstance() { return renderComponent_->GetMaterialInstance(); }
-// タグ取得
-const std::string& Engine::Object3d::GetNameTag() const { return nameTag; }
 // 描画するか設定
 void  Engine::Object3d::SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
-// 削除する
-void Engine::Object3d::IsDelete() { isDelete = true; isDelete_ = true; }
-// 削除されているか取得
-bool Engine::Object3d::GetIsDelete() const { return isDelete; }
 // オブジェクトに使われているモデルの透明度取得
 float Engine::Object3d::GetAlpha() { return renderComponent_->GetAlpha(); };
 
@@ -319,7 +290,15 @@ const Engine::WorldTransform* Engine::Object3d::GetWorldTransformPtr() const { r
 // 座標更新
 void Engine::Object3d::UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
 // 向いている方向
-Vector3 Engine::Object3d::ObjectDirection() const { return direction_; }
+Vector3 Engine::Object3d::ObjectDirection() const
+{
+	// ワールド行列のZ軸をForwardとして扱うことで、方向用の子Transformを持たずに向きを取得する。
+	Vector3 forward = transformComponent_->GetWorldTransform().worldMat_.AxisRow(2).Normalize();
+	if (forward.LengthSq() <= 0.000001f) {
+		return { 0.0f, 0.0f, 1.0f };
+	}
+	return forward;
+}
 
 Vector2 Engine::Object3d::GetScreenPosition()
 {

@@ -127,7 +127,7 @@ void Engine::EntityManager::UpdateImgui()
 			ImGui::End();
 			return;
 		}
-		ImGui::Text(entity->name.c_str());
+		ImGui::Text(entity->GetName().c_str());
 		ImGui::Separator();
 		std::string objectTypeName = "ObjectType : " + entity->GetRenderComponent()->GetObjectTypeName();
 		ImGui::Text(objectTypeName.c_str());
