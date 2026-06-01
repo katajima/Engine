@@ -83,12 +83,12 @@ namespace HitBox {
 		}
 		// デバック用表示
 		if (isLine) {
-			coll->isDebugLine = true;
+			coll->SetIsDebugLine(true);
 		}
 
-		coll->tag = tag;			// タグ設定
-		coll->layer = layer;		// レイヤー設定
-		coll->collisionMask = (1 << static_cast<uint32_t>(mask));	// マスク設定
+		coll->SetTag(tag);			// タグ設定
+		coll->SetLayer(layer);		// レイヤー設定
+		coll->SetCollisionMask((1 << static_cast<uint32_t>(mask)));	// マスク設定
 
 		return std::move(coll);
 	}

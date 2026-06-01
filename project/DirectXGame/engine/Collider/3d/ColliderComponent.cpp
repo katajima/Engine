@@ -14,7 +14,7 @@ void ColliderComponent::UpdateByTag(const WorldTransform& worldTransform, Collis
 {
     // タグでの更新
     for (auto& entry : colliders) {
-        if (entry.collider->tag == tag) {
+        if (entry.collider->GetTag() == tag) {
             entry.collider->Update(worldTransform, lineCommon);
         }
     }
@@ -47,8 +47,8 @@ void ColliderComponent::CheckAndNotify(ColliderComponent& other)
 }
 
 uint32_t ColliderComponent::AddCollider(std::unique_ptr<Collider> collider) {
-    collider->owner = this;
-    collider->id = nextId_;
+    collider->SetOwner(this);
+    collider->SetId(nextId_);
     uint32_t id = nextId_++;
     colliders.push_back({ id, std::move(collider) });
     return id;
@@ -57,14 +57,14 @@ uint32_t ColliderComponent::AddCollider(std::unique_ptr<Collider> collider) {
 void ColliderComponent::SetOwner(ColliderComponent* newOwner){
     owner = newOwner;
     for (auto& entry : colliders) {
-        entry.collider->owner = newOwner;
+        entry.collider->SetOwner(newOwner);
     }
 }
 
 void ColliderComponent::SetEnableByTag(CollisionTag tag, bool enable) {
     for (auto& entry : colliders) {
-        if (entry.collider->tag == tag) {
-            entry.collider->enabled = enable;
+        if (entry.collider->GetTag() == tag) {
+            entry.collider->SetEnabled(enable);
         }
     }
 }
@@ -72,7 +72,7 @@ void ColliderComponent::SetEnableByTag(CollisionTag tag, bool enable) {
 void ColliderComponent::SetEnableById(uint32_t id, bool enable) {
     for (auto& entry : colliders) {
         if (entry.id == id) {
-            entry.collider->enabled = enable;
+            entry.collider->SetEnabled(enable);
         }
     }
 }

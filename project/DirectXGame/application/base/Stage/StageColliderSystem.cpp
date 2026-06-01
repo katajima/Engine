@@ -5,7 +5,7 @@ void StageColliderSystem::Initialize(Engine::LineCommon* lineCommon) {
 	colliderComponent_ = std::make_unique<Engine::ColliderComponent>();
 	colliderComponent_->SetLineCommon(lineCommon);
 	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (!otherComponent) return;
 		};
 }
@@ -19,11 +19,11 @@ void StageColliderSystem::CreateCollider() {
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];
 				triangleColl->triangle03 = triangle.vertices[2];
-				triangleColl->tag = CollisionTag::Wall;
-				triangleColl->layer = CollisionLayer::Environment;
-				triangleColl->collisionMask = 0xFFFFFFFF;
-				triangleColl->isStatic = true;
-				triangleColl->isDebugLine = false;
+				triangleColl->SetTag(CollisionTag::Wall);
+				triangleColl->SetLayer(CollisionLayer::Environment);
+				triangleColl->SetCollisionMask(0xFFFFFFFF);
+				triangleColl->SetIsStatic(true);
+				triangleColl->SetIsDebugLine(false);
 				triangleColl->isNormal = true;
 				colliderComponent_->AddCollider(std::move(triangleColl));
 			}
@@ -44,11 +44,11 @@ void StageColliderSystem::DebugImGui() {
 	ImGui::Begin("Collider");
 	if (ImGui::Button("isDebugLine")) {
 		for (auto& coll : colliderComponent_->GetAllColliders()) {
-			if (coll->isDebugLine) {
-				coll->isDebugLine = false;
+			if (coll->IsDebugLine()) {
+				coll->SetIsDebugLine(false);
 			}
 			else {
-				coll->isDebugLine = true;
+				coll->SetIsDebugLine(true);
 			}
 		}
 	}

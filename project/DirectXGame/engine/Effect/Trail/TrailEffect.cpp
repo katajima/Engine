@@ -3,6 +3,7 @@
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Math/LineCurveMath.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
 
 #include <algorithm>
 #include <cmath>
@@ -132,6 +133,10 @@ void Engine::TrailEffect::Update()
 	material->GetMaterialInstance().color = baseColor_;
 	UpdateComposableModules(deltaTime);
 	material->GPUData();
+
+	if (debugDraw_) {
+		DrawDebugLines();
+	}
 }
 
 void Engine::TrailEffect::Draw()
@@ -181,6 +186,15 @@ void Engine::TrailEffect::UpdateImgui()
 		}
 		meshDirty_ = false;
 	}
+
+	ImGui::Separator();
+	ImGui::Text("Debug Draw");
+	ImGui::Checkbox("Draw Trail Debug", &debugDraw_);
+	ImGui::BeginDisabled(!debugDraw_);
+	ImGui::Checkbox("Draw Rails", &debugDrawRails_);
+	ImGui::Checkbox("Draw Mesh Edges", &debugDrawMesh_);
+	ImGui::Checkbox("Draw Points", &debugDrawPoints_);
+	ImGui::EndDisabled();
 
 	ImGui::Separator();
 	ImGui::Text("Features");
@@ -393,6 +407,59 @@ void Engine::TrailEffect::RebuildSplineMesh()
 			currentU,
 			previousU);
 	}
+}
+
+void Engine::TrailEffect::DrawDebugLines()
+{
+#ifdef _DEBUG
+	if (!effectManager || !effectManager->GetLineCommon()) {
+		return;
+	}
+
+	LineMeshData& lines = effectManager->GetLineCommon()->GetDebugLineMeshData();
+
+	const Vector3 currentStart = worldtransformTstr_.worldMat_.GetWorldPosition();
+	const Vector3 currentEnd = worldtransformTend_.worldMat_.GetWorldPosition();
+
+	// 現在の発生断面は黄色で表示し、親やオフセットの位置ずれを確認しやすくする。
+	lines.AddLine(currentStart, currentEnd, { 1.0f, 1.0f, 0.0f, 1.0f });
+
+	if (debugDrawRails_) {
+		for (const TrailSegment& segment : segments_) {
+			lines.AddLine(segment.prevStart, segment.start, { 0.0f, 1.0f, 0.2f, 1.0f });
+			lines.AddLine(segment.prevEnd, segment.end, { 0.1f, 0.7f, 1.0f, 1.0f });
+			lines.AddLine(segment.start, segment.end, { 1.0f, 1.0f, 1.0f, 0.8f });
+		}
+	}
+
+	if (debugDrawMesh_ && mesh) {
+		for (size_t i = 0; i + 5 < mesh->vertices.size(); i += kVerticesPerSegment) {
+			const Vector3 currentTop = { mesh->vertices[i + 0].position.x, mesh->vertices[i + 0].position.y, mesh->vertices[i + 0].position.z };
+			const Vector3 previousTop = { mesh->vertices[i + 1].position.x, mesh->vertices[i + 1].position.y, mesh->vertices[i + 1].position.z };
+			const Vector3 currentBottom = { mesh->vertices[i + 2].position.x, mesh->vertices[i + 2].position.y, mesh->vertices[i + 2].position.z };
+			const Vector3 previousBottom = { mesh->vertices[i + 5].position.x, mesh->vertices[i + 5].position.y, mesh->vertices[i + 5].position.z };
+
+			lines.AddLine(previousTop, currentTop, { 1.0f, 0.2f, 1.0f, 1.0f });
+			lines.AddLine(previousBottom, currentBottom, { 1.0f, 0.2f, 1.0f, 1.0f });
+			lines.AddLine(currentTop, currentBottom, { 1.0f, 0.2f, 1.0f, 0.75f });
+		}
+	}
+
+	if (debugDrawPoints_) {
+		constexpr size_t kMaxDebugPoints = 128;
+		size_t pointCount = 0;
+		lines.AddLineSphere({ currentStart, 0.035f }, { 1.0f, 1.0f, 0.0f, 1.0f }, 4, 4);
+		lines.AddLineSphere({ currentEnd, 0.035f }, { 1.0f, 1.0f, 0.0f, 1.0f }, 4, 4);
+
+		for (const TrailSegment& segment : segments_) {
+			if (pointCount++ >= kMaxDebugPoints) {
+				break;
+			}
+			lines.AddLineSphere({ segment.start, 0.025f }, { 0.0f, 1.0f, 0.2f, 1.0f }, 4, 4);
+			lines.AddLineSphere({ segment.end, 0.025f }, { 0.1f, 0.7f, 1.0f, 1.0f }, 4, 4);
+		}
+	}
+#endif // _DEBUG
 }
 
 void Engine::TrailEffect::UpdateUvScroll(float deltaTime)

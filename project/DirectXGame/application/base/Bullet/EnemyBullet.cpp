@@ -22,9 +22,9 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 	
 	// コライダ設定(球)
 	auto sphere = std::make_unique<Engine::SphereCollider>();
-	sphere->tag = CollisionTag::EnemyAttack;		// タグ設定
-	sphere->layer = CollisionLayer::EnemyAttack;	// レイヤー設定
-	sphere->collisionMask = static_cast<uint32_t>(CollisionLayer::Player);// マスク設定
+	sphere->SetTag(CollisionTag::EnemyAttack);		// タグ設定
+	sphere->SetLayer(CollisionLayer::EnemyAttack);	// レイヤー設定
+	sphere->SetCollisionMask(static_cast<uint32_t>(CollisionLayer::Player));// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable();	// 判定有効
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
@@ -40,8 +40,8 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 
 	// 衝突時のコールバック登録
 	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
-		if (!otherComponent || other->tag != CollisionTag::Player) return;
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
+		if (!otherComponent || other->GetTag() != CollisionTag::Player) return;
 		if (isAlive_ == false) return;
 		// 敵
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());

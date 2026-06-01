@@ -19,24 +19,44 @@ namespace Engine {
 	class Collider
 	{
 	public:
-		ColliderComponent* owner = nullptr; // 通知先ポインタ
-		bool enabled = true;
-		bool isStatic = false;  // 動かさない
-		bool isDebugLine = false;// ライン描画するか
-		Vector4 lineColor = { 1,1,1,1 };	// ライン色
-
-		Vector3 centerWorld = { 0,0,0 };
-		CollisionLayer layer = CollisionLayer::ALL;
-		CollisionTag tag = CollisionTag::None; // タグ
-		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
-		uint32_t id = 0; // コライダーID（ユニーク）
-
 		// 判定有効
-		void Enable() { enabled = true; }
+		void Enable() { enabled_ = true; }
 		// 判定無効
-		void Disable() { enabled = false; }
+		void Disable() { enabled_ = false; }
 		// 判定効力取得
-		bool IsEnabled() const { return enabled; }
+		bool IsEnabled() const { return enabled_; }
+		void SetEnabled(bool enabled) { enabled_ = enabled; }
+
+		// 通知先コンポーネント
+		void SetOwner(ColliderComponent* owner) { owner_ = owner; }
+		ColliderComponent* GetOwner() const { return owner_; }
+
+		// 動かないコライダーか
+		void SetIsStatic(bool isStatic) { isStatic_ = isStatic; }
+		bool IsStatic() const { return isStatic_; }
+
+		// デバッグライン
+		void SetIsDebugLine(bool isDebugLine) { isDebugLine_ = isDebugLine; }
+		bool IsDebugLine() const { return isDebugLine_; }
+		void SetLineColor(const Vector4& color) { lineColor_ = color; }
+		const Vector4& GetLineColor() const { return lineColor_; }
+
+		// 衝突分類
+		void SetLayer(CollisionLayer layer) { layer_ = layer; }
+		CollisionLayer GetLayer() const { return layer_; }
+		void SetTag(CollisionTag tag) { tag_ = tag; }
+		CollisionTag GetTag() const { return tag_; }
+		void SetCollisionMask(uint32_t mask) { collisionMask_ = mask; }
+		uint32_t GetCollisionMask() const { return collisionMask_; }
+
+		// ID
+		void SetId(uint32_t id) { id_ = id; }
+		uint32_t GetId() const { return id_; }
+
+		// ワールド中心
+		void SetCenterWorld(const Vector3& centerWorld) { centerWorld_ = centerWorld; }
+		const Vector3& GetCenterWorld() const { return centerWorld_; }
+
 		// 更新
 		virtual void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) = 0;
 		// 判定
@@ -50,8 +70,20 @@ namespace Engine {
 		// 追加: このコライダーのワールド空間AABBを返す（Broad Phase用）
 		virtual AABB GetAABB() const {
 			// 基底は点AABB（派生でオーバーライド推奨）
-			return AABB{ centerWorld, centerWorld };
+			return AABB{ centerWorld_, centerWorld_ };
 		}
+	protected:
+		ColliderComponent* owner_ = nullptr; // 通知先ポインタ
+		bool enabled_ = true;
+		bool isStatic_ = false;  // 動かさない
+		bool isDebugLine_ = false;// ライン描画するか
+		Vector4 lineColor_ = { 1,1,1,1 };	// ライン色
+
+		Vector3 centerWorld_ = { 0,0,0 };
+		CollisionLayer layer_ = CollisionLayer::ALL;
+		CollisionTag tag_ = CollisionTag::None; // タグ
+		uint32_t collisionMask_ = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
+		uint32_t id_ = 0; // コライダーID（ユニーク）
 	};
 
 	// 球コライダークラス
@@ -73,7 +105,7 @@ namespace Engine {
 		// AABB取得
 		AABB GetAABB() const override {
 			Vector3 r{ radius, radius, radius };
-			return AABB{ centerWorld - r, centerWorld + r };
+			return AABB{ centerWorld_ - r, centerWorld_ + r };
 		}
 
 	};
@@ -99,7 +131,7 @@ namespace Engine {
 
 		// 三角面取得
 		Triangle GetWorldTriangle() const {
-			return Triangle{ triangle01 + centerWorld,triangle02 + centerWorld, triangle03 + centerWorld};
+			return Triangle{ triangle01 + centerWorld_,triangle02 + centerWorld_, triangle03 + centerWorld_};
 		}
 
 		AABB GetAABB() const override {

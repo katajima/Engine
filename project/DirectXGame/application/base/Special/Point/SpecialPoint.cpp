@@ -67,17 +67,17 @@ void SpecalPoint::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 	// SphereColliderを追加
 	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->Enable();					// コライダ有効
-	sphere->tag = CollisionTag::Item;	// タグ設定
-	sphere->layer = CollisionLayer::Environment;// レイヤー設定
+	sphere->SetTag(CollisionTag::Item);	// タグ設定
+	sphere->SetLayer(CollisionLayer::Environment);// レイヤー設定
 	sphere->radius = 4.0f; // 半径を適宜設定
 	colliderComponent->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
 	colliderComponent->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 		// プレイヤーかチェック
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (!otherComponent) return;
-		if (other->tag != CollisionTag::Player) return;
+		if (other->GetTag() != CollisionTag::Player) return;
 			
 
 			objectComponent_->GetWorldTransform().scale_ = { 0,0,0 };

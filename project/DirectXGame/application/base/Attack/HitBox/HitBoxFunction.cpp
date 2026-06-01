@@ -9,7 +9,7 @@
 namespace HitBox {
 
 	bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* otherColl) {
-		other = static_cast<Engine::ColliderComponent*>(otherColl->owner);
+		other = static_cast<Engine::ColliderComponent*>(otherColl->GetOwner());
 		this->otherColl = otherColl;
 		if (!other) return false;
 
@@ -39,7 +39,7 @@ namespace HitBox {
 	}
 
 	void HitBoxFunction::UpdateTypePlayer() {
-		if (otherColl->tag != CollisionTag::Enemy) return;
+		if (otherColl->GetTag() != CollisionTag::Enemy) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
@@ -65,7 +65,7 @@ namespace HitBox {
 	}
 
 	void HitBoxFunction::UpdateTypeEnemy() {
-		if (otherColl->tag != CollisionTag::Player) return;
+		if (otherColl->GetTag() != CollisionTag::Player) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;

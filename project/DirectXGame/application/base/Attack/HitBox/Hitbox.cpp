@@ -39,7 +39,7 @@ namespace HitBox {
 
 			// 当たったコライダーによって相手に送るデータを決め転送
 			for (auto& data : colliders_) {
-				if (self->id == data.second.colliderID) {
+				if (self->GetId() == data.second.colliderID) {
 					hitBoxFunction_->SetData(data.second.reactionData);
 					break;
 				}
@@ -71,7 +71,7 @@ namespace HitBox {
 		ColliderData data;
 		data.colliderID = colliderComponent_->AddCollider(std::move(collider));
 		data.collider = colliderComponent_->FindColliderById(data.colliderID);
-		data.collider->isDebugLine = true;
+		data.collider->SetIsDebugLine(true);
 
 		worldTransform_.Update();
 
@@ -92,14 +92,14 @@ namespace HitBox {
 	void HitBoxInstance::Enable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Enable();
-			colliderData.second.collider->lineColor = color;
+			colliderData.second.collider->SetLineColor(color);
 		}
 	};
 	// 無効化
 	void HitBoxInstance::Disable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Disable();
-			colliderData.second.collider->lineColor = color;
+			colliderData.second.collider->SetLineColor(color);
 		}
 	};
 

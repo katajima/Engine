@@ -119,11 +119,10 @@ void Engine::EntityManager::UpdateImgui()
 	if (openedIndex >= 0 && openedIndex < static_cast<int>(entities_.size())) {
 		Object3d* entity = dynamic_cast<Object3d*>(entities_[openedIndex].get());
 		if (!entity) {
-			if (TrailEffect* trail = dynamic_cast<TrailEffect*>(entities_[openedIndex].get())) {
-				ImGui::Text(trail->GetName().c_str());
-				ImGui::Separator();
-				trail->UpdateImgui();
-			}
+			// Object3dではないEntityは、自分自身のデバッグUIだけをEntityManagerへ公開する。
+			ImGui::Text(entities_[openedIndex]->GetName().c_str());
+			ImGui::Separator();
+			entities_[openedIndex]->UpdateImgui();
 			ImGui::End();
 			return;
 		}
@@ -146,7 +145,8 @@ void Engine::EntityManager::UpdateImgui()
 				for (auto& coll : entity->GetColliderComponent()->GetAllColliders()) {
 					nameColliderComponent = "Collider" + std::to_string(collIndex);
 					if (ImGui::CollapsingHeader(nameColliderComponent.c_str())) {
-						ImGui::InputFloat3("position", &coll->centerWorld.x);
+						Vector3 centerWorld = coll->GetCenterWorld();
+						ImGui::InputFloat3("position", &centerWorld.x);
 					}
 					collIndex++;
 				}
@@ -230,13 +230,6 @@ void Engine::EntityManager::UpdateImgui()
 					}
 				}
 			}
-
-			// プリミティブ形状なら
-			if (entity->GetPrimitive()) {
-				ImGui::Separator();
-			}
-
-
 
 			if (entity->GetOcean()) {
 				ImGui::Separator();

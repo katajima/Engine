@@ -85,7 +85,7 @@ namespace Engine {
 		// 描画
 		void Draw() override;
 		// デバッグ表示。保存はせず、実行中の調整と状態確認だけを行う。
-		void UpdateImgui();
+		void UpdateImgui() override;
 		// カメラ設定
 		void SetCamera(Camera* camera) { camera_ = camera; };
 		// トレイルのオフセット設定
@@ -139,6 +139,7 @@ namespace Engine {
 		void RebuildMesh();
 		void RebuildLinearMesh();
 		void RebuildSplineMesh();
+		void DrawDebugLines();
 		void UpdateUvScroll(float deltaTime);
 		void UpdateDissolve(float deltaTime);
 		void UpdateComposableModules(float deltaTime);
@@ -174,6 +175,10 @@ namespace Engine {
 		Vector3 lastEnd_{};
 		Color baseColor_ = { 1,1,1,1 };
 		std::deque<TrailSegment> segments_;
+		bool debugDraw_ = false;
+		bool debugDrawRails_ = true;
+		bool debugDrawMesh_ = true;
+		bool debugDrawPoints_ = false;
 
 	private:
 		EffectManager* effectManager = nullptr;

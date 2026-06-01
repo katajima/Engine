@@ -194,6 +194,10 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/effect/dust.dds");
 	textureManager->LoadTexture("resources/Texture/effect/hit.dds");
 	textureManager->LoadTexture("resources/Texture/effect/ring.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg90.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg180.dds");
+	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds");
 
 	// 煙
 	textureManager->LoadTexture("resources/Texture/smoke/no1.dds");

@@ -1,4 +1,4 @@
-#include "Response.h"
+﻿#include "Response.h"
 #include <DirectXGame/application/base/Object/ObjectComponent.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -8,7 +8,7 @@
 
 void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)
 {
-	if (other->tag == tag) {
+	if (other->GetTag() == tag) {
 		Vector3 pushVec{};
 		if (self->ResolveCollision(*other, pushVec)) {
 			pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
@@ -16,11 +16,11 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 			// リアクション移動システムがあるなら
 			if (moveRequestSystem) {
 				MoveRequest request;
-				if (other->isStatic) {
+				if (other->IsStatic()) {
 					// 相手が動かないなら自分だけ押し戻す
 					request.velocity = pushVec;
 				}
-				else if (self->isStatic) {
+				else if (self->IsStatic()) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
@@ -35,13 +35,13 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 }
 
 void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
-	if (other->tag == CollisionTag::Wall) {
+	if (other->GetTag() == CollisionTag::Wall) {
 		Vector3 pushVec{};
 		if (self->ResolveCollision(*other, pushVec)) {
 			// リアクション移動システムがあるなら
 			if (moveRequestSystem) {
 				MoveRequest request;
-				if (other->isStatic) {
+				if (other->IsStatic()) {
 					// 相手が動かないなら自分だけ押し戻す
 					request.velocity = pushVec;
 				}
@@ -49,7 +49,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
 					request.velocity = pushVec * halfSize;
 				}
-				if (other->tag == CollisionTag::Wall) {
+				if (other->GetTag() == CollisionTag::Wall) {
 					if (pushVec.Normalize().y >= 0.7f) {
 						request.isLanding = true;
 					}
@@ -58,7 +58,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 					}
 				}
 
-				request.groundHeight = request.velocity.y + other->centerWorld.y;
+				request.groundHeight = request.velocity.y + other->GetCenterWorld().y;
 				moveRequestSystem->SetRequest(request);
 				return;
 			}
@@ -67,10 +67,10 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 }
 
 void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
-	if (other->tag == CollisionTag::PlayerEffect) {
+	if (other->GetTag() == CollisionTag::PlayerEffect) {
 		Vector3 pushVec{};
-		Vector3 otherPos = other->centerWorld;
-		Vector3 selfPos = self->centerWorld;
+		Vector3 otherPos = other->GetCenterWorld();
+		Vector3 selfPos = self->GetCenterWorld();
 		Vector3 dire = Normalize(otherPos - selfPos);
 
 		// リアクション移動システムがあるなら

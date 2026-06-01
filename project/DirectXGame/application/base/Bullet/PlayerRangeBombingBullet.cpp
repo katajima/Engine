@@ -39,9 +39,9 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 
 	// コライダ設定
 	auto sphere = std::make_unique<Engine::SphereCollider>();
-	sphere->tag = CollisionTag::PlayerAttack;			// タグ設定
-	sphere->layer = CollisionLayer::PlayerAttack;		// レイヤー設定
-	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
+	sphere->SetTag(CollisionTag::PlayerAttack);			// タグ設定
+	sphere->SetLayer(CollisionLayer::PlayerAttack);		// レイヤー設定
+	sphere->SetCollisionMask((1 << static_cast<uint32_t>(CollisionLayer::Enemy)));	// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable(); // 初期状態では無効化
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダコンポーネントに追加	
@@ -50,8 +50,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 
 	// 衝突時のコールバック登録
 	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
-		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
+		if (!otherComponent || other->GetTag() != CollisionTag::Enemy) return;
 
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());

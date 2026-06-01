@@ -134,13 +134,13 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 
 			// SphereColliderを追加
 			auto aabb = std::make_unique<Engine::AABBCollider>();
-			aabb->tag = CollisionTag::Wall;
+			aabb->SetTag(CollisionTag::Wall);
 			//sphere->layer = CollisionLayer::None;
-			aabb->collisionMask = 0xFFFFFFFF;
+			aabb->SetCollisionMask(0xFFFFFFFF);
 			//aabb->radius = objectData.size.x;
 			aabb->aabb.min = -((objectData.size) / 2)* objectData.scale;
 			aabb->aabb.max = ((objectData.size) / 2)* objectData.scale;
-			aabb->isStatic = true;
+			aabb->SetIsStatic(true);
 			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
 		}
 		// 座標 

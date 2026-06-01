@@ -22,6 +22,8 @@ namespace Engine {
 		virtual void Draw() {}
 		// シャドウマップ用の深度描画。不要なEntityは何もしない。
 		virtual void DrawShadowMap(ShadowMap*) {}
+		// Entity固有のデバッグUI。必要な派生クラスだけ実装する。
+		virtual void UpdateImgui() {}
 	public:
 		// 削除フラグ取得
 		virtual bool GetIsDelete() const { return isDelete_; }

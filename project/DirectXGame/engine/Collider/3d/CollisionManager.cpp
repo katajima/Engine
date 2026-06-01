@@ -29,7 +29,7 @@ void Engine::CollisionManager::BuildStaticSceneOctree()
 	debugTimer_.StartTimer();
 	for (auto* staticComp : staticColliders) {
 		for (auto* collider : staticComp->GetAllColliders()) {
-			if (collider->enabled) {
+			if (collider->IsEnabled()) {
 				octreeColliderStatic_->Insert(collider);
 			}
 		}
@@ -43,7 +43,7 @@ void Engine::CollisionManager::BuildDynamicSceneOctree() {
 	// 動的コライダーの登録
 	for (auto* staticComp : dynamicColliders) {
 		for (auto* collider : staticComp->GetAllColliders()) {
-			if (collider->enabled) {
+			if (collider->IsEnabled()) {
 				octreeCollider_->Insert(collider);
 			}
 		}
@@ -87,11 +87,11 @@ void Engine::CollisionManager::CheckAll() {
 void Engine::CollisionManager::CheckByLayer(ColliderComponent& a, ColliderComponent& b) {
 	for (auto* colA : a.GetAllColliders()) {
 		for (auto* colB : b.GetAllColliders()) {
-			if (!colA->enabled || !colB->enabled) continue;
+			if (!colA->IsEnabled() || !colB->IsEnabled()) continue;
 
 			// ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
-			if (!((1 << static_cast<uint32_t>(colB->layer)) & colA->collisionMask) ||
-				!((1 << static_cast<uint32_t>(colA->layer)) & colB->collisionMask)) {
+			if (!((1 << static_cast<uint32_t>(colB->GetLayer())) & colA->GetCollisionMask()) ||
+				!((1 << static_cast<uint32_t>(colA->GetLayer())) & colB->GetCollisionMask())) {
 				continue;
 			}
 
@@ -154,7 +154,7 @@ void Engine::CollisionManager::CheckDynamicVsDynamicMT()
 
 							const auto& colliders = colliderComp->GetAllColliders();
 							for (auto* collider : colliders) {
-								if (!collider || !collider->enabled) {
+								if (!collider || !collider->IsEnabled()) {
 									continue;
 								}
 
@@ -167,7 +167,7 @@ void Engine::CollisionManager::CheckDynamicVsDynamicMT()
 								octreeCollider_->Query(selfAabb, candidates);
 
 								for (auto* other : candidates) {
-									if (!other || !other->enabled) {
+									if (!other || !other->IsEnabled()) {
 										continue;
 									}
 
@@ -182,7 +182,7 @@ void Engine::CollisionManager::CheckDynamicVsDynamicMT()
 									}
 
 									// 同一owner 内の自己衝突はスキップ
-									if (collider->owner && other->owner && collider->owner == other->owner) {
+									if (collider->GetOwner() && other->GetOwner() && collider->GetOwner() == other->GetOwner()) {
 										continue;
 									}
 
@@ -272,7 +272,7 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 
 					const auto& colliders = colliderComp->GetAllColliders();
 					for (auto* collider : colliders) {
-						if (!collider || !collider->enabled) {
+						if (!collider || !collider->IsEnabled()) {
 							continue;
 						}
 
@@ -285,7 +285,7 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 						octreeColliderStatic_->Query(selfAabb, staticCandidates);
 
 						for (auto* other : staticCandidates) {
-							if (!other || !other->enabled) {
+							if (!other || !other->IsEnabled()) {
 								continue;
 							}
 
@@ -293,7 +293,7 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 								continue;
 							}
 
-							if (collider->owner && other->owner && collider->owner == other->owner) {
+							if (collider->GetOwner() && other->GetOwner() && collider->GetOwner() == other->GetOwner()) {
 								continue;
 							}
 
@@ -328,11 +328,11 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 }
 
 bool Engine::CollisionManager::CheckMask(Collider* a, Collider* b) const {
-	uint32_t aLayer = static_cast<uint32_t>(a->layer);
-	uint32_t bLayer = static_cast<uint32_t>(b->layer);
+	uint32_t aLayer = static_cast<uint32_t>(a->GetLayer());
+	uint32_t bLayer = static_cast<uint32_t>(b->GetLayer());
 
-	bool is = (bLayer & a->collisionMask) != 0;
-	bool is2 = (aLayer & b->collisionMask) != 0;
+	bool is = (bLayer & a->GetCollisionMask()) != 0;
+	bool is2 = (aLayer & b->GetCollisionMask()) != 0;
 
 	return is && is2;
 }
@@ -349,7 +349,7 @@ void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider*
 		}
 	}
 
-	ColliderComponent* otherComp = other->owner;
+	ColliderComponent* otherComp = other->GetOwner();
 	if (!otherComp) {
 		return;
 	}

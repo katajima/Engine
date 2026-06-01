@@ -101,19 +101,19 @@ namespace Character {
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->Enable();					// コライダ有効
-		sphere->tag = CollisionTag::Enemy;	// タグ設定
-		sphere->layer = CollisionLayer::ALL;// レイヤー設定
-		sphere->collisionMask = 0xFFFFFFFF;
+		sphere->SetTag(CollisionTag::Enemy);	// タグ設定
+		sphere->SetLayer(CollisionLayer::ALL);// レイヤー設定
+		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = colliderRadius; // 半径を適宜設定
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 		// コールバック登録（例：プレイヤーと衝突したらダメージ）
 		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 			// プレイヤーかチェック
-			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 			if (!otherComponent) return;
 
-			if (other->tag == CollisionTag::Enemy) {
+			if (other->GetTag() == CollisionTag::Enemy) {
 				//isStopping_ = true;
 			}
 

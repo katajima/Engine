@@ -58,11 +58,11 @@ namespace Character {
 
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
-		sphere->tag = CollisionTag::Player;
-		sphere->layer = CollisionLayer::ALL;
-		sphere->collisionMask = 0xFFFFFFFF;
+		sphere->SetTag(CollisionTag::Player);
+		sphere->SetLayer(CollisionLayer::ALL);
+		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = 1.0f; // 半径を適宜設定
-		sphere->isDebugLine = true;
+		sphere->SetIsDebugLine(true);
 		sphere->Enable();
 		// コライダ追加
 		GetColliderComponent()->AddCollider(std::move(sphere));
@@ -77,7 +77,7 @@ namespace Character {
 
 		// 衝突時のコールバック登録
 		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 			if (!otherComponent) return;
 
 			uint32_t otherId = otherComponent->GetUniqueId();

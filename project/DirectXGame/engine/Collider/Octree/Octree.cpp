@@ -6,7 +6,7 @@
 
 void Engine::OctreeCollider::Insert(Collider* collider)
 {
-	if (!collider || !collider->enabled) return;
+	if (!collider || !collider->IsEnabled()) return;
 	AABB aabb = collider->GetAABB();
 	InsertCollider(root.get(), collider, aabb);
 }

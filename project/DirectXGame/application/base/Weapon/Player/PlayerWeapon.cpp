@@ -14,7 +14,7 @@ void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
 
 	// トレイルはObject3dに所有させず、EntityManager管理の独立Entityとして生成する。
-	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/Image.png", provisionalData_.trailLifeTime,
+	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds", provisionalData_.trailLifeTime,
 		GetObject3D()->GetWorldTransform(), camera, provisionalData_.color,
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMin(),
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax()));

@@ -5,18 +5,18 @@
 
 void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// 球の中心位置と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld_ ,radius }, lineColor_, 8, 8);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld_ ,radius }, lineColor_, 8, 8);
 			}
 		}
 	}
@@ -25,43 +25,43 @@ void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCo
 
 bool Engine::SphereCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 	ColliderShapeType otherType = other.GetType();
 
 	// 球
 	if (otherType == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius });
+		return Collision::Detection::Check(Sphere{ centerWorld_ ,radius }, Sphere{ o.GetCenterWorld(), o.radius });
 	}
 
 	// AABB
 	else if (otherType == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
-		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld_ ,radius });
 	}
 
 	// カプセル
 	else if (otherType == ColliderShapeType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
-		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, o.capWorld_);
+		return Collision::Detection::Check(Sphere{ centerWorld_ ,radius }, o.capWorld_);
 	}
 
 	// OBB
 	else if (otherType == ColliderShapeType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
-		return Collision::Detection::Check(o.obb, Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(o.obb, Sphere{ centerWorld_ ,radius });
 	}
 
 	// Ray
 	else if (otherType == ColliderShapeType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
-		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld_ ,radius });
 	}
 
 	// 三角面
 	else if (otherType == ColliderShapeType::Triangle) {
 		auto& o = static_cast<const TriangleCollider&>(other);
-		bool is = Collision::Detection::Check(o.GetWorldTriangle(), Sphere{ centerWorld ,radius });
+		bool is = Collision::Detection::Check(o.GetWorldTriangle(), Sphere{ centerWorld_ ,radius });
 		return is;
 	}
 
@@ -75,19 +75,19 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& o = static_cast<const SphereCollider&>(other);
-		return Collision::Response::ReflectVelocity(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius }, outPushVec);
+		return Collision::Response::ReflectVelocity(Sphere{ centerWorld_ ,radius }, Sphere{ o.GetCenterWorld(), o.radius }, outPushVec);
 	}
 
 	// AABB
 	else if (other.GetType() == ColliderShapeType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 		Vector3 closest = {
-			std::clamp(centerWorld.x, o.minWorld.x, o.maxWorld.x),
-			std::clamp(centerWorld.y, o.minWorld.y, o.maxWorld.y),
-			std::clamp(centerWorld.z, o.minWorld.z, o.maxWorld.z)
+			std::clamp(centerWorld_.x, o.minWorld.x, o.maxWorld.x),
+			std::clamp(centerWorld_.y, o.minWorld.y, o.maxWorld.y),
+			std::clamp(centerWorld_.z, o.minWorld.z, o.maxWorld.z)
 		};
 
-		Vector3 diff = centerWorld - closest;
+		Vector3 diff = centerWorld_ - closest;
 		float distSq = diff.LengthSq();
 
 		if (distSq < radius * radius && distSq > 0.00001f) {
@@ -104,8 +104,8 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		const CapsuleCollider& o = static_cast<const CapsuleCollider&>(other);
 
 		// 球の中心とカプセルの線分の最近接点を求める
-		Vector3 closest = ClosestPoint::PointSegment(o.capsule.segment, centerWorld);
-		Vector3 diff = centerWorld - closest;
+		Vector3 closest = ClosestPoint::PointSegment(o.capsule.segment, centerWorld_);
+		Vector3 diff = centerWorld_ - closest;
 		float distSq = diff.LengthSq();
 		float radiusSum = radius + o.capsule.radius;
 
@@ -124,7 +124,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 
 		// 球の中心をOBBのローカル空間に変換
 		Matrix4x4 invMat = Inverse(OBB::MakeOBBMatrix(o.obb)); // OBBのワールド行列の逆行列
-		Vector3 localCenter = invMat.Transform(centerWorld);
+		Vector3 localCenter = invMat.Transform(centerWorld_);
 
 		// ローカルAABBとの最近接点
 		Vector3 localClosest = {
@@ -135,7 +135,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 
 		// ワールド空間に戻して差分・判定
 		Vector3 worldClosest = OBB::MakeOBBMatrix(o.obb).Transform(localClosest);
-		Vector3 diff = centerWorld - worldClosest;
+		Vector3 diff = centerWorld_ - worldClosest;
 		float distSq = diff.LengthSq();
 
 		if (distSq < radius * radius && distSq > 0.00001f) {
@@ -151,7 +151,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		const TriangleCollider& triangleColl = static_cast<const TriangleCollider&>(other);
 
 		const Triangle triangle = triangleColl.GetWorldTriangle();
-		const Vector3 sphereCenter = centerWorld;
+		const Vector3 sphereCenter = centerWorld_;
 		const float sphereRadius = radius;
 		const Vector3 a = triangle.vertices[0];
 		const Vector3 b = triangle.vertices[1];
@@ -222,20 +222,20 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 #pragma region AABB
 void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
-	minWorld = aabb.min + centerWorld;
-	maxWorld = aabb.max + centerWorld;
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
+	minWorld = aabb.min + centerWorld_;
+	maxWorld = aabb.max + centerWorld_;
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// AABBの最小・最大座標を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld_, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld_, lineColor_);
 			}
 		}
 	}
@@ -245,12 +245,12 @@ void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineComm
 
 bool Engine::AABBCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(AABB(minWorld, maxWorld), Sphere{ o.centerWorld ,o.radius });
+		return Collision::Detection::Check(AABB(minWorld, maxWorld), Sphere{ o.GetCenterWorld() ,o.radius });
 	}
 
 	// AABB
@@ -285,15 +285,15 @@ bool Engine::AABBCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		// AABBの最近接点を求める
-		Vector3 closestPoint = Vector3::Clamp(sphere.centerWorld, minWorld, maxWorld);
+		Vector3 closestPoint = Vector3::Clamp(sphere.GetCenterWorld(), minWorld, maxWorld);
 
-		Vector3 diff = sphere.centerWorld - closestPoint;
+		Vector3 diff = sphere.GetCenterWorld() - closestPoint;
 		float distSq = diff.LengthSq();
 		float radius = sphere.radius;
 
@@ -370,20 +370,20 @@ bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outP
 
 void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
-	capWorld_ = { Vector3{capsule.segment.origin + centerWorld},Vector3{capsule.segment.end + centerWorld},{capsule.radius} };
+	capWorld_ = { Vector3{capsule.segment.origin + centerWorld_},Vector3{capsule.segment.end + centerWorld_},{capsule.radius} };
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor_);
 			}
 		}
 	}
@@ -393,13 +393,13 @@ void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineC
 
 bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(Sphere{ {o.centerWorld} ,{o.radius} }, capWorld_);
+		return Collision::Detection::Check(Sphere{ {o.GetCenterWorld()} ,{o.radius} }, capWorld_);
 	}
 
 	// AABB
@@ -425,7 +425,7 @@ bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	if (other.GetType() == ColliderShapeType::Sphere) {
 	}
@@ -444,26 +444,26 @@ bool Engine::CapsuleCollider::ResolveCollision(const Collider& other, Vector3& o
 
 void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
-	obb.center = centerWorld;
+	obb.center = centerWorld_;
 	obb.orientations[0] = worldTransform.worldMat_.AxisRow(0).Normalize();
 	obb.orientations[1] = worldTransform.worldMat_.AxisRow(1).Normalize();
 	obb.orientations[2] = worldTransform.worldMat_.AxisRow(2).Normalize();
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
+		if (isDebugLine_) {
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
 			if (obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
 				// OBBのサイズを使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor_);
 			}
 		}
 	}
@@ -473,12 +473,12 @@ void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommo
 
 bool Engine::OBBCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(obb, Sphere{ o.centerWorld,o.radius });
+		return Collision::Detection::Check(obb, Sphere{ o.GetCenterWorld(),o.radius });
 	}
 
 	// AABB
@@ -503,7 +503,7 @@ bool Engine::OBBCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
@@ -512,7 +512,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 		Matrix4x4 invWorld = Inverse(obbWorld);
 
 		// 球の中心をOBBのローカル空間へ変換
-		Vector3 localCenter = invWorld.Transform(sphere.centerWorld);
+		Vector3 localCenter = invWorld.Transform(sphere.GetCenterWorld());
 
 		// OBBのローカルAABBで最近接点を求める
 		Vector3 localClosest = {
@@ -523,7 +523,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 
 		// ワールド空間に戻して判定
 		Vector3 worldClosest = obbWorld.Transform(localClosest);
-		Vector3 diff = sphere.centerWorld - worldClosest;
+		Vector3 diff = sphere.GetCenterWorld() - worldClosest;
 		float distSq = diff.LengthSq();
 
 		if (distSq < sphere.radius * sphere.radius && distSq > 0.00001f) {
@@ -541,7 +541,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 
 		// AABBを仮想球として扱う（近似）
 		SphereCollider tempSphere;
-		tempSphere.centerWorld = aabbCenter;
+		tempSphere.SetCenterWorld(aabbCenter);
 		tempSphere.radius = halfExtents.Length() * 0.5f;
 
 		return this->ResolveCollision(tempSphere, outPushVec); // 再帰的に使う
@@ -550,7 +550,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 		const CapsuleCollider& cap = static_cast<const CapsuleCollider&>(other);
 		Vector3 closest = ClosestPoint::PointSegment(cap.capsule.segment, obb.center); // OBB中心から最接近点
 		SphereCollider tempSphere;
-		tempSphere.centerWorld = closest;
+		tempSphere.SetCenterWorld(closest);
 		tempSphere.radius = cap.capsule.radius;
 
 		return this->ResolveCollision(tempSphere, outPushVec); // 再利用
@@ -578,13 +578,13 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 #pragma region Ray
 void Engine::RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 
-	ray_.origin = centerWorld;
+	ray_.origin = centerWorld_;
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
+		if (isDebugLine_) {
 			lineCommon->GetDebugLineMeshData().AddLine(ray_.origin, ray_.origin + ray_.diff, { 1,1,1,1 });
 		}
 	}
@@ -594,12 +594,12 @@ void Engine::RayCollider::Update(const WorldTransform& worldTransform, LineCommo
 
 bool Engine::RayCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	else if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(ray_, Sphere{ o.centerWorld,o.radius });
+		return Collision::Detection::Check(ray_, Sphere{ o.GetCenterWorld(),o.radius });
 	}
 
 	// AABB
@@ -624,7 +624,7 @@ bool Engine::RayCollider::CheckHit(const Collider& other) const
 }
 
 bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 	return false;
 }
 #pragma endregion
@@ -632,17 +632,17 @@ bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPu
 #pragma region Triangle
 
 void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon) {
-	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+	centerWorld_ = worldTransform.worldMat_.GetWorldPosition();
 #ifdef _DEBUG
 	if (lineCommon) {
-		if (isDebugLine) {
-			if (enabled) {
+		if (isDebugLine_) {
+			if (enabled_) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform, lineColor_);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineTriangle({ triangle01,triangle02 ,triangle03 }, worldTransform, lineColor);
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({ triangle01,triangle02 ,triangle03 }, worldTransform, lineColor_);
 			}
 		}
 	}
@@ -651,12 +651,12 @@ void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, Line
 
 bool Engine::TriangleCollider::CheckHit(const Collider& other) const
 {
-	if (!other.enabled) return false;
+	if (!other.IsEnabled()) return false;
 
 	// 球
 	else if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return Collision::Detection::Check(GetWorldTriangle(), Sphere{o.centerWorld,o.radius});
+		return Collision::Detection::Check(GetWorldTriangle(), Sphere{o.GetCenterWorld(),o.radius});
 	}
 
 	return false;
@@ -669,7 +669,7 @@ bool Engine::TriangleCollider::ResolveCollision(const Collider& other, Vector3& 
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		const Triangle triangle = GetWorldTriangle();
-		const Vector3 sphereCenter = sphere.centerWorld;
+		const Vector3 sphereCenter = sphere.GetCenterWorld();
 		const float sphereRadius = sphere.radius;
 
 		const Vector3 a = triangle.vertices[0];

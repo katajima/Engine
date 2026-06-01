@@ -157,7 +157,7 @@ namespace Engine {
         std::vector<Collider*> FindByTag(CollisionTag tag) const {
             std::vector<Collider*> results;
             for (const auto& entry : colliders) {
-                if (entry.collider->tag == tag) {
+                if (entry.collider->GetTag() == tag) {
                     results.push_back(entry.collider.get());
                 }
             }

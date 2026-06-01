@@ -42,7 +42,7 @@ void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManag
 
 
 	objectComponent_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (isAlive_ == false) return;
 		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
@@ -97,18 +97,18 @@ void Projectile::BaseProjectile::CreateCollision() {
 	if (param_.type == Type::Laser) {
 		// レーザーの場合は細長いカプセルコライダなども考えられるが、ここでは簡略化して球で設定
 		auto capsule = std::make_unique<Engine::CapsuleCollider>();
-		capsule->tag = param_.collisionTag;				// タグ設定
-		capsule->layer = param_.collisionLayer;			// レイヤー設定
-		capsule->collisionMask = param_.collisionMask;	// マスク設定
+		capsule->SetTag(param_.collisionTag);				// タグ設定
+		capsule->SetLayer(param_.collisionLayer);			// レイヤー設定
+		capsule->SetCollisionMask(param_.collisionMask);	// マスク設定
 		capsule->capsule.radius = param_.radius;			// 半径を適宜設定
 		capsule->Enable();								// 判定有効
 		objectComponent_->GetColliderComponent()->AddCollider(std::move(capsule));	// コライダーコンポーネントにコライダ追加
 	}
 	else {
 		auto sphere = std::make_unique<Engine::SphereCollider>();
-		sphere->tag = param_.collisionTag;				// タグ設定
-		sphere->layer = param_.collisionLayer;			// レイヤー設定
-		sphere->collisionMask = param_.collisionMask;	// マスク設定
+		sphere->SetTag(param_.collisionTag);				// タグ設定
+		sphere->SetLayer(param_.collisionLayer);			// レイヤー設定
+		sphere->SetCollisionMask(param_.collisionMask);	// マスク設定
 		sphere->radius = param_.radius;					// 半径を適宜設定
 		sphere->Enable();								// 判定有効
 		objectComponent_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
@@ -133,10 +133,10 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.hitBoxData.offset = {};
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
-		if (CollisionTag::Player == self->tag) {
+		if (CollisionTag::Player == self->GetTag()) {
 			useType = HitBox::UseType::kPlayer;
 		}
-		else if (CollisionTag::Enemy == self->tag) {
+		else if (CollisionTag::Enemy == self->GetTag()) {
 			useType = HitBox::UseType::kEnemy;
 		}
 		data_.hitBoxData.useType = useType;
@@ -148,7 +148,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		}
 	}
 
-	switch (other->tag) {
+	switch (other->GetTag()) {
 	case CollisionTag::Player:
 	{
 		// プレイヤー
