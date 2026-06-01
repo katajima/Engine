@@ -20,18 +20,11 @@ namespace Engine {
 	public:
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
-		// 更新
-		void Update(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
-		// 更新
-		void Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
-		// 更新
-		void Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
-		// 更新
-		void Update(Ocean* ocean, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
+		//// 更新
+		void Update(void* entity, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
+
 		// 更新
 		void Update(Camera* camera, Matrix4x4& mat);
-		// 更新
-		void UpdateSkinning(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 		// 更新
 		void UpdateSprite(Matrix4x4& mat);
 

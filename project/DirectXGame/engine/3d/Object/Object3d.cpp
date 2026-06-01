@@ -143,7 +143,7 @@ void Engine::Object3d::Update()
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
-		transformation->UpdateSkinning(GetModel(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+		transformation->Update(GetModel(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case ObjectModelType::kPrimitive:
 		if (GetPrimitive()) {
