@@ -8123,7 +8123,7 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.cpp
 ============================================================
-#include "HitBoxFunction.h"
+﻿#include "HitBoxFunction.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -8538,7 +8538,7 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/Hitbox.cpp
 ============================================================
-#include "Hitbox.h"
+﻿#include "Hitbox.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
 
