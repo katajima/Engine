@@ -9,11 +9,15 @@ namespace Character {
 		const Vector3& targetPos,
 		const Vector3& baseTarget,
 		const Vector3& flowDirection,
-		EnemyCrowdLayer layer
+		EnemyCrowdLayer layer,
+		BaseEnemy* commander,
+		bool isCommander
 	) const {
 		EnemyFlockingSteering steering{};
 		steering.owner = enemy;
 		steering.layer = layer;
+		steering.commander = commander;
+		steering.isCommander = isCommander;
 		steering.isDensityLimited = layer == EnemyCrowdLayer::Standby;
 
 		if (!enemy) {
@@ -39,6 +43,17 @@ namespace Character {
 		Vector3 direction = NormalizeXZ(combined);
 		if (direction.Length() <= 0.001f) {
 			direction = baseDirection;
+		}
+
+		if (commander && !isCommander && enemy->GetCrowdBehavior().type != EnemyCrowdBehaviorType::Formation) {
+			// 統率者ありの群衆では、全員が完全に別々の判断へ散らばらないよう統率者側の流れを少し混ぜる。
+			// 隊列型は隊形維持を優先し、統率者は攻撃順やデバッグ上の役割として扱う。
+			Vector3 toCommander = commander->GetWorldPosition() - enemy->GetWorldPosition();
+			toCommander.y = 0.0f;
+			Vector3 commanderDirection = NormalizeXZ(toCommander);
+			if (commanderDirection.Length() > 0.001f) {
+				direction = NormalizeXZ(direction + commanderDirection * enemy->GetCrowdBehavior().commanderInfluenceWeight);
+			}
 		}
 
 		if (layer == EnemyCrowdLayer::Attack) {

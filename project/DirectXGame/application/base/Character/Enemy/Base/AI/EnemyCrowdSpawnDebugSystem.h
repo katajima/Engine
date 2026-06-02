@@ -34,6 +34,12 @@ namespace Character {
 		float angularSpeed_ = 0.7f;
 		float waveInterval_ = 2.0f;
 		int waveCount_ = 3;
+		float targetChangeCooldown_ = 0.35f;
+		float targetSwitchDistance_ = 1.8f;
+		bool useCommander_ = false;
+		int commanderOrder_ = 0;
+		float commanderInfluenceWeight_ = 0.25f;
+		EnemyCrowdAttackStyle attackStyle_ = EnemyCrowdAttackStyle::Auto;
 
 		int smallMeleeCount_ = 5;
 		int smallRangedCount_ = 0;

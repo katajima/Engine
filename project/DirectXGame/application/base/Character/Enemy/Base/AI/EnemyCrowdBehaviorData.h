@@ -33,6 +33,15 @@ namespace Character {
 		Blocker,	// 圧迫
 	};
 
+	// 群衆ごとの攻撃許可の出し方
+	enum class EnemyCrowdAttackStyle {
+		Auto,				// 群衆タイプから自動で攻撃方式を決める
+		Individual,			// 個人ごとに順番に攻撃する
+		GroupVolley,		// 同じ群衆から複数体を一斉に攻撃させる
+		LeaderOnly,			// 統率者だけに攻撃許可を出す
+		SurroundThenAttack,	// 包囲がある程度できてから複数体で攻撃する
+	};
+
 	/// <summary>
 	/// 群衆グループの行動設定。スポーン時にプリセットを渡すだけで戦術を変更できる。
 	/// </summary>
@@ -44,6 +53,12 @@ namespace Character {
 		float angularSpeed = 0.7f;		// 流動・スパイラルの回転速度
 		float waveInterval = 2.0f;		// 波状型で前列が交代する秒数
 		uint32_t waveCount = 3;			// 波状型の列数
+		float targetChangeCooldown = 0.35f;	// 移動目標を切り替えるまでの最低待ち時間
+		float targetSwitchDistance = 1.8f;	// この距離以上ずれた目標だけを切り替え対象にする
+		bool useCommander = false;			// 群衆に統率者を置くか
+		uint32_t commanderOrder = 0;			// 生成順で何番目を統率者にするか
+		float commanderInfluenceWeight = 0.25f;	// 統率者の位置へ寄せる強さ
+		EnemyCrowdAttackStyle attackStyle = EnemyCrowdAttackStyle::Auto; // 攻撃順・一斉攻撃の方式
 
 		/// <summary>
 		/// 直進型

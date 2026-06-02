@@ -37,6 +37,8 @@ namespace Character {
 			int mediumMeleeCount = 0;
 			int dummyCount = 0;
 			EnemyCrowdBehaviorType behaviorType = EnemyCrowdBehaviorType::Flocking;
+			EnemyCrowdAttackStyle attackStyle = EnemyCrowdAttackStyle::Auto;
+			bool useCommander = false;
 		};
 	}
 #endif
@@ -79,11 +81,29 @@ namespace Character {
 		ImGui::DragFloat("回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
 		ImGui::DragFloat("波の切替秒数", &waveInterval_, 0.1f, 0.1f, 20.0f);
 		ImGui::DragInt("波の列数", &waveCount_, 1.0f, 1, 10);
+		ImGui::DragFloat("目標変更クールタイム", &targetChangeCooldown_, 0.05f, 0.0f, 3.0f);
+		ImGui::DragFloat("目標切替距離", &targetSwitchDistance_, 0.1f, 0.1f, 10.0f);
 
 		static const char* formationNames[] = { "横列", "円形", "V字", "方陣" };
 		int formationIndex = static_cast<int>(formationShape_);
 		if (ImGui::Combo("隊列の陣形", &formationIndex, formationNames, IM_ARRAYSIZE(formationNames))) {
 			formationShape_ = static_cast<EnemyFormationShape>(formationIndex);
+		}
+
+		ImGui::Checkbox("統率者を使う", &useCommander_);
+		ImGui::DragInt("統率者の順番", &commanderOrder_, 1.0f, 0, 60);
+		ImGui::DragFloat("統率者の影響", &commanderInfluenceWeight_, 0.05f, 0.0f, 1.0f);
+
+		static const char* attackStyleNames[] = {
+			"自動",
+			"個人攻撃",
+			"集団一斉攻撃",
+			"統率者のみ攻撃",
+			"包囲後に攻撃",
+		};
+		int attackStyleIndex = static_cast<int>(attackStyle_);
+		if (ImGui::Combo("攻撃方式", &attackStyleIndex, attackStyleNames, IM_ARRAYSIZE(attackStyleNames))) {
+			attackStyle_ = static_cast<EnemyCrowdAttackStyle>(attackStyleIndex);
 		}
 
 		ImGui::Separator();
@@ -126,6 +146,12 @@ namespace Character {
 		settings.angularSpeed = angularSpeed_;
 		settings.waveInterval = waveInterval_;
 		settings.waveCount = static_cast<uint32_t>(waveCount_);
+		settings.targetChangeCooldown = targetChangeCooldown_;
+		settings.targetSwitchDistance = targetSwitchDistance_;
+		settings.useCommander = useCommander_;
+		settings.commanderOrder = static_cast<uint32_t>((std::max)(commanderOrder_, 0));
+		settings.commanderInfluenceWeight = commanderInfluenceWeight_;
+		settings.attackStyle = attackStyle_;
 		return settings;
 	}
 
@@ -168,6 +194,8 @@ namespace Character {
 			CrowdSummary& summary = activeCrowds[enemy->GetCrowdGroupId()];
 			summary.count++;
 			summary.behaviorType = enemy->GetCrowdBehavior().type;
+			summary.attackStyle = enemy->GetCrowdBehavior().attackStyle;
+			summary.useCommander = enemy->GetCrowdBehavior().useCommander;
 			switch (enemy->GetType()) {
 			case EnemyType::kSmallMelee:
 				summary.smallMeleeCount++;
@@ -191,7 +219,11 @@ namespace Character {
 
 		for (const auto& [groupId, summary] : activeCrowds) {
 			ImGui::PushID(groupId);
-			ImGui::Text("ID %d / %s / %d体", groupId, ToText(summary.behaviorType), summary.count);
+			ImGui::Text("ID %d / %s / %d体 / 統率者:%s",
+				groupId,
+				ToText(summary.behaviorType),
+				summary.count,
+				summary.useCommander ? "あり" : "なし");
 			ImGui::Text("  近接:%d  遠距離:%d  中型:%d  ダミー:%d",
 				summary.smallMeleeCount,
 				summary.smallRangedCount,

@@ -34,11 +34,11 @@
         },
         "エフェクト(トレイル)生存時間": {
             "type": "float",
-            "value": 0.06666666269302368
+            "value": 0.050000011920928955
         },
         "エフェクト(トレイル)発生時間": {
             "type": "float",
-            "value": 0.3499999940395355
+            "value": 0.25
         },
         "カメラズーム": {
             "type": "bool",
@@ -168,6 +168,11 @@
             "type": "bool",
             "value": false
         },
+        "コンボ攻撃タイプ": {
+            "enumType": "ComboType",
+            "type": "enum",
+            "value": 1
+        },
         "コンボ移動キャンセル受付終了時間": {
             "type": "float",
             "value": 1.0166666507720947
@@ -195,7 +200,7 @@
         "ターゲット移動タイプ": {
             "enumType": "TargetMoveType",
             "type": "enum",
-            "value": 1
+            "value": 3
         },
         "ダウン持続時間": {
             "type": "float",
@@ -320,7 +325,7 @@
         },
         "ヒットボックス発生時間": {
             "type": "float",
-            "value": 0.3499999940395355
+            "value": 0.2666666805744171
         },
         "ヒットボックス発生条件タイプ": {
             "enumType": "HitBoxSpawnType",
@@ -441,6 +446,30 @@
         "親オブジェクト名前": {
             "type": "string",
             "value": "Player"
+        },
+        "遠距離ダメージ": {
+            "type": "float",
+            "value": 1.0
+        },
+        "遠距離弾速": {
+            "type": "float",
+            "value": 1.0
+        },
+        "遠距離発射数": {
+            "type": "int32_t",
+            "value": 1
+        },
+        "遠距離発射終了時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "遠距離発射開始時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "遠距離発射間隔": {
+            "type": "float",
+            "value": 0.5
         }
     }
 }

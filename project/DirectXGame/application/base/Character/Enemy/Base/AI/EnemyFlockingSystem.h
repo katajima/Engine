@@ -17,7 +17,9 @@ namespace Character {
 			const Vector3& targetPos,
 			const Vector3& baseTarget,
 			const Vector3& flowDirection,
-			EnemyCrowdLayer layer
+			EnemyCrowdLayer layer,
+			BaseEnemy* commander,
+			bool isCommander
 		) const;
 
 	private:

@@ -5,6 +5,7 @@
 #include "EnemyFlowFieldSystem.h"
 #include "EnemyCrowdPatternSystem.h"
 #include <cstdint>
+#include <unordered_map>
 #include <vector>
 
 namespace Character {
@@ -45,12 +46,27 @@ namespace Character {
 		// レイヤー、流れ方向、フロッキングを順に計算して移動結果を作る
 		void BuildFlockingSteering(
 			const std::vector<BaseEnemy*>& enemies,
-			const Vector3& targetPos
+			const Vector3& targetPos,
+			float dt
 		);
 
+		// 目標が細かく変わり続ける時に、一定時間は前回目標を保持して移動の震えを抑える
+		EnemyFlockingSteering ApplyTargetHold(BaseEnemy* enemy, EnemyFlockingSteering steering, float dt);
+
+		// 今フレーム存在しない敵の保持情報を削除する
+		void CleanupTargetHolds(const std::vector<BaseEnemy*>& enemies);
+
 	private:
+		struct TargetHoldState {
+			Vector3 target{};
+			Vector3 direction{};
+			float timer = 0.0f;
+			bool hasTarget = false;
+		};
+
 		std::vector<CrowdSlot> slots_;
 		std::vector<EnemyFlockingSteering> steerings_;
+		std::unordered_map<BaseEnemy*, TargetHoldState> targetHolds_;
 
 		float frontDistance_ = 8.0f;		// ターゲットから隊形先頭までの距離
 		float rowSpacing_ = 3.0f;			// 前後の間隔
@@ -61,5 +77,6 @@ namespace Character {
 		EnemyFlowFieldSystem flowFieldSystem_;	// 隊形目標への基本進行方向
 		EnemyFlockingSystem flockingSystem_;	// 群れ行動を反映した最終移動目標
 		EnemyCrowdPatternSystem patternSystem_;	// 群衆タイプ別の隊形目標生成
+		float defaultTargetHoldCooldown_ = 0.35f;	// 設定が無効な時の目標保持時間
 	};
 }

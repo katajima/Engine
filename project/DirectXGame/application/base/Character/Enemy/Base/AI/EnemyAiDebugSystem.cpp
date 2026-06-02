@@ -149,6 +149,12 @@ namespace Character {
 					ToText(layer),
 					ToText(ring),
 					granted ? " [TOKEN]" : "");
+				if (steering && (steering->isCommander || steering->isTargetHeld)) {
+					ImGui::SameLine();
+					ImGui::Text("%s%s",
+						steering->isCommander ? " [LEADER]" : "",
+						steering->isTargetHeld ? " [HOLD]" : "");
+				}
 			}
 		}
 
@@ -185,6 +191,10 @@ namespace Character {
 			if (showFlowDirection_ && steering) {
 				const Vector3 directionEnd = start + steering->flowDirection * 2.0f;
 				lines.AddLine(start, directionEnd, { 0.2f, 0.9f, 1.0f, 1.0f });
+			}
+
+			if (steering && steering->isCommander) {
+				lines.AddLineSphere(Sphere{ start + Vector3{ 0.0f, 0.8f, 0.0f }, 0.55f }, { 1.0f, 0.95f, 0.2f, 1.0f }, 6, 4);
 			}
 		}
 

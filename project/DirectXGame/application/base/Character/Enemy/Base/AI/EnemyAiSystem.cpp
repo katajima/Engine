@@ -1,4 +1,4 @@
-#include "EnemyAiSystem.h"
+﻿#include "EnemyAiSystem.h"
 
 namespace Character {
 
@@ -20,7 +20,7 @@ namespace Character {
 		float dt
 	) {
 		crowdSystem_->Update(enemies, targetPos, targetRotateY, dt);
-		attackSlotSystem_->Update(enemies, targetPos, targetRotateY);
+		attackSlotSystem_->Update(enemies, targetPos, targetRotateY, dt);
 	}
 
 	void EnemyAiSystem::UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt) {

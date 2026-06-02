@@ -1,4 +1,4 @@
-#include "MyGame.h"
+﻿#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
@@ -146,72 +146,18 @@ void Engine::MyGame::InitializeResource()
 {
 	TextureManager* textureManager = dxCommon_->GetTextureManager();
 	ModelManager* modelManager = dxCommon_->GetModelManager();
-	
-
-	textureManager->LoadTexture("resources/Texture/uvChecker.dds");
-	textureManager->LoadTexture("resources/Texture/Image.dds");
-	textureManager->LoadTexture("resources/Texture/simasima.dds");
-
-
-	textureManager->LoadTexture("resources/Texture/grass.dds");
-	textureManager->LoadTexture("resources/Texture/ground.dds");
-	textureManager->LoadTexture("resources/Texture/icon/LockOnW.dds");
-	textureManager->LoadTexture("resources/Texture/renga.dds");
-	textureManager->LoadTexture("resources/Texture/enemy.dds");
-
-	textureManager->LoadTexture("resources/Texture/text/normalAttack.dds");
-	textureManager->LoadTexture("resources/Texture/text/special.dds");
-	textureManager->LoadTexture("resources/Texture/text/Hit.dds");
-	textureManager->LoadTexture("resources/Texture/text/HP.dds");
-	textureManager->LoadTexture("resources/Texture/text/SP.dds");
-	textureManager->LoadTexture("resources/Texture/text/wave.dds");
-	textureManager->LoadTexture("resources/Texture/text/seconds.dds");
-	textureManager->LoadTexture("resources/Texture/text/preparation.dds");
-	textureManager->LoadTexture("resources/Texture/text/selectGamePlay.dds");
-	textureManager->LoadTexture("resources/Texture/text/selectTitle.dds");
-	textureManager->LoadTexture("resources/Texture/text/stamina.dds");
-	textureManager->LoadTexture("resources/Texture/text/over.dds");
-	textureManager->LoadTexture("resources/Texture/text/gameStartPreparation.dds");
-	textureManager->LoadTexture("resources/Texture/text/textScore.dds");
-
-
-
-
-	textureManager->LoadTexture("resources/Texture/effect/aa.dds");
-	textureManager->LoadTexture("resources/Texture/effect/aa2.dds");
-	for (int i = 0; i < 10; i++) {
-		std::string label = "resources/Texture/num/" + std::to_string(i) + ".dds";
-		textureManager->LoadTexture(label);
-	}
-	textureManager->LoadTexture("resources/Texture/num/Number_x64y96.dds");
-
-
-	textureManager->LoadTexture("resources/Texture/text/max.dds");
-
-	
-	textureManager->LoadTexture("resources/Texture/effect/circle2.dds");
-	textureManager->LoadTexture("resources/Texture/effect/gradationLine.dds");
-	textureManager->LoadTexture("resources/Texture/effect/dust.dds");
-	textureManager->LoadTexture("resources/Texture/effect/hit.dds");
-	textureManager->LoadTexture("resources/Texture/effect/ring.dds");
-	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px.dds");
-	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg90.dds");
-	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg180.dds");
-	textureManager->LoadTexture("resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds");
-
-	// 煙
-	textureManager->LoadTexture("resources/Texture/smoke/no1.dds");
-	textureManager->LoadTexture("resources/Texture/smoke/no2.dds");
-	textureManager->LoadTexture("resources/Texture/smoke/no3.dds");
-	
-	//
-	textureManager->LoadTexture("resources/Texture/effect/exp.dds");
-	
-	textureManager->LoadTexture("resources/Texture/effect/spark.dds");
-	
+	// テクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
+	// textテクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
+	// smokeテクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
+	// numテクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
+	// エフェクトテクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
 	// XBOXコントローラボタンテクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
-
 	// アイコン全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
 	
