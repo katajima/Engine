@@ -2429,9 +2429,18 @@ namespace Combo {
 		kSubWeapon,	// サブ武器
 	};
 
+	// 遠距離ロックオンタイプ
+	enum class RangeLockOnType {
+		kNone,		// ロックオンなし(向いている方向)
+		kTarget,	// ターゲットロックオン
+		kCamera,	// カメラロックオン
+	};
+
 	// 保存項目用遠距離攻撃データ
 	struct GlobalRange {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
+		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
+		float lockOnStartRadius = 30.0f;						// ターゲットを狙い始める半径
 		float rangeWindowStart = 0.1f;
 		float rangeWindowEnd = 0.5f;
 		float speed = 1.0f;
@@ -2444,6 +2453,9 @@ namespace Combo {
 		float subWeaponThrowLifeTime = 0.35f;				// サブ武器の投擲時間
 		float subWeaponReturnTime = 0.18f;					// サブ武器の戻り時間
 		float subWeaponSpinSpeed = 18.0f;					// サブ武器の回転速度
+		bool subWeaponAlignToDirection = true;				// 投擲方向へ向きを合わせるか
+		bool subWeaponUseSpin = true;						// 投擲中に回転させるか
+		Vector3 subWeaponRotateOffset = { 1.5708f, 0.0f, 3.1416f };	// サブ武器の回転オフセット
 	};
 
 	// 攻撃ノード単位のゲームプレイ調整項目。
@@ -2576,6 +2588,8 @@ namespace Combo {
 		float trailEffectStartTime = 0.1f;
 		// トレイル生存時間
 		float trailEffectLifeTime = 1.0;
+		// コンボ中に武器を表示するか
+		bool weaponDraw = true;
 	};
 
 	// 保存項目用コンボ接続データ
@@ -3111,6 +3125,11 @@ namespace Combo {
 			{ "武器", static_cast<int64_t>(RangeType::kWeapon) },
 			{ "サブ武器", static_cast<int64_t>(RangeType::kSubWeapon) },
 			});
+		EnumRegistry::Instance().Register("RangeLockOnType", {
+			{ "前方", static_cast<int64_t>(RangeLockOnType::kNone) },
+			{ "ターゲット", static_cast<int64_t>(RangeLockOnType::kTarget) },
+			{ "カメラ", static_cast<int64_t>(RangeLockOnType::kCamera) },
+			});
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
@@ -3438,6 +3457,8 @@ namespace Combo {
 
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
+			globalVariables->AddEnumItem(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->AddItem(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
@@ -3450,12 +3471,16 @@ namespace Combo {
 			globalVariables->AddItem(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
 			globalVariables->AddItem(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
 			globalVariables->AddItem(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
+			globalVariables->AddItem(name, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
+			globalVariables->AddItem(name, "サブ武器スピン", data.range.subWeaponUseSpin);
+			globalVariables->AddItem(name, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
 		}
 
 		// エフェクト
 		{
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+			globalVariables->AddItem(name, "エフェクト(武器表示)", data.effect.weaponDraw);
 		}
 		// 接続
 		{
@@ -3620,6 +3645,8 @@ namespace Combo {
 			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
+			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
+			data.range.lockOnStartRadius = globalVariables->GetValue<float>(name, "遠距離ロックオン開始半径");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
@@ -3632,12 +3659,16 @@ namespace Combo {
 			data.range.subWeaponThrowLifeTime = globalVariables->GetValue<float>(name, "サブ武器投擲時間");
 			data.range.subWeaponReturnTime = globalVariables->GetValue<float>(name, "サブ武器戻り時間");
 			data.range.subWeaponSpinSpeed = globalVariables->GetValue<float>(name, "サブ武器回転速度");
+			data.range.subWeaponAlignToDirection = globalVariables->GetValue<bool>(name, "サブ武器投擲方向に向ける");
+			data.range.subWeaponUseSpin = globalVariables->GetValue<bool>(name, "サブ武器スピン");
+			data.range.subWeaponRotateOffset = globalVariables->GetValue<Vector3>(name, "サブ武器回転オフセット");
 		}
 
 		// エフェクト
 		{
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
 		}
 		// 接続
 		{
@@ -3808,6 +3839,8 @@ namespace Combo {
 
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
+			globalVariables->SetEnumValue(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->SetValue(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
@@ -3820,12 +3853,16 @@ namespace Combo {
 			globalVariables->SetValue(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
 			globalVariables->SetValue(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
 			globalVariables->SetValue(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
+			globalVariables->SetValue(name, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
+			globalVariables->SetValue(name, "サブ武器スピン", data.range.subWeaponUseSpin);
+			globalVariables->SetValue(name, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
 		}
 
 		// エフェクト
 		{
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+			globalVariables->SetValue(name, "エフェクト(武器表示)", data.effect.weaponDraw);
 		}
 		// 接続
 		{
@@ -4888,6 +4925,7 @@ namespace Combo {
 			// カメラ
 			data.camera = comboEditorBlocks_[it.first].GetData().camera;
 			// エフェクト
+			data.effect = comboEditorBlocks_[it.first].GetData().effect;
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
@@ -5075,6 +5113,10 @@ namespace Combo {
 		ImGuiEndConditionType();
 		// 攻撃種別と遠距離設定
 		ImGuiAttackType();
+		// 遠距離設定
+		ImGuiRange();
+		// 演出設定
+		ImGuiEffect();
 		// 移動関係設定
 		ImGuiMove();
 		// リアクション設定
@@ -5247,18 +5289,33 @@ namespace Combo {
 		ImGui::Checkbox("ガードポイント", &data_.action.guardPoint);
 		ImGui::DragFloat("ヒットポーズ倍率", &data_.action.hitPauseScale, 0.01f, 0.0f, 5.0f, "%.2f");
 		ImGui::DragFloat("カメラシェイク量", &data_.action.cameraShakePower, 0.01f, 0.0f, 10.0f, "%.2f");
+	}
 
+	void EditorBlock::ImGuiRange() {
 		if (data_.type != Type::kRange && data_.type != Type::kMix) {
 			return;
 		}
+		if (!ImGui::CollapsingHeader("遠距離設定")) {
+			return;
+		}
 
-		ImGui::SeparatorText("遠距離攻撃設定");
 		static const char* RangeTypeLabels[] = {
 			"弾",
 			"武器",
 			"サブ武器",
 		};
 		Engine::ImGuiManager::Select("遠距離タイプ", RangeTypeLabels, data_.range.rangeType);
+
+		static const char* RangeLockOnTypeLabels[] = {
+			"前方",
+			"ターゲット",
+			"カメラ",
+		};
+		Engine::ImGuiManager::Select("狙いタイプ", RangeLockOnTypeLabels, data_.range.lockOnType);
+		if (data_.range.lockOnType == RangeLockOnType::kTarget) {
+			ImGui::DragFloat("狙い始める半径", &data_.range.lockOnStartRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
+		}
+
 		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
@@ -5274,6 +5331,9 @@ namespace Combo {
 			ImGui::DragFloat("投擲時間", &data_.range.subWeaponThrowLifeTime, 0.01f, 0.001f, 60.0f, "%.3f");
 			ImGui::DragFloat("戻り時間", &data_.range.subWeaponReturnTime, 0.01f, 0.001f, 60.0f, "%.3f");
 			ImGui::DragFloat("回転速度", &data_.range.subWeaponSpinSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
+			ImGui::Checkbox("投擲方向に向ける", &data_.range.subWeaponAlignToDirection);
+			ImGui::Checkbox("スピン", &data_.range.subWeaponUseSpin);
+			ImGui::DragFloat3("回転オフセット", &data_.range.subWeaponRotateOffset.x, 0.01f);
 		}
 
 		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
@@ -5291,6 +5351,16 @@ namespace Combo {
 		if (data_.range.subWeaponReturnTime < 0.001f) {
 			data_.range.subWeaponReturnTime = 0.001f;
 		}
+	}
+
+	void EditorBlock::ImGuiEffect() {
+		if (!ImGui::CollapsingHeader("演出")) {
+			return;
+		}
+
+		// 武器の表示有無はコンボ演出側で制御する
+		ImGui::Checkbox("武器表示", &data_.effect.weaponDraw);
+		ImGui::TextDisabled("トレイル時間はシーケンサーで調整します。");
 	}
 
 	void EditorBlock::ImGuiMove() {
@@ -5623,6 +5693,10 @@ namespace Combo {
 		void ImGuiEndConditionType();
 		// 攻撃種別と遠距離設定
 		void ImGuiAttackType();
+		// 遠距離攻撃設定
+		void ImGuiRange();
+		// 演出設定
+		void ImGuiEffect();
 		// 移動関係設定
 		void ImGuiMove();
 		// リアクション設定
@@ -5680,6 +5754,7 @@ namespace Combo {
 		GlobalData data_;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboImGui.cpp
@@ -6043,6 +6118,8 @@ namespace Combo {
 		weapon = owner->GetWeapon();
 		// トレイル終了
 		weapon->SetTrailEmit(false);
+		// コンボ演出として武器表示を切り替える
+		weapon->GetObject3D()->SetIsDraw(data_.weaponDraw);
 	}
 
 	// 更新
@@ -6058,6 +6135,8 @@ namespace Combo {
 	void ComboEffect::Exit(Character::BaseCharacter* owner) {
 		// トレイル終了
 		weapon->SetTrailEmit(false);
+		// コンボ終了後は通常表示へ戻す
+		weapon->GetObject3D()->SetIsDraw(true);
 	}
 
 #pragma endregion //コンボエフェクト
@@ -7219,7 +7298,7 @@ void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float tim
 			// 弾タイプは既存の弾生成処理を使用する
 			BulletInfo info{};
 			info.position = ctx.position;
-			info.targetPos = ctx.target ? ctx.target->GetWorldPosition() : ctx.position + ctx.direction;
+			info.targetPos = ctx.position + ResolveAimDirection(ctx);
 			info.speed = data_.speed;
 			info.damage = data_.damage;
 			info.type = ProjectileType::NORMAL;
@@ -7246,10 +7325,13 @@ void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float tim
 			throwData.throwLifeTime = data_.subWeaponThrowLifeTime;
 			throwData.returnTime = data_.subWeaponReturnTime;
 			throwData.spinSpeed = data_.subWeaponSpinSpeed;
+			throwData.alignToDirection = data_.subWeaponAlignToDirection;
+			throwData.useSpin = data_.subWeaponUseSpin;
+			throwData.rotateOffset = data_.subWeaponRotateOffset;
 			subWeapon->SetThrowData(throwData);
 
-			// ターゲットがいるならターゲット方向、いなければコンテキストの向きへ投げる
-			Vector3 throwDirection = ctx.target ? ctx.target->GetWorldPosition() - ctx.position : ctx.direction;
+			// コンボの狙い方設定に従って投擲方向を決める
+			Vector3 throwDirection = ResolveAimDirection(ctx);
 			subWeapon->Throw(ctx.position + data_.subWeaponStartOffset, throwDirection);
 			didUseRange = true;
 			break;
@@ -7266,6 +7348,31 @@ void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float tim
 		}
 		nextShotTime += interval;
 	}
+}
+
+Vector3 Combo::ComboRange::ResolveAimDirection(const Character::CharacterContext& ctx) const {
+	// 基本方向はプレイヤーの向きにする
+	Vector3 direction = ctx.direction;
+
+	// カメラ方向指定ならカメラの前方向を使う
+	if (data_.lockOnType == RangeLockOnType::kCamera) {
+		direction = ctx.cameraDirection;
+	}
+
+	// ターゲット指定なら半径内にいる時だけターゲット方向へ補正する
+	if (data_.lockOnType == RangeLockOnType::kTarget && ctx.target) {
+		const float radius = (std::max)(data_.lockOnStartRadius, 0.0f);
+		if (ctx.position.DistanceXZ(ctx.target->GetWorldPosition()) <= radius) {
+			direction = ctx.target->GetWorldPosition() - ctx.position;
+		}
+	}
+
+	// 水平方向の投擲に寄せ、ゼロ方向なら前方へフォールバックする
+	direction.y = 0.0f;
+	if (direction.LengthSq() <= 0.0001f) {
+		direction = { 0.0f,0.0f,1.0f };
+	}
+	return direction.Normalize();
 }
 // 終了
 void Combo::ComboRange::Exit(Character::BaseCharacter* owner) {
@@ -7307,6 +7414,9 @@ namespace Combo {
 		// データ構造体取得
 		Data& GetData() { return data_; }
 	private:
+		// 遠距離攻撃の狙い方向を取得する
+		Vector3 ResolveAimDirection(const Character::CharacterContext& ctx) const;
+
 		// コンボ使用者
 		Character::BaseCharacter* owner_ = nullptr;
 		// 弾の出現処理クラス
@@ -32815,6 +32925,7 @@ File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.cp
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <algorithm>
+#include <cmath>
 
 void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
@@ -32877,6 +32988,12 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	throwTimer_ = 0.0f;
 	throwState_ = ThrowState::kThrow;
 	GetWorldTransform().translate_ = startPosition;
+
+	// 必要なら投擲方向にサブ武器の向きを合わせる
+	if (throwData_.alignToDirection) {
+		GetWorldTransform().rotate_ = throwData_.rotateOffset;
+		GetWorldTransform().rotate_.y += std::atan2(throwDirection_.x, throwDirection_.z);
+	}
 }
 
 bool PlayerSubWeapon::IsThrowing() const {
@@ -32912,7 +33029,9 @@ void PlayerSubWeapon::UpdateThrow(float dt) {
 
 	// 前方へ飛ばしながら軽く回転させる
 	GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
-	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	if (throwData_.useSpin) {
+		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	}
 
 	// 投擲時間が終わったら戻り状態へ移行する
 	if (throwTimer_ >= throwData_.throwLifeTime) {
@@ -32937,7 +33056,9 @@ void PlayerSubWeapon::UpdateReturn(float dt) {
 	const Vector3 targetPosition = character->GetWorldPosition() + throwData_.idleOffset;
 	const float rate = (std::min)(throwTimer_ / throwData_.returnTime, 1.0f);
 	GetWorldTransform().translate_ = Vector3::Lerp(returnStartPosition_, targetPosition, rate);
-	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	if (throwData_.useSpin) {
+		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	}
 
 	// 戻り切ったら待機状態へ戻す
 	if (rate >= 1.0f) {
@@ -32963,6 +33084,9 @@ struct PlayerSubWeaponThrowData {
 	float throwLifeTime = 0.35f;					// 投擲状態の継続時間
 	float returnTime = 0.18f;						// 戻りにかける時間
 	float spinSpeed = 18.0f;						// 投擲中の回転速度
+	bool alignToDirection = true;					// 投擲方向へ向きを合わせるか
+	bool useSpin = true;							// 投擲中に回転させるか
+	Vector3 rotateOffset = { 1.5708f,0.0f,3.1416f };	// 投擲姿勢の回転オフセット
 };
 
 /// <summary>
