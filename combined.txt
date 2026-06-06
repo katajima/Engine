@@ -2382,7 +2382,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -2422,14 +2422,28 @@ namespace Combo {
 		kMix,		// 合わせ
 	};
 
+	// 遠距離タイプ
+	enum class RangeType {
+		kBullet,	// 弾
+		kWeapon,	// 武器
+		kSubWeapon,	// サブ武器
+	};
+
 	// 保存項目用遠距離攻撃データ
 	struct GlobalRange {
+		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		float rangeWindowStart = 0.1f;
 		float rangeWindowEnd = 0.5f;
 		float speed = 1.0f;
 		float interval = 0.5f;
 		int count = 1;
 		float damage = 1.0f;
+		Vector3 subWeaponIdleOffset = { 0.6f, 1.1f, 0.2f };	// サブ武器の待機位置
+		Vector3 subWeaponStartOffset = { 0.0f, 1.1f, 0.0f };	// 投擲開始位置のオフセット
+		float subWeaponThrowSpeed = 28.0f;					// サブ武器の投擲速度
+		float subWeaponThrowLifeTime = 0.35f;				// サブ武器の投擲時間
+		float subWeaponReturnTime = 0.18f;					// サブ武器の戻り時間
+		float subWeaponSpinSpeed = 18.0f;					// サブ武器の回転速度
 	};
 
 	// 攻撃ノード単位のゲームプレイ調整項目。
@@ -3070,7 +3084,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cpp
 ============================================================
-﻿#include "ComboSystem.h"
+#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -3085,6 +3099,19 @@ namespace Combo {
 		this->globalVariables = globalVariables;
 		owner = character;	// 所有者設定
 
+		// コンボ保存項目で使用するenumをグローバル変数エディタへ登録する
+		EnumRegistry::Instance().Register("ComboType", {
+			{ "移動のみ", static_cast<int64_t>(Type::kNone) },
+			{ "近距離", static_cast<int64_t>(Type::kMelle) },
+			{ "遠距離", static_cast<int64_t>(Type::kRange) },
+			{ "近距離 + 遠距離", static_cast<int64_t>(Type::kMix) },
+			});
+		EnumRegistry::Instance().Register("RangeType", {
+			{ "弾", static_cast<int64_t>(RangeType::kBullet) },
+			{ "武器", static_cast<int64_t>(RangeType::kWeapon) },
+			{ "サブ武器", static_cast<int64_t>(RangeType::kSubWeapon) },
+			});
+
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
 		comboDebug_ = std::make_unique<ComboDebug>();
@@ -3093,15 +3120,18 @@ namespace Combo {
 	}
 
 	void System::Update(const Character::CharacterContext& ctx) {
+		UpdateCooldowns(ctx.dt);
 		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
 		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
 		if (transitionedInput && pendingCostInput_ && *transitionedInput == *pendingCostInput_) {
 			PayStamina(pendingStaminaCost_);
+			StartCooldown(pendingCooldownNode_);
 		}
 		if (transitionedInput) {
 			pendingCostInput_.reset();
 			pendingStaminaCost_ = 0.0f;
+			pendingCooldownNode_.reset();
 		}
 		comboDebug_->Update(ctx.dt);
 	}
@@ -3128,6 +3158,7 @@ namespace Combo {
 			comboStateMachine_->HandleInput(input);
 			pendingCostInput_ = input;
 			pendingStaminaCost_ = transitionCost;
+			pendingCooldownNode_ = nextNode;
 			return true;
 		}
 
@@ -3158,9 +3189,11 @@ namespace Combo {
 
 		pendingCostInput_.reset();
 		pendingStaminaCost_ = 0.0f;
+		pendingCooldownNode_.reset();
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
 		PayStamina(startCost);
+		StartCooldown(startNode);
 		return true;
 	}
 
@@ -3184,6 +3217,8 @@ namespace Combo {
 		parentTransforms_.clear();
 		pendingCostInput_.reset();
 		pendingStaminaCost_ = 0.0f;
+		pendingCooldownNode_.reset();
+		cooldownTimers_.clear();
 	}
 
 	void System::AddComboNode(const std::string& name, std::shared_ptr<NodeState> node) {
@@ -3330,7 +3365,10 @@ namespace Combo {
 			}
 		}
 
-		// cooldown は保存済み。実運用で時間管理する時はここへ残り時間判定を追加する。
+		auto cooldownIt = cooldownTimers_.find(node->GetName());
+		if (cooldownIt != cooldownTimers_.end() && cooldownIt->second > 0.0f) {
+			return false;
+		}
 		return true;
 	}
 
@@ -3343,6 +3381,29 @@ namespace Combo {
 	void System::PayStamina(float cost) {
 		if (cost > 0.0f && owner->GetCharacterParameterComponent()) {
 			owner->GetCharacterParameterComponent()->Stamina().Add(-cost);
+		}
+	}
+
+	void System::UpdateCooldowns(float dt) {
+		for (auto it = cooldownTimers_.begin(); it != cooldownTimers_.end();) {
+			it->second -= dt;
+			if (it->second <= 0.0f) {
+				it = cooldownTimers_.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
+	void System::StartCooldown(const std::shared_ptr<NodeState>& node) {
+		if (!node) {
+			return;
+		}
+
+		const float cooldown = node->Data().GetActionData().cooldown;
+		if (cooldown > 0.0f) {
+			cooldownTimers_[node->GetName()] = cooldown;
 		}
 	}
 
@@ -3376,12 +3437,19 @@ namespace Combo {
 			globalVariables->AddItem(name, "攻撃音", data.action.soundName);
 
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
 			globalVariables->AddItem(name, "遠距離発射間隔", data.range.interval);
 			globalVariables->AddItem(name, "遠距離発射数", data.range.count);
 			globalVariables->AddItem(name, "遠距離ダメージ", data.range.damage);
+			globalVariables->AddItem(name, "サブ武器待機位置", data.range.subWeaponIdleOffset);
+			globalVariables->AddItem(name, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
+			globalVariables->AddItem(name, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
+			globalVariables->AddItem(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
+			globalVariables->AddItem(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
+			globalVariables->AddItem(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
 		}
 
 		// エフェクト
@@ -3551,12 +3619,19 @@ namespace Combo {
 			data.action.hitPauseScale = globalVariables->GetValue<float>(name, "ヒットポーズ倍率");
 			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
+			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
 			data.range.interval = globalVariables->GetValue<float>(name, "遠距離発射間隔");
 			data.range.count = globalVariables->GetValue<int>(name, "遠距離発射数");
 			data.range.damage = globalVariables->GetValue<float>(name, "遠距離ダメージ");
+			data.range.subWeaponIdleOffset = globalVariables->GetValue<Vector3>(name, "サブ武器待機位置");
+			data.range.subWeaponStartOffset = globalVariables->GetValue<Vector3>(name, "サブ武器投擲開始オフセット");
+			data.range.subWeaponThrowSpeed = globalVariables->GetValue<float>(name, "サブ武器投擲速度");
+			data.range.subWeaponThrowLifeTime = globalVariables->GetValue<float>(name, "サブ武器投擲時間");
+			data.range.subWeaponReturnTime = globalVariables->GetValue<float>(name, "サブ武器戻り時間");
+			data.range.subWeaponSpinSpeed = globalVariables->GetValue<float>(name, "サブ武器回転速度");
 		}
 
 		// エフェクト
@@ -3732,12 +3807,19 @@ namespace Combo {
 			globalVariables->SetValue(name, "攻撃音", data.action.soundName);
 
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
 			globalVariables->SetValue(name, "遠距離発射間隔", data.range.interval);
 			globalVariables->SetValue(name, "遠距離発射数", data.range.count);
 			globalVariables->SetValue(name, "遠距離ダメージ", data.range.damage);
+			globalVariables->SetValue(name, "サブ武器待機位置", data.range.subWeaponIdleOffset);
+			globalVariables->SetValue(name, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
+			globalVariables->SetValue(name, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
+			globalVariables->SetValue(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
+			globalVariables->SetValue(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
+			globalVariables->SetValue(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
 		}
 
 		// エフェクト
@@ -4033,7 +4115,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -4202,6 +4284,8 @@ namespace Combo {
 		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
 		bool CanPayStamina(float cost) const;
 		void PayStamina(float cost);
+		void UpdateCooldowns(float dt);
+		void StartCooldown(const std::shared_ptr<NodeState>& node);
 
 		
 	private:
@@ -4224,6 +4308,8 @@ namespace Combo {
 		bool isDebug = false;
 		std::optional<ActionInput> pendingCostInput_;
 		float pendingStaminaCost_ = 0.0f;
+		std::shared_ptr<NodeState> pendingCooldownNode_ = nullptr;
+		std::map<std::string, float> cooldownTimers_;
 		std::string groundLightStart_ = "MeleeAttack1";
 		std::string airLightStart_ = "JumpAttack";
 		std::string groundHeavyStart_ = "Attack10";
@@ -5167,12 +5253,28 @@ namespace Combo {
 		}
 
 		ImGui::SeparatorText("遠距離攻撃設定");
+		static const char* RangeTypeLabels[] = {
+			"弾",
+			"武器",
+			"サブ武器",
+		};
+		Engine::ImGuiManager::Select("遠距離タイプ", RangeTypeLabels, data_.range.rangeType);
 		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
 		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
 		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
 		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
+
+		if (data_.range.rangeType == RangeType::kSubWeapon) {
+			ImGui::SeparatorText("サブウェポン設定");
+			ImGui::DragFloat3("待機位置", &data_.range.subWeaponIdleOffset.x, 0.01f);
+			ImGui::DragFloat3("投擲開始オフセット", &data_.range.subWeaponStartOffset.x, 0.01f);
+			ImGui::DragFloat("投擲速度", &data_.range.subWeaponThrowSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
+			ImGui::DragFloat("投擲時間", &data_.range.subWeaponThrowLifeTime, 0.01f, 0.001f, 60.0f, "%.3f");
+			ImGui::DragFloat("戻り時間", &data_.range.subWeaponReturnTime, 0.01f, 0.001f, 60.0f, "%.3f");
+			ImGui::DragFloat("回転速度", &data_.range.subWeaponSpinSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
+		}
 
 		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
 			data_.range.rangeWindowEnd = data_.range.rangeWindowStart;
@@ -5182,6 +5284,12 @@ namespace Combo {
 		}
 		if (data_.range.count < 1) {
 			data_.range.count = 1;
+		}
+		if (data_.range.subWeaponThrowLifeTime < 0.001f) {
+			data_.range.subWeaponThrowLifeTime = 0.001f;
+		}
+		if (data_.range.subWeaponReturnTime < 0.001f) {
+			data_.range.subWeaponReturnTime = 0.001f;
 		}
 	}
 
@@ -7078,18 +7186,21 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.cp
 ============================================================
 #include "ComboRange.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
+#include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include <algorithm>
 
 // 開始
 void Combo::ComboRange::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
+	owner_ = owner;
 	bulletSpawn = owner->GetBulletSpawn();
 	bulletCount = 0;
 	nextShotTime = data_.rangeWindowStart;
 }
 // 更新
 void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float timer) {
-	if (!bulletSpawn || data_.count <= bulletCount ||
+	if (data_.count <= bulletCount ||
 		timer < data_.rangeWindowStart || timer > data_.rangeWindowEnd) {
 		return;
 	}
@@ -7097,20 +7208,68 @@ void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float tim
 	const float interval = (std::max)(data_.interval, 0.001f);
 	while (bulletCount < data_.count &&
 		timer >= nextShotTime && nextShotTime <= data_.rangeWindowEnd) {
-		BulletInfo info{};
-		info.position = ctx.position;
-		info.targetPos = ctx.target ? ctx.target->GetWorldPosition() : ctx.position + ctx.direction;
-		info.speed = data_.speed;
-		info.damage = data_.damage;
-		info.type = ProjectileType::NORMAL;
-		bulletSpawn->GenerateBullet(BulletType::kPlayerBullet, info);
+		bool didUseRange = false;	// 今回の発射タイミングで攻撃物を使用できたか
+		// RangeType別に使用する攻撃物を切り替える
+		switch (data_.rangeType) {
+		case RangeType::kBullet:
+		{
+			if (!bulletSpawn) {
+				break;
+			}
+			// 弾タイプは既存の弾生成処理を使用する
+			BulletInfo info{};
+			info.position = ctx.position;
+			info.targetPos = ctx.target ? ctx.target->GetWorldPosition() : ctx.position + ctx.direction;
+			info.speed = data_.speed;
+			info.damage = data_.damage;
+			info.type = ProjectileType::NORMAL;
+			bulletSpawn->GenerateBullet(BulletType::kPlayerBullet, info);
+			didUseRange = true;
+			break;
+		}
+		case RangeType::kSubWeapon:
+		{
+			// サブ武器タイプはプレイヤーが持つPlayerSubWeaponを投擲する
+			auto* player = dynamic_cast<Character::BasePlayer*>(owner_);
+			if (!player) {
+				break;
+			}
+			auto* subWeapon = dynamic_cast<PlayerSubWeapon*>(player->GetSubWeapon());
+			if (!subWeapon || subWeapon->IsThrowing()) {
+				break;
+			}
 
-		bulletCount++;
+			// コンボ保存項目の値をサブ武器の投擲データへ反映する
+			PlayerSubWeaponThrowData throwData{};
+			throwData.idleOffset = data_.subWeaponIdleOffset;
+			throwData.throwSpeed = data_.subWeaponThrowSpeed;
+			throwData.throwLifeTime = data_.subWeaponThrowLifeTime;
+			throwData.returnTime = data_.subWeaponReturnTime;
+			throwData.spinSpeed = data_.subWeaponSpinSpeed;
+			subWeapon->SetThrowData(throwData);
+
+			// ターゲットがいるならターゲット方向、いなければコンテキストの向きへ投げる
+			Vector3 throwDirection = ctx.target ? ctx.target->GetWorldPosition() - ctx.position : ctx.direction;
+			subWeapon->Throw(ctx.position + data_.subWeaponStartOffset, throwDirection);
+			didUseRange = true;
+			break;
+		}
+		case RangeType::kWeapon:
+		default:
+			// 通常武器投擲は今後の拡張枠として保存だけ行う
+			break;
+		}
+
+		// 使用できた時だけ発射数を進める
+		if (didUseRange) {
+			bulletCount++;
+		}
 		nextShotTime += interval;
 	}
 }
 // 終了
 void Combo::ComboRange::Exit(Character::BaseCharacter* owner) {
+	owner_ = nullptr;
 	bulletCount = 0;
 	nextShotTime = 0.0f;
 	bulletSpawn = nullptr;
@@ -7148,6 +7307,8 @@ namespace Combo {
 		// データ構造体取得
 		Data& GetData() { return data_; }
 	private:
+		// コンボ使用者
+		Character::BaseCharacter* owner_ = nullptr;
 		// 弾の出現処理クラス
 		BulletSpawn* bulletSpawn = nullptr;	
 		// データ
@@ -22675,6 +22836,9 @@ namespace Character {
 		// プレイヤUI取得
 		virtual PlayerUI* GetPlayerUI() = 0;
 
+		// サブ武器取得
+		BaseWeapon* GetSubWeapon() { return subWeapon_.get(); }
+
 		// SPゲージ加算
 		void AddSpGauge(int d);
 		// SP発動可能？
@@ -22835,6 +22999,7 @@ namespace Character {
 		subWeapon_ = std::make_unique<PlayerSubWeapon>();
 		subWeapon_->SetCharacter(this);
 		subWeapon_->Initialize(inputSystem, entityManager, globalVariables, {}, camera);
+		subWeapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
@@ -22940,7 +23105,9 @@ namespace Character {
 		weapon_->Update();
 
 		// サブ武器更新
-		subWeapon_->Update();
+		if (auto* playerSubWeapon = static_cast<PlayerSubWeapon*>(subWeapon_.get())) {
+			playerSubWeapon->Update(ctx.dt);
+		}
 
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),
@@ -22985,13 +23152,17 @@ namespace Character {
 	void NormalPlayer::HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
 
 	// 攻撃(スキル)
-	void NormalPlayer::SkillAttack() { RequestAttack(ActionInput::Skill); };
+	void NormalPlayer::SkillAttack() {
+		// スキル攻撃もコンボ側で管理する
+		RequestAttack(ActionInput::Skill);
+	};
 
-	void NormalPlayer::RequestAttack(ActionInput input) {
+	bool NormalPlayer::RequestAttack(ActionInput input) {
 		auto* ac = GetAttackController();
 		if (ac && ac->GetComboSystem()) {
-			ac->GetComboSystem()->RequestAttack(input);
+			return ac->GetComboSystem()->RequestAttack(input);
 		}
+		return false;
 	}
 
 	void NormalPlayer::ReloadComboData() {
@@ -23083,7 +23254,7 @@ namespace Character {
 		void InitAttack();
 
 		// 攻撃要求
-		void RequestAttack(ActionInput input);
+		bool RequestAttack(ActionInput input);
 
 	private:
 		// ステートマシーン初期化
@@ -29343,6 +29514,8 @@ protected: // 貰いもの
 File Path: project/DirectXGame/application/base/Stage/CustomStage.cpp
 ============================================================
 ﻿#include "CustomStage.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 void CustomStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager){
 
@@ -32639,25 +32812,83 @@ private:
 File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.cpp
 ============================================================
 #include "PlayerSubWeapon.h"
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <algorithm>
 
 void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 	this->inputSystem = inputSystem;						// インプット
 	this->entityManager = entityManager; // エンティティ3d
+	this->globalVariables = globalVariables;				// グローバル変数
+	this->camera = camera;								// カメラ
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entityManager, globalVariables, "PlayerWeapon", "Sword.obj", false, false, this);
-	objectComponent_->SetSRT({0,0,0}, {}, position);	// SRT設定
+	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "Sword.obj", false, false, this);
+	objectComponent_->SetSRT({ 0.55f,0.55f,0.55f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
 
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
 }
 
 void PlayerSubWeapon::Update() {
+	// dt指定が無い呼び出しでは待機位置だけを同期する
+	UpdateIdle();
 	// ワールドトランスフォーム更新
 	GetObject3D()->UpdateWorldTransform();
+}
+
+void PlayerSubWeapon::Update(float dt) {
+	// 状態ごとの移動処理
+	switch (throwState_) {
+	case ThrowState::kIdle:
+		UpdateIdle();
+		break;
+	case ThrowState::kThrow:
+		UpdateThrow(dt);
+		break;
+	case ThrowState::kReturn:
+		UpdateReturn(dt);
+		break;
+	default:
+		break;
+	}
+
+	// ワールドトランスフォーム更新
+	GetObject3D()->UpdateWorldTransform();
+}
+
+void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& direction) {
+	// 既に投擲中なら二重発射しない
+	if (throwState_ != ThrowState::kIdle) {
+		return;
+	}
+
+	// 投擲方向は水平寄りに正規化して、ゼロ方向なら前方へ投げる
+	throwDirection_ = direction;
+	throwDirection_.y = 0.0f;
+	if (throwDirection_.LengthSq() <= 0.0001f) {
+		throwDirection_ = { 0.0f,0.0f,1.0f };
+	}
+	throwDirection_ = throwDirection_.Normalize();
+
+	// 投擲開始位置と時間を初期化する
+	throwTimer_ = 0.0f;
+	throwState_ = ThrowState::kThrow;
+	GetWorldTransform().translate_ = startPosition;
+}
+
+bool PlayerSubWeapon::IsThrowing() const {
+	// 投擲または戻りの間はサブ武器攻撃中として扱う
+	return throwState_ != ThrowState::kIdle;
+}
+
+void PlayerSubWeapon::SetThrowData(const PlayerSubWeaponThrowData& data) {
+	// コンボ側から渡された投擲調整データを反映する
+	throwData_ = data;
+	throwData_.throwLifeTime = (std::max)(throwData_.throwLifeTime, 0.001f);
+	throwData_.returnTime = (std::max)(throwData_.returnTime, 0.001f);
 }
 
 void PlayerSubWeapon::DrawEffect() {
@@ -32668,6 +32899,54 @@ void PlayerSubWeapon::Draw2D() {
 
 }
 
+void PlayerSubWeapon::UpdateIdle() {
+	// 所有キャラクターがいる場合はプレイヤーの近くに待機させる
+	if (character) {
+		GetWorldTransform().translate_ = character->GetWorldPosition() + throwData_.idleOffset;
+	}
+}
+
+void PlayerSubWeapon::UpdateThrow(float dt) {
+	// 投擲時間を進める
+	throwTimer_ += dt;
+
+	// 前方へ飛ばしながら軽く回転させる
+	GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
+	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+
+	// 投擲時間が終わったら戻り状態へ移行する
+	if (throwTimer_ >= throwData_.throwLifeTime) {
+		throwTimer_ = 0.0f;
+		returnStartPosition_ = GetWorldTransform().translate_;
+		throwState_ = ThrowState::kReturn;
+	}
+}
+
+void PlayerSubWeapon::UpdateReturn(float dt) {
+	// 戻り時間を進める
+	throwTimer_ += dt;
+
+	// 所有者が無ければ待機状態へ戻す
+	if (!character) {
+		throwState_ = ThrowState::kIdle;
+		throwTimer_ = 0.0f;
+		return;
+	}
+
+	// プレイヤー近くの待機位置へ補間で戻す
+	const Vector3 targetPosition = character->GetWorldPosition() + throwData_.idleOffset;
+	const float rate = (std::min)(throwTimer_ / throwData_.returnTime, 1.0f);
+	GetWorldTransform().translate_ = Vector3::Lerp(returnStartPosition_, targetPosition, rate);
+	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+
+	// 戻り切ったら待機状態へ戻す
+	if (rate >= 1.0f) {
+		throwState_ = ThrowState::kIdle;
+		throwTimer_ = 0.0f;
+		UpdateIdle();
+	}
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h
@@ -32676,10 +32955,30 @@ File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 /// <summary>
+/// プレイヤーサブ武器の投擲調整データ
+/// </summary>
+struct PlayerSubWeaponThrowData {
+	Vector3 idleOffset = { 0.6f, 1.1f, 0.2f };		// プレイヤー基準の待機位置
+	float throwSpeed = 28.0f;						// 投擲速度
+	float throwLifeTime = 0.35f;					// 投擲状態の継続時間
+	float returnTime = 0.18f;						// 戻りにかける時間
+	float spinSpeed = 18.0f;						// 投擲中の回転速度
+};
+
+/// <summary>
 /// プレイヤーサブ武器
 /// </summary>
 class PlayerSubWeapon : public MeleeWeapon {
 public:
+	/// <summary>
+	/// サブ武器の行動状態
+	/// </summary>
+	enum class ThrowState {
+		kIdle,		// 待機中
+		kThrow,		// 投擲中
+		kReturn,	// 戻り中
+	};
+
 	///< summary>
 	/// 初期化
 	///</summary>
@@ -32692,6 +32991,26 @@ public:
 	void Update() override;
 
 	/// <summary>
+	/// 経過時間を使った更新
+	/// </summary>
+	void Update(float dt);
+
+	/// <summary>
+	/// サブ武器を投擲する
+	/// </summary>
+	void Throw(const Vector3& startPosition, const Vector3& direction);
+
+	/// <summary>
+	/// サブ武器の投擲データを設定する
+	/// </summary>
+	void SetThrowData(const PlayerSubWeaponThrowData& data);
+
+	/// <summary>
+	/// 投擲中か
+	/// </summary>
+	bool IsThrowing() const;
+
+	/// <summary>
 	/// エフェクトの描画
 	/// </summary>
 	void DrawEffect() override;
@@ -32702,6 +33021,26 @@ public:
 	void Draw2D() override;
 
 private:
+	/// <summary>
+	/// 待機中の位置を更新する
+	/// </summary>
+	void UpdateIdle();
+
+	/// <summary>
+	/// 投擲中の位置を更新する
+	/// </summary>
+	void UpdateThrow(float dt);
+
+	/// <summary>
+	/// 戻り中の位置を更新する
+	/// </summary>
+	void UpdateReturn(float dt);
+
+	ThrowState throwState_ = ThrowState::kIdle;		// サブ武器の現在状態
+	Vector3 throwDirection_ = { 0.0f, 0.0f, 1.0f };	// 投擲方向
+	Vector3 returnStartPosition_{};					// 戻り開始位置
+	float throwTimer_ = 0.0f;						// 投擲の経過時間
+	PlayerSubWeaponThrowData throwData_{};			// 投擲用の調整データ
 };
 
 
