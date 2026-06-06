@@ -49,6 +49,10 @@ namespace Combo {
 		void ImGuiEndConditionType();
 		// 攻撃種別と遠距離設定
 		void ImGuiAttackType();
+		// 遠距離攻撃設定
+		void ImGuiRange();
+		// 演出設定
+		void ImGuiEffect();
 		// 移動関係設定
 		void ImGuiMove();
 		// リアクション設定

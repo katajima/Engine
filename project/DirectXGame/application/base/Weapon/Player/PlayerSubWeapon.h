@@ -10,6 +10,9 @@ struct PlayerSubWeaponThrowData {
 	float throwLifeTime = 0.35f;					// 投擲状態の継続時間
 	float returnTime = 0.18f;						// 戻りにかける時間
 	float spinSpeed = 18.0f;						// 投擲中の回転速度
+	bool alignToDirection = true;					// 投擲方向へ向きを合わせるか
+	bool useSpin = true;							// 投擲中に回転させるか
+	Vector3 rotateOffset = { 1.5708f,0.0f,3.1416f };	// 投擲姿勢の回転オフセット
 };
 
 /// <summary>

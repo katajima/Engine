@@ -25,6 +25,11 @@ namespace Combo {
 			{ "武器", static_cast<int64_t>(RangeType::kWeapon) },
 			{ "サブ武器", static_cast<int64_t>(RangeType::kSubWeapon) },
 			});
+		EnumRegistry::Instance().Register("RangeLockOnType", {
+			{ "前方", static_cast<int64_t>(RangeLockOnType::kNone) },
+			{ "ターゲット", static_cast<int64_t>(RangeLockOnType::kTarget) },
+			{ "カメラ", static_cast<int64_t>(RangeLockOnType::kCamera) },
+			});
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
@@ -352,6 +357,8 @@ namespace Combo {
 
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
+			globalVariables->AddEnumItem(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->AddItem(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
@@ -364,12 +371,16 @@ namespace Combo {
 			globalVariables->AddItem(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
 			globalVariables->AddItem(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
 			globalVariables->AddItem(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
+			globalVariables->AddItem(name, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
+			globalVariables->AddItem(name, "サブ武器スピン", data.range.subWeaponUseSpin);
+			globalVariables->AddItem(name, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
 		}
 
 		// エフェクト
 		{
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+			globalVariables->AddItem(name, "エフェクト(武器表示)", data.effect.weaponDraw);
 		}
 		// 接続
 		{
@@ -534,6 +545,8 @@ namespace Combo {
 			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
+			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
+			data.range.lockOnStartRadius = globalVariables->GetValue<float>(name, "遠距離ロックオン開始半径");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
@@ -546,12 +559,16 @@ namespace Combo {
 			data.range.subWeaponThrowLifeTime = globalVariables->GetValue<float>(name, "サブ武器投擲時間");
 			data.range.subWeaponReturnTime = globalVariables->GetValue<float>(name, "サブ武器戻り時間");
 			data.range.subWeaponSpinSpeed = globalVariables->GetValue<float>(name, "サブ武器回転速度");
+			data.range.subWeaponAlignToDirection = globalVariables->GetValue<bool>(name, "サブ武器投擲方向に向ける");
+			data.range.subWeaponUseSpin = globalVariables->GetValue<bool>(name, "サブ武器スピン");
+			data.range.subWeaponRotateOffset = globalVariables->GetValue<Vector3>(name, "サブ武器回転オフセット");
 		}
 
 		// エフェクト
 		{
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
 		}
 		// 接続
 		{
@@ -722,6 +739,8 @@ namespace Combo {
 
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
+			globalVariables->SetEnumValue(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->SetValue(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
@@ -734,12 +753,16 @@ namespace Combo {
 			globalVariables->SetValue(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
 			globalVariables->SetValue(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
 			globalVariables->SetValue(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
+			globalVariables->SetValue(name, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
+			globalVariables->SetValue(name, "サブ武器スピン", data.range.subWeaponUseSpin);
+			globalVariables->SetValue(name, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
 		}
 
 		// エフェクト
 		{
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+			globalVariables->SetValue(name, "エフェクト(武器表示)", data.effect.weaponDraw);
 		}
 		// 接続
 		{

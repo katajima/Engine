@@ -40,6 +40,10 @@
             "type": "float",
             "value": 0.28333333134651184
         },
+        "エフェクト(武器表示)": {
+            "type": "bool",
+            "value": false
+        },
         "カメラシェイク量": {
             "type": "float",
             "value": 0.0
@@ -187,7 +191,7 @@
         "コンボ攻撃タイプ": {
             "enumType": "ComboType",
             "type": "enum",
-            "value": 2
+            "value": 3
         },
         "コンボ移動キャンセル受付終了時間": {
             "type": "float",
@@ -213,6 +217,18 @@
             "type": "bool",
             "value": false
         },
+        "サブ武器スピン": {
+            "type": "bool",
+            "value": true
+        },
+        "サブ武器回転オフセット": {
+            "type": "Vector3",
+            "value": [
+                1.5707999467849731,
+                0.0,
+                3.1415998935699463
+            ]
+        },
         "サブ武器回転速度": {
             "type": "float",
             "value": 47.5
@@ -228,6 +244,10 @@
         "サブ武器戻り時間": {
             "type": "float",
             "value": 0.18000000715255737
+        },
+        "サブ武器投擲方向に向ける": {
+            "type": "bool",
+            "value": true
         },
         "サブ武器投擲時間": {
             "type": "float",
@@ -380,7 +400,7 @@
         "ヒットボックス形状タイプ": {
             "enumType": "HitBoxShapeType",
             "type": "enum",
-            "value": 0
+            "value": 2
         },
         "ヒットボックス影響タイプ": {
             "enumType": "HitBoxHitEffectType",
@@ -570,9 +590,18 @@
             "type": "float",
             "value": 1.0
         },
+        "遠距離ロックオン開始半径": {
+            "type": "float",
+            "value": 30.0
+        },
         "遠距離弾速": {
             "type": "float",
             "value": 1.0
+        },
+        "遠距離狙いタイプ": {
+            "enumType": "RangeLockOnType",
+            "type": "enum",
+            "value": 1
         },
         "遠距離発射数": {
             "type": "int32_t",

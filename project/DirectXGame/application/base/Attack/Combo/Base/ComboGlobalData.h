@@ -45,9 +45,18 @@ namespace Combo {
 		kSubWeapon,	// サブ武器
 	};
 
+	// 遠距離ロックオンタイプ
+	enum class RangeLockOnType {
+		kNone,		// ロックオンなし(向いている方向)
+		kTarget,	// ターゲットロックオン
+		kCamera,	// カメラロックオン
+	};
+
 	// 保存項目用遠距離攻撃データ
 	struct GlobalRange {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
+		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
+		float lockOnStartRadius = 30.0f;						// ターゲットを狙い始める半径
 		float rangeWindowStart = 0.1f;
 		float rangeWindowEnd = 0.5f;
 		float speed = 1.0f;
@@ -60,6 +69,9 @@ namespace Combo {
 		float subWeaponThrowLifeTime = 0.35f;				// サブ武器の投擲時間
 		float subWeaponReturnTime = 0.18f;					// サブ武器の戻り時間
 		float subWeaponSpinSpeed = 18.0f;					// サブ武器の回転速度
+		bool subWeaponAlignToDirection = true;				// 投擲方向へ向きを合わせるか
+		bool subWeaponUseSpin = true;						// 投擲中に回転させるか
+		Vector3 subWeaponRotateOffset = { 1.5708f, 0.0f, 3.1416f };	// サブ武器の回転オフセット
 	};
 
 	// 攻撃ノード単位のゲームプレイ調整項目。
@@ -192,6 +204,8 @@ namespace Combo {
 		float trailEffectStartTime = 0.1f;
 		// トレイル生存時間
 		float trailEffectLifeTime = 1.0;
+		// コンボ中に武器を表示するか
+		bool weaponDraw = true;
 	};
 
 	// 保存項目用コンボ接続データ

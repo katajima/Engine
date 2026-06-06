@@ -2,6 +2,7 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <algorithm>
+#include <cmath>
 
 void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
@@ -64,6 +65,12 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	throwTimer_ = 0.0f;
 	throwState_ = ThrowState::kThrow;
 	GetWorldTransform().translate_ = startPosition;
+
+	// 必要なら投擲方向にサブ武器の向きを合わせる
+	if (throwData_.alignToDirection) {
+		GetWorldTransform().rotate_ = throwData_.rotateOffset;
+		GetWorldTransform().rotate_.y += std::atan2(throwDirection_.x, throwDirection_.z);
+	}
 }
 
 bool PlayerSubWeapon::IsThrowing() const {
@@ -99,7 +106,9 @@ void PlayerSubWeapon::UpdateThrow(float dt) {
 
 	// 前方へ飛ばしながら軽く回転させる
 	GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
-	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	if (throwData_.useSpin) {
+		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	}
 
 	// 投擲時間が終わったら戻り状態へ移行する
 	if (throwTimer_ >= throwData_.throwLifeTime) {
@@ -124,7 +133,9 @@ void PlayerSubWeapon::UpdateReturn(float dt) {
 	const Vector3 targetPosition = character->GetWorldPosition() + throwData_.idleOffset;
 	const float rate = (std::min)(throwTimer_ / throwData_.returnTime, 1.0f);
 	GetWorldTransform().translate_ = Vector3::Lerp(returnStartPosition_, targetPosition, rate);
-	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	if (throwData_.useSpin) {
+		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
+	}
 
 	// 戻り切ったら待機状態へ戻す
 	if (rate >= 1.0f) {

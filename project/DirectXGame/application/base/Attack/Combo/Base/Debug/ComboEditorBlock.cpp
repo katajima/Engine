@@ -73,6 +73,10 @@ namespace Combo {
 		ImGuiEndConditionType();
 		// 攻撃種別と遠距離設定
 		ImGuiAttackType();
+		// 遠距離設定
+		ImGuiRange();
+		// 演出設定
+		ImGuiEffect();
 		// 移動関係設定
 		ImGuiMove();
 		// リアクション設定
@@ -245,18 +249,33 @@ namespace Combo {
 		ImGui::Checkbox("ガードポイント", &data_.action.guardPoint);
 		ImGui::DragFloat("ヒットポーズ倍率", &data_.action.hitPauseScale, 0.01f, 0.0f, 5.0f, "%.2f");
 		ImGui::DragFloat("カメラシェイク量", &data_.action.cameraShakePower, 0.01f, 0.0f, 10.0f, "%.2f");
+	}
 
+	void EditorBlock::ImGuiRange() {
 		if (data_.type != Type::kRange && data_.type != Type::kMix) {
 			return;
 		}
+		if (!ImGui::CollapsingHeader("遠距離設定")) {
+			return;
+		}
 
-		ImGui::SeparatorText("遠距離攻撃設定");
 		static const char* RangeTypeLabels[] = {
 			"弾",
 			"武器",
 			"サブ武器",
 		};
 		Engine::ImGuiManager::Select("遠距離タイプ", RangeTypeLabels, data_.range.rangeType);
+
+		static const char* RangeLockOnTypeLabels[] = {
+			"前方",
+			"ターゲット",
+			"カメラ",
+		};
+		Engine::ImGuiManager::Select("狙いタイプ", RangeLockOnTypeLabels, data_.range.lockOnType);
+		if (data_.range.lockOnType == RangeLockOnType::kTarget) {
+			ImGui::DragFloat("狙い始める半径", &data_.range.lockOnStartRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
+		}
+
 		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
@@ -272,6 +291,9 @@ namespace Combo {
 			ImGui::DragFloat("投擲時間", &data_.range.subWeaponThrowLifeTime, 0.01f, 0.001f, 60.0f, "%.3f");
 			ImGui::DragFloat("戻り時間", &data_.range.subWeaponReturnTime, 0.01f, 0.001f, 60.0f, "%.3f");
 			ImGui::DragFloat("回転速度", &data_.range.subWeaponSpinSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
+			ImGui::Checkbox("投擲方向に向ける", &data_.range.subWeaponAlignToDirection);
+			ImGui::Checkbox("スピン", &data_.range.subWeaponUseSpin);
+			ImGui::DragFloat3("回転オフセット", &data_.range.subWeaponRotateOffset.x, 0.01f);
 		}
 
 		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
@@ -289,6 +311,16 @@ namespace Combo {
 		if (data_.range.subWeaponReturnTime < 0.001f) {
 			data_.range.subWeaponReturnTime = 0.001f;
 		}
+	}
+
+	void EditorBlock::ImGuiEffect() {
+		if (!ImGui::CollapsingHeader("演出")) {
+			return;
+		}
+
+		// 武器の表示有無はコンボ演出側で制御する
+		ImGui::Checkbox("武器表示", &data_.effect.weaponDraw);
+		ImGui::TextDisabled("トレイル時間はシーケンサーで調整します。");
 	}
 
 	void EditorBlock::ImGuiMove() {

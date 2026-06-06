@@ -56,6 +56,8 @@ namespace Combo {
 		weapon = owner->GetWeapon();
 		// トレイル終了
 		weapon->SetTrailEmit(false);
+		// コンボ演出として武器表示を切り替える
+		weapon->GetObject3D()->SetIsDraw(data_.weaponDraw);
 	}
 
 	// 更新
@@ -71,6 +73,8 @@ namespace Combo {
 	void ComboEffect::Exit(Character::BaseCharacter* owner) {
 		// トレイル終了
 		weapon->SetTrailEmit(false);
+		// コンボ終了後は通常表示へ戻す
+		weapon->GetObject3D()->SetIsDraw(true);
 	}
 
 #pragma endregion //コンボエフェクト
