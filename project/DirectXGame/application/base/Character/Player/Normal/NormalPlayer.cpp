@@ -294,22 +294,8 @@ namespace Character {
 
 	// 攻撃(スキル)
 	void NormalPlayer::SkillAttack() {
-		// サブ武器が戻り切るまでは次の投擲スキルを開始しない
-		auto* playerSubWeapon = static_cast<PlayerSubWeapon*>(subWeapon_.get());
-		if (playerSubWeapon && playerSubWeapon->IsThrowing()) {
-			return;
-		}
-
-		// スキルコンボが開始できた時だけサブ武器を投擲する
-		if (!RequestAttack(ActionInput::Skill)) {
-			return;
-		}
-
-		// PlayerSubWeaponを投擲系サブウェポンとして起動する
-		if (playerSubWeapon) {
-			Vector3 throwDirection = GetWorldTransform().GetForward();	// プレイヤーの向き
-			playerSubWeapon->Throw(GetWorldPosition() + Vector3{ 0.0f,1.1f,0.0f }, throwDirection);
-		}
+		// スキル攻撃もコンボ側で管理する
+		RequestAttack(ActionInput::Skill);
 	};
 
 	bool NormalPlayer::RequestAttack(ActionInput input) {

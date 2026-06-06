@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -47,12 +47,19 @@ namespace Combo {
 
 	// 保存項目用遠距離攻撃データ
 	struct GlobalRange {
+		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		float rangeWindowStart = 0.1f;
 		float rangeWindowEnd = 0.5f;
 		float speed = 1.0f;
 		float interval = 0.5f;
 		int count = 1;
 		float damage = 1.0f;
+		Vector3 subWeaponIdleOffset = { 0.6f, 1.1f, 0.2f };	// サブ武器の待機位置
+		Vector3 subWeaponStartOffset = { 0.0f, 1.1f, 0.0f };	// 投擲開始位置のオフセット
+		float subWeaponThrowSpeed = 28.0f;					// サブ武器の投擲速度
+		float subWeaponThrowLifeTime = 0.35f;				// サブ武器の投擲時間
+		float subWeaponReturnTime = 0.18f;					// サブ武器の戻り時間
+		float subWeaponSpinSpeed = 18.0f;					// サブ武器の回転速度
 	};
 
 	// 攻撃ノード単位のゲームプレイ調整項目。

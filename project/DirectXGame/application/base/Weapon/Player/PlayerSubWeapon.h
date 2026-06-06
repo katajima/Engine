@@ -2,6 +2,17 @@
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 /// <summary>
+/// プレイヤーサブ武器の投擲調整データ
+/// </summary>
+struct PlayerSubWeaponThrowData {
+	Vector3 idleOffset = { 0.6f, 1.1f, 0.2f };		// プレイヤー基準の待機位置
+	float throwSpeed = 28.0f;						// 投擲速度
+	float throwLifeTime = 0.35f;					// 投擲状態の継続時間
+	float returnTime = 0.18f;						// 戻りにかける時間
+	float spinSpeed = 18.0f;						// 投擲中の回転速度
+};
+
+/// <summary>
 /// プレイヤーサブ武器
 /// </summary>
 class PlayerSubWeapon : public MeleeWeapon {
@@ -37,6 +48,11 @@ public:
 	void Throw(const Vector3& startPosition, const Vector3& direction);
 
 	/// <summary>
+	/// サブ武器の投擲データを設定する
+	/// </summary>
+	void SetThrowData(const PlayerSubWeaponThrowData& data);
+
+	/// <summary>
 	/// 投擲中か
 	/// </summary>
 	bool IsThrowing() const;
@@ -68,12 +84,8 @@ private:
 	void UpdateReturn(float dt);
 
 	ThrowState throwState_ = ThrowState::kIdle;		// サブ武器の現在状態
-	Vector3 idleOffset_ = { 0.6f, 1.1f, 0.2f };		// プレイヤー基準の待機位置
 	Vector3 throwDirection_ = { 0.0f, 0.0f, 1.0f };	// 投擲方向
 	Vector3 returnStartPosition_{};					// 戻り開始位置
 	float throwTimer_ = 0.0f;						// 投擲の経過時間
-	float throwSpeed_ = 28.0f;						// 投擲速度
-	float throwLifeTime_ = 0.35f;					// 投擲状態の継続時間
-	float returnTime_ = 0.18f;						// 戻りにかける時間
-	float spinSpeed_ = 18.0f;						// 投擲中の回転速度
+	PlayerSubWeaponThrowData throwData_{};			// 投擲用の調整データ
 };

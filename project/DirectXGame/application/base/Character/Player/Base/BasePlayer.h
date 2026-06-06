@@ -65,6 +65,9 @@ namespace Character {
 		// プレイヤUI取得
 		virtual PlayerUI* GetPlayerUI() = 0;
 
+		// サブ武器取得
+		BaseWeapon* GetSubWeapon() { return subWeapon_.get(); }
+
 		// SPゲージ加算
 		void AddSpGauge(int d);
 		// SP発動可能？

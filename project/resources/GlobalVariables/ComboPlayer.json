@@ -102,7 +102,7 @@
         },
         "開始コンボ(地上スキル)": {
             "type": "string",
-            "value": "SkillAttackTest"
+            "value": "SkillTest"
         },
         "開始コンボ(地上弱攻撃)": {
             "type": "string",

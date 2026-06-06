@@ -26,6 +26,8 @@ namespace Combo {
 		// データ構造体取得
 		Data& GetData() { return data_; }
 	private:
+		// コンボ使用者
+		Character::BaseCharacter* owner_ = nullptr;
 		// 弾の出現処理クラス
 		BulletSpawn* bulletSpawn = nullptr;	
 		// データ

@@ -1,4 +1,4 @@
-﻿#include "ComboSystem.h"
+#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -13,6 +13,19 @@ namespace Combo {
 		this->globalVariables = globalVariables;
 		owner = character;	// 所有者設定
 
+		// コンボ保存項目で使用するenumをグローバル変数エディタへ登録する
+		EnumRegistry::Instance().Register("ComboType", {
+			{ "移動のみ", static_cast<int64_t>(Type::kNone) },
+			{ "近距離", static_cast<int64_t>(Type::kMelle) },
+			{ "遠距離", static_cast<int64_t>(Type::kRange) },
+			{ "近距離 + 遠距離", static_cast<int64_t>(Type::kMix) },
+			});
+		EnumRegistry::Instance().Register("RangeType", {
+			{ "弾", static_cast<int64_t>(RangeType::kBullet) },
+			{ "武器", static_cast<int64_t>(RangeType::kWeapon) },
+			{ "サブ武器", static_cast<int64_t>(RangeType::kSubWeapon) },
+			});
+
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
 		comboDebug_ = std::make_unique<ComboDebug>();
@@ -21,15 +34,18 @@ namespace Combo {
 	}
 
 	void System::Update(const Character::CharacterContext& ctx) {
+		UpdateCooldowns(ctx.dt);
 		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
 		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
 		if (transitionedInput && pendingCostInput_ && *transitionedInput == *pendingCostInput_) {
 			PayStamina(pendingStaminaCost_);
+			StartCooldown(pendingCooldownNode_);
 		}
 		if (transitionedInput) {
 			pendingCostInput_.reset();
 			pendingStaminaCost_ = 0.0f;
+			pendingCooldownNode_.reset();
 		}
 		comboDebug_->Update(ctx.dt);
 	}
@@ -56,6 +72,7 @@ namespace Combo {
 			comboStateMachine_->HandleInput(input);
 			pendingCostInput_ = input;
 			pendingStaminaCost_ = transitionCost;
+			pendingCooldownNode_ = nextNode;
 			return true;
 		}
 
@@ -86,9 +103,11 @@ namespace Combo {
 
 		pendingCostInput_.reset();
 		pendingStaminaCost_ = 0.0f;
+		pendingCooldownNode_.reset();
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
 		PayStamina(startCost);
+		StartCooldown(startNode);
 		return true;
 	}
 
@@ -112,6 +131,8 @@ namespace Combo {
 		parentTransforms_.clear();
 		pendingCostInput_.reset();
 		pendingStaminaCost_ = 0.0f;
+		pendingCooldownNode_.reset();
+		cooldownTimers_.clear();
 	}
 
 	void System::AddComboNode(const std::string& name, std::shared_ptr<NodeState> node) {
@@ -258,7 +279,10 @@ namespace Combo {
 			}
 		}
 
-		// cooldown は保存済み。実運用で時間管理する時はここへ残り時間判定を追加する。
+		auto cooldownIt = cooldownTimers_.find(node->GetName());
+		if (cooldownIt != cooldownTimers_.end() && cooldownIt->second > 0.0f) {
+			return false;
+		}
 		return true;
 	}
 
@@ -271,6 +295,29 @@ namespace Combo {
 	void System::PayStamina(float cost) {
 		if (cost > 0.0f && owner->GetCharacterParameterComponent()) {
 			owner->GetCharacterParameterComponent()->Stamina().Add(-cost);
+		}
+	}
+
+	void System::UpdateCooldowns(float dt) {
+		for (auto it = cooldownTimers_.begin(); it != cooldownTimers_.end();) {
+			it->second -= dt;
+			if (it->second <= 0.0f) {
+				it = cooldownTimers_.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
+	void System::StartCooldown(const std::shared_ptr<NodeState>& node) {
+		if (!node) {
+			return;
+		}
+
+		const float cooldown = node->Data().GetActionData().cooldown;
+		if (cooldown > 0.0f) {
+			cooldownTimers_[node->GetName()] = cooldown;
 		}
 	}
 
@@ -304,12 +351,19 @@ namespace Combo {
 			globalVariables->AddItem(name, "攻撃音", data.action.soundName);
 
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
 			globalVariables->AddItem(name, "遠距離発射間隔", data.range.interval);
 			globalVariables->AddItem(name, "遠距離発射数", data.range.count);
 			globalVariables->AddItem(name, "遠距離ダメージ", data.range.damage);
+			globalVariables->AddItem(name, "サブ武器待機位置", data.range.subWeaponIdleOffset);
+			globalVariables->AddItem(name, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
+			globalVariables->AddItem(name, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
+			globalVariables->AddItem(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
+			globalVariables->AddItem(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
+			globalVariables->AddItem(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
 		}
 
 		// エフェクト
@@ -479,12 +533,19 @@ namespace Combo {
 			data.action.hitPauseScale = globalVariables->GetValue<float>(name, "ヒットポーズ倍率");
 			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
+			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
 			data.range.interval = globalVariables->GetValue<float>(name, "遠距離発射間隔");
 			data.range.count = globalVariables->GetValue<int>(name, "遠距離発射数");
 			data.range.damage = globalVariables->GetValue<float>(name, "遠距離ダメージ");
+			data.range.subWeaponIdleOffset = globalVariables->GetValue<Vector3>(name, "サブ武器待機位置");
+			data.range.subWeaponStartOffset = globalVariables->GetValue<Vector3>(name, "サブ武器投擲開始オフセット");
+			data.range.subWeaponThrowSpeed = globalVariables->GetValue<float>(name, "サブ武器投擲速度");
+			data.range.subWeaponThrowLifeTime = globalVariables->GetValue<float>(name, "サブ武器投擲時間");
+			data.range.subWeaponReturnTime = globalVariables->GetValue<float>(name, "サブ武器戻り時間");
+			data.range.subWeaponSpinSpeed = globalVariables->GetValue<float>(name, "サブ武器回転速度");
 		}
 
 		// エフェクト
@@ -660,12 +721,19 @@ namespace Combo {
 			globalVariables->SetValue(name, "攻撃音", data.action.soundName);
 
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
+			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
 			globalVariables->SetValue(name, "遠距離発射間隔", data.range.interval);
 			globalVariables->SetValue(name, "遠距離発射数", data.range.count);
 			globalVariables->SetValue(name, "遠距離ダメージ", data.range.damage);
+			globalVariables->SetValue(name, "サブ武器待機位置", data.range.subWeaponIdleOffset);
+			globalVariables->SetValue(name, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
+			globalVariables->SetValue(name, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
+			globalVariables->SetValue(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
+			globalVariables->SetValue(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
+			globalVariables->SetValue(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
 		}
 
 		// エフェクト

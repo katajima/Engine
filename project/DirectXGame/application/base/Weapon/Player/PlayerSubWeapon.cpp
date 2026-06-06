@@ -71,6 +71,13 @@ bool PlayerSubWeapon::IsThrowing() const {
 	return throwState_ != ThrowState::kIdle;
 }
 
+void PlayerSubWeapon::SetThrowData(const PlayerSubWeaponThrowData& data) {
+	// コンボ側から渡された投擲調整データを反映する
+	throwData_ = data;
+	throwData_.throwLifeTime = (std::max)(throwData_.throwLifeTime, 0.001f);
+	throwData_.returnTime = (std::max)(throwData_.returnTime, 0.001f);
+}
+
 void PlayerSubWeapon::DrawEffect() {
 
 }
@@ -82,7 +89,7 @@ void PlayerSubWeapon::Draw2D() {
 void PlayerSubWeapon::UpdateIdle() {
 	// 所有キャラクターがいる場合はプレイヤーの近くに待機させる
 	if (character) {
-		GetWorldTransform().translate_ = character->GetWorldPosition() + idleOffset_;
+		GetWorldTransform().translate_ = character->GetWorldPosition() + throwData_.idleOffset;
 	}
 }
 
@@ -91,11 +98,11 @@ void PlayerSubWeapon::UpdateThrow(float dt) {
 	throwTimer_ += dt;
 
 	// 前方へ飛ばしながら軽く回転させる
-	GetWorldTransform().translate_ += throwDirection_ * throwSpeed_ * dt;
-	GetWorldTransform().rotate_.z += spinSpeed_ * dt;
+	GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
+	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
 
 	// 投擲時間が終わったら戻り状態へ移行する
-	if (throwTimer_ >= throwLifeTime_) {
+	if (throwTimer_ >= throwData_.throwLifeTime) {
 		throwTimer_ = 0.0f;
 		returnStartPosition_ = GetWorldTransform().translate_;
 		throwState_ = ThrowState::kReturn;
@@ -114,10 +121,10 @@ void PlayerSubWeapon::UpdateReturn(float dt) {
 	}
 
 	// プレイヤー近くの待機位置へ補間で戻す
-	const Vector3 targetPosition = character->GetWorldPosition() + idleOffset_;
-	const float rate = (std::min)(throwTimer_ / returnTime_, 1.0f);
+	const Vector3 targetPosition = character->GetWorldPosition() + throwData_.idleOffset;
+	const float rate = (std::min)(throwTimer_ / throwData_.returnTime, 1.0f);
 	GetWorldTransform().translate_ = Vector3::Lerp(returnStartPosition_, targetPosition, rate);
-	GetWorldTransform().rotate_.z += spinSpeed_ * dt;
+	GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
 
 	// 戻り切ったら待機状態へ戻す
 	if (rate >= 1.0f) {

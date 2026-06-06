@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -167,6 +167,8 @@ namespace Combo {
 		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
 		bool CanPayStamina(float cost) const;
 		void PayStamina(float cost);
+		void UpdateCooldowns(float dt);
+		void StartCooldown(const std::shared_ptr<NodeState>& node);
 
 		
 	private:
@@ -189,6 +191,8 @@ namespace Combo {
 		bool isDebug = false;
 		std::optional<ActionInput> pendingCostInput_;
 		float pendingStaminaCost_ = 0.0f;
+		std::shared_ptr<NodeState> pendingCooldownNode_ = nullptr;
+		std::map<std::string, float> cooldownTimers_;
 		std::string groundLightStart_ = "MeleeAttack1";
 		std::string airLightStart_ = "JumpAttack";
 		std::string groundHeavyStart_ = "Attack10";

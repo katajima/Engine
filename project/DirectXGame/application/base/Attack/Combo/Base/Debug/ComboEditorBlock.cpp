@@ -251,12 +251,28 @@ namespace Combo {
 		}
 
 		ImGui::SeparatorText("遠距離攻撃設定");
+		static const char* RangeTypeLabels[] = {
+			"弾",
+			"武器",
+			"サブ武器",
+		};
+		Engine::ImGuiManager::Select("遠距離タイプ", RangeTypeLabels, data_.range.rangeType);
 		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
 		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
 		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
 		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
+
+		if (data_.range.rangeType == RangeType::kSubWeapon) {
+			ImGui::SeparatorText("サブウェポン設定");
+			ImGui::DragFloat3("待機位置", &data_.range.subWeaponIdleOffset.x, 0.01f);
+			ImGui::DragFloat3("投擲開始オフセット", &data_.range.subWeaponStartOffset.x, 0.01f);
+			ImGui::DragFloat("投擲速度", &data_.range.subWeaponThrowSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
+			ImGui::DragFloat("投擲時間", &data_.range.subWeaponThrowLifeTime, 0.01f, 0.001f, 60.0f, "%.3f");
+			ImGui::DragFloat("戻り時間", &data_.range.subWeaponReturnTime, 0.01f, 0.001f, 60.0f, "%.3f");
+			ImGui::DragFloat("回転速度", &data_.range.subWeaponSpinSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
+		}
 
 		if (data_.range.rangeWindowEnd < data_.range.rangeWindowStart) {
 			data_.range.rangeWindowEnd = data_.range.rangeWindowStart;
@@ -266,6 +282,12 @@ namespace Combo {
 		}
 		if (data_.range.count < 1) {
 			data_.range.count = 1;
+		}
+		if (data_.range.subWeaponThrowLifeTime < 0.001f) {
+			data_.range.subWeaponThrowLifeTime = 0.001f;
+		}
+		if (data_.range.subWeaponReturnTime < 0.001f) {
+			data_.range.subWeaponReturnTime = 0.001f;
 		}
 	}
 
