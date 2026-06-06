@@ -38,6 +38,13 @@ namespace Combo {
 		kMix,		// 合わせ
 	};
 
+	// 遠距離タイプ
+	enum class RangeType {
+		kBullet,	// 弾
+		kWeapon,	// 武器
+		kSubWeapon,	// サブ武器
+	};
+
 	// 保存項目用遠距離攻撃データ
 	struct GlobalRange {
 		float rangeWindowStart = 0.1f;

@@ -1,4 +1,6 @@
 ﻿#include "CustomStage.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 void CustomStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager){
 

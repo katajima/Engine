@@ -64,7 +64,7 @@ namespace Character {
 		void InitAttack();
 
 		// 攻撃要求
-		void RequestAttack(ActionInput input);
+		bool RequestAttack(ActionInput input);
 
 	private:
 		// ステートマシーン初期化

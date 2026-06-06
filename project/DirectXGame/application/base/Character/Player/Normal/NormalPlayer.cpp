@@ -140,6 +140,7 @@ namespace Character {
 		subWeapon_ = std::make_unique<PlayerSubWeapon>();
 		subWeapon_->SetCharacter(this);
 		subWeapon_->Initialize(inputSystem, entityManager, globalVariables, {}, camera);
+		subWeapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
@@ -245,7 +246,9 @@ namespace Character {
 		weapon_->Update();
 
 		// サブ武器更新
-		subWeapon_->Update();
+		if (auto* playerSubWeapon = static_cast<PlayerSubWeapon*>(subWeapon_.get())) {
+			playerSubWeapon->Update(ctx.dt);
+		}
 
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),
@@ -290,13 +293,31 @@ namespace Character {
 	void NormalPlayer::HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
 
 	// 攻撃(スキル)
-	void NormalPlayer::SkillAttack() { RequestAttack(ActionInput::Skill); };
+	void NormalPlayer::SkillAttack() {
+		// サブ武器が戻り切るまでは次の投擲スキルを開始しない
+		auto* playerSubWeapon = static_cast<PlayerSubWeapon*>(subWeapon_.get());
+		if (playerSubWeapon && playerSubWeapon->IsThrowing()) {
+			return;
+		}
 
-	void NormalPlayer::RequestAttack(ActionInput input) {
+		// スキルコンボが開始できた時だけサブ武器を投擲する
+		if (!RequestAttack(ActionInput::Skill)) {
+			return;
+		}
+
+		// PlayerSubWeaponを投擲系サブウェポンとして起動する
+		if (playerSubWeapon) {
+			Vector3 throwDirection = GetWorldTransform().GetForward();	// プレイヤーの向き
+			playerSubWeapon->Throw(GetWorldPosition() + Vector3{ 0.0f,1.1f,0.0f }, throwDirection);
+		}
+	};
+
+	bool NormalPlayer::RequestAttack(ActionInput input) {
 		auto* ac = GetAttackController();
 		if (ac && ac->GetComboSystem()) {
-			ac->GetComboSystem()->RequestAttack(input);
+			return ac->GetComboSystem()->RequestAttack(input);
 		}
+		return false;
 	}
 
 	void NormalPlayer::ReloadComboData() {

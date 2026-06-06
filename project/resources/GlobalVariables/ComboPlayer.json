@@ -84,6 +84,14 @@
             "type": "string",
             "value": "SkillAttack01"
         },
+        "SkillAttackTest": {
+            "type": "string",
+            "value": "SkillAttackTest"
+        },
+        "SkillTest": {
+            "type": "string",
+            "value": "SkillTest"
+        },
         "testAttack": {
             "type": "string",
             "value": "testAttack"
@@ -94,7 +102,7 @@
         },
         "開始コンボ(地上スキル)": {
             "type": "string",
-            "value": "SkillAttack01"
+            "value": "SkillAttackTest"
         },
         "開始コンボ(地上弱攻撃)": {
             "type": "string",
