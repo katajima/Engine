@@ -25971,12 +25971,60 @@ namespace Game {
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Custom/CustomSystem.cpp
 ============================================================
+﻿#include "CustomSystem.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/engine/scene/SceneManager.h"
+
+void CustomSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* input,
+	Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables){
+	this->entityManager = entityManager;
+	this->globalVariables = globalVariables;
+	this->sceneManager = sceneManager;
+	this->input = input;
+}
+
+void CustomSystem::Update(float dt){
+
+}
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Custom/CustomSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
+
+// 前方宣言
+namespace Engine {
+	class DirectXCommon;
+	class EntityManager;
+	class GlobalVariables;
+	class SceneManager;
+}
+class EffectSystem;
+class InputSystem;
+
+class CustomSystem {
+public:
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="entity3DManager"></param>
+	/// <param name="entity2DManager"></param>
+	/// <param name="globalVariables"></param>
+	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables);
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+private:
+	Engine::EntityManager* entityManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
+	Engine::SceneManager* sceneManager = nullptr;
+	InputSystem* input = nullptr;
+};
 
 
 ============================================================
@@ -29294,12 +29342,45 @@ protected: // 貰いもの
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/CustomStage.cpp
 ============================================================
+﻿#include "CustomStage.h"
+
+void CustomStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager){
+
+}
+
+void CustomStage::Update(float dt){
+
+}
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/CustomStage.h
 ============================================================
-#pragma once
+﻿#pragma once
+#include "BaseStage.h"
+
+class CustomStage : public BaseStage {
+public:
+	// 初期化
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
+	// 更新
+	void Update(float dt) override;
+	///< summary>
+	/// 描画
+	///</summary>
+	void Draw() override {};
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
+	void DrawEffect() override {};
+	/// <summary>
+	/// 描画2d
+	/// </summary>
+	void Draw2D() override {};
+
+private:
+
+};
 
 
 ============================================================
@@ -30283,12 +30364,46 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/UI/CustomUI.cpp
 ============================================================
+﻿#include "CustomUI.h"
+
+void CustomUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+	Engine::GlobalVariables* globalVariables){
+
+
+}
+
+void CustomUI::Update(float dt){
+
+}
+
+void CustomUI::Draw(){
+
+}
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/UI/CustomUI.h
 ============================================================
-#pragma once
+﻿#pragma once
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+
+class CustomUI : public BaseUI {
+public:
+	// 初期化
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
+
+	// 更新
+	void Update(float dt) override;
+
+	// 描画
+	void Draw() override;
+
+
+
+private:
+
+};
+
 
 
 ============================================================
@@ -33145,13 +33260,17 @@ void CustomScene::Initialize() {
 	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
 	
 
+	// カスタムステージ初期化
+	customStage_ = std::make_unique<CustomStage>();
+	customStage_->Initialize(GetEntityManager(), cameraManager_.get());
 
-
-
-
-
-
-
+	// カスタムシステム初期化
+	customSystem_ = std::make_unique<CustomSystem>();
+	customSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	
+	// カスタムUI初期化
+	customUI_ = std::make_unique<CustomUI>();
+	customUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 
 
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
@@ -33166,6 +33285,30 @@ void CustomScene::Finalize() {}
 void CustomScene::Update() {
 	// 入力システム更新
 	inputSystem_->Update(GetTime());
+
+
+
+
+
+	// 入力システム更新
+	inputSystem_->Update(GetTime());
+
+	// リザルトシステム更新
+	customSystem_->Update(GetTime());
+
+	// ステージ更新
+	customStage_->Update(GetTime());
+
+	// UI更新
+	customUI_->Update(GetTime());
+
+	// エフェクト更新
+	effect_->Update(GetTime());
+
+	// カメラ更新
+	cameraManager_->Update();
+
+
 	// カメラ更新
 	cameraManager_->Update();
 }
@@ -33174,6 +33317,9 @@ void CustomScene::Draw3D() {
 }
 
 void CustomScene::Draw2D() {
+
+	//	UI描画
+	customUI_->Draw();
 }
 
 
@@ -33198,17 +33344,17 @@ File Path: project/DirectXGame/application/scene/CustomScene.h
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
-
-#include "DirectXGame/application/base/Input/InputHander.h"
-#include "DirectXGame/application/base/Stage/SelectStage.h"
-#include "DirectXGame/application/base/UI/SelectUI.h"
-#include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Game/Select/SelectSystem.h"
 #include <DirectXGame/application/base/Input/InputSystem.h>
 
+#include <DirectXGame/application/base/UI/CustomUI.h>
+#include <DirectXGame/application/base/Game/Custom/CustomSystem.h>
+#include <DirectXGame/application/base/Stage/CustomStage.h>
+
+
+
 /// <summary>
-/// セレクトシーン
+/// カスタムシーン
 /// </summary>
 class CustomScene : public Engine::BaseScene
 {
@@ -33236,6 +33382,13 @@ private:
 	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// インプットシステム
 	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+private:
+	// カスタムUI
+	std::unique_ptr<CustomUI> customUI_ = nullptr;
+	// カスタムステージ
+	std::unique_ptr<CustomStage> customStage_ = nullptr;
+	// カスタムシステム
+	std::unique_ptr<CustomSystem> customSystem_ = nullptr;
 };
 
 
@@ -77892,6 +78045,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\CustomUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultUI.cpp" />
@@ -78298,6 +78452,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
@@ -79660,6 +79815,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\CustomUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -80914,6 +81072,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
