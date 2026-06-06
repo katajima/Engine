@@ -68,6 +68,11 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 
 	// 重力
 	rigid.Integrate(cxt.dt, world);
+	if (cxt.state == Character::CharacterMainState::Attack &&
+		cxt.attackingMaxFallSpeed > 0.0f &&
+		rigid.Velocity().y < -cxt.attackingMaxFallSpeed) {
+		rigid.Velocity().y = -cxt.attackingMaxFallSpeed;
+	}
 }
 
 void MovementSystem::StateGravityProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world,

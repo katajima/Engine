@@ -1,4 +1,4 @@
-#include "ComboSystem.h"
+﻿#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -39,19 +39,23 @@ namespace Combo {
 			return false;
 		}
 
-		const float staminaCost = GetStaminaCost(input);
-		if (!CanPayStamina(staminaCost)) {
-			return false;
-		}
-
 		if (owner->GetCurrentMainState() == Character::CharacterMainState::Attack) {
-			if (!comboStateMachine_->CanTransition(input)) {
+			std::shared_ptr<NodeState> nextNode = comboStateMachine_->ResolveTransitionTarget(input);
+			if (!nextNode) {
+				return false;
+			}
+			if (!CanUseComboNode(nextNode)) {
+				return false;
+			}
+
+			const float transitionCost = GetComboStaminaCost(input, nextNode);
+			if (!CanPayStamina(transitionCost)) {
 				return false;
 			}
 
 			comboStateMachine_->HandleInput(input);
 			pendingCostInput_ = input;
-			pendingStaminaCost_ = staminaCost;
+			pendingStaminaCost_ = transitionCost;
 			return true;
 		}
 
@@ -65,6 +69,17 @@ namespace Combo {
 		}
 
 		const std::string startCombo = ResolveStartCombo(input, owner->GetMoveComponent()->GetIsLanding());
+		std::shared_ptr<NodeState> startNode = GetComboNodeState(startCombo);
+		if (!startNode) {
+			return false;
+		}
+		if (!CanUseComboNode(startNode)) {
+			return false;
+		}
+		const float startCost = GetComboStaminaCost(input, startNode);
+		if (!CanPayStamina(startCost)) {
+			return false;
+		}
 		if (!StartCombo(startCombo)) {
 			return false;
 		}
@@ -73,7 +88,7 @@ namespace Combo {
 		pendingStaminaCost_ = 0.0f;
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
-		PayStamina(staminaCost);
+		PayStamina(startCost);
 		return true;
 	}
 
@@ -189,8 +204,62 @@ namespace Combo {
 		}
 	}
 
+	StartComboRoutes System::GetStartComboRoutes() const {
+		return StartComboRoutes{
+			.groundLight = groundLightStart_,
+			.airLight = airLightStart_,
+			.groundHeavy = groundHeavyStart_,
+			.airHeavy = airHeavyStart_,
+			.groundSkill = groundSkillStart_,
+			.airSkill = airSkillStart_,
+		};
+	}
+
+	void System::SetStartComboRoutes(const StartComboRoutes& routes) {
+		groundLightStart_ = routes.groundLight;
+		airLightStart_ = routes.airLight;
+		groundHeavyStart_ = routes.groundHeavy;
+		airHeavyStart_ = routes.airHeavy;
+		groundSkillStart_ = routes.groundSkill;
+		airSkillStart_ = routes.airSkill;
+
+		if (globalVariables && !name.empty()) {
+			globalVariables->SetValue(name, kGroundLightStartKey, groundLightStart_);
+			globalVariables->SetValue(name, kAirLightStartKey, airLightStart_);
+			globalVariables->SetValue(name, kGroundHeavyStartKey, groundHeavyStart_);
+			globalVariables->SetValue(name, kAirHeavyStartKey, airHeavyStart_);
+			globalVariables->SetValue(name, kGroundSkillStartKey, groundSkillStart_);
+			globalVariables->SetValue(name, kAirSkillStartKey, airSkillStart_);
+		}
+	}
+
 	float System::GetStaminaCost(ActionInput input) const {
 		return input == ActionInput::Skill ? 25.0f : 0.0f;
+	}
+
+	float System::GetComboStaminaCost(ActionInput input, const std::shared_ptr<NodeState>& node) const {
+		if (!node) {
+			return GetStaminaCost(input);
+		}
+
+		const GlobalAction& action = node->Data().GetActionData();
+		return action.useCustomStaminaCost ? action.staminaCost : GetStaminaCost(input);
+	}
+
+	bool System::CanUseComboNode(const std::shared_ptr<NodeState>& node) const {
+		if (!node || !owner) {
+			return false;
+		}
+
+		const GlobalAction& action = node->Data().GetActionData();
+		if (action.requiredAirRemainCount > 0) {
+			if (!owner->GetMoveComponent() || owner->GetMoveComponent()->GetJumpCount() < action.requiredAirRemainCount) {
+				return false;
+			}
+		}
+
+		// cooldown は保存済み。実運用で時間管理する時はここへ残り時間判定を追加する。
+		return true;
 	}
 
 	bool System::CanPayStamina(float cost) const {
@@ -220,6 +289,20 @@ namespace Combo {
 
 		// 攻撃タイプと遠距離攻撃
 		{
+			globalVariables->AddItem(name, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			globalVariables->AddItem(name, "スタミナコスト", data.action.staminaCost);
+			globalVariables->AddItem(name, "クールダウン", data.action.cooldown);
+			globalVariables->AddItem(name, "空中残り回数要求", data.action.requiredAirRemainCount);
+			globalVariables->AddItem(name, "スーパーアーマー", data.action.superArmor);
+			globalVariables->AddItem(name, "無敵", data.action.invincible);
+			globalVariables->AddItem(name, "ガードポイント", data.action.guardPoint);
+			globalVariables->AddItem(name, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
+			globalVariables->AddItem(name, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
+			globalVariables->AddItem(name, "着地時のみキャンセル", data.action.landingCancel);
+			globalVariables->AddItem(name, "ヒットポーズ倍率", data.action.hitPauseScale);
+			globalVariables->AddItem(name, "カメラシェイク量", data.action.cameraShakePower);
+			globalVariables->AddItem(name, "攻撃音", data.action.soundName);
+
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
@@ -256,6 +339,7 @@ namespace Combo {
 		{
 			globalVariables->AddItem(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
 			globalVariables->AddItem(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			globalVariables->AddItem(name, "コンボ入力バッファ時間", data.condition.inputBufferTime);
 			globalVariables->AddItem(name, "コンボ終了時間", data.condition.stateEndTime);
 			globalVariables->AddItem(name, "コンボ移行時間", data.condition.stateNextTime);
 			globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
@@ -281,6 +365,7 @@ namespace Combo {
 		{
 			globalVariables->AddItem(name, "コンボ中の重力", data.move.isGravity);
 			globalVariables->AddItem(name, "コンボ中の重力強度", data.move.gravityScale);
+			globalVariables->AddItem(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
 			globalVariables->AddItem(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->AddItem(name, "移動スピード", data.move.moveSpeed);
@@ -308,6 +393,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.windowStart);
 			globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
 			globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->AddItem(name, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			globalVariables->AddItem(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
 			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
 			globalVariables->AddItem(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
@@ -330,6 +416,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
 			globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
 			globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->AddEnumItem(name, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
+			globalVariables->AddEnumItem(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
+			globalVariables->AddItem(name, "ヒット優先度", data.hitReaction.hitPriority);
+			globalVariables->AddItem(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
+			globalVariables->AddItem(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -375,6 +466,19 @@ namespace Combo {
 		// 攻撃タイプと遠距離攻撃
 		{
 			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
+			data.action.useCustomStaminaCost = globalVariables->GetValue<bool>(name, "スタミナコスト個別指定");
+			data.action.staminaCost = globalVariables->GetValue<float>(name, "スタミナコスト");
+			data.action.cooldown = globalVariables->GetValue<float>(name, "クールダウン");
+			data.action.requiredAirRemainCount = globalVariables->GetValue<int>(name, "空中残り回数要求");
+			data.action.superArmor = globalVariables->GetValue<bool>(name, "スーパーアーマー");
+			data.action.invincible = globalVariables->GetValue<bool>(name, "無敵");
+			data.action.guardPoint = globalVariables->GetValue<bool>(name, "ガードポイント");
+			data.action.cancelOnHitOnly = globalVariables->GetValue<bool>(name, "ヒット時のみキャンセル");
+			data.action.cancelOnMissOnly = globalVariables->GetValue<bool>(name, "ミス時のみキャンセル");
+			data.action.landingCancel = globalVariables->GetValue<bool>(name, "着地時のみキャンセル");
+			data.action.hitPauseScale = globalVariables->GetValue<float>(name, "ヒットポーズ倍率");
+			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
+			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
@@ -410,6 +514,7 @@ namespace Combo {
 		{
 			data.condition.stateInput.startTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 			data.condition.stateInput.endTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
+			data.condition.inputBufferTime = globalVariables->GetValue<float>(name, "コンボ入力バッファ時間");
 			data.condition.stateEndTime = globalVariables->GetValue<float>(name, "コンボ終了時間");
 			data.condition.stateNextTime = globalVariables->GetValue<float>(name, "コンボ移行時間");
 			data.condition.stateCancel.startTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
@@ -435,6 +540,7 @@ namespace Combo {
 		{
 			data.move.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
 			data.move.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
+			data.move.maxFallSpeed = globalVariables->GetValue<float>(name, "コンボ中の最大落下速度");
 			data.move.isResetGravity = globalVariables->GetValue<bool>(name, "コンボ開始時に重力速度リセット");
 
 			data.move.moveSpeed = globalVariables->GetValue<Vector3>(name, "移動スピード");
@@ -463,6 +569,11 @@ namespace Combo {
 			data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
 			data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
 			data.hitReaction.type = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+			data.hitReaction.selfHitStopPolicy = globalVariables->GetEnumValue<SelfHitStopPolicy>(name, "ヒットストップ方針(自分)");
+			data.hitReaction.attribute = globalVariables->GetEnumValue<AttackAttribute>(name, "攻撃属性");
+			data.hitReaction.hitPriority = globalVariables->GetValue<int>(name, "ヒット優先度");
+			data.hitReaction.cameraShakePower = globalVariables->GetValue<float>(name, "ヒットカメラシェイク量");
+			data.hitReaction.hitSoundName = globalVariables->GetValue<std::string>(name, "ヒット音");
 			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
 			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
@@ -474,6 +585,11 @@ namespace Combo {
 			data.hitReaction.targetHitStopTime = globalVariables->GetValue<float>(name, "ヒットストップ(相手)");
 			data.hitReaction.selfHitStopTime =  globalVariables->GetValue<float>(name, "ヒットストップ(自分)");
 			data.hitReaction.isSingleHitStop = globalVariables->GetValue<bool>(name, "ヒットストップ(一回のみ)");
+			// 旧データ互換: 以前の false は「自分側ヒットストップなし」として扱う。
+			if (!data.hitReaction.isSingleHitStop &&
+				data.hitReaction.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly) {
+				data.hitReaction.selfHitStopPolicy = SelfHitStopPolicy::None;
+			}
 
 
 			data.hitReaction.hitEffectNames.clear();
@@ -493,6 +609,7 @@ namespace Combo {
 			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
+			data.hitBox.recordPerCollider = globalVariables->GetValue<bool>(name, "ヒットボックスコライダー別ヒット記録");
 			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
 			data.hitBox.offset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
 			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
@@ -528,6 +645,20 @@ namespace Combo {
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
 		// 攻撃タイプと遠距離攻撃
 		{
+			globalVariables->SetValue(name, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			globalVariables->SetValue(name, "スタミナコスト", data.action.staminaCost);
+			globalVariables->SetValue(name, "クールダウン", data.action.cooldown);
+			globalVariables->SetValue(name, "空中残り回数要求", data.action.requiredAirRemainCount);
+			globalVariables->SetValue(name, "スーパーアーマー", data.action.superArmor);
+			globalVariables->SetValue(name, "無敵", data.action.invincible);
+			globalVariables->SetValue(name, "ガードポイント", data.action.guardPoint);
+			globalVariables->SetValue(name, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
+			globalVariables->SetValue(name, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
+			globalVariables->SetValue(name, "着地時のみキャンセル", data.action.landingCancel);
+			globalVariables->SetValue(name, "ヒットポーズ倍率", data.action.hitPauseScale);
+			globalVariables->SetValue(name, "カメラシェイク量", data.action.cameraShakePower);
+			globalVariables->SetValue(name, "攻撃音", data.action.soundName);
+
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
@@ -564,6 +695,7 @@ namespace Combo {
 		{
 			globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
 			globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			globalVariables->SetValue(name, "コンボ入力バッファ時間", data.condition.inputBufferTime);
 			globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
 			globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
 			globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
@@ -595,6 +727,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->SetValue(name, "コンボ中の重力", data.move.isGravity);
 			globalVariables->SetValue(name, "コンボ中の重力強度", data.move.gravityScale);
+			globalVariables->SetValue(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
 			globalVariables->SetValue(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
@@ -620,6 +753,11 @@ namespace Combo {
 			globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
 			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
 			globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->SetEnumValue(name, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
+			globalVariables->SetEnumValue(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
+			globalVariables->SetValue(name, "ヒット優先度", data.hitReaction.hitPriority);
+			globalVariables->SetValue(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
+			globalVariables->SetValue(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -630,7 +768,8 @@ namespace Combo {
 
 			globalVariables->SetValue(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
 			globalVariables->SetValue(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
-			globalVariables->SetValue(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
+			globalVariables->SetValue(name, "ヒットストップ(一回のみ)",
+				data.hitReaction.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly);
 
 
 			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
@@ -646,6 +785,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
 			globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
 			globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->SetValue(name, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			globalVariables->SetValue(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
 			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
 			globalVariables->SetValue(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
@@ -687,6 +827,7 @@ namespace Combo {
 
 	void System::SetData(ComboData& data, const GlobalData& gData) {
 		// 攻撃タイプと遠距離攻撃
+		data.GetActionData() = gData.action;
 		data.SetType(gData.type);
 		data.GetComboRange().GetData() = gData.range;
 		// ヒットボックスとリアクションデータ 
@@ -724,6 +865,22 @@ namespace Combo {
 		SetData(data, comboGlobalDatas_[comboNodeName]);
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName, data);
+	}
+
+	void System::CreateCombo(const std::string& comboNodeName, const GlobalData& sourceData) {
+		if (comboGlobalDatas_.find(comboNodeName) != comboGlobalDatas_.end() ||
+			comboNodes_.find(comboNodeName) != comboNodes_.end()) {
+			return;
+		}
+
+		comboGlobalDatas_[comboNodeName] = sourceData;
+		ApplyGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]);
+		SetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]);
+
+		ComboData data{};
+		SetData(data, comboGlobalDatas_[comboNodeName]);
+		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName, data);
+		ConnectSavedCombos();
 	}
 
 	void System::CreateGlobalData(const std::string& comboNodeName) {

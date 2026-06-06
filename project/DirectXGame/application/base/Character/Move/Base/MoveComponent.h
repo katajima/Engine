@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "MovementRestrictions.h"
 #include "MovementSystem.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
@@ -63,6 +63,8 @@ public: // ジャンプ系統
 	void DecrementJumpCount() { jumpSystem_->DecrementJumpCount(); }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpSystem_->GetIsJump(); }
+	// 残りジャンプ回数取得
+	int GetJumpCount() const { return jumpSystem_->GetJumpCount(); }
 	// 着地状態か
 	bool GetIsLanding() const { return movementSystem_->IsOnGround(); }
 	// 最大ジャンプカウント設定

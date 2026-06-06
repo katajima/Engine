@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -24,6 +24,15 @@ namespace Combo {
 	const std::string kAirHeavyStartKey = "開始コンボ(空中強攻撃)";
 	const std::string kGroundSkillStartKey = "開始コンボ(地上スキル)";
 	const std::string kAirSkillStartKey = "開始コンボ(空中スキル)";
+
+	struct StartComboRoutes {
+		std::string groundLight;
+		std::string airLight;
+		std::string groundHeavy;
+		std::string airHeavy;
+		std::string groundSkill;
+		std::string airSkill;
+	};
 
 
 	/// <summary>
@@ -99,6 +108,10 @@ namespace Combo {
 		std::map<std::string, std::string> GetComboNodeNames() { return comboNodenames_; }
 		// 名前取得
 		std::string GetName() const { return name; }
+		// 開始コンボ取得
+		StartComboRoutes GetStartComboRoutes() const;
+		// 開始コンボ設定
+		void SetStartComboRoutes(const StartComboRoutes& routes);
 		// コンボノードステート取得
 		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) {
 			auto it = comboNodes_.find(name);
@@ -142,12 +155,16 @@ namespace Combo {
 
 		// コンボ作成
 		void CreateCombo(const std::string& comboNodeName);
+		// 指定データを元にコンボ作成
+		void CreateCombo(const std::string& comboNodeName, const GlobalData& sourceData);
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
 		void ConnectSavedCombos();
 		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
 		float GetStaminaCost(ActionInput input) const;
+		float GetComboStaminaCost(ActionInput input, const std::shared_ptr<NodeState>& node) const;
+		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
 		bool CanPayStamina(float cost) const;
 		void PayStamina(float cost);
 

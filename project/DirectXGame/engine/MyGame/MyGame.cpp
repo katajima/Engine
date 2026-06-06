@@ -36,6 +36,7 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("RESULT");
 	scenenames_.push_back("TUTORIAL");
 	scenenames_.push_back("CHARACTER");
+	scenenames_.push_back("CUSTOM");
 
 #ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");

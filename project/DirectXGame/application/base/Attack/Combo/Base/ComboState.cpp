@@ -1,4 +1,4 @@
-#include "ComboState.h"
+﻿#include "ComboState.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
@@ -26,8 +26,23 @@ namespace Combo {
 	}
 
 	std::shared_ptr<State> NodeState::HandleInput(Character::BaseCharacter* owner, ActionInput input) {
+		return ResolveNextState(owner, input);
+	}
+
+	std::shared_ptr<NodeState> NodeState::ResolveNextState(Character::BaseCharacter* owner, ActionInput input) {
 		auto it = nextStates.find(input);
 		if (it == nextStates.end()) {
+			return nullptr;
+		}
+
+		const GlobalAction& action = comboData.GetActionData();
+		if (action.cancelOnHitOnly && !hasHit_) {
+			return nullptr;
+		}
+		if (action.cancelOnMissOnly && hasHit_) {
+			return nullptr;
+		}
+		if (action.landingCancel && owner && owner->GetMoveComponent() && !owner->GetMoveComponent()->GetIsLanding()) {
 			return nullptr;
 		}
 
@@ -133,12 +148,17 @@ namespace Combo {
 			currentState->Enter(owner, ctx);	// 開始処理
 		}
 		bufferedInput.reset(); // 状態遷移したら入力リセット
+		bufferedInputAge_ = 0.0f;
 		isBufferedInputAccepted_ = false;
 	}
 
 	bool StateMachine::CanTransition(ActionInput input) const {
+		return ResolveTransitionTarget(input) != nullptr;
+	}
+
+	std::shared_ptr<NodeState> StateMachine::ResolveTransitionTarget(ActionInput input) const {
 		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
-		return node && node->HandleInput(owner, input) != nullptr;
+		return node ? node->ResolveNextState(owner, input) : nullptr;
 	}
 
 	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
@@ -163,12 +183,23 @@ namespace Combo {
 
 		if (!isDebug && owner->GetCurrentMainState() != Character::CharacterMainState::Attack) {
 			bufferedInput.reset();
+			bufferedInputAge_ = 0.0f;
 			isBufferedInputAccepted_ = false;
 			return;
 		}
 
 		// 入力種類は RequestAttack から渡された ActionInput を正とする。
 		if (bufferedInput) {
+			bufferedInputAge_ += ctx.dt;
+			auto currentNode = std::dynamic_pointer_cast<NodeState>(currentState);
+			const float bufferTime = currentNode ? currentNode->Data().GetComboCondition().GetData().inputBufferTime : 0.0f;
+			if (bufferedInputAge_ > bufferTime) {
+				bufferedInput.reset();
+				bufferedInputAge_ = 0.0f;
+				isBufferedInputAccepted_ = false;
+				return;
+			}
+
 			if (currentState->IsInputAcceptable()) {
 				isBufferedInputAccepted_ = true;
 			}
@@ -187,6 +218,7 @@ namespace Combo {
 					SetState(next, ctx);
 				}
 				bufferedInput.reset();
+				bufferedInputAge_ = 0.0f;
 				isBufferedInputAccepted_ = false;
 			}
 		}

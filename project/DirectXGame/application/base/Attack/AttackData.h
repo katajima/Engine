@@ -137,7 +137,25 @@ enum class HitReactionType {
 	Knockback,
 	BlowAway,
 	Launch,
-	WallBounce
+	WallBounce,
+	Suction	// ヒットボックス中心へ引き寄せる
+};
+
+// 攻撃側のセルフヒットストップをどのヒットで発生させるか。
+enum class SelfHitStopPolicy {
+	None,
+	FirstHitOnly,
+	EveryHit
+};
+
+// 攻撃属性。受け手側で耐性、ガード、演出分岐を作るための分類。
+enum class AttackAttribute {
+	None,
+	Physical,
+	Fire,
+	Ice,
+	Thunder,
+	Special
 };
 
 struct HitEffectEntry {
@@ -163,6 +181,16 @@ struct HitReactionData {
 	float selfHitStopTime = 3.0f / 60.0f;
 	// 一回しかヒットストップしない(自分)
 	bool isSingleHitStop = true;
+	// 自分側ヒットストップの発生ルール
+	SelfHitStopPolicy selfHitStopPolicy = SelfHitStopPolicy::FirstHitOnly;
+	// 攻撃属性
+	AttackAttribute attribute = AttackAttribute::Physical;
+	// 同時ヒットや相殺を作る時の優先度
+	int hitPriority = 0;
+	// カメラシェイク量
+	float cameraShakePower = 0.0f;
+	// ヒット音
+	std::string hitSoundName = "";
 
 	// リアクション移動の有効時間
 	float duration = 0.25f;

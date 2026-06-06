@@ -1,6 +1,11 @@
-#include "CustomScene.h"
+﻿#include "CustomScene.h"
 
 void CustomScene::Initialize() {
+
+	// エフェクト
+	effect_ = std::make_unique<EffectSystem>();
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
+
 	input = GetInput();
 	// 入力システム初期化
 	inputSystem_ = std::make_unique<InputSystem>();
@@ -10,18 +15,21 @@ void CustomScene::Initialize() {
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
 	
+
+
+
+
+
+
+
+
+
+
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 	SetCamera(cameraManager_->GetCamera());
-
-
-	// エフェクト
-	effect_ = std::make_unique<EffectSystem>();
-	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-
 }
 
 void CustomScene::Finalize() {}

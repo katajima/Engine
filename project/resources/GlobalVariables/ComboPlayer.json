@@ -1,9 +1,5 @@
 {
     "ComboPlayer": {
-        "Attack10": {
-            "type": "string",
-            "value": "Attack10"
-        },
         "Attack11": {
             "type": "string",
             "value": "Attack11"
@@ -24,9 +20,25 @@
             "type": "string",
             "value": "Attack9"
         },
+        "HheavyLaunch": {
+            "type": "string",
+            "value": "HheavyLaunch"
+        },
         "JumpAttack": {
             "type": "string",
             "value": "JumpAttack"
+        },
+        "JumpLightAttack1": {
+            "type": "string",
+            "value": "JumpLightAttack1"
+        },
+        "JumpLightAttack2": {
+            "type": "string",
+            "value": "JumpLightAttack2"
+        },
+        "JumpLightAttack3": {
+            "type": "string",
+            "value": "JumpLightAttack3"
         },
         "JumpSkillAttack01": {
             "type": "string",
@@ -72,6 +84,10 @@
             "type": "string",
             "value": "SkillAttack01"
         },
+        "testAttack": {
+            "type": "string",
+            "value": "testAttack"
+        },
         "testAttack02": {
             "type": "string",
             "value": "testAttack02"
@@ -86,7 +102,7 @@
         },
         "開始コンボ(地上強攻撃)": {
             "type": "string",
-            "value": "Attack10"
+            "value": "HheavyLaunch"
         },
         "開始コンボ(空中スキル)": {
             "type": "string",
@@ -94,11 +110,11 @@
         },
         "開始コンボ(空中弱攻撃)": {
             "type": "string",
-            "value": "JumpAttack"
+            "value": "JumpLightAttack1"
         },
         "開始コンボ(空中強攻撃)": {
             "type": "string",
-            "value": "Attack10"
+            "value": "JumpAttack"
         }
     }
 }

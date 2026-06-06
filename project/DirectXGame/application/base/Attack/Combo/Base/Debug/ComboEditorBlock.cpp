@@ -183,6 +183,7 @@ namespace Combo {
 
 			// ヒット記録を使用
 			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
+			ImGui::Checkbox("コライダー別にヒット記録", &data_.hitBox.recordPerCollider);
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
 			// サイズ
@@ -208,10 +209,16 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
 
+			ImGui::SliderFloat("入力バッファ時間", &data_.condition.inputBufferTime, 0.0f, 1.0f, "%.2f");
 			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+
+			ImGui::SeparatorText("キャンセル制約");
+			ImGui::Checkbox("ヒット時のみキャンセル", &data_.action.cancelOnHitOnly);
+			ImGui::Checkbox("ミス時のみキャンセル", &data_.action.cancelOnMissOnly);
+			ImGui::Checkbox("着地時のみキャンセル", &data_.action.landingCancel);
 		}
 	}
 
@@ -227,6 +234,17 @@ namespace Combo {
 			"近距離 + 遠距離",
 		};
 		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
+
+		ImGui::SeparatorText("攻撃ノード設定");
+		ImGui::Checkbox("スタミナコスト個別指定", &data_.action.useCustomStaminaCost);
+		ImGui::DragFloat("スタミナコスト", &data_.action.staminaCost, 0.1f, 0.0f, 999.0f, "%.2f");
+		ImGui::DragFloat("クールダウン", &data_.action.cooldown, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragInt("空中残り回数要求", &data_.action.requiredAirRemainCount, 1, 0, 10);
+		ImGui::Checkbox("スーパーアーマー", &data_.action.superArmor);
+		ImGui::Checkbox("無敵", &data_.action.invincible);
+		ImGui::Checkbox("ガードポイント", &data_.action.guardPoint);
+		ImGui::DragFloat("ヒットポーズ倍率", &data_.action.hitPauseScale, 0.01f, 0.0f, 5.0f, "%.2f");
+		ImGui::DragFloat("カメラシェイク量", &data_.action.cameraShakePower, 0.01f, 0.0f, 10.0f, "%.2f");
 
 		if (data_.type != Type::kRange && data_.type != Type::kMix) {
 			return;
@@ -290,6 +308,7 @@ namespace Combo {
 
 			ImGui::Checkbox("重力", &data_.move.isGravity);
 			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
+			ImGui::DragFloat("最大落下速度(0で無制限)", &data_.move.maxFallSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
 			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
 
 			// ターゲットなら
@@ -320,7 +339,8 @@ namespace Combo {
 				"ノックバック",
 				"吹っ飛び",
 				"打ち上げ",
-				"壁バウンド"
+				"壁バウンド",
+				"吸い付き"
 			};
 			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.type);
 
@@ -331,7 +351,25 @@ namespace Combo {
 			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
 			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
 			data_.hitReaction.damageData.GetOne().SetDamage(damage);
-			ImGui::Checkbox("一回しかヒットストップしない", &data_.hitReaction.isSingleHitStop);
+
+			static const char* SelfHitStopPolicyLabels[] = {
+				"なし",
+				"最初のヒットのみ",
+				"毎ヒット",
+			};
+			Engine::ImGuiManager::Select("自分側ヒットストップ方針", SelfHitStopPolicyLabels, data_.hitReaction.selfHitStopPolicy);
+
+			static const char* AttackAttributeLabels[] = {
+				"なし",
+				"物理",
+				"炎",
+				"氷",
+				"雷",
+				"特殊",
+			};
+			Engine::ImGuiManager::Select("攻撃属性", AttackAttributeLabels, data_.hitReaction.attribute);
+			ImGui::DragInt("ヒット優先度", &data_.hitReaction.hitPriority, 1, -100, 100);
+			ImGui::DragFloat("ヒットカメラシェイク量", &data_.hitReaction.cameraShakePower, 0.01f, 0.0f, 10.0f, "%.2f");
 
 			ImGui::SliderFloat("ヒットストップ時間(相手)", &data_.hitReaction.targetHitStopTime, 0.0f, 10.0f, "%.2f");
 			ImGui::SliderFloat("ヒットストップ時間(自分)", &data_.hitReaction.selfHitStopTime, 0.0f, 10.0f, "%.2f");
@@ -429,6 +467,8 @@ namespace Combo {
 		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
 		// 条件
 		data_.condition = comboData.GetComboCondition().GetData();
+		// 攻撃ノード単位の調整項目
+		data_.action = comboData.GetActionData();
 		// カメラ
 		data_.camera = comboData.GetComboCamera().GetData();
 		// エフェクト

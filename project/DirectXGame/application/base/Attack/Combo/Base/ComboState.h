@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
@@ -81,6 +81,8 @@ namespace Combo {
         // 次のステート
         void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
         void NotifyHit() { hasHit_ = true; }
+        bool HasHit() const { return hasHit_; }
+        std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);
 
         // 次のステートは存在するか
         bool HasNextState() const;
@@ -158,9 +160,11 @@ namespace Combo {
         // 入力はバッファに保存のみ
         void HandleInput(ActionInput input) {
             bufferedInput = input;
+            bufferedInputAge_ = 0.0f;
             isBufferedInputAccepted_ = false;
         }
         bool CanTransition(ActionInput input) const;
+        std::shared_ptr<NodeState> ResolveTransitionTarget(ActionInput input) const;
         std::optional<ActionInput> ConsumeTransitionedInput();
         void NotifyCurrentStateHit();
         // リセット
@@ -192,6 +196,7 @@ namespace Combo {
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<ActionInput> bufferedInput;   // 入力バッファ
+        float bufferedInputAge_ = 0.0f;
         std::optional<ActionInput> transitionedInput_;
         bool isBufferedInputAccepted_ = false;
         bool isDebug = false;

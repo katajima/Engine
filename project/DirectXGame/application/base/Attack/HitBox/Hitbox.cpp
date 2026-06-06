@@ -11,6 +11,7 @@ namespace HitBox {
 		this->entityManager = entityManager;
 		type_ = type;
 		this->useContactRecord = useContactRecord;
+		attackInstanceId_ = UniqueIdGenerator::Generate();
 		// ワールド変換初期化
 		worldTransform_.Initialize();
 
@@ -27,14 +28,13 @@ namespace HitBox {
 		// ヒットボックス応答クラス生成
 		hitBoxFunction_ = std::make_unique<HitBoxFunction>();
 		hitBoxFunction_->Initialize(colliderComponent_.get(), character, type_);
+		hitBoxFunction_->SetAttackInstanceId(attackInstanceId_);
 
 		// 当たり判定コールバック設定
 		colliderComponent_->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 			// 開始
-			if (this->useContactRecord) {
-				if (!hitBoxFunction_->Begin(self, other)) {
-					return;
-				}
+			if (!hitBoxFunction_->Begin(self, other, this->useContactRecord)) {
+				return;
 			}
 
 			// 当たったコライダーによって相手に送るデータを決め転送
@@ -87,6 +87,12 @@ namespace HitBox {
 		colliders_[data.colliderID] = data;
 		colliderCount++; // コライダー数増加
 	};
+
+	void HitBoxInstance::SetRecordPerCollider(bool enabled) {
+		if (hitBoxFunction_) {
+			hitBoxFunction_->SetRecordPerCollider(enabled);
+		}
+	}
 
 	// 有効化
 	void HitBoxInstance::Enable(Vector4 color) {

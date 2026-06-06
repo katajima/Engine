@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Receiver/ComboCondition.h"
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
@@ -34,6 +34,9 @@ namespace Combo {
 		ComboRange& GetComboRange() { return range; }
 		// コンボタイプ取得
 		Type GetType() const { return type; }
+		// 攻撃ノード単位の調整データ取得
+		GlobalAction& GetActionData() { return action; }
+		const GlobalAction& GetActionData() const { return action; }
 	public:	// 時間
 		// 経過時間取得
 		float GetTimer() const { return timer_; }
@@ -52,6 +55,7 @@ namespace Combo {
 		ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 		ComboEffect effect{};					// コンボ用エフェクト
 		ComboRange range{};						// コンボ用遠距離クラス（弾など）
+		GlobalAction action{};					// 攻撃ノード単位の調整項目
 		float timer_ = 0.0f;					// 時間
 		bool isDebug = false;					// エディターを使用したデバック中か
 		bool isHitStop = false;					// ヒットストップ中か

@@ -1,4 +1,4 @@
-#include "SceneFactory.h"
+﻿#include "SceneFactory.h"
 #include <DirectXGame/engine/Base/pch.h>
 #include"TitleScene.h"
 #include"GamePlayScene.h"
@@ -8,6 +8,7 @@
 #include "ResultScene.h"
 #include "TutorialScene.h"
 #include "CharacterDebugScene.h"
+#include "CustomScene.h"
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
@@ -34,6 +35,9 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
 	}
     if (sceneName == "CHARACTER") {             // キャラクターのデバッグシーン
         return std::make_unique<CharacterDebugScene>();
+    }
+    if (sceneName == "CUSTOM") {             // カスタムシーン
+        return std::make_unique<CustomScene>();
     }
 
 

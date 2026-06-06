@@ -28,6 +28,7 @@ namespace Combo {
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
 		comboSystem->SertIsDebug(isComboEditorActive_);
 		DrawNodeManagement();
+		DrawStartComboSettings();
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
@@ -49,6 +50,7 @@ namespace Combo {
 		// 全てセーブ
 		if (ImGui::Button("AllSave")) {
 			SetGlobalData();
+			globalVariables->SaveFile(comboSystem->GetName());
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				globalVariables->SaveFile(it.first);
 			}
@@ -56,6 +58,7 @@ namespace Combo {
 		// セーブ
 		if (ImGui::Button("Save")) {
 			SetGlobalData();
+			globalVariables->SaveFile(comboSystem->GetName());
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				if (it.first == selectedComboEditorBlockName_)
 					globalVariables->SaveFile(it.first);
@@ -79,6 +82,25 @@ namespace Combo {
 		ImGui::SameLine();
 		if (ImGui::Button("Add Combo")) {
 			AddComboNode();
+		}
+		if (!comboEditorBlockNames_.empty()) {
+			const char* preview = copySourceComboName_.empty() ? "コピー元を選択" : copySourceComboName_.c_str();
+			if (ImGui::BeginCombo("Copy Source", preview)) {
+				for (const std::string& comboName : comboEditorBlockNames_) {
+					const bool selected = copySourceComboName_ == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						copySourceComboName_ = comboName;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::Checkbox("接続もコピー", &copyConnections_);
+			if (ImGui::Button("Add Copied Combo")) {
+				AddCopiedComboNode();
+			}
 		}
 
 		if (!selectedComboEditorBlockName_.empty()) {
@@ -141,24 +163,50 @@ namespace Combo {
 #endif
 	}
 
+	void Editor::DrawStartComboSettings() {
+#ifdef _DEBUG
+		if (!ImGui::CollapsingHeader("Start Combo Settings")) {
+			return;
+		}
+
+		StartComboRoutes routes = comboSystem->GetStartComboRoutes();
+		bool changed = false;
+
+		auto drawStartCombo = [&](const char* label, std::string& target) {
+			const char* preview = target.empty() ? "未設定" : target.c_str();
+			if (ImGui::BeginCombo(label, preview)) {
+				for (const std::string& comboName : comboEditorBlockNames_) {
+					const bool selected = target == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						target = comboName;
+						changed = true;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		};
+
+		ImGui::TextWrapped("攻撃を開始するときに使う最初のコンボを設定します。ここで変更した値は SaveComboName で ComboPlayer に保存されます。");
+		drawStartCombo("地上 / 弱攻撃", routes.groundLight);
+		drawStartCombo("空中 / 弱攻撃", routes.airLight);
+		drawStartCombo("地上 / 強攻撃", routes.groundHeavy);
+		drawStartCombo("空中 / 強攻撃", routes.airHeavy);
+		drawStartCombo("地上 / スキル", routes.groundSkill);
+		drawStartCombo("空中 / スキル", routes.airSkill);
+
+		if (changed) {
+			comboSystem->SetStartComboRoutes(routes);
+		}
+		ImGui::Separator();
+#endif
+	}
+
 	void Editor::AddComboNode() {
 		std::string comboName = newComboNameBuffer_.data();
-		if (comboName.empty()) {
-			nodeManagementMessage_ = "Combo name is required.";
-			return;
-		}
-		for (const unsigned char c : comboName) {
-			if (!std::isalnum(c) && c != '_') {
-				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
-				return;
-			}
-		}
-		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
-			nodeManagementMessage_ = "A combo with that name already exists.";
-			return;
-		}
-		if (globalVariables->HasGroup(comboName)) {
-			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+		if (!ValidateNewComboName(comboName)) {
 			return;
 		}
 
@@ -169,6 +217,58 @@ namespace Combo {
 		selectedComboEditorBlockName_ = comboName;
 		newComboNameBuffer_.fill('\0');
 		nodeManagementMessage_ = "Added and saved combo: " + comboName;
+	}
+
+	void Editor::AddCopiedComboNode() {
+		std::string comboName = newComboNameBuffer_.data();
+		if (!ValidateNewComboName(comboName)) {
+			return;
+		}
+		if (copySourceComboName_.empty()) {
+			nodeManagementMessage_ = "Copy source combo is required.";
+			return;
+		}
+		if (!globalVariables->HasKey(comboSystem->GetName(), copySourceComboName_) ||
+			!comboSystem->GetComboNodeState(copySourceComboName_)) {
+			nodeManagementMessage_ = "The copy source combo no longer exists.";
+			return;
+		}
+
+		SetGlobalData();
+		GlobalData copiedData = comboSystem->GetComboGlobalData(copySourceComboName_);
+		if (!copyConnections_) {
+			copiedData.connection = GlobalConnection{};
+		}
+
+		comboSystem->CreateCombo(comboName, copiedData);
+		globalVariables->SaveFile(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		ApplyComboEditorToSystem();
+		selectedComboEditorBlockName_ = comboName;
+		newComboNameBuffer_.fill('\0');
+		nodeManagementMessage_ = "Copied combo: " + copySourceComboName_ + " -> " + comboName;
+	}
+
+	bool Editor::ValidateNewComboName(const std::string& comboName) {
+		if (comboName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return false;
+		}
+		for (const unsigned char c : comboName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return false;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "A combo with that name already exists.";
+			return false;
+		}
+		if (globalVariables->HasGroup(comboName)) {
+			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+			return false;
+		}
+		return true;
 	}
 
 	void Editor::RenameComboNode(const std::string& oldName, const std::string& newName) {
@@ -347,6 +447,7 @@ namespace Combo {
 			// 条件
 			{
 				data.condition = comboEditorBlocks_[it.first].GetData().condition;
+				data.action = comboEditorBlocks_[it.first].GetData().action;
 				// 入力の時間
 				data.condition.stateInput.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
 				data.condition.stateInput.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "JumpData.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 
@@ -26,6 +26,8 @@ public:
 	JumpData& Data() { return data_; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
+	// 残りジャンプ回数取得
+	int GetJumpCount() const { return jumpCount_; }
 	//
 	bool GetIsJumping() const { return isJumping_;}
 	// データ設定

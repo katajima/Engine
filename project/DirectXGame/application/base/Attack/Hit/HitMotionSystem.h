@@ -23,6 +23,7 @@ public:
 		BlowAway,
 		Launch,
 		WallBounce,
+		Suction,
 		Down,
 	};
 
@@ -62,10 +63,14 @@ public:
 	float GetDownTimer() const { return downTimer_; }
 	// セルフヒットストップ時間
 	float GetSelfHitStopTimer() const { return selfHitStopTime_; }
+	// 現在のヒットリアクション状態取得
+	HitMotionState GetHitMotionState() const { return hitMotionState_; }
 
 
 	// 終了処理
 	bool IsFinished() const;
+	// デバッグ用に現在のリアクションを即終了する
+	void ForceFinishReaction();
 
 private:
 	// ダメージ処理

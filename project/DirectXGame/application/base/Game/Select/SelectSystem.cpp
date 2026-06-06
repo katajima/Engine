@@ -1,4 +1,4 @@
-#include "SelectSystem.h"
+﻿#include "SelectSystem.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
@@ -38,7 +38,7 @@ void SelectSystem::Update(float dt) {
 			sceneManager->ChangeScene("GAMEPLAY");
 		}
 		else if (selectedIndex == 1) {
-			//	sceneManager->ChangeScene("CUSTOM");
+			sceneManager->ChangeScene("CUSTOM");
 		}
 		else if (selectedIndex == 2) {
 			//	sceneManager->ChangeScene("OPERATION");

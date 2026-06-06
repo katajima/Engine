@@ -1,4 +1,4 @@
-#include "HitBoxSystem.h"
+﻿#include "HitBoxSystem.h"
 
 namespace HitBox {
 	void System::Initialize(Engine::EntityManager* entityManager) {
@@ -35,6 +35,7 @@ namespace HitBox {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
+		d.hitBox->SetRecordPerCollider(datas.hitBoxData.recordPerCollider);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
 		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
@@ -54,6 +55,7 @@ namespace HitBox {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
+		d.hitBox->SetRecordPerCollider(datas.hitBoxData.recordPerCollider);
 		d.hitBox->GetWorldTransform().Update();
 
 		// Id設定;

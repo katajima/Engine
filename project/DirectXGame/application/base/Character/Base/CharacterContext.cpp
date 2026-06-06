@@ -115,7 +115,9 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 // 重力処理
 void Character::CharacterContextSystem::CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx) {
 	if (comboStateMachine->GetCurrentState()) {
-		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
+		const auto& moveData = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData();
+		ctx.attackingGravity = moveData.gravityScale;
+		ctx.attackingMaxFallSpeed = moveData.maxFallSpeed;
 	}
 	// ダメージ中の重力
 	ctx.damageGravity = hitMotionSystem->GetGravityScale();

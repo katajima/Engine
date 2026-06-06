@@ -25,7 +25,10 @@ namespace Combo {
 		void SetGlobalData();
 		// コンボノードの管理
 		void DrawNodeManagement();
+		void DrawStartComboSettings();
 		void AddComboNode();
+		void AddCopiedComboNode();
+		bool ValidateNewComboName(const std::string& comboName);
 		void RenameComboNode(const std::string& oldName, const std::string& newName);
 		void DeleteComboNode(const std::string& comboName);
 	private:
@@ -49,6 +52,8 @@ namespace Combo {
 		std::string selectedComboEditorBlockName_;
 		std::array<char, 128> newComboNameBuffer_{};
 		std::array<char, 128> renameComboNameBuffer_{};
+		std::string copySourceComboName_;
+		bool copyConnections_ = false;
 		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;

@@ -1,9 +1,21 @@
-#pragma once
+﻿#pragma once
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 
 
 namespace HitBox {
+
+	// ヒット処理の判定結果。受け手側でガード、無敵、耐性などを差し込むための器。
+	struct HitResult {
+		bool accepted = true;
+		bool applyDamage = true;
+		bool applyReaction = true;
+		bool applyTargetHitStop = true;
+		bool applySelfHitStop = true;
+		bool notifyComboHit = true;
+		float damageScale = 1.0f;
+		HitReactionData reaction{};
+	};
 
 	// 生存タイプ
 	enum class LifetimeType {
@@ -84,6 +96,8 @@ namespace HitBox {
 		bool isEneble = true;
 		// デバック用ライン描画をするか
 		bool isLine = false;
+		// 同じ攻撃内でコライダー別ヒットを許可するか。
+		bool recordPerCollider = true;
 	};
 
 	// コライダーデータ

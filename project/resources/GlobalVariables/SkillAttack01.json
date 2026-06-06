@@ -40,6 +40,10 @@
             "type": "float",
             "value": 0.28333333134651184
         },
+        "カメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラズーム": {
             "type": "bool",
             "value": false
@@ -75,6 +79,14 @@
         "カメラロックオン補間速度": {
             "type": "float",
             "value": 0.5
+        },
+        "ガードポイント": {
+            "type": "bool",
+            "value": false
+        },
+        "クールダウン": {
+            "type": "float",
+            "value": 0.0
         },
         "コライダー(タグ)": {
             "enumType": "CollisionTag",
@@ -152,6 +164,10 @@
             "type": "float",
             "value": 1.0
         },
+        "コンボ入力バッファ時間": {
+            "type": "float",
+            "value": 0.25
+        },
         "コンボ入力受付終了時間": {
             "type": "float",
             "value": 0.4833333194255829
@@ -167,6 +183,11 @@
         "コンボ強制移行": {
             "type": "bool",
             "value": false
+        },
+        "コンボ攻撃タイプ": {
+            "enumType": "ComboType",
+            "type": "enum",
+            "value": 1
         },
         "コンボ移動キャンセル受付終了時間": {
             "type": "float",
@@ -189,6 +210,18 @@
             "value": 0.5
         },
         "コンボ開始時に重力速度リセット": {
+            "type": "bool",
+            "value": false
+        },
+        "スタミナコスト": {
+            "type": "float",
+            "value": 0.0
+        },
+        "スタミナコスト個別指定": {
+            "type": "bool",
+            "value": false
+        },
+        "スーパーアーマー": {
             "type": "bool",
             "value": false
         },
@@ -249,6 +282,10 @@
             "type": "int32_t",
             "value": 4
         },
+        "ヒットカメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
         "ヒットスタン持続時間": {
             "type": "float",
             "value": 0.10000000149011612
@@ -265,6 +302,11 @@
             "type": "float",
             "value": 0.05000000074505806
         },
+        "ヒットストップ方針(自分)": {
+            "enumType": "SelfHitStopPolicy",
+            "type": "enum",
+            "value": 1
+        },
         "ヒットボックスオフセット位置": {
             "type": "Vector3",
             "value": [
@@ -280,6 +322,10 @@
                 1.5,
                 1.0
             ]
+        },
+        "ヒットボックスコライダー別ヒット記録": {
+            "type": "bool",
+            "value": true
         },
         "ヒットボックスコライダー半径": {
             "type": "float",
@@ -327,10 +373,22 @@
             "type": "enum",
             "value": 0
         },
+        "ヒットポーズ倍率": {
+            "type": "float",
+            "value": 1.0
+        },
         "ヒットリアクションタイプ": {
             "enumType": "HitReactionType",
             "type": "enum",
             "value": 0
+        },
+        "ヒット優先度": {
+            "type": "int32_t",
+            "value": 0
+        },
+        "ヒット時のみキャンセル": {
+            "type": "bool",
+            "value": false
         },
         "ヒット重力": {
             "type": "bool",
@@ -339,6 +397,14 @@
         "ヒット重力倍率": {
             "type": "float",
             "value": 1.0
+        },
+        "ヒット音": {
+            "type": "string",
+            "value": ""
+        },
+        "ミス時のみキャンセル": {
+            "type": "bool",
+            "value": false
         },
         "ロックオンタイプ": {
             "enumType": "LockOnType",
@@ -421,6 +487,23 @@
             "type": "string",
             "value": ""
         },
+        "攻撃属性": {
+            "enumType": "AttackAttribute",
+            "type": "enum",
+            "value": 1
+        },
+        "攻撃音": {
+            "type": "string",
+            "value": ""
+        },
+        "無敵": {
+            "type": "bool",
+            "value": false
+        },
+        "着地時のみキャンセル": {
+            "type": "bool",
+            "value": false
+        },
         "移動スピード": {
             "type": "Vector3",
             "value": [
@@ -433,6 +516,10 @@
             "type": "bool",
             "value": true
         },
+        "空中残り回数要求": {
+            "type": "int32_t",
+            "value": 0
+        },
         "終了条件タイプ": {
             "enumType": "EndConditionType",
             "type": "enum",
@@ -441,6 +528,30 @@
         "親オブジェクト名前": {
             "type": "string",
             "value": "Player"
+        },
+        "遠距離ダメージ": {
+            "type": "float",
+            "value": 1.0
+        },
+        "遠距離弾速": {
+            "type": "float",
+            "value": 1.0
+        },
+        "遠距離発射数": {
+            "type": "int32_t",
+            "value": 1
+        },
+        "遠距離発射終了時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "遠距離発射開始時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "遠距離発射間隔": {
+            "type": "float",
+            "value": 0.5
         }
     }
 }

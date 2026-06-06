@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "HitBox.h"
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
 

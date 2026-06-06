@@ -91,6 +91,8 @@ namespace Character {
 		float fallGravity = 2.0f;
 		// 攻撃中の重力係数
 		float attackingGravity = 20.0f;
+		// 攻撃中の最大落下速度。0以下なら制限なし。
+		float attackingMaxFallSpeed = 0.0f;
 		// 被弾中の重力係数
 		float damageGravity = 1.0f;
 		// 死亡中の重力係数

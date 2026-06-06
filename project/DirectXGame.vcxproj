@@ -199,6 +199,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
@@ -220,6 +221,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\BaseStage.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\CustomStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\ResultStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp" />
@@ -632,6 +634,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />

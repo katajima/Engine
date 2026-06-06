@@ -3,6 +3,17 @@
 ###############################################################################
 * text=auto
 
+# Keep C++/shader source files on Windows line endings so Visual Studio
+# does not report mixed line endings after Codex or other tools edit them.
+*.cpp   text eol=crlf
+*.h     text eol=crlf
+*.hpp   text eol=crlf
+*.c     text eol=crlf
+*.cc    text eol=crlf
+*.cxx   text eol=crlf
+*.hlsl  text eol=crlf
+*.hlsli text eol=crlf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #

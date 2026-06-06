@@ -1,4 +1,4 @@
-#include "PlayerUI.h"
+﻿#include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
@@ -53,17 +53,17 @@ void PlayerUI::InitializeOperationUI() {
 	normalAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
 	normalAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
-	//// 通常攻撃UI初期化
-	//InitUIPair("havyAttack", attackTextData.pos2);
-	//Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
-	//havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
-	//havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	//havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
-	//havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
-	//havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
-	//havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
-	//havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
-	//havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
+	// 通常攻撃UI初期化
+	InitUIPair("havyAttack", attackTextData.pos2);
+	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
+	havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
+	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
+	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds"); // 
+	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
+	havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
+	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
+	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
+	havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
 	// 必殺技UI初期化
 	InitUIPair("special", spTextData.pos + Vector2{0,50});

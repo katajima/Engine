@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -47,6 +47,30 @@ namespace Combo {
 		int count = 1;
 		float damage = 1.0f;
 	};
+
+	// 攻撃ノード単位のゲームプレイ調整項目。
+	struct GlobalAction {
+		// 個別コストを使うか。falseなら従来どおり入力種別側のコストを使う。
+		bool useCustomStaminaCost = false;
+		float staminaCost = 0.0f;
+		float cooldown = 0.0f;
+		int requiredAirRemainCount = 0;
+
+		// 攻撃中に一時的に付与したい防御/割り込み耐性。
+		bool superArmor = false;
+		bool invincible = false;
+		bool guardPoint = false;
+
+		// キャンセル分岐の制約。
+		bool cancelOnHitOnly = false;
+		bool cancelOnMissOnly = false;
+		bool landingCancel = false;
+
+		// 攻撃演出の追加フック。
+		float hitPauseScale = 1.0f;
+		float cameraShakePower = 0.0f;
+		std::string soundName = "";
+	};
 	// 時間
 	struct StateTime {
 		// 入力受付時間
@@ -68,6 +92,8 @@ namespace Combo {
 		bool isGravity = true;
 		// 重力スケール
 		float gravityScale = 1.0f;
+		// 攻撃中の最大落下速度。0以下なら制限なし。
+		float maxFallSpeed = 0.0f;
 		// 開始時に重力速度をリセットするか
 		bool isResetGravity = false;
 		
@@ -124,6 +150,8 @@ namespace Combo {
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
+		// 先行入力として保持する寿命
+		float inputBufferTime = 0.25f;
 		// 入力受付から次のステートに移行するまでの時間
 		float inputDelay = 0.0f;
 		// キャンセル受付
@@ -171,6 +199,8 @@ namespace Combo {
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
+		// 攻撃ノード単位の調整項目
+		GlobalAction action{};
 		// 攻撃タイプ
 		Type type = Type::kMelle;
 		// 遠距離攻撃

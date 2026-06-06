@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -29,6 +29,7 @@ namespace HitBox {
 
 		// 更新
 		void Update(float dt);
+		uint32_t GetAttackInstanceId() const { return attackInstanceId_; }
 
 	public:
 
@@ -40,6 +41,7 @@ namespace HitBox {
 		void Disable(Vector4 color = { 1,1,1,1 });
 		// 履歴削除
 		void ClearContactRecord() { GetContactRecord().Clear(); }
+		void SetRecordPerCollider(bool enabled);
 	public:
 		// ワールドトランスフォーム取得
 		Engine::WorldTransform& GetWorldTransform() { return worldTransform_; }
@@ -60,6 +62,7 @@ namespace HitBox {
 		UseType type_;
 		// ヒット記録を使用するか（使用した場合連続ヒットしない）
 		bool useContactRecord = true;
+		uint32_t attackInstanceId_ = 0;
 
 
 		// コライダーデータ構造体

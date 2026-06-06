@@ -31,7 +31,7 @@ namespace Combo {
 
 		// キャンセル受付可能か
 		bool IsComdoCancelInputWindow(float timer) const {
-			return timer >= data_.stateCancel.startTime && timer <= data_.stateCancel.startTime;
+			return timer >= data_.stateCancel.startTime && timer <= data_.stateCancel.endTime;
 		};
 		// 入力受付開始時間取得
 		float GetNextInputStart() const { return data_.stateInput.startTime; }

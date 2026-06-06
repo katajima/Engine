@@ -128,6 +128,10 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 		hitMotionState_ = HitMotionState::WallBounce;
 		break;
 
+	case HitReactionType::Suction:
+		hitMotionState_ = HitMotionState::Suction;
+		break;
+
 	default:
 		hitMotionState_ = HitMotionState::None;
 		break;
@@ -141,6 +145,11 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 // 終了したか
 bool HitMotionSystem::IsFinished() const {
 	return !IsHitMotion();
+}
+
+// デバッグ用に現在のリアクションを即終了する
+void HitMotionSystem::ForceFinishReaction() {
+	FinishReaction();
 }
 
 // ヒットモーション中か
@@ -230,6 +239,15 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const {
 		velocity = horizontalDir * data_.power;
 		if (data_.isVerticalBoost) {
 			velocity.y = data_.verticalBoost;
+		}
+		break;
+	}
+	case HitReactionType::Suction:
+	{
+		// 吸い付きはヒットボックス中心へ向かう3D方向をそのまま使う
+		velocity = dir * data_.power;
+		if (data_.isVerticalBoost) {
+			velocity.y += data_.verticalBoost;
 		}
 		break;
 	}

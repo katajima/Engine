@@ -40,6 +40,10 @@
             "type": "float",
             "value": 0.25
         },
+        "カメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラズーム": {
             "type": "bool",
             "value": false
@@ -75,6 +79,14 @@
         "カメラロックオン補間速度": {
             "type": "float",
             "value": 0.5
+        },
+        "ガードポイント": {
+            "type": "bool",
+            "value": false
+        },
+        "クールダウン": {
+            "type": "float",
+            "value": 0.0
         },
         "コライダー(タグ)": {
             "enumType": "CollisionTag",
@@ -152,6 +164,10 @@
             "type": "float",
             "value": 1.0
         },
+        "コンボ入力バッファ時間": {
+            "type": "float",
+            "value": 0.25
+        },
         "コンボ入力受付終了時間": {
             "type": "float",
             "value": 0.6333333253860474
@@ -194,6 +210,18 @@
             "value": 0.3333333432674408
         },
         "コンボ開始時に重力速度リセット": {
+            "type": "bool",
+            "value": false
+        },
+        "スタミナコスト": {
+            "type": "float",
+            "value": 0.0
+        },
+        "スタミナコスト個別指定": {
+            "type": "bool",
+            "value": false
+        },
+        "スーパーアーマー": {
             "type": "bool",
             "value": false
         },
@@ -254,6 +282,10 @@
             "type": "int32_t",
             "value": 4
         },
+        "ヒットカメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
         "ヒットスタン持続時間": {
             "type": "float",
             "value": 0.10000000149011612
@@ -270,6 +302,11 @@
             "type": "float",
             "value": 0.05000000074505806
         },
+        "ヒットストップ方針(自分)": {
+            "enumType": "SelfHitStopPolicy",
+            "type": "enum",
+            "value": 1
+        },
         "ヒットボックスオフセット位置": {
             "type": "Vector3",
             "value": [
@@ -285,6 +322,10 @@
                 2.0,
                 2.0
             ]
+        },
+        "ヒットボックスコライダー別ヒット記録": {
+            "type": "bool",
+            "value": true
         },
         "ヒットボックスコライダー半径": {
             "type": "float",
@@ -332,10 +373,22 @@
             "type": "enum",
             "value": 0
         },
+        "ヒットポーズ倍率": {
+            "type": "float",
+            "value": 1.0
+        },
         "ヒットリアクションタイプ": {
             "enumType": "HitReactionType",
             "type": "enum",
             "value": 0
+        },
+        "ヒット優先度": {
+            "type": "int32_t",
+            "value": 0
+        },
+        "ヒット時のみキャンセル": {
+            "type": "bool",
+            "value": false
         },
         "ヒット重力": {
             "type": "bool",
@@ -344,6 +397,14 @@
         "ヒット重力倍率": {
             "type": "float",
             "value": 1.0
+        },
+        "ヒット音": {
+            "type": "string",
+            "value": ""
+        },
+        "ミス時のみキャンセル": {
+            "type": "bool",
+            "value": false
         },
         "ロックオンタイプ": {
             "enumType": "LockOnType",
@@ -408,7 +469,7 @@
         },
         "接続先(強攻撃)": {
             "type": "string",
-            "value": "Attack10"
+            "value": "HheavyLaunch"
         },
         "接続先(強攻撃-地上-ヒット)": {
             "type": "string",
@@ -426,6 +487,23 @@
             "type": "string",
             "value": ""
         },
+        "攻撃属性": {
+            "enumType": "AttackAttribute",
+            "type": "enum",
+            "value": 1
+        },
+        "攻撃音": {
+            "type": "string",
+            "value": ""
+        },
+        "無敵": {
+            "type": "bool",
+            "value": false
+        },
+        "着地時のみキャンセル": {
+            "type": "bool",
+            "value": false
+        },
         "移動スピード": {
             "type": "Vector3",
             "value": [
@@ -437,6 +515,10 @@
         "移動方向とキャラクターの向く方向を一致させるか": {
             "type": "bool",
             "value": true
+        },
+        "空中残り回数要求": {
+            "type": "int32_t",
+            "value": 0
         },
         "終了条件タイプ": {
             "enumType": "EndConditionType",
