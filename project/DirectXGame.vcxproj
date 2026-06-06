@@ -230,6 +230,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\CustomUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultUI.cpp" />
@@ -636,6 +637,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />

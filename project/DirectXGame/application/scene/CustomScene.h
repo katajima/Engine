@@ -16,17 +16,17 @@
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
-
-#include "DirectXGame/application/base/Input/InputHander.h"
-#include "DirectXGame/application/base/Stage/SelectStage.h"
-#include "DirectXGame/application/base/UI/SelectUI.h"
-#include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Game/Select/SelectSystem.h"
 #include <DirectXGame/application/base/Input/InputSystem.h>
 
+#include <DirectXGame/application/base/UI/CustomUI.h>
+#include <DirectXGame/application/base/Game/Custom/CustomSystem.h>
+#include <DirectXGame/application/base/Stage/CustomStage.h>
+
+
+
 /// <summary>
-/// セレクトシーン
+/// カスタムシーン
 /// </summary>
 class CustomScene : public Engine::BaseScene
 {
@@ -54,4 +54,11 @@ private:
 	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// インプットシステム
 	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+private:
+	// カスタムUI
+	std::unique_ptr<CustomUI> customUI_ = nullptr;
+	// カスタムステージ
+	std::unique_ptr<CustomStage> customStage_ = nullptr;
+	// カスタムシステム
+	std::unique_ptr<CustomSystem> customSystem_ = nullptr;
 };
