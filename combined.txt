@@ -309,6 +309,9 @@
     └── └── └── └── └── ├── GameData.h
     └── └── └── └── └── ├── GameEvent.cpp
     └── └── └── └── └── └── GameEvent.h
+    └── └── └── └── ├── Custom/
+    └── └── └── └── └── ├── CustomSystem.cpp
+    └── └── └── └── └── └── CustomSystem.h
     └── └── └── └── ├── GameEventController.cpp
     └── └── └── └── ├── GameEventController.h
     └── └── └── └── ├── GameFlowController.cpp
@@ -361,6 +364,8 @@
     └── └── └── ├── Stage/
     └── └── └── └── ├── BaseStage.cpp
     └── └── └── └── ├── BaseStage.h
+    └── └── └── └── ├── CustomStage.cpp
+    └── └── └── └── ├── CustomStage.h
     └── └── └── └── ├── MainStage.cpp
     └── └── └── └── ├── MainStage.h
     └── └── └── └── ├── ResultStage.cpp
@@ -376,6 +381,8 @@
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── BaseUI.cpp
     └── └── └── └── └── └── BaseUI.h
+    └── └── └── └── ├── CustomUI.cpp
+    └── └── └── └── ├── CustomUI.h
     └── └── └── └── ├── FpsUI.cpp
     └── └── └── └── ├── FpsUI.h
     └── └── └── └── ├── GameStartUI.cpp
@@ -2132,7 +2139,25 @@ enum class HitReactionType {
 	Knockback,
 	BlowAway,
 	Launch,
-	WallBounce
+	WallBounce,
+	Suction	// ヒットボックス中心へ引き寄せる
+};
+
+// 攻撃側のセルフヒットストップをどのヒットで発生させるか。
+enum class SelfHitStopPolicy {
+	None,
+	FirstHitOnly,
+	EveryHit
+};
+
+// 攻撃属性。受け手側で耐性、ガード、演出分岐を作るための分類。
+enum class AttackAttribute {
+	None,
+	Physical,
+	Fire,
+	Ice,
+	Thunder,
+	Special
 };
 
 struct HitEffectEntry {
@@ -2158,6 +2183,16 @@ struct HitReactionData {
 	float selfHitStopTime = 3.0f / 60.0f;
 	// 一回しかヒットストップしない(自分)
 	bool isSingleHitStop = true;
+	// 自分側ヒットストップの発生ルール
+	SelfHitStopPolicy selfHitStopPolicy = SelfHitStopPolicy::FirstHitOnly;
+	// 攻撃属性
+	AttackAttribute attribute = AttackAttribute::Physical;
+	// 同時ヒットや相殺を作る時の優先度
+	int hitPriority = 0;
+	// カメラシェイク量
+	float cameraShakePower = 0.0f;
+	// ヒット音
+	std::string hitSoundName = "";
 
 	// リアクション移動の有効時間
 	float duration = 0.25f;
@@ -2183,7 +2218,7 @@ struct HitReactionData {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.cpp
 ============================================================
-#include "ComboData.h"
+﻿#include "ComboData.h"
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
@@ -2269,10 +2304,11 @@ namespace Combo {
 
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Receiver/ComboCondition.h"
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
@@ -2308,6 +2344,9 @@ namespace Combo {
 		ComboRange& GetComboRange() { return range; }
 		// コンボタイプ取得
 		Type GetType() const { return type; }
+		// 攻撃ノード単位の調整データ取得
+		GlobalAction& GetActionData() { return action; }
+		const GlobalAction& GetActionData() const { return action; }
 	public:	// 時間
 		// 経過時間取得
 		float GetTimer() const { return timer_; }
@@ -2326,6 +2365,7 @@ namespace Combo {
 		ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 		ComboEffect effect{};					// コンボ用エフェクト
 		ComboRange range{};						// コンボ用遠距離クラス（弾など）
+		GlobalAction action{};					// 攻撃ノード単位の調整項目
 		float timer_ = 0.0f;					// 時間
 		bool isDebug = false;					// エディターを使用したデバック中か
 		bool isHitStop = false;					// ヒットストップ中か
@@ -2342,7 +2382,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -2391,6 +2431,30 @@ namespace Combo {
 		int count = 1;
 		float damage = 1.0f;
 	};
+
+	// 攻撃ノード単位のゲームプレイ調整項目。
+	struct GlobalAction {
+		// 個別コストを使うか。falseなら従来どおり入力種別側のコストを使う。
+		bool useCustomStaminaCost = false;
+		float staminaCost = 0.0f;
+		float cooldown = 0.0f;
+		int requiredAirRemainCount = 0;
+
+		// 攻撃中に一時的に付与したい防御/割り込み耐性。
+		bool superArmor = false;
+		bool invincible = false;
+		bool guardPoint = false;
+
+		// キャンセル分岐の制約。
+		bool cancelOnHitOnly = false;
+		bool cancelOnMissOnly = false;
+		bool landingCancel = false;
+
+		// 攻撃演出の追加フック。
+		float hitPauseScale = 1.0f;
+		float cameraShakePower = 0.0f;
+		std::string soundName = "";
+	};
 	// 時間
 	struct StateTime {
 		// 入力受付時間
@@ -2412,6 +2476,8 @@ namespace Combo {
 		bool isGravity = true;
 		// 重力スケール
 		float gravityScale = 1.0f;
+		// 攻撃中の最大落下速度。0以下なら制限なし。
+		float maxFallSpeed = 0.0f;
 		// 開始時に重力速度をリセットするか
 		bool isResetGravity = false;
 		
@@ -2468,6 +2534,8 @@ namespace Combo {
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
+		// 先行入力として保持する寿命
+		float inputBufferTime = 0.25f;
 		// 入力受付から次のステートに移行するまでの時間
 		float inputDelay = 0.0f;
 		// キャンセル受付
@@ -2515,6 +2583,8 @@ namespace Combo {
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
+		// 攻撃ノード単位の調整項目
+		GlobalAction action{};
 		// 攻撃タイプ
 		Type type = Type::kMelle;
 		// 遠距離攻撃
@@ -2542,7 +2612,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.cpp
 ============================================================
-#include "ComboState.h"
+﻿#include "ComboState.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
@@ -2570,8 +2640,23 @@ namespace Combo {
 	}
 
 	std::shared_ptr<State> NodeState::HandleInput(Character::BaseCharacter* owner, ActionInput input) {
+		return ResolveNextState(owner, input);
+	}
+
+	std::shared_ptr<NodeState> NodeState::ResolveNextState(Character::BaseCharacter* owner, ActionInput input) {
 		auto it = nextStates.find(input);
 		if (it == nextStates.end()) {
+			return nullptr;
+		}
+
+		const GlobalAction& action = comboData.GetActionData();
+		if (action.cancelOnHitOnly && !hasHit_) {
+			return nullptr;
+		}
+		if (action.cancelOnMissOnly && hasHit_) {
+			return nullptr;
+		}
+		if (action.landingCancel && owner && owner->GetMoveComponent() && !owner->GetMoveComponent()->GetIsLanding()) {
 			return nullptr;
 		}
 
@@ -2677,12 +2762,17 @@ namespace Combo {
 			currentState->Enter(owner, ctx);	// 開始処理
 		}
 		bufferedInput.reset(); // 状態遷移したら入力リセット
+		bufferedInputAge_ = 0.0f;
 		isBufferedInputAccepted_ = false;
 	}
 
 	bool StateMachine::CanTransition(ActionInput input) const {
+		return ResolveTransitionTarget(input) != nullptr;
+	}
+
+	std::shared_ptr<NodeState> StateMachine::ResolveTransitionTarget(ActionInput input) const {
 		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
-		return node && node->HandleInput(owner, input) != nullptr;
+		return node ? node->ResolveNextState(owner, input) : nullptr;
 	}
 
 	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
@@ -2707,12 +2797,23 @@ namespace Combo {
 
 		if (!isDebug && owner->GetCurrentMainState() != Character::CharacterMainState::Attack) {
 			bufferedInput.reset();
+			bufferedInputAge_ = 0.0f;
 			isBufferedInputAccepted_ = false;
 			return;
 		}
 
 		// 入力種類は RequestAttack から渡された ActionInput を正とする。
 		if (bufferedInput) {
+			bufferedInputAge_ += ctx.dt;
+			auto currentNode = std::dynamic_pointer_cast<NodeState>(currentState);
+			const float bufferTime = currentNode ? currentNode->Data().GetComboCondition().GetData().inputBufferTime : 0.0f;
+			if (bufferedInputAge_ > bufferTime) {
+				bufferedInput.reset();
+				bufferedInputAge_ = 0.0f;
+				isBufferedInputAccepted_ = false;
+				return;
+			}
+
 			if (currentState->IsInputAcceptable()) {
 				isBufferedInputAccepted_ = true;
 			}
@@ -2731,6 +2832,7 @@ namespace Combo {
 					SetState(next, ctx);
 				}
 				bufferedInput.reset();
+				bufferedInputAge_ = 0.0f;
 				isBufferedInputAccepted_ = false;
 			}
 		}
@@ -2759,7 +2861,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
@@ -2842,6 +2944,8 @@ namespace Combo {
         // 次のステート
         void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
         void NotifyHit() { hasHit_ = true; }
+        bool HasHit() const { return hasHit_; }
+        std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);
 
         // 次のステートは存在するか
         bool HasNextState() const;
@@ -2919,9 +3023,11 @@ namespace Combo {
         // 入力はバッファに保存のみ
         void HandleInput(ActionInput input) {
             bufferedInput = input;
+            bufferedInputAge_ = 0.0f;
             isBufferedInputAccepted_ = false;
         }
         bool CanTransition(ActionInput input) const;
+        std::shared_ptr<NodeState> ResolveTransitionTarget(ActionInput input) const;
         std::optional<ActionInput> ConsumeTransitionedInput();
         void NotifyCurrentStateHit();
         // リセット
@@ -2953,6 +3059,7 @@ namespace Combo {
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<ActionInput> bufferedInput;   // 入力バッファ
+        float bufferedInputAge_ = 0.0f;
         std::optional<ActionInput> transitionedInput_;
         bool isBufferedInputAccepted_ = false;
         bool isDebug = false;
@@ -2963,7 +3070,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cpp
 ============================================================
-#include "ComboSystem.h"
+﻿#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -3004,19 +3111,23 @@ namespace Combo {
 			return false;
 		}
 
-		const float staminaCost = GetStaminaCost(input);
-		if (!CanPayStamina(staminaCost)) {
-			return false;
-		}
-
 		if (owner->GetCurrentMainState() == Character::CharacterMainState::Attack) {
-			if (!comboStateMachine_->CanTransition(input)) {
+			std::shared_ptr<NodeState> nextNode = comboStateMachine_->ResolveTransitionTarget(input);
+			if (!nextNode) {
+				return false;
+			}
+			if (!CanUseComboNode(nextNode)) {
+				return false;
+			}
+
+			const float transitionCost = GetComboStaminaCost(input, nextNode);
+			if (!CanPayStamina(transitionCost)) {
 				return false;
 			}
 
 			comboStateMachine_->HandleInput(input);
 			pendingCostInput_ = input;
-			pendingStaminaCost_ = staminaCost;
+			pendingStaminaCost_ = transitionCost;
 			return true;
 		}
 
@@ -3030,6 +3141,17 @@ namespace Combo {
 		}
 
 		const std::string startCombo = ResolveStartCombo(input, owner->GetMoveComponent()->GetIsLanding());
+		std::shared_ptr<NodeState> startNode = GetComboNodeState(startCombo);
+		if (!startNode) {
+			return false;
+		}
+		if (!CanUseComboNode(startNode)) {
+			return false;
+		}
+		const float startCost = GetComboStaminaCost(input, startNode);
+		if (!CanPayStamina(startCost)) {
+			return false;
+		}
 		if (!StartCombo(startCombo)) {
 			return false;
 		}
@@ -3038,7 +3160,7 @@ namespace Combo {
 		pendingStaminaCost_ = 0.0f;
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
-		PayStamina(staminaCost);
+		PayStamina(startCost);
 		return true;
 	}
 
@@ -3154,8 +3276,62 @@ namespace Combo {
 		}
 	}
 
+	StartComboRoutes System::GetStartComboRoutes() const {
+		return StartComboRoutes{
+			.groundLight = groundLightStart_,
+			.airLight = airLightStart_,
+			.groundHeavy = groundHeavyStart_,
+			.airHeavy = airHeavyStart_,
+			.groundSkill = groundSkillStart_,
+			.airSkill = airSkillStart_,
+		};
+	}
+
+	void System::SetStartComboRoutes(const StartComboRoutes& routes) {
+		groundLightStart_ = routes.groundLight;
+		airLightStart_ = routes.airLight;
+		groundHeavyStart_ = routes.groundHeavy;
+		airHeavyStart_ = routes.airHeavy;
+		groundSkillStart_ = routes.groundSkill;
+		airSkillStart_ = routes.airSkill;
+
+		if (globalVariables && !name.empty()) {
+			globalVariables->SetValue(name, kGroundLightStartKey, groundLightStart_);
+			globalVariables->SetValue(name, kAirLightStartKey, airLightStart_);
+			globalVariables->SetValue(name, kGroundHeavyStartKey, groundHeavyStart_);
+			globalVariables->SetValue(name, kAirHeavyStartKey, airHeavyStart_);
+			globalVariables->SetValue(name, kGroundSkillStartKey, groundSkillStart_);
+			globalVariables->SetValue(name, kAirSkillStartKey, airSkillStart_);
+		}
+	}
+
 	float System::GetStaminaCost(ActionInput input) const {
 		return input == ActionInput::Skill ? 25.0f : 0.0f;
+	}
+
+	float System::GetComboStaminaCost(ActionInput input, const std::shared_ptr<NodeState>& node) const {
+		if (!node) {
+			return GetStaminaCost(input);
+		}
+
+		const GlobalAction& action = node->Data().GetActionData();
+		return action.useCustomStaminaCost ? action.staminaCost : GetStaminaCost(input);
+	}
+
+	bool System::CanUseComboNode(const std::shared_ptr<NodeState>& node) const {
+		if (!node || !owner) {
+			return false;
+		}
+
+		const GlobalAction& action = node->Data().GetActionData();
+		if (action.requiredAirRemainCount > 0) {
+			if (!owner->GetMoveComponent() || owner->GetMoveComponent()->GetJumpCount() < action.requiredAirRemainCount) {
+				return false;
+			}
+		}
+
+		// cooldown は保存済み。実運用で時間管理する時はここへ残り時間判定を追加する。
+		return true;
 	}
 
 	bool System::CanPayStamina(float cost) const {
@@ -3185,6 +3361,20 @@ namespace Combo {
 
 		// 攻撃タイプと遠距離攻撃
 		{
+			globalVariables->AddItem(name, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			globalVariables->AddItem(name, "スタミナコスト", data.action.staminaCost);
+			globalVariables->AddItem(name, "クールダウン", data.action.cooldown);
+			globalVariables->AddItem(name, "空中残り回数要求", data.action.requiredAirRemainCount);
+			globalVariables->AddItem(name, "スーパーアーマー", data.action.superArmor);
+			globalVariables->AddItem(name, "無敵", data.action.invincible);
+			globalVariables->AddItem(name, "ガードポイント", data.action.guardPoint);
+			globalVariables->AddItem(name, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
+			globalVariables->AddItem(name, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
+			globalVariables->AddItem(name, "着地時のみキャンセル", data.action.landingCancel);
+			globalVariables->AddItem(name, "ヒットポーズ倍率", data.action.hitPauseScale);
+			globalVariables->AddItem(name, "カメラシェイク量", data.action.cameraShakePower);
+			globalVariables->AddItem(name, "攻撃音", data.action.soundName);
+
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
@@ -3221,6 +3411,7 @@ namespace Combo {
 		{
 			globalVariables->AddItem(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
 			globalVariables->AddItem(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			globalVariables->AddItem(name, "コンボ入力バッファ時間", data.condition.inputBufferTime);
 			globalVariables->AddItem(name, "コンボ終了時間", data.condition.stateEndTime);
 			globalVariables->AddItem(name, "コンボ移行時間", data.condition.stateNextTime);
 			globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
@@ -3246,6 +3437,7 @@ namespace Combo {
 		{
 			globalVariables->AddItem(name, "コンボ中の重力", data.move.isGravity);
 			globalVariables->AddItem(name, "コンボ中の重力強度", data.move.gravityScale);
+			globalVariables->AddItem(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
 			globalVariables->AddItem(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->AddItem(name, "移動スピード", data.move.moveSpeed);
@@ -3273,6 +3465,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.windowStart);
 			globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
 			globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->AddItem(name, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			globalVariables->AddItem(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
 			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
 			globalVariables->AddItem(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
@@ -3295,6 +3488,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
 			globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
 			globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->AddEnumItem(name, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
+			globalVariables->AddEnumItem(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
+			globalVariables->AddItem(name, "ヒット優先度", data.hitReaction.hitPriority);
+			globalVariables->AddItem(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
+			globalVariables->AddItem(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -3340,6 +3538,19 @@ namespace Combo {
 		// 攻撃タイプと遠距離攻撃
 		{
 			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
+			data.action.useCustomStaminaCost = globalVariables->GetValue<bool>(name, "スタミナコスト個別指定");
+			data.action.staminaCost = globalVariables->GetValue<float>(name, "スタミナコスト");
+			data.action.cooldown = globalVariables->GetValue<float>(name, "クールダウン");
+			data.action.requiredAirRemainCount = globalVariables->GetValue<int>(name, "空中残り回数要求");
+			data.action.superArmor = globalVariables->GetValue<bool>(name, "スーパーアーマー");
+			data.action.invincible = globalVariables->GetValue<bool>(name, "無敵");
+			data.action.guardPoint = globalVariables->GetValue<bool>(name, "ガードポイント");
+			data.action.cancelOnHitOnly = globalVariables->GetValue<bool>(name, "ヒット時のみキャンセル");
+			data.action.cancelOnMissOnly = globalVariables->GetValue<bool>(name, "ミス時のみキャンセル");
+			data.action.landingCancel = globalVariables->GetValue<bool>(name, "着地時のみキャンセル");
+			data.action.hitPauseScale = globalVariables->GetValue<float>(name, "ヒットポーズ倍率");
+			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
+			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
@@ -3375,6 +3586,7 @@ namespace Combo {
 		{
 			data.condition.stateInput.startTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 			data.condition.stateInput.endTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
+			data.condition.inputBufferTime = globalVariables->GetValue<float>(name, "コンボ入力バッファ時間");
 			data.condition.stateEndTime = globalVariables->GetValue<float>(name, "コンボ終了時間");
 			data.condition.stateNextTime = globalVariables->GetValue<float>(name, "コンボ移行時間");
 			data.condition.stateCancel.startTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
@@ -3400,6 +3612,7 @@ namespace Combo {
 		{
 			data.move.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
 			data.move.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
+			data.move.maxFallSpeed = globalVariables->GetValue<float>(name, "コンボ中の最大落下速度");
 			data.move.isResetGravity = globalVariables->GetValue<bool>(name, "コンボ開始時に重力速度リセット");
 
 			data.move.moveSpeed = globalVariables->GetValue<Vector3>(name, "移動スピード");
@@ -3428,6 +3641,11 @@ namespace Combo {
 			data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
 			data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
 			data.hitReaction.type = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+			data.hitReaction.selfHitStopPolicy = globalVariables->GetEnumValue<SelfHitStopPolicy>(name, "ヒットストップ方針(自分)");
+			data.hitReaction.attribute = globalVariables->GetEnumValue<AttackAttribute>(name, "攻撃属性");
+			data.hitReaction.hitPriority = globalVariables->GetValue<int>(name, "ヒット優先度");
+			data.hitReaction.cameraShakePower = globalVariables->GetValue<float>(name, "ヒットカメラシェイク量");
+			data.hitReaction.hitSoundName = globalVariables->GetValue<std::string>(name, "ヒット音");
 			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
 			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
@@ -3439,6 +3657,11 @@ namespace Combo {
 			data.hitReaction.targetHitStopTime = globalVariables->GetValue<float>(name, "ヒットストップ(相手)");
 			data.hitReaction.selfHitStopTime =  globalVariables->GetValue<float>(name, "ヒットストップ(自分)");
 			data.hitReaction.isSingleHitStop = globalVariables->GetValue<bool>(name, "ヒットストップ(一回のみ)");
+			// 旧データ互換: 以前の false は「自分側ヒットストップなし」として扱う。
+			if (!data.hitReaction.isSingleHitStop &&
+				data.hitReaction.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly) {
+				data.hitReaction.selfHitStopPolicy = SelfHitStopPolicy::None;
+			}
 
 
 			data.hitReaction.hitEffectNames.clear();
@@ -3458,6 +3681,7 @@ namespace Combo {
 			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
+			data.hitBox.recordPerCollider = globalVariables->GetValue<bool>(name, "ヒットボックスコライダー別ヒット記録");
 			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
 			data.hitBox.offset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
 			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
@@ -3493,6 +3717,20 @@ namespace Combo {
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
 		// 攻撃タイプと遠距離攻撃
 		{
+			globalVariables->SetValue(name, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			globalVariables->SetValue(name, "スタミナコスト", data.action.staminaCost);
+			globalVariables->SetValue(name, "クールダウン", data.action.cooldown);
+			globalVariables->SetValue(name, "空中残り回数要求", data.action.requiredAirRemainCount);
+			globalVariables->SetValue(name, "スーパーアーマー", data.action.superArmor);
+			globalVariables->SetValue(name, "無敵", data.action.invincible);
+			globalVariables->SetValue(name, "ガードポイント", data.action.guardPoint);
+			globalVariables->SetValue(name, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
+			globalVariables->SetValue(name, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
+			globalVariables->SetValue(name, "着地時のみキャンセル", data.action.landingCancel);
+			globalVariables->SetValue(name, "ヒットポーズ倍率", data.action.hitPauseScale);
+			globalVariables->SetValue(name, "カメラシェイク量", data.action.cameraShakePower);
+			globalVariables->SetValue(name, "攻撃音", data.action.soundName);
+
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
@@ -3529,6 +3767,7 @@ namespace Combo {
 		{
 			globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
 			globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			globalVariables->SetValue(name, "コンボ入力バッファ時間", data.condition.inputBufferTime);
 			globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
 			globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
 			globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
@@ -3560,6 +3799,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->SetValue(name, "コンボ中の重力", data.move.isGravity);
 			globalVariables->SetValue(name, "コンボ中の重力強度", data.move.gravityScale);
+			globalVariables->SetValue(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
 			globalVariables->SetValue(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
@@ -3585,6 +3825,11 @@ namespace Combo {
 			globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
 			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
 			globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->SetEnumValue(name, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
+			globalVariables->SetEnumValue(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
+			globalVariables->SetValue(name, "ヒット優先度", data.hitReaction.hitPriority);
+			globalVariables->SetValue(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
+			globalVariables->SetValue(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -3595,7 +3840,8 @@ namespace Combo {
 
 			globalVariables->SetValue(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
 			globalVariables->SetValue(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
-			globalVariables->SetValue(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
+			globalVariables->SetValue(name, "ヒットストップ(一回のみ)",
+				data.hitReaction.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly);
 
 
 			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
@@ -3611,6 +3857,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
 			globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
 			globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->SetValue(name, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			globalVariables->SetValue(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
 			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
 			globalVariables->SetValue(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
@@ -3652,6 +3899,7 @@ namespace Combo {
 
 	void System::SetData(ComboData& data, const GlobalData& gData) {
 		// 攻撃タイプと遠距離攻撃
+		data.GetActionData() = gData.action;
 		data.SetType(gData.type);
 		data.GetComboRange().GetData() = gData.range;
 		// ヒットボックスとリアクションデータ 
@@ -3689,6 +3937,22 @@ namespace Combo {
 		SetData(data, comboGlobalDatas_[comboNodeName]);
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName, data);
+	}
+
+	void System::CreateCombo(const std::string& comboNodeName, const GlobalData& sourceData) {
+		if (comboGlobalDatas_.find(comboNodeName) != comboGlobalDatas_.end() ||
+			comboNodes_.find(comboNodeName) != comboNodes_.end()) {
+			return;
+		}
+
+		comboGlobalDatas_[comboNodeName] = sourceData;
+		ApplyGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]);
+		SetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]);
+
+		ComboData data{};
+		SetData(data, comboGlobalDatas_[comboNodeName]);
+		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName, data);
+		ConnectSavedCombos();
 	}
 
 	void System::CreateGlobalData(const std::string& comboNodeName) {
@@ -3769,7 +4033,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -3795,6 +4059,15 @@ namespace Combo {
 	const std::string kAirHeavyStartKey = "開始コンボ(空中強攻撃)";
 	const std::string kGroundSkillStartKey = "開始コンボ(地上スキル)";
 	const std::string kAirSkillStartKey = "開始コンボ(空中スキル)";
+
+	struct StartComboRoutes {
+		std::string groundLight;
+		std::string airLight;
+		std::string groundHeavy;
+		std::string airHeavy;
+		std::string groundSkill;
+		std::string airSkill;
+	};
 
 
 	/// <summary>
@@ -3870,6 +4143,10 @@ namespace Combo {
 		std::map<std::string, std::string> GetComboNodeNames() { return comboNodenames_; }
 		// 名前取得
 		std::string GetName() const { return name; }
+		// 開始コンボ取得
+		StartComboRoutes GetStartComboRoutes() const;
+		// 開始コンボ設定
+		void SetStartComboRoutes(const StartComboRoutes& routes);
 		// コンボノードステート取得
 		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) {
 			auto it = comboNodes_.find(name);
@@ -3913,12 +4190,16 @@ namespace Combo {
 
 		// コンボ作成
 		void CreateCombo(const std::string& comboNodeName);
+		// 指定データを元にコンボ作成
+		void CreateCombo(const std::string& comboNodeName, const GlobalData& sourceData);
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
 		void ConnectSavedCombos();
 		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
 		float GetStaminaCost(ActionInput input) const;
+		float GetComboStaminaCost(ActionInput input, const std::shared_ptr<NodeState>& node) const;
+		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
 		bool CanPayStamina(float cost) const;
 		void PayStamina(float cost);
 
@@ -4066,6 +4347,7 @@ namespace Combo {
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
 		comboSystem->SertIsDebug(isComboEditorActive_);
 		DrawNodeManagement();
+		DrawStartComboSettings();
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
@@ -4087,6 +4369,7 @@ namespace Combo {
 		// 全てセーブ
 		if (ImGui::Button("AllSave")) {
 			SetGlobalData();
+			globalVariables->SaveFile(comboSystem->GetName());
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				globalVariables->SaveFile(it.first);
 			}
@@ -4094,6 +4377,7 @@ namespace Combo {
 		// セーブ
 		if (ImGui::Button("Save")) {
 			SetGlobalData();
+			globalVariables->SaveFile(comboSystem->GetName());
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				if (it.first == selectedComboEditorBlockName_)
 					globalVariables->SaveFile(it.first);
@@ -4117,6 +4401,25 @@ namespace Combo {
 		ImGui::SameLine();
 		if (ImGui::Button("Add Combo")) {
 			AddComboNode();
+		}
+		if (!comboEditorBlockNames_.empty()) {
+			const char* preview = copySourceComboName_.empty() ? "コピー元を選択" : copySourceComboName_.c_str();
+			if (ImGui::BeginCombo("Copy Source", preview)) {
+				for (const std::string& comboName : comboEditorBlockNames_) {
+					const bool selected = copySourceComboName_ == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						copySourceComboName_ = comboName;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::Checkbox("接続もコピー", &copyConnections_);
+			if (ImGui::Button("Add Copied Combo")) {
+				AddCopiedComboNode();
+			}
 		}
 
 		if (!selectedComboEditorBlockName_.empty()) {
@@ -4179,24 +4482,50 @@ namespace Combo {
 #endif
 	}
 
+	void Editor::DrawStartComboSettings() {
+#ifdef _DEBUG
+		if (!ImGui::CollapsingHeader("Start Combo Settings")) {
+			return;
+		}
+
+		StartComboRoutes routes = comboSystem->GetStartComboRoutes();
+		bool changed = false;
+
+		auto drawStartCombo = [&](const char* label, std::string& target) {
+			const char* preview = target.empty() ? "未設定" : target.c_str();
+			if (ImGui::BeginCombo(label, preview)) {
+				for (const std::string& comboName : comboEditorBlockNames_) {
+					const bool selected = target == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						target = comboName;
+						changed = true;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		};
+
+		ImGui::TextWrapped("攻撃を開始するときに使う最初のコンボを設定します。ここで変更した値は SaveComboName で ComboPlayer に保存されます。");
+		drawStartCombo("地上 / 弱攻撃", routes.groundLight);
+		drawStartCombo("空中 / 弱攻撃", routes.airLight);
+		drawStartCombo("地上 / 強攻撃", routes.groundHeavy);
+		drawStartCombo("空中 / 強攻撃", routes.airHeavy);
+		drawStartCombo("地上 / スキル", routes.groundSkill);
+		drawStartCombo("空中 / スキル", routes.airSkill);
+
+		if (changed) {
+			comboSystem->SetStartComboRoutes(routes);
+		}
+		ImGui::Separator();
+#endif
+	}
+
 	void Editor::AddComboNode() {
 		std::string comboName = newComboNameBuffer_.data();
-		if (comboName.empty()) {
-			nodeManagementMessage_ = "Combo name is required.";
-			return;
-		}
-		for (const unsigned char c : comboName) {
-			if (!std::isalnum(c) && c != '_') {
-				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
-				return;
-			}
-		}
-		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
-			nodeManagementMessage_ = "A combo with that name already exists.";
-			return;
-		}
-		if (globalVariables->HasGroup(comboName)) {
-			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+		if (!ValidateNewComboName(comboName)) {
 			return;
 		}
 
@@ -4207,6 +4536,58 @@ namespace Combo {
 		selectedComboEditorBlockName_ = comboName;
 		newComboNameBuffer_.fill('\0');
 		nodeManagementMessage_ = "Added and saved combo: " + comboName;
+	}
+
+	void Editor::AddCopiedComboNode() {
+		std::string comboName = newComboNameBuffer_.data();
+		if (!ValidateNewComboName(comboName)) {
+			return;
+		}
+		if (copySourceComboName_.empty()) {
+			nodeManagementMessage_ = "Copy source combo is required.";
+			return;
+		}
+		if (!globalVariables->HasKey(comboSystem->GetName(), copySourceComboName_) ||
+			!comboSystem->GetComboNodeState(copySourceComboName_)) {
+			nodeManagementMessage_ = "The copy source combo no longer exists.";
+			return;
+		}
+
+		SetGlobalData();
+		GlobalData copiedData = comboSystem->GetComboGlobalData(copySourceComboName_);
+		if (!copyConnections_) {
+			copiedData.connection = GlobalConnection{};
+		}
+
+		comboSystem->CreateCombo(comboName, copiedData);
+		globalVariables->SaveFile(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		ApplyComboEditorToSystem();
+		selectedComboEditorBlockName_ = comboName;
+		newComboNameBuffer_.fill('\0');
+		nodeManagementMessage_ = "Copied combo: " + copySourceComboName_ + " -> " + comboName;
+	}
+
+	bool Editor::ValidateNewComboName(const std::string& comboName) {
+		if (comboName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return false;
+		}
+		for (const unsigned char c : comboName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return false;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "A combo with that name already exists.";
+			return false;
+		}
+		if (globalVariables->HasGroup(comboName)) {
+			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+			return false;
+		}
+		return true;
 	}
 
 	void Editor::RenameComboNode(const std::string& oldName, const std::string& newName) {
@@ -4385,6 +4766,7 @@ namespace Combo {
 			// 条件
 			{
 				data.condition = comboEditorBlocks_[it.first].GetData().condition;
+				data.action = comboEditorBlocks_[it.first].GetData().action;
 				// 入力の時間
 				data.condition.stateInput.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
 				data.condition.stateInput.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
@@ -4488,7 +4870,10 @@ namespace Combo {
 		void SetGlobalData();
 		// コンボノードの管理
 		void DrawNodeManagement();
+		void DrawStartComboSettings();
 		void AddComboNode();
+		void AddCopiedComboNode();
+		bool ValidateNewComboName(const std::string& comboName);
 		void RenameComboNode(const std::string& oldName, const std::string& newName);
 		void DeleteComboNode(const std::string& comboName);
 	private:
@@ -4512,6 +4897,8 @@ namespace Combo {
 		std::string selectedComboEditorBlockName_;
 		std::array<char, 128> newComboNameBuffer_{};
 		std::array<char, 128> renameComboNameBuffer_{};
+		std::string copySourceComboName_;
+		bool copyConnections_ = false;
 		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;
@@ -4712,6 +5099,7 @@ namespace Combo {
 
 			// ヒット記録を使用
 			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
+			ImGui::Checkbox("コライダー別にヒット記録", &data_.hitBox.recordPerCollider);
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
 			// サイズ
@@ -4737,10 +5125,16 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
 
+			ImGui::SliderFloat("入力バッファ時間", &data_.condition.inputBufferTime, 0.0f, 1.0f, "%.2f");
 			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+
+			ImGui::SeparatorText("キャンセル制約");
+			ImGui::Checkbox("ヒット時のみキャンセル", &data_.action.cancelOnHitOnly);
+			ImGui::Checkbox("ミス時のみキャンセル", &data_.action.cancelOnMissOnly);
+			ImGui::Checkbox("着地時のみキャンセル", &data_.action.landingCancel);
 		}
 	}
 
@@ -4756,6 +5150,17 @@ namespace Combo {
 			"近距離 + 遠距離",
 		};
 		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
+
+		ImGui::SeparatorText("攻撃ノード設定");
+		ImGui::Checkbox("スタミナコスト個別指定", &data_.action.useCustomStaminaCost);
+		ImGui::DragFloat("スタミナコスト", &data_.action.staminaCost, 0.1f, 0.0f, 999.0f, "%.2f");
+		ImGui::DragFloat("クールダウン", &data_.action.cooldown, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragInt("空中残り回数要求", &data_.action.requiredAirRemainCount, 1, 0, 10);
+		ImGui::Checkbox("スーパーアーマー", &data_.action.superArmor);
+		ImGui::Checkbox("無敵", &data_.action.invincible);
+		ImGui::Checkbox("ガードポイント", &data_.action.guardPoint);
+		ImGui::DragFloat("ヒットポーズ倍率", &data_.action.hitPauseScale, 0.01f, 0.0f, 5.0f, "%.2f");
+		ImGui::DragFloat("カメラシェイク量", &data_.action.cameraShakePower, 0.01f, 0.0f, 10.0f, "%.2f");
 
 		if (data_.type != Type::kRange && data_.type != Type::kMix) {
 			return;
@@ -4819,6 +5224,7 @@ namespace Combo {
 
 			ImGui::Checkbox("重力", &data_.move.isGravity);
 			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
+			ImGui::DragFloat("最大落下速度(0で無制限)", &data_.move.maxFallSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
 			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
 
 			// ターゲットなら
@@ -4849,7 +5255,8 @@ namespace Combo {
 				"ノックバック",
 				"吹っ飛び",
 				"打ち上げ",
-				"壁バウンド"
+				"壁バウンド",
+				"吸い付き"
 			};
 			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.type);
 
@@ -4860,7 +5267,25 @@ namespace Combo {
 			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
 			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
 			data_.hitReaction.damageData.GetOne().SetDamage(damage);
-			ImGui::Checkbox("一回しかヒットストップしない", &data_.hitReaction.isSingleHitStop);
+
+			static const char* SelfHitStopPolicyLabels[] = {
+				"なし",
+				"最初のヒットのみ",
+				"毎ヒット",
+			};
+			Engine::ImGuiManager::Select("自分側ヒットストップ方針", SelfHitStopPolicyLabels, data_.hitReaction.selfHitStopPolicy);
+
+			static const char* AttackAttributeLabels[] = {
+				"なし",
+				"物理",
+				"炎",
+				"氷",
+				"雷",
+				"特殊",
+			};
+			Engine::ImGuiManager::Select("攻撃属性", AttackAttributeLabels, data_.hitReaction.attribute);
+			ImGui::DragInt("ヒット優先度", &data_.hitReaction.hitPriority, 1, -100, 100);
+			ImGui::DragFloat("ヒットカメラシェイク量", &data_.hitReaction.cameraShakePower, 0.01f, 0.0f, 10.0f, "%.2f");
 
 			ImGui::SliderFloat("ヒットストップ時間(相手)", &data_.hitReaction.targetHitStopTime, 0.0f, 10.0f, "%.2f");
 			ImGui::SliderFloat("ヒットストップ時間(自分)", &data_.hitReaction.selfHitStopTime, 0.0f, 10.0f, "%.2f");
@@ -4958,6 +5383,8 @@ namespace Combo {
 		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
 		// 条件
 		data_.condition = comboData.GetComboCondition().GetData();
+		// 攻撃ノード単位の調整項目
+		data_.action = comboData.GetActionData();
 		// カメラ
 		data_.camera = comboData.GetComboCamera().GetData();
 		// エフェクト
@@ -5032,6 +5459,7 @@ namespace Combo {
 
 #pragma endregion // コンボ単位管理
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditorBlock.h
@@ -6900,7 +7328,7 @@ namespace Combo {
 
 		// キャンセル受付可能か
 		bool IsComdoCancelInputWindow(float timer) const {
-			return timer >= data_.stateCancel.startTime && timer <= data_.stateCancel.startTime;
+			return timer >= data_.stateCancel.startTime && timer <= data_.stateCancel.endTime;
 		};
 		// 入力受付開始時間取得
 		float GetNextInputStart() const { return data_.stateInput.startTime; }
@@ -7617,6 +8045,10 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 		hitMotionState_ = HitMotionState::WallBounce;
 		break;
 
+	case HitReactionType::Suction:
+		hitMotionState_ = HitMotionState::Suction;
+		break;
+
 	default:
 		hitMotionState_ = HitMotionState::None;
 		break;
@@ -7630,6 +8062,11 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 // 終了したか
 bool HitMotionSystem::IsFinished() const {
 	return !IsHitMotion();
+}
+
+// デバッグ用に現在のリアクションを即終了する
+void HitMotionSystem::ForceFinishReaction() {
+	FinishReaction();
 }
 
 // ヒットモーション中か
@@ -7719,6 +8156,15 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const {
 		velocity = horizontalDir * data_.power;
 		if (data_.isVerticalBoost) {
 			velocity.y = data_.verticalBoost;
+		}
+		break;
+	}
+	case HitReactionType::Suction:
+	{
+		// 吸い付きはヒットボックス中心へ向かう3D方向をそのまま使う
+		velocity = dir * data_.power;
+		if (data_.isVerticalBoost) {
+			velocity.y += data_.verticalBoost;
 		}
 		break;
 	}
@@ -7834,6 +8280,7 @@ public:
 		BlowAway,
 		Launch,
 		WallBounce,
+		Suction,
 		Down,
 	};
 
@@ -7873,10 +8320,14 @@ public:
 	float GetDownTimer() const { return downTimer_; }
 	// セルフヒットストップ時間
 	float GetSelfHitStopTimer() const { return selfHitStopTime_; }
+	// 現在のヒットリアクション状態取得
+	HitMotionState GetHitMotionState() const { return hitMotionState_; }
 
 
 	// 終了処理
 	bool IsFinished() const;
+	// デバッグ用に現在のリアクションを即終了する
+	void ForceFinishReaction();
 
 private:
 	// ダメージ処理
@@ -7933,7 +8384,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -7964,6 +8415,7 @@ namespace HitBox {
 
 		// 更新
 		void Update(float dt);
+		uint32_t GetAttackInstanceId() const { return attackInstanceId_; }
 
 	public:
 
@@ -7975,6 +8427,7 @@ namespace HitBox {
 		void Disable(Vector4 color = { 1,1,1,1 });
 		// 履歴削除
 		void ClearContactRecord() { GetContactRecord().Clear(); }
+		void SetRecordPerCollider(bool enabled);
 	public:
 		// ワールドトランスフォーム取得
 		Engine::WorldTransform& GetWorldTransform() { return worldTransform_; }
@@ -7995,6 +8448,7 @@ namespace HitBox {
 		UseType type_;
 		// ヒット記録を使用するか（使用した場合連続ヒットしない）
 		bool useContactRecord = true;
+		uint32_t attackInstanceId_ = 0;
 
 
 		// コライダーデータ構造体
@@ -8018,15 +8472,28 @@ namespace HitBox {
 	};
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 
 
 namespace HitBox {
+
+	// ヒット処理の判定結果。受け手側でガード、無敵、耐性などを差し込むための器。
+	struct HitResult {
+		bool accepted = true;
+		bool applyDamage = true;
+		bool applyReaction = true;
+		bool applyTargetHitStop = true;
+		bool applySelfHitStop = true;
+		bool notifyComboHit = true;
+		float damageScale = 1.0f;
+		HitReactionData reaction{};
+	};
 
 	// 生存タイプ
 	enum class LifetimeType {
@@ -8107,6 +8574,8 @@ namespace HitBox {
 		bool isEneble = true;
 		// デバック用ライン描画をするか
 		bool isLine = false;
+		// 同じ攻撃内でコライダー別ヒットを許可するか。
+		bool recordPerCollider = true;
 	};
 
 	// コライダーデータ
@@ -8120,10 +8589,11 @@ namespace HitBox {
 	};
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.cpp
 ============================================================
-﻿#include "HitBoxFunction.h"
+#include "HitBoxFunction.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -8133,18 +8603,29 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.cpp
 
 namespace HitBox {
 
-	bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* otherColl) {
+	bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* otherColl, bool useContactRecord) {
 		other = static_cast<Engine::ColliderComponent*>(otherColl->GetOwner());
+		this->selfColl = self;
 		this->otherColl = otherColl;
 		if (!other) return false;
+		if (!useContactRecord) {
+			return true;
+		}
 
-		const uint32_t otherId = other->GetUniqueId();	// ID取得
+		// 同一攻撃内のヒット履歴は「攻撃インスタンス + 自分のコライダー + 相手」で分ける。
+		// 多段攻撃や複数コライダー攻撃で、意図せず別判定まで潰れないようにするため。
+		const uint32_t selfId = recordPerCollider_ ? self->GetId() : 0;
+		const uint32_t otherId = other->GetUniqueId();
+		const uint32_t contactKey =
+			(attackInstanceId_ * 73856093u) ^
+			(selfId * 19349663u) ^
+			(otherId * 83492791u);
 		const float nowTime = Engine::MyGame::NowTime();		// 現在時間
-		if (GetContactRecord().CheckHistory(otherId)) {
+		if (GetContactRecord().CheckHistory(contactKey)) {
 			return false; // クールタイム中のため無視
 		}
 		// 履歴追加
-		GetContactRecord().AddHistory(otherId, nowTime);
+		GetContactRecord().AddHistory(contactKey, nowTime);
 
 		return true;
 	}
@@ -8163,8 +8644,35 @@ namespace HitBox {
 		}
 	}
 
+	HitResult HitBoxFunction::BuildHitResult() const {
+		HitResult result{};
+		result.reaction = data_;
+
+		// 吸い付きはヒットした瞬間の「相手位置 -> ヒットボックス中心」を移動方向にする。
+		if (result.reaction.type == HitReactionType::Suction && selfColl && otherColl) {
+			result.reaction.normal = selfColl->GetCenterWorld() - otherColl->GetCenterWorld();
+		}
+
+		// 今後、ここでガード、無敵、属性耐性、ジャスト回避などを吸収する。
+		// 既存挙動維持のため、現時点では必殺技中のプレイヤーだけ無効化する。
+		if (type_ == UseType::kEnemy && otherColl && otherColl->GetTag() == CollisionTag::Player) {
+			Character::BasePlayer* player = other ? static_cast<Character::BasePlayer*>(other->GetHitReceiver()) : nullptr;
+			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.applySelfHitStop = false;
+				result.notifyComboHit = false;
+			}
+		}
+
+		return result;
+	}
+
 	void HitBoxFunction::UpdateTypePlayer() {
 		if (otherColl->GetTag() != CollisionTag::Enemy) return;
+		HitResult result = BuildHitResult();
+		if (!result.accepted) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
@@ -8172,11 +8680,16 @@ namespace HitBox {
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
 		// リアクションデータ
-		enemy->GetHitMotionSystem()->SetReactionData(data_);
+		if (result.applyReaction) {
+			enemy->GetHitMotionSystem()->SetReactionData(result.reaction);
+		}
 
-		if (data_.isSingleHitStop) {
-			isHitStop = false; // 一回しかヒットストップしない場合は無効化
+		const bool shouldSelfHitStop =
+			data_.selfHitStopPolicy == SelfHitStopPolicy::EveryHit ||
+			(data_.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly && !hasAppliedSelfHitStop_);
+		if (result.applySelfHitStop && shouldSelfHitStop) {
 			player->GetHitMotionSystem()->SetSelfHitStopTime(data_.selfHitStopTime);
+			hasAppliedSelfHitStop_ = true;
 		}
 		//	エフェクト出現
 		enemy->GetHitMotionSystem()->EmitHitEffect();
@@ -8186,28 +8699,34 @@ namespace HitBox {
 		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
 		player->GetAttackController()->GetHitCounter().Hit();
-		player->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		if (result.notifyComboHit) {
+			player->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		}
 	}
 
 	void HitBoxFunction::UpdateTypeEnemy() {
 		if (otherColl->GetTag() != CollisionTag::Player) return;
+		HitResult result = BuildHitResult();
+		if (!result.accepted) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
-		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
-			return; // プレイヤーが必殺技中は無効
-		}
 
-		if (data_.isSingleHitStop) {
-			isHitStop = false; // 一回しかヒットストップしない場合は無効化
+		const bool shouldSelfHitStop =
+			data_.selfHitStopPolicy == SelfHitStopPolicy::EveryHit ||
+			(data_.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly && !hasAppliedSelfHitStop_);
+		if (result.applySelfHitStop && shouldSelfHitStop) {
 			enemy->GetHitMotionSystem()->SetSelfHitStopTime(data_.selfHitStopTime);
+			hasAppliedSelfHitStop_ = true;
 		}
 
 		// リアクションデータ
-		player->GetHitMotionSystem()->SetReactionData(data_);
+		if (result.applyReaction) {
+			player->GetHitMotionSystem()->SetReactionData(result.reaction);
+		}
 		// プレイヤーステート設定
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
@@ -8242,18 +8761,21 @@ namespace HitBox {
 		};
 
 		// 開始
-		bool Begin(Engine::Collider* self, Engine::Collider* other);
+		bool Begin(Engine::Collider* self, Engine::Collider* other, bool useContactRecord);
 
 		// 更新
 		void Update();
 
+		void SetAttackInstanceId(uint32_t id) { attackInstanceId_ = id; }
+		void SetRecordPerCollider(bool enabled) { recordPerCollider_ = enabled; }
 
 		void SetData(HitReactionData data) {
 			data_ = data; 
-			isHitStop = true;
 		};
 
 	private:
+		// 受け手の防御状態や属性耐性を反映した最終ヒット結果を作る。
+		HitResult BuildHitResult() const;
 		// 使用者がプレイヤーの場合の更新処理
 		void UpdateTypePlayer();
 		// 使用者が敵の場合の更新処理
@@ -8269,10 +8791,13 @@ namespace HitBox {
 		Character::BaseCharacter* character = nullptr;	// 使用キャラクター
 		UseType type_;							// 使用者
 
+		Engine::Collider* selfColl = nullptr;	// ヒットした自分側コライダー
 		Engine::Collider* otherColl = nullptr;
 		HitReactionData data_;
 
-		bool isHitStop = false;	// 使用者がヒットストップするか
+		bool hasAppliedSelfHitStop_ = false;	// FirstHitOnly用
+		uint32_t attackInstanceId_ = 0;
+		bool recordPerCollider_ = true;
 	};
 };
 
@@ -8280,7 +8805,7 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.cpp
 ============================================================
-#include "HitBoxSystem.h"
+﻿#include "HitBoxSystem.h"
 
 namespace HitBox {
 	void System::Initialize(Engine::EntityManager* entityManager) {
@@ -8317,6 +8842,7 @@ namespace HitBox {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
+		d.hitBox->SetRecordPerCollider(datas.hitBoxData.recordPerCollider);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
 		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
@@ -8336,6 +8862,7 @@ namespace HitBox {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
+		d.hitBox->SetRecordPerCollider(datas.hitBoxData.recordPerCollider);
 		d.hitBox->GetWorldTransform().Update();
 
 		// Id設定;
@@ -8438,7 +8965,7 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "HitBox.h"
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
 
@@ -8551,6 +9078,7 @@ namespace HitBox {
 		this->entityManager = entityManager;
 		type_ = type;
 		this->useContactRecord = useContactRecord;
+		attackInstanceId_ = UniqueIdGenerator::Generate();
 		// ワールド変換初期化
 		worldTransform_.Initialize();
 
@@ -8567,14 +9095,13 @@ namespace HitBox {
 		// ヒットボックス応答クラス生成
 		hitBoxFunction_ = std::make_unique<HitBoxFunction>();
 		hitBoxFunction_->Initialize(colliderComponent_.get(), character, type_);
+		hitBoxFunction_->SetAttackInstanceId(attackInstanceId_);
 
 		// 当たり判定コールバック設定
 		colliderComponent_->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 			// 開始
-			if (this->useContactRecord) {
-				if (!hitBoxFunction_->Begin(self, other)) {
-					return;
-				}
+			if (!hitBoxFunction_->Begin(self, other, this->useContactRecord)) {
+				return;
 			}
 
 			// 当たったコライダーによって相手に送るデータを決め転送
@@ -8627,6 +9154,12 @@ namespace HitBox {
 		colliders_[data.colliderID] = data;
 		colliderCount++; // コライダー数増加
 	};
+
+	void HitBoxInstance::SetRecordPerCollider(bool enabled) {
+		if (hitBoxFunction_) {
+			hitBoxFunction_->SetRecordPerCollider(enabled);
+		}
+	}
 
 	// 有効化
 	void HitBoxInstance::Enable(Vector4 color) {
@@ -14322,7 +14855,9 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 // 重力処理
 void Character::CharacterContextSystem::CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx) {
 	if (comboStateMachine->GetCurrentState()) {
-		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
+		const auto& moveData = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData();
+		ctx.attackingGravity = moveData.gravityScale;
+		ctx.attackingMaxFallSpeed = moveData.maxFallSpeed;
 	}
 	// ダメージ中の重力
 	ctx.damageGravity = hitMotionSystem->GetGravityScale();
@@ -14498,6 +15033,8 @@ namespace Character {
 		float fallGravity = 2.0f;
 		// 攻撃中の重力係数
 		float attackingGravity = 20.0f;
+		// 攻撃中の最大落下速度。0以下なら制限なし。
+		float attackingMaxFallSpeed = 0.0f;
 		// 被弾中の重力係数
 		float damageGravity = 1.0f;
 		// 死亡中の重力係数
@@ -18652,11 +19189,13 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.cpp
 ============================================================
-#include "DummyEnemy.h"
+﻿#include "DummyEnemy.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
+#include "imgui.h"
 
 namespace Character {
 	void DummyEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
@@ -18667,6 +19206,8 @@ namespace Character {
 		Vector3 size = { 0.9f,0.9f,0.9f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 
+		// デバッグ用の帰還位置を初期配置で保持
+		returnPosition_ = position;
 
 		moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
 
@@ -18690,7 +19231,202 @@ namespace Character {
 		// 基盤の更新
 		BaseUpdate();
 
+		// 被弾した瞬間にデバッグ挙動を反映
+		ApplyDebugBehaviorOnHit();
+
+		// 地上/空中固定を有効にしている場合は検証姿勢を維持
+		ApplyDummyTypeLock();
+
+		// 完全停止中はリアクション移動後も指定位置へ戻す
+		if (completeStop_) {
+			ResetToDebugReturnPosition();
+		}
+
+		// 状態をモデルカラーで見分けられるようにする
+		ApplyDebugStateColor();
+
+		// ダミー検証中に倒れないようHPを常に最大へ戻す
 		Parameters()->HP.value = 100.0f;
+
+		// ダミーの状態確認と挙動切り替えUI
+		UpdateDebugImGui();
+	}
+
+	void DummyEnemy::UpdateDebugImGui() {
+		// 表示自体を切れるようにして、検証画面の邪魔にならないようにする
+		if (!showDebugWindow_) {
+			return;
+		}
+
+		const CharacterMainState mainState = GetCurrentMainState();				// 現在のメイン状態
+		HitMotionSystem* hitMotion = GetHitMotionSystem();						// ヒットリアクション情報
+		Engine::RigidBodyComponent* rigid = objectComponent_->GetRigidBodyComponent(); // 物理速度確認用
+		Vector3 worldPos = GetWorldTransform().GetWorldPosition();				// 現在位置
+		Vector3 velocity = rigid ? rigid->GetVelocity() : Vector3{};			// 現在速度
+		int dummyTypeIndex = static_cast<int>(dummyType_);						// ImGui用の選択番号
+		const char* dummyTypeLabels[] = { "Ground", "Air" };					// ダミータイプ表示名
+
+		ImGui::Begin("DummyEnemy Debug", &showDebugWindow_);
+
+		ImGui::SeparatorText("Basic");
+		ImGui::Text("Name        : %s", GetName().c_str());
+		ImGui::Text("Main State  : %s", GetMainStateName(mainState));
+		ImGui::Text("HP          : %.1f / %.1f", Parameters()->HP.value, Parameters()->HP.maxValue);
+		ImGui::Text("Position    : %.2f, %.2f, %.2f", worldPos.x, worldPos.y, worldPos.z);
+		ImGui::Text("Velocity    : %.2f, %.2f, %.2f", velocity.x, velocity.y, velocity.z);
+
+		ImGui::SeparatorText("Hit Reaction");
+		ImGui::Text("Hit State   : %s", hitMotion ? GetHitMotionStateName(hitMotion->GetHitMotionState()) : "None");
+		ImGui::Text("Hit Motion  : %s", hitMotion && hitMotion->IsHitMotion() ? "true" : "false");
+		ImGui::Text("Hit Stun    : %s / %.2f", hitMotion && hitMotion->IsHitStun() ? "true" : "false",
+			hitMotion ? hitMotion->GetHitStunTimer() : 0.0f);
+		ImGui::Text("Down        : %s / %.2f", hitMotion && hitMotion->IsDown() ? "true" : "false",
+			hitMotion ? hitMotion->GetDownTimer() : 0.0f);
+		ImGui::Text("Launch      : %s", hitMotion && hitMotion->IsLaunch() ? "true" : "false");
+		ImGui::Text("Hit Stop    : %s", hitMotion && hitMotion->IsHitStop() ? "true" : "false");
+		ImGui::Checkbox("Use State Color", &useDebugStateColor_);
+		ImGui::Text("Color Memo  : White=Normal, Yellow=HitStop, Orange=Stun, Cyan=Launch, Blue=Down, Red=Damage");
+
+		ImGui::SeparatorText("Behavior");
+		ImGui::Checkbox("Complete Stop", &completeStop_);
+		ImGui::Checkbox("Return On Hit", &returnOnHit_);
+		ImGui::Checkbox("Recover Immediately On Hit", &recoverImmediatelyOnHit_);
+		ImGui::DragFloat3("Return Position", &returnPosition_.x, 0.1f);
+		if (ImGui::Button("Set Return Position From Current")) {
+			returnPosition_ = worldPos;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Return Now")) {
+			ResetToDebugReturnPosition();
+		}
+
+		ImGui::SeparatorText("Dummy Type");
+		if (ImGui::Combo("Type", &dummyTypeIndex, dummyTypeLabels, 2)) {
+			dummyType_ = static_cast<DummyType>(dummyTypeIndex);
+		}
+		ImGui::Checkbox("Lock Ground/Air State", &lockDummyType_);
+		ImGui::DragFloat("Ground Height", &groundHeight_, 0.1f);
+		ImGui::DragFloat("Air Height", &airHeight_, 0.1f);
+
+		ImGui::End();
+	}
+
+	void DummyEnemy::ApplyDebugBehaviorOnHit() {
+		const bool isDamageState = GetCurrentMainState() == CharacterMainState::Damage; // 現在Damageか
+		const bool enteredDamageState = isDamageState && !wasDamageState_;				// 今フレームでDamageへ入ったか
+
+		if (enteredDamageState) {
+			if (returnOnHit_) {
+				ResetToDebugReturnPosition();
+			}
+			if (recoverImmediatelyOnHit_) {
+				GetHitMotionSystem()->ForceFinishReaction();
+				GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+			}
+		}
+
+		wasDamageState_ = isDamageState;
+	}
+
+	void DummyEnemy::ApplyDummyTypeLock() {
+		// 固定が無効なら、タイプ表示だけを使って挙動には干渉しない
+		if (!lockDummyType_) {
+			return;
+		}
+
+		Engine::RigidBodyComponent* rigid = objectComponent_->GetRigidBodyComponent(); // 物理速度リセット用
+		Engine::WorldTransform& world = GetWorldTransform();							// 位置固定対象
+
+		// ダミータイプに応じてY座標を固定し、リアクション検証時の地上/空中条件を安定させる
+		world.translate_.y = dummyType_ == DummyType::Ground ? groundHeight_ : airHeight_;
+		world.Update();
+
+		if (rigid) {
+			rigid->ResetAcceleration();
+			rigid->ResetVelocity();
+			rigid->SetIsGravity(false);
+		}
+	}
+
+	void DummyEnemy::ApplyDebugStateColor() {
+		// 色表示を使わない場合は通常色へ戻す
+		if (!useDebugStateColor_) {
+			objectComponent_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+			return;
+		}
+
+		HitMotionSystem* hitMotion = GetHitMotionSystem(); // 色分けに使うヒットリアクション情報
+
+		// 優先度の高い一瞬の状態から順に判定する
+		if (hitMotion && hitMotion->IsHitStop()) {
+			objectComponent_->SetColor({ 1.0f, 1.0f, 0.0f, 1.0f }); // ヒットストップ中は黄色
+			return;
+		}
+		if (hitMotion && hitMotion->IsDown()) {
+			objectComponent_->SetColor({ 0.1f, 0.25f, 1.0f, 1.0f }); // ダウン中は青
+			return;
+		}
+		if (hitMotion && hitMotion->IsLaunch()) {
+			objectComponent_->SetColor({ 0.0f, 0.9f, 1.0f, 1.0f }); // 打ち上げ中はシアン
+			return;
+		}
+		if (hitMotion && hitMotion->IsHitStun()) {
+			objectComponent_->SetColor({ 1.0f, 0.45f, 0.0f, 1.0f }); // スタン中はオレンジ
+			return;
+		}
+		if (GetCurrentMainState() == CharacterMainState::Damage) {
+			objectComponent_->SetColor({ 1.0f, 0.1f, 0.1f, 1.0f }); // 被弾状態は赤
+			return;
+		}
+
+		// 通常時は白に戻す
+		objectComponent_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+
+	void DummyEnemy::ResetToDebugReturnPosition() {
+		Engine::WorldTransform& world = GetWorldTransform();	// 座標を戻す対象
+		Engine::RigidBodyComponent* rigid = objectComponent_->GetRigidBodyComponent(); // 物理速度リセット用
+
+		world.translate_ = returnPosition_;
+		world.Update();
+
+		if (rigid) {
+			rigid->ResetAcceleration();
+			rigid->ResetVelocity();
+		}
+	}
+
+	const char* DummyEnemy::GetMainStateName(CharacterMainState state) const {
+		// ImGui表示用にメインステートを短い英字へ変換
+		switch (state) {
+		case CharacterMainState::Idle: return "Idle";
+		case CharacterMainState::Move: return "Move";
+		case CharacterMainState::Jump: return "Jump";
+		case CharacterMainState::Avoidance: return "Avoidance";
+		case CharacterMainState::Defense: return "Defense";
+		case CharacterMainState::Attack: return "Attack";
+		case CharacterMainState::Die: return "Die";
+		case CharacterMainState::Damage: return "Damage";
+		case CharacterMainState::Dash: return "Dash";
+		case CharacterMainState::Fainting: return "Fainting";
+		case CharacterMainState::Skill: return "Skill";
+		case CharacterMainState::Special: return "Special";
+		default: return "Unknown";
+		}
+	}
+
+	const char* DummyEnemy::GetHitMotionStateName(HitMotionSystem::HitMotionState state) const {
+		// ImGui表示用にヒットリアクション状態を短い英字へ変換
+		switch (state) {
+		case HitMotionSystem::HitMotionState::None: return "None";
+		case HitMotionSystem::HitMotionState::HitStop: return "HitStop";
+		case HitMotionSystem::HitMotionState::Knockback: return "Knockback";
+		case HitMotionSystem::HitMotionState::BlowAway: return "BlowAway";
+		case HitMotionSystem::HitMotionState::Launch: return "Launch";
+		case HitMotionSystem::HitMotionState::WallBounce: return "WallBounce";
+		case HitMotionSystem::HitMotionState::Down: return "Down";
+		default: return "Unknown";
+		}
 	}
 
 
@@ -18710,16 +19446,24 @@ namespace Character {
 	}
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include "DummyEnemyState.h"
 
 namespace Character {
 	class DummyEnemy : public BaseEnemy {
 	public:
+		// ダミーを地上扱いにするか空中扱いにするか
+		enum class DummyType {
+			Ground,	// 地上ダミー
+			Air,	// 空中ダミー
+		};
+
 		DummyEnemy() {
 
 		}
@@ -18746,11 +19490,38 @@ namespace Character {
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
+		// デバッグ用の表示と操作をまとめて更新
+		void UpdateDebugImGui();
+		// Damage状態へ入った瞬間に有効なデバッグ挙動を実行
+		void ApplyDebugBehaviorOnHit();
+		// 指定された地上/空中タイプに合わせて座標と物理速度を固定
+		void ApplyDummyTypeLock();
+		// ヒットリアクションやステートに合わせてダミーの色を更新
+		void ApplyDebugStateColor();
+		// ダミーを指定位置へ戻し、物理速度もリセット
+		void ResetToDebugReturnPosition();
+		// 現在のメインステートをデバッグ表示用の文字列へ変換
+		const char* GetMainStateName(CharacterMainState state) const;
+		// 現在のヒットリアクション状態をデバッグ表示用の文字列へ変換
+		const char* GetHitMotionStateName(HitMotionSystem::HitMotionState state) const;
 
 	private:
-		float hp = 100.0f;
+		float hp = 100.0f;						// ダミーの最大HP
+		bool showDebugWindow_ = true;			// DummyEnemy専用ImGuiを表示するか
+		bool completeStop_ = false;				// ヒットリアクション後も指定位置に固定するか
+		bool returnOnHit_ = false;				// 被弾した瞬間に指定位置へ戻すか
+		bool recoverImmediatelyOnHit_ = false;	// 被弾した瞬間にDamage状態とリアクションを終了するか
+		bool lockDummyType_ = false;				// 地上/空中タイプに合わせて毎フレーム位置を固定するか
+		bool useDebugStateColor_ = true;			// 状態確認用にモデルカラーを変更するか
+		bool wasDamageState_ = false;			// 前フレームにDamage状態だったか
+		DummyType dummyType_ = DummyType::Ground;// 検証用のダミータイプ
+		Vector3 returnPosition_{};				// 被弾時や完全停止時に戻す座標
+		float groundHeight_ = -3.0f;				// 地上固定時のY座標
+		float airHeight_ = 2.0f;					// 空中固定時のY座標
 	};
+
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemyState.cpp
@@ -20916,7 +21687,7 @@ void MovementComponent::SetGlobalData(const std::string& name)
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Move/Base/MoveComponent.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "MovementRestrictions.h"
 #include "MovementSystem.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
@@ -20981,6 +21752,8 @@ public: // ジャンプ系統
 	void DecrementJumpCount() { jumpSystem_->DecrementJumpCount(); }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpSystem_->GetIsJump(); }
+	// 残りジャンプ回数取得
+	int GetJumpCount() const { return jumpSystem_->GetJumpCount(); }
 	// 着地状態か
 	bool GetIsLanding() const { return movementSystem_->IsOnGround(); }
 	// 最大ジャンプカウント設定
@@ -21244,6 +22017,11 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 
 	// 重力
 	rigid.Integrate(cxt.dt, world);
+	if (cxt.state == Character::CharacterMainState::Attack &&
+		cxt.attackingMaxFallSpeed > 0.0f &&
+		rigid.Velocity().y < -cxt.attackingMaxFallSpeed) {
+		rigid.Velocity().y = -cxt.attackingMaxFallSpeed;
+	}
 }
 
 void MovementSystem::StateGravityProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world,
@@ -21408,7 +22186,7 @@ void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid) {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Move/Jump/JumpSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "JumpData.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 
@@ -21436,6 +22214,8 @@ public:
 	JumpData& Data() { return data_; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
+	// 残りジャンプ回数取得
+	int GetJumpCount() const { return jumpCount_; }
 	//
 	bool GetIsJumping() const { return isJumping_;}
 	// データ設定
@@ -21460,6 +22240,7 @@ private:
 	// 入力ホールドタイマー
 	float holdTimer_ = 0.0f;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Move/Move/MoveData.h
@@ -25188,9 +25969,20 @@ namespace Game {
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Game/Custom/CustomSystem.cpp
+============================================================
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Custom/CustomSystem.h
+============================================================
+#pragma once
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Game/GameEventController.cpp
 ============================================================
-#include "GameEventController.h"
+﻿#include "GameEventController.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -25249,8 +26041,8 @@ namespace Game {
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
 		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 5, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 3, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 10, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);
@@ -25264,7 +26056,7 @@ namespace Game {
 		// WAVE 2: 左右から寄せ、片側にはあえて逃げ道を残す（2群衆 / 合計13体）
 		const Character::CrowdBehaviorSettings wave2Encircle = Character::CrowdBehaviorSettings::Encircle(12.0f);
 		const Character::CrowdBehaviorSettings wave2Distributed = Character::CrowdBehaviorSettings::DistributedEncircle(15.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 8, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 15, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 5, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
 		data.battleWaveIndex_ = 2;
 		data.time_.max = 28.0f;
@@ -25279,7 +26071,7 @@ namespace Game {
 		// WAVE 3: 前後から列が入れ替わって攻める波状攻撃（2群衆 / 合計17体）
 		const Character::CrowdBehaviorSettings wave3Assault = Character::CrowdBehaviorSettings::WaveAssault(2.2f, 3);
 		const Character::CrowdBehaviorSettings wave3Line = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::Line);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 12, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 20, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
 		data.battleWaveIndex_ = 3;
 		data.time_.max = 32.0f;
@@ -25294,8 +26086,8 @@ namespace Game {
 		// WAVE 4: 流動する外周と役割分担する追跡隊で移動を強制する（2群衆 / 合計20体）
 		const Character::CrowdBehaviorSettings wave4Flow = Character::CrowdBehaviorSettings::FlowCrowd(13.0f);
 		const Character::CrowdBehaviorSettings wave4Hunting = Character::CrowdBehaviorSettings::Hunting();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 12, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 15, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 8, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 2, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
 		data.battleWaveIndex_ = 4;
 		data.time_.max = 36.0f;
@@ -25311,7 +26103,7 @@ namespace Game {
 		const Character::CrowdBehaviorSettings wave5Pressure = Character::CrowdBehaviorSettings::PressureCrowd();
 		const Character::CrowdBehaviorSettings wave5Adaptive = Character::CrowdBehaviorSettings::DensityAdaptive();
 		const Character::CrowdBehaviorSettings wave5Vanguard = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::VShape);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 14, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 18, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 8, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
 		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
 		data.battleWaveIndex_ = 5;
@@ -25817,7 +26609,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.cpp
 ============================================================
-#include "SelectSystem.h"
+﻿#include "SelectSystem.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
@@ -25857,7 +26649,7 @@ void SelectSystem::Update(float dt) {
 			sceneManager->ChangeScene("GAMEPLAY");
 		}
 		else if (selectedIndex == 1) {
-			//	sceneManager->ChangeScene("CUSTOM");
+			sceneManager->ChangeScene("CUSTOM");
 		}
 		else if (selectedIndex == 2) {
 			//	sceneManager->ChangeScene("OPERATION");
@@ -28500,6 +29292,17 @@ protected: // 貰いもの
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Stage/CustomStage.cpp
+============================================================
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Stage/CustomStage.h
+============================================================
+#pragma once
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Stage/MainStage.cpp
 ============================================================
 #include "MainStage.h"
@@ -29478,6 +30281,17 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/UI/CustomUI.cpp
+============================================================
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/CustomUI.h
+============================================================
+#pragma once
+
+
+============================================================
 File Path: project/DirectXGame/application/base/UI/FpsUI.cpp
 ============================================================
 #include "FpsUI.h"
@@ -29936,7 +30750,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/UI/PlayerUI.cpp
 ============================================================
-#include "PlayerUI.h"
+﻿#include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
@@ -29991,17 +30805,17 @@ void PlayerUI::InitializeOperationUI() {
 	normalAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
 	normalAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
-	//// 通常攻撃UI初期化
-	//InitUIPair("havyAttack", attackTextData.pos2);
-	//Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
-	//havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
-	//havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	//havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
-	//havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
-	//havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
-	//havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
-	//havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
-	//havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
+	// 通常攻撃UI初期化
+	InitUIPair("havyAttack", attackTextData.pos2);
+	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
+	havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
+	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
+	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds"); // 
+	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
+	havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
+	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
+	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
+	havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
 	// 必殺技UI初期化
 	InitUIPair("special", spTextData.pos + Vector2{0,50});
@@ -32313,9 +33127,14 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/CustomScene.cpp
 ============================================================
-#include "CustomScene.h"
+﻿#include "CustomScene.h"
 
 void CustomScene::Initialize() {
+
+	// エフェクト
+	effect_ = std::make_unique<EffectSystem>();
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
+
 	input = GetInput();
 	// 入力システム初期化
 	inputSystem_ = std::make_unique<InputSystem>();
@@ -32325,18 +33144,21 @@ void CustomScene::Initialize() {
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
 	
+
+
+
+
+
+
+
+
+
+
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 	SetCamera(cameraManager_->GetCamera());
-
-
-	// エフェクト
-	effect_ = std::make_unique<EffectSystem>();
-	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-
 }
 
 void CustomScene::Finalize() {}
@@ -32358,7 +33180,7 @@ void CustomScene::Draw2D() {
 ============================================================
 File Path: project/DirectXGame/application/scene/CustomScene.h
 ============================================================
-#pragma once
+﻿#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -33423,7 +34245,7 @@ struct SceneData {
 ============================================================
 File Path: project/DirectXGame/application/scene/SceneFactory.cpp
 ============================================================
-#include "SceneFactory.h"
+﻿#include "SceneFactory.h"
 #include <DirectXGame/engine/Base/pch.h>
 #include"TitleScene.h"
 #include"GamePlayScene.h"
@@ -33433,6 +34255,7 @@ File Path: project/DirectXGame/application/scene/SceneFactory.cpp
 #include "ResultScene.h"
 #include "TutorialScene.h"
 #include "CharacterDebugScene.h"
+#include "CustomScene.h"
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
@@ -33459,6 +34282,9 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
 	}
     if (sceneName == "CHARACTER") {             // キャラクターのデバッグシーン
         return std::make_unique<CharacterDebugScene>();
+    }
+    if (sceneName == "CUSTOM") {             // カスタムシーン
+        return std::make_unique<CustomScene>();
     }
 
 
@@ -66406,6 +67232,7 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("RESULT");
 	scenenames_.push_back("TUTORIAL");
 	scenenames_.push_back("CHARACTER");
+	scenenames_.push_back("CUSTOM");
 
 #ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");
@@ -77034,6 +77861,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
@@ -77055,6 +77883,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\BaseStage.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\CustomStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\ResultStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp" />
@@ -77467,6 +78296,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
@@ -77758,7 +78589,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -78822,6 +79652,12 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\CustomStage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80074,6 +80910,12 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Manager\Entity\Entity.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -80081,7 +80923,6 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
-
 
 ============================================================
 File Path: project/main.cpp
