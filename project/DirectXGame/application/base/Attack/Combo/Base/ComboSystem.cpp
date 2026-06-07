@@ -29,6 +29,25 @@ namespace Combo {
 			{ "前方", static_cast<int64_t>(RangeLockOnType::kNone) },
 			{ "ターゲット", static_cast<int64_t>(RangeLockOnType::kTarget) },
 			{ "カメラ", static_cast<int64_t>(RangeLockOnType::kCamera) },
+			{ "オフセットターゲット", static_cast<int64_t>(RangeLockOnType::kOffsetTarget) },
+			});
+		EnumRegistry::Instance().Register("RangeThrowMoveType", {
+			{ "直進", static_cast<int64_t>(RangeThrowMoveType::kStraight) },
+			{ "ヒット時停止", static_cast<int64_t>(RangeThrowMoveType::kStopOnHit) },
+			{ "ターゲット瞬間移動", static_cast<int64_t>(RangeThrowMoveType::kTeleportToTarget) },
+			{ "ターゲット補間移動", static_cast<int64_t>(RangeThrowMoveType::kLerpToTarget) },
+			});
+		EnumRegistry::Instance().Register("RangeEffectTriggerType", {
+			{ "なし", static_cast<int64_t>(RangeEffectTriggerType::kNone) },
+			{ "ボタン", static_cast<int64_t>(RangeEffectTriggerType::kButton) },
+			{ "時間経過", static_cast<int64_t>(RangeEffectTriggerType::kTimer) },
+			{ "ヒット", static_cast<int64_t>(RangeEffectTriggerType::kHit) },
+			});
+		EnumRegistry::Instance().Register("RangeRecallTriggerType", {
+			{ "なし", static_cast<int64_t>(RangeRecallTriggerType::kNone) },
+			{ "ボタン", static_cast<int64_t>(RangeRecallTriggerType::kButton) },
+			{ "時間経過", static_cast<int64_t>(RangeRecallTriggerType::kTimer) },
+			{ "近づく", static_cast<int64_t>(RangeRecallTriggerType::kNearOwner) },
 			});
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
@@ -358,7 +377,16 @@ namespace Combo {
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->AddEnumItem(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->AddEnumItem(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
+			globalVariables->AddEnumItem(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
+			globalVariables->AddEnumItem(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
 			globalVariables->AddItem(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
+			globalVariables->AddItem(name, "遠距離オフセットターゲット", data.range.offsetTarget);
+			globalVariables->AddItem(name, "投擲補間時間", data.range.throwLerpTime);
+			globalVariables->AddItem(name, "投擲効果発動時間", data.range.effectTriggerTime);
+			globalVariables->AddItem(name, "投擲回収時間", data.range.recallTriggerTime);
+			globalVariables->AddItem(name, "投擲回収近接半径", data.range.recallNearRadius);
+			globalVariables->AddItem(name, "投擲停滞時間", data.range.throwStayTime);
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
@@ -546,7 +574,16 @@ namespace Combo {
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
+			data.range.throwMoveType = globalVariables->GetEnumValue<Combo::RangeThrowMoveType>(name, "投擲移動タイプ");
+			data.range.effectTriggerType = globalVariables->GetEnumValue<Combo::RangeEffectTriggerType>(name, "投擲効果発動条件");
+			data.range.recallTriggerType = globalVariables->GetEnumValue<Combo::RangeRecallTriggerType>(name, "投擲回収条件");
 			data.range.lockOnStartRadius = globalVariables->GetValue<float>(name, "遠距離ロックオン開始半径");
+			data.range.offsetTarget = globalVariables->GetValue<Vector3>(name, "遠距離オフセットターゲット");
+			data.range.throwLerpTime = globalVariables->GetValue<float>(name, "投擲補間時間");
+			data.range.effectTriggerTime = globalVariables->GetValue<float>(name, "投擲効果発動時間");
+			data.range.recallTriggerTime = globalVariables->GetValue<float>(name, "投擲回収時間");
+			data.range.recallNearRadius = globalVariables->GetValue<float>(name, "投擲回収近接半径");
+			data.range.throwStayTime = globalVariables->GetValue<float>(name, "投擲停滞時間");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
@@ -740,7 +777,16 @@ namespace Combo {
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->SetEnumValue(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->SetEnumValue(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
+			globalVariables->SetEnumValue(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
+			globalVariables->SetEnumValue(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
 			globalVariables->SetValue(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
+			globalVariables->SetValue(name, "遠距離オフセットターゲット", data.range.offsetTarget);
+			globalVariables->SetValue(name, "投擲補間時間", data.range.throwLerpTime);
+			globalVariables->SetValue(name, "投擲効果発動時間", data.range.effectTriggerTime);
+			globalVariables->SetValue(name, "投擲回収時間", data.range.recallTriggerTime);
+			globalVariables->SetValue(name, "投擲回収近接半径", data.range.recallNearRadius);
+			globalVariables->SetValue(name, "投擲停滞時間", data.range.throwStayTime);
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);

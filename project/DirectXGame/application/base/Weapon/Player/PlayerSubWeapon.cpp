@@ -36,6 +36,9 @@ void PlayerSubWeapon::Update(float dt) {
 	case ThrowState::kThrow:
 		UpdateThrow(dt);
 		break;
+	case ThrowState::kHold:
+		UpdateHold(dt);
+		break;
 	case ThrowState::kReturn:
 		UpdateReturn(dt);
 		break;
@@ -64,6 +67,7 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	// 投擲開始位置と時間を初期化する
 	throwTimer_ = 0.0f;
 	throwState_ = ThrowState::kThrow;
+	throwStartPosition_ = startPosition;
 	GetWorldTransform().translate_ = startPosition;
 
 	// 必要なら投擲方向にサブ武器の向きを合わせる
@@ -73,9 +77,31 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	}
 }
 
+void PlayerSubWeapon::StopAtCurrentPosition() {
+	// 投擲中の位置で止め、効果発動や回収待ちに使う
+	if (throwState_ == ThrowState::kThrow) {
+		throwState_ = ThrowState::kHold;
+		throwTimer_ = 0.0f;
+	}
+}
+
+void PlayerSubWeapon::Recall() {
+	// 待機中以外なら現在位置から所有者の近くへ戻す
+	if (throwState_ != ThrowState::kIdle && throwState_ != ThrowState::kReturn) {
+		returnStartPosition_ = GetWorldTransform().translate_;
+		throwTimer_ = 0.0f;
+		throwState_ = ThrowState::kReturn;
+	}
+}
+
 bool PlayerSubWeapon::IsThrowing() const {
 	// 投擲または戻りの間はサブ武器攻撃中として扱う
 	return throwState_ != ThrowState::kIdle;
+}
+
+bool PlayerSubWeapon::IsHolding() const {
+	// 投擲地点で停止しているかを返す
+	return throwState_ == ThrowState::kHold;
 }
 
 void PlayerSubWeapon::SetThrowData(const PlayerSubWeaponThrowData& data) {
@@ -83,6 +109,7 @@ void PlayerSubWeapon::SetThrowData(const PlayerSubWeaponThrowData& data) {
 	throwData_ = data;
 	throwData_.throwLifeTime = (std::max)(throwData_.throwLifeTime, 0.001f);
 	throwData_.returnTime = (std::max)(throwData_.returnTime, 0.001f);
+	throwData_.lerpTime = (std::max)(throwData_.lerpTime, 0.001f);
 }
 
 void PlayerSubWeapon::DrawEffect() {
@@ -104,17 +131,43 @@ void PlayerSubWeapon::UpdateThrow(float dt) {
 	// 投擲時間を進める
 	throwTimer_ += dt;
 
-	// 前方へ飛ばしながら軽く回転させる
-	GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
+	// 移動タイプに応じて投擲位置を更新する
+	switch (throwData_.moveType) {
+	case PlayerSubWeaponThrowData::MoveType::kTeleportToTarget:
+		GetWorldTransform().translate_ = throwData_.targetPosition;
+		StopAtCurrentPosition();
+		break;
+	case PlayerSubWeaponThrowData::MoveType::kLerpToTarget:
+	{
+		const float rate = (std::min)(throwTimer_ / throwData_.lerpTime, 1.0f);
+		GetWorldTransform().translate_ = Vector3::Lerp(throwStartPosition_, throwData_.targetPosition, rate);
+		if (rate >= 1.0f) {
+			StopAtCurrentPosition();
+		}
+		break;
+	}
+	case PlayerSubWeaponThrowData::MoveType::kStopOnHit:
+	case PlayerSubWeaponThrowData::MoveType::kStraight:
+	default:
+		GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
+		break;
+	}
+
+	// 必要なら投擲中に回転させる
 	if (throwData_.useSpin) {
 		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
 	}
 
-	// 投擲時間が終わったら戻り状態へ移行する
-	if (throwTimer_ >= throwData_.throwLifeTime) {
-		throwTimer_ = 0.0f;
-		returnStartPosition_ = GetWorldTransform().translate_;
-		throwState_ = ThrowState::kReturn;
+	// 自動戻りが有効なら投擲時間後に回収へ移る
+	if (throwData_.autoReturn && throwTimer_ >= throwData_.throwLifeTime) {
+		Recall();
+	}
+}
+
+void PlayerSubWeapon::UpdateHold(float dt) {
+	// 停止中も演出用スピンを継続できる
+	if (throwData_.useSpin) {
+		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
 	}
 }
 

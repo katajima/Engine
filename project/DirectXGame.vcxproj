@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -117,7 +117,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.cpp" />
@@ -543,7 +545,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.h" />

@@ -50,6 +50,31 @@ namespace Combo {
 		kNone,		// ロックオンなし(向いている方向)
 		kTarget,	// ターゲットロックオン
 		kCamera,	// カメラロックオン
+		kOffsetTarget,	// 自分基準のオフセット位置
+	};
+
+	// 投擲物の移動タイプ
+	enum class RangeThrowMoveType {
+		kStraight,			// 直進
+		kStopOnHit,			// ヒット時にその場で停止
+		kTeleportToTarget,	// ターゲット位置へ瞬間移動
+		kLerpToTarget,		// ターゲット位置へ補間移動
+	};
+
+	// 投擲物の効果発動条件
+	enum class RangeEffectTriggerType {
+		kNone,		// 効果発動なし
+		kButton,	// ボタン入力で発動
+		kTimer,		// 時間経過で発動
+		kHit,		// ヒットで発動
+	};
+
+	// 投擲物の回収条件
+	enum class RangeRecallTriggerType {
+		kNone,		// 自動回収なし
+		kButton,	// ボタン入力で回収
+		kTimer,		// 時間経過で回収
+		kNearOwner,	// 投擲物に近づいたら回収
 	};
 
 	// 保存項目用遠距離攻撃データ
@@ -57,6 +82,15 @@ namespace Combo {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
 		float lockOnStartRadius = 30.0f;						// ターゲットを狙い始める半径
+		Vector3 offsetTarget = { 0.0f, 0.0f, 20.0f };			// 自分基準で狙うオフセット位置
+		RangeThrowMoveType throwMoveType = RangeThrowMoveType::kStraight;	// 投擲物の移動タイプ
+		RangeEffectTriggerType effectTriggerType = RangeEffectTriggerType::kNone;	// 効果発動条件
+		RangeRecallTriggerType recallTriggerType = RangeRecallTriggerType::kTimer;	// 回収条件
+		float throwLerpTime = 0.25f;					// ターゲット位置へ補間移動する時間
+		float effectTriggerTime = 0.35f;				// 時間経過で効果発動するまでの時間
+		float recallTriggerTime = 0.8f;				// 時間経過で回収するまでの時間
+		float recallNearRadius = 2.0f;				// 近づいたら回収する半径
+		float throwStayTime = 0.0f;					// 投げてから回収までその場に留まる時間
 		float rangeWindowStart = 0.1f;
 		float rangeWindowEnd = 0.5f;
 		float speed = 1.0f;

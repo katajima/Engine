@@ -100,12 +100,12 @@
         "コライダー(マスク)": {
             "enumType": "CollisionMask",
             "type": "enum",
-            "value": 6
+            "value": 2
         },
         "コライダー(レイヤー)": {
             "enumType": "CollisionLayer",
             "type": "enum",
-            "value": 6
+            "value": 3
         },
         "コンボキャンセル受付終了時間": {
             "type": "float",
@@ -219,7 +219,7 @@
         },
         "サブ武器スピン": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "サブ武器回転オフセット": {
             "type": "Vector3",
@@ -231,7 +231,7 @@
         },
         "サブ武器回転速度": {
             "type": "float",
-            "value": 47.5
+            "value": 0.0
         },
         "サブ武器待機位置": {
             "type": "Vector3",
@@ -251,7 +251,7 @@
         },
         "サブ武器投擲時間": {
             "type": "float",
-            "value": 1.1200000047683716
+            "value": 0.5
         },
         "サブ武器投擲速度": {
             "type": "float",
@@ -292,7 +292,7 @@
         },
         "ノックバック力": {
             "type": "float",
-            "value": 115.12000274658203
+            "value": 10.0
         },
         "ノックバック持続時間": {
             "type": "float",
@@ -414,11 +414,11 @@
         },
         "ヒットボックス生存時間": {
             "type": "float",
-            "value": 0.7333333492279053
+            "value": 1.0
         },
         "ヒットボックス発生時間": {
             "type": "float",
-            "value": 0.2666666805744171
+            "value": 0.0
         },
         "ヒットボックス発生条件タイプ": {
             "enumType": "HitBoxSpawnType",
@@ -432,7 +432,7 @@
         "ヒットリアクションタイプ": {
             "enumType": "HitReactionType",
             "type": "enum",
-            "value": 0
+            "value": 4
         },
         "ヒット優先度": {
             "type": "int32_t",
@@ -478,6 +478,41 @@
         "打ち上げ最大高度": {
             "type": "float",
             "value": 10.0
+        },
+        "投擲停滞時間": {
+            "type": "float",
+            "value": 1.0
+        },
+        "投擲効果発動時間": {
+            "type": "float",
+            "value": 0.3499999940395355
+        },
+        "投擲効果発動条件": {
+            "enumType": "RangeEffectTriggerType",
+            "type": "enum",
+            "value": 3
+        },
+        "投擲回収時間": {
+            "type": "float",
+            "value": 0.800000011920929
+        },
+        "投擲回収条件": {
+            "enumType": "RangeRecallTriggerType",
+            "type": "enum",
+            "value": 2
+        },
+        "投擲回収近接半径": {
+            "type": "float",
+            "value": 2.0
+        },
+        "投擲移動タイプ": {
+            "enumType": "RangeThrowMoveType",
+            "type": "enum",
+            "value": 0
+        },
+        "投擲補間時間": {
+            "type": "float",
+            "value": 0.25
         },
         "接続先(スキル)": {
             "type": "string",
@@ -580,6 +615,14 @@
         "親オブジェクト名前": {
             "type": "string",
             "value": "SubWeapon"
+        },
+        "遠距離オフセットターゲット": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                -10.0
+            ]
         },
         "遠距離タイプ": {
             "enumType": "RangeType",

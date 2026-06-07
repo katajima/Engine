@@ -1,13 +1,13 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include "DirectXGame/application/base/Attack/Combo/Range/ComboBullet.h"
+#include "DirectXGame/application/base/Attack/Combo/Range/ComboThrow.h"
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 
 // 前方宣言
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
-// 弾出現
-class BulletSpawn;
 
 namespace Combo {
 
@@ -23,21 +23,22 @@ namespace Combo {
 		void Update(const Character::CharacterContext& ctx, float timer);
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
+		// 現在のコンボ攻撃がヒットしたことを通知する
+		void NotifyHit();
 		// データ構造体取得
 		Data& GetData() { return data_; }
 	private:
 		// 遠距離攻撃の狙い方向を取得する
 		Vector3 ResolveAimDirection(const Character::CharacterContext& ctx) const;
+		// 遠距離攻撃の狙い位置を取得する
+		Vector3 ResolveAimTarget(const Character::CharacterContext& ctx) const;
 
 		// コンボ使用者
 		Character::BaseCharacter* owner_ = nullptr;
-		// 弾の出現処理クラス
-		BulletSpawn* bulletSpawn = nullptr;	
 		// データ
 		Data data_;
-		// 発射した弾の数
-		int bulletCount = 0;
-		float nextShotTime = 0.0f;
+		ComboBullet bullet_;	// 弾を使用する遠距離処理
+		ComboThrow throw_;		// 投擲物を使用する遠距離処理
 	};
 
 }

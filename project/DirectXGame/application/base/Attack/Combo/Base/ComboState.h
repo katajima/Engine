@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
@@ -80,7 +80,11 @@ namespace Combo {
 
         // 次のステート
         void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
-        void NotifyHit() { hasHit_ = true; }
+        void NotifyHit() {
+            // ヒット発生をキャンセル条件と遠距離投擲物の制御へ伝える
+            hasHit_ = true;
+            comboData.GetComboRange().NotifyHit();
+        }
         bool HasHit() const { return hasHit_; }
         std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);
 
