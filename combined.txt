@@ -2441,6 +2441,12 @@ namespace Combo {
 		kOffsetTarget,	// 自分基準のオフセット位置
 	};
 
+	// オフセットターゲットの座標タイプ
+	enum class RangeOffsetTargetType {
+		kWorldOffset,		// 所有者位置にワールド軸のオフセットを足す
+		kOwnerLocalOffset,	// 所有者の向き基準のローカルオフセットを足す
+	};
+
 	// 投擲物の移動タイプ
 	enum class RangeThrowMoveType {
 		kStraight,			// 直進
@@ -2469,8 +2475,9 @@ namespace Combo {
 	struct GlobalRange {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
+		RangeOffsetTargetType offsetTargetType = RangeOffsetTargetType::kWorldOffset;	// オフセットターゲットの座標タイプ
 		float lockOnStartRadius = 30.0f;						// ターゲットを狙い始める半径
-		Vector3 offsetTarget = { 0.0f, 0.0f, 20.0f };			// 自分基準で狙うオフセット位置
+		Vector3 offsetTarget = { 0.0f, 0.0f, 20.0f };			// 狙うオフセット位置
 		RangeThrowMoveType throwMoveType = RangeThrowMoveType::kStraight;	// 投擲物の移動タイプ
 		RangeEffectTriggerType effectTriggerType = RangeEffectTriggerType::kNone;	// 効果発動条件
 		RangeRecallTriggerType recallTriggerType = RangeRecallTriggerType::kTimer;	// 回収条件
@@ -3173,6 +3180,10 @@ namespace Combo {
 			{ "カメラ", static_cast<int64_t>(RangeLockOnType::kCamera) },
 			{ "オフセットターゲット", static_cast<int64_t>(RangeLockOnType::kOffsetTarget) },
 			});
+		EnumRegistry::Instance().Register("RangeOffsetTargetType", {
+			{ "ワールドオフセット", static_cast<int64_t>(RangeOffsetTargetType::kWorldOffset) },
+			{ "所有者ローカル", static_cast<int64_t>(RangeOffsetTargetType::kOwnerLocalOffset) },
+			});
 		EnumRegistry::Instance().Register("RangeThrowMoveType", {
 			{ "直進", static_cast<int64_t>(RangeThrowMoveType::kStraight) },
 			{ "ヒット時停止", static_cast<int64_t>(RangeThrowMoveType::kStopOnHit) },
@@ -3519,6 +3530,7 @@ namespace Combo {
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->AddEnumItem(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->AddEnumItem(name, "遠距離オフセットタイプ", data.range.offsetTargetType, "RangeOffsetTargetType");
 			globalVariables->AddEnumItem(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
 			globalVariables->AddEnumItem(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
 			globalVariables->AddEnumItem(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
@@ -3716,6 +3728,7 @@ namespace Combo {
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
+			data.range.offsetTargetType = globalVariables->GetEnumValue<Combo::RangeOffsetTargetType>(name, "遠距離オフセットタイプ");
 			data.range.throwMoveType = globalVariables->GetEnumValue<Combo::RangeThrowMoveType>(name, "投擲移動タイプ");
 			data.range.effectTriggerType = globalVariables->GetEnumValue<Combo::RangeEffectTriggerType>(name, "投擲効果発動条件");
 			data.range.recallTriggerType = globalVariables->GetEnumValue<Combo::RangeRecallTriggerType>(name, "投擲回収条件");
@@ -3919,6 +3932,7 @@ namespace Combo {
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->SetEnumValue(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->SetEnumValue(name, "遠距離オフセットタイプ", data.range.offsetTargetType, "RangeOffsetTargetType");
 			globalVariables->SetEnumValue(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
 			globalVariables->SetEnumValue(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
 			globalVariables->SetEnumValue(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
@@ -5394,6 +5408,7 @@ namespace Combo {
 		};
 		Engine::ImGuiManager::Select("遠距離タイプ", RangeTypeLabels, data_.range.rangeType);
 
+		ImGui::SeparatorText("共通の狙い設定");
 		static const char* RangeLockOnTypeLabels[] = {
 			"前方",
 			"ターゲット",
@@ -5405,55 +5420,66 @@ namespace Combo {
 			ImGui::DragFloat("狙い始める半径", &data_.range.lockOnStartRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
 		}
 		if (data_.range.lockOnType == RangeLockOnType::kOffsetTarget) {
+			static const char* RangeOffsetTargetTypeLabels[] = {
+				"ワールドオフセット",
+				"所有者ローカル",
+			};
+			Engine::ImGuiManager::Select("オフセットタイプ", RangeOffsetTargetTypeLabels, data_.range.offsetTargetType);
 			ImGui::DragFloat3("オフセットターゲット", &data_.range.offsetTarget.x, 0.1f);
 		}
 
-		static const char* RangeThrowMoveTypeLabels[] = {
-			"直進",
-			"ヒット時停止",
-			"ターゲット瞬間移動",
-			"ターゲット補間移動",
-		};
-		Engine::ImGuiManager::Select("投擲移動タイプ", RangeThrowMoveTypeLabels, data_.range.throwMoveType);
-		if (data_.range.throwMoveType == RangeThrowMoveType::kLerpToTarget) {
-			ImGui::DragFloat("投擲補間時間", &data_.range.throwLerpTime, 0.01f, 0.001f, 60.0f, "%.3f");
-		}
+		ImGui::SeparatorText("共通の使用タイミング");
+		ImGui::DragFloat("開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("使用間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+		ImGui::DragInt("使用数", &data_.range.count, 1.0f, 1, 100);
 
-		static const char* RangeEffectTriggerTypeLabels[] = {
-			"なし",
-			"ボタン",
-			"時間経過",
-			"ヒット",
-		};
-		Engine::ImGuiManager::Select("効果発動条件", RangeEffectTriggerTypeLabels, data_.range.effectTriggerType);
-		if (data_.range.effectTriggerType == RangeEffectTriggerType::kTimer) {
-			ImGui::DragFloat("効果発動時間", &data_.range.effectTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+		if (data_.range.rangeType == RangeType::kBullet) {
+			ImGui::SeparatorText("弾設定");
+			ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
+			ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
 		}
-
-		static const char* RangeRecallTriggerTypeLabels[] = {
-			"なし",
-			"ボタン",
-			"時間経過",
-			"近づく",
-		};
-		Engine::ImGuiManager::Select("回収条件", RangeRecallTriggerTypeLabels, data_.range.recallTriggerType);
-		if (data_.range.recallTriggerType == RangeRecallTriggerType::kTimer) {
-			ImGui::DragFloat("回収時間", &data_.range.recallTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
-		}
-		if (data_.range.recallTriggerType == RangeRecallTriggerType::kNearOwner) {
-			ImGui::DragFloat("回収近接半径", &data_.range.recallNearRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
-		}
-		ImGui::DragFloat("回収前の停滞時間", &data_.range.throwStayTime, 0.01f, 0.0f, 60.0f, "%.2f");
-
-		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
-		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
-		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
-		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
-		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
-		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
 
 		if (data_.range.rangeType == RangeType::kSubWeapon) {
-			ImGui::SeparatorText("サブウェポン設定");
+			ImGui::SeparatorText("投擲物設定");
+			static const char* RangeThrowMoveTypeLabels[] = {
+				"直進",
+				"ヒット時停止",
+				"ターゲット瞬間移動",
+				"ターゲット補間移動",
+			};
+			Engine::ImGuiManager::Select("投擲移動タイプ", RangeThrowMoveTypeLabels, data_.range.throwMoveType);
+			if (data_.range.throwMoveType == RangeThrowMoveType::kLerpToTarget) {
+				ImGui::DragFloat("投擲補間時間", &data_.range.throwLerpTime, 0.01f, 0.001f, 60.0f, "%.3f");
+			}
+
+			static const char* RangeEffectTriggerTypeLabels[] = {
+				"なし",
+				"ボタン",
+				"時間経過",
+				"ヒット",
+			};
+			Engine::ImGuiManager::Select("効果発動条件", RangeEffectTriggerTypeLabels, data_.range.effectTriggerType);
+			if (data_.range.effectTriggerType == RangeEffectTriggerType::kTimer) {
+				ImGui::DragFloat("効果発動時間", &data_.range.effectTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			}
+
+			static const char* RangeRecallTriggerTypeLabels[] = {
+				"なし",
+				"ボタン",
+				"時間経過",
+				"近づく",
+			};
+			Engine::ImGuiManager::Select("回収条件", RangeRecallTriggerTypeLabels, data_.range.recallTriggerType);
+			if (data_.range.recallTriggerType == RangeRecallTriggerType::kTimer) {
+				ImGui::DragFloat("回収時間", &data_.range.recallTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			}
+			if (data_.range.recallTriggerType == RangeRecallTriggerType::kNearOwner) {
+				ImGui::DragFloat("回収近接半径", &data_.range.recallNearRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
+			}
+			ImGui::DragFloat("回収前の停滞時間", &data_.range.throwStayTime, 0.01f, 0.0f, 60.0f, "%.2f");
+
+			ImGui::SeparatorText("サブウェポン表示設定");
 			ImGui::DragFloat3("待機位置", &data_.range.subWeaponIdleOffset.x, 0.01f);
 			ImGui::DragFloat3("投擲開始オフセット", &data_.range.subWeaponStartOffset.x, 0.01f);
 			ImGui::DragFloat("投擲速度", &data_.range.subWeaponThrowSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
@@ -7561,10 +7587,33 @@ Vector3 Combo::ComboRange::ResolveAimTarget(const Character::CharacterContext& c
 
 	// オフセットターゲット指定なら自分基準の保存オフセット位置を狙う
 	if (data_.lockOnType == RangeLockOnType::kOffsetTarget) {
-		target = ctx.position + data_.offsetTarget;
+		target = ResolveOffsetAimTarget(ctx);
 	}
 
 	return target;
+}
+
+Vector3 Combo::ComboRange::ResolveOffsetAimTarget(const Character::CharacterContext& ctx) const {
+	// 従来どおり、所有者位置にワールド軸のオフセットを足す
+	if (data_.offsetTargetType == RangeOffsetTargetType::kWorldOffset) {
+		return ctx.position + data_.offsetTarget;
+	}
+
+	// 所有者の前方を基準に、X=右、Y=上、Z=前のローカルオフセットを作る
+	Vector3 forward = ctx.direction;
+	forward.y = 0.0f;
+	if (forward.LengthSq() <= 0.0001f) {
+		forward = { 0.0f, 0.0f, 1.0f };
+	}
+	forward = forward.Normalize();
+
+	const Vector3 up = { 0.0f, 1.0f, 0.0f };		// ローカルYの基準
+	const Vector3 right = Cross(up, forward);	// ローカルXの基準
+	const Vector3 localOffset =
+		right * data_.offsetTarget.x +
+		up * data_.offsetTarget.y +
+		forward * data_.offsetTarget.z;			// 所有者向き基準のオフセット
+	return ctx.position + localOffset;
 }
 
 void Combo::ComboRange::NotifyHit() {
@@ -7617,6 +7666,8 @@ namespace Combo {
 		Vector3 ResolveAimDirection(const Character::CharacterContext& ctx) const;
 		// 遠距離攻撃の狙い位置を取得する
 		Vector3 ResolveAimTarget(const Character::CharacterContext& ctx) const;
+		// オフセットターゲットの狙い位置を取得する
+		Vector3 ResolveOffsetAimTarget(const Character::CharacterContext& ctx) const;
 
 		// コンボ使用者
 		Character::BaseCharacter* owner_ = nullptr;
@@ -33394,7 +33445,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.cpp
 ============================================================
-#include "PlayerSubWeapon.h"
+﻿#include "PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <algorithm>
@@ -33409,7 +33460,7 @@ void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "Sword.obj", false, false, this);
+	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "AnimatedCube.gltf", false, false, this);
 	objectComponent_->SetSRT({ 0.55f,0.55f,0.55f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
 
 	// 描画する
