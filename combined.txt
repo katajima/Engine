@@ -50,8 +50,12 @@
     └── └── └── └── └── └── ├── ComboMove.cpp
     └── └── └── └── └── └── └── ComboMove.h
     └── └── └── └── └── ├── Range/
+    └── └── └── └── └── └── ├── ComboBullet.cpp
+    └── └── └── └── └── └── ├── ComboBullet.h
     └── └── └── └── └── └── ├── ComboRange.cpp
-    └── └── └── └── └── └── └── ComboRange.h
+    └── └── └── └── └── └── ├── ComboRange.h
+    └── └── └── └── └── └── ├── ComboThrow.cpp
+    └── └── └── └── └── └── └── ComboThrow.h
     └── └── └── └── └── └── Receiver/
     └── └── └── └── └──     ├── ComboCancelReceiver.cpp
     └── └── └── └── └──     ├── ComboCancelReceiver.h
@@ -2434,6 +2438,31 @@ namespace Combo {
 		kNone,		// ロックオンなし(向いている方向)
 		kTarget,	// ターゲットロックオン
 		kCamera,	// カメラロックオン
+		kOffsetTarget,	// 自分基準のオフセット位置
+	};
+
+	// 投擲物の移動タイプ
+	enum class RangeThrowMoveType {
+		kStraight,			// 直進
+		kStopOnHit,			// ヒット時にその場で停止
+		kTeleportToTarget,	// ターゲット位置へ瞬間移動
+		kLerpToTarget,		// ターゲット位置へ補間移動
+	};
+
+	// 投擲物の効果発動条件
+	enum class RangeEffectTriggerType {
+		kNone,		// 効果発動なし
+		kButton,	// ボタン入力で発動
+		kTimer,		// 時間経過で発動
+		kHit,		// ヒットで発動
+	};
+
+	// 投擲物の回収条件
+	enum class RangeRecallTriggerType {
+		kNone,		// 自動回収なし
+		kButton,	// ボタン入力で回収
+		kTimer,		// 時間経過で回収
+		kNearOwner,	// 投擲物に近づいたら回収
 	};
 
 	// 保存項目用遠距離攻撃データ
@@ -2441,6 +2470,15 @@ namespace Combo {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
 		float lockOnStartRadius = 30.0f;						// ターゲットを狙い始める半径
+		Vector3 offsetTarget = { 0.0f, 0.0f, 20.0f };			// 自分基準で狙うオフセット位置
+		RangeThrowMoveType throwMoveType = RangeThrowMoveType::kStraight;	// 投擲物の移動タイプ
+		RangeEffectTriggerType effectTriggerType = RangeEffectTriggerType::kNone;	// 効果発動条件
+		RangeRecallTriggerType recallTriggerType = RangeRecallTriggerType::kTimer;	// 回収条件
+		float throwLerpTime = 0.25f;					// ターゲット位置へ補間移動する時間
+		float effectTriggerTime = 0.35f;				// 時間経過で効果発動するまでの時間
+		float recallTriggerTime = 0.8f;				// 時間経過で回収するまでの時間
+		float recallNearRadius = 2.0f;				// 近づいたら回収する半径
+		float throwStayTime = 0.0f;					// 投げてから回収までその場に留まる時間
 		float rangeWindowStart = 0.1f;
 		float rangeWindowEnd = 0.5f;
 		float speed = 1.0f;
@@ -2889,7 +2927,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
@@ -2971,7 +3009,11 @@ namespace Combo {
 
         // 次のステート
         void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
-        void NotifyHit() { hasHit_ = true; }
+        void NotifyHit() {
+            // ヒット発生をキャンセル条件と遠距離投擲物の制御へ伝える
+            hasHit_ = true;
+            comboData.GetComboRange().NotifyHit();
+        }
         bool HasHit() const { return hasHit_; }
         std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);
 
@@ -3129,6 +3171,25 @@ namespace Combo {
 			{ "前方", static_cast<int64_t>(RangeLockOnType::kNone) },
 			{ "ターゲット", static_cast<int64_t>(RangeLockOnType::kTarget) },
 			{ "カメラ", static_cast<int64_t>(RangeLockOnType::kCamera) },
+			{ "オフセットターゲット", static_cast<int64_t>(RangeLockOnType::kOffsetTarget) },
+			});
+		EnumRegistry::Instance().Register("RangeThrowMoveType", {
+			{ "直進", static_cast<int64_t>(RangeThrowMoveType::kStraight) },
+			{ "ヒット時停止", static_cast<int64_t>(RangeThrowMoveType::kStopOnHit) },
+			{ "ターゲット瞬間移動", static_cast<int64_t>(RangeThrowMoveType::kTeleportToTarget) },
+			{ "ターゲット補間移動", static_cast<int64_t>(RangeThrowMoveType::kLerpToTarget) },
+			});
+		EnumRegistry::Instance().Register("RangeEffectTriggerType", {
+			{ "なし", static_cast<int64_t>(RangeEffectTriggerType::kNone) },
+			{ "ボタン", static_cast<int64_t>(RangeEffectTriggerType::kButton) },
+			{ "時間経過", static_cast<int64_t>(RangeEffectTriggerType::kTimer) },
+			{ "ヒット", static_cast<int64_t>(RangeEffectTriggerType::kHit) },
+			});
+		EnumRegistry::Instance().Register("RangeRecallTriggerType", {
+			{ "なし", static_cast<int64_t>(RangeRecallTriggerType::kNone) },
+			{ "ボタン", static_cast<int64_t>(RangeRecallTriggerType::kButton) },
+			{ "時間経過", static_cast<int64_t>(RangeRecallTriggerType::kTimer) },
+			{ "近づく", static_cast<int64_t>(RangeRecallTriggerType::kNearOwner) },
 			});
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
@@ -3458,7 +3519,16 @@ namespace Combo {
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->AddEnumItem(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->AddEnumItem(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
+			globalVariables->AddEnumItem(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
+			globalVariables->AddEnumItem(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
 			globalVariables->AddItem(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
+			globalVariables->AddItem(name, "遠距離オフセットターゲット", data.range.offsetTarget);
+			globalVariables->AddItem(name, "投擲補間時間", data.range.throwLerpTime);
+			globalVariables->AddItem(name, "投擲効果発動時間", data.range.effectTriggerTime);
+			globalVariables->AddItem(name, "投擲回収時間", data.range.recallTriggerTime);
+			globalVariables->AddItem(name, "投擲回収近接半径", data.range.recallNearRadius);
+			globalVariables->AddItem(name, "投擲停滞時間", data.range.throwStayTime);
 			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
@@ -3646,7 +3716,16 @@ namespace Combo {
 			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
+			data.range.throwMoveType = globalVariables->GetEnumValue<Combo::RangeThrowMoveType>(name, "投擲移動タイプ");
+			data.range.effectTriggerType = globalVariables->GetEnumValue<Combo::RangeEffectTriggerType>(name, "投擲効果発動条件");
+			data.range.recallTriggerType = globalVariables->GetEnumValue<Combo::RangeRecallTriggerType>(name, "投擲回収条件");
 			data.range.lockOnStartRadius = globalVariables->GetValue<float>(name, "遠距離ロックオン開始半径");
+			data.range.offsetTarget = globalVariables->GetValue<Vector3>(name, "遠距離オフセットターゲット");
+			data.range.throwLerpTime = globalVariables->GetValue<float>(name, "投擲補間時間");
+			data.range.effectTriggerTime = globalVariables->GetValue<float>(name, "投擲効果発動時間");
+			data.range.recallTriggerTime = globalVariables->GetValue<float>(name, "投擲回収時間");
+			data.range.recallNearRadius = globalVariables->GetValue<float>(name, "投擲回収近接半径");
+			data.range.throwStayTime = globalVariables->GetValue<float>(name, "投擲停滞時間");
 			data.range.rangeWindowStart = globalVariables->GetValue<float>(name, "遠距離発射開始時間");
 			data.range.rangeWindowEnd = globalVariables->GetValue<float>(name, "遠距離発射終了時間");
 			data.range.speed = globalVariables->GetValue<float>(name, "遠距離弾速");
@@ -3840,7 +3919,16 @@ namespace Combo {
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
 			globalVariables->SetEnumValue(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			globalVariables->SetEnumValue(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
+			globalVariables->SetEnumValue(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
+			globalVariables->SetEnumValue(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
 			globalVariables->SetValue(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
+			globalVariables->SetValue(name, "遠距離オフセットターゲット", data.range.offsetTarget);
+			globalVariables->SetValue(name, "投擲補間時間", data.range.throwLerpTime);
+			globalVariables->SetValue(name, "投擲効果発動時間", data.range.effectTriggerTime);
+			globalVariables->SetValue(name, "投擲回収時間", data.range.recallTriggerTime);
+			globalVariables->SetValue(name, "投擲回収近接半径", data.range.recallNearRadius);
+			globalVariables->SetValue(name, "投擲停滞時間", data.range.throwStayTime);
 			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
 			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
 			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
@@ -5310,11 +5398,52 @@ namespace Combo {
 			"前方",
 			"ターゲット",
 			"カメラ",
+			"オフセットターゲット",
 		};
 		Engine::ImGuiManager::Select("狙いタイプ", RangeLockOnTypeLabels, data_.range.lockOnType);
 		if (data_.range.lockOnType == RangeLockOnType::kTarget) {
 			ImGui::DragFloat("狙い始める半径", &data_.range.lockOnStartRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
 		}
+		if (data_.range.lockOnType == RangeLockOnType::kOffsetTarget) {
+			ImGui::DragFloat3("オフセットターゲット", &data_.range.offsetTarget.x, 0.1f);
+		}
+
+		static const char* RangeThrowMoveTypeLabels[] = {
+			"直進",
+			"ヒット時停止",
+			"ターゲット瞬間移動",
+			"ターゲット補間移動",
+		};
+		Engine::ImGuiManager::Select("投擲移動タイプ", RangeThrowMoveTypeLabels, data_.range.throwMoveType);
+		if (data_.range.throwMoveType == RangeThrowMoveType::kLerpToTarget) {
+			ImGui::DragFloat("投擲補間時間", &data_.range.throwLerpTime, 0.01f, 0.001f, 60.0f, "%.3f");
+		}
+
+		static const char* RangeEffectTriggerTypeLabels[] = {
+			"なし",
+			"ボタン",
+			"時間経過",
+			"ヒット",
+		};
+		Engine::ImGuiManager::Select("効果発動条件", RangeEffectTriggerTypeLabels, data_.range.effectTriggerType);
+		if (data_.range.effectTriggerType == RangeEffectTriggerType::kTimer) {
+			ImGui::DragFloat("効果発動時間", &data_.range.effectTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+		}
+
+		static const char* RangeRecallTriggerTypeLabels[] = {
+			"なし",
+			"ボタン",
+			"時間経過",
+			"近づく",
+		};
+		Engine::ImGuiManager::Select("回収条件", RangeRecallTriggerTypeLabels, data_.range.recallTriggerType);
+		if (data_.range.recallTriggerType == RangeRecallTriggerType::kTimer) {
+			ImGui::DragFloat("回収時間", &data_.range.recallTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+		}
+		if (data_.range.recallTriggerType == RangeRecallTriggerType::kNearOwner) {
+			ImGui::DragFloat("回収近接半径", &data_.range.recallNearRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
+		}
+		ImGui::DragFloat("回収前の停滞時間", &data_.range.throwStayTime, 0.01f, 0.0f, 60.0f, "%.2f");
 
 		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
 		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
@@ -5350,6 +5479,18 @@ namespace Combo {
 		}
 		if (data_.range.subWeaponReturnTime < 0.001f) {
 			data_.range.subWeaponReturnTime = 0.001f;
+		}
+		if (data_.range.throwLerpTime < 0.001f) {
+			data_.range.throwLerpTime = 0.001f;
+		}
+		if (data_.range.lockOnStartRadius < 0.0f) {
+			data_.range.lockOnStartRadius = 0.0f;
+		}
+		if (data_.range.recallNearRadius < 0.0f) {
+			data_.range.recallNearRadius = 0.0f;
+		}
+		if (data_.range.throwStayTime < 0.0f) {
+			data_.range.throwStayTime = 0.0f;
 		}
 	}
 
@@ -7261,111 +7402,135 @@ namespace Combo {
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboBullet.cpp
+============================================================
+﻿#include "ComboBullet.h"
+#include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+#include <algorithm>
+
+namespace Combo {
+
+	void ComboBullet::Enter(Character::BaseCharacter* owner, const GlobalRange& data) {
+		owner_ = owner;									// コンボ使用者
+		bulletSpawn_ = owner_ ? owner_->GetBulletSpawn() : nullptr;	// 弾生成クラス
+		bulletCount_ = 0;								// 発射数リセット
+		nextShotTime_ = data.rangeWindowStart;			// 次の発射時間
+	}
+
+	void ComboBullet::Update(const Character::CharacterContext& ctx, float timer, const GlobalRange& data, const Vector3& aimTarget) {
+		// 弾生成クラスが無い、または発射受付時間外なら何もしない
+		if (!bulletSpawn_ || bulletCount_ >= data.count || timer < data.rangeWindowStart || timer > data.rangeWindowEnd) {
+			return;
+		}
+
+		// 発射間隔に従って同一フレーム内の連射も処理する
+		const float interval = (std::max)(data.interval, 0.001f);
+		while (bulletCount_ < data.count && timer >= nextShotTime_ && nextShotTime_ <= data.rangeWindowEnd) {
+			BulletInfo info{};					// 弾生成情報
+			info.position = ctx.position;		// 発射位置
+			info.targetPos = aimTarget;			// 狙う位置
+			info.speed = data.speed;				// 弾速
+			info.damage = data.damage;			// ダメージ
+			info.type = ProjectileType::NORMAL;	// 通常弾
+			bulletSpawn_->GenerateBullet(BulletType::kPlayerBullet, info);
+
+			bulletCount_++;				// 発射済み数
+			nextShotTime_ += interval;	// 次の発射時間
+		}
+	}
+
+	void ComboBullet::Exit() {
+		owner_ = nullptr;			// コンボ使用者を解除
+		bulletSpawn_ = nullptr;		// 弾生成クラスを解除
+		bulletCount_ = 0;			// 発射数リセット
+		nextShotTime_ = 0.0f;		// 次発射時間リセット
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboBullet.h
+============================================================
+﻿#pragma once
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+
+namespace Character {
+	class BaseCharacter;
+	struct CharacterContext;
+}
+
+class BulletSpawn;
+
+namespace Combo {
+
+	/// <summary>
+	/// コンボ遠距離の弾生成処理
+	/// </summary>
+	class ComboBullet {
+	public:
+		/// <summary>
+		/// 弾生成処理の開始
+		/// </summary>
+		void Enter(Character::BaseCharacter* owner, const GlobalRange& data);
+
+		/// <summary>
+		/// 弾生成処理の更新
+		/// </summary>
+		void Update(const Character::CharacterContext& ctx, float timer, const GlobalRange& data, const Vector3& aimTarget);
+
+		/// <summary>
+		/// 弾生成処理の終了
+		/// </summary>
+		void Exit();
+
+	private:
+		Character::BaseCharacter* owner_ = nullptr;	// コンボ使用者
+		BulletSpawn* bulletSpawn_ = nullptr;			// 弾生成クラス
+		int bulletCount_ = 0;						// 発射済みの弾数
+		float nextShotTime_ = 0.0f;					// 次の発射時間
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.cpp
 ============================================================
 #include "ComboRange.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
-#include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
-#include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include <algorithm>
 
 // 開始
 void Combo::ComboRange::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
-	owner_ = owner;
-	bulletSpawn = owner->GetBulletSpawn();
-	bulletCount = 0;
-	nextShotTime = data_.rangeWindowStart;
+	owner_ = owner;				// コンボ使用者
+	bullet_.Enter(owner, data_);	// 弾処理開始
+	throw_.Enter(owner, data_);	// 投擲処理開始
 }
+
 // 更新
 void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float timer) {
-	if (data_.count <= bulletCount ||
-		timer < data_.rangeWindowStart || timer > data_.rangeWindowEnd) {
-		return;
-	}
+	const Vector3 aimDirection = ResolveAimDirection(ctx);	// 狙い方向
+	const Vector3 aimTarget = ResolveAimTarget(ctx);			// 狙い位置
 
-	const float interval = (std::max)(data_.interval, 0.001f);
-	while (bulletCount < data_.count &&
-		timer >= nextShotTime && nextShotTime <= data_.rangeWindowEnd) {
-		bool didUseRange = false;	// 今回の発射タイミングで攻撃物を使用できたか
-		// RangeType別に使用する攻撃物を切り替える
-		switch (data_.rangeType) {
-		case RangeType::kBullet:
-		{
-			if (!bulletSpawn) {
-				break;
-			}
-			// 弾タイプは既存の弾生成処理を使用する
-			BulletInfo info{};
-			info.position = ctx.position;
-			info.targetPos = ctx.position + ResolveAimDirection(ctx);
-			info.speed = data_.speed;
-			info.damage = data_.damage;
-			info.type = ProjectileType::NORMAL;
-			bulletSpawn->GenerateBullet(BulletType::kPlayerBullet, info);
-			didUseRange = true;
-			break;
-		}
-		case RangeType::kSubWeapon:
-		{
-			// サブ武器タイプはプレイヤーが持つPlayerSubWeaponを投擲する
-			auto* player = dynamic_cast<Character::BasePlayer*>(owner_);
-			if (!player) {
-				break;
-			}
-			auto* subWeapon = dynamic_cast<PlayerSubWeapon*>(player->GetSubWeapon());
-			if (!subWeapon || subWeapon->IsThrowing()) {
-				break;
-			}
-
-			// コンボ保存項目の値をサブ武器の投擲データへ反映する
-			PlayerSubWeaponThrowData throwData{};
-			throwData.idleOffset = data_.subWeaponIdleOffset;
-			throwData.throwSpeed = data_.subWeaponThrowSpeed;
-			throwData.throwLifeTime = data_.subWeaponThrowLifeTime;
-			throwData.returnTime = data_.subWeaponReturnTime;
-			throwData.spinSpeed = data_.subWeaponSpinSpeed;
-			throwData.alignToDirection = data_.subWeaponAlignToDirection;
-			throwData.useSpin = data_.subWeaponUseSpin;
-			throwData.rotateOffset = data_.subWeaponRotateOffset;
-			subWeapon->SetThrowData(throwData);
-
-			// コンボの狙い方設定に従って投擲方向を決める
-			Vector3 throwDirection = ResolveAimDirection(ctx);
-			subWeapon->Throw(ctx.position + data_.subWeaponStartOffset, throwDirection);
-			didUseRange = true;
-			break;
-		}
-		case RangeType::kWeapon:
-		default:
-			// 通常武器投擲は今後の拡張枠として保存だけ行う
-			break;
-		}
-
-		// 使用できた時だけ発射数を進める
-		if (didUseRange) {
-			bulletCount++;
-		}
-		nextShotTime += interval;
+	// 遠距離タイプ別の処理を各クラスへ委譲する
+	switch (data_.rangeType) {
+	case RangeType::kBullet:
+		bullet_.Update(ctx, timer, data_, aimTarget);
+		break;
+	case RangeType::kSubWeapon:
+		throw_.Update(ctx, timer, data_, aimDirection, aimTarget);
+		break;
+	case RangeType::kWeapon:
+	default:
+		// 通常武器投擲は今後の拡張枠として保存だけ行う
+		break;
 	}
 }
 
 Vector3 Combo::ComboRange::ResolveAimDirection(const Character::CharacterContext& ctx) const {
-	// 基本方向はプレイヤーの向きにする
-	Vector3 direction = ctx.direction;
-
-	// カメラ方向指定ならカメラの前方向を使う
-	if (data_.lockOnType == RangeLockOnType::kCamera) {
-		direction = ctx.cameraDirection;
-	}
-
-	// ターゲット指定なら半径内にいる時だけターゲット方向へ補正する
-	if (data_.lockOnType == RangeLockOnType::kTarget && ctx.target) {
-		const float radius = (std::max)(data_.lockOnStartRadius, 0.0f);
-		if (ctx.position.DistanceXZ(ctx.target->GetWorldPosition()) <= radius) {
-			direction = ctx.target->GetWorldPosition() - ctx.position;
-		}
-	}
+	// 狙い位置から方向を作る
+	Vector3 direction = ResolveAimTarget(ctx) - ctx.position;
 
 	// 水平方向の投擲に寄せ、ゼロ方向なら前方へフォールバックする
 	direction.y = 0.0f;
@@ -7374,12 +7539,44 @@ Vector3 Combo::ComboRange::ResolveAimDirection(const Character::CharacterContext
 	}
 	return direction.Normalize();
 }
+
+Vector3 Combo::ComboRange::ResolveAimTarget(const Character::CharacterContext& ctx) const {
+	// 基本はプレイヤー前方を狙う
+	Vector3 direction = ctx.direction;
+	Vector3 target = ctx.position + direction * data_.speed;
+
+	// カメラ方向指定ならカメラの前方を狙う
+	if (data_.lockOnType == RangeLockOnType::kCamera) {
+		direction = ctx.cameraDirection;
+		target = ctx.position + direction * data_.speed;
+	}
+
+	// ターゲット指定なら半径内のターゲット位置を狙う
+	if (data_.lockOnType == RangeLockOnType::kTarget && ctx.target) {
+		const float radius = (std::max)(data_.lockOnStartRadius, 0.0f);
+		if (ctx.position.DistanceXZ(ctx.target->GetWorldPosition()) <= radius) {
+			target = ctx.target->GetWorldPosition();
+		}
+	}
+
+	// オフセットターゲット指定なら自分基準の保存オフセット位置を狙う
+	if (data_.lockOnType == RangeLockOnType::kOffsetTarget) {
+		target = ctx.position + data_.offsetTarget;
+	}
+
+	return target;
+}
+
+void Combo::ComboRange::NotifyHit() {
+	// ヒット通知は投擲物処理へ渡す
+	throw_.NotifyHit(data_);
+}
+
 // 終了
 void Combo::ComboRange::Exit(Character::BaseCharacter* owner) {
-	owner_ = nullptr;
-	bulletCount = 0;
-	nextShotTime = 0.0f;
-	bulletSpawn = nullptr;
+	throw_.Exit(data_);	// 投擲処理終了
+	bullet_.Exit();		// 弾処理終了
+	owner_ = nullptr;	// コンボ使用者を解除
 }
 
 
@@ -7388,14 +7585,14 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.h
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include "DirectXGame/application/base/Attack/Combo/Range/ComboBullet.h"
+#include "DirectXGame/application/base/Attack/Combo/Range/ComboThrow.h"
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 
 // 前方宣言
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
-// 弾出現
-class BulletSpawn;
 
 namespace Combo {
 
@@ -7411,23 +7608,299 @@ namespace Combo {
 		void Update(const Character::CharacterContext& ctx, float timer);
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
+		// 現在のコンボ攻撃がヒットしたことを通知する
+		void NotifyHit();
 		// データ構造体取得
 		Data& GetData() { return data_; }
 	private:
 		// 遠距離攻撃の狙い方向を取得する
 		Vector3 ResolveAimDirection(const Character::CharacterContext& ctx) const;
+		// 遠距離攻撃の狙い位置を取得する
+		Vector3 ResolveAimTarget(const Character::CharacterContext& ctx) const;
 
 		// コンボ使用者
 		Character::BaseCharacter* owner_ = nullptr;
-		// 弾の出現処理クラス
-		BulletSpawn* bulletSpawn = nullptr;	
 		// データ
 		Data data_;
-		// 発射した弾の数
-		int bulletCount = 0;
-		float nextShotTime = 0.0f;
+		ComboBullet bullet_;	// 弾を使用する遠距離処理
+		ComboThrow throw_;		// 投擲物を使用する遠距離処理
 	};
 
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboThrow.cpp
+============================================================
+﻿#include "ComboThrow.h"
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+#include <algorithm>
+
+namespace Combo {
+
+	void ComboThrow::Enter(Character::BaseCharacter* owner, const GlobalRange& data) {
+		owner_ = owner;							// コンボ使用者
+		throwCount_ = 0;						// 投擲数リセット
+		nextThrowTime_ = data.rangeWindowStart;	// 次の投擲時間
+		isEffectActive_ = false;				// 効果発動状態リセット
+		isHit_ = false;							// ヒット状態リセット
+		isRecallWaiting_ = false;				// 回収待機状態リセット
+		stayTimer_ = 0.0f;						// 停滞時間リセット
+	}
+
+	void ComboThrow::Update(const Character::CharacterContext& ctx, float timer, const GlobalRange& data,
+		const Vector3& aimDirection, const Vector3& aimTarget) {
+		UpdateThrowSpawn(ctx, timer, data, aimDirection, aimTarget);
+		UpdateEffectTrigger(ctx, timer, data);
+		UpdateRecallTrigger(ctx, timer, data);
+	}
+
+	void ComboThrow::Exit(const GlobalRange& data) {
+		// 回収条件が有効な投擲物はコンボ終了時にも回収へ移す
+		if (data.recallTriggerType != RangeRecallTriggerType::kNone) {
+			if (PlayerSubWeapon* subWeapon = GetPlayerSubWeapon()) {
+				subWeapon->Recall();
+			}
+		}
+
+		owner_ = nullptr;			// コンボ使用者を解除
+		throwCount_ = 0;			// 投擲数リセット
+		nextThrowTime_ = 0.0f;		// 次投擲時間リセット
+		isEffectActive_ = false;		// 効果発動状態リセット
+		isHit_ = false;				// ヒット状態リセット
+		isRecallWaiting_ = false;	// 回収待機状態リセット
+		stayTimer_ = 0.0f;			// 停滞時間リセット
+	}
+
+	void ComboThrow::NotifyHit(const GlobalRange& data) {
+		isHit_ = true;	// ヒット状態を記録
+		if (data.throwMoveType == RangeThrowMoveType::kStopOnHit) {
+			if (PlayerSubWeapon* subWeapon = GetPlayerSubWeapon()) {
+				subWeapon->StopAtCurrentPosition();
+			}
+		}
+	}
+
+	void ComboThrow::UpdateThrowSpawn(const Character::CharacterContext& ctx, float timer, const GlobalRange& data,
+		const Vector3& aimDirection, const Vector3& aimTarget) {
+		// 投擲受付時間外なら新しい投擲物を出さない
+		if (throwCount_ >= data.count || timer < data.rangeWindowStart || timer > data.rangeWindowEnd) {
+			return;
+		}
+
+		// 投擲間隔に従って複数投擲を処理する
+		const float interval = (std::max)(data.interval, 0.001f);
+		while (throwCount_ < data.count && timer >= nextThrowTime_ && nextThrowTime_ <= data.rangeWindowEnd) {
+			PlayerSubWeapon* subWeapon = GetPlayerSubWeapon();
+			if (!subWeapon || subWeapon->IsThrowing()) {
+				break;
+			}
+
+			PlayerSubWeaponThrowData throwData{};						// サブ武器投擲データ
+			throwData.idleOffset = data.subWeaponIdleOffset;				// 待機位置
+			throwData.targetPosition = aimTarget;							// 移動目標位置
+			throwData.throwSpeed = data.subWeaponThrowSpeed;				// 投擲速度
+			throwData.throwLifeTime = data.subWeaponThrowLifeTime;			// 投擲時間
+			throwData.returnTime = data.subWeaponReturnTime;				// 戻り時間
+			throwData.lerpTime = data.throwLerpTime;						// 補間時間
+			throwData.spinSpeed = data.subWeaponSpinSpeed;					// 回転速度
+			throwData.autoReturn = false;									// 回収条件で戻す
+			throwData.alignToDirection = data.subWeaponAlignToDirection;	// 投擲方向へ向けるか
+			throwData.useSpin = data.subWeaponUseSpin;						// スピンするか
+			throwData.moveType = ToSubWeaponMoveType(data);					// 移動タイプ
+			throwData.rotateOffset = data.subWeaponRotateOffset;			// 回転オフセット
+			subWeapon->SetThrowData(throwData);
+			subWeapon->Throw(ctx.position + data.subWeaponStartOffset, aimDirection);
+
+			throwCount_++;				// 投擲済み数
+			nextThrowTime_ += interval;	// 次の投擲時間
+		}
+	}
+
+	void ComboThrow::UpdateEffectTrigger(const Character::CharacterContext& ctx, float timer, const GlobalRange& data) {
+		// 一度発動した効果は同じコンボ中に再発動しない
+		if (isEffectActive_ || data.effectTriggerType == RangeEffectTriggerType::kNone) {
+			return;
+		}
+
+		bool shouldActivate = false;	// 効果を発動するか
+		switch (data.effectTriggerType) {
+		case RangeEffectTriggerType::kButton:
+			shouldActivate = ctx.inputData.skillTrigger;
+			break;
+		case RangeEffectTriggerType::kTimer:
+			shouldActivate = timer >= data.effectTriggerTime;
+			break;
+		case RangeEffectTriggerType::kHit:
+			shouldActivate = isHit_;
+			break;
+		default:
+			break;
+		}
+
+		if (shouldActivate) {
+			isEffectActive_ = true;	// 効果発動済みにする
+			stayTimer_ = 0.0f;		// 停滞時間を初期化
+			if (PlayerSubWeapon* subWeapon = GetPlayerSubWeapon()) {
+				subWeapon->StopAtCurrentPosition();
+			}
+		}
+	}
+
+	void ComboThrow::UpdateRecallTrigger(const Character::CharacterContext& ctx, float timer, const GlobalRange& data) {
+		PlayerSubWeapon* subWeapon = GetPlayerSubWeapon();	// 回収対象のサブ武器
+		if (!subWeapon || !subWeapon->IsThrowing()) {
+			return;
+		}
+
+		if (isRecallWaiting_) {
+			UpdateRecallStay(ctx.dt, data, subWeapon);
+			return;
+		}
+
+		bool shouldRecall = false;	// 回収を開始するか
+		switch (data.recallTriggerType) {
+		case RangeRecallTriggerType::kButton:
+			shouldRecall = ctx.inputData.skillTrigger;
+			break;
+		case RangeRecallTriggerType::kTimer:
+			shouldRecall = timer >= data.recallTriggerTime;
+			break;
+		case RangeRecallTriggerType::kNearOwner:
+			shouldRecall = ctx.position.DistanceXZ(subWeapon->GetWorldTransform().GetWorldPosition()) <= data.recallNearRadius;
+			break;
+		default:
+			break;
+		}
+
+		if (!shouldRecall) {
+			return;
+		}
+
+		if (data.throwStayTime > 0.0f) {
+			isRecallWaiting_ = true;		// 回収前の停滞に入る
+			stayTimer_ = 0.0f;			// 停滞時間リセット
+			subWeapon->StopAtCurrentPosition();
+			return;
+		}
+
+		subWeapon->Recall();
+	}
+
+	void ComboThrow::UpdateRecallStay(float dt, const GlobalRange& data, PlayerSubWeapon* subWeapon) {
+		stayTimer_ += dt;	// 停滞時間を加算
+		if (stayTimer_ >= data.throwStayTime) {
+			isRecallWaiting_ = false;	// 停滞終了
+			stayTimer_ = 0.0f;			// 停滞時間リセット
+			subWeapon->Recall();
+		}
+	}
+
+	PlayerSubWeaponThrowData::MoveType ComboThrow::ToSubWeaponMoveType(const GlobalRange& data) const {
+		switch (data.throwMoveType) {
+		case RangeThrowMoveType::kStopOnHit:
+			return PlayerSubWeaponThrowData::MoveType::kStopOnHit;
+		case RangeThrowMoveType::kTeleportToTarget:
+			return PlayerSubWeaponThrowData::MoveType::kTeleportToTarget;
+		case RangeThrowMoveType::kLerpToTarget:
+			return PlayerSubWeaponThrowData::MoveType::kLerpToTarget;
+		case RangeThrowMoveType::kStraight:
+		default:
+			return PlayerSubWeaponThrowData::MoveType::kStraight;
+		}
+	}
+
+	PlayerSubWeapon* ComboThrow::GetPlayerSubWeapon() const {
+		auto* player = dynamic_cast<Character::BasePlayer*>(owner_);	// プレイヤー型へ変換
+		if (!player) {
+			return nullptr;
+		}
+		return dynamic_cast<PlayerSubWeapon*>(player->GetSubWeapon());
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboThrow.h
+============================================================
+﻿#pragma once
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+#include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
+
+namespace Character {
+	class BaseCharacter;
+}
+
+namespace Combo {
+
+	/// <summary>
+	/// コンボ遠距離の投擲物処理
+	/// </summary>
+	class ComboThrow {
+	public:
+		/// <summary>
+		/// 投擲処理の開始
+		/// </summary>
+		void Enter(Character::BaseCharacter* owner, const GlobalRange& data);
+
+		/// <summary>
+		/// 投擲処理の更新
+		/// </summary>
+		void Update(const Character::CharacterContext& ctx, float timer, const GlobalRange& data,
+			const Vector3& aimDirection, const Vector3& aimTarget);
+
+		/// <summary>
+		/// 投擲処理の終了
+		/// </summary>
+		void Exit(const GlobalRange& data);
+
+		/// <summary>
+		/// 現在のコンボ攻撃がヒットしたことを通知する
+		/// </summary>
+		void NotifyHit(const GlobalRange& data);
+
+	private:
+		/// <summary>
+		/// 投擲物を生成する
+		/// </summary>
+		void UpdateThrowSpawn(const Character::CharacterContext& ctx, float timer, const GlobalRange& data,
+			const Vector3& aimDirection, const Vector3& aimTarget);
+
+		/// <summary>
+		/// 効果発動条件を更新する
+		/// </summary>
+		void UpdateEffectTrigger(const Character::CharacterContext& ctx, float timer, const GlobalRange& data);
+
+		/// <summary>
+		/// 回収条件を更新する
+		/// </summary>
+		void UpdateRecallTrigger(const Character::CharacterContext& ctx, float timer, const GlobalRange& data);
+
+		/// <summary>
+		/// 回収前の停滞時間を更新する
+		/// </summary>
+		void UpdateRecallStay(float dt, const GlobalRange& data, PlayerSubWeapon* subWeapon);
+
+		/// <summary>
+		/// サブ武器の移動タイプへ変換する
+		/// </summary>
+		PlayerSubWeaponThrowData::MoveType ToSubWeaponMoveType(const GlobalRange& data) const;
+
+		/// <summary>
+		/// プレイヤーのサブ武器を取得する
+		/// </summary>
+		PlayerSubWeapon* GetPlayerSubWeapon() const;
+
+		Character::BaseCharacter* owner_ = nullptr;	// コンボ使用者
+		int throwCount_ = 0;						// 投擲済み数
+		float nextThrowTime_ = 0.0f;				// 次の投擲時間
+		bool isEffectActive_ = false;				// 効果が発動済みか
+		bool isHit_ = false;						// 現在のコンボでヒットしたか
+		bool isRecallWaiting_ = false;				// 回収前の停滞中か
+		float stayTimer_ = 0.0f;					// 回収前の停滞時間
+	};
 }
 
 
@@ -32959,6 +33432,9 @@ void PlayerSubWeapon::Update(float dt) {
 	case ThrowState::kThrow:
 		UpdateThrow(dt);
 		break;
+	case ThrowState::kHold:
+		UpdateHold(dt);
+		break;
 	case ThrowState::kReturn:
 		UpdateReturn(dt);
 		break;
@@ -32987,6 +33463,7 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	// 投擲開始位置と時間を初期化する
 	throwTimer_ = 0.0f;
 	throwState_ = ThrowState::kThrow;
+	throwStartPosition_ = startPosition;
 	GetWorldTransform().translate_ = startPosition;
 
 	// 必要なら投擲方向にサブ武器の向きを合わせる
@@ -32996,9 +33473,31 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	}
 }
 
+void PlayerSubWeapon::StopAtCurrentPosition() {
+	// 投擲中の位置で止め、効果発動や回収待ちに使う
+	if (throwState_ == ThrowState::kThrow) {
+		throwState_ = ThrowState::kHold;
+		throwTimer_ = 0.0f;
+	}
+}
+
+void PlayerSubWeapon::Recall() {
+	// 待機中以外なら現在位置から所有者の近くへ戻す
+	if (throwState_ != ThrowState::kIdle && throwState_ != ThrowState::kReturn) {
+		returnStartPosition_ = GetWorldTransform().translate_;
+		throwTimer_ = 0.0f;
+		throwState_ = ThrowState::kReturn;
+	}
+}
+
 bool PlayerSubWeapon::IsThrowing() const {
 	// 投擲または戻りの間はサブ武器攻撃中として扱う
 	return throwState_ != ThrowState::kIdle;
+}
+
+bool PlayerSubWeapon::IsHolding() const {
+	// 投擲地点で停止しているかを返す
+	return throwState_ == ThrowState::kHold;
 }
 
 void PlayerSubWeapon::SetThrowData(const PlayerSubWeaponThrowData& data) {
@@ -33006,6 +33505,7 @@ void PlayerSubWeapon::SetThrowData(const PlayerSubWeaponThrowData& data) {
 	throwData_ = data;
 	throwData_.throwLifeTime = (std::max)(throwData_.throwLifeTime, 0.001f);
 	throwData_.returnTime = (std::max)(throwData_.returnTime, 0.001f);
+	throwData_.lerpTime = (std::max)(throwData_.lerpTime, 0.001f);
 }
 
 void PlayerSubWeapon::DrawEffect() {
@@ -33027,17 +33527,43 @@ void PlayerSubWeapon::UpdateThrow(float dt) {
 	// 投擲時間を進める
 	throwTimer_ += dt;
 
-	// 前方へ飛ばしながら軽く回転させる
-	GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
+	// 移動タイプに応じて投擲位置を更新する
+	switch (throwData_.moveType) {
+	case PlayerSubWeaponThrowData::MoveType::kTeleportToTarget:
+		GetWorldTransform().translate_ = throwData_.targetPosition;
+		StopAtCurrentPosition();
+		break;
+	case PlayerSubWeaponThrowData::MoveType::kLerpToTarget:
+	{
+		const float rate = (std::min)(throwTimer_ / throwData_.lerpTime, 1.0f);
+		GetWorldTransform().translate_ = Vector3::Lerp(throwStartPosition_, throwData_.targetPosition, rate);
+		if (rate >= 1.0f) {
+			StopAtCurrentPosition();
+		}
+		break;
+	}
+	case PlayerSubWeaponThrowData::MoveType::kStopOnHit:
+	case PlayerSubWeaponThrowData::MoveType::kStraight:
+	default:
+		GetWorldTransform().translate_ += throwDirection_ * throwData_.throwSpeed * dt;
+		break;
+	}
+
+	// 必要なら投擲中に回転させる
 	if (throwData_.useSpin) {
 		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
 	}
 
-	// 投擲時間が終わったら戻り状態へ移行する
-	if (throwTimer_ >= throwData_.throwLifeTime) {
-		throwTimer_ = 0.0f;
-		returnStartPosition_ = GetWorldTransform().translate_;
-		throwState_ = ThrowState::kReturn;
+	// 自動戻りが有効なら投擲時間後に回収へ移る
+	if (throwData_.autoReturn && throwTimer_ >= throwData_.throwLifeTime) {
+		Recall();
+	}
+}
+
+void PlayerSubWeapon::UpdateHold(float dt) {
+	// 停止中も演出用スピンを継続できる
+	if (throwData_.useSpin) {
+		GetWorldTransform().rotate_.z += throwData_.spinSpeed * dt;
 	}
 }
 
@@ -33079,13 +33605,24 @@ File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h
 /// プレイヤーサブ武器の投擲調整データ
 /// </summary>
 struct PlayerSubWeaponThrowData {
+	enum class MoveType {
+		kStraight,			// 直進
+		kStopOnHit,			// ヒット時に停止
+		kTeleportToTarget,	// ターゲット位置へ瞬間移動
+		kLerpToTarget,		// ターゲット位置へ補間移動
+	};
+
 	Vector3 idleOffset = { 0.6f, 1.1f, 0.2f };		// プレイヤー基準の待機位置
+	Vector3 targetPosition{};						// 移動タイプ用の目標位置
 	float throwSpeed = 28.0f;						// 投擲速度
 	float throwLifeTime = 0.35f;					// 投擲状態の継続時間
 	float returnTime = 0.18f;						// 戻りにかける時間
+	float lerpTime = 0.25f;							// 目標位置へ補間移動する時間
 	float spinSpeed = 18.0f;						// 投擲中の回転速度
+	bool autoReturn = true;							// 投擲時間後に自動で戻るか
 	bool alignToDirection = true;					// 投擲方向へ向きを合わせるか
 	bool useSpin = true;							// 投擲中に回転させるか
+	MoveType moveType = MoveType::kStraight;		// 投擲物の移動タイプ
 	Vector3 rotateOffset = { 1.5708f,0.0f,3.1416f };	// 投擲姿勢の回転オフセット
 };
 
@@ -33100,6 +33637,7 @@ public:
 	enum class ThrowState {
 		kIdle,		// 待機中
 		kThrow,		// 投擲中
+		kHold,		// 投擲位置で停止中
 		kReturn,	// 戻り中
 	};
 
@@ -33125,6 +33663,16 @@ public:
 	void Throw(const Vector3& startPosition, const Vector3& direction);
 
 	/// <summary>
+	/// 現在位置で停止する
+	/// </summary>
+	void StopAtCurrentPosition();
+
+	/// <summary>
+	/// 所有者の近くへ回収する
+	/// </summary>
+	void Recall();
+
+	/// <summary>
 	/// サブ武器の投擲データを設定する
 	/// </summary>
 	void SetThrowData(const PlayerSubWeaponThrowData& data);
@@ -33133,6 +33681,11 @@ public:
 	/// 投擲中か
 	/// </summary>
 	bool IsThrowing() const;
+
+	/// <summary>
+	/// 停止中か
+	/// </summary>
+	bool IsHolding() const;
 
 	/// <summary>
 	/// エフェクトの描画
@@ -33156,11 +33709,17 @@ private:
 	void UpdateThrow(float dt);
 
 	/// <summary>
+	/// 停止中の位置を更新する
+	/// </summary>
+	void UpdateHold(float dt);
+
+	/// <summary>
 	/// 戻り中の位置を更新する
 	/// </summary>
 	void UpdateReturn(float dt);
 
 	ThrowState throwState_ = ThrowState::kIdle;		// サブ武器の現在状態
+	Vector3 throwStartPosition_{};					// 投擲開始位置
 	Vector3 throwDirection_ = { 0.0f, 0.0f, 1.0f };	// 投擲方向
 	Vector3 returnStartPosition_{};					// 戻り開始位置
 	float throwTimer_ = 0.0f;						// 投擲の経過時間
@@ -78276,7 +78835,7 @@ struct VertexHash {
 ============================================================
 File Path: project/DirectXGame.vcxproj
 ============================================================
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -78395,7 +78954,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.cpp" />
@@ -78821,7 +79382,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.h" />
@@ -79207,6 +79770,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
+
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -80177,6 +80741,12 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboBullet.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp">
@@ -81540,6 +82110,12 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboBullet.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -81547,6 +82123,7 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
+
 
 ============================================================
 File Path: project/main.cpp
