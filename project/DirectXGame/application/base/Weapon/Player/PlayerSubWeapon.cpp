@@ -1,4 +1,4 @@
-#include "PlayerSubWeapon.h"
+﻿#include "PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <algorithm>
@@ -13,7 +13,7 @@ void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "Sword.obj", false, false, this);
+	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "AnimatedCube.gltf", false, false, this);
 	objectComponent_->SetSRT({ 0.55f,0.55f,0.55f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
 
 	// 描画する

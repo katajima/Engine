@@ -62,10 +62,33 @@ Vector3 Combo::ComboRange::ResolveAimTarget(const Character::CharacterContext& c
 
 	// オフセットターゲット指定なら自分基準の保存オフセット位置を狙う
 	if (data_.lockOnType == RangeLockOnType::kOffsetTarget) {
-		target = ctx.position + data_.offsetTarget;
+		target = ResolveOffsetAimTarget(ctx);
 	}
 
 	return target;
+}
+
+Vector3 Combo::ComboRange::ResolveOffsetAimTarget(const Character::CharacterContext& ctx) const {
+	// 従来どおり、所有者位置にワールド軸のオフセットを足す
+	if (data_.offsetTargetType == RangeOffsetTargetType::kWorldOffset) {
+		return ctx.position + data_.offsetTarget;
+	}
+
+	// 所有者の前方を基準に、X=右、Y=上、Z=前のローカルオフセットを作る
+	Vector3 forward = ctx.direction;
+	forward.y = 0.0f;
+	if (forward.LengthSq() <= 0.0001f) {
+		forward = { 0.0f, 0.0f, 1.0f };
+	}
+	forward = forward.Normalize();
+
+	const Vector3 up = { 0.0f, 1.0f, 0.0f };		// ローカルYの基準
+	const Vector3 right = Cross(up, forward);	// ローカルXの基準
+	const Vector3 localOffset =
+		right * data_.offsetTarget.x +
+		up * data_.offsetTarget.y +
+		forward * data_.offsetTarget.z;			// 所有者向き基準のオフセット
+	return ctx.position + localOffset;
 }
 
 void Combo::ComboRange::NotifyHit() {

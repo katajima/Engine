@@ -32,6 +32,8 @@ namespace Combo {
 		Vector3 ResolveAimDirection(const Character::CharacterContext& ctx) const;
 		// 遠距離攻撃の狙い位置を取得する
 		Vector3 ResolveAimTarget(const Character::CharacterContext& ctx) const;
+		// オフセットターゲットの狙い位置を取得する
+		Vector3 ResolveOffsetAimTarget(const Character::CharacterContext& ctx) const;
 
 		// コンボ使用者
 		Character::BaseCharacter* owner_ = nullptr;

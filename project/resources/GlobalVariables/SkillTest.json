@@ -6,7 +6,7 @@
         },
         "Y方向ノックバック力": {
             "type": "float",
-            "value": 118.08999633789063
+            "value": 8.600000381469727
         },
         "アニメーションを一定時間で止めるか": {
             "type": "bool",
@@ -109,11 +109,11 @@
         },
         "コンボキャンセル受付終了時間": {
             "type": "float",
-            "value": 0.36666667461395264
+            "value": 0.10000000149011612
         },
         "コンボキャンセル受付開始時間": {
             "type": "float",
-            "value": 0.1666666716337204
+            "value": 0.0
         },
         "コンボキャンセル可能": {
             "type": "bool",
@@ -174,11 +174,11 @@
         },
         "コンボ入力受付終了時間": {
             "type": "float",
-            "value": 0.4833333194255829
+            "value": 1.0
         },
         "コンボ入力受付開始時間": {
             "type": "float",
-            "value": 0.21666666865348816
+            "value": 0.5833333134651184
         },
         "コンボ入力遅延": {
             "type": "float",
@@ -195,11 +195,11 @@
         },
         "コンボ移動キャンセル受付終了時間": {
             "type": "float",
-            "value": 0.9666666388511658
+            "value": 1.0
         },
         "コンボ移動キャンセル受付開始時間": {
             "type": "float",
-            "value": 0.4833333194255829
+            "value": 0.5833333134651184
         },
         "コンボ移動キャンセル可能": {
             "type": "bool",
@@ -207,7 +207,7 @@
         },
         "コンボ移行時間": {
             "type": "float",
-            "value": 0.2666666805744171
+            "value": 0.7666666507720947
         },
         "コンボ終了時間": {
             "type": "float",
@@ -251,7 +251,7 @@
         },
         "サブ武器投擲時間": {
             "type": "float",
-            "value": 0.5
+            "value": 0.15000000596046448
         },
         "サブ武器投擲速度": {
             "type": "float",
@@ -288,7 +288,7 @@
         },
         "ダメージ": {
             "type": "float",
-            "value": 20.0
+            "value": 0.0
         },
         "ノックバック力": {
             "type": "float",
@@ -320,7 +320,7 @@
         },
         "ヒットエフェクト名前1": {
             "type": "string",
-            "value": "EmitterHitEmit"
+            "value": "EmitterRingHit"
         },
         "ヒットエフェクト名前2": {
             "type": "string",
@@ -332,7 +332,7 @@
         },
         "ヒットエフェクト数": {
             "type": "int32_t",
-            "value": 4
+            "value": 0
         },
         "ヒットカメラシェイク量": {
             "type": "float",
@@ -348,11 +348,11 @@
         },
         "ヒットストップ(相手)": {
             "type": "float",
-            "value": 0.05000000074505806
+            "value": 0.0
         },
         "ヒットストップ(自分)": {
             "type": "float",
-            "value": 0.05000000074505806
+            "value": 0.0
         },
         "ヒットストップ方針(自分)": {
             "enumType": "SelfHitStopPolicy",
@@ -381,11 +381,11 @@
         },
         "ヒットボックスコライダー半径": {
             "type": "float",
-            "value": 1.0
+            "value": 5.0
         },
         "ヒットボックスヒット記録を使用": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "ヒットボックス使用者タイプ": {
             "enumType": "HitBoxUseType",
@@ -414,11 +414,11 @@
         },
         "ヒットボックス生存時間": {
             "type": "float",
-            "value": 1.0
+            "value": 0.8333332538604736
         },
         "ヒットボックス発生時間": {
             "type": "float",
-            "value": 0.0
+            "value": 0.3499999940395355
         },
         "ヒットボックス発生条件タイプ": {
             "enumType": "HitBoxSpawnType",
@@ -481,7 +481,7 @@
         },
         "投擲停滞時間": {
             "type": "float",
-            "value": 1.0
+            "value": 3.0
         },
         "投擲効果発動時間": {
             "type": "float",
@@ -490,7 +490,7 @@
         "投擲効果発動条件": {
             "enumType": "RangeEffectTriggerType",
             "type": "enum",
-            "value": 3
+            "value": 0
         },
         "投擲回収時間": {
             "type": "float",
@@ -508,11 +508,11 @@
         "投擲移動タイプ": {
             "enumType": "RangeThrowMoveType",
             "type": "enum",
-            "value": 0
+            "value": 3
         },
         "投擲補間時間": {
             "type": "float",
-            "value": 0.25
+            "value": 0.10000000149011612
         },
         "接続先(スキル)": {
             "type": "string",
@@ -616,12 +616,17 @@
             "type": "string",
             "value": "SubWeapon"
         },
+        "遠距離オフセットタイプ": {
+            "enumType": "RangeOffsetTargetType",
+            "type": "enum",
+            "value": 1
+        },
         "遠距離オフセットターゲット": {
             "type": "Vector3",
             "value": [
                 0.0,
-                0.0,
-                -10.0
+                0.5,
+                10.0
             ]
         },
         "遠距離タイプ": {
@@ -644,7 +649,7 @@
         "遠距離狙いタイプ": {
             "enumType": "RangeLockOnType",
             "type": "enum",
-            "value": 1
+            "value": 3
         },
         "遠距離発射数": {
             "type": "int32_t",
@@ -652,7 +657,7 @@
         },
         "遠距離発射終了時間": {
             "type": "float",
-            "value": 0.5
+            "value": 0.30000001192092896
         },
         "遠距離発射開始時間": {
             "type": "float",

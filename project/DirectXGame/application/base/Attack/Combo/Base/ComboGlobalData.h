@@ -53,6 +53,12 @@ namespace Combo {
 		kOffsetTarget,	// 自分基準のオフセット位置
 	};
 
+	// オフセットターゲットの座標タイプ
+	enum class RangeOffsetTargetType {
+		kWorldOffset,		// 所有者位置にワールド軸のオフセットを足す
+		kOwnerLocalOffset,	// 所有者の向き基準のローカルオフセットを足す
+	};
+
 	// 投擲物の移動タイプ
 	enum class RangeThrowMoveType {
 		kStraight,			// 直進
@@ -81,8 +87,9 @@ namespace Combo {
 	struct GlobalRange {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
+		RangeOffsetTargetType offsetTargetType = RangeOffsetTargetType::kWorldOffset;	// オフセットターゲットの座標タイプ
 		float lockOnStartRadius = 30.0f;						// ターゲットを狙い始める半径
-		Vector3 offsetTarget = { 0.0f, 0.0f, 20.0f };			// 自分基準で狙うオフセット位置
+		Vector3 offsetTarget = { 0.0f, 0.0f, 20.0f };			// 狙うオフセット位置
 		RangeThrowMoveType throwMoveType = RangeThrowMoveType::kStraight;	// 投擲物の移動タイプ
 		RangeEffectTriggerType effectTriggerType = RangeEffectTriggerType::kNone;	// 効果発動条件
 		RangeRecallTriggerType recallTriggerType = RangeRecallTriggerType::kTimer;	// 回収条件

@@ -266,6 +266,7 @@ namespace Combo {
 		};
 		Engine::ImGuiManager::Select("遠距離タイプ", RangeTypeLabels, data_.range.rangeType);
 
+		ImGui::SeparatorText("共通の狙い設定");
 		static const char* RangeLockOnTypeLabels[] = {
 			"前方",
 			"ターゲット",
@@ -277,55 +278,66 @@ namespace Combo {
 			ImGui::DragFloat("狙い始める半径", &data_.range.lockOnStartRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
 		}
 		if (data_.range.lockOnType == RangeLockOnType::kOffsetTarget) {
+			static const char* RangeOffsetTargetTypeLabels[] = {
+				"ワールドオフセット",
+				"所有者ローカル",
+			};
+			Engine::ImGuiManager::Select("オフセットタイプ", RangeOffsetTargetTypeLabels, data_.range.offsetTargetType);
 			ImGui::DragFloat3("オフセットターゲット", &data_.range.offsetTarget.x, 0.1f);
 		}
 
-		static const char* RangeThrowMoveTypeLabels[] = {
-			"直進",
-			"ヒット時停止",
-			"ターゲット瞬間移動",
-			"ターゲット補間移動",
-		};
-		Engine::ImGuiManager::Select("投擲移動タイプ", RangeThrowMoveTypeLabels, data_.range.throwMoveType);
-		if (data_.range.throwMoveType == RangeThrowMoveType::kLerpToTarget) {
-			ImGui::DragFloat("投擲補間時間", &data_.range.throwLerpTime, 0.01f, 0.001f, 60.0f, "%.3f");
-		}
+		ImGui::SeparatorText("共通の使用タイミング");
+		ImGui::DragFloat("開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::DragFloat("使用間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+		ImGui::DragInt("使用数", &data_.range.count, 1.0f, 1, 100);
 
-		static const char* RangeEffectTriggerTypeLabels[] = {
-			"なし",
-			"ボタン",
-			"時間経過",
-			"ヒット",
-		};
-		Engine::ImGuiManager::Select("効果発動条件", RangeEffectTriggerTypeLabels, data_.range.effectTriggerType);
-		if (data_.range.effectTriggerType == RangeEffectTriggerType::kTimer) {
-			ImGui::DragFloat("効果発動時間", &data_.range.effectTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+		if (data_.range.rangeType == RangeType::kBullet) {
+			ImGui::SeparatorText("弾設定");
+			ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
+			ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
 		}
-
-		static const char* RangeRecallTriggerTypeLabels[] = {
-			"なし",
-			"ボタン",
-			"時間経過",
-			"近づく",
-		};
-		Engine::ImGuiManager::Select("回収条件", RangeRecallTriggerTypeLabels, data_.range.recallTriggerType);
-		if (data_.range.recallTriggerType == RangeRecallTriggerType::kTimer) {
-			ImGui::DragFloat("回収時間", &data_.range.recallTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
-		}
-		if (data_.range.recallTriggerType == RangeRecallTriggerType::kNearOwner) {
-			ImGui::DragFloat("回収近接半径", &data_.range.recallNearRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
-		}
-		ImGui::DragFloat("回収前の停滞時間", &data_.range.throwStayTime, 0.01f, 0.0f, 60.0f, "%.2f");
-
-		ImGui::DragFloat("発射開始時間", &data_.range.rangeWindowStart, 0.01f, 0.0f, 60.0f, "%.2f");
-		ImGui::DragFloat("発射終了時間", &data_.range.rangeWindowEnd, 0.01f, 0.0f, 60.0f, "%.2f");
-		ImGui::DragFloat("弾速", &data_.range.speed, 0.1f, 0.0f, 1000.0f, "%.2f");
-		ImGui::DragFloat("発射間隔", &data_.range.interval, 0.01f, 0.001f, 60.0f, "%.3f");
-		ImGui::DragInt("発射数", &data_.range.count, 1.0f, 1, 100);
-		ImGui::DragFloat("弾ダメージ", &data_.range.damage, 0.1f, 0.0f, 1000.0f, "%.2f");
 
 		if (data_.range.rangeType == RangeType::kSubWeapon) {
-			ImGui::SeparatorText("サブウェポン設定");
+			ImGui::SeparatorText("投擲物設定");
+			static const char* RangeThrowMoveTypeLabels[] = {
+				"直進",
+				"ヒット時停止",
+				"ターゲット瞬間移動",
+				"ターゲット補間移動",
+			};
+			Engine::ImGuiManager::Select("投擲移動タイプ", RangeThrowMoveTypeLabels, data_.range.throwMoveType);
+			if (data_.range.throwMoveType == RangeThrowMoveType::kLerpToTarget) {
+				ImGui::DragFloat("投擲補間時間", &data_.range.throwLerpTime, 0.01f, 0.001f, 60.0f, "%.3f");
+			}
+
+			static const char* RangeEffectTriggerTypeLabels[] = {
+				"なし",
+				"ボタン",
+				"時間経過",
+				"ヒット",
+			};
+			Engine::ImGuiManager::Select("効果発動条件", RangeEffectTriggerTypeLabels, data_.range.effectTriggerType);
+			if (data_.range.effectTriggerType == RangeEffectTriggerType::kTimer) {
+				ImGui::DragFloat("効果発動時間", &data_.range.effectTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			}
+
+			static const char* RangeRecallTriggerTypeLabels[] = {
+				"なし",
+				"ボタン",
+				"時間経過",
+				"近づく",
+			};
+			Engine::ImGuiManager::Select("回収条件", RangeRecallTriggerTypeLabels, data_.range.recallTriggerType);
+			if (data_.range.recallTriggerType == RangeRecallTriggerType::kTimer) {
+				ImGui::DragFloat("回収時間", &data_.range.recallTriggerTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			}
+			if (data_.range.recallTriggerType == RangeRecallTriggerType::kNearOwner) {
+				ImGui::DragFloat("回収近接半径", &data_.range.recallNearRadius, 0.1f, 0.0f, 1000.0f, "%.2f");
+			}
+			ImGui::DragFloat("回収前の停滞時間", &data_.range.throwStayTime, 0.01f, 0.0f, 60.0f, "%.2f");
+
+			ImGui::SeparatorText("サブウェポン表示設定");
 			ImGui::DragFloat3("待機位置", &data_.range.subWeaponIdleOffset.x, 0.01f);
 			ImGui::DragFloat3("投擲開始オフセット", &data_.range.subWeaponStartOffset.x, 0.01f);
 			ImGui::DragFloat("投擲速度", &data_.range.subWeaponThrowSpeed, 0.1f, 0.0f, 1000.0f, "%.2f");
