@@ -14,7 +14,7 @@ void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "AnimatedCube.gltf", false, false, this);
-	objectComponent_->SetSRT({ 0.55f,0.55f,0.55f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
+	objectComponent_->SetSRT({ 0.15f,0.15f,0.15f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
 
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
