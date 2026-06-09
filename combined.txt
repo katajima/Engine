@@ -194,6 +194,7 @@
     └── └── └── └── └── └── └── ├── EnemyAiDebugSystem.h
     └── └── └── └── └── └── └── ├── EnemyAiSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAiSystem.h
+    └── └── └── └── └── └── └── ├── EnemyAttackCandidate.h
     └── └── └── └── └── └── └── ├── EnemyAttackRequest.h
     └── └── └── └── └── └── └── ├── EnemyAttackRequestSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAttackRequestSystem.h
@@ -201,6 +202,10 @@
     └── └── └── └── └── └── └── ├── EnemyAttackSlotSystem.h
     └── └── └── └── └── └── └── ├── EnemyAttackSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAttackSystem.h
+    └── └── └── └── └── └── └── ├── EnemyAttackTokenSystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyAttackTokenSystem.h
+    └── └── └── └── └── └── └── ├── EnemyCombatDirector.cpp
+    └── └── └── └── └── └── └── ├── EnemyCombatDirector.h
     └── └── └── └── └── └── └── ├── EnemyCrowdBehaviorData.h
     └── └── └── └── └── └── └── ├── EnemyCrowdData.h
     └── └── └── └── └── └── └── ├── EnemyCrowdDensitySystem.cpp
@@ -17146,6 +17151,26 @@ namespace Character {
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackCandidate.h
+============================================================
+#pragma once
+#include "EnemyAttackRequest.h"
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// Combat DirectorとAttack Tokenが共有する攻撃候補。
+	/// 敵本体と、その敵が持っている攻撃要求を1セットで扱う。
+	/// </summary>
+	struct EnemyAttackCandidate {
+		BaseEnemy* enemy = nullptr;				// 攻撃候補になっている敵
+		EnemyAttackRequest* request = nullptr;	// 敵が保持している攻撃要求
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackRequest.h
 ============================================================
 #pragma once
@@ -17257,13 +17282,9 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackRequestSystem.cpp
 ============================================================
-﻿#include "EnemyAttackRequestSystem.h"
+#include "EnemyAttackRequestSystem.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h"
-
-#include <algorithm>
-#include <cmath>
-#include <map>
 
 namespace Character {
 
@@ -17271,14 +17292,19 @@ namespace Character {
 		// 攻撃要求の連番と、攻撃許可の間隔タイマーを初期状態へ戻す
 		requestCounter_ = 1;
 		intervalTimer_ = 0.0f;
+
+		// Attack Tokenは攻撃数の制限、Combat Directorは群衆ごとの攻撃判断を担当する
+		attackTokenSystem_.Initialize();
+		attackTokenSystem_.SetLimits(maxAttackCount_, maxGroupAttackCount_, approachRingCount_);
+		combatDirector_.Initialize();
 	}
 
 	void EnemyAttackRequestSystem::Update(const std::vector<BaseEnemy*>& enemies, float dt) {
-		
 		// 毎フレーム、攻撃要求のクールダウンを進めて許可をリセット
 		UpdateIntervalTimer(dt);
+		attackTokenSystem_.BeginFrame();
 
-		std::vector<AttackCandidate> activeRequests;
+		std::vector<EnemyAttackCandidate> activeRequests;
 
 		for (BaseEnemy* enemy : enemies) {
 			if (!enemy) {
@@ -17324,10 +17350,10 @@ namespace Character {
 			}
 
 			// ソートで使うターゲット距離を要求側へ記録する
-			float distance = enemy->GetTargetDistance();
+			const float distance = enemy->GetTargetDistance();
 			request->SetDistance(distance);
 
-			activeRequests.push_back(AttackCandidate{ enemy, request });
+			activeRequests.push_back(EnemyAttackCandidate{ enemy, request });
 		}
 
 		if (activeRequests.empty()) {
@@ -17340,200 +17366,14 @@ namespace Character {
 			return;
 		}
 
-		std::sort(activeRequests.begin(), activeRequests.end(),
-			[this](const AttackCandidate& a, const AttackCandidate& b) {
-				float distanceDiff = std::abs(a.request->GetDistance() - b.request->GetDistance());
-
-				// 距離差が大きいなら近い敵を優先
-				if (distanceDiff > sameDistanceRange_) {
-					return a.request->GetDistance() < b.request->GetDistance();
-				}
-
-				// 近い距離帯なら先に要求した敵を優先
-				return a.request->GetNumber() < b.request->GetNumber();
-			});
-
-		// 群衆IDごとにまとめ、集団タイプに応じて攻撃の出し方を変える
-		std::map<int, std::vector<AttackCandidate>> groups;
-		for (const AttackCandidate& candidate : activeRequests) {
-			groups[candidate.enemy->GetCrowdGroupId()].push_back(candidate);
-		}
-
-		// 攻撃リング数
-		uint32_t attackRingCount = 0;
-		// 接近リング数
-		uint32_t approachRingCount = 0;
-
-		// 群衆ごとに攻撃スタイルを決めて、攻撃役・接近役・待機役へ振り分ける
-		for (auto& [groupId, candidates] : groups) {
-			(void)groupId;
-			if (candidates.empty()) {
-				continue;
-			}
-
-			// 群衆内の並び順で揃え、LeaderOnlyやVolleyで安定した順番を使う
-			std::sort(candidates.begin(), candidates.end(),
-				[](const AttackCandidate& a, const AttackCandidate& b) {
-					return a.enemy->GetCrowdMemberIndex() < b.enemy->GetCrowdMemberIndex();
-				});
-
-			// 群衆ごとの攻撃スタイルに応じて、Attack / Approach / Standbyへ振り分ける
-			switch (ResolveAttackStyle(candidates.front().enemy, candidates.size())) {
-			case EnemyCrowdAttackStyle::GroupVolley:
-				AssignGroupVolley(candidates, attackRingCount);
-				break;
-			case EnemyCrowdAttackStyle::LeaderOnly:
-				AssignLeaderOnly(candidates, attackRingCount);
-				break;
-			case EnemyCrowdAttackStyle::SurroundThenAttack:
-				AssignSurroundThenAttack(candidates, attackRingCount, approachRingCount);
-				break;
-			case EnemyCrowdAttackStyle::Individual:
-			case EnemyCrowdAttackStyle::Auto:
-			default:
-				AssignIndividual(candidates, attackRingCount, approachRingCount);
-				break;
-			}
-		}
+		// Combat Directorへ渡し、群衆タイプに応じた攻撃方式でAttack Tokenを配る
+		combatDirector_.Direct(activeRequests, attackTokenSystem_);
 
 		// 今回攻撃許可を更新したので、次回まで少し間隔を空ける
 		intervalTimer_ = attackInterval_;
 	}
 
-	EnemyCrowdAttackStyle EnemyAttackRequestSystem::ResolveAttackStyle(const BaseEnemy* enemy, size_t groupSize) const {
-		if (!enemy) {
-			// 敵情報が取れない場合は最も単純な個別攻撃にする
-			return EnemyCrowdAttackStyle::Individual;
-		}
-
-		const CrowdBehaviorSettings& behavior = enemy->GetCrowdBehavior();
-		if (behavior.attackStyle != EnemyCrowdAttackStyle::Auto) {
-			return behavior.attackStyle;
-		}
-
-		// Autoでは群衆タイプの性格から攻撃方法を決める
-		switch (behavior.type) {
-		case EnemyCrowdBehaviorType::WaveAssault:
-		case EnemyCrowdBehaviorType::PressureCrowd:
-			return EnemyCrowdAttackStyle::GroupVolley;
-		case EnemyCrowdBehaviorType::Encircle:
-		case EnemyCrowdBehaviorType::DistributedEncircle:
-			return EnemyCrowdAttackStyle::SurroundThenAttack;
-		case EnemyCrowdBehaviorType::Formation:
-			return behavior.useCommander ? EnemyCrowdAttackStyle::LeaderOnly : EnemyCrowdAttackStyle::GroupVolley;
-		case EnemyCrowdBehaviorType::DensityAdaptive:
-			return groupSize >= 8 ? EnemyCrowdAttackStyle::GroupVolley : EnemyCrowdAttackStyle::Individual;
-		case EnemyCrowdBehaviorType::Rush:
-		case EnemyCrowdBehaviorType::Flocking:
-		case EnemyCrowdBehaviorType::FlowCrowd:
-		case EnemyCrowdBehaviorType::Spiral:
-		case EnemyCrowdBehaviorType::Hunting:
-		default:
-			return EnemyCrowdAttackStyle::Individual;
-		}
-	}
-
-	void EnemyAttackRequestSystem::AssignIndividual(std::vector<AttackCandidate>& candidates, uint32_t& attackCount, uint32_t& approachCount) {
-		// 個別攻撃では近い敵を優先し、同程度なら要求順を優先する
-		std::sort(candidates.begin(), candidates.end(),
-			[this](const AttackCandidate& a, const AttackCandidate& b) {
-				const float distanceDiff = std::abs(a.request->GetDistance() - b.request->GetDistance());
-				if (distanceDiff > sameDistanceRange_) {
-					return a.request->GetDistance() < b.request->GetDistance();
-				}
-				return a.request->GetNumber() < b.request->GetNumber();
-			});
-
-		for (AttackCandidate& candidate : candidates) {
-			if (attackCount < maxAttackCount_) {
-				// 同時攻撃上限に収まる敵だけ攻撃許可を出す
-				candidate.request->SetRing(EnemyAttackRing::Attack);
-				candidate.request->Grant();
-				attackCount++;
-				continue;
-			}
-
-			if (approachCount < approachRingCount_) {
-				// 攻撃待ちの一部は前に詰め、次の攻撃候補にする
-				candidate.request->SetRing(EnemyAttackRing::Approach);
-				approachCount++;
-				continue;
-			}
-
-			// それ以外は密集を避けるため待機レイヤーへ回す
-			candidate.request->SetRing(EnemyAttackRing::Standby);
-		}
-	}
-
-	void EnemyAttackRequestSystem::AssignGroupVolley(std::vector<AttackCandidate>& candidates, uint32_t& attackCount) {
-		// 一斉攻撃ではグループ内の先頭から一定数まで攻撃許可を出す
-		const uint32_t groupLimit = (std::min)(maxGroupAttackCount_, static_cast<uint32_t>(candidates.size()));
-		for (uint32_t i = 0; i < candidates.size(); ++i) {
-			AttackCandidate& candidate = candidates[i];
-			if (attackCount < maxGroupAttackCount_ && i < groupLimit) {
-				candidate.request->SetRing(EnemyAttackRing::Attack);
-				candidate.request->Grant();
-				attackCount++;
-			}
-			else {
-				candidate.request->SetRing(i < groupLimit + approachRingCount_ ? EnemyAttackRing::Approach : EnemyAttackRing::Standby);
-			}
-		}
-	}
-
-	void EnemyAttackRequestSystem::AssignLeaderOnly(std::vector<AttackCandidate>& candidates, uint32_t& attackCount) {
-		// 統率者が指定されていればその順番を、無ければ先頭メンバーをリーダー扱いにする
-		const CrowdBehaviorSettings& behavior = candidates.front().enemy->GetCrowdBehavior();
-		const uint32_t leaderOrder = behavior.useCommander ?
-			(std::min)(behavior.commanderOrder, static_cast<uint32_t>(candidates.size() - 1)) :
-			0;
-
-		for (uint32_t i = 0; i < candidates.size(); ++i) {
-			AttackCandidate& candidate = candidates[i];
-			if (i == leaderOrder && attackCount < maxAttackCount_) {
-				// リーダーだけに攻撃許可を出し、他メンバーは接近か待機にする
-				candidate.request->SetRing(EnemyAttackRing::Attack);
-				candidate.request->Grant();
-				attackCount++;
-			}
-			else {
-				candidate.request->SetRing(i < leaderOrder + approachRingCount_ ? EnemyAttackRing::Approach : EnemyAttackRing::Standby);
-			}
-		}
-	}
-
-	void EnemyAttackRequestSystem::AssignSurroundThenAttack(
-		std::vector<AttackCandidate>& candidates,
-		uint32_t& attackCount,
-		uint32_t& approachCount
-	) {
-		uint32_t readyCount = 0;
-		for (const AttackCandidate& candidate : candidates) {
-			// 包囲成立判定として、一定距離内に入っている敵数を数える
-			if (candidate.request->GetDistance() <= surroundReadyDistance_) {
-				readyCount++;
-			}
-		}
-
-		if (readyCount < (std::min)(surroundReadyCount_, static_cast<uint32_t>(candidates.size()))) {
-			// 包囲ができるまでは攻撃せず、前進役と待機役に分ける
-			for (AttackCandidate& candidate : candidates) {
-				if (approachCount < approachRingCount_) {
-					candidate.request->SetRing(EnemyAttackRing::Approach);
-					approachCount++;
-				}
-				else {
-					candidate.request->SetRing(EnemyAttackRing::Standby);
-				}
-			}
-			return;
-		}
-
-		// 包囲が成立したら、グループ一斉攻撃として許可を出す
-		AssignGroupVolley(candidates, attackCount);
-	}
-
-	void EnemyAttackRequestSystem::UpdateIntervalTimer(float dt){
+	void EnemyAttackRequestSystem::UpdateIntervalTimer(float dt) {
 		if (intervalTimer_ > 0.0f) {
 			// 攻撃許可を連続で出しすぎないよう、間隔タイマーを進める
 			intervalTimer_ -= dt;
@@ -17548,18 +17388,19 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackRequestSystem.h
 ============================================================
-﻿#pragma once
-#include "EnemyAttackRequest.h"
-#include "EnemyCrowdBehaviorData.h"
-#include <vector>
+#pragma once
+#include "EnemyAttackCandidate.h"
+#include "EnemyAttackTokenSystem.h"
+#include "EnemyCombatDirector.h"
 #include <cstdint>
-
+#include <vector>
 
 namespace Character {
 	class BaseEnemy;
 
 	/// <summary>
-	/// 敵から出された攻撃要求を整理し、同時攻撃数や群衆戦術に応じて許可を出す。
+	/// 敵から出された攻撃要求を集め、Combat DirectorとAttack Tokenへ攻撃許可判断を渡す。
+	/// 候補収集とクールタイム管理だけを担当し、攻撃方式の判断はEnemyCombatDirectorに分離する。
 	/// </summary>
 	class EnemyAttackRequestSystem {
 	public:
@@ -17570,48 +17411,23 @@ namespace Character {
 		void Update(const std::vector<BaseEnemy*>& enemies, float dt);
 
 	private:
-		// 攻撃許可判定に使う敵と要求の組
-		struct AttackCandidate {
-			BaseEnemy* enemy = nullptr;				// 候補になっている敵
-			EnemyAttackRequest* request = nullptr;	// 敵が保持している攻撃要求
-		};
-
-		// 群衆タイプと設定から、攻撃許可の出し方を決める
-		EnemyCrowdAttackStyle ResolveAttackStyle(const BaseEnemy* enemy, size_t groupSize) const;
-		// 個人順で攻撃許可を出す
-		void AssignIndividual(std::vector<AttackCandidate>& candidates, uint32_t& attackCount, uint32_t& approachCount);
-		// 同じ群衆から複数体へ同時に攻撃許可を出す
-		void AssignGroupVolley(std::vector<AttackCandidate>& candidates, uint32_t& attackCount);
-		// 統率者だけを攻撃役へ回し、他メンバーは接近・待機へ回す
-		void AssignLeaderOnly(std::vector<AttackCandidate>& candidates, uint32_t& attackCount);
-		// 包囲がある程度成立した時だけ複数体へ攻撃許可を出す
-		void AssignSurroundThenAttack(std::vector<AttackCandidate>& candidates, uint32_t& attackCount, uint32_t& approachCount);
-
 		// インターバルタイマーを進める。攻撃許可を出した後、次の許可まで少し間隔を空けるために使う
 		void UpdateIntervalTimer(float dt);
+
 	private:
-		// 攻撃要求に付ける連番
-		uint32_t requestCounter_ = 1;	
+		uint32_t requestCounter_ = 1;	// 攻撃要求に付ける連番
 
-		// 同時に攻撃できる敵数
-		uint32_t maxAttackCount_ = 2;
-
-		// 攻撃待ちの中でも前に詰める敵数
-		uint32_t approachRingCount_ = 2;
-
-		// 攻撃許可の間隔
-		float attackInterval_ = 0.1f;
-		float intervalTimer_ = 0.0f;	// 次の攻撃許可までの残り時間
-
-		// 攻撃後、同じ敵が再攻撃できない時間
-		float reAttackCooldown_ = 3.0f;
-
-		// 距離差がこの値以内なら要求順を優先
-		float sameDistanceRange_ = 1.0f;
-
+		uint32_t maxAttackCount_ = 2;	// 個人攻撃で同時に攻撃できる敵数
 		uint32_t maxGroupAttackCount_ = 4;	// 一斉攻撃で同時に許可する最大数
-		uint32_t surroundReadyCount_ = 3;	// 包囲型で攻撃開始とみなす最低人数
-		float surroundReadyDistance_ = 12.0f;	// 包囲成立判定に使う距離
+		uint32_t approachRingCount_ = 2;	// 攻撃待ちの中でも前に詰める敵数
+
+		float attackInterval_ = 0.1f;	// 攻撃許可を更新する間隔
+		float intervalTimer_ = 0.0f;		// 次の攻撃許可までの残り時間
+
+		float reAttackCooldown_ = 3.0f;	// 攻撃後、同じ敵が再攻撃できない時間
+
+		EnemyAttackTokenSystem attackTokenSystem_;	// 攻撃許可トークンの使用数と上限を管理する
+		EnemyCombatDirector combatDirector_;		// 群衆タイプごとの攻撃方式を判断する
 	};
 }
 
@@ -18048,6 +17864,411 @@ namespace Character {
 		std::unique_ptr<EnemyAttackRequest> attackRequest_;
 	};
 }
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackTokenSystem.cpp
+============================================================
+#include "EnemyAttackTokenSystem.h"
+
+namespace Character {
+
+	void EnemyAttackTokenSystem::Initialize() {
+		// 起動時やリセット時に、使用中トークン数を空にする
+		BeginFrame();
+	}
+
+	void EnemyAttackTokenSystem::BeginFrame() {
+		// 攻撃許可の再計算ごとに、今回分の使用数だけをリセットする
+		grantedCount_ = 0;
+		approachCount_ = 0;
+	}
+
+	void EnemyAttackTokenSystem::SetLimits(uint32_t individualMax, uint32_t groupMax, uint32_t approachMax) {
+		// 外部調整用に上限をまとめて設定できるようにする
+		individualAttackLimit_ = individualMax;
+		groupAttackLimit_ = groupMax;
+		approachLimit_ = approachMax;
+	}
+
+	bool EnemyAttackTokenSystem::TryGrantAttack(EnemyAttackRequest* request, uint32_t tokenLimit) {
+		if (!request) {
+			// 攻撃要求が無い敵にはトークンを渡せない
+			return false;
+		}
+
+		if (grantedCount_ >= tokenLimit) {
+			// 今回使える攻撃トークンが残っていない
+			return false;
+		}
+
+		// 攻撃リングへ入れ、実際に攻撃開始してよい状態へする
+		request->SetRing(EnemyAttackRing::Attack);
+		request->Grant();
+		grantedCount_++;
+		return true;
+	}
+
+	bool EnemyAttackTokenSystem::TryAssignApproach(EnemyAttackRequest* request) {
+		if (!request) {
+			// 攻撃要求が無い敵は接近リングにも入れない
+			return false;
+		}
+
+		if (approachCount_ >= approachLimit_) {
+			// 接近役が多すぎると密集するため、上限を超えたら待機へ回す
+			return false;
+		}
+
+		// 次の攻撃候補として、プレイヤー側へ詰める役にする
+		request->SetRing(EnemyAttackRing::Approach);
+		approachCount_++;
+		return true;
+	}
+
+	void EnemyAttackTokenSystem::AssignStandby(EnemyAttackRequest* request) const {
+		if (!request) {
+			return;
+		}
+
+		// 攻撃枠にも接近枠にも入らない敵は、密集を避けるため待機へ送る
+		request->SetRing(EnemyAttackRing::Standby);
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackTokenSystem.h
+============================================================
+#pragma once
+#include "EnemyAttackRequest.h"
+#include <cstdint>
+
+namespace Character {
+
+	/// <summary>
+	/// 攻撃許可トークンを管理するシステム。
+	/// 同時攻撃数と接近待ち数をここで制限し、Combat Directorから使いやすい形に分離する。
+	/// </summary>
+	class EnemyAttackTokenSystem {
+	public:
+		// トークン数と接近数を初期状態へ戻す
+		void Initialize();
+
+		// 1回の攻撃許可更新を始める前に、今回分の使用数をリセットする
+		void BeginFrame();
+
+		// 攻撃トークン数と接近リング数の上限を設定する
+		void SetLimits(uint32_t individualMax, uint32_t groupMax, uint32_t approachMax);
+
+		// 攻撃トークンを1つ消費し、敵へ攻撃許可を出す
+		bool TryGrantAttack(EnemyAttackRequest* request, uint32_t tokenLimit);
+
+		// 接近リングの枠を1つ消費し、敵を次の攻撃候補として前に出す
+		bool TryAssignApproach(EnemyAttackRequest* request);
+
+		// 攻撃・接近枠に入らない敵を待機リングへ送る
+		void AssignStandby(EnemyAttackRequest* request) const;
+
+		// 個人攻撃で使う同時攻撃上限を返す
+		uint32_t GetIndividualAttackLimit() const { return individualAttackLimit_; }
+		// 一斉攻撃で使う同時攻撃上限を返す
+		uint32_t GetGroupAttackLimit() const { return groupAttackLimit_; }
+		// 接近リングの上限を返す
+		uint32_t GetApproachLimit() const { return approachLimit_; }
+		// 今回すでに攻撃許可を出した数を返す
+		uint32_t GetGrantedCount() const { return grantedCount_; }
+		// 今回すでに接近リングへ送った数を返す
+		uint32_t GetApproachCount() const { return approachCount_; }
+
+	private:
+		uint32_t individualAttackLimit_ = 2;	// 個人攻撃時に同時に攻撃できる最大数
+		uint32_t groupAttackLimit_ = 4;		// 一斉攻撃時に同時に攻撃できる最大数
+		uint32_t approachLimit_ = 2;			// 攻撃待ちとして前に出せる最大数
+
+		uint32_t grantedCount_ = 0;			// 今回の更新で攻撃許可を出した数
+		uint32_t approachCount_ = 0;			// 今回の更新で接近リングへ送った数
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCombatDirector.cpp
+============================================================
+#include "EnemyCombatDirector.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+namespace Character {
+
+	void EnemyCombatDirector::Initialize() {
+		// 現状は固定パラメータで動かす。将来ImGuiや難易度設定から変更する入口にする。
+		sameDistanceRange_ = 1.0f;
+		surroundReadyCount_ = 3;
+		surroundReadyDistance_ = 12.0f;
+	}
+
+	void EnemyCombatDirector::Direct(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) {
+		if (candidates.empty()) {
+			// 攻撃候補が無い場合は、作戦判断を行わない
+			return;
+		}
+
+		// 全体の優先順を先に揃える。距離が大きく違う時は近い敵、近い距離帯では要求順を優先する。
+		std::sort(candidates.begin(), candidates.end(),
+			[this](const EnemyAttackCandidate& a, const EnemyAttackCandidate& b) {
+				const float distanceDiff = std::abs(a.request->GetDistance() - b.request->GetDistance());
+				if (distanceDiff > sameDistanceRange_) {
+					return a.request->GetDistance() < b.request->GetDistance();
+				}
+				return a.request->GetNumber() < b.request->GetNumber();
+			});
+
+		// 群衆IDごとにまとめ、同じ群衆内で攻撃方式を共有する
+		std::map<int, std::vector<EnemyAttackCandidate>> groupMap;
+		for (const EnemyAttackCandidate& candidate : candidates) {
+			if (!candidate.enemy || !candidate.request) {
+				// 不完全な候補は攻撃判断から外す
+				continue;
+			}
+			groupMap[candidate.enemy->GetCrowdGroupId()].push_back(candidate);
+		}
+
+		struct GroupOrder {
+			int groupId = 0;				// 群衆ID
+			float nearestDistance = 0.0f;	// 群衆内で一番近い敵の距離
+		};
+
+		std::vector<GroupOrder> groupOrders;
+		groupOrders.reserve(groupMap.size());
+		for (const auto& [groupId, groupCandidates] : groupMap) {
+			if (groupCandidates.empty()) {
+				continue;
+			}
+
+			// 群衆同士の順番は、一番近いメンバーの距離で決める
+			groupOrders.push_back(GroupOrder{ groupId, groupCandidates.front().request->GetDistance() });
+		}
+
+		std::sort(groupOrders.begin(), groupOrders.end(),
+			[](const GroupOrder& a, const GroupOrder& b) {
+				return a.nearestDistance < b.nearestDistance;
+			});
+
+		for (const GroupOrder& order : groupOrders) {
+			std::vector<EnemyAttackCandidate>& groupCandidates = groupMap[order.groupId];
+			if (groupCandidates.empty()) {
+				continue;
+			}
+
+			// 群衆内の並び順で揃え、LeaderOnlyやVolleyで安定した順番を使う
+			std::sort(groupCandidates.begin(), groupCandidates.end(),
+				[](const EnemyAttackCandidate& a, const EnemyAttackCandidate& b) {
+					return a.enemy->GetCrowdMemberIndex() < b.enemy->GetCrowdMemberIndex();
+				});
+
+			// 群衆ごとの攻撃スタイルに応じて、Attack / Approach / Standbyへ振り分ける
+			switch (ResolveAttackStyle(groupCandidates.front().enemy, groupCandidates.size())) {
+			case EnemyCrowdAttackStyle::GroupVolley:
+				AssignGroupVolley(groupCandidates, tokenSystem);
+				break;
+			case EnemyCrowdAttackStyle::LeaderOnly:
+				AssignLeaderOnly(groupCandidates, tokenSystem);
+				break;
+			case EnemyCrowdAttackStyle::SurroundThenAttack:
+				AssignSurroundThenAttack(groupCandidates, tokenSystem);
+				break;
+			case EnemyCrowdAttackStyle::Individual:
+			case EnemyCrowdAttackStyle::Auto:
+			default:
+				AssignIndividual(groupCandidates, tokenSystem);
+				break;
+			}
+		}
+	}
+
+	EnemyCrowdAttackStyle EnemyCombatDirector::ResolveAttackStyle(const BaseEnemy* enemy, size_t groupSize) const {
+		if (!enemy) {
+			// 敵情報が取れない場合は最も単純な個別攻撃にする
+			return EnemyCrowdAttackStyle::Individual;
+		}
+
+		const CrowdBehaviorSettings& behavior = enemy->GetCrowdBehavior();
+		if (behavior.attackStyle != EnemyCrowdAttackStyle::Auto) {
+			// スポーンエディタなどで明示された攻撃方式を優先する
+			return behavior.attackStyle;
+		}
+
+		// Autoでは群衆タイプの性格から攻撃方法を決める
+		switch (behavior.type) {
+		case EnemyCrowdBehaviorType::WaveAssault:
+		case EnemyCrowdBehaviorType::PressureCrowd:
+			return EnemyCrowdAttackStyle::GroupVolley;
+		case EnemyCrowdBehaviorType::Encircle:
+		case EnemyCrowdBehaviorType::DistributedEncircle:
+			return EnemyCrowdAttackStyle::SurroundThenAttack;
+		case EnemyCrowdBehaviorType::Formation:
+			return behavior.useCommander ? EnemyCrowdAttackStyle::LeaderOnly : EnemyCrowdAttackStyle::GroupVolley;
+		case EnemyCrowdBehaviorType::DensityAdaptive:
+			return groupSize >= 8 ? EnemyCrowdAttackStyle::GroupVolley : EnemyCrowdAttackStyle::Individual;
+		case EnemyCrowdBehaviorType::Rush:
+		case EnemyCrowdBehaviorType::Flocking:
+		case EnemyCrowdBehaviorType::FlowCrowd:
+		case EnemyCrowdBehaviorType::Spiral:
+		case EnemyCrowdBehaviorType::Hunting:
+		default:
+			return EnemyCrowdAttackStyle::Individual;
+		}
+	}
+
+	void EnemyCombatDirector::AssignIndividual(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const {
+		// 個別攻撃では近い敵を優先し、同程度なら要求順を優先する
+		std::sort(candidates.begin(), candidates.end(),
+			[this](const EnemyAttackCandidate& a, const EnemyAttackCandidate& b) {
+				const float distanceDiff = std::abs(a.request->GetDistance() - b.request->GetDistance());
+				if (distanceDiff > sameDistanceRange_) {
+					return a.request->GetDistance() < b.request->GetDistance();
+				}
+				return a.request->GetNumber() < b.request->GetNumber();
+			});
+
+		for (EnemyAttackCandidate& candidate : candidates) {
+			if (tokenSystem.TryGrantAttack(candidate.request, tokenSystem.GetIndividualAttackLimit())) {
+				// 攻撃トークンを取れた敵はそのまま攻撃へ進む
+				continue;
+			}
+
+			if (tokenSystem.TryAssignApproach(candidate.request)) {
+				// 攻撃できないが前に詰められる敵は、次の攻撃候補にする
+				continue;
+			}
+
+			// それ以外は密集を避けるため待機へ回す
+			tokenSystem.AssignStandby(candidate.request);
+		}
+	}
+
+	void EnemyCombatDirector::AssignGroupVolley(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const {
+		// 一斉攻撃ではグループ内の先頭から一定数まで攻撃許可を出す
+		const uint32_t groupLimit = (std::min)(tokenSystem.GetGroupAttackLimit(), static_cast<uint32_t>(candidates.size()));
+		for (uint32_t i = 0; i < candidates.size(); ++i) {
+			EnemyAttackCandidate& candidate = candidates[i];
+
+			if (i < groupLimit && tokenSystem.TryGrantAttack(candidate.request, tokenSystem.GetGroupAttackLimit())) {
+				// 一斉攻撃枠に入った敵だけ攻撃トークンを取る
+				continue;
+			}
+
+			if (tokenSystem.TryAssignApproach(candidate.request)) {
+				// 一斉攻撃枠外の近い敵は、次の波として前に出す
+				continue;
+			}
+
+			tokenSystem.AssignStandby(candidate.request);
+		}
+	}
+
+	void EnemyCombatDirector::AssignLeaderOnly(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const {
+		if (candidates.empty()) {
+			return;
+		}
+
+		// 統率者が指定されていればその順番を、無ければ先頭メンバーをリーダー扱いにする
+		const CrowdBehaviorSettings& behavior = candidates.front().enemy->GetCrowdBehavior();
+		const uint32_t leaderOrder = behavior.useCommander ?
+			(std::min)(behavior.commanderOrder, static_cast<uint32_t>(candidates.size() - 1)) :
+			0;
+
+		for (uint32_t i = 0; i < candidates.size(); ++i) {
+			EnemyAttackCandidate& candidate = candidates[i];
+			if (i == leaderOrder && tokenSystem.TryGrantAttack(candidate.request, tokenSystem.GetIndividualAttackLimit())) {
+				// リーダーだけに攻撃許可を出し、他メンバーは接近か待機にする
+				continue;
+			}
+
+			if (tokenSystem.TryAssignApproach(candidate.request)) {
+				continue;
+			}
+
+			tokenSystem.AssignStandby(candidate.request);
+		}
+	}
+
+	void EnemyCombatDirector::AssignSurroundThenAttack(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const {
+		uint32_t readyCount = 0;
+		for (const EnemyAttackCandidate& candidate : candidates) {
+			// 包囲成立判定として、一定距離内に入っている敵数を数える
+			if (candidate.request->GetDistance() <= surroundReadyDistance_) {
+				readyCount++;
+			}
+		}
+
+		if (readyCount < (std::min)(surroundReadyCount_, static_cast<uint32_t>(candidates.size()))) {
+			// 包囲ができるまでは攻撃せず、前進役と待機役に分ける
+			for (EnemyAttackCandidate& candidate : candidates) {
+				if (tokenSystem.TryAssignApproach(candidate.request)) {
+					continue;
+				}
+
+				tokenSystem.AssignStandby(candidate.request);
+			}
+			return;
+		}
+
+		// 包囲が成立したら、グループ一斉攻撃として許可を出す
+		AssignGroupVolley(candidates, tokenSystem);
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCombatDirector.h
+============================================================
+#pragma once
+#include "EnemyAttackCandidate.h"
+#include "EnemyAttackTokenSystem.h"
+#include "EnemyCrowdBehaviorData.h"
+#include <cstdint>
+#include <vector>
+
+namespace Character {
+
+	/// <summary>
+	/// 群衆ごとの攻撃方式を決め、Attack Tokenを使って攻撃役・接近役・待機役を割り当てる。
+	/// 攻撃の作戦判断をEnemyAttackRequestSystemから分離するためのクラス。
+	/// </summary>
+	class EnemyCombatDirector {
+	public:
+		// Combat Directorの内部パラメータを初期状態にする
+		void Initialize();
+
+		// 攻撃候補を群衆ごとに整理し、群衆タイプに応じて攻撃トークンを配る
+		void Direct(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem);
+
+	private:
+		// 群衆タイプと設定から、攻撃許可の出し方を決める
+		EnemyCrowdAttackStyle ResolveAttackStyle(const BaseEnemy* enemy, size_t groupSize) const;
+
+		// 個人順で攻撃許可を出す
+		void AssignIndividual(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const;
+
+		// 同じ群衆から複数体へ同時に攻撃許可を出す
+		void AssignGroupVolley(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const;
+
+		// 統率者だけを攻撃役へ回し、他メンバーは接近・待機へ回す
+		void AssignLeaderOnly(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const;
+
+		// 包囲がある程度成立した時だけ複数体へ攻撃許可を出す
+		void AssignSurroundThenAttack(std::vector<EnemyAttackCandidate>& candidates, EnemyAttackTokenSystem& tokenSystem) const;
+
+		float sameDistanceRange_ = 1.0f;			// 距離差がこの値以内なら要求順を優先する
+		uint32_t surroundReadyCount_ = 3;		// 包囲型で攻撃開始とみなす最低人数
+		float surroundReadyDistance_ = 12.0f;	// 包囲成立判定に使う距離
+	};
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h
@@ -33781,7 +34002,7 @@ void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entityManager, globalVariables, "PlayerSubWeapon", "AnimatedCube.gltf", false, false, this);
-	objectComponent_->SetSRT({ 0.55f,0.55f,0.55f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
+	objectComponent_->SetSRT({ 0.15f,0.15f,0.15f }, { 0.0f,0.0f,0.0f }, position);	// SRT設定
 
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
@@ -79235,7 +79456,7 @@ struct VertexHash {
 ============================================================
 File Path: project/DirectXGame.vcxproj
 ============================================================
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -79409,6 +79630,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Death\DeathSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackTokenSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCombatDirector.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp" />
@@ -79847,7 +80070,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiDebugSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackCandidate.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackTokenSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCombatDirector.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h" />
@@ -80175,7 +80401,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
 ============================================================
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="ソース ファイル">
@@ -81207,6 +81433,12 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackTokenSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCombatDirector.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp">
@@ -82483,7 +82715,16 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSpawnDebugSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackCandidate.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackTokenSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCombatDirector.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h">
