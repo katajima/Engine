@@ -286,6 +286,7 @@
     └── └── └── └── └── └── ├── BasePlayer.cpp
     └── └── └── └── └── └── └── BasePlayer.h
     └── └── └── └── └── └── Normal/
+    └── └── └── └── └──     ├── DodgeSuccessEffect.cpp
     └── └── └── └── └──     ├── DodgeSuccessEffect.h
     └── └── └── └── └──     ├── NormalPlayer.cpp
     └── └── └── └── └──     ├── NormalPlayer.h
@@ -315,6 +316,7 @@
     └── └── └── └── ├── EffectEditor.cpp
     └── └── └── └── ├── EffectEditor.h
     └── └── └── └── └── SlowMotion/
+    └── └── └── └──     ├── SlowMotionManager.cpp
     └── └── └── └──     ├── SlowMotionManager.h
     └── └── └── └──     └── SlowMotionRequest.h
     └── └── └── ├── Game/
@@ -24141,9 +24143,9 @@ namespace Character {
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuccessEffect.h
+File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuccessEffect.cpp
 ============================================================
-#pragma once
+﻿#include "DodgeSuccessEffect.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
@@ -24151,106 +24153,175 @@ File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuc
 
 namespace Character {
 
+	DodgeSuccessEffect::~DodgeSuccessEffect()
+	{
+		// プレイヤー破棄時に画面効果だけ残らないよう停止する
+		Stop();
+	}
+
+	void DodgeSuccessEffect::Initialize(Engine::Camera* camera)
+	{
+		camera_ = camera;	// 演出を適用するカメラを保持する
+		if (!camera_) {
+			return;
+		}
+
+		Engine::PostEffectPipeline* pipeline = camera_->GetPostEffectPipeline();
+		if (!pipeline) {
+			return;
+		}
+
+		//// 既に登録済みなら再利用し、未登録なら今回の演出用パスを追加する
+		//grayPass_ = pipeline->FindPass(kGrayPassName_);
+		//if (!grayPass_) {
+		//	camera_->AddEffectBlock(kGrayEffectName_, Engine::PostEffectBlockType::kGrayScale, false);
+		//	grayPass_ = pipeline->FindPass(kGrayPassName_);
+		//}
+
+		//// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
+		//vignettePass_ = pipeline->FindPass(kVignettePassName_);
+		//if (!vignettePass_) {
+		//	camera_->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
+		//	vignettePass_ = pipeline->FindPass(kVignettePassName_);
+		//}
+
+		// スロー中の速度感を出すため、画面中心へ向かうラジアルブラーを追加する
+		radialBlurPass_ = pipeline->FindPass(kRadialBlurPassName_);
+		if (!radialBlurPass_) {
+			camera_->AddEffectBlock(kRadialBlurEffectName_, Engine::PostEffectBlockType::kRadialBlur, false);
+			radialBlurPass_ = pipeline->FindPass(kRadialBlurPassName_);
+		}
+
+		//ConfigureVignette();		// 回避成功用のビネット強度を設定する
+		ConfigureRadialBlur();		// 回避成功用のラジアルブラー強度を設定する
+		SetPostEffectUse(false);	// 初期状態では演出を非表示にしておく
+	}
+
+	void DodgeSuccessEffect::Start()
+	{
+		isActive_ = true;
+		timer_ = 0.0f;	// 連続で成功した場合はポストエフェクト時間を最初から数え直す
+		SetPostEffectUse(true);
+	}
+
+	void DodgeSuccessEffect::Update(float deltaTime)
+	{
+		if (!isActive_) {
+			return;
+		}
+
+		// スロー演出とは別に、ポストエフェクトだけの寿命を進める
+		timer_ += deltaTime;
+
+		if (timer_ >= effectDuration_) {
+			Stop();
+		}
+	}
+
+	void DodgeSuccessEffect::Stop()
+	{
+		isActive_ = false;
+		timer_ = 0.0f;
+		SetPostEffectUse(false);
+	}
+
+	void DodgeSuccessEffect::ConfigureVignette()
+	{
+		if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
+			!vignettePass_->GetPostEffectData()->GetVignette()) {
+			return;
+		}
+
+		// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
+		auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
+		vignetteData->scale = 9.5f;
+		vignetteData->squared = 0.55f;
+	}
+
+	void DodgeSuccessEffect::ConfigureRadialBlur()
+	{
+		if (!radialBlurPass_ || !radialBlurPass_->GetPostEffectData() ||
+			!radialBlurPass_->GetPostEffectData()->GetRadialBlur()) {
+			return;
+		}
+
+		// centerは画面中心、numSamplesはサンプリング数、blurWidthはブラーの伸び幅として扱う
+		auto* radialBlurData = radialBlurPass_->GetPostEffectData()->GetRadialBlur()->Data();
+		radialBlurData->center = Vector2{ 0.5f, 0.5f };
+		radialBlurData->numSamples = 6;
+		radialBlurData->blurWidth = 0.035f;
+	}
+
+	void DodgeSuccessEffect::SetPostEffectUse(bool use)
+	{
+		if (grayPass_) {
+			grayPass_->SetUse(use);
+		}
+		if (vignettePass_) {
+			vignettePass_->SetUse(use);
+		}
+		if (radialBlurPass_) {
+			radialBlurPass_->SetUse(use);
+		}
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuccessEffect.h
+============================================================
+#pragma once
+
+namespace Engine {
+	class Camera;
+	class PostEffectPass;
+}
+
+namespace Character {
+
 	// 回避成功時のポストエフェクトを管理するクラス
 	class DodgeSuccessEffect {
 	public:
 		// 破棄時にポストエフェクトが残らないよう停止する
-		~DodgeSuccessEffect() { Stop(); }
+		~DodgeSuccessEffect();
 
 		// 使用するカメラへ回避成功用ポストエフェクトを登録する
-		void Initialize(Engine::Camera* camera) {
-			camera_ = camera;	// 演出を適用するカメラを保持する
-			if (!camera_) {
-				return;
-			}
-
-			Engine::PostEffectPipeline* pipeline = camera_->GetPostEffectPipeline();
-			if (!pipeline) {
-				return;
-			}
-
-			// 既に登録済みなら再利用し、未登録なら今回の演出用パスを追加する
-			grayPass_ = pipeline->FindPass(kGrayPassName_);
-			if (!grayPass_) {
-				camera_->AddEffectBlock(kGrayEffectName_, Engine::PostEffectBlockType::kGrayScale, false);
-				grayPass_ = pipeline->FindPass(kGrayPassName_);
-			}
-
-			// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
-			vignettePass_ = pipeline->FindPass(kVignettePassName_);
-			if (!vignettePass_) {
-				camera_->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
-				vignettePass_ = pipeline->FindPass(kVignettePassName_);
-			}
-
-			ConfigureVignette();		// 回避成功用のビネット強度を設定する
-			SetPostEffectUse(false);	// 初期状態では演出を非表示にしておく
-		}
+		void Initialize(Engine::Camera* camera);
 
 		// 回避成功ポストエフェクトを開始する
-		void Start() {
-			isActive_ = true;
-			timer_ = 0.0f;	// 連続で成功した場合はポストエフェクト時間を最初から数え直す
-			SetPostEffectUse(true);
-		}
+		void Start();
 
 		// ポストエフェクト時間を進め、時間切れで解除する
-		void Update(float deltaTime) {
-			if (!isActive_) {
-				return;
-			}
-
-			// スロー演出とは別に、ポストエフェクトだけの寿命を進める
-			timer_ += deltaTime;
-
-			if (timer_ >= effectDuration_) {
-				Stop();
-			}
-		}
+		void Update(float deltaTime);
 
 		// ポストエフェクトを即座に停止する
-		void Stop() {
-			isActive_ = false;
-			timer_ = 0.0f;
-			SetPostEffectUse(false);
-		}
+		void Stop();
 
 	private:
 		// 回避成功用ビネットのパラメータを調整する
-		void ConfigureVignette() {
-			if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
-				!vignettePass_->GetPostEffectData()->GetVignette()) {
-				return;
-			}
+		void ConfigureVignette();
 
-			// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
-			auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
-			vignetteData->scale = 9.5f;
-			vignetteData->squared = 0.55f;
-		}
+		// 回避成功用ラジアルブラーのパラメータを調整する
+		void ConfigureRadialBlur();
 
 		// 登録済みポストエフェクトの使用状態をまとめて切り替える
-		void SetPostEffectUse(bool use) {
-			if (grayPass_) {
-				grayPass_->SetUse(use);
-			}
-			if (vignettePass_) {
-				vignettePass_->SetUse(use);
-			}
-		}
+		void SetPostEffectUse(bool use);
 
 	private:
-		static constexpr const char* kGrayEffectName_ = "DodgeSuccessGray";				// グレースケール登録名
-		static constexpr const char* kGrayPassName_ = "GrayScale_DodgeSuccessGray";		// グレースケールパス検索名
-		static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";		// ビネット登録名
+		static constexpr const char* kGrayEffectName_ = "DodgeSuccessGray";					// グレースケール登録名
+		static constexpr const char* kGrayPassName_ = "GrayScale_DodgeSuccessGray";			// グレースケールパス検索名
+		static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";			// ビネット登録名
 		static constexpr const char* kVignettePassName_ = "Vignette_DodgeSuccessVignette";	// ビネットパス検索名
+		static constexpr const char* kRadialBlurEffectName_ = "DodgeSuccessRadialBlur";		// ラジアルブラー登録名
+		static constexpr const char* kRadialBlurPassName_ = "RadialBlur_DodgeSuccessRadialBlur";	// ラジアルブラーパス検索名
 
-		Engine::Camera* camera_ = nullptr;						// 演出を追加するカメラ
-		Engine::PostEffectPass* grayPass_ = nullptr;			// 回避成功中に使用するグレースケールパス
-		Engine::PostEffectPass* vignettePass_ = nullptr;		// 回避成功中に使用するビネットパス
-		bool isActive_ = false;									// 演出再生中か
-		float timer_ = 0.0f;									// 演出の経過時間
-		float effectDuration_ = 0.35f;							// ポストエフェクトを維持する時間
+		Engine::Camera* camera_ = nullptr;					// 演出を追加するカメラ
+		Engine::PostEffectPass* grayPass_ = nullptr;		// 回避成功中に使用するグレースケールパス
+		Engine::PostEffectPass* vignettePass_ = nullptr;	// 回避成功中に使用するビネットパス
+		Engine::PostEffectPass* radialBlurPass_ = nullptr;	// 回避成功中に使用するラジアルブラーパス
+		bool isActive_ = false;								// 演出再生中か
+		float timer_ = 0.0f;								// 演出の経過時間
+		float effectDuration_ = 0.35f;						// ポストエフェクトを維持する時間
 	};
 }
 
@@ -24261,6 +24332,7 @@ File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPl
 #include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
@@ -24467,7 +24539,7 @@ namespace Character {
 
 		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
 		if (slowMotionManager_) {
-			slowMotionManager_->Update();
+			slowMotionManager_->Update(targetCharacters);
 		}
 
 		// 回避成功ポストエフェクトはスロー中でも実時間で解除したいので、固定デルタタイムで進める
@@ -24751,7 +24823,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.cpp
 ============================================================
-#include "NormalPlayerState.h"
+﻿#include "NormalPlayerState.h"
 #include "NormalPlayer.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletManager.h>
@@ -24987,7 +25059,7 @@ namespace Character {
 		anima->SetIsLoop(false);					// 回避は短い単発モーションとして扱う
 		anima->SetIsPlaying(true);					// アニメーション再生
 		anima->SetAnimationSpeed(1.5f);				// 既存走りモーションを素早く再生する
-		anima->SetAnimation("SwordRun01", 0.05f);	// 専用回避アニメが無いので走りを短くブレンドする
+		anima->SetAnimation("Rig|Roll", 0.05f);	// 専用回避アニメが無いので走りを短くブレンドする
 	}
 
 #pragma endregion // 回避
@@ -25147,7 +25219,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 
@@ -25229,8 +25301,8 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;					// 回避経過時間
-		float duration_ = 0.25f;				// 回避の継続時間
-		float speed_ = 35.0f;					// 回避中の移動速度
+		float duration_ = 0.75f;				// 回避の継続時間
+		float speed_ = 15.0f;					// 回避中の移動速度
 		float staminaCost_ = 20.0f;				// 回避開始時に消費するスタミナ
 		Vector3 direction_ = { 0.0f,0.0f,1.0f };	// 回避に使うワールド方向
 		bool isDirectionFixed_ = false;			// 回避方向を決定済みか
@@ -27262,68 +27334,129 @@ private:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionManager.cpp
+============================================================
+#include "SlowMotionManager.h"
+
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
+namespace Character {
+
+	SlowMotionManager::~SlowMotionManager()
+	{
+		// 破棄時は内部状態だけを停止する
+		Stop();
+	}
+
+	void SlowMotionManager::Request(const SlowMotionRequest& request)
+	{
+		if (isActive_ && request.GetPriority() < activePriority_) {
+			return;	// 優先度が低いリクエストは現在のスローを邪魔しない
+		}
+
+		// 受け付けたリクエスト内容を現在の対象スロー演出として適用する
+		isActive_ = true;
+		timer_ = 0.0f;
+		duration_ = request.GetDuration();
+		targetTimeScale_ = request.GetTimeScale();
+		activePriority_ = request.GetPriority();
+	}
+
+	void SlowMotionManager::Update(const std::vector<const BaseCharacter*>& targets)
+	{
+		if (!isActive_) {
+			// 非スロー中も現在の敵を通常速度へ戻し、前回スローの残りを消す
+			ApplyTargets(targets, normalTimeScale_);
+			return;
+		}
+
+		// プレイヤーは通常速度のままにしたいので、管理時間は固定デルタタイムで進める
+		timer_ += Engine::MyGame::BaseDeltaTime();
+		if (timer_ >= duration_) {
+			Stop();
+			ApplyTargets(targets, normalTimeScale_);
+			return;
+		}
+
+		// スロー中は対象キャラクターだけ時間倍率を下げる
+		ApplyTargets(targets, targetTimeScale_);
+	}
+
+	void SlowMotionManager::Stop()
+	{
+		if (!isActive_) {
+			return;
+		}
+
+		// 管理中のリクエスト状態をリセットする
+		isActive_ = false;
+		timer_ = 0.0f;
+		duration_ = 0.0f;
+		targetTimeScale_ = normalTimeScale_;
+		activePriority_ = 0;
+	}
+
+	void SlowMotionManager::ApplyTargets(const std::vector<const BaseCharacter*>& targets, float timeScale)
+	{
+		for (const BaseCharacter* target : targets) {
+			if (!target || target->GetCharacterType() != Type::Enemy) {
+				continue;
+			}
+
+			// ロックオン用のリストはconst参照なので、時間倍率だけ変更するために可変参照へ戻す
+			BaseCharacter* mutableTarget = const_cast<BaseCharacter*>(target);
+			if (!mutableTarget->GetObjectComponent()) {
+				continue;
+			}
+
+			// 敵だけ遅くすることで、プレイヤーは通常速度でカウンターへ移れる
+			mutableTarget->GetObjectComponent()->SetTimeSpeed(timeScale);
+		}
+	}
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionManager.h
 ============================================================
 #pragma once
 
 #include "DirectXGame/application/base/Effect/SlowMotion/SlowMotionRequest.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include <vector>
+
+namespace Character {
+	class BaseCharacter;
+}
 
 namespace Character {
 
-	// スロー演出リクエストを受け取り、ゲーム全体の時間倍率を管理するクラス
+	// スロー演出リクエストを受け取り、対象キャラクターの時間倍率を管理するクラス
 	class SlowMotionManager {
 	public:
-		// 破棄時に時間倍率が残らないよう、管理中のスローを解除する
-		~SlowMotionManager() { Stop(); }
+		// 破棄時に内部状態を停止する
+		~SlowMotionManager();
 
 		// スロー演出リクエストを受け付ける
-		void Request(const SlowMotionRequest& request) {
-			if (!isActive_) {
-				restoreTimeScale_ = Engine::MyGame::GetTimeScale();	// 演出前の時間倍率を退避する
-			}
-			else if (request.GetPriority() < activePriority_) {
-				return;	// 優先度が低いリクエストは現在のスローを邪魔しない
-			}
+		void Request(const SlowMotionRequest& request);
 
-			isActive_ = true;
-			timer_ = 0.0f;
-			duration_ = request.GetDuration();
-			activePriority_ = request.GetPriority();
-			Engine::MyGame::SetTimeScale(request.GetTimeScale());
-		}
-
-		// スロー演出の時間を進め、終了したら元の時間倍率へ戻す
-		void Update() {
-			if (!isActive_) {
-				return;
-			}
-
-			// スロー中でも演出の寿命は実時間基準で進める
-			timer_ += Engine::MyGame::BaseDeltaTime();
-			if (timer_ >= duration_) {
-				Stop();
-			}
-		}
+		// スロー演出の時間を進め、対象キャラクターへ時間倍率を反映する
+		void Update(const std::vector<const BaseCharacter*>& targets);
 
 		// 現在のスロー演出を即座に解除する
-		void Stop() {
-			if (!isActive_) {
-				return;
-			}
+		void Stop();
 
-			Engine::MyGame::SetTimeScale(restoreTimeScale_);
-			isActive_ = false;
-			timer_ = 0.0f;
-			duration_ = 0.0f;
-			activePriority_ = 0;
-		}
+	private:
+		// 対象キャラクターへ現在の時間倍率を反映する
+		void ApplyTargets(const std::vector<const BaseCharacter*>& targets, float timeScale);
 
 	private:
 		bool isActive_ = false;			// スロー演出を適用中か
 		float timer_ = 0.0f;			// 現在のスロー演出の経過時間
 		float duration_ = 0.0f;			// 現在のスロー演出の継続時間
-		float restoreTimeScale_ = 1.0f;	// スロー終了時に戻す時間倍率
+		float targetTimeScale_ = 1.0f;	// 対象キャラクターへ適用する時間倍率
+		float normalTimeScale_ = 1.0f;	// スロー終了時に対象キャラクターへ戻す時間倍率
 		int activePriority_ = 0;		// 現在適用中のスロー優先度
 	};
 }
@@ -27336,19 +27469,19 @@ File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionRequ
 
 namespace Character {
 
-	// スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
+	// 対象スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
 	class SlowMotionRequest {
 	public:
-		// 回避成功用のスロー演出リクエストを生成する
+		// 回避成功用の対象スロー演出リクエストを生成する
 		static SlowMotionRequest CreateDodgeSuccess() {
 			SlowMotionRequest request;	// 回避成功時に使うスロー設定
-			request.timeScale_ = 0.18f;
-			request.duration_ = 0.18f;
+			request.timeScale_ = 0.10f;
+			request.duration_ = 1.0f;
 			request.priority_ = 10;
 			return request;
 		}
 
-		// 適用したい時間倍率を取得する
+		// 対象へ適用したい時間倍率を取得する
 		float GetTimeScale() const { return timeScale_; }
 
 		// スロー演出を維持する時間を取得する
@@ -27358,7 +27491,7 @@ namespace Character {
 		int GetPriority() const { return priority_; }
 
 	private:
-		float timeScale_ = 1.0f;	// リクエスト中に適用する時間倍率
+		float timeScale_ = 1.0f;	// リクエスト中に対象へ適用する時間倍率
 		float duration_ = 0.0f;	// リクエストの継続時間
 		int priority_ = 0;		// 現在のスローより優先して上書きできるかの値
 	};
@@ -27930,7 +28063,7 @@ namespace Game {
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
 		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 10, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 20, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
@@ -27945,7 +28078,7 @@ namespace Game {
 		// WAVE 2: 左右から寄せ、片側にはあえて逃げ道を残す（2群衆 / 合計13体）
 		const Character::CrowdBehaviorSettings wave2Encircle = Character::CrowdBehaviorSettings::Encircle(12.0f);
 		const Character::CrowdBehaviorSettings wave2Distributed = Character::CrowdBehaviorSettings::DistributedEncircle(15.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 15, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 25, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 5, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
 		data.battleWaveIndex_ = 2;
 		data.time_.max = 28.0f;
@@ -27960,7 +28093,7 @@ namespace Game {
 		// WAVE 3: 前後から列が入れ替わって攻める波状攻撃（2群衆 / 合計17体）
 		const Character::CrowdBehaviorSettings wave3Assault = Character::CrowdBehaviorSettings::WaveAssault(2.2f, 3);
 		const Character::CrowdBehaviorSettings wave3Line = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::Line);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 20, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 30, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
 		data.battleWaveIndex_ = 3;
 		data.time_.max = 32.0f;
@@ -27975,7 +28108,7 @@ namespace Game {
 		// WAVE 4: 流動する外周と役割分担する追跡隊で移動を強制する（2群衆 / 合計20体）
 		const Character::CrowdBehaviorSettings wave4Flow = Character::CrowdBehaviorSettings::FlowCrowd(13.0f);
 		const Character::CrowdBehaviorSettings wave4Hunting = Character::CrowdBehaviorSettings::Hunting();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 15, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 25, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 8, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 2, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
 		data.battleWaveIndex_ = 4;
@@ -27992,7 +28125,7 @@ namespace Game {
 		const Character::CrowdBehaviorSettings wave5Pressure = Character::CrowdBehaviorSettings::PressureCrowd();
 		const Character::CrowdBehaviorSettings wave5Adaptive = Character::CrowdBehaviorSettings::DensityAdaptive();
 		const Character::CrowdBehaviorSettings wave5Vanguard = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::VShape);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 18, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 28, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 8, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
 		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
 		data.battleWaveIndex_ = 5;
@@ -80413,8 +80546,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerWeapon.cpp" />
@@ -80775,6 +80910,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
@@ -80782,6 +80918,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />
@@ -81531,6 +81669,12 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
@@ -83435,6 +83579,15 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
