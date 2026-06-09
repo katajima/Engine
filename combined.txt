@@ -1713,6 +1713,7 @@ File Path: project/DirectXGame/application/base/Attack/AttackController.cpp
 
 void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 	Character::ParameterComponent* base, Character::BaseCharacter* owner) {
+	// 攻撃データやデバッグ調整に使うグローバル変数を保持する
 	this->globalVariables = globalVariables;
 
 	// ダメージ計算用ステータスの初期化
@@ -1733,11 +1734,13 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 void AttackController::Update(const Character::CharacterContext& ctx) {
 	// ヒットカウンターの更新
 	if (!isStopHitTimer_) {
+		// ヒット間隔の計測を進め、連続ヒット表示や判定に使う
 		hitCounter_.Update(ctx.dt);
 	}
 
 	if (IsAttack() || isDebugEditor_) {
 		// コンボシステムの更新
+		// デバッグエディタ中は攻撃中でなくてもコンボ調整を動かす
 		comboSystem_->Update(ctx);
 	}
 };
@@ -1763,14 +1766,14 @@ namespace Engine {
 
 
 /// <summary>
-/// 攻撃を管理するクラス。
+/// 攻撃状態、コンボ、ヒットカウント、ロックオンをまとめて管理するクラス。
 /// </summary>
 class AttackController {
 public:
-	// 初期化
+	// 攻撃に必要な各サブシステムを初期化する
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
 		Character::ParameterComponent* base, Character::BaseCharacter* owner);
-	// 更新
+	// 攻撃状態に応じてヒットカウンターとコンボを更新する
 	void Update(const Character::CharacterContext& ctx);
 
 	
@@ -1781,7 +1784,7 @@ public:
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
 	// コンボシステムクラス取得
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
-	// ロックオンシステム更新
+	// ロックオンシステム取得
 	LockOnSystem* GeyLockOnSysutem() { return lockOnSystem_.get(); }
 
 	// 攻撃中か取得
@@ -1789,7 +1792,7 @@ public:
 	// 攻撃中か設定
 	void SetIsAttack(bool is) { isAttack_ = is; };
 
-	// treu
+	// ヒットカウンターの時間更新を止めるか設定
 	void IsStopHitTimer(bool is) { isStopHitTimer_ = is; };
 
 public:
@@ -1808,10 +1811,11 @@ private:
 private:
 	// 攻撃中か
 	bool isAttack_ = false;
-	//
+	// ヒットカウンターの経過時間を止めるか
 	bool isStopHitTimer_ = false;
 
 private:
+	// 攻撃設定やデバッグ編集で使うグローバル変数
 	Engine::GlobalVariables* globalVariables = nullptr;
 
 
@@ -6397,6 +6401,7 @@ namespace Combo {
 
 	// 開始
 	void ComboHitBox::Enter(Character::BaseCharacter* owner, Type type) {
+		// 使用者と攻撃種別を保持し、以降のヒットボックス更新で参照する
 		this->type = type;
 		this->owner = owner;
 		// ヒットボックスシステムを渡す
@@ -6406,6 +6411,7 @@ namespace Combo {
 
 		// 常時なら
 		if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kInfinite) {
+			// 常時型は開始時に生成しておき、受付時間外は無効化して使い回す
 			hitBoxSystem->AddHitBox(id, owner, collData_, perent);
 			hitBox = hitBoxSystem->GetHitBoxInstance(id);
 			hitBox->Disable(Vector4{ 1,1,1,0.0f });
@@ -6415,6 +6421,7 @@ namespace Combo {
 
 	// 更新
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
+		(void)ctx;
 		// ノックバック方向
 		collData_.reactionData.normal = direction;
 
@@ -6422,16 +6429,19 @@ namespace Combo {
 		if (Type::kMelle == type || Type::kMix == type) {
 			// 一時的なコライダーなら
 			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
+				// 一時型は生成条件を満たした瞬間だけヒットボックスを追加する
 				// 出現方法によっての処理
 				switch (collData_.hitBoxData.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
+					// 指定された開始時間を過ぎたら生成する
 					if (timer >= collData_.hitBoxData.windowStart) {
 						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
+					// 空中攻撃などで、着地した瞬間に発生する攻撃用
 					if (movementComponent->GetIsLanding()) {
 						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
 						isPopHitBox_ = true;
@@ -6448,6 +6458,7 @@ namespace Combo {
 			// 常時なら
 			else if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kInfinite) {
 				if (hitBox) {
+					// 受付時間内だけ有効化し、時間外は透明なデバッグ色で無効化する
 					if (timer >= collData_.hitBoxData.windowStart && timer <= collData_.hitBoxData.windowStart + collData_.hitBoxData.lifeTime) {
 						hitBox->Enable();
 					}
@@ -6461,15 +6472,18 @@ namespace Combo {
 
 	// 終了
 	void ComboHitBox::Exit() {
+		// 次のコンボへ生成済み状態を持ち越さないようリセットする
 		isPopHitBox_ = false;
 		hitBoxSystem->Clear();
 		if (hitBox) {
+			// 常時型ヒットボックスの当たり履歴も次回用に消す
 			hitBox->Disable();
 			hitBox->ClearContactRecord();
 		}
 	}
 
 	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {
+		// ヒットボックス形状に、コンボデータ側のリアクションと受付設定を合成する
 		HitBox::CollData data = hitBoxData;
 		// リアクションデータ
 		data.reactionData = combo.hitReaction;
@@ -6552,16 +6566,19 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Input/ComboButton.c
 
 // 押したら
 bool Combo::ComboButton::IsPressed(const InputSystem& inputSystem) const {
+	// コンボ用ボタンを入力システム用ボタンへ変換して、押下中か確認する
 	return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
 }
 
 // 押した瞬間
 bool Combo::ComboButton::IsTriggered(const InputSystem& inputSystem) const {
+	// このフレームに押された入力だけを拾う
 	return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
 }
 
 // 離した瞬間
 bool Combo::ComboButton::IsReleased(const InputSystem& inputSystem) const {
+	// このフレームに離された入力だけを拾う
 	return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
 }
 
@@ -6569,6 +6586,7 @@ bool Combo::ComboButton::IsReleased(const InputSystem& inputSystem) const {
 // 押して反応する条件
 bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
 
+	// 設定された入力条件に合わせて、押下中・押した瞬間・離した瞬間を組み合わせる
 	switch (type_)
 	{
 	case ComboButtonInputType::kPressed: // 押したら
@@ -6604,8 +6622,10 @@ bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
 /// コンボボタンを順番に登録
 /// </summary>
 void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons) {
+	// 新しいコンボ入力列を登録するため、古い入力列を破棄する
 	comboButtons_.clear();
 	for (auto& b : buttons) {
+		// ボタン設定は値としてコピーして保持する
 		comboButtons_.emplace_back(b);
 	}
 }
@@ -6616,6 +6636,7 @@ void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons
 bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 	if (comboButtons_.empty()) return false;
 	// 入力判定
+	// 現状は順番入力ではなく、登録されたどれかのボタンが成立したら次コンボへ進める
 	for (auto& bu : comboButtons_) {
 		if (bu.IsInput(*ctx.input)) {
 			return true;
@@ -6628,6 +6649,7 @@ bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 
 GamePadButton Combo::ConvertGamePadButton(ComboGamePadButton button)
 {
+	// コンボデータ用の列挙値を、InputSystemが理解する列挙値へ対応付ける
 	switch (button)
 	{
 	case Combo::ComboGamePadButton::GAMEPAD_Up:
@@ -6713,6 +6735,7 @@ namespace Combo {
 	};
 
 
+	// コンボデータ上で扱うゲームパッドボタン種別
 	enum class ComboGamePadButton {
 		GAMEPAD_Up = 0,			// 十字(上)
 		GAMEPAD_Down = 1,		// 十字(下)
@@ -6731,6 +6754,7 @@ namespace Combo {
 		GAMEPAD_Max       // 最大ボタン数
 	};
 
+	// コンボ用ボタン種別を入力システム用ボタン種別へ変換する
 	GamePadButton ConvertGamePadButton(ComboGamePadButton button);
 
 	/// <summary>
@@ -6754,12 +6778,12 @@ namespace Combo {
 			// 押して反応する条件
 			bool IsInput(const InputSystem& inputSystem) const;
 
-		// どのボタンに反応するか
+		// どのボタンに反応するかを設定する
 		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
 
 	private:
-		ComboGamePadButton button_;
-		ComboButtonInputType type_ = ComboButtonInputType::kPressed;
+		ComboGamePadButton button_;	// 判定対象のゲームパッドボタン
+		ComboButtonInputType type_ = ComboButtonInputType::kPressed;	// 押下、トリガー、リリースなどの入力条件
 	};
 
 
@@ -6783,7 +6807,7 @@ namespace Combo {
 	private:
 		// コンボ移行ボタン
 		std::vector<ComboButton> comboButtons_;
-		size_t currentIndex_ = 0;
+		size_t currentIndex_ = 0;	// 将来の順番入力判定で使う現在位置
 	};
 
 
@@ -6791,6 +6815,7 @@ namespace Combo {
 	
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboAnimation.cpp
@@ -7964,17 +7989,21 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCance
 namespace Combo {
 
 	void CancelReceiver::Enter() {
+		// コンボ開始時はキャンセル未成立の状態から始める
 		isCancel_ = false;				// キャンセルフラグをfalseに
 	};
 	
 	void CancelReceiver::Exit() {
+		// 次のコンボへ状態を持ち越さないようにリセットする
 		isCancel_ = false;				// キャンセルフラグをfalseに
 	};
 
 	void CancelReceiver::Update(const Character::CharacterContext& ctx, const GlobalCondition& data,float timer) {
+		// 通常キャンセルの受付時間内かを判定する
 		bool isCancelStart = data.stateCancel.startTime <= timer;			// キャンセル開始時間を過ぎたら
 		bool isCancelEnd = data.stateCancel.endTime >= timer;				// キャンセル終了時間より前なら
 
+		// 移動キャンセルの受付時間内かを判定する
 		bool isCancelMoveStart = data.stateMoveCancel.startTime  <= timer;			// キャンセル開始時間を過ぎたら
 		bool isCancelMoveEnd = data.stateMoveCancel.endTime >= timer;				// キャンセル終了時間より前なら
 		
@@ -7982,10 +8011,11 @@ namespace Combo {
 		bool isMoveStick = ctx.worldStickDirection.Length() != 0;
 		bool isJumpCancel = ctx.inputData.jumpTrigger;
 
-		
+
 		
 		// 移動スティックによる
 		if (isCancelMoveStart && isCancelMoveEnd && data.isMoveCancel) {
+			// 移動入力があれば、移動キャンセル成立として扱う
 			if (!isCancel_ && isMoveStick) {
 				isCancel_ = true;
 			}
@@ -7993,6 +8023,7 @@ namespace Combo {
 
 
 		if (isJumpCancel && !ctx.isJumpAttacking && data.isCancel) {
+			// ジャンプ攻撃中でなければ、ジャンプ入力によるキャンセルを許可する
 			if (!isCancel_) {
 				isCancel_ = true;
 			}
@@ -8003,6 +8034,7 @@ namespace Combo {
 		// キャンセル受付時間内なら
 		if (isCancelStart && isCancelEnd && data.isCancel) {
 			if (!isCancel_) {
+				// 登録済みの次コンボ入力が成立したらキャンセル可能にする
 				isCancel_ = comboSequence_.Update(ctx);
 			}
 			return;
@@ -8010,6 +8042,7 @@ namespace Combo {
 	};
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCancelReceiver.h
@@ -8173,15 +8206,18 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCondi
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
 void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterContext& ctx,EndConditionType type, ComboButton button, float timer, float endTime, bool isPress){
+	// 終了条件の種類に応じて、コンボ終了判定に使うタイマーを進める
 	// 終了タイプ
 	switch (type)
 	{
 	case Combo::EndConditionType::kOnGround:	// 着地したら
+		// 空中にいる間だけタイマーを進め、着地で終了条件を満たす
 		if (!ctx.onGround) {
 			timer += ctx.dt;
 		}
 		break;
 	case Combo::EndConditionType::kOnButtonRelease:	// 押し続けているなら
+		// 指定ボタンを押し続けている間だけ受付時間を伸ばす
 		if (button.IsPressed(*ctx.input)) {
 			if (isPress) {
 				timer += ctx.dt;
@@ -8192,15 +8228,19 @@ void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterCon
 		}
 		break;
 	case Combo::EndConditionType::kOnMeterEmpty:	// 何かのメータが空なら
+		// メーター連携は今後の拡張用
 
 		break;
 	case Combo::EndConditionType::kOnTimer:	// 時間が過ぎたら
+		// タイマー終了型は終了時刻へ直接合わせる
 		timer = endTime;
 		break;
 	case Combo::EndConditionType::kOnHit:	// 何かに当たったら
+		// ヒット通知連携は今後の拡張用
 
 		break;
 	case Combo::EndConditionType::kManual:	// 特殊
+		// 手動終了型は外部側で終了を制御する
 
 		break;
 	default:
@@ -8221,9 +8261,12 @@ class MovementComponent;			// ジャンプシステム
 
 namespace Combo {
 
+	/// <summary>
+	/// コンボの終了条件タイプごとのタイマー更新をまとめる補助クラス。
+	/// </summary>
 	class ConditionFunction {
 	public:
-		// 終了条件によっての処理
+		// 終了条件によってタイマーや押下状態を更新する
 		static void ConditionTypeUpdate(const Character::CharacterContext& ctx, EndConditionType type, ComboButton button,
 		float timer, float endTime, bool isPress);
 	};
@@ -8262,25 +8305,29 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboEndCo
 
 namespace Combo {
 
+	/// <summary>
+	/// コンボを終了する条件と終了時刻を管理する。
+	/// </summary>
 	class EndCondition {
 	public:
-		// 開始
+		// 終了条件の初期値をコンボデータから設定する
 		void Enter(const GlobalCondition& data);
-		//　終了
+		// 終了条件の状態をリセットする
 		void Exit();
-		// 更新
+		// 現在の状態と経過時間から終了条件を更新する
 		void Update(const Character::CharacterContext& ctx, const GlobalCondition& data,float time);
 	public:
-		//
+		// コンボが終了可能になる時間を取得する
 		float GetComboEndTime() const { return endTime_; }
 	private:
 		ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
 
 		float endTime_ = 0.0f;				// コンボ終了時間
-		bool isPress_ = false;
+		bool isPress_ = false;				// 押しっぱなし条件を継続中か
 	};
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboNextCondition.cpp
@@ -8315,21 +8362,24 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboNextC
 
 namespace Combo {
 
+	/// <summary>
+	/// 次のコンボへ移行できる条件と受付時刻を管理する。
+	/// </summary>
 	class NextCondition {
 	public:
-		// 開始
+		// 次段条件の初期値をコンボデータから設定する
 		void Enter(const GlobalCondition& data);
-		//　終了
+		// 次段条件の状態をリセットする
 		void Exit();
-		// 更新
+		// 現在の状態と経過時間から次段受付条件を更新する
 		void Update(const Character::CharacterContext& ctx, const GlobalCondition& data, float time);
 	public:
 		// 次のコンボ移行する時間
 		float GetComboNextTime() const { return nextTime_; }
 	private:
 		ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
-		float nextTime_ = 0.0f;				// コンボ終了時間
-		bool isPress_ = false;
+		float nextTime_ = 0.0f;				// 次コンボへ移行可能になる時間
+		bool isPress_ = false;				// 押しっぱなし条件を継続中か
 	};
 
 
@@ -10032,15 +10082,18 @@ File Path: project/DirectXGame/application/base/Attack/LockOn/LockOnSystem.cpp
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 void LockOnSystem::Initialize(Character::BaseCharacter* owner) {
+	// ロックオンを行う攻撃者と、その視線基準になるカメラ管理を保持する
 	this->owner = owner;
 	cameraManager = owner->GetCameraManager();
 }
 
 const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
 	if (targetCharacters.empty()) {
+		// 候補が無い場合はロックオンしない
 		return nullptr;
 	}
 
+	// 設定されたロックオン方式に応じてターゲットを選ぶ
 	switch (data_.type) {
 	case LockOnType::kHit: // 以前ヒットした相手にロックオン       
 		return GetHitLockOn();
@@ -10056,6 +10109,7 @@ const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
 
 const Character::BaseCharacter* LockOnSystem::GetTarget() const {
 	if (!targetCharacters.empty()) {
+		// 明示ターゲットがある場合は先頭を現在ターゲットとして扱う
 		return targetCharacters.front();
 	}
 	else {
@@ -10065,6 +10119,7 @@ const Character::BaseCharacter* LockOnSystem::GetTarget() const {
 
 
 Vector3 LockOnSystem::GetOwnerPos() const {
+	// スコア計算で何度も使う所有者座標を取得する
 	return owner->GetWorldPosition();
 }
 
@@ -10083,10 +10138,12 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 
 	if (aimDir.LengthSq() < 1e-6f)
 	{
+		// カメラ方向が無効な時は安全にロックオンしない
 		return nullptr;
 	}
 	aimDir = aimDir.Normalize();
 
+	// 角度と距離のスコアが最も小さい有効な敵を探す
 	auto it = std::min_element(
 		targetCharacters.begin(),
 		targetCharacters.end(),
@@ -10115,6 +10172,7 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 
 	const Character::BaseCharacter* bestTarget = *it;
 	if (bestTarget && data_.radius >= bestTarget->GetWorldPosition().Distance(ownerPos)) {
+		// 半径内かつ生存中の敵だけをロックオン対象として返す
 		if (bestTarget->GetAlive() && !bestTarget->GetDelete())
 			return bestTarget;
 	}
@@ -10124,10 +10182,12 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
 	if (targetCharacters.empty())
 	{
+		// 候補が無い場合はヒット履歴ロックオンも成立しない
 		return nullptr;
 	}
 	Vector3 ownerPos = GetOwnerPos();
 	for (auto& target : targetCharacters) {
+		// 最後にヒットしたタグ番号と一致し、現在も有効な敵を優先する
 		if (target->GetTagNumber() == hitTag && target->GetAlive() && !target->GetDelete() &&
 			target->GetCurrentMainState() != Character::CharacterMainState::Die) {
 			if (data_.radius >= target->GetWorldPosition().Distance(ownerPos)) {
@@ -10145,12 +10205,14 @@ float LockOnSystem::CalcSoftLockScore(
 	const Vector3& aimDir,
 	const Character::BaseCharacter* enemy)const
 {
+	// プレイヤーから敵への水平ベクトルを作る
 	Vector3 toEnemy = enemy->GetWorldPosition() - playerPos;
 	toEnemy.y = 0.0f;
 
 	float distSq = toEnemy.LengthSq();
 	if (distSq < 1e-6f) return FLT_MAX;
 
+	// 方向ベクトルに正規化して、カメラ前方との角度を計算する
 	Vector3 dir = toEnemy / std::sqrt(distSq);
 
 	// 角度（dotが1に近いほど良い）
@@ -10161,8 +10223,10 @@ float LockOnSystem::CalcSoftLockScore(
 	constexpr float kAngleWeight = 2.0f;
 	constexpr float kDistWeight = 0.15f;
 
+	// 角度を強め、距離を弱めに足して「向いている近い敵」を優先する
 	return angle * kAngleWeight + std::sqrt(distSq) * kDistWeight;
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/LockOn/LockOnSystem.h
@@ -16739,6 +16803,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiD
 namespace Character {
 #ifdef _DEBUG
 	namespace {
+		// 攻撃リングをImGui表示用の文字列に変換する
 		const char* ToText(EnemyAttackRing ring) {
 			switch (ring) {
 			case EnemyAttackRing::TooClose: return "TooClose";
@@ -16750,6 +16815,7 @@ namespace Character {
 			}
 		}
 
+		// 群衆レイヤーをImGui表示用の文字列に変換する
 		const char* ToText(EnemyCrowdLayer layer) {
 			switch (layer) {
 			case EnemyCrowdLayer::Attack: return "Attack";
@@ -16759,6 +16825,7 @@ namespace Character {
 			}
 		}
 
+		// 群衆の行動タイプをImGui表示用の文字列に変換する
 		const char* ToText(EnemyCrowdBehaviorType type) {
 			switch (type) {
 			case EnemyCrowdBehaviorType::Rush: return "Rush";
@@ -16776,6 +16843,7 @@ namespace Character {
 			}
 		}
 
+		// 役割レイヤーごとにデバッグ線の色を変える
 		Vector4 LayerColor(EnemyCrowdLayer layer) {
 			switch (layer) {
 			case EnemyCrowdLayer::Attack: return { 1.0f, 0.2f, 0.2f, 1.0f };
@@ -16788,16 +16856,19 @@ namespace Character {
 #endif
 
 	void EnemyAiDebugSystem::Initialize(Engine::LineCommon* lineCommon) {
+		// デバッグ線を描画するための共通描画クラスを保持する
 		lineCommon_ = lineCommon;
 	}
 
 	void EnemyAiDebugSystem::Update(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
 #ifdef _DEBUG
+		// Debugビルドでは操作パネルとワールド上の補助線を更新する
 		DrawControlPanel(enemies, aiSystem);
 		if (isVisible_ && lineCommon_ && aiSystem) {
 			DrawWorldDebug(enemies, aiSystem);
 		}
 #else
+		// Releaseビルドでは引数未使用警告を抑える
 		(void)enemies;
 		(void)aiSystem;
 #endif
@@ -16805,11 +16876,13 @@ namespace Character {
 
 #ifdef _DEBUG
 	void EnemyAiDebugSystem::DrawControlPanel(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+		// ImGuiウィンドウが折りたたまれている時は中身を描画しない
 		if (!ImGui::Begin("Enemy AI Debug")) {
 			ImGui::End();
 			return;
 		}
 
+		// 表示したいデバッグ情報だけを切り替えられるようにする
 		ImGui::Checkbox("AI表示", &isVisible_);
 		ImGui::Checkbox("最終移動目標", &showMoveTarget_);
 		ImGui::Checkbox("隊形スロット", &showFormationSlot_);
@@ -16821,6 +16894,7 @@ namespace Character {
 		int ringCount[5]{};
 		int layerCount[3]{};
 		int grantedCount = 0;
+		// 現在の敵全体の攻撃リングと群衆レイヤーの数を集計する
 		for (BaseEnemy* enemy : enemies) {
 			if (!enemy) {
 				continue;
@@ -16855,6 +16929,7 @@ namespace Character {
 
 		if (showEnemyDetails_ && aiSystem) {
 			ImGui::Separator();
+			// 敵ごとの役割、攻撃許可、群衆内番号を一覧表示する
 			for (BaseEnemy* enemy : enemies) {
 				if (!enemy) {
 					continue;
@@ -16886,6 +16961,7 @@ namespace Character {
 	}
 
 	void EnemyAiDebugSystem::DrawWorldDebug(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+		// LineCommonのデバッグメッシュへ、AI判断を示す補助線を追加する
 		Engine::LineMeshData& lines = lineCommon_->GetDebugLineMeshData();
 		EnemyCrowdSystem* crowdSystem = aiSystem->GetCrowdSystem();
 
@@ -16899,6 +16975,7 @@ namespace Character {
 			const Vector4 color = steering ? LayerColor(steering->layer) : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 			if (showMoveTarget_ && steering) {
+				// 敵から最終移動目標までの線と目標球を描画する
 				const Vector3 moveTarget = steering->moveTarget + Vector3{ 0.0f, 0.4f, 0.0f };
 				lines.AddLine(start, moveTarget, color);
 				lines.AddLineSphere(Sphere{ moveTarget, 0.32f }, color, 4, 4);
@@ -16906,6 +16983,7 @@ namespace Character {
 
 			if (showFormationSlot_) {
 				if (const CrowdSlot* slot = crowdSystem->FindSlot(enemy)) {
+					// 群衆パターンで割り当てられた隊形スロットを描画する
 					const Vector3 position = slot->position + Vector3{ 0.0f, 0.2f, 0.0f };
 					lines.AddLine(start, position, { 0.2f, 0.7f, 1.0f, 1.0f });
 					lines.AddLineSphere(Sphere{ position, 0.24f }, { 0.2f, 0.7f, 1.0f, 1.0f }, 4, 4);
@@ -16913,16 +16991,19 @@ namespace Character {
 			}
 
 			if (showFlowDirection_ && steering) {
+				// フロー方向を短い線で表示し、群衆の流れを確認できるようにする
 				const Vector3 directionEnd = start + steering->flowDirection * 2.0f;
 				lines.AddLine(start, directionEnd, { 0.2f, 0.9f, 1.0f, 1.0f });
 			}
 
 			if (steering && steering->isCommander) {
+				// 統率者は頭上の球で強調する
 				lines.AddLineSphere(Sphere{ start + Vector3{ 0.0f, 0.8f, 0.0f }, 0.55f }, { 1.0f, 0.95f, 0.2f, 1.0f }, 6, 4);
 			}
 		}
 
 		if (showAttackSlots_) {
+			// 攻撃スロットは使用中かどうかで色を変えて描画する
 			for (const AttackSlot& slot : aiSystem->GetAttackSlotSystem()->GetSlots()) {
 				const Vector4 color = slot.occupied ?
 					Vector4{ 1.0f, 0.25f, 0.15f, 1.0f } :
@@ -16984,12 +17065,15 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiS
 namespace Character {
 
 	void EnemyAiSystem::Initialize() {
+		// 攻撃要求を先に準備し、移動側から参照できる状態にする
 		attackRequestSystem_ = std::make_unique<EnemyAttackRequestSystem>();
 		attackRequestSystem_->Initialize();
 
+		// 攻撃可能な立ち位置を作るシステムを準備する
 		attackSlotSystem_ = std::make_unique<EnemyAttackSlotSystem>();
 		attackSlotSystem_->Initialize();
 
+		// 群衆の隊形とフロッキングを計算するシステムを準備する
 		crowdSystem_ = std::make_unique<EnemyCrowdSystem>();
 		crowdSystem_->Initialize();
 	}
@@ -17000,11 +17084,13 @@ namespace Character {
 		float targetRotateY,
 		float dt
 	) {
+		// 先に群衆の移動目標を決め、攻撃スロットは同じターゲット情報で同期させる
 		crowdSystem_->Update(enemies, targetPos, targetRotateY, dt);
 		attackSlotSystem_->Update(enemies, targetPos, targetRotateY, dt);
 	}
 
 	void EnemyAiSystem::UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt) {
+		// 攻撃要求は移動更新とは分け、攻撃タイミング側の状態だけを更新する
 		attackRequestSystem_->Update(enemies, dt);
 	}
 }
@@ -17023,12 +17109,16 @@ namespace Character {
 
 	class BaseEnemy;
 
+	/// <summary>
+	/// 敵AIの攻撃要求、攻撃位置、群衆移動をまとめて更新する統合システム。
+	/// </summary>
 	class EnemyAiSystem {
 	public:
 
 		// 初期化
 		void Initialize();
 
+		// 群衆移動と攻撃スロットを更新し、各敵の移動目標を決める
 		void UpdateSlot(
 			const std::vector<BaseEnemy*>& enemies,
 			const Vector3& targetPos,
@@ -17036,14 +17126,20 @@ namespace Character {
 			float dt
 		);
 
+		// 攻撃したい敵の要求を整理し、攻撃許可を割り当てる
 		void UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt);
 
+		// 攻撃スロット情報を外部システムから参照する
 		EnemyAttackSlotSystem* GetAttackSlotSystem() const { return attackSlotSystem_.get(); }
+		// 群衆移動情報を外部システムから参照する
 		EnemyCrowdSystem* GetCrowdSystem() const { return crowdSystem_.get(); }
 
 	private:
+		// 敵ごとの攻撃要求と攻撃許可を管理する
 		std::unique_ptr<EnemyAttackRequestSystem> attackRequestSystem_ = nullptr;
+		// プレイヤー周囲の攻撃位置を管理する
 		std::unique_ptr<EnemyAttackSlotSystem> attackSlotSystem_ = nullptr;
+		// 敵の隊形、役割、移動目標を管理する
 		std::unique_ptr<EnemyCrowdSystem> crowdSystem_ = nullptr;
 	};
 }
@@ -17057,20 +17153,26 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAtt
 
 namespace Character {
 
+	// 敵がターゲットとの距離に応じて取る攻撃待機リング
 	enum class EnemyAttackRing {
-		None,
-		TooClose,
-		Attack,
-		Standby,
-		Approach,
+		None,		// 未分類
+		TooClose,	// 近すぎるため攻撃待ちへ戻す
+		Attack,		// 攻撃許可を受けた状態
+		Standby,	// 密集回避や順番待ちで待機する状態
+		Approach,	// 攻撃候補として接近する状態
 	};
 
+	/// <summary>
+	/// 1体の敵が持つ攻撃要求状態。攻撃許可、距離、再攻撃クールタイムを保持する。
+	/// </summary>
 	class EnemyAttackRequest {
 	public:
+		// 攻撃要求を有効化する
 		void Activate() {
 			isActive = true;
 		}
 
+		// 攻撃要求を無効化し、許可状態と分類番号をリセットする
 		void Deactivate() {
 			isActive = false;
 			isGranted = false;
@@ -17078,34 +17180,42 @@ namespace Character {
 			ring = EnemyAttackRing::None;
 		}
 
+		// 攻撃許可を与える
 		void Grant() {
 			isGranted = true;
 		}
 
+		// 攻撃許可を取り消す
 		void Deny() {
 			isGranted = false;
 		}
 
+		// ターゲットまでの距離を記録する
 		void SetDistance(float value) {
 			distance = value;
 		}
 
+		// ターゲットまでの距離を取得する
 		float GetDistance() const {
 			return distance;
 		}
 
+		// 攻撃リングを設定する
 		void SetRing(EnemyAttackRing value) {
 			ring = value;
 		}
 
+		// 現在の攻撃リングを取得する
 		EnemyAttackRing GetRing() const {
 			return ring;
 		}
 
+		// 攻撃後の再攻撃クールタイムを開始する
 		void StartCooldown(float time) {
 			cooldownTimer = time;
 		}
 
+		// クールタイムを経過時間分だけ進める
 		void UpdateCooldown(float dt) {
 			if (cooldownTimer > 0.0f) {
 				cooldownTimer -= dt;
@@ -17115,26 +17225,31 @@ namespace Character {
 			}
 		}
 
+		// 再攻撃クールタイム中かを返す
 		bool IsCooldown() const {
 			return cooldownTimer > 0.0f;
 		}
 
+		// 攻撃要求が有効かを返す
 		bool GetIsActive() const { return isActive; }
+		// 攻撃許可を受けているかを返す
 		bool GetIsGranted() const { return isGranted; }
 
+		// 要求順を比較するための連番を取得する
 		uint32_t GetNumber() const { return number; }
+		// 要求順を比較するための連番を設定する
 		void SetNumber(uint32_t value) { number = value; }
 
 	private:
-		float distance = 0.0f;
-		float cooldownTimer = 0.0f;
+		float distance = 0.0f;			// ターゲットまでの距離
+		float cooldownTimer = 0.0f;		// 再攻撃までの残り時間
 
-		EnemyAttackRing ring = EnemyAttackRing::None;
+		EnemyAttackRing ring = EnemyAttackRing::None;	// 現在の攻撃リング
 
-		uint32_t number = 0;
+		uint32_t number = 0;				// 攻撃要求を出した順番
 
-		bool isActive = false;
-		bool isGranted = false;
+		bool isActive = false;			// 攻撃要求が有効か
+		bool isGranted = false;			// 攻撃許可を受けているか
 	};
 }
 
@@ -17153,39 +17268,42 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAtt
 namespace Character {
 
 	void EnemyAttackRequestSystem::Initialize() {
+		// 攻撃要求の連番と、攻撃許可の間隔タイマーを初期状態へ戻す
 		requestCounter_ = 1;
 		intervalTimer_ = 0.0f;
 	}
 
 	void EnemyAttackRequestSystem::Update(const std::vector<BaseEnemy*>& enemies, float dt) {
-		if (intervalTimer_ > 0.0f) {
-			intervalTimer_ -= dt;
-			if (intervalTimer_ < 0.0f) {
-				intervalTimer_ = 0.0f;
-			}
-		}
+		
+		// 毎フレーム、攻撃要求のクールダウンを進めて許可をリセット
+		UpdateIntervalTimer(dt);
 
 		std::vector<AttackCandidate> activeRequests;
 
 		for (BaseEnemy* enemy : enemies) {
 			if (!enemy) {
+				// 無効な敵ポインタは候補に入れない
 				continue;
 			}
 
 			EnemyAttackSystem* attackSystem = enemy->GetEnemyAttackSystem();
 			if (!attackSystem) {
+				// 攻撃システムを持たない敵はAIの攻撃許可対象外
 				continue;
 			}
 
 			EnemyAttackRequest* request = attackSystem->GetAttackRequest();
 			if (!request) {
+				// 攻撃要求コンポーネントが無い場合はスキップする
 				continue;
 			}
 
+			// 毎フレーム一度許可を取り消し、この更新で改めて許可を割り当てる
 			request->UpdateCooldown(dt);
 			request->Deny();
 
 			if (!request->GetIsActive()) {
+				// 攻撃したい状態でない敵は候補に入れない
 				continue;
 			}
 
@@ -17201,9 +17319,11 @@ namespace Character {
 			}
 
 			if (request->GetNumber() == 0) {
+				// 新規要求には連番を付け、距離が同じ時の優先順に使う
 				request->SetNumber(requestCounter_++);
 			}
 
+			// ソートで使うターゲット距離を要求側へ記録する
 			float distance = enemy->GetTargetDistance();
 			request->SetDistance(distance);
 
@@ -17211,10 +17331,12 @@ namespace Character {
 		}
 
 		if (activeRequests.empty()) {
+			// 攻撃候補が無い場合はリング割り当てを行わない
 			return;
 		}
 
 		if (intervalTimer_ > 0.0f) {
+			// 攻撃許可の間隔中は、前回の分類だけを維持する
 			return;
 		}
 
@@ -17237,20 +17359,25 @@ namespace Character {
 			groups[candidate.enemy->GetCrowdGroupId()].push_back(candidate);
 		}
 
+		// 攻撃リング数
 		uint32_t attackRingCount = 0;
+		// 接近リング数
 		uint32_t approachRingCount = 0;
 
+		// 群衆ごとに攻撃スタイルを決めて、攻撃役・接近役・待機役へ振り分ける
 		for (auto& [groupId, candidates] : groups) {
 			(void)groupId;
 			if (candidates.empty()) {
 				continue;
 			}
 
+			// 群衆内の並び順で揃え、LeaderOnlyやVolleyで安定した順番を使う
 			std::sort(candidates.begin(), candidates.end(),
 				[](const AttackCandidate& a, const AttackCandidate& b) {
 					return a.enemy->GetCrowdMemberIndex() < b.enemy->GetCrowdMemberIndex();
 				});
 
+			// 群衆ごとの攻撃スタイルに応じて、Attack / Approach / Standbyへ振り分ける
 			switch (ResolveAttackStyle(candidates.front().enemy, candidates.size())) {
 			case EnemyCrowdAttackStyle::GroupVolley:
 				AssignGroupVolley(candidates, attackRingCount);
@@ -17269,11 +17396,13 @@ namespace Character {
 			}
 		}
 
+		// 今回攻撃許可を更新したので、次回まで少し間隔を空ける
 		intervalTimer_ = attackInterval_;
 	}
 
 	EnemyCrowdAttackStyle EnemyAttackRequestSystem::ResolveAttackStyle(const BaseEnemy* enemy, size_t groupSize) const {
 		if (!enemy) {
+			// 敵情報が取れない場合は最も単純な個別攻撃にする
 			return EnemyCrowdAttackStyle::Individual;
 		}
 
@@ -17305,6 +17434,7 @@ namespace Character {
 	}
 
 	void EnemyAttackRequestSystem::AssignIndividual(std::vector<AttackCandidate>& candidates, uint32_t& attackCount, uint32_t& approachCount) {
+		// 個別攻撃では近い敵を優先し、同程度なら要求順を優先する
 		std::sort(candidates.begin(), candidates.end(),
 			[this](const AttackCandidate& a, const AttackCandidate& b) {
 				const float distanceDiff = std::abs(a.request->GetDistance() - b.request->GetDistance());
@@ -17316,6 +17446,7 @@ namespace Character {
 
 		for (AttackCandidate& candidate : candidates) {
 			if (attackCount < maxAttackCount_) {
+				// 同時攻撃上限に収まる敵だけ攻撃許可を出す
 				candidate.request->SetRing(EnemyAttackRing::Attack);
 				candidate.request->Grant();
 				attackCount++;
@@ -17323,16 +17454,19 @@ namespace Character {
 			}
 
 			if (approachCount < approachRingCount_) {
+				// 攻撃待ちの一部は前に詰め、次の攻撃候補にする
 				candidate.request->SetRing(EnemyAttackRing::Approach);
 				approachCount++;
 				continue;
 			}
 
+			// それ以外は密集を避けるため待機レイヤーへ回す
 			candidate.request->SetRing(EnemyAttackRing::Standby);
 		}
 	}
 
 	void EnemyAttackRequestSystem::AssignGroupVolley(std::vector<AttackCandidate>& candidates, uint32_t& attackCount) {
+		// 一斉攻撃ではグループ内の先頭から一定数まで攻撃許可を出す
 		const uint32_t groupLimit = (std::min)(maxGroupAttackCount_, static_cast<uint32_t>(candidates.size()));
 		for (uint32_t i = 0; i < candidates.size(); ++i) {
 			AttackCandidate& candidate = candidates[i];
@@ -17348,6 +17482,7 @@ namespace Character {
 	}
 
 	void EnemyAttackRequestSystem::AssignLeaderOnly(std::vector<AttackCandidate>& candidates, uint32_t& attackCount) {
+		// 統率者が指定されていればその順番を、無ければ先頭メンバーをリーダー扱いにする
 		const CrowdBehaviorSettings& behavior = candidates.front().enemy->GetCrowdBehavior();
 		const uint32_t leaderOrder = behavior.useCommander ?
 			(std::min)(behavior.commanderOrder, static_cast<uint32_t>(candidates.size() - 1)) :
@@ -17356,6 +17491,7 @@ namespace Character {
 		for (uint32_t i = 0; i < candidates.size(); ++i) {
 			AttackCandidate& candidate = candidates[i];
 			if (i == leaderOrder && attackCount < maxAttackCount_) {
+				// リーダーだけに攻撃許可を出し、他メンバーは接近か待機にする
 				candidate.request->SetRing(EnemyAttackRing::Attack);
 				candidate.request->Grant();
 				attackCount++;
@@ -17373,12 +17509,14 @@ namespace Character {
 	) {
 		uint32_t readyCount = 0;
 		for (const AttackCandidate& candidate : candidates) {
+			// 包囲成立判定として、一定距離内に入っている敵数を数える
 			if (candidate.request->GetDistance() <= surroundReadyDistance_) {
 				readyCount++;
 			}
 		}
 
 		if (readyCount < (std::min)(surroundReadyCount_, static_cast<uint32_t>(candidates.size()))) {
+			// 包囲ができるまでは攻撃せず、前進役と待機役に分ける
 			for (AttackCandidate& candidate : candidates) {
 				if (approachCount < approachRingCount_) {
 					candidate.request->SetRing(EnemyAttackRing::Approach);
@@ -17391,7 +17529,18 @@ namespace Character {
 			return;
 		}
 
+		// 包囲が成立したら、グループ一斉攻撃として許可を出す
 		AssignGroupVolley(candidates, attackCount);
+	}
+
+	void EnemyAttackRequestSystem::UpdateIntervalTimer(float dt){
+		if (intervalTimer_ > 0.0f) {
+			// 攻撃許可を連続で出しすぎないよう、間隔タイマーを進める
+			intervalTimer_ -= dt;
+			if (intervalTimer_ < 0.0f) {
+				intervalTimer_ = 0.0f;
+			}
+		}
 	}
 }
 
@@ -17409,16 +17558,22 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAtt
 namespace Character {
 	class BaseEnemy;
 
+	/// <summary>
+	/// 敵から出された攻撃要求を整理し、同時攻撃数や群衆戦術に応じて許可を出す。
+	/// </summary>
 	class EnemyAttackRequestSystem {
 	public:
+		// 攻撃要求管理を初期化する
 		void Initialize();
 
+		// 敵一覧の攻撃要求を更新し、攻撃リングを割り当てる
 		void Update(const std::vector<BaseEnemy*>& enemies, float dt);
 
 	private:
+		// 攻撃許可判定に使う敵と要求の組
 		struct AttackCandidate {
-			BaseEnemy* enemy = nullptr;
-			EnemyAttackRequest* request = nullptr;
+			BaseEnemy* enemy = nullptr;				// 候補になっている敵
+			EnemyAttackRequest* request = nullptr;	// 敵が保持している攻撃要求
 		};
 
 		// 群衆タイプと設定から、攻撃許可の出し方を決める
@@ -17432,7 +17587,11 @@ namespace Character {
 		// 包囲がある程度成立した時だけ複数体へ攻撃許可を出す
 		void AssignSurroundThenAttack(std::vector<AttackCandidate>& candidates, uint32_t& attackCount, uint32_t& approachCount);
 
-		uint32_t requestCounter_ = 1;
+		// インターバルタイマーを進める。攻撃許可を出した後、次の許可まで少し間隔を空けるために使う
+		void UpdateIntervalTimer(float dt);
+	private:
+		// 攻撃要求に付ける連番
+		uint32_t requestCounter_ = 1;	
 
 		// 同時に攻撃できる敵数
 		uint32_t maxAttackCount_ = 2;
@@ -17442,7 +17601,7 @@ namespace Character {
 
 		// 攻撃許可の間隔
 		float attackInterval_ = 0.1f;
-		float intervalTimer_ = 0.0f;
+		float intervalTimer_ = 0.0f;	// 次の攻撃許可までの残り時間
 
 		// 攻撃後、同じ敵が再攻撃できない時間
 		float reAttackCooldown_ = 3.0f;
@@ -17460,7 +17619,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSlotSystem.cpp
 ============================================================
-#include "EnemyAttackSlotSystem.h"
+﻿#include "EnemyAttackSlotSystem.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 #include <DirectXGame/engine/Math/MathFunctions.h>
@@ -17472,6 +17631,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAtt
 namespace Character {
 
 	void EnemyAttackSlotSystem::Initialize() {
+		// 起動時は前フレームの担当者が存在しないので、全スロットを未使用にする
 		ClearOwners();
 	}
 
@@ -17481,13 +17641,17 @@ namespace Character {
 		float targetRotateY,
 		float dt
 	) {
+		// 敵リストから外れた保持情報を消して、古いポインタ参照を避ける
 		CleanupSlotHolds(enemies);
+		// ターゲット位置と向きに合わせて攻撃位置を作り直す
 		CreateSlots(targetPos, targetRotateY);
+		// 作り直したスロットへ、今フレームの担当者を再割り当てする
 		ClearOwners();
 		AssignSlots(enemies, dt);
 	}
 
 	void EnemyAttackSlotSystem::CreateSlots(const Vector3& targetPos, float targetRotateY) {
+		// 全スロットを等間隔で円周上に置く
 		const float angleStep = std::numbers::pi_v<float> *2.0f / static_cast<float>(kSlotCount);
 
 		for (uint32_t i = 0; i < kSlotCount; ++i) {
@@ -17506,6 +17670,7 @@ namespace Character {
 
 	void EnemyAttackSlotSystem::ClearOwners() {
 		for (AttackSlot& slot : slots_) {
+			// 位置は残し、使用者だけを毎フレームリセットする
 			slot.owner = nullptr;
 			slot.occupied = false;
 		}
@@ -17513,12 +17678,19 @@ namespace Character {
 
 	void EnemyAttackSlotSystem::AssignSlots(const std::vector<BaseEnemy*>& enemies, float dt) {
 		for (BaseEnemy* enemy : enemies) {
-			if (!enemy) {
+			if (!enemy){
+				continue;
+			}
+			// 群衆移動の役割が攻撃レイヤーにいる敵だけをスロット割り当て対象にする
+			const EnemyFlockingSteering* flockingSteering = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSteering(enemy);
+			if (!flockingSteering || flockingSteering->layer != EnemyCrowdLayer::Attack) {
+				// 攻撃レイヤーにいない敵はスロットを割り当てない
 				continue;
 			}
 
 			SlotHoldState& hold = slotHolds_[enemy];
 			if (hold.timer > 0.0f) {
+				// 切り替え抑制時間を減らし、0未満にならないよう丸める
 				hold.timer = (std::max)(0.0f, hold.timer - dt);
 			}
 
@@ -17536,6 +17708,7 @@ namespace Character {
 
 			Vector3 enemyPos = enemy->GetWorldPosition();
 
+			// 未使用スロットの中から、この敵に一番近い位置を探す
 			for (uint32_t i = 0; i < kSlotCount; ++i) {
 				AttackSlot& slot = slots_[i];
 				if (slot.occupied) {
@@ -17553,6 +17726,7 @@ namespace Character {
 			}
 
 			if (nearestSlot) {
+				// 前回位置との差が小さい時は補間し、大きく変わる時だけクールタイムを入れる
 				const float targetDiff = hold.hasSlot ? DistanceXZ(hold.position, nearestSlot->position) : slotSwitchDistance_ + 1.0f;
 				if (hold.hasSlot && targetDiff <= slotSwitchDistance_) {
 					hold.position = Vector3::Lerp(hold.position, nearestSlot->position, 0.12f);
@@ -17574,6 +17748,7 @@ namespace Character {
 	const AttackSlot* EnemyAttackSlotSystem::FindSlot(BaseEnemy* enemy) const {
 		for (const AttackSlot& slot : slots_) {
 			if (slot.owner == enemy) {
+				// 所有者が一致したスロットをそのまま返す
 				return &slot;
 			}
 		}
@@ -17582,6 +17757,7 @@ namespace Character {
 	}
 
 	void EnemyAttackSlotSystem::CleanupSlotHolds(const std::vector<BaseEnemy*>& enemies) {
+		// 現在生きている敵だけを集合にして、保持テーブルを掃除する
 		std::unordered_set<BaseEnemy*> activeEnemies;
 		for (BaseEnemy* enemy : enemies) {
 			if (enemy) {
@@ -17613,16 +17789,22 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAtt
 namespace Character {
 	class BaseEnemy;
 
+	// プレイヤー周囲に作られる攻撃位置と、その位置を担当する敵
 	struct AttackSlot {
-		Vector3 position{};
-		BaseEnemy* owner = nullptr;
-		bool occupied = false;
+		Vector3 position{};			// 攻撃時に敵が目指すワールド座標
+		BaseEnemy* owner = nullptr;	// このスロットを確保している敵
+		bool occupied = false;		// 今フレーム使用中か
 	};
 
+	/// <summary>
+	/// 複数の敵が同じ攻撃位置へ重ならないよう、プレイヤー周囲のスロットを割り当てる。
+	/// </summary>
 	class EnemyAttackSlotSystem {
 	public:
+		// スロット状態を初期化する
 		void Initialize();
 
+		// ターゲット位置を基準に攻撃スロットを作り、敵へ割り当てる
 		void Update(
 			const std::vector<BaseEnemy*>& enemies,
 			const Vector3& targetPos,
@@ -17630,29 +17812,36 @@ namespace Character {
 			float dt
 		);
 
+		// 指定した敵が確保している攻撃スロットを取得する
 		const AttackSlot* FindSlot(BaseEnemy* enemy) const;
 		// デバッグ描画など読み取り用途に、全攻撃位置を公開する
 		const auto& GetSlots() const { return slots_; }
 
 	private:
+		// ターゲットの周囲に円形の攻撃スロットを作成する
 		void CreateSlots(const Vector3& targetPos, float targetRotateY);
+		// 各敵に最も近い未使用スロットを割り当てる
 		void AssignSlots(const std::vector<BaseEnemy*>& enemies, float dt);
+		// 今フレームの割り当て情報をリセットする
 		void ClearOwners();
+		// 消滅した敵の保持情報を削除する
 		void CleanupSlotHolds(const std::vector<BaseEnemy*>& enemies);
 
 	private:
+		// プレイヤー周囲に作る攻撃スロット数
 		static constexpr uint32_t kSlotCount = 8;
+		// スロット切り替えを滑らかにするために前回の割り当てを保持する
 		struct SlotHoldState {
-			Vector3 position{};
-			uint32_t index = 0;
-			float timer = 0.0f;
-			bool hasSlot = false;
+			Vector3 position{};	// 保持している攻撃位置
+			uint32_t index = 0;	// 保持しているスロット番号
+			float timer = 0.0f;	// 切り替えを抑える残り時間
+			bool hasSlot = false;	// 有効な保持情報があるか
 		};
 
-		std::array<AttackSlot, kSlotCount> slots_{};
-		std::unordered_map<BaseEnemy*, SlotHoldState> slotHolds_;
+		std::array<AttackSlot, kSlotCount> slots_{};					// 今フレームの攻撃スロット一覧
+		std::unordered_map<BaseEnemy*, SlotHoldState> slotHolds_;	// 敵ごとの前回スロット保持情報
 
-		float slotRadius_ = 8.0f;
+		float slotRadius_ = 8.0f;				// ターゲットから攻撃位置までの距離
 		float slotChangeCooldown_ = 0.35f;	// 攻撃位置を切り替えるまでの待ち時間
 		float slotSwitchDistance_ = 1.8f;	// この距離以上ずれた時だけ切り替え対象にする
 	};
@@ -18575,36 +18764,8 @@ namespace Character {
 			behaviorType_ = static_cast<EnemyCrowdBehaviorType>(behaviorIndex);
 		}
 
-		// パターン変更を試しやすいよう、利用可能な設定値を常に編集できるようにする
-		ImGui::DragFloat("基準半径", &radius_, 0.1f, 1.0f, 50.0f);
-		ImGui::DragFloat("隊列間隔", &spacing_, 0.1f, 0.1f, 20.0f);
-		ImGui::DragFloat("回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
-		ImGui::DragFloat("波の切替秒数", &waveInterval_, 0.1f, 0.1f, 20.0f);
-		ImGui::DragInt("波の列数", &waveCount_, 1.0f, 1, 10);
-		ImGui::DragFloat("目標変更クールタイム", &targetChangeCooldown_, 0.05f, 0.0f, 3.0f);
-		ImGui::DragFloat("目標切替距離", &targetSwitchDistance_, 0.1f, 0.1f, 10.0f);
-
-		static const char* formationNames[] = { "横列", "円形", "V字", "方陣" };
-		int formationIndex = static_cast<int>(formationShape_);
-		if (ImGui::Combo("隊列の陣形", &formationIndex, formationNames, IM_ARRAYSIZE(formationNames))) {
-			formationShape_ = static_cast<EnemyFormationShape>(formationIndex);
-		}
-
-		ImGui::Checkbox("統率者を使う", &useCommander_);
-		ImGui::DragInt("統率者の順番", &commanderOrder_, 1.0f, 0, 60);
-		ImGui::DragFloat("統率者の影響", &commanderInfluenceWeight_, 0.05f, 0.0f, 1.0f);
-
-		static const char* attackStyleNames[] = {
-			"自動",
-			"個人攻撃",
-			"集団一斉攻撃",
-			"統率者のみ攻撃",
-			"包囲後に攻撃",
-		};
-		int attackStyleIndex = static_cast<int>(attackStyle_);
-		if (ImGui::Combo("攻撃方式", &attackStyleIndex, attackStyleNames, IM_ARRAYSIZE(attackStyleNames))) {
-			attackStyle_ = static_cast<EnemyCrowdAttackStyle>(attackStyleIndex);
-		}
+		DrawBehaviorParameters();
+		DrawCommonAiParameters();
 
 		ImGui::Separator();
 		ImGui::Text("敵の種類と人数");
@@ -18673,6 +18834,104 @@ namespace Character {
 		characterManager->CreateEnemyGroup(EnemyType::kSmallRanged, groupId, smallRangedCount_, spawnPosition_, spawnArea, settings);
 		characterManager->CreateEnemyGroup(EnemyType::kMediumMelee, groupId, mediumMeleeCount_, spawnPosition_, spawnArea, settings);
 		characterManager->CreateEnemyGroup(EnemyType::kDummy, groupId, dummyCount_, spawnPosition_, spawnArea, settings);
+	}
+
+	void EnemyCrowdSpawnDebugSystem::DrawBehaviorParameters() {
+		if (!ImGui::CollapsingHeader("タイプ専用パラメータ", ImGuiTreeNodeFlags_DefaultOpen)) {
+			return;
+		}
+
+		switch (behaviorType_) {
+		case EnemyCrowdBehaviorType::Rush:
+			// 直進型は突撃レーンの横幅だけを使う
+			ImGui::DragFloat("突撃レーン間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			break;
+		case EnemyCrowdBehaviorType::Encircle:
+			// 包囲型はプレイヤーを中心にした円の半径だけを使う
+			ImGui::DragFloat("包囲半径", &radius_, 0.1f, 1.0f, 50.0f);
+			break;
+		case EnemyCrowdBehaviorType::WaveAssault:
+			// 波状型は前列/後列の距離、横幅、波の切替タイミングを使う
+			ImGui::DragFloat("前列基準半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("横方向の間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			ImGui::DragFloat("波の切替秒数", &waveInterval_, 0.1f, 0.1f, 20.0f);
+			ImGui::DragInt("波の列数", &waveCount_, 1.0f, 1, 10);
+			break;
+		case EnemyCrowdBehaviorType::Formation: {
+			// 隊列型は陣形、プレイヤーからの距離、隊列間隔を使う
+			static const char* formationNames[] = { "横列", "円形", "V字", "方陣" };
+			int formationIndex = static_cast<int>(formationShape_);
+			if (ImGui::Combo("隊列の陣形", &formationIndex, formationNames, IM_ARRAYSIZE(formationNames))) {
+				formationShape_ = static_cast<EnemyFormationShape>(formationIndex);
+			}
+			ImGui::DragFloat("隊列基準半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("隊列間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			break;
+		}
+		case EnemyCrowdBehaviorType::FlowCrowd:
+			// 流動型は円周上を流れる半径と回転速度を使う
+			ImGui::DragFloat("流動半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("流動回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
+			break;
+		case EnemyCrowdBehaviorType::PressureCrowd:
+			// 圧迫型は密度を高める輪の半径を使う
+			ImGui::DragFloat("圧迫半径", &radius_, 0.1f, 1.0f, 50.0f);
+			break;
+		case EnemyCrowdBehaviorType::DistributedEncircle:
+			// 分散包囲型は逃げ道を残す弧の半径を使う
+			ImGui::DragFloat("分散包囲半径", &radius_, 0.1f, 1.0f, 50.0f);
+			break;
+		case EnemyCrowdBehaviorType::DensityAdaptive:
+			// 人数適応型は少人数Rush、中人数Encircle、大人数Pressureへ切り替えるため両方の値を使う
+			ImGui::DragFloat("適応半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("少人数時の間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			break;
+		case EnemyCrowdBehaviorType::Spiral:
+			// スパイラル型は回転半径と回転速度を使う
+			ImGui::DragFloat("スパイラル半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("スパイラル回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
+			break;
+		case EnemyCrowdBehaviorType::Flocking:
+		case EnemyCrowdBehaviorType::Hunting:
+		default:
+			// 群れ型とハンティング型は現状固定配置/群れ補正中心で、専用の数値パラメータを持たない
+			ImGui::Text("このタイプ専用の追加パラメータはありません");
+			break;
+		}
+	}
+
+	void EnemyCrowdSpawnDebugSystem::DrawCommonAiParameters() {
+		if (!ImGui::CollapsingHeader("共通AIパラメータ", ImGuiTreeNodeFlags_DefaultOpen)) {
+			return;
+		}
+
+		// 目標保持は全群衆タイプで使うため、タイプ専用ではなく共通設定として表示する
+		ImGui::DragFloat("目標変更クールタイム", &targetChangeCooldown_, 0.05f, 0.0f, 3.0f);
+		ImGui::DragFloat("目標切替距離", &targetSwitchDistance_, 0.1f, 0.1f, 10.0f);
+
+		ImGui::Checkbox("統率者を使う", &useCommander_);
+		if (useCommander_) {
+			ImGui::DragInt("統率者の順番", &commanderOrder_, 1.0f, 0, 60);
+			if (behaviorType_ != EnemyCrowdBehaviorType::Formation) {
+				ImGui::DragFloat("統率者の影響", &commanderInfluenceWeight_, 0.05f, 0.0f, 1.0f);
+			}
+			else {
+				// 隊列型では隊形維持を優先し、統率者の影響値は移動補正には使わない
+				ImGui::Text("隊列型では統率者の影響値は移動補正に使用しません");
+			}
+		}
+
+		static const char* attackStyleNames[] = {
+			"自動",
+			"個人攻撃",
+			"集団一斉攻撃",
+			"統率者のみ攻撃",
+			"包囲後に攻撃",
+		};
+		int attackStyleIndex = static_cast<int>(attackStyle_);
+		if (ImGui::Combo("攻撃方式", &attackStyleIndex, attackStyleNames, IM_ARRAYSIZE(attackStyleNames))) {
+			attackStyle_ = static_cast<EnemyCrowdAttackStyle>(attackStyleIndex);
+		}
 	}
 
 	void EnemyCrowdSpawnDebugSystem::DrawActiveCrowds(CharacterManager* characterManager) {
@@ -18766,6 +19025,10 @@ namespace Character {
 		CrowdBehaviorSettings BuildBehaviorSettings() const;
 		// 選択中の敵構成をひとつの群衆グループとして生成する
 		void SpawnConfiguredCrowd(CharacterManager* characterManager);
+		// 選択中の群衆タイプで実際に使う行動パラメータだけを表示する
+		void DrawBehaviorParameters();
+		// 群衆タイプに依存しないAI制御パラメータを表示する
+		void DrawCommonAiParameters();
 		// 現在活動中の群衆を一覧表示し、指定された群衆の退場要求を受け取る
 		void DrawActiveCrowds(CharacterManager* characterManager);
 #endif
@@ -18801,7 +19064,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSystem.cpp
 ============================================================
-#include "EnemyCrowdSystem.h"
+﻿#include "EnemyCrowdSystem.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 #include <algorithm>
@@ -18965,7 +19228,10 @@ namespace Character {
 
 			// 役割に応じた移動制約と群れ行動を、個別のシステムで順に合成する
 			EnemyCrowdLayer layer = layerSystem_.ResolveLayer(enemy, slots_, targetPos);
+			// 敵の現在位置から指定された移動先への水平移動方向を返す
 			Vector3 flowDirection = flowFieldSystem_.CalculateDirection(enemy, baseTarget);
+
+			// 隊形目標、役割、流れ方向を基に、密集回避や統率者への追従などの群れ行動を合成して最終的な移動目標を決める
 			const CrowdSlot* slot = FindSlot(enemy);
 			EnemyFlockingSteering steering = flockingSystem_.BuildSteering(
 				enemy,
@@ -22744,20 +23010,25 @@ File Path: project/DirectXGame/application/base/Character/Move/Base/MovementSyst
 ============================================================
 #include "MovementSystem.h"
 
+// 初期化時に外部リソースを持たないため、現状は空実装
 void MovementSystem::Initialize() {}
 
 void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 	// ヒットストップ中は移動処理を行わない
 	if (cxt.isHitStop || cxt.isSelfHitStop) return;
 
+	// 移動システムで合成済みの最終速度を座標へ反映する
 	world.translate_ += cmd.finalVelocity;
 	if (cmd.finalDirection.Length() != 0.0f) {
+		// 入力やAIから有効な方向が来ていれば、その方向を向く
 		direction_ = cmd.finalDirection;
 	}
 	else {
+		// 移動方向が無い時は現在の前方を維持して回転の跳ねを防ぐ
 		direction_ = world.GetForward();
 	}
 	//isLinding_ = cmd.isLanding;
+	// 移動命令側で計算された床高さを着地判定に使う
 	groundHeight_ = cmd.groundHeight;
 	// 回転処理
 	RotateProcess(cxt, world);
@@ -22771,15 +23042,19 @@ void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCo
 
 
 void MovementSystem::ResetGravityVelocity()
-{}
+{
+	// TODO: 重力速度のリセットが必要な呼び出し元に合わせて実装する
+}
 
 void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
 	if (!useGravity) {
+		// このシステム側で重力を使わない場合は、剛体の重力も無効にする
 		rigid.SetIsGravity(!useGravity);
 		return;
 	}
 
+	// 次のY位置が地面以下になるかを先読みして着地判定する
 	float currentY = world.GetWorldPosition().y;
 	float velocityY = rigid.GetVelocity().y * cxt.dt;
 
@@ -22791,6 +23066,7 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 	}
 
 	if (isLinding_) {
+		// 地面に到達したら高さを固定し、落下に関係する値を初期化する
 		world.translate_.y = groundHeight_;
 		rigid.ResetAcceleration();			// 加速度リセット
 		rigid.ResetVelocity();				// 速度リセット
@@ -22801,6 +23077,7 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 		rigid.SetIsGravity(cxt.isGravity);
 
 		if (!cxt.isGravity) {
+			// 状態側で重力を止める場合、直前の落下速度を残さない
 			rigid.ResetAcceleration();			// 加速度リセット
 			rigid.ResetVelocity();				// 速度リセット
 		}
@@ -22815,6 +23092,7 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 	if (cxt.state == Character::CharacterMainState::Attack &&
 		cxt.attackingMaxFallSpeed > 0.0f &&
 		rigid.Velocity().y < -cxt.attackingMaxFallSpeed) {
+		// 攻撃中は落下しすぎないよう、専用の最大落下速度で制限する
 		rigid.Velocity().y = -cxt.attackingMaxFallSpeed;
 	}
 }
@@ -22827,6 +23105,7 @@ void MovementSystem::StateGravityProcess(const Character::CharacterContext& cxt,
 	case Character::CharacterMainState::Move:
 	case Character::CharacterMainState::Dash:
 	case Character::CharacterMainState::Jump:
+		// 上昇中と下降中で重力倍率を変え、ジャンプの手触りを調整する
 		if (rigid.GetVelocity().y < 0.0f) {
 			rigid.SetGravityScale(cxt.fallGravity);
 		}
@@ -22835,13 +23114,16 @@ void MovementSystem::StateGravityProcess(const Character::CharacterContext& cxt,
 		}
 		break;
 	case Character::CharacterMainState::Attack:
+		// 攻撃中はコンボや空中攻撃用の重力倍率を使う
 		rigid.SetGravityScale(cxt.attackingGravity);
 		break;
 	case Character::CharacterMainState::Damage:
 	case Character::CharacterMainState::Fainting:
+		// 被ダメージ中は吹き飛びや硬直用の重力倍率を使う
 		rigid.SetGravityScale(cxt.damageGravity);
 		break;
 	case Character::CharacterMainState::Die:
+		// 死亡中は専用の落下挙動に切り替える
 		rigid.SetGravityScale(cxt.dieGravity);
 		break;
 	default:
@@ -22883,52 +23165,56 @@ File Path: project/DirectXGame/application/base/Character/Move/Base/MovementSyst
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 /// <summary>
-/// 移動リクエストを元に最終的な移動速度→トランスフォーム更新をこなうクラス
+/// 移動リクエストを元に最終速度を反映し、重力と向きの更新まで行う移動処理クラス。
 /// </summary>
 class MovementSystem {
 public:
 
 	/// <summary>
-	/// 更新
+	/// 移動システムの初期化。現状は初期値のみで動くため空実装。
 	/// </summary>
 	void Initialize();
 
 
 	/// <summary>
-	/// 更新
+	/// キャラクター状態と移動命令を元に、座標・回転・重力を更新する。
 	/// </summary>
-	/// <param name="dt"></param>
+	/// <param name="ctx">キャラクターの状態情報</param>
+	/// <param name="cmd">今フレームの移動命令</param>
+	/// <param name="world">更新対象のワールド座標</param>
+	/// <param name="rigid">重力と速度を持つ剛体情報</param>
 	void Update(const Character::CharacterContext& ctx,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
 public:
 	// 着地状態か？
 	bool IsOnGround() const{ return isLinding_; }
-	// 
+	// 現在キャラクターが向いている移動方向を取得
 	Vector3 GetDirection() const { return direction_;}
-	// ジャンプの処理を使うか設定
+	// 重力処理を使うか設定
 	void SetUseGravity(bool isUse) { useGravity = isUse; }
-	// 重力速度リセット
+	// 重力速度をリセットする。外部から着地や演出で速度を消す時に使う
 	void ResetGravityVelocity();
 private:
-	// 重力処理
+	// 地面判定、重力ON/OFF、剛体積分をまとめて処理する
 	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
-	// ステートによっての重力処理
+	// ステートによって重力スケールを切り替える
 	void StateGravityProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
 	
-	// 回転処理
+	// 現在の移動方向へ向くようにY軸回転を補間する
 	void RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world);
 private:
-	// 高さ
+	// 着地判定に使う地面の高さ
 	float groundHeight_ = -3.0f;
-	bool useGravity = true;
+	bool useGravity = true;	// この移動システムで重力を制御するか
 
-	bool isLinding_ = false;
+	bool isLinding_ = false;	// 今フレーム地面に接しているか
 	// 移動方向
 	Vector3 direction_ = { 0.0f,0.0f,1.0f };
 	// 回転補間速度
 	float rotationSpeed = 0.1f;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Move/Jump/JumpData.h
@@ -30565,9 +30851,12 @@ File Path: project/DirectXGame/application/base/Stage/StageColliderSystem.cpp
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
 void StageColliderSystem::Initialize(Engine::LineCommon* lineCommon) {
+	// ステージ用のコライダー管理コンポーネントを作成する
 	colliderComponent_ = std::make_unique<Engine::ColliderComponent>();
 	colliderComponent_->SetLineCommon(lineCommon);
+	// ステージは基本的に衝突結果を受けるだけなので、コールバックは相手取得までに留める
 	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
+		(void)self;
 		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->GetOwner());
 		if (!otherComponent) return;
 		};
@@ -30575,9 +30864,11 @@ void StageColliderSystem::Initialize(Engine::LineCommon* lineCommon) {
 
 void StageColliderSystem::CreateCollider() {
 
+	// ステージモデルの全三角形を静的な壁コライダーとして登録する
 	for (auto& obj : objects) {
 		for (auto& mesh : obj->GetModel()->GetModelData().mesh) {
 			for (auto& triangle : mesh->GetTriangles()) {
+				// モデルメッシュの三角形頂点をそのままコライダー形状に使う
 				auto triangleColl = std::make_unique<Engine::TriangleCollider>();
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];
@@ -30597,13 +30888,16 @@ void StageColliderSystem::CreateCollider() {
 
 void StageColliderSystem::Update() {
 
+	// デバッグ表示の切り替えUIを更新する
 	DebugImGui();
 
+	// ステージは静的オブジェクトなので、代表オブジェクトのTransformで全コライダーを更新する
 	colliderComponent_->UpdateAll(objects[0]->GetWorldTransform());
 };
 
 void StageColliderSystem::DebugImGui() {
 #ifdef _DEBUG
+	// コライダー線の表示/非表示をまとめて切り替える
 	ImGui::Begin("Collider");
 	if (ImGui::Button("isDebugLine")) {
 		for (auto& coll : colliderComponent_->GetAllColliders()) {
@@ -32064,10 +32358,12 @@ File Path: project/DirectXGame/application/base/UI/ResultUI.cpp
 
 void ResultUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables) {
+	// 外部から受け取った管理クラスを保持し、更新処理で使えるようにする
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->inputSystem = inputSystem;
 
+	// タイトルへ戻るボタンの背景スプライトを作成する
 	titleUI_ = std::make_unique<Engine::Sprite>();
 	titleUI_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/Image.dds");
 	titleUI_->SetPosition(titlePos_);
@@ -32075,6 +32371,7 @@ void ResultUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entit
 	titleUI_->SetTextureSize(uiSize_);
 	titleUI_->SetSize(uiSize_);
 	titleUI_->SetColor(uiColor_);
+	// タイトルへ戻るボタンの文字スプライトを作成する
 	titleUItxt_ = std::make_unique<Engine::Sprite>();
 	titleUItxt_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/selectTitle.dds");
 	titleUItxt_->SetPosition(titlePos_);
@@ -32085,6 +32382,7 @@ void ResultUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entit
 
 
 
+	// ゲームプレイへ戻るボタンの背景スプライトを作成する
 	gamePlayUI_ = std::make_unique<Engine::Sprite>();
 	gamePlayUI_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/Image.dds");
 	gamePlayUI_->SetPosition(gamePlayPos_);
@@ -32093,6 +32391,7 @@ void ResultUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entit
 	gamePlayUI_->SetSize(uiSize_);
 	gamePlayUI_->SetColor(uiColor_);
 
+	// ゲームプレイへ戻るボタンの文字スプライトを作成する
 	gamePlayUItxt_ = std::make_unique<Engine::Sprite>();
 	gamePlayUItxt_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/selectGamePlay.dds");
 	gamePlayUItxt_->SetPosition(gamePlayPos_);
@@ -32105,6 +32404,10 @@ void ResultUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entit
 }
 
 void ResultUI::Update(float dt) {
+	// 未使用のdtを受け取り、他UIと同じ更新関数の形を保つ
+	(void)dt;
+
+	// まず通常色に戻してから、選択中の項目だけ強調色にする
 	titleUI_->SetColor(uiColor_);
 	gamePlayUI_->SetColor(uiColor_);
 	if (selectedIndex == 0) {
@@ -32115,6 +32418,7 @@ void ResultUI::Update(float dt) {
 	}
 
 
+	// 背景と文字のスプライトをそれぞれ更新する
 	titleUI_->Update();
 	titleUItxt_->Update();
 
@@ -32123,6 +32427,7 @@ void ResultUI::Update(float dt) {
 }
 
 void ResultUI::Draw() {
+	// 背景を先に描き、その上に文字を重ねる
 	titleUI_->Draw();
 	titleUItxt_->Draw();
 
@@ -32686,6 +32991,7 @@ File Path: project/DirectXGame/application/base/Weapon/Base/WeaponData.h
 ============================================================
 #pragma once
 
+// 武器の大分類。攻撃処理側で近接、遠距離、複合を切り替えるために使う
 enum class WeaonType
 {
 	MELL,	// 近距離武器
@@ -32701,6 +33007,7 @@ struct WeaponData{
 // 近距離武器専用のデータ構造体(近距離武器クラス用)
 struct MeleeWeaponData
 {
+	// チャージ攻撃、ヒットストップ、コンボ補正に必要な近接武器パラメータ
 	bool isCharging = false;				// チャージ中かのフラグ
 	float chargeTime = 0.0f;				// チャージ時間(チャージ開始からの時間)
 	float chargeDamageMultiplier = 1.0f;	// チャージによるダメージ倍率(チャージ時間に応じて変化する)
@@ -32713,6 +33020,7 @@ struct MeleeWeaponData
 // 遠距離武器専用のデータ構造体(遠距離武器クラス用)
 struct RangedWeaponData
 {
+	// 弾の生成、補充、特殊挙動に必要な遠距離武器パラメータ
 	float bulletSpeed = 10.0f;				// 弾の速度
 	float bulletLifeTime = 1.0f;			// 弾のライフタイム(弾が消えるまでの時間)
 	float bulletSpread = 0.0f;				// 弾の散布率(弾がばらける範囲)
@@ -33247,6 +33555,8 @@ File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.cp
 void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
+	(void)camera;
+	// 敵近接武器が参照する入力とエンティティ管理を保持する
 	this->inputSystem = inputSystem;			// インプット
 	this->entityManager = entityManager;	// エンティティ3d
 	
@@ -33261,15 +33571,18 @@ void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 
 void SmallMeleeWeapon::Update()
 {
+	// 武器モデルのTransformや当たり判定用コンポーネントを更新する
 	objectComponent_->Update();
 }
 
 void SmallMeleeWeapon::DrawEffect()
 {
+	// 近接武器専用エフェクトは未実装
 }
 
 void SmallMeleeWeapon::Draw2D()
 {
+	// 近接武器専用2D表示は未実装
 }
 
 
@@ -33323,6 +33636,8 @@ File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.cp
 
 void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
+	(void)camera;
+	// 敵遠距離武器が参照する入力とエンティティ管理を保持する
 	this->inputSystem = inputSystem;						// インプット
 	this->entityManager = entityManager; // エンティティ3d
 	
@@ -33337,18 +33652,22 @@ void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 void SmallRangeWeapon::Update()
 {
 	if (target) {
+		// ターゲットがいる場合は、発射時に使う狙い位置を最新化する
 		targetPos_ = target->GetWorldPosition();
 	}
 	
+	// 武器モデルのTransformや内部コンポーネントを更新する
 	objectComponent_->Update();
 }
 
 void SmallRangeWeapon::DrawEffect()
 {
+	// 遠距離武器専用エフェクトは未実装
 }
 
 void SmallRangeWeapon::Draw2D()
 {
+	// 遠距離武器専用2D表示は未実装
 }
 
 void SmallRangeWeapon::Shot()
@@ -33362,6 +33681,7 @@ void SmallRangeWeapon::Shot()
 
 	// モードによって弾の状態変更
 	if (modeType_ == ModeType::Normal) {
+		// 通常モードでは標準の敵弾として生成する
 		info.type = ProjectileType::NORMAL;
 	}
 	
@@ -33788,6 +34108,7 @@ File Path: project/DirectXGame/application/base/Weapon/Player/PlayerWeapon.cpp
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
+	// プレイヤー武器が参照する入力とエンティティ管理を保持する
 	this->inputSystem = inputSystem;						// インプット
 	this->entityManager = entityManager; // エンティティ3d
 	
@@ -33812,10 +34133,13 @@ void PlayerWeapon::Update(){
 	GetObject3D()->UpdateWorldTransform();
 }
 
-void PlayerWeapon::Draw2D(){}
+void PlayerWeapon::Draw2D(){
+	// プレイヤー武器専用の2D表示は未実装
+}
 
-void PlayerWeapon::DrawEffect(){}
-
+void PlayerWeapon::DrawEffect(){
+	// トレイルは独立Entityとして生成しているため、ここでは追加描画を行わない
+}
 
 
 ============================================================
@@ -35485,6 +35809,7 @@ File Path: project/DirectXGame/application/scene/SceneFactory.cpp
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
+    // シーン名に対応するシーンクラスを生成する
     if (sceneName == "TITLE") {                 // タイトル
         return std::make_unique<TitleScene>();
     }
@@ -35513,7 +35838,7 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
         return std::make_unique<CustomScene>();
     }
 
-
+    // 未登録のシーン名が渡された場合は生成できないことを通知する
     return nullptr;
 }
 
@@ -67437,13 +67762,16 @@ File Path: project/DirectXGame/engine/Math/Random.cpp
 
 uint32_t Random::RandomUint32_t(uint32_t min, uint32_t max)
 {
+	// スレッドごとに乱数エンジンを持ち、呼び出し間で状態を継続する
 	static thread_local std::mt19937 generator(std::random_device{}());
+	// 指定範囲内の整数を均等な確率で生成する
 	std::uniform_int_distribution<uint32_t> distribution(min, max);
 	return distribution(generator);
 }
 
 int32_t Random::RandomInt32_t(int32_t min, int32_t max)
 {
+	// 符号付き整数用の分布で、min〜maxの範囲から生成する
 	static thread_local std::mt19937 generator(std::random_device{}());
 	std::uniform_int_distribution<int32_t> distribution(min, max);
 	return distribution(generator);
@@ -67451,6 +67779,7 @@ int32_t Random::RandomInt32_t(int32_t min, int32_t max)
 
 size_t Random::RandomSize_t(size_t min, size_t max)
 {
+	// 配列添字やサイズ用途に使うsize_t乱数を生成する
 	static thread_local std::mt19937 generator(std::random_device{}());
 	std::uniform_int_distribution<size_t> distribution(min, max);
 	return distribution(generator);
@@ -67458,8 +67787,10 @@ size_t Random::RandomSize_t(size_t min, size_t max)
 
 float Random::RandomFloat(float min, float max)
 {
+	// 引数の大小が逆でも使えるように範囲を補正する
 	if (min > max) std::swap(min, max);
 	static thread_local std::mt19937 generator(std::random_device{}());
+	// 小数は連続一様分布で生成する
 	std::uniform_real_distribution<float> distribution(min, max);
 	return distribution(generator);
 }
@@ -67467,6 +67798,7 @@ float Random::RandomFloat(float min, float max)
 
 double Random::RandomDouble(double min, double max)
 {
+	// double精度が必要な計算用に、float版とは別の分布で生成する
 	static thread_local std::mt19937 generator(std::random_device{}());
 	std::uniform_real_distribution<double> distribution(min, max);
 	return distribution(generator);
@@ -67475,36 +67807,43 @@ double Random::RandomDouble(double min, double max)
 
 Vector2 Random::RandomVector2(float min, float max)
 {
+	// 各成分を同じ範囲の乱数で生成する
 	return { RandomFloat(min,max), RandomFloat(min,max) };
 }
 
 Vector3 Random::RandomVector3(float min, float max)
 {
+	// 3D座標や速度用にXYZを同じ範囲から生成する
 	return { RandomFloat(min,max) , RandomFloat(min,max) , RandomFloat(min,max) };
 }
 
 Vector4 Random::RandomVector4(float min, float max)
 {
+	// 色や4次元パラメータ用にXYZWを同じ範囲から生成する
 	return { RandomFloat(min,max) , RandomFloat(min,max) , RandomFloat(min,max) , RandomFloat(min,max) };
 }
 
 Vector2 Random::RandomVector2(Vector2 min, Vector2 max)
 {
+	// 成分ごとに異なる最小・最大値を使う
 	return { RandomFloat(min.x,max.x), RandomFloat(min.y,max.y) };
 }
 
 Vector3 Random::RandomVector3(Vector3 min, Vector3 max)
 {
+	// XYZそれぞれの範囲指定に従って生成する
 	return { RandomFloat(min.x,max.x) , RandomFloat(min.y,max.y) , RandomFloat(min.z,max.z) };
 }
 
 Vector4 Random::RandomVector4(Vector4 min, Vector4 max)
 {
+	// XYZWそれぞれの範囲指定に従って生成する
 	return { RandomFloat(min.x,max.x) , RandomFloat(min.y,max.y) , RandomFloat(min.z,max.z) , RandomFloat(min.w,max.w) };
 }
 
 bool Random::RandomBool()
 {
+	// true/falseを同じ確率で返す
 	static thread_local std::mt19937 generator(std::random_device{}());
 	std::bernoulli_distribution distribution(0.5); // 50%の確率でtrueまたはfalse
 	return distribution(generator);
@@ -67513,6 +67852,7 @@ bool Random::RandomBool()
 
 float Random::RandFloat(const Range <float>& vec3, std::mt19937& randomEngine)
 {
+	// 呼び出し元が管理する乱数エンジンを使い、再現性のある乱数を生成する
 	std::uniform_real_distribution<float> vec(vec3.min, vec3.max);
 
 	return vec(randomEngine);
@@ -67520,6 +67860,7 @@ float Random::RandFloat(const Range <float>& vec3, std::mt19937& randomEngine)
 
 Vector2 Random::RandVector2(const Range <Vector2>& vec3, std::mt19937& randomEngine)
 {
+	// Rangeの各成分を個別の分布として扱う
 	std::uniform_real_distribution<float> vecX(vec3.min.x, vec3.max.x);
 	std::uniform_real_distribution<float> vecY(vec3.min.y, vec3.max.y);
 
@@ -67529,6 +67870,7 @@ Vector2 Random::RandVector2(const Range <Vector2>& vec3, std::mt19937& randomEng
 
 Vector3 Random::RandVector3(const Range <Vector3>& vec3, std::mt19937& randomEngine)
 {
+	// 3成分それぞれに範囲指定を反映する
 	std::uniform_real_distribution<float> vecX(vec3.min.x, vec3.max.x);
 	std::uniform_real_distribution<float> vecY(vec3.min.y, vec3.max.y);
 	std::uniform_real_distribution<float> vecZ(vec3.min.z, vec3.max.z);
@@ -67539,6 +67881,7 @@ Vector3 Random::RandVector3(const Range <Vector3>& vec3, std::mt19937& randomEng
 
 Vector4 Random::RandVector4(const Range <Vector4>& vec3, std::mt19937& randomEngine)
 {
+	// 4成分それぞれに範囲指定を反映する
 	std::uniform_real_distribution<float> vecX(vec3.min.x, vec3.max.x);
 	std::uniform_real_distribution<float> vecY(vec3.min.y, vec3.max.y);
 	std::uniform_real_distribution<float> vecZ(vec3.min.z, vec3.max.z);
@@ -67550,6 +67893,7 @@ Vector4 Random::RandVector4(const Range <Vector4>& vec3, std::mt19937& randomEng
 
 float Random::RandFloat(const MedianWithRange<float>& vec3, std::mt19937& randomEngine)
 {
+	// 中央値+幅の指定から最小値と最大値を計算して使う
 	std::uniform_real_distribution<float> vec(vec3.Min(), vec3.Max());
 
 	return vec(randomEngine);
@@ -67557,6 +67901,7 @@ float Random::RandFloat(const MedianWithRange<float>& vec3, std::mt19937& random
 
 Vector2 Random::RandVector2(const MedianWithRange<Vector2>& vec3, std::mt19937& randomEngine)
 {
+	// 中央値+幅の指定を成分ごとの範囲へ展開する
 	std::uniform_real_distribution<float> vecX(vec3.Min().x, vec3.Max().x);
 	std::uniform_real_distribution<float> vecY(vec3.Min().y, vec3.Max().y);
 
@@ -67565,6 +67910,7 @@ Vector2 Random::RandVector2(const MedianWithRange<Vector2>& vec3, std::mt19937& 
 
 Vector3 Random::RandVector3(const MedianWithRange<Vector3>& vec3, std::mt19937& randomEngine)
 {
+	// XYZそれぞれの中央値+幅から分布を作る
 	std::uniform_real_distribution<float> vecX(vec3.Min().x, vec3.Max().x);
 	std::uniform_real_distribution<float> vecY(vec3.Min().y, vec3.Max().y);
 	std::uniform_real_distribution<float> vecZ(vec3.Min().z, vec3.Max().z);
@@ -67574,6 +67920,7 @@ Vector3 Random::RandVector3(const MedianWithRange<Vector3>& vec3, std::mt19937& 
 
 Vector4 Random::RandVector4(const MedianWithRange<Vector4>& vec3, std::mt19937& randomEngine)
 {
+	// XYZWそれぞれの中央値+幅から分布を作る
 	std::uniform_real_distribution<float> vecX(vec3.Min().x, vec3.Max().x);
 	std::uniform_real_distribution<float> vecY(vec3.Min().y, vec3.Max().y);
 	std::uniform_real_distribution<float> vecZ(vec3.Min().z, vec3.Max().z);
@@ -67584,6 +67931,7 @@ Vector4 Random::RandVector4(const MedianWithRange<Vector4>& vec3, std::mt19937& 
 
 Vector3 Random::RandomUnitVector3(std::mt19937& engine)
 {
+	// [-1, 1]の立方体から候補を作り、単位球の内側だけ採用する
 	std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 
 	Vector3 v;
@@ -67593,6 +67941,7 @@ Vector3 Random::RandomUnitVector3(std::mt19937& engine)
 
 	return Normalize(v); // 単位ベクトル
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Math/Random.h
@@ -68571,18 +68920,18 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 	// テクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
-	// textテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
-	// smokeテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
-	// numテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
-	// エフェクトテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
-	// XBOXコントローラボタンテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
-	// アイコン全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
+	//// textテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
+	//// smokeテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
+	//// numテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
+	//// エフェクトテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
+	//// XBOXコントローラボタンテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
+	//// アイコン全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
 	
 	// ModelData;
 	LoadModel();
