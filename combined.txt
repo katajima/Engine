@@ -286,6 +286,7 @@
     └── └── └── └── └── └── ├── BasePlayer.cpp
     └── └── └── └── └── └── └── BasePlayer.h
     └── └── └── └── └── └── Normal/
+    └── └── └── └── └──     ├── DodgeSuccessEffect.h
     └── └── └── └── └──     ├── NormalPlayer.cpp
     └── └── └── └── └──     ├── NormalPlayer.h
     └── └── └── └── └──     ├── NormalPlayerState.cpp
@@ -312,7 +313,10 @@
     └── └── └── └── ├── Effect.cpp
     └── └── └── └── ├── Effect.h
     └── └── └── └── ├── EffectEditor.cpp
-    └── └── └── └── └── EffectEditor.h
+    └── └── └── └── ├── EffectEditor.h
+    └── └── └── └── └── SlowMotion/
+    └── └── └── └──     ├── SlowMotionManager.h
+    └── └── └── └──     └── SlowMotionRequest.h
     └── └── └── ├── Game/
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── GameData.h
@@ -24137,6 +24141,121 @@ namespace Character {
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuccessEffect.h
+============================================================
+#pragma once
+
+#include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/Offscreen/PostEffect.h"
+#include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
+
+namespace Character {
+
+	// 回避成功時のポストエフェクトを管理するクラス
+	class DodgeSuccessEffect {
+	public:
+		// 破棄時にポストエフェクトが残らないよう停止する
+		~DodgeSuccessEffect() { Stop(); }
+
+		// 使用するカメラへ回避成功用ポストエフェクトを登録する
+		void Initialize(Engine::Camera* camera) {
+			camera_ = camera;	// 演出を適用するカメラを保持する
+			if (!camera_) {
+				return;
+			}
+
+			Engine::PostEffectPipeline* pipeline = camera_->GetPostEffectPipeline();
+			if (!pipeline) {
+				return;
+			}
+
+			// 既に登録済みなら再利用し、未登録なら今回の演出用パスを追加する
+			grayPass_ = pipeline->FindPass(kGrayPassName_);
+			if (!grayPass_) {
+				camera_->AddEffectBlock(kGrayEffectName_, Engine::PostEffectBlockType::kGrayScale, false);
+				grayPass_ = pipeline->FindPass(kGrayPassName_);
+			}
+
+			// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
+			vignettePass_ = pipeline->FindPass(kVignettePassName_);
+			if (!vignettePass_) {
+				camera_->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
+				vignettePass_ = pipeline->FindPass(kVignettePassName_);
+			}
+
+			ConfigureVignette();		// 回避成功用のビネット強度を設定する
+			SetPostEffectUse(false);	// 初期状態では演出を非表示にしておく
+		}
+
+		// 回避成功ポストエフェクトを開始する
+		void Start() {
+			isActive_ = true;
+			timer_ = 0.0f;	// 連続で成功した場合はポストエフェクト時間を最初から数え直す
+			SetPostEffectUse(true);
+		}
+
+		// ポストエフェクト時間を進め、時間切れで解除する
+		void Update(float deltaTime) {
+			if (!isActive_) {
+				return;
+			}
+
+			// スロー演出とは別に、ポストエフェクトだけの寿命を進める
+			timer_ += deltaTime;
+
+			if (timer_ >= effectDuration_) {
+				Stop();
+			}
+		}
+
+		// ポストエフェクトを即座に停止する
+		void Stop() {
+			isActive_ = false;
+			timer_ = 0.0f;
+			SetPostEffectUse(false);
+		}
+
+	private:
+		// 回避成功用ビネットのパラメータを調整する
+		void ConfigureVignette() {
+			if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
+				!vignettePass_->GetPostEffectData()->GetVignette()) {
+				return;
+			}
+
+			// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
+			auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
+			vignetteData->scale = 9.5f;
+			vignetteData->squared = 0.55f;
+		}
+
+		// 登録済みポストエフェクトの使用状態をまとめて切り替える
+		void SetPostEffectUse(bool use) {
+			if (grayPass_) {
+				grayPass_->SetUse(use);
+			}
+			if (vignettePass_) {
+				vignettePass_->SetUse(use);
+			}
+		}
+
+	private:
+		static constexpr const char* kGrayEffectName_ = "DodgeSuccessGray";				// グレースケール登録名
+		static constexpr const char* kGrayPassName_ = "GrayScale_DodgeSuccessGray";		// グレースケールパス検索名
+		static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";		// ビネット登録名
+		static constexpr const char* kVignettePassName_ = "Vignette_DodgeSuccessVignette";	// ビネットパス検索名
+
+		Engine::Camera* camera_ = nullptr;						// 演出を追加するカメラ
+		Engine::PostEffectPass* grayPass_ = nullptr;			// 回避成功中に使用するグレースケールパス
+		Engine::PostEffectPass* vignettePass_ = nullptr;		// 回避成功中に使用するビネットパス
+		bool isActive_ = false;									// 演出再生中か
+		float timer_ = 0.0f;									// 演出の経過時間
+		float effectDuration_ = 0.35f;							// ポストエフェクトを維持する時間
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
 #include "NormalPlayer.h"
@@ -24193,6 +24312,13 @@ namespace Character {
 		moveComponent_->GetJumpSystem()->Data().power = 0.0f;
 		moveComponent_->SetMaxJumpCount(1);
 		moveComponent_->SetCamera(followCamera->GetUniqueCamera());
+
+		// 回避成功などで使うスロー演出管理クラスを生成する
+		slowMotionManager_ = std::make_unique<SlowMotionManager>();
+
+		// 回避成功時に使うポストエフェクトを、プレイヤーが使用するカメラへ登録する
+		dodgeSuccessEffect_ = std::make_unique<DodgeSuccessEffect>();
+		dodgeSuccessEffect_->Initialize(followCamera->GetUniqueCamera());
 
 		// 保存項目初期化
 		InitializeBaseAddItem();
@@ -24339,6 +24465,16 @@ namespace Character {
 			}
 		}
 
+		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
+		if (slowMotionManager_) {
+			slowMotionManager_->Update();
+		}
+
+		// 回避成功ポストエフェクトはスロー中でも実時間で解除したいので、固定デルタタイムで進める
+		if (dodgeSuccessEffect_) {
+			dodgeSuccessEffect_->Update(Engine::MyGame::BaseDeltaTime());
+		}
+
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
@@ -24445,6 +24581,16 @@ namespace Character {
 	void NormalPlayer::OnDodgeSuccess() {
 		// 敵攻撃を回避中にすり抜けたら、専用開始コンボの受付時間を開く
 		dodgeSuccessComboTimer_ = dodgeSuccessComboWindow_;
+
+		// 成功した瞬間を分かりやすくするため、スロー演出リクエストを管理クラスへ渡す
+		if (slowMotionManager_) {
+			slowMotionManager_->Request(SlowMotionRequest::CreateDodgeSuccess());
+		}
+
+		// ポストエフェクトは画面効果クラスで再生する
+		if (dodgeSuccessEffect_) {
+			dodgeSuccessEffect_->Start();
+		}
 	}
 
 	bool NormalPlayer::IsDodgeSuccessComboWindow() const {
@@ -24504,6 +24650,8 @@ File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPl
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
+#include "DirectXGame/application/base/Effect/SlowMotion/SlowMotionManager.h"
+#include "DodgeSuccessEffect.h"
 #include "NormalPlayerState.h"
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
@@ -24593,6 +24741,8 @@ namespace Character {
 		bool isSpecial = false;
 		float dodgeSuccessComboTimer_ = 0.0f;		// 回避成功後コンボの受付残り時間
 		float dodgeSuccessComboWindow_ = 0.45f;		// 回避成功後コンボを受け付ける時間
+		std::unique_ptr<SlowMotionManager> slowMotionManager_;	// 回避成功などのスロー演出を処理する管理クラス
+		std::unique_ptr<DodgeSuccessEffect> dodgeSuccessEffect_;	// 回避成功時のポストエフェクト演出
 	};
 
 }
@@ -27110,6 +27260,110 @@ private:
 	// グローバル変数保存
 	Engine::GlobalVariables* globalVariables = nullptr;
 };
+
+============================================================
+File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionManager.h
+============================================================
+#pragma once
+
+#include "DirectXGame/application/base/Effect/SlowMotion/SlowMotionRequest.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
+namespace Character {
+
+	// スロー演出リクエストを受け取り、ゲーム全体の時間倍率を管理するクラス
+	class SlowMotionManager {
+	public:
+		// 破棄時に時間倍率が残らないよう、管理中のスローを解除する
+		~SlowMotionManager() { Stop(); }
+
+		// スロー演出リクエストを受け付ける
+		void Request(const SlowMotionRequest& request) {
+			if (!isActive_) {
+				restoreTimeScale_ = Engine::MyGame::GetTimeScale();	// 演出前の時間倍率を退避する
+			}
+			else if (request.GetPriority() < activePriority_) {
+				return;	// 優先度が低いリクエストは現在のスローを邪魔しない
+			}
+
+			isActive_ = true;
+			timer_ = 0.0f;
+			duration_ = request.GetDuration();
+			activePriority_ = request.GetPriority();
+			Engine::MyGame::SetTimeScale(request.GetTimeScale());
+		}
+
+		// スロー演出の時間を進め、終了したら元の時間倍率へ戻す
+		void Update() {
+			if (!isActive_) {
+				return;
+			}
+
+			// スロー中でも演出の寿命は実時間基準で進める
+			timer_ += Engine::MyGame::BaseDeltaTime();
+			if (timer_ >= duration_) {
+				Stop();
+			}
+		}
+
+		// 現在のスロー演出を即座に解除する
+		void Stop() {
+			if (!isActive_) {
+				return;
+			}
+
+			Engine::MyGame::SetTimeScale(restoreTimeScale_);
+			isActive_ = false;
+			timer_ = 0.0f;
+			duration_ = 0.0f;
+			activePriority_ = 0;
+		}
+
+	private:
+		bool isActive_ = false;			// スロー演出を適用中か
+		float timer_ = 0.0f;			// 現在のスロー演出の経過時間
+		float duration_ = 0.0f;			// 現在のスロー演出の継続時間
+		float restoreTimeScale_ = 1.0f;	// スロー終了時に戻す時間倍率
+		int activePriority_ = 0;		// 現在適用中のスロー優先度
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionRequest.h
+============================================================
+#pragma once
+
+namespace Character {
+
+	// スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
+	class SlowMotionRequest {
+	public:
+		// 回避成功用のスロー演出リクエストを生成する
+		static SlowMotionRequest CreateDodgeSuccess() {
+			SlowMotionRequest request;	// 回避成功時に使うスロー設定
+			request.timeScale_ = 0.18f;
+			request.duration_ = 0.18f;
+			request.priority_ = 10;
+			return request;
+		}
+
+		// 適用したい時間倍率を取得する
+		float GetTimeScale() const { return timeScale_; }
+
+		// スロー演出を維持する時間を取得する
+		float GetDuration() const { return duration_; }
+
+		// 同時に複数リクエストが来た時の優先度を取得する
+		int GetPriority() const { return priority_; }
+
+	private:
+		float timeScale_ = 1.0f;	// リクエスト中に適用する時間倍率
+		float duration_ = 0.0f;	// リクエストの継続時間
+		int priority_ = 0;		// 現在のスローより優先して上書きできるかの値
+	};
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Base/GameData.h
@@ -38644,7 +38898,7 @@ File Path: project/DirectXGame/engine/2d/SpriteData.h
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/Model.cpp
 ============================================================
-// engine
+﻿// engine
 #include"Model.h"
 #include"ModelCommon.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
@@ -38963,8 +39217,14 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		pMesh->vertices.resize(mesh->mNumVertices);
 		pMesh->verticesline.resize(mesh->mNumVertices);
 
-		Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes - 1) - meshIndex];
-		pMesh->position = offset;// 位置オフセットを設定
+		// メッシュノードの移動量を取得する。存在しない場合は原点扱いにする
+		Vector3 offset = {};
+		if (auto it = modelData.meshOffsetMap.find(meshIndex); it != modelData.meshOffsetMap.end()) {
+			offset = it->second;
+		}
+		// ボーン付きメッシュはスキニング行列側でノード階層を扱うため、頂点へオフセットを焼き込まない
+		const Vector3 bakedOffset = mesh->HasBones() ? Vector3{} : offset;
+		pMesh->position = bakedOffset;// 位置オフセットを設定
 
 		if (mesh->HasTangentsAndBitangents()) { // 追加: タンジェント・ビタンジェントの確認
 			modelData.isTangent = true;
@@ -38997,7 +39257,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 
 
 
-			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
+			pMesh->vertices[vertexIndex].position = { -position.x + bakedOffset.x ,position.y + bakedOffset.y,position.z + bakedOffset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			if (mesh->HasTextureCoords(0)) {
 				pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
@@ -39244,7 +39504,8 @@ Engine::Node Engine::LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32
 	result.meshIndices.resize(node->mNumMeshes);
 	for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
 		result.meshIndices[i] = node->mMeshes[i];
-		meshOffsetMap[i] = { -translate.x, translate.y, translate.z };
+		// Assimpの実メッシュIndexへ、メッシュを持つノードの移動量を対応付ける
+		meshOffsetMap[node->mMeshes[i]] = { -translate.x, translate.y, translate.z };
 	}
 
 
@@ -39611,7 +39872,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/ModelManager.cpp
 ============================================================
-#include "ModelManager.h"
+﻿#include "ModelManager.h"
 #include"ModelCommon.h"
 #include"Model.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
@@ -40402,7 +40663,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/Object3d.cpp
 ============================================================
-#include"Object3dCommon.h"
+﻿#include"Object3dCommon.h"
 #include"Object3d.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
 
@@ -41104,7 +41365,6 @@ void Engine::Object3dCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	psoManager_->AddInputElementDesc("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3d.VS.hlsl");
 	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3d.PS.hlsl");
@@ -41935,7 +42195,6 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	psoManager_->AddInputElementDesc("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS,
 		L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
@@ -42447,7 +42706,9 @@ File Path: project/DirectXGame/engine/Animation/Animation.cpp
 ============================================================
 #include "Animation.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
+#include <algorithm>
 #include <execution> // C++17 以降
+#include <numeric>
 
 void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
@@ -42560,6 +42821,11 @@ void Engine::AnimationFunction::BlendSkeletons(Skeleton& outSkeleton,
 
 void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
 {
+	// ライン描画が未初期化、またはジョイントが無い場合は描画しない
+	if (!lineCommon || joints.empty()) {
+		return;
+	}
+
 	std::vector<int> depths(joints.size(), 0);
 	int maxDepth = 0;
 	for (size_t i = 0; i < joints.size(); ++i) {
@@ -42570,6 +42836,9 @@ void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::v
 	for (const Joint& joint : joints) {
 		if (joint.parent.has_value()) {
 			const int32_t parentIndex = joint.parent.value();
+			if (parentIndex < 0 || static_cast<size_t>(parentIndex) >= joints.size()) {
+				continue; // 親Indexが不正なジョイントは描画しない
+			}
 
 			// ワールド座標を取得
 			Vector3 parentPos = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition();
@@ -42647,18 +42916,24 @@ Matrix4x4 Engine::AnimationFunction::GetWorldMatrixOfJoint(const Skeleton& skele
 
 void Engine::AnimationFunction::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
 {
-	if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
-		cachedSkeletonMatrices.resize(skeleton.joints.size());
+	// スキニングに必要な配列数が揃っていない場合は、存在する範囲だけ更新する
+	size_t jointCount = (std::min)({ skeleton.joints.size(), skinCluster.inverseBindPoseMatrices.size(), skinCluster.mappedPalette.size() });
+	if (jointCount == 0) {
+		return;
 	}
 
-	// キャッシュ作成
-	for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+	if (cachedSkeletonMatrices.size() != jointCount) {
+		cachedSkeletonMatrices.resize(jointCount);
+	}
+
+	// スケルトン行列をキャッシュして並列更新中の参照を安定させる
+	for (size_t i = 0; i < jointCount; ++i) {
 		cachedSkeletonMatrices[i] = skeleton.joints[i].skeletonSpaceMatrix;
 	}
 
 	
 
-	std::vector<size_t> indices(skeleton.joints.size());
+	std::vector<size_t> indices(jointCount);
 	std::iota(indices.begin(), indices.end(), 0);
 
 	std::for_each(std::execution::par, indices.begin(), indices.end(), [&](size_t i) {
@@ -42721,9 +42996,17 @@ void Engine::AnimationFunction::ImGuiNode(const std::vector<Node>& nodes)
 
 int Engine::AnimationFunction::CalculateDepth(const std::vector<Joint>& joints, int index)
 {
+	// 範囲外のIndexは深さ0として扱い、壊れたデータでの再帰クラッシュを防ぐ
+	if (index < 0 || static_cast<size_t>(index) >= joints.size()) {
+		return 0;
+	}
+
 	const Joint& joint = joints[index];
 	if (!joint.parent.has_value()) {
 		return 0; // ルートジョイントの深さは0
+	}
+	if (joint.parent.value() < 0 || static_cast<size_t>(joint.parent.value()) >= joints.size()) {
+		return 0; // 親Indexが不正な場合はここで打ち切る
 	}
 	return 1 + AnimationFunction::CalculateDepth(joints, joint.parent.value());
 }
@@ -42997,311 +43280,389 @@ File Path: project/DirectXGame/engine/Animation/AnimationComponent.cpp
 #include "AnimationComponent.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
+#include"DirectXGame/engine/Material/Material.h"
+
+#include <algorithm>
+#include <cmath>
+#include <future>
 
 void Engine::AnimationComponent::Init(LineCommon* lineCommon) {
 	this->lineCommon = lineCommon;
 }
 
-void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform worldTransform)
+void Engine::AnimationComponent::AdvanceAnimationTime(const Animation& currentAnimation, float deltaTime)
 {
-
-	// モデルが存在する場合
-	if (model) {
-		const auto& animations = model->GetModelData().animations;
-		auto& modelData = model->GetModelData();
-
-		const std::string& currentName = modelData.currentAnimName;
-		auto itCurrent = animations.find(currentName);
-
-		if (itCurrent != animations.end()) {
-			// アニメーション時間更新（毎フレーム）
-			float deltaTime = deltatime * animationSpeed;
-			if (isPlaying) {
-				if (isReversePlayback) { // 逆再生なら
-					animationTime -= deltaTime;
-				}
-				else {
-					animationTime += deltaTime;
-				}
-			}
-
-			// ループするなら
-			if (isLoop) {
-				animationTime = std::fmod(animationTime, itCurrent->second.duration);
-
-				// 負の値を返す可能性があるので
-				if (animationTime < 0.0f) {
-					animationTime += itCurrent->second.duration;
-				}
-			}
-			else { // しないなら
-				if (isReversePlayback) {
-					if (animationTime <= 0) {
-						animationTime = 0; // 最終フレームで止める
-						isPlaying = false; // 自動停止
-					}
-				}
-				else {
-					if (animationTime >= itCurrent->second.duration) {
-						animationTime = itCurrent->second.duration; // 最終フレームで止める
-						isPlaying = false; // 自動停止
-					}
-				}
-			}
-
-
-			// アニメーションブレンド中か？
-			if (modelData.isBlending && modelData.previousAnimName != "") {
-				auto itPrev = animations.find(modelData.previousAnimName);
-				if (itPrev != animations.end()) {
-					const Animation& prevAnim = itPrev->second;
-					const Animation& currAnim = itCurrent->second;
-
-					auto WrapTime = [](float time, float duration) {
-						float wrapped = std::fmod(time, duration);
-						if (wrapped < 0.0f) wrapped += duration;
-						return wrapped;
-						};
-
-					float prevTime = WrapTime(animationTime, prevAnim.duration);
-					float currTime = WrapTime(animationTime, currAnim.duration);
-
-
-					// ① 各スケルトン姿勢を取得
-					Skeleton prevSkeleton = modelData.skeleton;
-					Skeleton currSkeleton = modelData.skeleton;
-					AnimationFunction::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
-					AnimationFunction::ApplyAnimation(currSkeleton, currAnim, currTime);
-
-					// ② 補間割合を更新（EaseInOutでなめらかに）
-					modelData.blendTime += deltaTime;
-					float t = modelData.blendTime / modelData.blendDuration;
-					t = std::clamp(t, 0.0f, 1.0f);
-					t = t * t * (3.0f - 2.0f * t); // Hermite補間（EaseInOut）
-
-					// ③ スケルトン補間
-					AnimationFunction::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
-
-					// ブレンド完了判定
-					if (modelData.blendTime >= modelData.blendDuration) {
-						modelData.isBlending = false;
-						modelData.previousAnimName.clear();
-					}
-				}
-				else {
-					// 前アニメーションが見つからなければ通常再生
-					AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, animationTime);
-				}
-			}
-			else {
-				// ブレンドしていない通常の再生
-				AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, animationTime);
-			}
-
-
-
-
-			// スケルトン姿勢更新
-			AnimationFunction::UpdateSkeleton(modelData.skeleton);
-
-			std::vector<Matrix4x4> cachedSkeletonMatrices;
-			for (auto& mesh : modelData.mesh) {
-				AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-			}
-
-			// ルートの変換行列反映
-			localMatrix_ = modelData.skeleton.joints[0].skeletonSpaceMatrix;
-			// デバッグ用：スケルトン描画
-			AnimationFunction::DrawSkeleton(
-				lineCommon,
-				modelData.skeleton.joints,
-				worldTransform.worldMat_.GetWorldPosition(),
-				worldTransform.scale_,
-				MakeRotateXYZ(worldTransform.rotate_)
-			);
+	// 尺が0秒以下のアニメーションではfmodを使わず、先頭フレーム固定にする
+	if (currentAnimation.duration <= 0.0f) {
+		animationTime = 0.0f;
+		if (!isLoop) {
+			isPlaying = false;
 		}
-		else {
-			// アニメーションが見つからない場合のフォールバック
-			localMatrix_ = model->GetModelData().rootNode.localMatrix;
-
-			std::vector<Matrix4x4> cachedSkeletonMatrices;
-			for (auto& mesh : modelData.mesh) {
-				AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-			}
-
-			// デバッグ用：スケルトン描画
-			AnimationFunction::DrawSkeleton(
-				lineCommon,
-				modelData.skeleton.joints,
-				worldTransform.worldMat_.GetWorldPosition(),
-				worldTransform.scale_,
-				MakeRotateXYZ(worldTransform.rotate_)
-			);
-		}
-
-
-
-		std::vector<std::future<void>> futures;
-		for (auto& mesh : model->GetModelData().mesh) {
-			futures.push_back(std::async(std::launch::async, [&mesh]() {
-				mesh->material->GPUData();
-				}));
-		}
-
-		// 全スレッドの終了を待つ
-		for (auto& f : futures) {
-			f.get();
-		}
-
+		return;
 	}
 
+	// 再生中だけ現在時間を進める
+	if (isPlaying) {
+		if (isReversePlayback) {
+			animationTime -= deltaTime; // 逆再生時は時間を戻す
+		}
+		else {
+			animationTime += deltaTime; // 通常再生時は時間を進める
+		}
+	}
 
+	// ループ設定に合わせて時間を尺内へ丸める
+	if (isLoop) {
+		animationTime = WrapAnimationTime(animationTime, currentAnimation.duration);
+	}
+	else if (isReversePlayback) {
+		if (animationTime <= 0.0f) {
+			animationTime = 0.0f; // 逆再生の終端で停止する
+			isPlaying = false;
+		}
+	}
+	else if (animationTime >= currentAnimation.duration) {
+		animationTime = currentAnimation.duration; // 通常再生の終端で停止する
+		isPlaying = false;
+	}
+}
+
+void Engine::AnimationComponent::AdvancePreviousAnimationTime(const Animation& previousAnimation, float deltaTime)
+{
+	// ブレンド元アニメーションの尺がない場合は先頭フレームを使う
+	if (previousAnimation.duration <= 0.0f) {
+		previousAnimationTime_ = 0.0f;
+		return;
+	}
+
+	// ブレンド元も再生方向に合わせて別時間で進める
+	if (isPlaying) {
+		if (isReversePlayback) {
+			previousAnimationTime_ -= deltaTime;
+		}
+		else {
+			previousAnimationTime_ += deltaTime;
+		}
+	}
+
+	// 前アニメーションはブレンド中の参照用なので常に尺内へ丸める
+	previousAnimationTime_ = WrapAnimationTime(previousAnimationTime_, previousAnimation.duration);
+}
+
+float Engine::AnimationComponent::WrapAnimationTime(float time, float duration) const
+{
+	// 0秒アニメーションでfmodしないための安全ガード
+	if (duration <= 0.0f) {
+		return 0.0f;
+	}
+
+	// fmodは負値を返す可能性があるため、負の時間を正の尺内に戻す
+	float wrapped = std::fmod(time, duration);
+	if (wrapped < 0.0f) {
+		wrapped += duration;
+	}
+	return wrapped;
+}
+
+float Engine::AnimationComponent::UpdateBlendRate(ModelData& modelData, float deltaTime)
+{
+	// ブレンド時間が0以下なら即座に現在アニメーションへ切り替える
+	if (modelData.blendDuration <= 0.0f) {
+		modelData.isBlending = false;
+		modelData.previousAnimName.clear();
+		return 1.0f;
+	}
+
+	// ブレンド経過時間を進めて0.0f～1.0fへ正規化する
+	modelData.blendTime += deltaTime;
+	float t = modelData.blendTime / modelData.blendDuration;
+	t = std::clamp(t, 0.0f, 1.0f);
+
+	// Hermite補間でブレンド開始・終了をなめらかにする
+	float easedT = t * t * (3.0f - 2.0f * t);
+
+	// ブレンドが終わったら前アニメーション名を消して通常再生へ戻す
+	if (modelData.blendTime >= modelData.blendDuration) {
+		modelData.isBlending = false;
+		modelData.previousAnimName.clear();
+	}
+
+	return easedT;
+}
+
+void Engine::AnimationComponent::ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime)
+{
+	const auto& animations = modelData.animations;
+
+	// ブレンド中は前アニメーションと現在アニメーションを別々の時刻で評価する
+	if (modelData.isBlending && !modelData.previousAnimName.empty()) {
+		auto itPrev = animations.find(modelData.previousAnimName);
+		if (itPrev != animations.end()) {
+			const Animation& previousAnimation = itPrev->second;
+			AdvancePreviousAnimationTime(previousAnimation, deltaTime);
+
+			Skeleton previousSkeleton = modelData.skeleton; // ブレンド元の姿勢を作る一時スケルトン
+			Skeleton currentSkeleton = modelData.skeleton;  // ブレンド先の姿勢を作る一時スケルトン
+			AnimationFunction::ApplyAnimation(previousSkeleton, previousAnimation, previousAnimationTime_);
+			AnimationFunction::ApplyAnimation(currentSkeleton, currentAnimation, animationTime);
+
+			float t = UpdateBlendRate(modelData, deltaTime);
+			AnimationFunction::BlendSkeletons(modelData.skeleton, previousSkeleton, currentSkeleton, t);
+			return;
+		}
+
+		// 前アニメーションが存在しなければブレンドを解除して通常再生へ戻す
+		modelData.isBlending = false;
+		modelData.previousAnimName.clear();
+	}
+
+	// ブレンドしていない場合は現在アニメーションだけを適用する
+	AnimationFunction::ApplyAnimation(modelData.skeleton, currentAnimation, animationTime);
+}
+
+void Engine::AnimationComponent::ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime)
+{
+	const auto& animations = modelData.animations;
+
+	// 通常ノードアニメーションでも、前後アニメーションを別時刻で評価してブレンドする
+	if (modelData.isBlending && !modelData.previousAnimName.empty()) {
+		auto itPrev = animations.find(modelData.previousAnimName);
+		if (itPrev != animations.end()) {
+			const Animation& previousAnimation = itPrev->second;
+			AdvancePreviousAnimationTime(previousAnimation, deltaTime);
+			float t = UpdateBlendRate(modelData, deltaTime);
+
+			for (const auto& [nodeName, currentNodeAnimation] : currentAnimation.nodeAnimations) {
+				auto itPrevNode = previousAnimation.nodeAnimations.find(nodeName);
+				if (itPrevNode != previousAnimation.nodeAnimations.end()) {
+					// 同名ノードがある場合はTRSを成分ごとに補間する
+					const NodeAnimation& previousNodeAnimation = itPrevNode->second;
+					Vector3 previousTranslate = AnimationFunction::CalculateValue(previousNodeAnimation.translate.keyframes, previousAnimationTime_);
+					Quaternion previousRotate = AnimationFunction::CalculateValue(previousNodeAnimation.rotate.keyframes, previousAnimationTime_);
+					Vector3 previousScale = AnimationFunction::CalculateValue(previousNodeAnimation.scale.keyframes, previousAnimationTime_);
+					Vector3 currentTranslate = AnimationFunction::CalculateValue(currentNodeAnimation.translate.keyframes, animationTime);
+					Quaternion currentRotate = AnimationFunction::CalculateValue(currentNodeAnimation.rotate.keyframes, animationTime);
+					Vector3 currentScale = AnimationFunction::CalculateValue(currentNodeAnimation.scale.keyframes, animationTime);
+
+					Vector3 blendTranslate = Lerp(previousTranslate, currentTranslate, t);
+					Quaternion blendRotate = Slerp(previousRotate, currentRotate, t);
+					Vector3 blendScale = Lerp(previousScale, currentScale, t);
+					localMatrix_ = MakeAffineMatrix(blendScale, blendRotate, blendTranslate);
+				}
+				else {
+					// ブレンド元に無いノードは現在アニメーションだけを反映する
+					localMatrix_ = CalculateNodeLocalMatrix(currentNodeAnimation, animationTime);
+				}
+			}
+			return;
+		}
+
+		// 前アニメーションが存在しなければブレンドを解除して通常再生へ戻す
+		modelData.isBlending = false;
+		modelData.previousAnimName.clear();
+	}
+
+	// 各ノードのアニメーション行列を作る。既存仕様に合わせて最後に評価したノードをlocalMatrix_へ保持する
+	for (const auto& [nodeName, nodeAnimation] : currentAnimation.nodeAnimations) {
+		(void)nodeName; // ノード名はmap走査の識別用で、現在の行列計算には使わない
+		localMatrix_ = CalculateNodeLocalMatrix(nodeAnimation, animationTime);
+	}
+}
+
+Matrix4x4 Engine::AnimationComponent::CalculateNodeLocalMatrix(const NodeAnimation& nodeAnimation, float animationTime) const
+{
+	// 指定時刻のTRSを取得してローカル行列を作成する
+	Vector3 interpTranslate = AnimationFunction::CalculateValue(nodeAnimation.translate.keyframes, animationTime);
+	Quaternion interpRotate = AnimationFunction::CalculateValue(nodeAnimation.rotate.keyframes, animationTime);
+	Vector3 interpScale = AnimationFunction::CalculateValue(nodeAnimation.scale.keyframes, animationTime);
+	return MakeAffineMatrix(interpScale, interpRotate, interpTranslate);
+}
+
+void Engine::AnimationComponent::UpdateSkinClusters(ModelData& modelData)
+{
+	std::vector<Matrix4x4> cachedSkeletonMatrices;
+	for (auto& mesh : modelData.mesh) {
+		// メッシュまたはスキンクラスターが無い場合は更新を飛ばす
+		if (!mesh || !mesh->skinCluster) {
+			continue;
+		}
+		AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+	}
+}
+
+void Engine::AnimationComponent::UpdateMaterialGPUData(ModelData& modelData)
+{
+	std::vector<std::future<void>> futures;
+	for (auto& mesh : modelData.mesh) {
+		// マテリアルが無いメッシュはGPU転送できないためスキップする
+		if (!mesh || !mesh->material) {
+			continue;
+		}
+
+		Material* material = mesh->material.get(); // 非同期更新で使うマテリアル実体
+		futures.push_back(std::async(std::launch::async, [material]() {
+			material->GPUData();
+			}));
+	}
+
+	// 全スレッドの終了を待ってから次の描画処理へ進む
+	for (auto& f : futures) {
+		f.get();
+	}
+}
+
+void Engine::AnimationComponent::UpdateSkin(float deltatime, WorldTransform worldTransform)
+{
+	// モデルが設定されていない場合は更新できない
+	if (!model) {
+		return;
+	}
+
+	auto& modelData = model->GetModelData();
+	const auto& animations = modelData.animations;
+	auto itCurrent = animations.find(modelData.currentAnimName);
+
+	if (itCurrent != animations.end()) {
+		const Animation& currentAnimation = itCurrent->second;
+		float deltaTime = deltatime * animationSpeed;
+		AdvanceAnimationTime(currentAnimation, deltaTime);
+		ApplySkinAnimation(modelData, currentAnimation, deltaTime);
+
+		// スケルトン姿勢を更新してスキニング用パレットへ反映する
+		AnimationFunction::UpdateSkeleton(modelData.skeleton);
+		UpdateSkinClusters(modelData);
+
+		// スキニング後の頂点は既にスケルトン空間へ変換済みなので、描画時にルート行列を二重に掛けない
+		localMatrix_ = MakeIdentity4x4();
+	}
+	else {
+		// アニメーションが見つからない場合はモデルのルート行列を使う
+		localMatrix_ = modelData.rootNode.localMatrix;
+		UpdateSkinClusters(modelData);
+	}
+
+	// デバッグ用にスケルトンを描画する
+	AnimationFunction::DrawSkeleton(
+		lineCommon,
+		modelData.skeleton.joints,
+		worldTransform.worldMat_.GetWorldPosition(),
+		worldTransform.scale_,
+		MakeRotateXYZ(worldTransform.rotate_)
+	);
+
+	// メッシュのマテリアルGPUデータを更新する
+	UpdateMaterialGPUData(modelData);
 }
 
 void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTransform)
 {
-	if (model) {
-		const auto& animations = model->GetModelData().animations;
-		auto& modelData = model->GetModelData();
+	(void)worldTransform; // 通常ノード更新ではワールド変換を直接使わない
 
-		const std::string& currentName = modelData.currentAnimName;
-		auto itCurrent = animations.find(currentName);
-
-		if (itCurrent != animations.end()) {
-			// アニメーション時間更新（毎フレーム）
-			float deltaTime = deltatime * animationSpeed;
-			if (isPlaying) {
-				if (isReversePlayback) { // 逆再生なら
-					animationTime -= deltaTime;
-				}
-				else {
-					animationTime += deltaTime;
-				}
-			}
-
-			// ループするなら
-			if (isLoop) {
-				animationTime = std::fmod(animationTime, itCurrent->second.duration);
-
-				// 負の値を返す可能性があるので
-				if (animationTime < 0.0f) {
-					animationTime += itCurrent->second.duration;
-				}
-			}
-			else { // しないなら
-				if (isReversePlayback) {
-					if (animationTime <= 0) {
-						animationTime = 0; // 最終フレームで止める
-						isPlaying = false; // 自動停止
-					}
-				}
-				else {
-					if (animationTime >= itCurrent->second.duration) {
-						animationTime = itCurrent->second.duration; // 最終フレームで止める
-						isPlaying = false; // 自動停止
-					}
-				}
-			}
-			// アニメーションブレンド中か？
-			if (modelData.isBlending && modelData.previousAnimName != "") {
-				auto itPrev = animations.find(modelData.previousAnimName);
-				if (itPrev != animations.end()) {
-					const Animation& prevAnim = itPrev->second;
-					const Animation& currAnim = itCurrent->second;
-
-					auto WrapTime = [](float time, float duration) {
-						float wrapped = std::fmod(time, duration);
-						if (wrapped < 0.0f) wrapped += duration;
-						return wrapped;
-						};
-
-					float prevTime = WrapTime(animationTime, prevAnim.duration);
-					float currTime = WrapTime(animationTime, currAnim.duration);
-				}
-			}
-
-			// 各ノード（ボーンではなく、単なるノード）のトランスフォーム補間
-			for (auto& [nodeName, nodeAnim] : itCurrent->second.nodeAnimations) {
-				// 時間に対応する補間結果を取得
-				Vector3 interpTranslate = AnimationFunction::CalculateValue(nodeAnim.translate.keyframes, animationTime);
-				Quaternion interpRotate = AnimationFunction::CalculateValue(nodeAnim.rotate.keyframes, animationTime);
-				Vector3 interpScale = AnimationFunction::CalculateValue(nodeAnim.scale.keyframes, animationTime);
-
-				// TRSマトリクスの生成
-				Matrix4x4 localMatrix = MakeAffineMatrix(interpScale, interpRotate, interpTranslate);
-			
-				localMatrix_ = localMatrix;
-			}
-			
-		}
-		else {
-
-			// アニメーションが見つからない場合のフォールバック
-			localMatrix_ = model->GetModelData().rootNode.localMatrix;
-		}
-
-		std::vector<std::future<void>> futures;
-		for (auto& mesh : model->GetModelData().mesh) {
-			futures.push_back(std::async(std::launch::async, [&mesh]() {
-				mesh->material->GPUData();
-				}));
-		}
-
-		// 全スレッドの終了を待つ
-		for (auto& f : futures) {
-			f.get();
-		}
-
+	// モデルが設定されていない場合は更新できない
+	if (!model) {
+		return;
 	}
+
+	auto& modelData = model->GetModelData();
+	const auto& animations = modelData.animations;
+	auto itCurrent = animations.find(modelData.currentAnimName);
+
+	if (itCurrent != animations.end()) {
+		const Animation& currentAnimation = itCurrent->second;
+		float deltaTime = deltatime * animationSpeed;
+		AdvanceAnimationTime(currentAnimation, deltaTime);
+		ApplyNodeAnimation(modelData, currentAnimation, deltaTime);
+	}
+	else {
+		// アニメーションが見つからない場合はモデルのルート行列を使う
+		localMatrix_ = modelData.rootNode.localMatrix;
+	}
+
+	// メッシュのマテリアルGPUデータを更新する
+	UpdateMaterialGPUData(modelData);
 }
 
 bool Engine::AnimationComponent::IsAnimationFinished()
 {
-	if (!model) return false;
+	if (!model) {
+		return false;
+	}
 
 	const auto& animations = model->GetModelData().animations;
-	auto& modelData = model->GetModelData();
-
-	const std::string& currentName = modelData.currentAnimName;
-	auto itCurrent = animations.find(currentName);
+	const auto& modelData = model->GetModelData();
+	auto itCurrent = animations.find(modelData.currentAnimName);
 
 	// 現在のアニメーション名が見つからなかった場合は再生終了扱い
 	if (itCurrent == animations.end()) {
 		return true;
 	}
 
-	// アニメ再生中かつアニメ時間が duration に達していれば終了
-	if (isReversePlayback) {
+	// 0秒アニメーションは停止状態なら終了扱いにする
+	if (itCurrent->second.duration <= 0.0f) {
+		return !isPlaying;
+	}
 
-		return !isPlaying && animationTime <= 0;
+	// アニメ再生中かつアニメ時間が終端に達していれば終了
+	if (isReversePlayback) {
+		return !isPlaying && animationTime <= 0.0f;
 	}
-	else {
-		return !isPlaying && animationTime >= itCurrent->second.duration;
-	}
+	return !isPlaying && animationTime >= itCurrent->second.duration;
 }
 
 void Engine::AnimationComponent::SetAnimation(const std::string& name, float time) {
-	AnimationFunction::SetAnimation(model->GetModelData(), name, time);
+	// モデルが未設定ならアニメーションを切り替えられない
+	if (!model) {
+		return;
+	}
+
+	auto& modelData = model->GetModelData();
+	if (modelData.animations.find(name) == modelData.animations.end()) {
+		return;
+	}
+
+	// 切り替え前の時刻をブレンド元アニメーション用に保持する
+	if (modelData.currentAnimName != name) {
+		previousAnimationTime_ = animationTime;
+		animationTime = 0.0f;
+		isPlaying = true;
+	}
+
+	AnimationFunction::SetAnimation(modelData, name, time);
 }
 
 void Engine::AnimationComponent::SetEndAnimeTime() {
-	const auto& animations = model->GetModelData().animations;
-	auto& modelData = model->GetModelData();
-	const std::string& currentName = modelData.currentAnimName;
-	auto itCurrent = animations.find(currentName);
+	// モデルが未設定なら終了時刻を取得できない
+	if (!model) {
+		return;
+	}
 
+	const auto& animations = model->GetModelData().animations;
+	const auto& modelData = model->GetModelData();
+	auto itCurrent = animations.find(modelData.currentAnimName);
+	if (itCurrent == animations.end()) {
+		return;
+	}
+
+	// 現在アニメーションの終端時間へ合わせる
 	animationTime = itCurrent->second.duration;
 }
 
 float Engine::AnimationComponent::GetEndAnimeTime(std::string name) const {
+	// モデルが未設定なら終了時刻を取得できない
+	if (!model) {
+		return 0.0f;
+	}
+
 	const auto& animations = model->GetModelData().animations;
 	auto it = animations.find(name);
 	if (it != animations.end()) {
 		return it->second.duration;
 	}
-	// 見つからない場合は 0.0f や -1.0f を返す
+
+	// 見つからない場合は0秒として扱う
 	return 0.0f;
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Animation/AnimationComponent.h
@@ -43361,6 +43722,26 @@ namespace Engine {
 		float GetEndAnimeTime(std::string name) const;
 
 	private:
+		// アニメーション時間を再生状態に合わせて進める
+		void AdvanceAnimationTime(const Animation& currentAnimation, float deltaTime);
+		// 前アニメーションのブレンド用時間を再生方向に合わせて進める
+		void AdvancePreviousAnimationTime(const Animation& previousAnimation, float deltaTime);
+		// アニメーション時間を尺内に丸める
+		float WrapAnimationTime(float time, float duration) const;
+		// ブレンド率を更新して0.0f～1.0fの補間値を返す
+		float UpdateBlendRate(ModelData& modelData, float deltaTime);
+		// スキニング用のアニメーション姿勢を反映する
+		void ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		// 通常ノード用のアニメーション姿勢を反映する
+		void ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		// ノードアニメーションからローカル行列を作成する
+		Matrix4x4 CalculateNodeLocalMatrix(const NodeAnimation& nodeAnimation, float animationTime) const;
+		// スキンクラスターのパレットを安全に更新する
+		void UpdateSkinClusters(ModelData& modelData);
+		// マテリアルのGPU転送を安全に更新する
+		void UpdateMaterialGPUData(ModelData& modelData);
+
+	private:
 		// アニメーション再生しているか
 		bool isPlaying = true;
 		// 逆再生するか
@@ -43376,6 +43757,8 @@ namespace Engine {
 		Matrix4x4 localMatrix_{};
 		// アニメーション時間
 		float animationTime = 0.0f;
+		// ブレンド開始時点の前アニメーション時間
+		float previousAnimationTime_ = 0.0f;
 	private:
 		// モデル
 		Model* model = nullptr;
@@ -45854,7 +46237,7 @@ namespace Logger
 ============================================================
 File Path: project/DirectXGame/engine/Base/Texture/TextureManager.cpp
 ============================================================
-#include "TextureManager.h"
+﻿#include "TextureManager.h"
 #include"DirectXGame/engine/Utility/StringUtility.h"
 #include<unordered_map>
 
@@ -66205,14 +66588,9 @@ void Engine::Material::GPUData()
 	cbResource_->Data()->color = GetMaterialInstance().color;
 	cbResource_->Data()->uvTransform = MakeAffineMatrix(GetMaterialInstance().transform.scale, GetMaterialInstance().transform.rotate, GetMaterialInstance().transform.translate);
 	cbResource_->Data()->alphaClipping = GetMaterialInstance().alphaClipping_;
-
-
-	if (GetMaterialInstance().useNormalMap_) {
-		cbResource_->Data()->useNormalMap = GetMaterialInstance().useNormalMap_;
-	}
-	if (GetMaterialInstance().useSpeculerMap_) {
-		cbResource_->Data()->useSpeculerMap = GetMaterialInstance().useSpeculerMap_;
-	}
+	// ノーマル/スペキュラマップの使用フラグは、OFFになった時もGPUへ必ず反映する
+	cbResource_->Data()->useNormalMap = GetMaterialInstance().useNormalMap_;
+	cbResource_->Data()->useSpeculerMap = GetMaterialInstance().useSpeculerMap_;
 }
 
 void Engine::Material::LoadTex()
@@ -66277,13 +66655,9 @@ void Engine::Material::SetGPUMaterialInstance(const MaterialInstance& materialIn
 	cbResourcePtr->Data()->alphaClipping = materialInstance.alphaClipping_;
 	cbResourcePtr->Data()->color = materialInstance.color;
 	cbResourcePtr->Data()->uvTransform = MakeAffineMatrix(materialInstance.transform.scale, materialInstance.transform.rotate, materialInstance.transform.translate);
-
-	if (materialInstance.useNormalMap_) {
-		cbResourcePtr->Data()->useNormalMap = materialInstance.useNormalMap_;
-	}
-	if (materialInstance.useSpeculerMap_) {
-		cbResourcePtr->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
-	}
+	// ノーマル/スペキュラマップの使用フラグは、OFFになった時もGPUへ必ず反映する
+	cbResourcePtr->Data()->useNormalMap = materialInstance.useNormalMap_;
+	cbResourcePtr->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
 
 
 
@@ -69295,6 +69669,19 @@ const float Engine::MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float Engine::MyGame::kTimeSpeed_ = 1.0f;
 float Engine::MyGame::nowTime = 0.0f;
 
+void Engine::MyGame::SetTimeScale(float timeScale)
+{
+	// スロー演出などから呼ばれても破綻しないよう、時間倍率を安全な範囲に丸める
+	if (timeScale < 0.0f) {
+		timeScale = 0.0f;
+	}
+	if (timeScale > 4.0f) {
+		timeScale = 4.0f;
+	}
+
+	kTimeSpeed_ = timeScale;
+}
+
 void Engine::MyGame::Initialize()
 {
 	debugTimer_.StartTimer();
@@ -69437,19 +69824,7 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 	// テクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
-	//// textテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
-	//// smokeテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
-	//// numテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
-	//// エフェクトテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
-	//// XBOXコントローラボタンテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
-	//// アイコン全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
-	
+		
 	// ModelData;
 	LoadModel();
 
@@ -69658,6 +70033,10 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModelAsync("hasira.obj", "stage/objects"); // 柱()
 	modelManager->LoadModelAsync("testField.obj", "stage/test"); // フィールド()
 
+	modelManager->LoadModelAsync("testField.obj", "stage/Field"); // フィールド()
+
+	modelManager->LoadModelAsync("lock.gltf", "stage/Stone"); // フィールド()
+
 
 	modelManager->LoadModelAsync("Stone.obj", "stage/Title/Stone"); // フィールド()
 	modelManager->LoadModelAsync("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)
@@ -69755,6 +70134,12 @@ namespace Engine {
 
 		// ゲーム内時間取得
 		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
+		// 時間倍率を掛けていない固定デルタタイム取得
+		static float BaseDeltaTime() { return kDeltaTime_; };
+		// 現在のゲーム内時間倍率取得
+		static float GetTimeScale() { return kTimeSpeed_; };
+		// ゲーム内時間倍率設定
+		static void SetTimeScale(float timeScale);
 		// 現在の時間
 		static float NowTime() { return nowTime; };
 
@@ -72544,7 +72929,6 @@ void Engine::SkinningConmmon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	psoManager_->AddInputElementDesc("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 	psoManager_->AddInputElementDesc("WEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1);
 	psoManager_->AddInputElementDesc("INDEX", 0, DXGI_FORMAT_R32G32B32A32_SINT, 1);
 
