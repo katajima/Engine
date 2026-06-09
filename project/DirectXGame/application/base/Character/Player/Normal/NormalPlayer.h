@@ -3,6 +3,8 @@
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
+#include "DirectXGame/application/base/Effect/SlowMotion/SlowMotionManager.h"
+#include "DodgeSuccessEffect.h"
 #include "NormalPlayerState.h"
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
@@ -92,6 +94,8 @@ namespace Character {
 		bool isSpecial = false;
 		float dodgeSuccessComboTimer_ = 0.0f;		// 回避成功後コンボの受付残り時間
 		float dodgeSuccessComboWindow_ = 0.45f;		// 回避成功後コンボを受け付ける時間
+		std::unique_ptr<SlowMotionManager> slowMotionManager_;	// 回避成功などのスロー演出を処理する管理クラス
+		std::unique_ptr<DodgeSuccessEffect> dodgeSuccessEffect_;	// 回避成功時のポストエフェクト演出
 	};
 
 }

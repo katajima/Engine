@@ -32,6 +32,12 @@ namespace Engine {
 
 		// ゲーム内時間取得
 		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
+		// 時間倍率を掛けていない固定デルタタイム取得
+		static float BaseDeltaTime() { return kDeltaTime_; };
+		// 現在のゲーム内時間倍率取得
+		static float GetTimeScale() { return kTimeSpeed_; };
+		// ゲーム内時間倍率設定
+		static void SetTimeScale(float timeScale);
 		// 現在の時間
 		static float NowTime() { return nowTime; };
 

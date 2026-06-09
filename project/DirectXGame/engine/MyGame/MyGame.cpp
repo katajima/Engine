@@ -7,6 +7,19 @@ const float Engine::MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float Engine::MyGame::kTimeSpeed_ = 1.0f;
 float Engine::MyGame::nowTime = 0.0f;
 
+void Engine::MyGame::SetTimeScale(float timeScale)
+{
+	// スロー演出などから呼ばれても破綻しないよう、時間倍率を安全な範囲に丸める
+	if (timeScale < 0.0f) {
+		timeScale = 0.0f;
+	}
+	if (timeScale > 4.0f) {
+		timeScale = 4.0f;
+	}
+
+	kTimeSpeed_ = timeScale;
+}
+
 void Engine::MyGame::Initialize()
 {
 	debugTimer_.StartTimer();
@@ -149,19 +162,7 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 	// テクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
-	//// textテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
-	//// smokeテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
-	//// numテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
-	//// エフェクトテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
-	//// XBOXコントローラボタンテクスチャ全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
-	//// アイコン全て読み込み
-	//textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
-	
+		
 	// ModelData;
 	LoadModel();
 

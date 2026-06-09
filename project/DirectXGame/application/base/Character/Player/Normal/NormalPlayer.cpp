@@ -53,6 +53,13 @@ namespace Character {
 		moveComponent_->SetMaxJumpCount(1);
 		moveComponent_->SetCamera(followCamera->GetUniqueCamera());
 
+		// 回避成功などで使うスロー演出管理クラスを生成する
+		slowMotionManager_ = std::make_unique<SlowMotionManager>();
+
+		// 回避成功時に使うポストエフェクトを、プレイヤーが使用するカメラへ登録する
+		dodgeSuccessEffect_ = std::make_unique<DodgeSuccessEffect>();
+		dodgeSuccessEffect_->Initialize(followCamera->GetUniqueCamera());
+
 		// 保存項目初期化
 		InitializeBaseAddItem();
 
@@ -198,6 +205,16 @@ namespace Character {
 			}
 		}
 
+		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
+		if (slowMotionManager_) {
+			slowMotionManager_->Update();
+		}
+
+		// 回避成功ポストエフェクトはスロー中でも実時間で解除したいので、固定デルタタイムで進める
+		if (dodgeSuccessEffect_) {
+			dodgeSuccessEffect_->Update(Engine::MyGame::BaseDeltaTime());
+		}
+
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
@@ -304,6 +321,16 @@ namespace Character {
 	void NormalPlayer::OnDodgeSuccess() {
 		// 敵攻撃を回避中にすり抜けたら、専用開始コンボの受付時間を開く
 		dodgeSuccessComboTimer_ = dodgeSuccessComboWindow_;
+
+		// 成功した瞬間を分かりやすくするため、スロー演出リクエストを管理クラスへ渡す
+		if (slowMotionManager_) {
+			slowMotionManager_->Request(SlowMotionRequest::CreateDodgeSuccess());
+		}
+
+		// ポストエフェクトは画面効果クラスで再生する
+		if (dodgeSuccessEffect_) {
+			dodgeSuccessEffect_->Start();
+		}
 	}
 
 	bool NormalPlayer::IsDodgeSuccessComboWindow() const {
