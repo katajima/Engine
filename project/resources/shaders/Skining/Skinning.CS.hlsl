@@ -12,7 +12,7 @@ struct Vertex
     float4 position;
     float2 texcoord;
     float3 normal;
-    float4 tangent; // © w ‚ğŠÜ‚ß‚é
+    float4 tangent; // ï¿½ï¿½ w ï¿½ï¿½ï¿½Ü‚ß‚ï¿½
 };
 StructuredBuffer<Vertex> gInputVertices : register(t1);
 
@@ -42,28 +42,33 @@ void main( uint3 DTid : SV_DispatchThreadID )
         Vertex input = gInputVertices[vertexIndex];
         VertexInfluence influence = gInfluence[vertexIndex];
         
-        // ƒXƒLƒjƒ“ƒO‚ğŒvZ
+        // ï¿½Xï¿½Lï¿½jï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½vï¿½Z
         Vertex skinned;
         skinned.texcoord = input.texcoord;
         
         
-        // ˆÊ’u‚Ì•ÏŠ·
+        // ï¿½Ê’uï¿½Ì•ÏŠï¿½
         skinned.position = mul(input.position, gMatrixPalette[influence.index.x].skeletonSpaceMatrix) * influence.weight.x;
         skinned.position += mul(input.position, gMatrixPalette[influence.index.y].skeletonSpaceMatrix) * influence.weight.y;
         skinned.position += mul(input.position, gMatrixPalette[influence.index.z].skeletonSpaceMatrix) * influence.weight.z;
         skinned.position += mul(input.position, gMatrixPalette[influence.index.w].skeletonSpaceMatrix) * influence.weight.w;
-        skinned.position.w = 1.0f; // ŠmÀ‚É1‚ğ“ü‚ê‚é
+        skinned.position.w = 1.0f; // ï¿½mï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-        // –@ü‚Ì•ÏŠ·
+        // ï¿½@ï¿½ï¿½ï¿½Ì•ÏŠï¿½
         skinned.normal = mul(input.normal, (float3x3) gMatrixPalette[influence.index.x].skeletonSpaceInverseTransposeMatrix) * influence.weight.x;
         skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[influence.index.y].skeletonSpaceInverseTransposeMatrix) * influence.weight.y;
         skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[influence.index.z].skeletonSpaceInverseTransposeMatrix) * influence.weight.z;
         skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[influence.index.w].skeletonSpaceInverseTransposeMatrix) * influence.weight.w;
         skinned.normal = normalize(skinned.normal);
         
-        skinned.tangent = input.tangent;
+        // æ¥ãƒ™ã‚¯ãƒˆãƒ«ã‚‚æ³•ç·šã¨åŒã˜ãã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã—ã€wã«ã¯å¾“ãƒ™ã‚¯ãƒˆãƒ«ã®å‘ãã‚’ä¿æŒã™ã‚‹
+        float3 skinnedTangent = mul(input.tangent.xyz, (float3x3) gMatrixPalette[influence.index.x].skeletonSpaceMatrix) * influence.weight.x;
+        skinnedTangent += mul(input.tangent.xyz, (float3x3) gMatrixPalette[influence.index.y].skeletonSpaceMatrix) * influence.weight.y;
+        skinnedTangent += mul(input.tangent.xyz, (float3x3) gMatrixPalette[influence.index.z].skeletonSpaceMatrix) * influence.weight.z;
+        skinnedTangent += mul(input.tangent.xyz, (float3x3) gMatrixPalette[influence.index.w].skeletonSpaceMatrix) * influence.weight.w;
+        skinned.tangent = float4(normalize(skinnedTangent), input.tangent.w);
         
-        // ’¸“_ƒf[ƒ^‚ğŠi”[
+        // ï¿½ï¿½ï¿½_ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½iï¿½[
         gOutputVertices[vertexIndex] = skinned;
     }
     

@@ -20,10 +20,8 @@ struct VertexShaderInput
     float4 position : POSITION0;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
-    // ’Ç‰Á
-    float3 tangent : TANGENT0; // ÚƒxƒNƒgƒ‹
-    float3 biNormal : BINORMAL0; // ]ƒxƒNƒgƒ‹
-     // ƒXƒLƒjƒ“ƒO
+    // ï¿½Ç‰ï¿½
+    float4 tangent : TANGENT0; // ï¿½Úƒxï¿½Nï¿½gï¿½ï¿½     // ï¿½Xï¿½Lï¿½jï¿½ï¿½ï¿½O
     float4 weight : WEIGHT0;
     int4 index : INDEX0;
 };
@@ -36,22 +34,22 @@ struct Skinned
 Skinned Skinning(VertexShaderInput input)
 {
     Skinned skinned;
-    
-    // ˆÊ’u‚Ì•ÏŠ·
+
+    // ï¿½Ê’uï¿½Ì•ÏŠï¿½
     skinned.position = mul(input.position, gMatrixPalette[input.index.x].skeletonSpaceMatrix) * input.weight.x;
     skinned.position += mul(input.position, gMatrixPalette[input.index.y].skeletonSpaceMatrix) * input.weight.y;
     skinned.position += mul(input.position, gMatrixPalette[input.index.z].skeletonSpaceMatrix) * input.weight.z;
     skinned.position += mul(input.position, gMatrixPalette[input.index.w].skeletonSpaceMatrix) * input.weight.w;
-    skinned.position.w = 1.0f; // ŠmÀ‚É1‚ğ“ü‚ê‚é
+    skinned.position.w = 1.0f; // ï¿½mï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-   // –@ü‚Ì•ÏŠ·
+   // ï¿½@ï¿½ï¿½ï¿½Ì•ÏŠï¿½
     skinned.normal =  mul(input.normal, (float3x3) gMatrixPalette[input.index.x].skeletonSpaceInverseTransposeMatrix) * input.weight.x;
     skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[input.index.y].skeletonSpaceInverseTransposeMatrix) * input.weight.y;
     skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[input.index.z].skeletonSpaceInverseTransposeMatrix) * input.weight.z;
     skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[input.index.w].skeletonSpaceInverseTransposeMatrix) * input.weight.w;
     skinned.normal = normalize(skinned.normal);
 
-    
+
     return skinned;
 };
 
@@ -59,18 +57,19 @@ VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
     Skinned skinned = Skinning(input);
-    
-    
+
+
     output.position = mul(skinned.position, gTransformationMatrix.WVP);
     output.texcoord = input.texcoord;
     output.normal = normalize(mul(skinned.normal, (float3x3) gTransformationMatrix.WorldInverseTranspose));
     output.worldPosition = mul(skinned.position, gTransformationMatrix.World).xyz;
-    // ’¸“_ƒVƒF[ƒ_‚Å‚Ì–@üAÚƒxƒNƒgƒ‹A]ƒxƒNƒgƒ‹‚Ì•ÏŠ· 
-    output.biNormal = normalize(mul((float3x3) gTransformationMatrix.World, (float3) input.biNormal));
-    output.tangent = normalize(mul((float3x3) gTransformationMatrix.World, (float3) input.tangent));
+    // ï¿½ï¿½ï¿½_ï¿½Vï¿½Fï¿½[ï¿½_ï¿½Å‚Ì–@ï¿½ï¿½ï¿½Aï¿½Úƒxï¿½Nï¿½gï¿½ï¿½ï¿½Aï¿½]ï¿½xï¿½Nï¿½gï¿½ï¿½ï¿½Ì•ÏŠï¿½
+    output.tangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent.xyz));
+    // å¾“ãƒ™ã‚¯ãƒˆãƒ«ã¯é ‚ç‚¹ã«æŒãŸãšã€æ¥ãƒ™ã‚¯ãƒˆãƒ«ã®wã«å…¥ã£ã¦ã„ã‚‹å‘ãã§å¾©å…ƒã™ã‚‹
+    output.biNormal = normalize(cross(output.normal, output.tangent) * input.tangent.w);
 
-    // ƒsƒNƒZƒ‹ƒVƒF[ƒ_‚Åg—p‚·‚é–@ü‚ğŒvZ 
+    // ï¿½sï¿½Nï¿½Zï¿½ï¿½ï¿½Vï¿½Fï¿½[ï¿½_ï¿½Ågï¿½pï¿½ï¿½ï¿½ï¿½@ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½Z
     output.transformedNormal = normalize(mul((float3x3) gTransformationMatrix.WorldInverseTranspose, input.normal));
-    
+
     return output;
 }

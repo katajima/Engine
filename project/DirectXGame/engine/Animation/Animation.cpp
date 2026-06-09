@@ -1,6 +1,8 @@
 #include "Animation.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
+#include <algorithm>
 #include <execution> // C++17 以降
+#include <numeric>
 
 void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
@@ -113,6 +115,11 @@ void Engine::AnimationFunction::BlendSkeletons(Skeleton& outSkeleton,
 
 void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
 {
+	// ライン描画が未初期化、またはジョイントが無い場合は描画しない
+	if (!lineCommon || joints.empty()) {
+		return;
+	}
+
 	std::vector<int> depths(joints.size(), 0);
 	int maxDepth = 0;
 	for (size_t i = 0; i < joints.size(); ++i) {
@@ -123,6 +130,9 @@ void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::v
 	for (const Joint& joint : joints) {
 		if (joint.parent.has_value()) {
 			const int32_t parentIndex = joint.parent.value();
+			if (parentIndex < 0 || static_cast<size_t>(parentIndex) >= joints.size()) {
+				continue; // 親Indexが不正なジョイントは描画しない
+			}
 
 			// ワールド座標を取得
 			Vector3 parentPos = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition();
@@ -200,18 +210,24 @@ Matrix4x4 Engine::AnimationFunction::GetWorldMatrixOfJoint(const Skeleton& skele
 
 void Engine::AnimationFunction::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
 {
-	if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
-		cachedSkeletonMatrices.resize(skeleton.joints.size());
+	// スキニングに必要な配列数が揃っていない場合は、存在する範囲だけ更新する
+	size_t jointCount = (std::min)({ skeleton.joints.size(), skinCluster.inverseBindPoseMatrices.size(), skinCluster.mappedPalette.size() });
+	if (jointCount == 0) {
+		return;
 	}
 
-	// キャッシュ作成
-	for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+	if (cachedSkeletonMatrices.size() != jointCount) {
+		cachedSkeletonMatrices.resize(jointCount);
+	}
+
+	// スケルトン行列をキャッシュして並列更新中の参照を安定させる
+	for (size_t i = 0; i < jointCount; ++i) {
 		cachedSkeletonMatrices[i] = skeleton.joints[i].skeletonSpaceMatrix;
 	}
 
 	
 
-	std::vector<size_t> indices(skeleton.joints.size());
+	std::vector<size_t> indices(jointCount);
 	std::iota(indices.begin(), indices.end(), 0);
 
 	std::for_each(std::execution::par, indices.begin(), indices.end(), [&](size_t i) {
@@ -274,9 +290,17 @@ void Engine::AnimationFunction::ImGuiNode(const std::vector<Node>& nodes)
 
 int Engine::AnimationFunction::CalculateDepth(const std::vector<Joint>& joints, int index)
 {
+	// 範囲外のIndexは深さ0として扱い、壊れたデータでの再帰クラッシュを防ぐ
+	if (index < 0 || static_cast<size_t>(index) >= joints.size()) {
+		return 0;
+	}
+
 	const Joint& joint = joints[index];
 	if (!joint.parent.has_value()) {
 		return 0; // ルートジョイントの深さは0
+	}
+	if (joint.parent.value() < 0 || static_cast<size_t>(joint.parent.value()) >= joints.size()) {
+		return 0; // 親Indexが不正な場合はここで打ち切る
 	}
 	return 1 + AnimationFunction::CalculateDepth(joints, joint.parent.value());
 }

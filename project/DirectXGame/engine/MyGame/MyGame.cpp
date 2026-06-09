@@ -371,6 +371,10 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModelAsync("hasira.obj", "stage/objects"); // 柱()
 	modelManager->LoadModelAsync("testField.obj", "stage/test"); // フィールド()
 
+	modelManager->LoadModelAsync("testField.obj", "stage/Field"); // フィールド()
+
+	modelManager->LoadModelAsync("lock.gltf", "stage/Stone"); // フィールド()
+
 
 	modelManager->LoadModelAsync("Stone.obj", "stage/Title/Stone"); // フィールド()
 	modelManager->LoadModelAsync("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)

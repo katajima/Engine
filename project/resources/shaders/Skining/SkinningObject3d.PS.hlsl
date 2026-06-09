@@ -166,15 +166,7 @@ PixelShaderOutput main(PixelShaderInput input)
     float32_t4 textureColor = gTexture.Sample(sSampler, transformedUV.xy);
     
     
-    float3 normal = input.normal;
-    float3 tangent = float3(0, 0, 0);
-    float3 biNormal = float3(0, 0, 0);
-    if (gMaterial.useNormalMap)
-    {
-        tangent = normalize(mul((float3) input.worldPosition, (float3) input.tangent));
-        biNormal = normalize(mul((float3) input.worldPosition, (float3) input.biNormal));
-        normal = normalize(mul((float3) input.worldPosition, (float3) input.normal));
-    }
+    float3 normal = normalize(input.normal);
     
     if (gMaterial.enableLighting != 0) // Lightingする場合
     {
@@ -185,12 +177,10 @@ PixelShaderOutput main(PixelShaderInput input)
         float amdientPower = 0;
         if (gMaterial.useNormalMap)
         {
-            float3 localNormal = g_Normalmap.Sample(sSampler, input.texcoord).xyz;
-        // タンジェントスペース
-            localNormal = (localNormal - 0.5f) * 2.0f;
-            normal = input.tangent * localNormal.x + input.biNormal * localNormal.y + input.transformedNormal * localNormal.z;
-    
-           
+            // ノーマルマップの値をタンジェント空間からワールド空間へ変換する
+            float3 localNormal = g_Normalmap.Sample(sSampler, transformedUV.xy).xyz * 2.0f - 1.0f;
+            float3x3 TBN = float3x3(normalize(input.tangent), normalize(input.biNormal), normalize(input.normal));
+            normal = normalize(mul(localNormal, TBN));
         }
         
             

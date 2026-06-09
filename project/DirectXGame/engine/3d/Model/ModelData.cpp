@@ -20,8 +20,14 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		pMesh->vertices.resize(mesh->mNumVertices);
 		pMesh->verticesline.resize(mesh->mNumVertices);
 
-		Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes - 1) - meshIndex];
-		pMesh->position = offset;// 位置オフセットを設定
+		// メッシュノードの移動量を取得する。存在しない場合は原点扱いにする
+		Vector3 offset = {};
+		if (auto it = modelData.meshOffsetMap.find(meshIndex); it != modelData.meshOffsetMap.end()) {
+			offset = it->second;
+		}
+		// ボーン付きメッシュはスキニング行列側でノード階層を扱うため、頂点へオフセットを焼き込まない
+		const Vector3 bakedOffset = mesh->HasBones() ? Vector3{} : offset;
+		pMesh->position = bakedOffset;// 位置オフセットを設定
 
 		if (mesh->HasTangentsAndBitangents()) { // 追加: タンジェント・ビタンジェントの確認
 			modelData.isTangent = true;
@@ -54,7 +60,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 
 
 
-			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
+			pMesh->vertices[vertexIndex].position = { -position.x + bakedOffset.x ,position.y + bakedOffset.y,position.z + bakedOffset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			if (mesh->HasTextureCoords(0)) {
 				pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
@@ -301,7 +307,8 @@ Engine::Node Engine::LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32
 	result.meshIndices.resize(node->mNumMeshes);
 	for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
 		result.meshIndices[i] = node->mMeshes[i];
-		meshOffsetMap[i] = { -translate.x, translate.y, translate.z };
+		// Assimpの実メッシュIndexへ、メッシュを持つノードの移動量を対応付ける
+		meshOffsetMap[node->mMeshes[i]] = { -translate.x, translate.y, translate.z };
 	}
 
 

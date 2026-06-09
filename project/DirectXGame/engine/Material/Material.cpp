@@ -73,14 +73,9 @@ void Engine::Material::GPUData()
 	cbResource_->Data()->color = GetMaterialInstance().color;
 	cbResource_->Data()->uvTransform = MakeAffineMatrix(GetMaterialInstance().transform.scale, GetMaterialInstance().transform.rotate, GetMaterialInstance().transform.translate);
 	cbResource_->Data()->alphaClipping = GetMaterialInstance().alphaClipping_;
-
-
-	if (GetMaterialInstance().useNormalMap_) {
-		cbResource_->Data()->useNormalMap = GetMaterialInstance().useNormalMap_;
-	}
-	if (GetMaterialInstance().useSpeculerMap_) {
-		cbResource_->Data()->useSpeculerMap = GetMaterialInstance().useSpeculerMap_;
-	}
+	// ノーマル/スペキュラマップの使用フラグは、OFFになった時もGPUへ必ず反映する
+	cbResource_->Data()->useNormalMap = GetMaterialInstance().useNormalMap_;
+	cbResource_->Data()->useSpeculerMap = GetMaterialInstance().useSpeculerMap_;
 }
 
 void Engine::Material::LoadTex()
@@ -145,13 +140,9 @@ void Engine::Material::SetGPUMaterialInstance(const MaterialInstance& materialIn
 	cbResourcePtr->Data()->alphaClipping = materialInstance.alphaClipping_;
 	cbResourcePtr->Data()->color = materialInstance.color;
 	cbResourcePtr->Data()->uvTransform = MakeAffineMatrix(materialInstance.transform.scale, materialInstance.transform.rotate, materialInstance.transform.translate);
-
-	if (materialInstance.useNormalMap_) {
-		cbResourcePtr->Data()->useNormalMap = materialInstance.useNormalMap_;
-	}
-	if (materialInstance.useSpeculerMap_) {
-		cbResourcePtr->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
-	}
+	// ノーマル/スペキュラマップの使用フラグは、OFFになった時もGPUへ必ず反映する
+	cbResourcePtr->Data()->useNormalMap = materialInstance.useNormalMap_;
+	cbResourcePtr->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
 
 
 

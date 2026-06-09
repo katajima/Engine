@@ -53,6 +53,26 @@ namespace Engine {
 		float GetEndAnimeTime(std::string name) const;
 
 	private:
+		// アニメーション時間を再生状態に合わせて進める
+		void AdvanceAnimationTime(const Animation& currentAnimation, float deltaTime);
+		// 前アニメーションのブレンド用時間を再生方向に合わせて進める
+		void AdvancePreviousAnimationTime(const Animation& previousAnimation, float deltaTime);
+		// アニメーション時間を尺内に丸める
+		float WrapAnimationTime(float time, float duration) const;
+		// ブレンド率を更新して0.0f～1.0fの補間値を返す
+		float UpdateBlendRate(ModelData& modelData, float deltaTime);
+		// スキニング用のアニメーション姿勢を反映する
+		void ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		// 通常ノード用のアニメーション姿勢を反映する
+		void ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		// ノードアニメーションからローカル行列を作成する
+		Matrix4x4 CalculateNodeLocalMatrix(const NodeAnimation& nodeAnimation, float animationTime) const;
+		// スキンクラスターのパレットを安全に更新する
+		void UpdateSkinClusters(ModelData& modelData);
+		// マテリアルのGPU転送を安全に更新する
+		void UpdateMaterialGPUData(ModelData& modelData);
+
+	private:
 		// アニメーション再生しているか
 		bool isPlaying = true;
 		// 逆再生するか
@@ -68,6 +88,8 @@ namespace Engine {
 		Matrix4x4 localMatrix_{};
 		// アニメーション時間
 		float animationTime = 0.0f;
+		// ブレンド開始時点の前アニメーション時間
+		float previousAnimationTime_ = 0.0f;
 	private:
 		// モデル
 		Model* model = nullptr;

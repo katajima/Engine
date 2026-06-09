@@ -677,7 +677,6 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	psoManager_->AddInputElementDesc("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS,
 		L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");

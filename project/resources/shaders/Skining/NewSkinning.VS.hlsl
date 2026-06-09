@@ -8,14 +8,13 @@ struct TransformationMatrix
 };
 ConstantBuffer<TransformationMatrix> gTransformationMatrix : register(b0);
 
-// Compute Shader ‚ÅƒXƒLƒjƒ“ƒOÏ‚İ‚Ì’¸“_ƒf[ƒ^‚ğ‘O’ñ‚Æ‚µ‚½“ü—Í
+// Compute Shader ï¿½ÅƒXï¿½Lï¿½jï¿½ï¿½ï¿½Oï¿½Ï‚İ‚Ì’ï¿½ï¿½_ï¿½fï¿½[ï¿½^ï¿½ï¿½Oï¿½ï¿½Æ‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 struct VertexShaderInput
 {
     float4 position : POSITION0;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     float4 tangent : TANGENT0;
-    float3 biNormal : BINORMAL0;
     
 };
 
@@ -27,8 +26,9 @@ VertexShaderOutput main(VertexShaderInput input)
     output.texcoord = input.texcoord;
     output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix.WorldInverseTranspose));
     output.worldPosition = mul(input.position, gTransformationMatrix.World).xyz;
-    output.biNormal = normalize(mul((float3x3) gTransformationMatrix.World, input.biNormal));
     output.tangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent.xyz));
+    // å¾“ãƒ™ã‚¯ãƒˆãƒ«ã¯é ‚ç‚¹ã«æŒãŸãšã€æ¥ãƒ™ã‚¯ãƒˆãƒ«ã®wã«å…¥ã£ã¦ã„ã‚‹å‘ãã§å¾©å…ƒã™ã‚‹
+    output.biNormal = normalize(cross(output.normal, output.tangent) * input.tangent.w);
     output.transformedNormal = normalize(mul((float3x3) gTransformationMatrix.WorldInverseTranspose, input.normal));
 
     return output;

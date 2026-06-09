@@ -16,7 +16,6 @@ struct VertexShaderInput
     float3 normal : NORMAL0;
     // 追加
     float4 tangent : TANGENT0; // 接ベクトル
-    float3 biNormal : BINORMAL0; // 従ベクトル 
 };
 
 VertexShaderOutput main(VertexShaderInput input)
@@ -29,6 +28,7 @@ VertexShaderOutput main(VertexShaderInput input)
     // 頂点シェーダ側
     float3 transformedNormal = normalize(mul((float3x3) gTransformationMatrix.WorldInverseTranspose, input.normal));
     float3 transformedTangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent.xyz));
+    // 従ベクトルは頂点に持たず、接ベクトルのwに入っている向きで復元する
     float3 transformedBinormal = normalize(cross(transformedNormal, transformedTangent) * input.tangent.w); // ←重要！
 
     output.normal = transformedNormal;

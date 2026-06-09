@@ -16,7 +16,6 @@ struct VertexShaderInput
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     float4 tangent : TANGENT0;
-    float3 biNormal : BINORMAL0;
 };
 
 float4 main(VertexShaderInput input, uint instanceId : SV_InstanceID) : SV_POSITION
