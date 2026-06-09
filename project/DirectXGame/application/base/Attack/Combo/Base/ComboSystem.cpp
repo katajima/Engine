@@ -547,6 +547,18 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
 			globalVariables->AddItem(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
 
+			// ターゲット有無で移動の味付けを変えるための上書き設定
+			globalVariables->AddItem(name, "ターゲットあり移動上書き", data.move.targetMove.enabled);
+			globalVariables->AddItem(name, "ターゲットあり移動スピード", data.move.targetMove.moveSpeed);
+			globalVariables->AddItem(name, "ターゲットあり移動方向", data.move.targetMove.localMoveVector);
+			globalVariables->AddItem(name, "ターゲットあり移動方向を正規化してから使うか", data.move.targetMove.isNormalizeLocalMove);
+			globalVariables->AddEnumItem(name, "ターゲットありターゲット移動タイプ", data.move.targetMove.targetMoveType, "TargetMoveType");
+			globalVariables->AddItem(name, "ターゲットあり接近距離半径", data.move.targetMove.moveTargetRadius);
+			globalVariables->AddItem(name, "ターゲットなし移動上書き", data.move.noTargetMove.enabled);
+			globalVariables->AddItem(name, "ターゲットなし移動スピード", data.move.noTargetMove.moveSpeed);
+			globalVariables->AddItem(name, "ターゲットなし移動方向", data.move.noTargetMove.localMoveVector);
+			globalVariables->AddItem(name, "ターゲットなし移動方向を正規化してから使うか", data.move.noTargetMove.isNormalizeLocalMove);
+
 		}
 		// ヒットボックス
 		{
@@ -743,6 +755,18 @@ namespace Combo {
 			data.move.isNormalizeLocalMove = globalVariables->GetValue<bool>(name, "コンボ中の移動方向を正規化してから使うか");
 			data.move.isFlattenTargetDirection = globalVariables->GetValue<bool>(name, "コンボ中の移動基準前方を水平化");
 			data.move.alignCharacterToMovement = globalVariables->GetValue<bool>(name, "移動方向とキャラクターの向く方向を一致させるか");
+
+			// ターゲット有無で切り替える移動上書きを読み込む
+			data.move.targetMove.enabled = globalVariables->GetValue<bool>(name, "ターゲットあり移動上書き");
+			data.move.targetMove.moveSpeed = globalVariables->GetValue<Vector3>(name, "ターゲットあり移動スピード");
+			data.move.targetMove.localMoveVector = globalVariables->GetValue<Vector3>(name, "ターゲットあり移動方向");
+			data.move.targetMove.isNormalizeLocalMove = globalVariables->GetValue<bool>(name, "ターゲットあり移動方向を正規化してから使うか");
+			data.move.targetMove.targetMoveType = globalVariables->GetEnumValue<TargetMoveType>(name, "ターゲットありターゲット移動タイプ");
+			data.move.targetMove.moveTargetRadius = globalVariables->GetValue<float>(name, "ターゲットあり接近距離半径");
+			data.move.noTargetMove.enabled = globalVariables->GetValue<bool>(name, "ターゲットなし移動上書き");
+			data.move.noTargetMove.moveSpeed = globalVariables->GetValue<Vector3>(name, "ターゲットなし移動スピード");
+			data.move.noTargetMove.localMoveVector = globalVariables->GetValue<Vector3>(name, "ターゲットなし移動方向");
+			data.move.noTargetMove.isNormalizeLocalMove = globalVariables->GetValue<bool>(name, "ターゲットなし移動方向を正規化してから使うか");
 
 		}
 		// リアクション
@@ -950,6 +974,18 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
 			globalVariables->SetValue(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
 			globalVariables->SetValue(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
+
+			// ターゲット有無で移動の味付けを変えるための上書き設定
+			globalVariables->SetValue(name, "ターゲットあり移動上書き", data.move.targetMove.enabled);
+			globalVariables->SetValue(name, "ターゲットあり移動スピード", data.move.targetMove.moveSpeed);
+			globalVariables->SetValue(name, "ターゲットあり移動方向", data.move.targetMove.localMoveVector);
+			globalVariables->SetValue(name, "ターゲットあり移動方向を正規化してから使うか", data.move.targetMove.isNormalizeLocalMove);
+			globalVariables->SetEnumValue(name, "ターゲットありターゲット移動タイプ", data.move.targetMove.targetMoveType, "TargetMoveType");
+			globalVariables->SetValue(name, "ターゲットあり接近距離半径", data.move.targetMove.moveTargetRadius);
+			globalVariables->SetValue(name, "ターゲットなし移動上書き", data.move.noTargetMove.enabled);
+			globalVariables->SetValue(name, "ターゲットなし移動スピード", data.move.noTargetMove.moveSpeed);
+			globalVariables->SetValue(name, "ターゲットなし移動方向", data.move.noTargetMove.localMoveVector);
+			globalVariables->SetValue(name, "ターゲットなし移動方向を正規化してから使うか", data.move.noTargetMove.isNormalizeLocalMove);
 
 		}
 		// リアクション

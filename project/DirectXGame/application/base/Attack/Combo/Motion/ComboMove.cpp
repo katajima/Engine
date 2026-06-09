@@ -123,7 +123,10 @@ namespace Combo {
 
 			case MoveType::kTraget:
 				if (!traget) {
-					canMove = false;
+					// ターゲットなし上書きがない場合は、従来通りターゲット移動を発生させない
+					if (!data_.noTargetMove.enabled) {
+						canMove = false;
+					}
 					break;
 				}
 				canMove = ApplyTargetMove(request, dt);
@@ -138,7 +141,7 @@ namespace Combo {
 			}
 
 			if (canMove) {
-				if (data_.moveType != MoveType::kTraget) {
+				if (data_.moveType != MoveType::kTraget || !traget) {
 					request.velocity = Multiply(moveDirection_, dt);
 				}
 				request.priority = 0;
@@ -219,8 +222,8 @@ namespace Combo {
 		baseForward = NormalizeSafe(baseForward, Vector3{ 0.0f,0.0f,1.0f });
 
 		// ローカル入力
-		Vector3 local = data_.localMoveVector;
-		if (data_.isNormalizeLocalMove && local.Length() > 0.0001f) {
+		Vector3 local = GetActiveLocalMoveVector();
+		if (GetActiveNormalizeLocalMove() && local.Length() > 0.0001f) {
 			local = local.Normalize();
 		}
 
@@ -229,10 +232,11 @@ namespace Combo {
 		const Vector3 right = MakeRightFromForward(baseForward);
 
 		// ★ここが重要（速度を掛ける）
+		const Vector3 moveSpeed = GetActiveMoveSpeed();
 		Vector3 result =
-			(right * (local.x * data_.moveSpeed.x)) +
-			(up * (local.y * data_.moveSpeed.y)) +
-			(baseForward * (local.z * data_.moveSpeed.z));
+			(right * (local.x * moveSpeed.x)) +
+			(up * (local.y * moveSpeed.y)) +
+			(baseForward * (local.z * moveSpeed.z));
 
 		return result;
 	}
@@ -247,7 +251,7 @@ namespace Combo {
 		}
 
 		Vector3 toTargetDir = NormalizeSafe(toTarget, NormalizeSafe(moveComponent->GetDirection()));
-		return targetPos - toTargetDir * data_.lockOnData.moveTargetRadius;
+		return targetPos - toTargetDir * GetActiveMoveTargetRadius();
 	}
 
 	bool ComboMove::ApplyTargetMove(MoveRequest& request, float dt) {
@@ -268,7 +272,8 @@ namespace Combo {
 			return false;
 		}
 
-		switch (data_.lockOnData.targetMoveType)
+		const TargetMoveType targetMoveType = GetActiveTargetMoveType();
+		switch (targetMoveType)
 		{
 		case TargetMoveType::kNone:
 			return false;
@@ -295,7 +300,8 @@ namespace Combo {
 
 		case TargetMoveType::kInterpolation:
 		{
-			const float speed = (std::max)((std::max)(std::abs(data_.moveSpeed.x), std::abs(data_.moveSpeed.y)), std::abs(data_.moveSpeed.z));
+			const Vector3 moveSpeed = GetActiveMoveSpeed();
+			const float speed = (std::max)((std::max)(std::abs(moveSpeed.x), std::abs(moveSpeed.y)), std::abs(moveSpeed.z));
 			const float t = std::clamp(speed * dt, 0.0f, 1.0f);
 			request.velocity = Lerp(currentPos, goalPos, t) - currentPos;
 			break;
@@ -305,7 +311,51 @@ namespace Combo {
 			return false;
 		}
 
-		return data_.lockOnData.targetMoveType == TargetMoveType::kTeleport || request.velocity.Length() > 0.0001f;
+		return targetMoveType == TargetMoveType::kTeleport || request.velocity.Length() > 0.0001f;
+	}
+
+	Vector3 ComboMove::GetActiveMoveSpeed() const {
+		if (traget && data_.targetMove.enabled) {
+			return data_.targetMove.moveSpeed;
+		}
+		if (!traget && data_.noTargetMove.enabled) {
+			return data_.noTargetMove.moveSpeed;
+		}
+		return data_.moveSpeed;
+	}
+
+	Vector3 ComboMove::GetActiveLocalMoveVector() const {
+		if (traget && data_.targetMove.enabled) {
+			return data_.targetMove.localMoveVector;
+		}
+		if (!traget && data_.noTargetMove.enabled) {
+			return data_.noTargetMove.localMoveVector;
+		}
+		return data_.localMoveVector;
+	}
+
+	bool ComboMove::GetActiveNormalizeLocalMove() const {
+		if (traget && data_.targetMove.enabled) {
+			return data_.targetMove.isNormalizeLocalMove;
+		}
+		if (!traget && data_.noTargetMove.enabled) {
+			return data_.noTargetMove.isNormalizeLocalMove;
+		}
+		return data_.isNormalizeLocalMove;
+	}
+
+	TargetMoveType ComboMove::GetActiveTargetMoveType() const {
+		if (traget && data_.targetMove.enabled) {
+			return data_.targetMove.targetMoveType;
+		}
+		return data_.lockOnData.targetMoveType;
+	}
+
+	float ComboMove::GetActiveMoveTargetRadius() const {
+		if (traget && data_.targetMove.enabled) {
+			return data_.targetMove.moveTargetRadius;
+		}
+		return data_.lockOnData.moveTargetRadius;
 	}
 
 	const Engine::WorldTransform* ComboMove::GetTarget() {

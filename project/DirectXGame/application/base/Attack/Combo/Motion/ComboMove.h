@@ -59,6 +59,16 @@ namespace Combo {
 		Vector3 BuildTargetMoveGoal() const;
 		// ターゲット移動タイプによる移動処理
 		bool ApplyTargetMove(MoveRequest& request, float dt);
+		// ターゲット有無に応じた移動速度取得
+		Vector3 GetActiveMoveSpeed() const;
+		// ターゲット有無に応じたローカル移動方向取得
+		Vector3 GetActiveLocalMoveVector() const;
+		// ターゲット有無に応じてローカル移動方向を正規化するか取得
+		bool GetActiveNormalizeLocalMove() const;
+		// ターゲット有無に応じたターゲット移動タイプ取得
+		TargetMoveType GetActiveTargetMoveType() const;
+		// ターゲット有無に応じた接近停止半径取得
+		float GetActiveMoveTargetRadius() const;
 	private:
 		// 移動
 		MovementComponent* moveComponent = nullptr;

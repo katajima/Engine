@@ -281,6 +281,63 @@
             "type": "bool",
             "value": false
         },
+        "ターゲットありターゲット移動タイプ": {
+            "enumType": "TargetMoveType",
+            "type": "enum",
+            "value": 1
+        },
+        "ターゲットあり接近距離半径": {
+            "type": "float",
+            "value": 1.0
+        },
+        "ターゲットあり移動スピード": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                27.299999237060547
+            ]
+        },
+        "ターゲットあり移動上書き": {
+            "type": "bool",
+            "value": true
+        },
+        "ターゲットあり移動方向": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "ターゲットあり移動方向を正規化してから使うか": {
+            "type": "bool",
+            "value": true
+        },
+        "ターゲットなし移動スピード": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                27.299999237060547
+            ]
+        },
+        "ターゲットなし移動上書き": {
+            "type": "bool",
+            "value": true
+        },
+        "ターゲットなし移動方向": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "ターゲットなし移動方向を正規化してから使うか": {
+            "type": "bool",
+            "value": true
+        },
         "ターゲット移動タイプ": {
             "enumType": "TargetMoveType",
             "type": "enum",

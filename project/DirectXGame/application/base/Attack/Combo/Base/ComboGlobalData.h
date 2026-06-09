@@ -147,6 +147,15 @@ namespace Combo {
 	};
 
 	// 保存項目移動データ
+	struct GlobalMoveTargetParameters {
+		bool enabled = false;							// ターゲット有無別の移動設定を使うか
+		Vector3 moveSpeed = { 0.0f, 0.0f, 0.0f };		// 条件一致時の移動速度
+		Vector3 localMoveVector = { 0.0f, 0.0f, 1.0f };	// 条件一致時のローカル移動方向
+		bool isNormalizeLocalMove = true;				// 条件一致時のローカル移動方向を正規化するか
+		TargetMoveType targetMoveType = TargetMoveType::kMove;	// ターゲットあり時の接近処理
+		float moveTargetRadius = 1.0f;					// ターゲットあり時の接近停止半径
+	};
+
 	struct GlobalMove {
 		// 受付時間
 		StateTime moveWindow{};
@@ -195,6 +204,10 @@ namespace Combo {
 		MoveType moveType = MoveType::kTraget;
 		// ロックオンタイプ
 		LockOnData lockOnData{};
+		// ターゲットがいる時だけ使う移動上書き
+		GlobalMoveTargetParameters targetMove{};
+		// ターゲットがいない時だけ使う移動上書き
+		GlobalMoveTargetParameters noTargetMove{};
 	};
 
 	// 保存項目アニメーション

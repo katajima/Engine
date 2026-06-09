@@ -390,6 +390,55 @@ namespace Combo {
 
 	void EditorBlock::ImGuiMove() {
 		if (ImGui::CollapsingHeader("移動関係")) {
+			auto clampLocalMoveVector = [](Vector3& localMoveVector) {
+				if (localMoveVector.x >= 1.0f) {
+					localMoveVector.x = 1.0f;
+				}
+				if (localMoveVector.y >= 1.0f) {
+					localMoveVector.y = 1.0f;
+				}
+				if (localMoveVector.z >= 1.0f) {
+					localMoveVector.z = 1.0f;
+				}
+				if (localMoveVector.x <= -1.0f) {
+					localMoveVector.x = -1.0f;
+				}
+				if (localMoveVector.y <= -1.0f) {
+					localMoveVector.y = -1.0f;
+				}
+				if (localMoveVector.z <= -1.0f) {
+					localMoveVector.z = -1.0f;
+				}
+				};
+			auto drawConditionalMove = [&](const char* label, GlobalMoveTargetParameters& parameters, bool drawTargetSettings) {
+				ImGui::PushID(label);
+				ImGui::SeparatorText(label);
+				ImGui::Checkbox("この条件の移動を上書き", &parameters.enabled);
+				if (parameters.enabled) {
+					if (ImGui::Button("基本移動をコピー")) {
+						parameters.moveSpeed = data_.move.moveSpeed;
+						parameters.localMoveVector = data_.move.localMoveVector;
+						parameters.isNormalizeLocalMove = data_.move.isNormalizeLocalMove;
+						parameters.targetMoveType = data_.move.lockOnData.targetMoveType;
+						parameters.moveTargetRadius = data_.move.lockOnData.moveTargetRadius;
+					}
+					ImGui::DragFloat3("移動速度", &parameters.moveSpeed.x, 0.1f);
+					ImGui::DragFloat3("ローカル移動ベクトル", &parameters.localMoveVector.x, 0.01f);
+					clampLocalMoveVector(parameters.localMoveVector);
+					ImGui::Checkbox("ローカル移動ベクトルを正規化してから使うか", &parameters.isNormalizeLocalMove);
+					if (drawTargetSettings) {
+						static const char* TargetMoveTypeLabels[] = {
+						"なし",
+						"移動",
+						"瞬間移動",
+						"補間移動"
+						};
+						Engine::ImGuiManager::Select("ターゲット移動タイプ", TargetMoveTypeLabels, parameters.targetMoveType);
+						ImGui::SliderFloat("ターゲット接近距離半径", &parameters.moveTargetRadius, 0.0f, 100.0f);
+					}
+				}
+				ImGui::PopID();
+				};
 			static const char* MoveTypeLabels[] = {
 			"入力方向",
 			"ターゲットに向かって",
@@ -402,24 +451,7 @@ namespace Combo {
 			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
 
 			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
-			if (data_.move.localMoveVector.x >= 1.0f) {
-				data_.move.localMoveVector.x = 1.0f;
-			}
-			if (data_.move.localMoveVector.y >= 1.0f) {
-				data_.move.localMoveVector.y = 1.0f;
-			}
-			if (data_.move.localMoveVector.z >= 1.0f) {
-				data_.move.localMoveVector.z = 1.0f;
-			}
-			if (data_.move.localMoveVector.x <= -1.0f) {
-				data_.move.localMoveVector.x = -1.0f;
-			}
-			if (data_.move.localMoveVector.y <= -1.0f) {
-				data_.move.localMoveVector.y = -1.0f;
-			}
-			if (data_.move.localMoveVector.z <= -1.0f) {
-				data_.move.localMoveVector.z = -1.0f;
-			}
+			clampLocalMoveVector(data_.move.localMoveVector);
 			ImGui::Checkbox("ローカル移動ベクトルを正規化してから使うか", &data_.move.isNormalizeLocalMove);
 			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
 			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
@@ -448,6 +480,11 @@ namespace Combo {
 				ImGui::SliderFloat("ターゲット接近距離半径", &data_.move.lockOnData.moveTargetRadius, 0.0f, 100.0f);
 
 			}
+
+			ImGui::SeparatorText("ターゲット有無別の移動");
+			ImGui::TextWrapped("上書きをオンにした条件だけ、基本移動の速度や方向を差し替えます。");
+			drawConditionalMove("ターゲットあり", data_.move.targetMove, true);
+			drawConditionalMove("ターゲットなし", data_.move.noTargetMove, false);
 		}
 	}
 
