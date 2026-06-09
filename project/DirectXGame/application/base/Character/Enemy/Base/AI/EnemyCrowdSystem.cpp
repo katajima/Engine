@@ -1,4 +1,4 @@
-#include "EnemyCrowdSystem.h"
+﻿#include "EnemyCrowdSystem.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 #include <algorithm>
@@ -162,7 +162,10 @@ namespace Character {
 
 			// 役割に応じた移動制約と群れ行動を、個別のシステムで順に合成する
 			EnemyCrowdLayer layer = layerSystem_.ResolveLayer(enemy, slots_, targetPos);
+			// 敵の現在位置から指定された移動先への水平移動方向を返す
 			Vector3 flowDirection = flowFieldSystem_.CalculateDirection(enemy, baseTarget);
+
+			// 隊形目標、役割、流れ方向を基に、密集回避や統率者への追従などの群れ行動を合成して最終的な移動目標を決める
 			const CrowdSlot* slot = FindSlot(enemy);
 			EnemyFlockingSteering steering = flockingSystem_.BuildSteering(
 				enemy,

@@ -26,6 +26,7 @@ namespace Combo {
 	};
 
 
+	// コンボデータ上で扱うゲームパッドボタン種別
 	enum class ComboGamePadButton {
 		GAMEPAD_Up = 0,			// 十字(上)
 		GAMEPAD_Down = 1,		// 十字(下)
@@ -44,6 +45,7 @@ namespace Combo {
 		GAMEPAD_Max       // 最大ボタン数
 	};
 
+	// コンボ用ボタン種別を入力システム用ボタン種別へ変換する
 	GamePadButton ConvertGamePadButton(ComboGamePadButton button);
 
 	/// <summary>
@@ -67,12 +69,12 @@ namespace Combo {
 			// 押して反応する条件
 			bool IsInput(const InputSystem& inputSystem) const;
 
-		// どのボタンに反応するか
+		// どのボタンに反応するかを設定する
 		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
 
 	private:
-		ComboGamePadButton button_;
-		ComboButtonInputType type_ = ComboButtonInputType::kPressed;
+		ComboGamePadButton button_;	// 判定対象のゲームパッドボタン
+		ComboButtonInputType type_ = ComboButtonInputType::kPressed;	// 押下、トリガー、リリースなどの入力条件
 	};
 
 
@@ -96,7 +98,7 @@ namespace Combo {
 	private:
 		// コンボ移行ボタン
 		std::vector<ComboButton> comboButtons_;
-		size_t currentIndex_ = 0;
+		size_t currentIndex_ = 0;	// 将来の順番入力判定で使う現在位置
 	};
 
 

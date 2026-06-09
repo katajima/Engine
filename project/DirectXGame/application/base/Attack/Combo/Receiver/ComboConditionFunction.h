@@ -7,9 +7,12 @@ class MovementComponent;			// ジャンプシステム
 
 namespace Combo {
 
+	/// <summary>
+	/// コンボの終了条件タイプごとのタイマー更新をまとめる補助クラス。
+	/// </summary>
 	class ConditionFunction {
 	public:
-		// 終了条件によっての処理
+		// 終了条件によってタイマーや押下状態を更新する
 		static void ConditionTypeUpdate(const Character::CharacterContext& ctx, EndConditionType type, ComboButton button,
 		float timer, float endTime, bool isPress);
 	};

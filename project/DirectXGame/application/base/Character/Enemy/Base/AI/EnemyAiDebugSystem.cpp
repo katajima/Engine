@@ -15,6 +15,7 @@
 namespace Character {
 #ifdef _DEBUG
 	namespace {
+		// 攻撃リングをImGui表示用の文字列に変換する
 		const char* ToText(EnemyAttackRing ring) {
 			switch (ring) {
 			case EnemyAttackRing::TooClose: return "TooClose";
@@ -26,6 +27,7 @@ namespace Character {
 			}
 		}
 
+		// 群衆レイヤーをImGui表示用の文字列に変換する
 		const char* ToText(EnemyCrowdLayer layer) {
 			switch (layer) {
 			case EnemyCrowdLayer::Attack: return "Attack";
@@ -35,6 +37,7 @@ namespace Character {
 			}
 		}
 
+		// 群衆の行動タイプをImGui表示用の文字列に変換する
 		const char* ToText(EnemyCrowdBehaviorType type) {
 			switch (type) {
 			case EnemyCrowdBehaviorType::Rush: return "Rush";
@@ -52,6 +55,7 @@ namespace Character {
 			}
 		}
 
+		// 役割レイヤーごとにデバッグ線の色を変える
 		Vector4 LayerColor(EnemyCrowdLayer layer) {
 			switch (layer) {
 			case EnemyCrowdLayer::Attack: return { 1.0f, 0.2f, 0.2f, 1.0f };
@@ -64,16 +68,19 @@ namespace Character {
 #endif
 
 	void EnemyAiDebugSystem::Initialize(Engine::LineCommon* lineCommon) {
+		// デバッグ線を描画するための共通描画クラスを保持する
 		lineCommon_ = lineCommon;
 	}
 
 	void EnemyAiDebugSystem::Update(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
 #ifdef _DEBUG
+		// Debugビルドでは操作パネルとワールド上の補助線を更新する
 		DrawControlPanel(enemies, aiSystem);
 		if (isVisible_ && lineCommon_ && aiSystem) {
 			DrawWorldDebug(enemies, aiSystem);
 		}
 #else
+		// Releaseビルドでは引数未使用警告を抑える
 		(void)enemies;
 		(void)aiSystem;
 #endif
@@ -81,11 +88,13 @@ namespace Character {
 
 #ifdef _DEBUG
 	void EnemyAiDebugSystem::DrawControlPanel(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+		// ImGuiウィンドウが折りたたまれている時は中身を描画しない
 		if (!ImGui::Begin("Enemy AI Debug")) {
 			ImGui::End();
 			return;
 		}
 
+		// 表示したいデバッグ情報だけを切り替えられるようにする
 		ImGui::Checkbox("AI表示", &isVisible_);
 		ImGui::Checkbox("最終移動目標", &showMoveTarget_);
 		ImGui::Checkbox("隊形スロット", &showFormationSlot_);
@@ -97,6 +106,7 @@ namespace Character {
 		int ringCount[5]{};
 		int layerCount[3]{};
 		int grantedCount = 0;
+		// 現在の敵全体の攻撃リングと群衆レイヤーの数を集計する
 		for (BaseEnemy* enemy : enemies) {
 			if (!enemy) {
 				continue;
@@ -131,6 +141,7 @@ namespace Character {
 
 		if (showEnemyDetails_ && aiSystem) {
 			ImGui::Separator();
+			// 敵ごとの役割、攻撃許可、群衆内番号を一覧表示する
 			for (BaseEnemy* enemy : enemies) {
 				if (!enemy) {
 					continue;
@@ -162,6 +173,7 @@ namespace Character {
 	}
 
 	void EnemyAiDebugSystem::DrawWorldDebug(const std::vector<BaseEnemy*>& enemies, const EnemyAiSystem* aiSystem) {
+		// LineCommonのデバッグメッシュへ、AI判断を示す補助線を追加する
 		Engine::LineMeshData& lines = lineCommon_->GetDebugLineMeshData();
 		EnemyCrowdSystem* crowdSystem = aiSystem->GetCrowdSystem();
 
@@ -175,6 +187,7 @@ namespace Character {
 			const Vector4 color = steering ? LayerColor(steering->layer) : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 			if (showMoveTarget_ && steering) {
+				// 敵から最終移動目標までの線と目標球を描画する
 				const Vector3 moveTarget = steering->moveTarget + Vector3{ 0.0f, 0.4f, 0.0f };
 				lines.AddLine(start, moveTarget, color);
 				lines.AddLineSphere(Sphere{ moveTarget, 0.32f }, color, 4, 4);
@@ -182,6 +195,7 @@ namespace Character {
 
 			if (showFormationSlot_) {
 				if (const CrowdSlot* slot = crowdSystem->FindSlot(enemy)) {
+					// 群衆パターンで割り当てられた隊形スロットを描画する
 					const Vector3 position = slot->position + Vector3{ 0.0f, 0.2f, 0.0f };
 					lines.AddLine(start, position, { 0.2f, 0.7f, 1.0f, 1.0f });
 					lines.AddLineSphere(Sphere{ position, 0.24f }, { 0.2f, 0.7f, 1.0f, 1.0f }, 4, 4);
@@ -189,16 +203,19 @@ namespace Character {
 			}
 
 			if (showFlowDirection_ && steering) {
+				// フロー方向を短い線で表示し、群衆の流れを確認できるようにする
 				const Vector3 directionEnd = start + steering->flowDirection * 2.0f;
 				lines.AddLine(start, directionEnd, { 0.2f, 0.9f, 1.0f, 1.0f });
 			}
 
 			if (steering && steering->isCommander) {
+				// 統率者は頭上の球で強調する
 				lines.AddLineSphere(Sphere{ start + Vector3{ 0.0f, 0.8f, 0.0f }, 0.55f }, { 1.0f, 0.95f, 0.2f, 1.0f }, 6, 4);
 			}
 		}
 
 		if (showAttackSlots_) {
+			// 攻撃スロットは使用中かどうかで色を変えて描画する
 			for (const AttackSlot& slot : aiSystem->GetAttackSlotSystem()->GetSlots()) {
 				const Vector4 color = slot.occupied ?
 					Vector4{ 1.0f, 0.25f, 0.15f, 1.0f } :

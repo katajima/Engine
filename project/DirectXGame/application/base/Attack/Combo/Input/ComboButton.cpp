@@ -5,16 +5,19 @@
 
 // 押したら
 bool Combo::ComboButton::IsPressed(const InputSystem& inputSystem) const {
+	// コンボ用ボタンを入力システム用ボタンへ変換して、押下中か確認する
 	return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
 }
 
 // 押した瞬間
 bool Combo::ComboButton::IsTriggered(const InputSystem& inputSystem) const {
+	// このフレームに押された入力だけを拾う
 	return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
 }
 
 // 離した瞬間
 bool Combo::ComboButton::IsReleased(const InputSystem& inputSystem) const {
+	// このフレームに離された入力だけを拾う
 	return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
 }
 
@@ -22,6 +25,7 @@ bool Combo::ComboButton::IsReleased(const InputSystem& inputSystem) const {
 // 押して反応する条件
 bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
 
+	// 設定された入力条件に合わせて、押下中・押した瞬間・離した瞬間を組み合わせる
 	switch (type_)
 	{
 	case ComboButtonInputType::kPressed: // 押したら
@@ -57,8 +61,10 @@ bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
 /// コンボボタンを順番に登録
 /// </summary>
 void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons) {
+	// 新しいコンボ入力列を登録するため、古い入力列を破棄する
 	comboButtons_.clear();
 	for (auto& b : buttons) {
+		// ボタン設定は値としてコピーして保持する
 		comboButtons_.emplace_back(b);
 	}
 }
@@ -69,6 +75,7 @@ void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons
 bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 	if (comboButtons_.empty()) return false;
 	// 入力判定
+	// 現状は順番入力ではなく、登録されたどれかのボタンが成立したら次コンボへ進める
 	for (auto& bu : comboButtons_) {
 		if (bu.IsInput(*ctx.input)) {
 			return true;
@@ -81,6 +88,7 @@ bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 
 GamePadButton Combo::ConvertGamePadButton(ComboGamePadButton button)
 {
+	// コンボデータ用の列挙値を、InputSystemが理解する列挙値へ対応付ける
 	switch (button)
 	{
 	case Combo::ComboGamePadButton::GAMEPAD_Up:

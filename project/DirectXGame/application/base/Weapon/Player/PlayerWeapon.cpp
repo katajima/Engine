@@ -5,6 +5,7 @@
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
+	// プレイヤー武器が参照する入力とエンティティ管理を保持する
 	this->inputSystem = inputSystem;						// インプット
 	this->entityManager = entityManager; // エンティティ3d
 	
@@ -29,7 +30,10 @@ void PlayerWeapon::Update(){
 	GetObject3D()->UpdateWorldTransform();
 }
 
-void PlayerWeapon::Draw2D(){}
+void PlayerWeapon::Draw2D(){
+	// プレイヤー武器専用の2D表示は未実装
+}
 
-void PlayerWeapon::DrawEffect(){}
-
+void PlayerWeapon::DrawEffect(){
+	// トレイルは独立Entityとして生成しているため、ここでは追加描画を行わない
+}

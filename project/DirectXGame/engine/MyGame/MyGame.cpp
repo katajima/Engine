@@ -149,18 +149,18 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 	// テクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
-	// textテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
-	// smokeテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
-	// numテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
-	// エフェクトテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
-	// XBOXコントローラボタンテクスチャ全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
-	// アイコン全て読み込み
-	textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
+	//// textテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/text");
+	//// smokeテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/smoke");
+	//// numテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/num");
+	//// エフェクトテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/effect");
+	//// XBOXコントローラボタンテクスチャ全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
+	//// アイコン全て読み込み
+	//textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
 	
 	// ModelData;
 	LoadModel();

@@ -1,5 +1,6 @@
 #pragma once
 
+// 武器の大分類。攻撃処理側で近接、遠距離、複合を切り替えるために使う
 enum class WeaonType
 {
 	MELL,	// 近距離武器
@@ -15,6 +16,7 @@ struct WeaponData{
 // 近距離武器専用のデータ構造体(近距離武器クラス用)
 struct MeleeWeaponData
 {
+	// チャージ攻撃、ヒットストップ、コンボ補正に必要な近接武器パラメータ
 	bool isCharging = false;				// チャージ中かのフラグ
 	float chargeTime = 0.0f;				// チャージ時間(チャージ開始からの時間)
 	float chargeDamageMultiplier = 1.0f;	// チャージによるダメージ倍率(チャージ時間に応じて変化する)
@@ -27,6 +29,7 @@ struct MeleeWeaponData
 // 遠距離武器専用のデータ構造体(遠距離武器クラス用)
 struct RangedWeaponData
 {
+	// 弾の生成、補充、特殊挙動に必要な遠距離武器パラメータ
 	float bulletSpeed = 10.0f;				// 弾の速度
 	float bulletLifeTime = 1.0f;			// 弾のライフタイム(弾が消えるまでの時間)
 	float bulletSpread = 0.0f;				// 弾の散布率(弾がばらける範囲)

@@ -15,14 +15,14 @@ namespace Engine {
 
 
 /// <summary>
-/// 攻撃を管理するクラス。
+/// 攻撃状態、コンボ、ヒットカウント、ロックオンをまとめて管理するクラス。
 /// </summary>
 class AttackController {
 public:
-	// 初期化
+	// 攻撃に必要な各サブシステムを初期化する
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
 		Character::ParameterComponent* base, Character::BaseCharacter* owner);
-	// 更新
+	// 攻撃状態に応じてヒットカウンターとコンボを更新する
 	void Update(const Character::CharacterContext& ctx);
 
 	
@@ -33,7 +33,7 @@ public:
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
 	// コンボシステムクラス取得
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
-	// ロックオンシステム更新
+	// ロックオンシステム取得
 	LockOnSystem* GeyLockOnSysutem() { return lockOnSystem_.get(); }
 
 	// 攻撃中か取得
@@ -41,7 +41,7 @@ public:
 	// 攻撃中か設定
 	void SetIsAttack(bool is) { isAttack_ = is; };
 
-	// treu
+	// ヒットカウンターの時間更新を止めるか設定
 	void IsStopHitTimer(bool is) { isStopHitTimer_ = is; };
 
 public:
@@ -60,10 +60,11 @@ private:
 private:
 	// 攻撃中か
 	bool isAttack_ = false;
-	//
+	// ヒットカウンターの経過時間を止めるか
 	bool isStopHitTimer_ = false;
 
 private:
+	// 攻撃設定やデバッグ編集で使うグローバル変数
 	Engine::GlobalVariables* globalVariables = nullptr;
 
 

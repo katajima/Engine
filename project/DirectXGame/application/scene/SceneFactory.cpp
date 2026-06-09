@@ -12,6 +12,7 @@
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
+    // シーン名に対応するシーンクラスを生成する
     if (sceneName == "TITLE") {                 // タイトル
         return std::make_unique<TitleScene>();
     }
@@ -40,6 +41,6 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
         return std::make_unique<CustomScene>();
     }
 
-
+    // 未登録のシーン名が渡された場合は生成できないことを通知する
     return nullptr;
 }

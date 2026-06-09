@@ -5,6 +5,8 @@
 void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
+	(void)camera;
+	// 敵近接武器が参照する入力とエンティティ管理を保持する
 	this->inputSystem = inputSystem;			// インプット
 	this->entityManager = entityManager;	// エンティティ3d
 	
@@ -19,13 +21,16 @@ void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 
 void SmallMeleeWeapon::Update()
 {
+	// 武器モデルのTransformや当たり判定用コンポーネントを更新する
 	objectComponent_->Update();
 }
 
 void SmallMeleeWeapon::DrawEffect()
 {
+	// 近接武器専用エフェクトは未実装
 }
 
 void SmallMeleeWeapon::Draw2D()
 {
+	// 近接武器専用2D表示は未実装
 }

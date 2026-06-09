@@ -75,36 +75,8 @@ namespace Character {
 			behaviorType_ = static_cast<EnemyCrowdBehaviorType>(behaviorIndex);
 		}
 
-		// パターン変更を試しやすいよう、利用可能な設定値を常に編集できるようにする
-		ImGui::DragFloat("基準半径", &radius_, 0.1f, 1.0f, 50.0f);
-		ImGui::DragFloat("隊列間隔", &spacing_, 0.1f, 0.1f, 20.0f);
-		ImGui::DragFloat("回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
-		ImGui::DragFloat("波の切替秒数", &waveInterval_, 0.1f, 0.1f, 20.0f);
-		ImGui::DragInt("波の列数", &waveCount_, 1.0f, 1, 10);
-		ImGui::DragFloat("目標変更クールタイム", &targetChangeCooldown_, 0.05f, 0.0f, 3.0f);
-		ImGui::DragFloat("目標切替距離", &targetSwitchDistance_, 0.1f, 0.1f, 10.0f);
-
-		static const char* formationNames[] = { "横列", "円形", "V字", "方陣" };
-		int formationIndex = static_cast<int>(formationShape_);
-		if (ImGui::Combo("隊列の陣形", &formationIndex, formationNames, IM_ARRAYSIZE(formationNames))) {
-			formationShape_ = static_cast<EnemyFormationShape>(formationIndex);
-		}
-
-		ImGui::Checkbox("統率者を使う", &useCommander_);
-		ImGui::DragInt("統率者の順番", &commanderOrder_, 1.0f, 0, 60);
-		ImGui::DragFloat("統率者の影響", &commanderInfluenceWeight_, 0.05f, 0.0f, 1.0f);
-
-		static const char* attackStyleNames[] = {
-			"自動",
-			"個人攻撃",
-			"集団一斉攻撃",
-			"統率者のみ攻撃",
-			"包囲後に攻撃",
-		};
-		int attackStyleIndex = static_cast<int>(attackStyle_);
-		if (ImGui::Combo("攻撃方式", &attackStyleIndex, attackStyleNames, IM_ARRAYSIZE(attackStyleNames))) {
-			attackStyle_ = static_cast<EnemyCrowdAttackStyle>(attackStyleIndex);
-		}
+		DrawBehaviorParameters();
+		DrawCommonAiParameters();
 
 		ImGui::Separator();
 		ImGui::Text("敵の種類と人数");
@@ -173,6 +145,104 @@ namespace Character {
 		characterManager->CreateEnemyGroup(EnemyType::kSmallRanged, groupId, smallRangedCount_, spawnPosition_, spawnArea, settings);
 		characterManager->CreateEnemyGroup(EnemyType::kMediumMelee, groupId, mediumMeleeCount_, spawnPosition_, spawnArea, settings);
 		characterManager->CreateEnemyGroup(EnemyType::kDummy, groupId, dummyCount_, spawnPosition_, spawnArea, settings);
+	}
+
+	void EnemyCrowdSpawnDebugSystem::DrawBehaviorParameters() {
+		if (!ImGui::CollapsingHeader("タイプ専用パラメータ", ImGuiTreeNodeFlags_DefaultOpen)) {
+			return;
+		}
+
+		switch (behaviorType_) {
+		case EnemyCrowdBehaviorType::Rush:
+			// 直進型は突撃レーンの横幅だけを使う
+			ImGui::DragFloat("突撃レーン間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			break;
+		case EnemyCrowdBehaviorType::Encircle:
+			// 包囲型はプレイヤーを中心にした円の半径だけを使う
+			ImGui::DragFloat("包囲半径", &radius_, 0.1f, 1.0f, 50.0f);
+			break;
+		case EnemyCrowdBehaviorType::WaveAssault:
+			// 波状型は前列/後列の距離、横幅、波の切替タイミングを使う
+			ImGui::DragFloat("前列基準半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("横方向の間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			ImGui::DragFloat("波の切替秒数", &waveInterval_, 0.1f, 0.1f, 20.0f);
+			ImGui::DragInt("波の列数", &waveCount_, 1.0f, 1, 10);
+			break;
+		case EnemyCrowdBehaviorType::Formation: {
+			// 隊列型は陣形、プレイヤーからの距離、隊列間隔を使う
+			static const char* formationNames[] = { "横列", "円形", "V字", "方陣" };
+			int formationIndex = static_cast<int>(formationShape_);
+			if (ImGui::Combo("隊列の陣形", &formationIndex, formationNames, IM_ARRAYSIZE(formationNames))) {
+				formationShape_ = static_cast<EnemyFormationShape>(formationIndex);
+			}
+			ImGui::DragFloat("隊列基準半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("隊列間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			break;
+		}
+		case EnemyCrowdBehaviorType::FlowCrowd:
+			// 流動型は円周上を流れる半径と回転速度を使う
+			ImGui::DragFloat("流動半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("流動回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
+			break;
+		case EnemyCrowdBehaviorType::PressureCrowd:
+			// 圧迫型は密度を高める輪の半径を使う
+			ImGui::DragFloat("圧迫半径", &radius_, 0.1f, 1.0f, 50.0f);
+			break;
+		case EnemyCrowdBehaviorType::DistributedEncircle:
+			// 分散包囲型は逃げ道を残す弧の半径を使う
+			ImGui::DragFloat("分散包囲半径", &radius_, 0.1f, 1.0f, 50.0f);
+			break;
+		case EnemyCrowdBehaviorType::DensityAdaptive:
+			// 人数適応型は少人数Rush、中人数Encircle、大人数Pressureへ切り替えるため両方の値を使う
+			ImGui::DragFloat("適応半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("少人数時の間隔", &spacing_, 0.1f, 0.1f, 20.0f);
+			break;
+		case EnemyCrowdBehaviorType::Spiral:
+			// スパイラル型は回転半径と回転速度を使う
+			ImGui::DragFloat("スパイラル半径", &radius_, 0.1f, 1.0f, 50.0f);
+			ImGui::DragFloat("スパイラル回転速度", &angularSpeed_, 0.05f, -5.0f, 5.0f);
+			break;
+		case EnemyCrowdBehaviorType::Flocking:
+		case EnemyCrowdBehaviorType::Hunting:
+		default:
+			// 群れ型とハンティング型は現状固定配置/群れ補正中心で、専用の数値パラメータを持たない
+			ImGui::Text("このタイプ専用の追加パラメータはありません");
+			break;
+		}
+	}
+
+	void EnemyCrowdSpawnDebugSystem::DrawCommonAiParameters() {
+		if (!ImGui::CollapsingHeader("共通AIパラメータ", ImGuiTreeNodeFlags_DefaultOpen)) {
+			return;
+		}
+
+		// 目標保持は全群衆タイプで使うため、タイプ専用ではなく共通設定として表示する
+		ImGui::DragFloat("目標変更クールタイム", &targetChangeCooldown_, 0.05f, 0.0f, 3.0f);
+		ImGui::DragFloat("目標切替距離", &targetSwitchDistance_, 0.1f, 0.1f, 10.0f);
+
+		ImGui::Checkbox("統率者を使う", &useCommander_);
+		if (useCommander_) {
+			ImGui::DragInt("統率者の順番", &commanderOrder_, 1.0f, 0, 60);
+			if (behaviorType_ != EnemyCrowdBehaviorType::Formation) {
+				ImGui::DragFloat("統率者の影響", &commanderInfluenceWeight_, 0.05f, 0.0f, 1.0f);
+			}
+			else {
+				// 隊列型では隊形維持を優先し、統率者の影響値は移動補正には使わない
+				ImGui::Text("隊列型では統率者の影響値は移動補正に使用しません");
+			}
+		}
+
+		static const char* attackStyleNames[] = {
+			"自動",
+			"個人攻撃",
+			"集団一斉攻撃",
+			"統率者のみ攻撃",
+			"包囲後に攻撃",
+		};
+		int attackStyleIndex = static_cast<int>(attackStyle_);
+		if (ImGui::Combo("攻撃方式", &attackStyleIndex, attackStyleNames, IM_ARRAYSIZE(attackStyleNames))) {
+			attackStyle_ = static_cast<EnemyCrowdAttackStyle>(attackStyleIndex);
+		}
 	}
 
 	void EnemyCrowdSpawnDebugSystem::DrawActiveCrowds(CharacterManager* characterManager) {

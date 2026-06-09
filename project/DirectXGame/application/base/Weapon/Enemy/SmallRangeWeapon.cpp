@@ -7,6 +7,8 @@
 
 void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
+	(void)camera;
+	// 敵遠距離武器が参照する入力とエンティティ管理を保持する
 	this->inputSystem = inputSystem;						// インプット
 	this->entityManager = entityManager; // エンティティ3d
 	
@@ -21,18 +23,22 @@ void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 void SmallRangeWeapon::Update()
 {
 	if (target) {
+		// ターゲットがいる場合は、発射時に使う狙い位置を最新化する
 		targetPos_ = target->GetWorldPosition();
 	}
 	
+	// 武器モデルのTransformや内部コンポーネントを更新する
 	objectComponent_->Update();
 }
 
 void SmallRangeWeapon::DrawEffect()
 {
+	// 遠距離武器専用エフェクトは未実装
 }
 
 void SmallRangeWeapon::Draw2D()
 {
+	// 遠距離武器専用2D表示は未実装
 }
 
 void SmallRangeWeapon::Shot()
@@ -46,6 +52,7 @@ void SmallRangeWeapon::Shot()
 
 	// モードによって弾の状態変更
 	if (modeType_ == ModeType::Normal) {
+		// 通常モードでは標準の敵弾として生成する
 		info.type = ProjectileType::NORMAL;
 	}
 	

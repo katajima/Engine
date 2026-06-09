@@ -20,6 +20,10 @@ namespace Character {
 		CrowdBehaviorSettings BuildBehaviorSettings() const;
 		// 選択中の敵構成をひとつの群衆グループとして生成する
 		void SpawnConfiguredCrowd(CharacterManager* characterManager);
+		// 選択中の群衆タイプで実際に使う行動パラメータだけを表示する
+		void DrawBehaviorParameters();
+		// 群衆タイプに依存しないAI制御パラメータを表示する
+		void DrawCommonAiParameters();
 		// 現在活動中の群衆を一覧表示し、指定された群衆の退場要求を受け取る
 		void DrawActiveCrowds(CharacterManager* characterManager);
 #endif
