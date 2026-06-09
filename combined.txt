@@ -3266,12 +3266,15 @@ namespace Combo {
 		const bool canStart =
 			state == Character::CharacterMainState::Idle ||
 			state == Character::CharacterMainState::Move ||
-			state == Character::CharacterMainState::Jump;
+			state == Character::CharacterMainState::Jump ||
+			state == Character::CharacterMainState::Avoidance;
 		if (!canStart || !owner->GetMoveComponent()) {
 			return false;
 		}
 
-		const std::string startCombo = ResolveStartCombo(input, owner->GetMoveComponent()->GetIsLanding());
+		const bool isDodging = state == Character::CharacterMainState::Avoidance;	// 回避中の開始ルートを使うか
+		const bool isDodgeSuccess = owner->IsDodgeSuccessComboWindow();			// 回避成功後の開始ルートを使うか
+		const std::string startCombo = ResolveStartCombo(input, owner->GetMoveComponent()->GetIsLanding(), isDodging, isDodgeSuccess);
 		std::shared_ptr<NodeState> startNode = GetComboNodeState(startCombo);
 		if (!startNode) {
 			return false;
@@ -3387,6 +3390,12 @@ namespace Combo {
 		renameStart(airHeavyStart_, kAirHeavyStartKey);
 		renameStart(groundSkillStart_, kGroundSkillStartKey);
 		renameStart(airSkillStart_, kAirSkillStartKey);
+		renameStart(dodgeLightStart_, kDodgeLightStartKey);
+		renameStart(dodgeHeavyStart_, kDodgeHeavyStartKey);
+		renameStart(dodgeSkillStart_, kDodgeSkillStartKey);
+		renameStart(dodgeSuccessLightStart_, kDodgeSuccessLightStartKey);
+		renameStart(dodgeSuccessHeavyStart_, kDodgeSuccessHeavyStartKey);
+		renameStart(dodgeSuccessSkillStart_, kDodgeSuccessSkillStartKey);
 	}
 
 	bool System::StartCombo(const std::string& name) {
@@ -3398,7 +3407,33 @@ namespace Combo {
 		return false;
 	}
 
-	std::string System::ResolveStartCombo(ActionInput input, bool isLanding) const {
+	std::string System::ResolveStartCombo(ActionInput input, bool isLanding, bool isDodging, bool isDodgeSuccess) const {
+		if (isDodgeSuccess) {
+			// 回避成功後は地上/空中より専用開始ルートを優先する
+			switch (input) {
+			case ActionInput::LightAttack:
+				return dodgeSuccessLightStart_;
+			case ActionInput::HeavyAttack:
+				return dodgeSuccessHeavyStart_;
+			case ActionInput::Skill:
+				return dodgeSuccessSkillStart_;
+			default:
+				return "";
+			}
+		}
+		if (isDodging) {
+			// 回避中に攻撃した場合は回避中専用開始ルートを使う
+			switch (input) {
+			case ActionInput::LightAttack:
+				return dodgeLightStart_;
+			case ActionInput::HeavyAttack:
+				return dodgeHeavyStart_;
+			case ActionInput::Skill:
+				return dodgeSkillStart_;
+			default:
+				return "";
+			}
+		}
 		switch (input) {
 		case ActionInput::LightAttack:
 			return isLanding ? groundLightStart_ : airLightStart_;
@@ -3419,6 +3454,12 @@ namespace Combo {
 			.airHeavy = airHeavyStart_,
 			.groundSkill = groundSkillStart_,
 			.airSkill = airSkillStart_,
+			.dodgeLight = dodgeLightStart_,
+			.dodgeHeavy = dodgeHeavyStart_,
+			.dodgeSkill = dodgeSkillStart_,
+			.dodgeSuccessLight = dodgeSuccessLightStart_,
+			.dodgeSuccessHeavy = dodgeSuccessHeavyStart_,
+			.dodgeSuccessSkill = dodgeSuccessSkillStart_,
 		};
 	}
 
@@ -3429,6 +3470,12 @@ namespace Combo {
 		airHeavyStart_ = routes.airHeavy;
 		groundSkillStart_ = routes.groundSkill;
 		airSkillStart_ = routes.airSkill;
+		dodgeLightStart_ = routes.dodgeLight;
+		dodgeHeavyStart_ = routes.dodgeHeavy;
+		dodgeSkillStart_ = routes.dodgeSkill;
+		dodgeSuccessLightStart_ = routes.dodgeSuccessLight;
+		dodgeSuccessHeavyStart_ = routes.dodgeSuccessHeavy;
+		dodgeSuccessSkillStart_ = routes.dodgeSuccessSkill;
 
 		if (globalVariables && !name.empty()) {
 			globalVariables->SetValue(name, kGroundLightStartKey, groundLightStart_);
@@ -3437,7 +3484,23 @@ namespace Combo {
 			globalVariables->SetValue(name, kAirHeavyStartKey, airHeavyStart_);
 			globalVariables->SetValue(name, kGroundSkillStartKey, groundSkillStart_);
 			globalVariables->SetValue(name, kAirSkillStartKey, airSkillStart_);
+			globalVariables->SetValue(name, kDodgeLightStartKey, dodgeLightStart_);
+			globalVariables->SetValue(name, kDodgeHeavyStartKey, dodgeHeavyStart_);
+			globalVariables->SetValue(name, kDodgeSkillStartKey, dodgeSkillStart_);
+			globalVariables->SetValue(name, kDodgeSuccessLightStartKey, dodgeSuccessLightStart_);
+			globalVariables->SetValue(name, kDodgeSuccessHeavyStartKey, dodgeSuccessHeavyStart_);
+			globalVariables->SetValue(name, kDodgeSuccessSkillStartKey, dodgeSuccessSkillStart_);
 		}
+	}
+
+	bool System::IsStartComboKey(const std::string& key) const {
+		// ComboPlayer グループ内で、コンボノード名ではなく開始ルート設定として扱うキー
+		return key == kGroundLightStartKey || key == kAirLightStartKey ||
+			key == kGroundHeavyStartKey || key == kAirHeavyStartKey ||
+			key == kGroundSkillStartKey || key == kAirSkillStartKey ||
+			key == kDodgeLightStartKey || key == kDodgeHeavyStartKey ||
+			key == kDodgeSkillStartKey || key == kDodgeSuccessLightStartKey ||
+			key == kDodgeSuccessHeavyStartKey || key == kDodgeSuccessSkillStartKey;
 	}
 
 	float System::GetStaminaCost(ActionInput input) const {
@@ -4236,17 +4299,27 @@ namespace Combo {
 		globalVariables->AddItem(name, kAirHeavyStartKey, airHeavyStart_);
 		globalVariables->AddItem(name, kGroundSkillStartKey, groundSkillStart_);
 		globalVariables->AddItem(name, kAirSkillStartKey, airSkillStart_);
+		globalVariables->AddItem(name, kDodgeLightStartKey, dodgeLightStart_);
+		globalVariables->AddItem(name, kDodgeHeavyStartKey, dodgeHeavyStart_);
+		globalVariables->AddItem(name, kDodgeSkillStartKey, dodgeSkillStart_);
+		globalVariables->AddItem(name, kDodgeSuccessLightStartKey, dodgeSuccessLightStart_);
+		globalVariables->AddItem(name, kDodgeSuccessHeavyStartKey, dodgeSuccessHeavyStart_);
+		globalVariables->AddItem(name, kDodgeSuccessSkillStartKey, dodgeSuccessSkillStart_);
 		groundLightStart_ = globalVariables->GetValue<std::string>(name, kGroundLightStartKey);
 		airLightStart_ = globalVariables->GetValue<std::string>(name, kAirLightStartKey);
 		groundHeavyStart_ = globalVariables->GetValue<std::string>(name, kGroundHeavyStartKey);
 		airHeavyStart_ = globalVariables->GetValue<std::string>(name, kAirHeavyStartKey);
 		groundSkillStart_ = globalVariables->GetValue<std::string>(name, kGroundSkillStartKey);
 		airSkillStart_ = globalVariables->GetValue<std::string>(name, kAirSkillStartKey);
+		dodgeLightStart_ = globalVariables->GetValue<std::string>(name, kDodgeLightStartKey);
+		dodgeHeavyStart_ = globalVariables->GetValue<std::string>(name, kDodgeHeavyStartKey);
+		dodgeSkillStart_ = globalVariables->GetValue<std::string>(name, kDodgeSkillStartKey);
+		dodgeSuccessLightStart_ = globalVariables->GetValue<std::string>(name, kDodgeSuccessLightStartKey);
+		dodgeSuccessHeavyStart_ = globalVariables->GetValue<std::string>(name, kDodgeSuccessHeavyStartKey);
+		dodgeSuccessSkillStart_ = globalVariables->GetValue<std::string>(name, kDodgeSuccessSkillStartKey);
 
 		for (auto& data : globalVariables->GetGroupData(name)) {
-			if (data.first == kGroundLightStartKey || data.first == kAirLightStartKey ||
-				data.first == kGroundHeavyStartKey || data.first == kAirHeavyStartKey ||
-				data.first == kGroundSkillStartKey || data.first == kAirSkillStartKey) {
+			if (IsStartComboKey(data.first)) {
 				continue;
 			}
 			CreateCombo(globalVariables->GetValue<std::string>(name, data.first));
@@ -4289,6 +4362,12 @@ namespace Combo {
 	const std::string kAirHeavyStartKey = "開始コンボ(空中強攻撃)";
 	const std::string kGroundSkillStartKey = "開始コンボ(地上スキル)";
 	const std::string kAirSkillStartKey = "開始コンボ(空中スキル)";
+	const std::string kDodgeLightStartKey = "開始コンボ(回避中弱攻撃)";
+	const std::string kDodgeHeavyStartKey = "開始コンボ(回避中強攻撃)";
+	const std::string kDodgeSkillStartKey = "開始コンボ(回避中スキル)";
+	const std::string kDodgeSuccessLightStartKey = "開始コンボ(回避成功後弱攻撃)";
+	const std::string kDodgeSuccessHeavyStartKey = "開始コンボ(回避成功後強攻撃)";
+	const std::string kDodgeSuccessSkillStartKey = "開始コンボ(回避成功後スキル)";
 
 	struct StartComboRoutes {
 		std::string groundLight;
@@ -4297,6 +4376,12 @@ namespace Combo {
 		std::string airHeavy;
 		std::string groundSkill;
 		std::string airSkill;
+		std::string dodgeLight;
+		std::string dodgeHeavy;
+		std::string dodgeSkill;
+		std::string dodgeSuccessLight;
+		std::string dodgeSuccessHeavy;
+		std::string dodgeSuccessSkill;
 	};
 
 
@@ -4426,7 +4511,8 @@ namespace Combo {
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
 		void ConnectSavedCombos();
-		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
+		std::string ResolveStartCombo(ActionInput input, bool isLanding, bool isDodging, bool isDodgeSuccess) const;
+		bool IsStartComboKey(const std::string& key) const;
 		float GetStaminaCost(ActionInput input) const;
 		float GetComboStaminaCost(ActionInput input, const std::shared_ptr<NodeState>& node) const;
 		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
@@ -4464,6 +4550,12 @@ namespace Combo {
 		std::string airHeavyStart_ = "Attack10";
 		std::string groundSkillStart_ = "SkillAttack01";
 		std::string airSkillStart_ = "JumpSkillAttack01";
+		std::string dodgeLightStart_ = "MeleeAttack1";
+		std::string dodgeHeavyStart_ = "Attack10";
+		std::string dodgeSkillStart_ = "SkillAttack01";
+		std::string dodgeSuccessLightStart_ = "MeleeAttack1";
+		std::string dodgeSuccessHeavyStart_ = "Attack10";
+		std::string dodgeSuccessSkillStart_ = "SkillAttack01";
 
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
@@ -4749,6 +4841,12 @@ namespace Combo {
 		drawStartCombo("空中 / 強攻撃", routes.airHeavy);
 		drawStartCombo("地上 / スキル", routes.groundSkill);
 		drawStartCombo("空中 / スキル", routes.airSkill);
+		drawStartCombo("回避中 / 弱攻撃", routes.dodgeLight);
+		drawStartCombo("回避中 / 強攻撃", routes.dodgeHeavy);
+		drawStartCombo("回避中 / スキル", routes.dodgeSkill);
+		drawStartCombo("回避成功後 / 弱攻撃", routes.dodgeSuccessLight);
+		drawStartCombo("回避成功後 / 強攻撃", routes.dodgeSuccessHeavy);
+		drawStartCombo("回避成功後 / スキル", routes.dodgeSuccessSkill);
 
 		if (changed) {
 			comboSystem->SetStartComboRoutes(routes);
@@ -4887,7 +4985,13 @@ namespace Combo {
 			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundHeavyStartKey) == comboName ||
 			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirHeavyStartKey) == comboName ||
 			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundSkillStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName) {
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSuccessLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSuccessHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSuccessSkillStartKey) == comboName) {
 			nodeManagementMessage_ = "A configured start combo cannot be deleted because attacks must keep a valid entry point.";
 			return;
 		}
@@ -9503,11 +9607,19 @@ namespace HitBox {
 			result.reaction.normal = selfColl->GetCenterWorld() - otherColl->GetCenterWorld();
 		}
 
-		// 今後、ここでガード、無敵、属性耐性、ジャスト回避などを吸収する。
-		// 既存挙動維持のため、現時点では必殺技中のプレイヤーだけ無効化する。
+		// 今後、ここでガード、無敵、属性耐性などを吸収する。
+		// 既存挙動維持のため、必殺技中と回避成功中のプレイヤーだけ無効化する。
 		if (type_ == UseType::kEnemy && otherColl && otherColl->GetTag() == CollisionTag::Player) {
 			Character::BasePlayer* player = other ? static_cast<Character::BasePlayer*>(other->GetHitReceiver()) : nullptr;
-			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
+			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+				player->OnDodgeSuccess();		// 回避成功後コンボの受付を開く
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.applySelfHitStop = false;
+				result.notifyComboHit = false;
+			}
+			else if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
 				result.accepted = false;
 				result.applyDamage = false;
 				result.applyReaction = false;
@@ -10785,6 +10897,10 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 	{
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());
+		if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+			player->OnDodgeSuccess();	// 回避成功後コンボの受付を開く
+			return;						// 回避成功時はダメージと被弾ステートを入れない
+		}
 		player->AddDamage(param_.damage);	// ダメージを与える
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // ダメージ状態に遷移
 	}
@@ -12227,6 +12343,15 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 
 		// 衝突履歴追加
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
+
+		// 回避中に敵弾へ触れた場合は回避成功として扱い、ダメージを入れない
+		if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+			player->OnDodgeSuccess();
+			if (info_.type == ProjectileType::NORMAL) {
+				hitDelete_ = true;	// 回避成功でも通常弾は命中扱いで消す
+			}
+			return;
+		}
 
 		// 敵にダメージ
 		player->AddDamage(parameter_.damage);
@@ -15424,6 +15549,10 @@ namespace Character {
 		virtual void Jump() = 0;
 		/// 回避
 		virtual void Dodge() {};
+		/// 回避成功通知
+		virtual void OnDodgeSuccess() {};
+		/// 回避成功後のコンボ受付中か
+		virtual bool IsDodgeSuccessComboWindow() const { return false; };
 		/// 攻撃(弱攻撃)
 		virtual void Attack() = 0;
 		/// 攻撃(強攻撃)
@@ -23957,6 +24086,10 @@ namespace Character {
 		virtual void Jump() = 0;
 		// 回避
 		virtual void Dodge() = 0;
+		// 回避成功通知
+		virtual void OnDodgeSuccess() override {};
+		// 回避成功後のコンボ受付中か
+		virtual bool IsDodgeSuccessComboWindow() const override { return false; };
 		// 攻撃(弱攻撃)
 		virtual void Attack() = 0;
 		// 攻撃(強攻撃)
@@ -24198,6 +24331,14 @@ namespace Character {
 		UpdateBaseGetValue(); //保存機能 基本値の更新
 		ApplyGlobalVariables();
 
+		// 回避成功後コンボの受付時間を毎フレーム減らす
+		if (dodgeSuccessComboTimer_ > 0.0f) {
+			dodgeSuccessComboTimer_ -= GetTime();
+			if (dodgeSuccessComboTimer_ < 0.0f) {
+				dodgeSuccessComboTimer_ = 0.0f;
+			}
+		}
+
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
@@ -24301,6 +24442,16 @@ namespace Character {
 		}
 	}
 
+	void NormalPlayer::OnDodgeSuccess() {
+		// 敵攻撃を回避中にすり抜けたら、専用開始コンボの受付時間を開く
+		dodgeSuccessComboTimer_ = dodgeSuccessComboWindow_;
+	}
+
+	bool NormalPlayer::IsDodgeSuccessComboWindow() const {
+		// 受付時間が残っている間だけ回避成功後コンボを開始できる
+		return dodgeSuccessComboTimer_ > 0.0f;
+	}
+
 #pragma endregion //移動関係
 
 #pragma region MyRegion
@@ -24396,6 +24547,12 @@ namespace Character {
 		// 回避
 		void Dodge() override;
 
+		// 回避成功通知
+		void OnDodgeSuccess() override;
+
+		// 回避成功後のコンボ受付中か
+		bool IsDodgeSuccessComboWindow() const override;
+
 		// 攻撃(弱攻撃)
 		void Attack() override;
 
@@ -24434,6 +24591,8 @@ namespace Character {
 		bool isCanJump = false;
 		//必殺技中か
 		bool isSpecial = false;
+		float dodgeSuccessComboTimer_ = 0.0f;		// 回避成功後コンボの受付残り時間
+		float dodgeSuccessComboWindow_ = 0.45f;		// 回避成功後コンボを受け付ける時間
 	};
 
 }
