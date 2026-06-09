@@ -107,6 +107,16 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::Skill)] =
         input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
 
+    // ---- Dodge（Pad LB）----
+    triggered_[Idx(Action::Dodge)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
+
+    pressed_[Idx(Action::Dodge)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB);
+
+    released_[Idx(Action::Dodge)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB);
+
     // ---- Dash（LT 押した瞬間）----
     triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f);
     pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f);

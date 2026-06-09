@@ -43,6 +43,9 @@ namespace Character {
 		// ジャンプ
 		void Jump() override;
 
+		// 回避
+		void Dodge() override;
+
 		// 攻撃(弱攻撃)
 		void Attack() override;
 

@@ -62,6 +62,31 @@ namespace Character {
 		float maxTimer = 0.1f;
 	};
 
+	// 回避
+	class PlayerStateAvoidance : public AvoidanceState {
+	public:
+		// コンストラクタ
+		PlayerStateAvoidance(BaseCharacter* player)
+			: AvoidanceState(player) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+
+		// 初期化
+		void Enter() override;
+	private:
+		float timer_ = 0.0f;					// 回避経過時間
+		float duration_ = 0.25f;				// 回避の継続時間
+		float speed_ = 35.0f;					// 回避中の移動速度
+		float staminaCost_ = 20.0f;				// 回避開始時に消費するスタミナ
+		Vector3 direction_ = { 0.0f,0.0f,1.0f };	// 回避に使うワールド方向
+		bool isDirectionFixed_ = false;			// 回避方向を決定済みか
+	};
+
 	// 攻撃
 	class PlayerStateAttack :public AttackState
 	{

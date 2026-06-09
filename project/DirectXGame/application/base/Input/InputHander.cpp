@@ -13,6 +13,9 @@ namespace Character {
 	void JampCommand::Exec(Character::BaseCharacter& character){
 		character.Jump();
 	}
+	void DodgeCommand::Exec(Character::BaseCharacter& character){
+		character.Dodge();
+	}
 	void AttackCommand::Exec(Character::BaseCharacter& character){
 		character.Attack();
 	}

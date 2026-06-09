@@ -93,6 +93,7 @@ void MovementSystem::StateGravityProcess(const Character::CharacterContext& cxt,
 	{
 	case Character::CharacterMainState::Idle:
 	case Character::CharacterMainState::Move:
+	case Character::CharacterMainState::Avoidance:
 	case Character::CharacterMainState::Dash:
 	case Character::CharacterMainState::Jump:
 		// 上昇中と下降中で重力倍率を変え、ジャンプの手触りを調整する

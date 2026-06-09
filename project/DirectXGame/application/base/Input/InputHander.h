@@ -36,6 +36,12 @@ namespace Character {
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
+	// 回避コマンド
+	class DodgeCommand : public ICommand
+	{
+	public:
+		void Exec(Character::BaseCharacter& character) override;
+	};
 	// 攻撃コマンド
 	class AttackCommand : public ICommand
 	{

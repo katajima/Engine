@@ -172,6 +172,9 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Jump, [](BaseCharacter* p) {
 			return std::make_unique<PlayerStateJump>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Avoidance, [](BaseCharacter* p) {
+			return std::make_unique<PlayerStateAvoidance>(p);
+			});
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<PlayerStateDie>(p);
 			});
@@ -279,6 +282,14 @@ namespace Character {
 
 			stateMachine_->ChangeState(CharacterMainState::Jump);
 			GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.01f);
+		}
+	}
+
+	void NormalPlayer::Dodge() {
+		if (isSpecial) return;
+		// 生存中かつ地上で動ける状態なら回避ステートへ移行する
+		if (GetAlive() && moveComponent_->GetIsLanding()) {
+			stateMachine_->ChangeState(CharacterMainState::Avoidance);
 		}
 	}
 

@@ -37,6 +37,8 @@ namespace Character {
 		virtual void Move() = 0;
 		// ジャンプ
 		virtual void Jump() = 0;
+		// 回避
+		virtual void Dodge() = 0;
 		// 攻撃(弱攻撃)
 		virtual void Attack() = 0;
 		// 攻撃(強攻撃)

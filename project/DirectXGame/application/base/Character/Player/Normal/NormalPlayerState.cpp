@@ -29,6 +29,12 @@ namespace Character {
 			}
 		}
 
+		// 回避入力があれば移動方向または向いている方向へステップする
+		if (ctx.inputData.dodgeTrigger && character->GetCharacterParameterComponent()->GetStamina() >= 20.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Avoidance);
+			return;
+		}
+
 		// 移動したら
 		if (ctx.inputData.moveShick.Length() != 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
@@ -69,6 +75,12 @@ namespace Character {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
+		}
+
+		// 回避入力があれば移動方向または向いている方向へステップする
+		if (ctx.inputData.dodgeTrigger && character->GetCharacterParameterComponent()->GetStamina() >= 20.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Avoidance);
+			return;
 		}
 
 		// 止まったら
@@ -170,6 +182,62 @@ namespace Character {
 	}
 
 #pragma endregion // ジャンプ
+
+#pragma region Avoidance
+
+	void PlayerStateAvoidance::Update(const CharacterContext& ctx) {
+		timer_ += ctx.dt;
+
+		if (!isDirectionFixed_) {
+			// 入力方向がある時はその方向、無い時は現在の向きを回避方向に使う
+			direction_ = Vector3{ ctx.worldStickDirection.x,0.0f,ctx.worldStickDirection.y };
+			if (direction_.Length() == 0.0f) {
+				direction_ = ctx.direction;
+				direction_.y = 0.0f;
+			}
+			direction_ = Normalize(direction_);
+			isDirectionFixed_ = true;
+		}
+
+		MoveRequest request{};						// 回避専用の移動リクエスト
+		request.layer = MoveLayer::kOverride;		// 通常移動より優先したい移動
+		request.velocity = direction_ * speed_ * ctx.dt;	// 1フレーム分の回避移動量
+		request.direction = direction_;				// 回避方向へ体を向ける
+		request.priority = 0;						// 通常移動より優先度を高くする
+		request.invincible = true;					// 将来の無敵判定拡張用フラグ
+		character->GetMoveComponent()->GetMoveRequestSystem()->SetRequest(request);
+
+		// 回避時間が終わったら入力状態に合わせて自然な通常ステートへ戻す
+		if (timer_ >= duration_) {
+			if (ctx.inputData.moveShick.Length() != 0.0f) {
+				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+			}
+			else {
+				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
+			}
+			return;
+		}
+	}
+
+	void PlayerStateAvoidance::Exit() {
+		timer_ = 0.0f;				// 次回回避用に経過時間を戻す
+		isDirectionFixed_ = false;	// 次回回避用に方向決定を解除する
+	}
+
+	void PlayerStateAvoidance::Enter() {
+		timer_ = 0.0f;				// 回避開始時にタイマーを初期化する
+		isDirectionFixed_ = false;	// 初回更新で入力方向を確定する
+		character->GetCharacterParameterComponent()->Stamina().Add(-staminaCost_);	// 回避コストを支払う
+		character->GetCharacterParameterComponent()->Stamina().useRate = false;		// 回避中はスタミナ回復を止める
+
+		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+		anima->SetIsLoop(false);					// 回避は短い単発モーションとして扱う
+		anima->SetIsPlaying(true);					// アニメーション再生
+		anima->SetAnimationSpeed(1.5f);				// 既存走りモーションを素早く再生する
+		anima->SetAnimation("SwordRun01", 0.05f);	// 専用回避アニメが無いので走りを短くブレンドする
+	}
+
+#pragma endregion // 回避
 
 #pragma region Attack
 

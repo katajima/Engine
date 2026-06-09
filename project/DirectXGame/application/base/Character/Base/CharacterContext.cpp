@@ -78,6 +78,8 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 		ctx.isJumping = true;
 		break;
 	case CharacterMainState::Avoidance: // 回避中
+		// 回避専用の移動リクエストだけを反映するため、通常移動は止める
+		ctx.isCanMove = false;
 		break;
 	case CharacterMainState::Defense: // 防御中
 		break;
