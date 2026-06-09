@@ -1,6 +1,7 @@
 #include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
@@ -207,7 +208,7 @@ namespace Character {
 
 		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
 		if (slowMotionManager_) {
-			slowMotionManager_->Update();
+			slowMotionManager_->Update(targetCharacters);
 		}
 
 		// 回避成功ポストエフェクトはスロー中でも実時間で解除したいので、固定デルタタイムで進める

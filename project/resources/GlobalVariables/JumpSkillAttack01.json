@@ -40,6 +40,10 @@
             "type": "float",
             "value": 0.0
         },
+        "エフェクト(武器表示)": {
+            "type": "bool",
+            "value": true
+        },
         "カメラシェイク量": {
             "type": "float",
             "value": 0.0
@@ -114,6 +118,10 @@
         "コンボキャンセル可能": {
             "type": "bool",
             "value": true
+        },
+        "コンボ中の最大落下速度": {
+            "type": "float",
+            "value": 0.0
         },
         "コンボ中の移動タイプ": {
             "enumType": "MoveType",
@@ -208,6 +216,54 @@
         "コンボ開始時に重力速度リセット": {
             "type": "bool",
             "value": true
+        },
+        "サブ武器スピン": {
+            "type": "bool",
+            "value": true
+        },
+        "サブ武器回転オフセット": {
+            "type": "Vector3",
+            "value": [
+                1.5707999467849731,
+                0.0,
+                3.1415998935699463
+            ]
+        },
+        "サブ武器回転速度": {
+            "type": "float",
+            "value": 18.0
+        },
+        "サブ武器待機位置": {
+            "type": "Vector3",
+            "value": [
+                0.6000000238418579,
+                1.100000023841858,
+                0.20000000298023224
+            ]
+        },
+        "サブ武器戻り時間": {
+            "type": "float",
+            "value": 0.18000000715255737
+        },
+        "サブ武器投擲方向に向ける": {
+            "type": "bool",
+            "value": true
+        },
+        "サブ武器投擲時間": {
+            "type": "float",
+            "value": 0.3499999940395355
+        },
+        "サブ武器投擲速度": {
+            "type": "float",
+            "value": 28.0
+        },
+        "サブ武器投擲開始オフセット": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                1.100000023841858,
+                0.0
+            ]
         },
         "スタミナコスト": {
             "type": "float",
@@ -423,6 +479,41 @@
             "type": "float",
             "value": 10.0
         },
+        "投擲停滞時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "投擲効果発動時間": {
+            "type": "float",
+            "value": 0.3499999940395355
+        },
+        "投擲効果発動条件": {
+            "enumType": "RangeEffectTriggerType",
+            "type": "enum",
+            "value": 0
+        },
+        "投擲回収時間": {
+            "type": "float",
+            "value": 0.800000011920929
+        },
+        "投擲回収条件": {
+            "enumType": "RangeRecallTriggerType",
+            "type": "enum",
+            "value": 2
+        },
+        "投擲回収近接半径": {
+            "type": "float",
+            "value": 2.0
+        },
+        "投擲移動タイプ": {
+            "enumType": "RangeThrowMoveType",
+            "type": "enum",
+            "value": 0
+        },
+        "投擲補間時間": {
+            "type": "float",
+            "value": 0.25
+        },
         "接続先(スキル)": {
             "type": "string",
             "value": ""
@@ -525,13 +616,40 @@
             "type": "string",
             "value": "Player"
         },
+        "遠距離オフセットタイプ": {
+            "enumType": "RangeOffsetTargetType",
+            "type": "enum",
+            "value": 0
+        },
+        "遠距離オフセットターゲット": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                20.0
+            ]
+        },
+        "遠距離タイプ": {
+            "enumType": "RangeType",
+            "type": "enum",
+            "value": 0
+        },
         "遠距離ダメージ": {
             "type": "float",
             "value": 1.0
         },
+        "遠距離ロックオン開始半径": {
+            "type": "float",
+            "value": 30.0
+        },
         "遠距離弾速": {
             "type": "float",
             "value": 1.0
+        },
+        "遠距離狙いタイプ": {
+            "enumType": "RangeLockOnType",
+            "type": "enum",
+            "value": 1
         },
         "遠距離発射数": {
             "type": "int32_t",

@@ -450,6 +450,12 @@
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
@@ -2352,6 +2358,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboThrow.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

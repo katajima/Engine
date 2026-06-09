@@ -1,4 +1,4 @@
-#include "NormalPlayerState.h"
+﻿#include "NormalPlayerState.h"
 #include "NormalPlayer.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletManager.h>
@@ -234,7 +234,7 @@ namespace Character {
 		anima->SetIsLoop(false);					// 回避は短い単発モーションとして扱う
 		anima->SetIsPlaying(true);					// アニメーション再生
 		anima->SetAnimationSpeed(1.5f);				// 既存走りモーションを素早く再生する
-		anima->SetAnimation("SwordRun01", 0.05f);	// 専用回避アニメが無いので走りを短くブレンドする
+		anima->SetAnimation("Rig|Roll", 0.05f);	// 専用回避アニメが無いので走りを短くブレンドする
 	}
 
 #pragma endregion // 回避

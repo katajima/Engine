@@ -1,9 +1,5 @@
 {
     "ComboPlayer": {
-        "Attack11": {
-            "type": "string",
-            "value": "Attack11"
-        },
         "Attack6": {
             "type": "string",
             "value": "Attack6"
@@ -19,6 +15,14 @@
         "Attack9": {
             "type": "string",
             "value": "Attack9"
+        },
+        "HeavyLaunch2": {
+            "type": "string",
+            "value": "HeavyLaunch2"
+        },
+        "HeavyRangeAttack": {
+            "type": "string",
+            "value": "HeavyRangeAttack"
         },
         "HheavyLaunch": {
             "type": "string",
@@ -99,6 +103,30 @@
         "testAttack02": {
             "type": "string",
             "value": "testAttack02"
+        },
+        "開始コンボ(回避中スキル)": {
+            "type": "string",
+            "value": "SkillAttack01"
+        },
+        "開始コンボ(回避中弱攻撃)": {
+            "type": "string",
+            "value": "MeleeAttack1"
+        },
+        "開始コンボ(回避中強攻撃)": {
+            "type": "string",
+            "value": "Attack10"
+        },
+        "開始コンボ(回避成功後スキル)": {
+            "type": "string",
+            "value": "SkillAttack01"
+        },
+        "開始コンボ(回避成功後弱攻撃)": {
+            "type": "string",
+            "value": "MeleeAttack1"
+        },
+        "開始コンボ(回避成功後強攻撃)": {
+            "type": "string",
+            "value": "Attack10"
         },
         "開始コンボ(地上スキル)": {
             "type": "string",

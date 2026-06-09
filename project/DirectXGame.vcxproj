@@ -275,8 +275,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerWeapon.cpp" />
@@ -637,6 +639,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
@@ -644,6 +647,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />

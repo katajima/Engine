@@ -2,19 +2,19 @@
 
 namespace Character {
 
-	// スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
+	// 対象スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
 	class SlowMotionRequest {
 	public:
-		// 回避成功用のスロー演出リクエストを生成する
+		// 回避成功用の対象スロー演出リクエストを生成する
 		static SlowMotionRequest CreateDodgeSuccess() {
 			SlowMotionRequest request;	// 回避成功時に使うスロー設定
-			request.timeScale_ = 0.18f;
-			request.duration_ = 0.18f;
+			request.timeScale_ = 0.10f;
+			request.duration_ = 1.0f;
 			request.priority_ = 10;
 			return request;
 		}
 
-		// 適用したい時間倍率を取得する
+		// 対象へ適用したい時間倍率を取得する
 		float GetTimeScale() const { return timeScale_; }
 
 		// スロー演出を維持する時間を取得する
@@ -24,7 +24,7 @@ namespace Character {
 		int GetPriority() const { return priority_; }
 
 	private:
-		float timeScale_ = 1.0f;	// リクエスト中に適用する時間倍率
+		float timeScale_ = 1.0f;	// リクエスト中に対象へ適用する時間倍率
 		float duration_ = 0.0f;	// リクエストの継続時間
 		int priority_ = 0;		// 現在のスローより優先して上書きできるかの値
 	};

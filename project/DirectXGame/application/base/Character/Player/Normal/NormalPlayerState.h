@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 
@@ -80,8 +80,8 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;					// 回避経過時間
-		float duration_ = 0.25f;				// 回避の継続時間
-		float speed_ = 35.0f;					// 回避中の移動速度
+		float duration_ = 0.75f;				// 回避の継続時間
+		float speed_ = 15.0f;					// 回避中の移動速度
 		float staminaCost_ = 20.0f;				// 回避開始時に消費するスタミナ
 		Vector3 direction_ = { 0.0f,0.0f,1.0f };	// 回避に使うワールド方向
 		bool isDirectionFixed_ = false;			// 回避方向を決定済みか
