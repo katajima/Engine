@@ -60,6 +60,15 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 		// 衝突履歴追加
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
+		// 回避中に敵弾へ触れた場合は回避成功として扱い、ダメージを入れない
+		if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+			player->OnDodgeSuccess();
+			if (info_.type == ProjectileType::NORMAL) {
+				hitDelete_ = true;	// 回避成功でも通常弾は命中扱いで消す
+			}
+			return;
+		}
+
 		// 敵にダメージ
 		player->AddDamage(parameter_.damage);
 

@@ -153,6 +153,10 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 	{
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());
+		if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+			player->OnDodgeSuccess();	// 回避成功後コンボの受付を開く
+			return;						// 回避成功時はダメージと被弾ステートを入れない
+		}
 		player->AddDamage(param_.damage);	// ダメージを与える
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // ダメージ状態に遷移
 	}

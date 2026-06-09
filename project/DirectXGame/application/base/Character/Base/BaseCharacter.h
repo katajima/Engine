@@ -54,6 +54,10 @@ namespace Character {
 		virtual void Jump() = 0;
 		/// 回避
 		virtual void Dodge() {};
+		/// 回避成功通知
+		virtual void OnDodgeSuccess() {};
+		/// 回避成功後のコンボ受付中か
+		virtual bool IsDodgeSuccessComboWindow() const { return false; };
 		/// 攻撃(弱攻撃)
 		virtual void Attack() = 0;
 		/// 攻撃(強攻撃)

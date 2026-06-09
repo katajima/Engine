@@ -46,6 +46,12 @@ namespace Character {
 		// 回避
 		void Dodge() override;
 
+		// 回避成功通知
+		void OnDodgeSuccess() override;
+
+		// 回避成功後のコンボ受付中か
+		bool IsDodgeSuccessComboWindow() const override;
+
 		// 攻撃(弱攻撃)
 		void Attack() override;
 
@@ -84,6 +90,8 @@ namespace Character {
 		bool isCanJump = false;
 		//必殺技中か
 		bool isSpecial = false;
+		float dodgeSuccessComboTimer_ = 0.0f;		// 回避成功後コンボの受付残り時間
+		float dodgeSuccessComboWindow_ = 0.45f;		// 回避成功後コンボを受け付ける時間
 	};
 
 }

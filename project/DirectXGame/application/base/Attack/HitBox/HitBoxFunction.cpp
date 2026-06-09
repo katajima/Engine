@@ -58,11 +58,19 @@ namespace HitBox {
 			result.reaction.normal = selfColl->GetCenterWorld() - otherColl->GetCenterWorld();
 		}
 
-		// 今後、ここでガード、無敵、属性耐性、ジャスト回避などを吸収する。
-		// 既存挙動維持のため、現時点では必殺技中のプレイヤーだけ無効化する。
+		// 今後、ここでガード、無敵、属性耐性などを吸収する。
+		// 既存挙動維持のため、必殺技中と回避成功中のプレイヤーだけ無効化する。
 		if (type_ == UseType::kEnemy && otherColl && otherColl->GetTag() == CollisionTag::Player) {
 			Character::BasePlayer* player = other ? static_cast<Character::BasePlayer*>(other->GetHitReceiver()) : nullptr;
-			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
+			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+				player->OnDodgeSuccess();		// 回避成功後コンボの受付を開く
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.applySelfHitStop = false;
+				result.notifyComboHit = false;
+			}
+			else if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
 				result.accepted = false;
 				result.applyDamage = false;
 				result.applyReaction = false;

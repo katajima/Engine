@@ -190,6 +190,14 @@ namespace Character {
 		UpdateBaseGetValue(); //保存機能 基本値の更新
 		ApplyGlobalVariables();
 
+		// 回避成功後コンボの受付時間を毎フレーム減らす
+		if (dodgeSuccessComboTimer_ > 0.0f) {
+			dodgeSuccessComboTimer_ -= GetTime();
+			if (dodgeSuccessComboTimer_ < 0.0f) {
+				dodgeSuccessComboTimer_ = 0.0f;
+			}
+		}
+
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
@@ -291,6 +299,16 @@ namespace Character {
 		if (GetAlive() && moveComponent_->GetIsLanding()) {
 			stateMachine_->ChangeState(CharacterMainState::Avoidance);
 		}
+	}
+
+	void NormalPlayer::OnDodgeSuccess() {
+		// 敵攻撃を回避中にすり抜けたら、専用開始コンボの受付時間を開く
+		dodgeSuccessComboTimer_ = dodgeSuccessComboWindow_;
+	}
+
+	bool NormalPlayer::IsDodgeSuccessComboWindow() const {
+		// 受付時間が残っている間だけ回避成功後コンボを開始できる
+		return dodgeSuccessComboTimer_ > 0.0f;
 	}
 
 #pragma endregion //移動関係

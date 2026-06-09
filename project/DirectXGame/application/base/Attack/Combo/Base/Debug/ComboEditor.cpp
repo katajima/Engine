@@ -196,6 +196,12 @@ namespace Combo {
 		drawStartCombo("空中 / 強攻撃", routes.airHeavy);
 		drawStartCombo("地上 / スキル", routes.groundSkill);
 		drawStartCombo("空中 / スキル", routes.airSkill);
+		drawStartCombo("回避中 / 弱攻撃", routes.dodgeLight);
+		drawStartCombo("回避中 / 強攻撃", routes.dodgeHeavy);
+		drawStartCombo("回避中 / スキル", routes.dodgeSkill);
+		drawStartCombo("回避成功後 / 弱攻撃", routes.dodgeSuccessLight);
+		drawStartCombo("回避成功後 / 強攻撃", routes.dodgeSuccessHeavy);
+		drawStartCombo("回避成功後 / スキル", routes.dodgeSuccessSkill);
 
 		if (changed) {
 			comboSystem->SetStartComboRoutes(routes);
@@ -334,7 +340,13 @@ namespace Combo {
 			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundHeavyStartKey) == comboName ||
 			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirHeavyStartKey) == comboName ||
 			globalVariables->GetValue<std::string>(comboSystem->GetName(), kGroundSkillStartKey) == comboName ||
-			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName) {
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kAirSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSkillStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSuccessLightStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSuccessHeavyStartKey) == comboName ||
+			globalVariables->GetValue<std::string>(comboSystem->GetName(), kDodgeSuccessSkillStartKey) == comboName) {
 			nodeManagementMessage_ = "A configured start combo cannot be deleted because attacks must keep a valid entry point.";
 			return;
 		}

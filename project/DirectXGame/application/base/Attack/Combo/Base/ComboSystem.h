@@ -24,6 +24,12 @@ namespace Combo {
 	const std::string kAirHeavyStartKey = "開始コンボ(空中強攻撃)";
 	const std::string kGroundSkillStartKey = "開始コンボ(地上スキル)";
 	const std::string kAirSkillStartKey = "開始コンボ(空中スキル)";
+	const std::string kDodgeLightStartKey = "開始コンボ(回避中弱攻撃)";
+	const std::string kDodgeHeavyStartKey = "開始コンボ(回避中強攻撃)";
+	const std::string kDodgeSkillStartKey = "開始コンボ(回避中スキル)";
+	const std::string kDodgeSuccessLightStartKey = "開始コンボ(回避成功後弱攻撃)";
+	const std::string kDodgeSuccessHeavyStartKey = "開始コンボ(回避成功後強攻撃)";
+	const std::string kDodgeSuccessSkillStartKey = "開始コンボ(回避成功後スキル)";
 
 	struct StartComboRoutes {
 		std::string groundLight;
@@ -32,6 +38,12 @@ namespace Combo {
 		std::string airHeavy;
 		std::string groundSkill;
 		std::string airSkill;
+		std::string dodgeLight;
+		std::string dodgeHeavy;
+		std::string dodgeSkill;
+		std::string dodgeSuccessLight;
+		std::string dodgeSuccessHeavy;
+		std::string dodgeSuccessSkill;
 	};
 
 
@@ -161,7 +173,8 @@ namespace Combo {
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
 		void ConnectSavedCombos();
-		std::string ResolveStartCombo(ActionInput input, bool isLanding) const;
+		std::string ResolveStartCombo(ActionInput input, bool isLanding, bool isDodging, bool isDodgeSuccess) const;
+		bool IsStartComboKey(const std::string& key) const;
 		float GetStaminaCost(ActionInput input) const;
 		float GetComboStaminaCost(ActionInput input, const std::shared_ptr<NodeState>& node) const;
 		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
@@ -199,6 +212,12 @@ namespace Combo {
 		std::string airHeavyStart_ = "Attack10";
 		std::string groundSkillStart_ = "SkillAttack01";
 		std::string airSkillStart_ = "JumpSkillAttack01";
+		std::string dodgeLightStart_ = "MeleeAttack1";
+		std::string dodgeHeavyStart_ = "Attack10";
+		std::string dodgeSkillStart_ = "SkillAttack01";
+		std::string dodgeSuccessLightStart_ = "MeleeAttack1";
+		std::string dodgeSuccessHeavyStart_ = "Attack10";
+		std::string dodgeSuccessSkillStart_ = "SkillAttack01";
 
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
