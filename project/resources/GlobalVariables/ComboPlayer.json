@@ -16,6 +16,10 @@
             "type": "string",
             "value": "Attack9"
         },
+        "HeavyDashAttack": {
+            "type": "string",
+            "value": "HeavyDashAttack"
+        },
         "HeavyLaunch2": {
             "type": "string",
             "value": "HeavyLaunch2"
@@ -51,6 +55,18 @@
         "LaunchAttack": {
             "type": "string",
             "value": "LaunchAttack"
+        },
+        "LightDashAttack": {
+            "type": "string",
+            "value": "LightDashAttack"
+        },
+        "LightDashAttack2": {
+            "type": "string",
+            "value": "LightDashAttack2"
+        },
+        "LightDashAttack3": {
+            "type": "string",
+            "value": "LightDashAttack3"
         },
         "MeleeAttack1": {
             "type": "string",
@@ -126,7 +142,7 @@
         },
         "開始コンボ(回避成功後強攻撃)": {
             "type": "string",
-            "value": "Attack10"
+            "value": "HeavyRangeAttack"
         },
         "開始コンボ(地上スキル)": {
             "type": "string",

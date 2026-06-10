@@ -105,10 +105,26 @@ void PlayerUI::InitializeOperationUI() {
 	skillPair->GetFirstSprite()->SetAnchorPoint(skillTextData.anchorPoint);			// アンカーポイント設定
 	skillPair->GetFirstSprite()->SetSize(skillTextData.size);				// サイズ設定
 	skillPair->GetFirstSprite()->SetColor(skillTextData.color);	// 色設定
-	skillPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
+	skillPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
 	skillPair->GetSecondSprite()->SetAnchorPoint(skillTextData.anchorPoint2);			// アンカーポイント設定
 	skillPair->GetSecondSprite()->SetSize(skillTextData.size2);						// サイズ設定
 	skillPair->GetSecondSprite()->SetColor(skillTextData.color);	// 色設定
+
+	// 回避UI初期化
+	InitUIPair("evade", evadeTextData.pos + Vector2{ 0,200 });
+	Engine::UIPair* evadePair = GetUIPair("evade");
+	evadePair->SetOffset(evadeTextData.offset);
+	evadePair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	evadePair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lb.dds");
+	evadePair->GetFirstSprite()->SetAnchorPoint(evadeTextData.anchorPoint);			// アンカーポイント設定
+	evadePair->GetFirstSprite()->SetSize(evadeTextData.size);				// サイズ設定
+	evadePair->GetFirstSprite()->SetColor(evadeTextData.color);	// 色設定
+	evadePair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
+	evadePair->GetSecondSprite()->SetAnchorPoint(evadeTextData.anchorPoint2);			// アンカーポイント設定
+	evadePair->GetSecondSprite()->SetSize(evadeTextData.size2);						// サイズ設定
+	evadePair->GetSecondSprite()->SetColor(evadeTextData.color);	// 色設定
+
+
 }
 
 void PlayerUI::InitializePlayerUI() {

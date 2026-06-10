@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
@@ -65,8 +65,8 @@ private:
 	MeterUIData staminaSpriteData;
 
 	struct TextData {
-		Vector2 pos = { 1120,520 };
-		Vector2 pos2 = { 1120,470 };
+		Vector2 pos = { 1120,420 };
+		Vector2 pos2 = { 1120,370 };
 
 		Vector2 anchorPoint = { 0.5f,0.5f };
 		Vector2 anchorPoint2 = { 0.0f,0.5f };
@@ -82,6 +82,7 @@ private:
 	TextData spTextData;
 	TextData jumpTextData;
 	TextData skillTextData;
+	TextData evadeTextData;
 
 	struct MaxTextData {
 		float size_ = 0.25f;

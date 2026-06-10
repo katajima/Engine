@@ -597,7 +597,7 @@
         },
         "接続先(弱攻撃)": {
             "type": "string",
-            "value": "HeavyLaunch2"
+            "value": "LightDashAttack"
         },
         "接続先(弱攻撃-地上-ヒット)": {
             "type": "string",
