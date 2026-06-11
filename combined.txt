@@ -2406,6 +2406,8 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalDat
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/application/base/Camera/Base/CameraData.h"
+#include <string>
+#include <vector>
 
 namespace Character {
 	struct CharacterContext;
@@ -2655,6 +2657,16 @@ namespace Combo {
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
 
+	// コンボ中に指定時間で発生させるエフェクト
+	struct ComboEffectEntry {
+		std::string effectName = "";					// 発生させるエフェクト名
+		std::string parentName = "Player";				// 発生位置の追従先
+		float startTime = 0.0f;							// コンボ開始から発生開始までの時間
+		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
+		float interval = 0.1f;							// 発生頻度
+		Vector3 offset = { 0.0f, 0.0f, 0.0f };			// 追従先からの発生オフセット
+	};
+
 	// 保存項目エフェクトデータ
 	struct GloblEffectData {
 		// トレイル発生時間
@@ -2663,6 +2675,8 @@ namespace Combo {
 		float trailEffectLifeTime = 1.0;
 		// コンボ中に武器を表示するか
 		bool weaponDraw = true;
+		// コンボ中に一度だけ発生させるエフェクト一覧
+		std::vector<ComboEffectEntry> comboEffects;
 	};
 
 	// 保存項目用コンボ接続データ
@@ -3654,6 +3668,16 @@ namespace Combo {
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 			globalVariables->AddItem(name, "エフェクト(武器表示)", data.effect.weaponDraw);
+			globalVariables->AddItem(name, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+
+			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
+				globalVariables->AddItem(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
+				globalVariables->AddItem(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->AddItem(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
+				globalVariables->AddItem(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
+				globalVariables->AddItem(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
+				globalVariables->AddItem(name, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+			}
 		}
 		// 接続
 		{
@@ -3864,6 +3888,28 @@ namespace Combo {
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
+			data.effect.comboEffects.clear();
+
+			const int comboEffectCount = globalVariables->GetValue<int>(name, kComboEffectCountKey);
+			for (int i = 0; i < comboEffectCount; ++i) {
+				ComboEffectEntry entry{};
+				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
+				entry.startTime = globalVariables->GetValue<float>(name, MakeComboEffectStartTimeKey(i));
+				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
+				if (globalVariables->HasKey(name, MakeComboEffectParentKey(i))) {
+					entry.parentName = globalVariables->GetValue<std::string>(name, MakeComboEffectParentKey(i));
+				}
+				if (globalVariables->HasKey(name, MakeComboEffectEndTimeKey(i))) {
+					entry.endTime = globalVariables->GetValue<float>(name, MakeComboEffectEndTimeKey(i));
+				}
+				else {
+					entry.endTime = entry.startTime;
+				}
+				if (globalVariables->HasKey(name, MakeComboEffectIntervalKey(i))) {
+					entry.interval = globalVariables->GetValue<float>(name, MakeComboEffectIntervalKey(i));
+				}
+				data.effect.comboEffects.push_back(entry);
+			}
 		}
 		// 接続
 		{
@@ -4080,6 +4126,16 @@ namespace Combo {
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 			globalVariables->SetValue(name, "エフェクト(武器表示)", data.effect.weaponDraw);
+			globalVariables->SetValue(name, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+
+			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
+				globalVariables->SetValue(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
+				globalVariables->SetValue(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->SetValue(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
+				globalVariables->SetValue(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
+				globalVariables->SetValue(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
+				globalVariables->SetValue(name, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+			}
 		}
 		// 接続
 		{
@@ -4261,6 +4317,7 @@ namespace Combo {
 		data.GetComboCondition().GetData() = gData.condition;
 		// エフェクト
 		data.GetComboEffect().GetData() = gData.effect;
+		data.GetComboEffect().SetParentTransforms(parentTransforms_);
 		// カメラ
 		data.GetComboCamera().GetData() = gData.camera;
 		// コンボボタン設定
@@ -4402,6 +4459,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 namespace Combo {
 
 	const std::string kHitEffectCountKey = "ヒットエフェクト数";
+	const std::string kComboEffectCountKey = "コンボエフェクト数";
 
 	static std::string MakeHitEffectSlotKey(int index) {
 		return "ヒットエフェクトスロット" + std::to_string(index);
@@ -4409,6 +4467,34 @@ namespace Combo {
 
 	static std::string MakeHitEffectNameKey(int index) {
 		return "ヒットエフェクト名前" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectNameKey(int index) {
+		return "コンボエフェクト名前" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectStartTimeKey(int index) {
+		return "コンボエフェクト開始時間" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectEndTimeKey(int index) {
+		return "コンボエフェクト終了時間" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectIntervalKey(int index) {
+		return "コンボエフェクト頻度" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectParentKey(int index) {
+		return "コンボエフェクト追従先" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectOffsetKey(int index) {
+		return "コンボエフェクトオフセット" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectSequenceName(int index) {
+		return "コンボエフェクト" + std::to_string(index);
 	}
 
 	const std::string kGroundLightStartKey = "開始コンボ(地上弱攻撃)";
@@ -5198,6 +5284,16 @@ namespace Combo {
 			data.effect = comboEditorBlocks_[it.first].GetData().effect;
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
+			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
+				AttackEvent effectEvent{};
+				if (combo.TryGetEvent(MakeComboEffectSequenceName(i), effectEvent)) {
+					data.effect.comboEffects[i].startTime = ConvertUtility::FramesToSeconds(effectEvent.startFrame);
+					data.effect.comboEffects[i].endTime = ConvertUtility::FramesToSeconds(effectEvent.endFrame);
+					if (data.effect.comboEffects[i].endTime < data.effect.comboEffects[i].startTime) {
+						data.effect.comboEffects[i].endTime = data.effect.comboEffects[i].startTime;
+					}
+				}
+			}
 
 			// 接続
 			data.connection = comboEditorBlocks_[it.first].GetData().connection;
@@ -5696,6 +5792,9 @@ namespace Combo {
 		// 武器の表示有無はコンボ演出側で制御する
 		ImGui::Checkbox("武器表示", &data_.effect.weaponDraw);
 		ImGui::TextDisabled("トレイル時間はシーケンサーで調整します。");
+		if (effectSystem) {
+			DrawComboEffectEditor(data_.effect, effectSystem->GetEffectGlobalDatas());
+		}
 	}
 
 	void EditorBlock::ImGuiMove() {
@@ -6005,6 +6104,93 @@ namespace Combo {
 		}
 	}
 
+	void EditorBlock::DrawComboEffectEditor(GloblEffectData& effect,
+		const std::map<std::string, EffectGlobalData>& effectDatas) {
+		ImGui::SeparatorText("コンボエフェクト");
+		ImGui::TextWrapped("コンボ開始から指定秒数で、使用者位置 + オフセットに一度だけ発生します。");
+
+		int removeIndex = -1;
+		bool shouldSyncSequence = false;
+
+		for (int i = 0; i < static_cast<int>(effect.comboEffects.size()); ++i) {
+			ImGui::PushID(i);
+
+			ComboEffectEntry& entry = effect.comboEffects[i];
+			char effectBuffer[128]{};
+			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
+
+			ImGui::InputText("エフェクト名", effectBuffer, sizeof(effectBuffer));
+			entry.effectName = effectBuffer;
+
+			Engine::ImGuiManager::Select("追従先", entry.parentName, comboSystem->GetParentTransforms());
+
+			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
+				for (const auto& effectPair : effectDatas) {
+					const bool isSelected = (entry.effectName == effectPair.first);
+					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
+						entry.effectName = effectPair.first;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			shouldSyncSequence |= ImGui::DragFloat("開始時間", &entry.startTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			shouldSyncSequence |= ImGui::DragFloat("終了時間", &entry.endTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
+			if (entry.endTime < entry.startTime) {
+				entry.endTime = entry.startTime;
+			}
+			if (entry.interval < 0.001f) {
+				entry.interval = 0.001f;
+			}
+
+			if (ImGui::Button("削除")) {
+				removeIndex = i;
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+
+		if (removeIndex >= 0 && removeIndex < static_cast<int>(effect.comboEffects.size())) {
+			effect.comboEffects.erase(effect.comboEffects.begin() + removeIndex);
+			shouldSyncSequence = true;
+		}
+
+		if (ImGui::Button("コンボエフェクト追加")) {
+			effect.comboEffects.push_back(ComboEffectEntry{
+				.effectName = "",
+				.parentName = "Player",
+				.startTime = 0.0f,
+				.endTime = 0.0f,
+				.interval = 0.1f,
+				.offset = { 0.0f, 0.0f, 0.0f }
+				});
+			shouldSyncSequence = true;
+		}
+
+		if (shouldSyncSequence) {
+			SyncComboEffectSequenceEvents();
+		}
+	}
+
+	void EditorBlock::SyncComboEffectSequenceEvents() {
+		sequence_.RemoveEventsByPrefix("コンボエフェクト");
+		for (int i = 0; i < static_cast<int>(data_.effect.comboEffects.size()); ++i) {
+			const ComboEffectEntry& entry = data_.effect.comboEffects[i];
+			sequence_.UpsertEvent(AttackEvent{
+				.startFrame = ConvertUtility::SecondsToFrames(entry.startTime, 60.0f),
+				.endFrame = ConvertUtility::SecondsToFrames(entry.endTime, 60.0f),
+				.color = 0x00AAFFFF,
+				.name = MakeComboEffectSequenceName(i)
+				});
+		}
+	}
+
 #pragma endregion // ImGui管理
 
 #pragma endregion // コンボ単位管理
@@ -6083,6 +6269,10 @@ namespace Combo {
 
 		void DrawHitEffectEditor(HitReactionData& reaction,
 			const std::map<std::string, EffectGlobalData>& effectDatas);
+		void DrawComboEffectEditor(GloblEffectData& effect,
+			const std::map<std::string, EffectGlobalData>& effectDatas);
+		// コンボエフェクトの設定をシーケンサー表示へ反映する
+		void SyncComboEffectSequenceEvents();
 
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;
@@ -6274,6 +6464,12 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	AddSequencerEvent(sequence,hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
 	AddSequencerEvent(sequence,moveStart, moveEnd, 0xFF000000, "移動時間");
 	AddSequencerEvent(sequence,trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
+
+	const auto& comboEffects = comboData.GetComboEffect().GetData().comboEffects;
+	for (int i = 0; i < static_cast<int>(comboEffects.size()); ++i) {
+		const ComboEffectEntry& entry = comboEffects[i];
+		AddSequencerEvent(sequence, entry.startTime, entry.endTime, 0x00AAFFFF, MakeComboEffectSequenceName(i));
+	}
 }
 
 void Combo::ComboImGui::AddSequencerEvent(AttackSequence& sequence, float startFrame, float endFrame, 
@@ -6324,6 +6520,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboSeq
 ============================================================
 #pragma once
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include <algorithm>
 
 // イベント構造体
 struct AttackEvent {
@@ -6377,6 +6574,27 @@ public:
 		events.push_back(event);
 	}
 
+	// 同名イベントがあれば更新し、なければ追加する
+	void UpsertEvent(const AttackEvent& event) {
+		for (AttackEvent& current : events) {
+			if (current.name == event.name) {
+				current = event;
+				return;
+			}
+		}
+		events.push_back(event);
+	}
+
+	// 指定した接頭辞で始まるイベントを削除する
+	void RemoveEventsByPrefix(const std::string& prefix) {
+		events.erase(
+			std::remove_if(events.begin(), events.end(),
+				[&prefix](const AttackEvent& event) {
+					return event.name.rfind(prefix, 0) == 0;
+				}),
+			events.end());
+	}
+
 	// イベントのクリア
 	void ClearEvents() {
 		events.clear();
@@ -6411,6 +6629,17 @@ public: // 取得系
 		return events[0];
 	}
 
+	// 名前でイベント取得できるか
+	bool TryGetEvent(const std::string& name, AttackEvent& out) const {
+		for (const AttackEvent& event : events) {
+			if (event.name == name) {
+				out = event;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// イベント名取得
 	std::string GetEventName(int index) const {
 		if (index >= 0 && index < static_cast<int>(events.size())) {
@@ -6437,7 +6666,10 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/engine/3d/Object/Object3d.h>
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <algorithm>
 
 namespace Combo {
 
@@ -6486,8 +6718,18 @@ namespace Combo {
 
 	// 開始
 	void ComboEffect::Enter(Character::BaseCharacter* owner) {
+		// コンボエフェクト発生に使う所有者とエフェクト管理を保持する
+		this->owner = owner;
+		effectSystem = owner ? owner->GetEffect() : nullptr;
+		nextEmitTimes_.clear();
+		for (const ComboEffectEntry& entry : data_.comboEffects) {
+			nextEmitTimes_.push_back(entry.startTime);
+		}
 		// 武器情報取得
-		weapon = owner->GetWeapon();
+		weapon = owner ? owner->GetWeapon() : nullptr;
+		if (!weapon) {
+			return;
+		}
 		// トレイル終了
 		weapon->SetTrailEmit(false);
 		// コンボ演出として武器表示を切り替える
@@ -6496,6 +6738,13 @@ namespace Combo {
 
 	// 更新
 	void ComboEffect::Update(float timer, float dt) {
+		// 指定時間になったコンボエフェクトを発生させる
+		EmitComboEffects(timer);
+
+		if (!weapon) {
+			return;
+		}
+
 		// トレイル使用可能か
 		bool isTrail = false;
 		if (IsEffectTrail(timer)) { isTrail = true; }
@@ -6505,10 +6754,54 @@ namespace Combo {
 
 	// 終了
 	void ComboEffect::Exit(Character::BaseCharacter* owner) {
-		// トレイル終了
-		weapon->SetTrailEmit(false);
-		// コンボ終了後は通常表示へ戻す
-		weapon->GetObject3D()->SetIsDraw(true);
+		if (weapon) {
+			// トレイル終了
+			weapon->SetTrailEmit(false);
+			// コンボ終了後は通常表示へ戻す
+			weapon->GetObject3D()->SetIsDraw(true);
+		}
+		// 次のコンボ開始時に発生状態を作り直す
+		nextEmitTimes_.clear();
+		effectSystem = nullptr;
+		this->owner = nullptr;
+		weapon = nullptr;
+	}
+
+	void ComboEffect::EmitComboEffects(float timer) {
+		if (!owner || !effectSystem) {
+			return;
+		}
+		if (nextEmitTimes_.size() != data_.comboEffects.size()) {
+			nextEmitTimes_.clear();
+			for (const ComboEffectEntry& entry : data_.comboEffects) {
+				nextEmitTimes_.push_back(entry.startTime);
+			}
+		}
+
+		for (int i = 0; i < static_cast<int>(data_.comboEffects.size()); ++i) {
+			ComboEffectEntry& entry = data_.comboEffects[i];
+			const float endTime = (std::max)(entry.startTime, entry.endTime);
+			const float interval = (std::max)(entry.interval, 0.001f);
+			if (entry.effectName.empty() || timer < entry.startTime || timer > endTime || timer < nextEmitTimes_[i]) {
+				continue;
+			}
+
+			// 追従先の現在位置にオフセットを足した場所へ発生させる
+			const Vector3 emitPosition = GetEffectBasePosition(entry) + entry.offset;
+			effectSystem->Emit(entry.effectName, emitPosition);
+			nextEmitTimes_[i] += interval;
+		}
+	}
+
+	Vector3 ComboEffect::GetEffectBasePosition(const ComboEffectEntry& entry) const {
+		auto it = parentTransforms_.find(entry.parentName);
+		if (it != parentTransforms_.end() && it->second) {
+			return it->second->GetWorldPosition();
+		}
+		if (owner) {
+			return owner->GetWorldPosition();
+		}
+		return {};
 	}
 
 #pragma endregion //コンボエフェクト
@@ -6521,6 +6814,8 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include <map>
+#include <vector>
 
 namespace Engine {
 	class WorldTransform;
@@ -6533,6 +6828,7 @@ namespace Character {
 	class BaseCharacter;		// キャラクター
 }
 class BaseWeapon;			// 武器
+class EffectSystem;			// エフェクト管理
 
 namespace Combo {
 	/// <summary>
@@ -6575,6 +6871,8 @@ namespace Combo {
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
+		// コンボシステムが持つ追従先Transform一覧を設定する
+		void SetParentTransforms(const std::map<std::string, Engine::WorldTransform*>& parentTransforms) { parentTransforms_ = parentTransforms; }
 
 		// トレイルするか
 		bool IsEffectTrail(float timer) const {
@@ -6583,12 +6881,22 @@ namespace Combo {
 		}
 		GloblEffectData& GetData() { return data_; }
 	private:
+		// 指定時間内のコンボエフェクトを頻度に応じて発生させる
+		void EmitComboEffects(float timer);
+		// エフェクトの発生基準位置を取得する
+		Vector3 GetEffectBasePosition(const ComboEffectEntry& entry) const;
+	private:
 		GloblEffectData data_;
 
 
+		Character::BaseCharacter* owner = nullptr;	// 使用者
 		BaseWeapon* weapon = nullptr;
+		EffectSystem* effectSystem = nullptr;		// エフェクト発生先
+		std::map<std::string, Engine::WorldTransform*> parentTransforms_;	// 追従先Transform一覧
+		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.cpp
