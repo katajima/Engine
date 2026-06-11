@@ -3,6 +3,8 @@
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/application/base/Camera/Base/CameraData.h"
+#include <string>
+#include <vector>
 
 namespace Character {
 	struct CharacterContext;
@@ -252,6 +254,16 @@ namespace Combo {
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
 
+	// コンボ中に指定時間で発生させるエフェクト
+	struct ComboEffectEntry {
+		std::string effectName = "";					// 発生させるエフェクト名
+		std::string parentName = "Player";				// 発生位置の追従先
+		float startTime = 0.0f;							// コンボ開始から発生開始までの時間
+		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
+		float interval = 0.1f;							// 発生頻度
+		Vector3 offset = { 0.0f, 0.0f, 0.0f };			// 追従先からの発生オフセット
+	};
+
 	// 保存項目エフェクトデータ
 	struct GloblEffectData {
 		// トレイル発生時間
@@ -260,6 +272,8 @@ namespace Combo {
 		float trailEffectLifeTime = 1.0;
 		// コンボ中に武器を表示するか
 		bool weaponDraw = true;
+		// コンボ中に一度だけ発生させるエフェクト一覧
+		std::vector<ComboEffectEntry> comboEffects;
 	};
 
 	// 保存項目用コンボ接続データ

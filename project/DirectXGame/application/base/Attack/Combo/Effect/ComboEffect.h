@@ -1,5 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include <map>
+#include <vector>
 
 namespace Engine {
 	class WorldTransform;
@@ -12,6 +14,7 @@ namespace Character {
 	class BaseCharacter;		// キャラクター
 }
 class BaseWeapon;			// 武器
+class EffectSystem;			// エフェクト管理
 
 namespace Combo {
 	/// <summary>
@@ -54,6 +57,8 @@ namespace Combo {
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
+		// コンボシステムが持つ追従先Transform一覧を設定する
+		void SetParentTransforms(const std::map<std::string, Engine::WorldTransform*>& parentTransforms) { parentTransforms_ = parentTransforms; }
 
 		// トレイルするか
 		bool IsEffectTrail(float timer) const {
@@ -62,9 +67,18 @@ namespace Combo {
 		}
 		GloblEffectData& GetData() { return data_; }
 	private:
+		// 指定時間内のコンボエフェクトを頻度に応じて発生させる
+		void EmitComboEffects(float timer);
+		// エフェクトの発生基準位置を取得する
+		Vector3 GetEffectBasePosition(const ComboEffectEntry& entry) const;
+	private:
 		GloblEffectData data_;
 
 
+		Character::BaseCharacter* owner = nullptr;	// 使用者
 		BaseWeapon* weapon = nullptr;
+		EffectSystem* effectSystem = nullptr;		// エフェクト発生先
+		std::map<std::string, Engine::WorldTransform*> parentTransforms_;	// 追従先Transform一覧
+		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
 	};
 }

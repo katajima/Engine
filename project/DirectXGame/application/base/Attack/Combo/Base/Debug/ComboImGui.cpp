@@ -141,6 +141,12 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	AddSequencerEvent(sequence,hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
 	AddSequencerEvent(sequence,moveStart, moveEnd, 0xFF000000, "移動時間");
 	AddSequencerEvent(sequence,trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
+
+	const auto& comboEffects = comboData.GetComboEffect().GetData().comboEffects;
+	for (int i = 0; i < static_cast<int>(comboEffects.size()); ++i) {
+		const ComboEffectEntry& entry = comboEffects[i];
+		AddSequencerEvent(sequence, entry.startTime, entry.endTime, 0x00AAFFFF, MakeComboEffectSequenceName(i));
+	}
 }
 
 void Combo::ComboImGui::AddSequencerEvent(AttackSequence& sequence, float startFrame, float endFrame, 

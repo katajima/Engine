@@ -386,6 +386,9 @@ namespace Combo {
 		// 武器の表示有無はコンボ演出側で制御する
 		ImGui::Checkbox("武器表示", &data_.effect.weaponDraw);
 		ImGui::TextDisabled("トレイル時間はシーケンサーで調整します。");
+		if (effectSystem) {
+			DrawComboEffectEditor(data_.effect, effectSystem->GetEffectGlobalDatas());
+		}
 	}
 
 	void EditorBlock::ImGuiMove() {
@@ -691,6 +694,93 @@ namespace Combo {
 			reaction.hitEffectNames.push_back(HitEffectEntry{
 				.slotName = "NewEffect",
 				.effectName = ""
+				});
+		}
+	}
+
+	void EditorBlock::DrawComboEffectEditor(GloblEffectData& effect,
+		const std::map<std::string, EffectGlobalData>& effectDatas) {
+		ImGui::SeparatorText("コンボエフェクト");
+		ImGui::TextWrapped("コンボ開始から指定秒数で、使用者位置 + オフセットに一度だけ発生します。");
+
+		int removeIndex = -1;
+		bool shouldSyncSequence = false;
+
+		for (int i = 0; i < static_cast<int>(effect.comboEffects.size()); ++i) {
+			ImGui::PushID(i);
+
+			ComboEffectEntry& entry = effect.comboEffects[i];
+			char effectBuffer[128]{};
+			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
+
+			ImGui::InputText("エフェクト名", effectBuffer, sizeof(effectBuffer));
+			entry.effectName = effectBuffer;
+
+			Engine::ImGuiManager::Select("追従先", entry.parentName, comboSystem->GetParentTransforms());
+
+			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
+				for (const auto& effectPair : effectDatas) {
+					const bool isSelected = (entry.effectName == effectPair.first);
+					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
+						entry.effectName = effectPair.first;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			shouldSyncSequence |= ImGui::DragFloat("開始時間", &entry.startTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			shouldSyncSequence |= ImGui::DragFloat("終了時間", &entry.endTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
+			if (entry.endTime < entry.startTime) {
+				entry.endTime = entry.startTime;
+			}
+			if (entry.interval < 0.001f) {
+				entry.interval = 0.001f;
+			}
+
+			if (ImGui::Button("削除")) {
+				removeIndex = i;
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+
+		if (removeIndex >= 0 && removeIndex < static_cast<int>(effect.comboEffects.size())) {
+			effect.comboEffects.erase(effect.comboEffects.begin() + removeIndex);
+			shouldSyncSequence = true;
+		}
+
+		if (ImGui::Button("コンボエフェクト追加")) {
+			effect.comboEffects.push_back(ComboEffectEntry{
+				.effectName = "",
+				.parentName = "Player",
+				.startTime = 0.0f,
+				.endTime = 0.0f,
+				.interval = 0.1f,
+				.offset = { 0.0f, 0.0f, 0.0f }
+				});
+			shouldSyncSequence = true;
+		}
+
+		if (shouldSyncSequence) {
+			SyncComboEffectSequenceEvents();
+		}
+	}
+
+	void EditorBlock::SyncComboEffectSequenceEvents() {
+		sequence_.RemoveEventsByPrefix("コンボエフェクト");
+		for (int i = 0; i < static_cast<int>(data_.effect.comboEffects.size()); ++i) {
+			const ComboEffectEntry& entry = data_.effect.comboEffects[i];
+			sequence_.UpsertEvent(AttackEvent{
+				.startFrame = ConvertUtility::SecondsToFrames(entry.startTime, 60.0f),
+				.endFrame = ConvertUtility::SecondsToFrames(entry.endTime, 60.0f),
+				.color = 0x00AAFFFF,
+				.name = MakeComboEffectSequenceName(i)
 				});
 		}
 	}

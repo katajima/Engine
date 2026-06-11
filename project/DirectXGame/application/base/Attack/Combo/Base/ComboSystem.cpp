@@ -477,6 +477,16 @@ namespace Combo {
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 			globalVariables->AddItem(name, "エフェクト(武器表示)", data.effect.weaponDraw);
+			globalVariables->AddItem(name, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+
+			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
+				globalVariables->AddItem(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
+				globalVariables->AddItem(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->AddItem(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
+				globalVariables->AddItem(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
+				globalVariables->AddItem(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
+				globalVariables->AddItem(name, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+			}
 		}
 		// 接続
 		{
@@ -687,6 +697,28 @@ namespace Combo {
 			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
+			data.effect.comboEffects.clear();
+
+			const int comboEffectCount = globalVariables->GetValue<int>(name, kComboEffectCountKey);
+			for (int i = 0; i < comboEffectCount; ++i) {
+				ComboEffectEntry entry{};
+				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
+				entry.startTime = globalVariables->GetValue<float>(name, MakeComboEffectStartTimeKey(i));
+				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
+				if (globalVariables->HasKey(name, MakeComboEffectParentKey(i))) {
+					entry.parentName = globalVariables->GetValue<std::string>(name, MakeComboEffectParentKey(i));
+				}
+				if (globalVariables->HasKey(name, MakeComboEffectEndTimeKey(i))) {
+					entry.endTime = globalVariables->GetValue<float>(name, MakeComboEffectEndTimeKey(i));
+				}
+				else {
+					entry.endTime = entry.startTime;
+				}
+				if (globalVariables->HasKey(name, MakeComboEffectIntervalKey(i))) {
+					entry.interval = globalVariables->GetValue<float>(name, MakeComboEffectIntervalKey(i));
+				}
+				data.effect.comboEffects.push_back(entry);
+			}
 		}
 		// 接続
 		{
@@ -903,6 +935,16 @@ namespace Combo {
 			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
 			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 			globalVariables->SetValue(name, "エフェクト(武器表示)", data.effect.weaponDraw);
+			globalVariables->SetValue(name, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+
+			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
+				globalVariables->SetValue(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
+				globalVariables->SetValue(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->SetValue(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
+				globalVariables->SetValue(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
+				globalVariables->SetValue(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
+				globalVariables->SetValue(name, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+			}
 		}
 		// 接続
 		{
@@ -1084,6 +1126,7 @@ namespace Combo {
 		data.GetComboCondition().GetData() = gData.condition;
 		// エフェクト
 		data.GetComboEffect().GetData() = gData.effect;
+		data.GetComboEffect().SetParentTransforms(parentTransforms_);
 		// カメラ
 		data.GetComboCamera().GetData() = gData.camera;
 		// コンボボタン設定

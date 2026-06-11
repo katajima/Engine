@@ -107,6 +107,26 @@
             "type": "enum",
             "value": 6
         },
+        "コンボエフェクトオフセット0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクト名前0": {
+            "type": "string",
+            "value": "EmitterAnimatedCube"
+        },
+        "コンボエフェクト数": {
+            "type": "int32_t",
+            "value": 1
+        },
+        "コンボエフェクト開始時間0": {
+            "type": "float",
+            "value": 0.0
+        },
         "コンボキャンセル受付終了時間": {
             "type": "float",
             "value": 0.5

@@ -67,6 +67,10 @@ namespace Combo {
 
 		void DrawHitEffectEditor(HitReactionData& reaction,
 			const std::map<std::string, EffectGlobalData>& effectDatas);
+		void DrawComboEffectEditor(GloblEffectData& effect,
+			const std::map<std::string, EffectGlobalData>& effectDatas);
+		// コンボエフェクトの設定をシーケンサー表示へ反映する
+		void SyncComboEffectSequenceEvents();
 
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;

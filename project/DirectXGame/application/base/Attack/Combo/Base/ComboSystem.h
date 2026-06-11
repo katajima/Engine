@@ -9,6 +9,7 @@
 namespace Combo {
 
 	const std::string kHitEffectCountKey = "ヒットエフェクト数";
+	const std::string kComboEffectCountKey = "コンボエフェクト数";
 
 	static std::string MakeHitEffectSlotKey(int index) {
 		return "ヒットエフェクトスロット" + std::to_string(index);
@@ -16,6 +17,34 @@ namespace Combo {
 
 	static std::string MakeHitEffectNameKey(int index) {
 		return "ヒットエフェクト名前" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectNameKey(int index) {
+		return "コンボエフェクト名前" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectStartTimeKey(int index) {
+		return "コンボエフェクト開始時間" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectEndTimeKey(int index) {
+		return "コンボエフェクト終了時間" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectIntervalKey(int index) {
+		return "コンボエフェクト頻度" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectParentKey(int index) {
+		return "コンボエフェクト追従先" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectOffsetKey(int index) {
+		return "コンボエフェクトオフセット" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectSequenceName(int index) {
+		return "コンボエフェクト" + std::to_string(index);
 	}
 
 	const std::string kGroundLightStartKey = "開始コンボ(地上弱攻撃)";

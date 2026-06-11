@@ -1,5 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include <algorithm>
 
 // イベント構造体
 struct AttackEvent {
@@ -53,6 +54,27 @@ public:
 		events.push_back(event);
 	}
 
+	// 同名イベントがあれば更新し、なければ追加する
+	void UpsertEvent(const AttackEvent& event) {
+		for (AttackEvent& current : events) {
+			if (current.name == event.name) {
+				current = event;
+				return;
+			}
+		}
+		events.push_back(event);
+	}
+
+	// 指定した接頭辞で始まるイベントを削除する
+	void RemoveEventsByPrefix(const std::string& prefix) {
+		events.erase(
+			std::remove_if(events.begin(), events.end(),
+				[&prefix](const AttackEvent& event) {
+					return event.name.rfind(prefix, 0) == 0;
+				}),
+			events.end());
+	}
+
 	// イベントのクリア
 	void ClearEvents() {
 		events.clear();
@@ -85,6 +107,17 @@ public: // 取得系
 
 		/// 見つからなかった場合は空のイベントを返す
 		return events[0];
+	}
+
+	// 名前でイベント取得できるか
+	bool TryGetEvent(const std::string& name, AttackEvent& out) const {
+		for (const AttackEvent& event : events) {
+			if (event.name == name) {
+				out = event;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// イベント名取得

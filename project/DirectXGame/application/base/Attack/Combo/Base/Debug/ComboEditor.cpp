@@ -498,6 +498,16 @@ namespace Combo {
 			data.effect = comboEditorBlocks_[it.first].GetData().effect;
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
+			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
+				AttackEvent effectEvent{};
+				if (combo.TryGetEvent(MakeComboEffectSequenceName(i), effectEvent)) {
+					data.effect.comboEffects[i].startTime = ConvertUtility::FramesToSeconds(effectEvent.startFrame);
+					data.effect.comboEffects[i].endTime = ConvertUtility::FramesToSeconds(effectEvent.endFrame);
+					if (data.effect.comboEffects[i].endTime < data.effect.comboEffects[i].startTime) {
+						data.effect.comboEffects[i].endTime = data.effect.comboEffects[i].startTime;
+					}
+				}
+			}
 
 			// 接続
 			data.connection = comboEditorBlocks_[it.first].GetData().connection;
