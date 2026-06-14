@@ -10,6 +10,8 @@ namespace Combo {
 		GroundHit,
 		AirMiss,
 		AirHit,
+		LockOn,
+		NoLockOn,
 	};
 
     /// <summary>
@@ -143,6 +145,8 @@ namespace Combo {
             std::weak_ptr<NodeState> groundHit;
             std::weak_ptr<NodeState> airMiss;
             std::weak_ptr<NodeState> airHit;
+            std::weak_ptr<NodeState> lockOn;
+            std::weak_ptr<NodeState> noLockOn;
         };
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;

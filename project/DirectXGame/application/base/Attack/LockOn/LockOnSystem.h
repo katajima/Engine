@@ -49,9 +49,11 @@ public:
 
 private:
 	// ロックオン対象として有効か確認
-	bool IsValidTarget(const Character::BaseCharacter* target) const;
+	bool IsValidTarget(const Character::BaseCharacter* target, float radius) const;
 	// 範囲内の近くの相手を取得
 	const Character::BaseCharacter* GetNearLockOn() const;
+	// 指定半径内の近くの相手を取得
+	const Character::BaseCharacter* GetNearLockOn(float radius) const;
 	// 最後に当てた相手を取得
 	const Character::BaseCharacter* GetHitLockOn() const;
 

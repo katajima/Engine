@@ -46,6 +46,17 @@ namespace Combo {
 			return nullptr;
 		}
 
+		const bool isLockOn =
+			owner &&
+			owner->GetAttackController() &&
+			owner->GetAttackController()->GeyLockOnSysutem() &&
+			owner->GetAttackController()->GeyLockOnSysutem()->IsLockOn();
+		const std::weak_ptr<NodeState>& lockOnTarget = isLockOn ? it->second.lockOn : it->second.noLockOn;
+		if (auto next = lockOnTarget.lock()) {
+			// ロックオン用の分岐が設定されている場合は、地上/空中やヒット状態より優先する
+			return next;
+		}
+
 		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
 		const std::weak_ptr<NodeState>& conditionalTarget =
 			onGround ? (hasHit_ ? it->second.groundHit : it->second.groundMiss)
@@ -71,6 +82,12 @@ namespace Combo {
 		case TransitionCondition::AirHit:
 			targets.airHit = next;
 			break;
+		case TransitionCondition::LockOn:
+			targets.lockOn = next;
+			break;
+		case TransitionCondition::NoLockOn:
+			targets.noLockOn = next;
+			break;
 		default:
 			targets.defaultTarget = next;
 			break;
@@ -80,7 +97,8 @@ namespace Combo {
 	bool NodeState::HasNextState() const {
 		for (const auto& [input, targets] : nextStates) {
 			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
-				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired()) {
+				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
+				!targets.lockOn.expired() || !targets.noLockOn.expired()) {
 				return true;
 			}
 		}
@@ -94,7 +112,8 @@ namespace Combo {
 		}
 		const TransitionTargets& targets = it->second;
 		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
-			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired();
+			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
+			!targets.lockOn.expired() || !targets.noLockOn.expired();
 	}
 
 	// 更新

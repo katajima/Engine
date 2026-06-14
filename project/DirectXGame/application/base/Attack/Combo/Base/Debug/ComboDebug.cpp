@@ -21,8 +21,10 @@ namespace Combo {
 			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ data.GetComboMotion().GetComboMove().GetTargetPosition(),3 }, { 0,1,1,1 }, 8, 8);
 
 
-			// ロックオン半径
-			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.radius }, { 0,1,0,1 }, 8, 8);
+			// ソフトロックオン半径
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.softLockRadius }, { 0,1,0,1 }, 8, 8);
+			// 手動ロックオン半径
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.lockOnRadius }, { 1,1,0,1 }, 8, 8);
 
 
 			// 方向

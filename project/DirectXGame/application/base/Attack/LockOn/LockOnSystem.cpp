@@ -18,9 +18,9 @@ const Character::BaseCharacter* LockOnSystem::UpdateLockOn(bool isLockOnRequest)
 		return nullptr;
 	}
 
-	if (!IsValidTarget(currentTarget_)) {
+	if (!IsValidTarget(currentTarget_, data_.lockOnRadius)) {
 		// 現在の対象が無効なら、カメラ前方に近い相手を探し直す
-		currentTarget_ = SoftLockOn();
+		currentTarget_ = GetNearLockOn(data_.lockOnRadius);
 	}
 
 	isLockOn_ = currentTarget_ != nullptr;
@@ -63,7 +63,7 @@ Vector3 LockOnSystem::GetOwnerPos() const {
 	return owner->GetWorldPosition();
 }
 
-bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
+bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target, float radius) const {
 	if (!owner || !target) {
 		// 所有者か対象が無ければロックオンを維持できない
 		return false;
@@ -75,7 +75,7 @@ bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
 		return false;
 	}
 
-	if (data_.radius < target->GetWorldPosition().Distance(GetOwnerPos())) {
+	if (radius < target->GetWorldPosition().Distance(GetOwnerPos())) {
 		// 設定半径の外へ出た相手は解除する
 		return false;
 	}
@@ -85,6 +85,10 @@ bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
 }
 
 const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
+	return GetNearLockOn(data_.softLockRadius);
+}
+
+const Character::BaseCharacter* LockOnSystem::GetNearLockOn(float radius) const {
 	if (targetCharacters.empty())
 	{
 		return nullptr;
@@ -107,7 +111,7 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 	float bestScore = (std::numeric_limits<float>::max)();
 
 	for (const Character::BaseCharacter* target : targetCharacters) {
-		if (!IsValidTarget(target)) {
+		if (!IsValidTarget(target, radius)) {
 			// 無効な候補はスコア計算に含めない
 			continue;
 		}
@@ -134,7 +138,7 @@ const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
 		// 最後にヒットしたタグ番号と一致し、現在も有効な敵を優先する
 		if (target->GetTagNumber() == hitTag && target->GetAlive() && !target->GetDelete() &&
 			target->GetCurrentMainState() != Character::CharacterMainState::Die) {
-			if (data_.radius >= target->GetWorldPosition().Distance(ownerPos)) {
+			if (data_.softLockRadius >= target->GetWorldPosition().Distance(ownerPos)) {
 				return target;
 			}
 		}

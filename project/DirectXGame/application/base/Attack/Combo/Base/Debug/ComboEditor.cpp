@@ -370,6 +370,10 @@ namespace Combo {
 					drawConnectionCombo("空中 / 未ヒット", targets.airMiss);
 					ImGui::SetNextItemWidth(260.0f);
 					drawConnectionCombo("空中 / ヒット", targets.airHit);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("ロックオン中", targets.lockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("ロックオンなし", targets.noLockOn);
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
@@ -596,6 +600,8 @@ namespace Combo {
 				clearTarget(targets.groundHit);
 				clearTarget(targets.airMiss);
 				clearTarget(targets.airHit);
+				clearTarget(targets.lockOn);
+				clearTarget(targets.noLockOn);
 			};
 			clearTarget(data.connection.lightAttack);
 			clearTarget(data.connection.heavyAttack);

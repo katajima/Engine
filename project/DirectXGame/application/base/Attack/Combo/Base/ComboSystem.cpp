@@ -208,6 +208,8 @@ namespace Combo {
 				renameTarget(targets.groundHit);
 				renameTarget(targets.airMiss);
 				renameTarget(targets.airHit);
+				renameTarget(targets.lockOn);
+				renameTarget(targets.noLockOn);
 			};
 			renameTarget(data.connection.lightAttack);
 			renameTarget(data.connection.heavyAttack);
@@ -497,14 +499,20 @@ namespace Combo {
 			globalVariables->AddItem(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
 			globalVariables->AddItem(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
 			globalVariables->AddItem(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->AddItem(name, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
+			globalVariables->AddItem(name, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
 			globalVariables->AddItem(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
 			globalVariables->AddItem(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
 			globalVariables->AddItem(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
 			globalVariables->AddItem(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->AddItem(name, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
+			globalVariables->AddItem(name, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
 			globalVariables->AddItem(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
 			globalVariables->AddItem(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
 			globalVariables->AddItem(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
 			globalVariables->AddItem(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
+			globalVariables->AddItem(name, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
+			globalVariables->AddItem(name, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
 		}
 		// 条件
 		{
@@ -544,7 +552,8 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
-			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->AddItem(name, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
+			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.lockOnRadius);
 			globalVariables->AddItem(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
 
 			globalVariables->AddEnumItem(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
@@ -729,14 +738,20 @@ namespace Combo {
 			data.connection.lightCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-地上-ヒット)");
 			data.connection.lightCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-未ヒット)");
 			data.connection.lightCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-ヒット)");
+			data.connection.lightCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオン中)");
+			data.connection.lightCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオンなし)");
 			data.connection.heavyCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-未ヒット)");
 			data.connection.heavyCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-ヒット)");
 			data.connection.heavyCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-未ヒット)");
 			data.connection.heavyCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-ヒット)");
+			data.connection.heavyCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオン中)");
+			data.connection.heavyCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオンなし)");
 			data.connection.skillCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-未ヒット)");
 			data.connection.skillCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-ヒット)");
 			data.connection.skillCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-未ヒット)");
 			data.connection.skillCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-ヒット)");
+			data.connection.skillCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオン中)");
+			data.connection.skillCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオンなし)");
 		}
 		// 条件
 		{
@@ -776,7 +791,8 @@ namespace Combo {
 			data.move.moveWindow.endTime = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
 			data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 			data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
-			data.move.lockOnData.radius = globalVariables->GetValue<float>(name, "ロックオン半径");
+			data.move.lockOnData.softLockRadius = globalVariables->GetValue<float>(name, "ソフトロックオン半径");
+			data.move.lockOnData.lockOnRadius = globalVariables->GetValue<float>(name, "ロックオン半径");
 			data.move.lockOnData.moveTargetRadius = globalVariables->GetValue<float>(name, "ロックオンターゲット接近半径");
 			data.move.lockOnData.type = globalVariables->GetEnumValue<LockOnType>(name, "ロックオンタイプ");
 			data.move.lockOnData.targetMoveType = globalVariables->GetEnumValue<TargetMoveType>(name, "ターゲット移動タイプ");
@@ -955,14 +971,20 @@ namespace Combo {
 			globalVariables->SetValue(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
 			globalVariables->SetValue(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
 			globalVariables->SetValue(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->SetValue(name, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
+			globalVariables->SetValue(name, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
 			globalVariables->SetValue(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
 			globalVariables->SetValue(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
 			globalVariables->SetValue(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
 			globalVariables->SetValue(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->SetValue(name, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
+			globalVariables->SetValue(name, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
 			globalVariables->SetValue(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
 			globalVariables->SetValue(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
 			globalVariables->SetValue(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
 			globalVariables->SetValue(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
+			globalVariables->SetValue(name, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
+			globalVariables->SetValue(name, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
 		}
 		// 条件
 		{
@@ -1004,7 +1026,8 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
-			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->SetValue(name, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
+			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.lockOnRadius);
 			globalVariables->SetValue(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
 
 			globalVariables->SetEnumValue(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
@@ -1182,6 +1205,12 @@ namespace Combo {
 	void System::ConnectSavedCombos() {
 		for (const auto& [nodeName, data] : comboGlobalDatas_) {
 			auto connectConditional = [&](ActionInput input, const GlobalConditionalConnection& targets) {
+				if (!targets.lockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.lockOn, TransitionCondition::LockOn);
+				}
+				if (!targets.noLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.noLockOn, TransitionCondition::NoLockOn);
+				}
 				if (!targets.groundMiss.empty()) {
 					ConnectCombo(nodeName, input, targets.groundMiss, TransitionCondition::GroundMiss);
 				}

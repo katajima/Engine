@@ -282,6 +282,8 @@ namespace Combo {
 		std::string groundHit = "";
 		std::string airMiss = "";
 		std::string airHit = "";
+		std::string lockOn = "";
+		std::string noLockOn = "";
 	};
 
 	struct GlobalConnection {

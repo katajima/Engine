@@ -472,7 +472,8 @@ namespace Combo {
 				"近い相手",
 				};
 				Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.move.lockOnData.type);
-				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.softLockRadius, 0.0f, 100.0f);
+				ImGui::SliderFloat("手動ロックオン半径", &data_.move.lockOnData.lockOnRadius, 0.0f, 100.0f);
 				static const char* TargetMoveTypeLabels[] = {
 				"なし",
 				"移動",
@@ -600,6 +601,8 @@ namespace Combo {
 					drawConnection("地上 / ヒット", conditionalTargets.groundHit);
 					drawConnection("空中 / 未ヒット", conditionalTargets.airMiss);
 					drawConnection("空中 / ヒット", conditionalTargets.airHit);
+					drawConnection("ロックオン中", conditionalTargets.lockOn);
+					drawConnection("ロックオンなし", conditionalTargets.noLockOn);
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
