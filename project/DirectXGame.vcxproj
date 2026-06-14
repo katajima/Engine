@@ -46,12 +46,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\generated\outputs\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\imnodes;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\generated\outputs\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\imnodes;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -385,6 +385,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="externals\imnodes\imnodes.cpp" />
     <ClCompile Include="DirectXGame\engine\input\Input.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
@@ -540,6 +541,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
+    <Text Include="externals\imnodes\LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
@@ -913,6 +915,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
+    <ClInclude Include="externals\imnodes\imnodes.h" />
+    <ClInclude Include="externals\imnodes\imnodes_internal.h" />
     <ClInclude Include="DirectXGame\engine\input\Input.h" />
     <ClInclude Include="DirectXGame\engine\Base\Logger.h" />
     <ClInclude Include="DirectXGame\engine\Math\MathFunctions.h" />

@@ -42,6 +42,8 @@ namespace Combo {
 
 		// データ取得
 		GlobalData GetData() const { return data_; }
+		// エディタ上で直接編集するためのデータ参照を取得
+		GlobalData& GetMutableData() { return data_; }
 	private:
 		// ヒットボックス設定
 		void ImGuiApplyHitBox();

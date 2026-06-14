@@ -7,8 +7,7 @@ const float Engine::MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float Engine::MyGame::kTimeSpeed_ = 1.0f;
 float Engine::MyGame::nowTime = 0.0f;
 
-void Engine::MyGame::SetTimeScale(float timeScale)
-{
+void Engine::MyGame::SetTimeScale(float timeScale) {
 	// スロー演出などから呼ばれても破綻しないよう、時間倍率を安全な範囲に丸める
 	if (timeScale < 0.0f) {
 		timeScale = 0.0f;
@@ -20,8 +19,7 @@ void Engine::MyGame::SetTimeScale(float timeScale)
 	kTimeSpeed_ = timeScale;
 }
 
-void Engine::MyGame::Initialize()
-{
+void Engine::MyGame::Initialize() {
 	debugTimer_.StartTimer();
 
 	Framework::Initialize();

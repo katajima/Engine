@@ -1,4 +1,4 @@
-#include "GamePlayScene.h"
+﻿#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -192,6 +192,7 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
+	inputManager_->SetOwner(characterManager_->GetPlayer());
 	// 入力システム更新
 	inputSystem_->Update(GetTime());
 
@@ -208,7 +209,7 @@ void GamePlayScene::Update()
 
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_) {
+	if (this->iCommand_ && characterManager_->GetPlayer()) {
 		iCommand_->Exec(*characterManager_->GetPlayer());
 	}
 

@@ -237,6 +237,9 @@
     <ClCompile Include="externals\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="externals\imnodes\imnodes.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル\engine</Filter>
     </ClCompile>
@@ -1227,6 +1230,12 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imnodes\imnodes.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imnodes\imnodes_internal.h">
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\2d\SpriteCommon.h">
@@ -2372,6 +2381,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
+      <Filter>imgui</Filter>
+    </Text>
+    <Text Include="externals\imnodes\LICENSE.md">
       <Filter>imgui</Filter>
     </Text>
   </ItemGroup>

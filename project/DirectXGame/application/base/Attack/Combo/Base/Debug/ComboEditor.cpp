@@ -3,6 +3,9 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
+#include "imnodes.h"
+
+#include <algorithm>
 #include <cctype>
 
 namespace Combo {
@@ -29,6 +32,7 @@ namespace Combo {
 		comboSystem->SertIsDebug(isComboEditorActive_);
 		DrawNodeManagement();
 		DrawStartComboSettings();
+		DrawComboNodeGraph();
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
@@ -158,6 +162,230 @@ namespace Combo {
 				}
 			}
 			ImGui::EndPopup();
+		}
+		ImGui::Separator();
+#endif
+	}
+
+	void Editor::DrawComboNodeGraph() {
+#ifdef _DEBUG
+		if (!ImGui::CollapsingHeader("Combo Node Graph", ImGuiTreeNodeFlags_DefaultOpen)) {
+			return;
+		}
+
+		// 詳細エディタ側の未保存変更を保存データ側へ寄せて、グラフ表示の接続とSave時の接続を揃える。
+		for (auto& [comboName, block] : comboEditorBlocks_) {
+			if (comboSystem->GetComboNodeState(comboName)) {
+				comboSystem->GetComboGlobalData(comboName).connection = block.GetMutableData().connection;
+			}
+		}
+
+		struct LinkInfo {
+			int id = 0;				// imnodesに渡すリンクID
+			int startPinId = 0;		// 接続元ピンID
+			int endPinId = 0;		// 接続先ピンID
+		};
+
+		auto getNodeId = [](int index) {
+			// imnodes用に、ノードIDとピンIDの範囲を分けて衝突を避ける。
+			return 1000 + index;
+		};
+		auto getInputPinId = [](int index) {
+			// 各コンボノードへ入るための入力ピンID
+			return 200000 + index;
+		};
+		auto getOutputPinId = [](int index, int slot) {
+			// slot 0=弱攻撃, 1=強攻撃, 2=スキル
+			return 300000 + index * 10 + slot;
+		};
+		auto getLinkId = [](int fromIndex, int slot) {
+			// 標準接続は1ノードにつき3本までなので、接続元と入力種別で固定IDにする。
+			return 400000 + fromIndex * 10 + slot;
+		};
+		auto getIndexFromInputPin = [](int pinId) {
+			return pinId - 200000;
+		};
+		auto getIndexFromOutputPin = [](int pinId) {
+			return (pinId - 300000) / 10;
+		};
+		auto getSlotFromOutputPin = [](int pinId) {
+			return (pinId - 300000) % 10;
+		};
+		auto isInputPin = [](int pinId) {
+			return pinId >= 200000 && pinId < 300000;
+		};
+		auto isOutputPin = [](int pinId) {
+			return pinId >= 300000 && pinId < 400000;
+		};
+
+		std::map<std::string, int> comboNameToIndex;
+		for (int i = 0; i < static_cast<int>(comboEditorBlockNames_.size()); ++i) {
+			comboNameToIndex[comboEditorBlockNames_[i]] = i;
+		}
+
+		auto collectTarget = [&](std::vector<LinkInfo>& links, const std::string& from,
+			const std::string& to, int slot) {
+			const bool visibleLink = showAllNodeLinks_ || from == selectedComboEditorBlockName_ || to == selectedComboEditorBlockName_;
+			if (!visibleLink || to.empty() ||
+				comboNameToIndex.find(from) == comboNameToIndex.end() ||
+				comboNameToIndex.find(to) == comboNameToIndex.end()) {
+				return;
+			}
+			const int fromIndex = comboNameToIndex[from];
+			const int toIndex = comboNameToIndex[to];
+			links.push_back(LinkInfo{
+				.id = getLinkId(fromIndex, slot),
+				.startPinId = getOutputPinId(fromIndex, slot),
+				.endPinId = getInputPinId(toIndex),
+				});
+		};
+		auto drawConnectionCombo = [&](const char* label, std::string& target) {
+			const char* preview = target.empty() ? "なし" : target.c_str();
+			if (ImGui::BeginCombo(label, preview)) {
+				const bool noSelection = target.empty();
+				if (ImGui::Selectable("なし", noSelection)) {
+					target.clear();
+				}
+				if (noSelection) {
+					ImGui::SetItemDefaultFocus();
+				}
+				for (const std::string& comboName : comboEditorBlockNames_) {
+					const bool selected = target == comboName;
+					if (ImGui::Selectable(comboName.c_str(), selected)) {
+						target = comboName;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		};
+
+		std::vector<LinkInfo> links;
+		ImGui::Checkbox("全ノードの線を表示", &showAllNodeLinks_);
+
+		for (auto& [comboName, block] : comboEditorBlocks_) {
+			GlobalConnection& connection = block.GetMutableData().connection;
+			collectTarget(links, comboName, connection.lightAttack, 0);
+			collectTarget(links, comboName, connection.heavyAttack, 1);
+			collectTarget(links, comboName, connection.skill, 2);
+		}
+
+		ImGui::TextWrapped("ノードをクリックすると編集対象を切り替えます。ピン同士をドラッグすると標準接続を作成できます。");
+		ImGui::Separator();
+
+		const float nodeStartX = 40.0f;
+		const float nodeStartY = 40.0f;
+		const float nodeGapX = 300.0f;
+		const float nodeGapY = 210.0f;
+		const int columnCount = 3;
+		ImNodes::BeginNodeEditor();
+		for (const std::string& comboName : comboEditorBlockNames_) {
+			const int nodeIndex = comboNameToIndex[comboName];
+			const bool selected = comboName == selectedComboEditorBlockName_;
+
+			const int nodeId = getNodeId(nodeIndex);
+			// ノードの初期配置は最初の一度だけ行い、その後のドラッグ移動はimnodes側に保持させる。
+			if (initializedNodeGraphNodeIds_.insert(nodeId).second) {
+				ImNodes::SetNodeGridSpacePos(nodeId, ImVec2(
+					nodeStartX + (nodeIndex % columnCount) * nodeGapX,
+					nodeStartY + (nodeIndex / columnCount) * nodeGapY));
+			}
+
+			ImNodes::BeginNode(nodeId);
+			ImNodes::BeginNodeTitleBar();
+			ImGui::PushID(comboName.c_str());
+			if (ImGui::Selectable(comboName.c_str(), selected, 0, ImVec2(180.0f, 22.0f))) {
+				selectedComboEditorBlockName_ = comboName;
+			}
+			ImNodes::EndNodeTitleBar();
+
+			ImNodes::BeginInputAttribute(getInputPinId(nodeIndex));
+			ImGui::Text("In");
+			ImNodes::EndInputAttribute();
+
+			ImNodes::BeginOutputAttribute(getOutputPinId(nodeIndex, 0));
+			ImGui::Indent(90.0f);
+			ImGui::Text("弱攻撃");
+			ImGui::Unindent(90.0f);
+			ImNodes::EndOutputAttribute();
+
+			ImNodes::BeginOutputAttribute(getOutputPinId(nodeIndex, 1));
+			ImGui::Indent(90.0f);
+			ImGui::Text("強攻撃");
+			ImGui::Unindent(90.0f);
+			ImNodes::EndOutputAttribute();
+
+			ImNodes::BeginOutputAttribute(getOutputPinId(nodeIndex, 2));
+			ImGui::Indent(90.0f);
+			ImGui::Text("スキル");
+			ImGui::Unindent(90.0f);
+			ImNodes::EndOutputAttribute();
+
+			ImGui::PopID();
+			ImNodes::EndNode();
+		}
+
+		for (const LinkInfo& link : links) {
+			ImNodes::Link(link.id, link.startPinId, link.endPinId);
+		}
+		ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
+		ImNodes::EndNodeEditor();
+
+		int startedPinId = 0;
+		int endedPinId = 0;
+		if (ImNodes::IsLinkCreated(&startedPinId, &endedPinId)) {
+			// 逆向きにドラッグされた場合も、出力ピン -> 入力ピンとして解釈する。
+			if (isInputPin(startedPinId) && isOutputPin(endedPinId)) {
+				std::swap(startedPinId, endedPinId);
+			}
+			if (isOutputPin(startedPinId) && isInputPin(endedPinId)) {
+				const int fromIndex = getIndexFromOutputPin(startedPinId);
+				const int slot = getSlotFromOutputPin(startedPinId);
+				const int toIndex = getIndexFromInputPin(endedPinId);
+				if (fromIndex >= 0 && fromIndex < static_cast<int>(comboEditorBlockNames_.size()) &&
+					toIndex >= 0 && toIndex < static_cast<int>(comboEditorBlockNames_.size()) &&
+					slot >= 0 && slot < 3) {
+					GlobalConnection& connection = comboEditorBlocks_[comboEditorBlockNames_[fromIndex]].GetMutableData().connection;
+					std::string& target = slot == 0 ? connection.lightAttack :
+						slot == 1 ? connection.heavyAttack : connection.skill;
+					target = comboEditorBlockNames_[toIndex];
+				}
+			}
+		}
+
+		// グラフで選択中のノードについて、条件付き接続まで同じ場所で編集できるようにする。
+		auto selectedIt = comboEditorBlocks_.find(selectedComboEditorBlockName_);
+		if (selectedIt != comboEditorBlocks_.end()) {
+			GlobalConnection& connection = selectedIt->second.GetMutableData().connection;
+			auto drawConditionalConnection = [&](const char* inputLabel, GlobalConditionalConnection& targets) {
+				ImGui::PushID(inputLabel);
+				if (ImGui::TreeNode(inputLabel)) {
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / 未ヒット", targets.groundMiss);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / ヒット", targets.groundHit);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / 未ヒット", targets.airMiss);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / ヒット", targets.airHit);
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			};
+
+			ImGui::SeparatorText("Selected Node Connections");
+			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
+			ImGui::SetNextItemWidth(260.0f);
+			drawConnectionCombo("弱攻撃 / 標準", connection.lightAttack);
+			ImGui::SetNextItemWidth(260.0f);
+			drawConnectionCombo("強攻撃 / 標準", connection.heavyAttack);
+			ImGui::SetNextItemWidth(260.0f);
+			drawConnectionCombo("スキル / 標準", connection.skill);
+			drawConditionalConnection("弱攻撃 / 条件付き", connection.lightCondition);
+			drawConditionalConnection("強攻撃 / 条件付き", connection.heavyCondition);
+			drawConditionalConnection("スキル / 条件付き", connection.skillCondition);
 		}
 		ImGui::Separator();
 #endif
@@ -427,6 +655,7 @@ namespace Combo {
 		// コンボエディターブロッククリア
 		comboEditorBlocks_.clear();
 		comboEditorBlockNames_.clear();
+		initializedNodeGraphNodeIds_.clear();
 
 		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
 		for (auto& comboState : comboSystem->GetComboNodeStates()) {

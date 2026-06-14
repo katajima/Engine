@@ -10,6 +10,7 @@
 #include "ImGuiJapaneseFont.h"
 
 #include "imgui.h"
+#include "imnodes.h"
 
 // ギズモの操作モード
 static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値は移動
@@ -23,6 +24,8 @@ void Engine::ImGuiManager::Initialize(DirectXCommon* dxCommon)
 
 	// コンテキストの生成
 	ImGui::CreateContext();
+	// ImGuiノードエディタ用のコンテキストを生成
+	ImNodes::CreateContext();
 	// Imguiのスタイルを設定 黒
 	ImGui::StyleColorsDark();
 
@@ -51,6 +54,8 @@ void Engine::ImGuiManager::Finalize()
 	// 後始末
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
+	// ImGui本体より先にノードエディタ用コンテキストを破棄
+	ImNodes::DestroyContext();
 	ImGui::DestroyContext();
 
 #endif // _DEBUG

@@ -1,5 +1,6 @@
 #pragma once
 #include "ComboEditorBlock.h"
+#include <set>
 
 namespace Combo {
 	// コンボエディター
@@ -26,6 +27,8 @@ namespace Combo {
 		// コンボノードの管理
 		void DrawNodeManagement();
 		void DrawStartComboSettings();
+		// コンボ全体の流れをノードとして表示、接続を編集
+		void DrawComboNodeGraph();
 		void AddComboNode();
 		void AddCopiedComboNode();
 		bool ValidateNewComboName(const std::string& comboName);
@@ -57,6 +60,8 @@ namespace Combo {
 		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;
+		bool showAllNodeLinks_ = false;			// ノードグラフで全接続線を表示するか
+		std::set<int> initializedNodeGraphNodeIds_;	// imnodes上で初期配置済みのノードID
 
 		GlobalData data;
 
