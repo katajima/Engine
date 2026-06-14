@@ -10893,11 +10893,30 @@ File Path: project/DirectXGame/application/base/Attack/LockOn/LockOnSystem.cpp
 #include "LockOnSystem.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include <algorithm>
+#include <limits>
 
 void LockOnSystem::Initialize(Character::BaseCharacter* owner) {
 	// ロックオンを行う攻撃者と、その視線基準になるカメラ管理を保持する
 	this->owner = owner;
 	cameraManager = owner->GetCameraManager();
+}
+
+const Character::BaseCharacter* LockOnSystem::UpdateLockOn(bool isLockOnRequest) {
+	if (!isLockOnRequest) {
+		// 入力が無い時は保持中のターゲットを解除する
+		isLockOn_ = false;
+		currentTarget_ = nullptr;
+		return nullptr;
+	}
+
+	if (!IsValidTarget(currentTarget_)) {
+		// 現在の対象が無効なら、カメラ前方に近い相手を探し直す
+		currentTarget_ = SoftLockOn();
+	}
+
+	isLockOn_ = currentTarget_ != nullptr;
+	return currentTarget_;
 }
 
 const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
@@ -10936,6 +10955,26 @@ Vector3 LockOnSystem::GetOwnerPos() const {
 	return owner->GetWorldPosition();
 }
 
+bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
+	if (!owner || !target) {
+		// 所有者か対象が無ければロックオンを維持できない
+		return false;
+	}
+
+	if (!target->GetAlive() || target->GetDelete() ||
+		target->GetCurrentMainState() == Character::CharacterMainState::Die) {
+		// 死亡・削除済みの相手はロックオン対象から外す
+		return false;
+	}
+
+	if (data_.radius < target->GetWorldPosition().Distance(GetOwnerPos())) {
+		// 設定半径の外へ出た相手は解除する
+		return false;
+	}
+
+	// 現在の候補リストに残っている相手だけを有効にする
+	return std::find(targetCharacters.begin(), targetCharacters.end(), target) != targetCharacters.end();
+}
 
 const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 	if (targetCharacters.empty())
@@ -10956,40 +10995,24 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 	}
 	aimDir = aimDir.Normalize();
 
-	// 角度と距離のスコアが最も小さい有効な敵を探す
-	auto it = std::min_element(
-		targetCharacters.begin(),
-		targetCharacters.end(),
-		[&](const Character::BaseCharacter* a, const Character::BaseCharacter* b)
-		{
-			if (!a || !b) return false;
+	const Character::BaseCharacter* bestTarget = nullptr;
+	float bestScore = (std::numeric_limits<float>::max)();
 
-			bool is = a->GetAlive() && a->GetCurrentMainState() != Character::CharacterMainState::Die;
-			bool is2 = b->GetAlive() && b->GetCurrentMainState() != Character::CharacterMainState::Die;
-			if (is && is2) {
-				float scoreA = CalcSoftLockScore(ownerPos, aimDir, a);
-				float scoreB = CalcSoftLockScore(ownerPos, aimDir, b);
-
-				return scoreA < scoreB;
-			}
-			else {
-				return false;
-			}
+	for (const Character::BaseCharacter* target : targetCharacters) {
+		if (!IsValidTarget(target)) {
+			// 無効な候補はスコア計算に含めない
+			continue;
 		}
-	);
 
-	if (it == targetCharacters.end())
-	{
-		return nullptr;
+		const float score = CalcSoftLockScore(ownerPos, aimDir, target);
+		if (score < bestScore) {
+			// 角度と距離のスコアが一番小さい相手を採用する
+			bestScore = score;
+			bestTarget = target;
+		}
 	}
 
-	const Character::BaseCharacter* bestTarget = *it;
-	if (bestTarget && data_.radius >= bestTarget->GetWorldPosition().Distance(ownerPos)) {
-		// 半径内かつ生存中の敵だけをロックオン対象として返す
-		if (bestTarget->GetAlive() && !bestTarget->GetDelete())
-			return bestTarget;
-	}
-	return nullptr;
+	return bestTarget;
 }
 
 const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
@@ -11023,7 +11046,7 @@ float LockOnSystem::CalcSoftLockScore(
 	toEnemy.y = 0.0f;
 
 	float distSq = toEnemy.LengthSq();
-	if (distSq < 1e-6f) return FLT_MAX;
+	if (distSq < 1e-6f) return (std::numeric_limits<float>::max)();
 
 	// 方向ベクトルに正規化して、カメラ前方との角度を計算する
 	Vector3 dir = toEnemy / std::sqrt(distSq);
@@ -11065,10 +11088,17 @@ public:
 	// 初期化
 	void Initialize(Character::BaseCharacter* owner);
 
+	// 入力状態に合わせてロックオン対象を更新
+	const Character::BaseCharacter* UpdateLockOn(bool isLockOnRequest);
+
 	// ロックオン相手を選別
 	const Character::BaseCharacter* SoftLockOn() const;
 	// ターゲット取得
 	const Character::BaseCharacter* GetTarget() const;
+	// 現在ロックオン中のターゲット取得
+	const Character::BaseCharacter* GetLockOnTarget() const { return currentTarget_; }
+	// ロックオン中か取得
+	bool IsLockOn() const { return isLockOn_; }
 public:
 
 	// ターゲット指定
@@ -11087,6 +11117,8 @@ public:
 	void ClearTag() { hitTag = -1; }
 
 private:
+	// ロックオン対象として有効か確認
+	bool IsValidTarget(const Character::BaseCharacter* target) const;
 	// 範囲内の近くの相手を取得
 	const Character::BaseCharacter* GetNearLockOn() const;
 	// 最後に当てた相手を取得
@@ -11106,8 +11138,10 @@ private:
 private:
 	// ロックオンデータ
 	LockOnData data_;
-	//
+	// 現在ロックオン中か
 	bool isLockOn_ = false;
+	// 現在ロックオンしている相手
+	const Character::BaseCharacter* currentTarget_ = nullptr;
 	// 当てた相手
 	uint32_t hitTag = -1;
 };
@@ -25219,6 +25253,9 @@ namespace Character {
 		UpdateBaseGetValue(); //保存機能 基本値の更新
 		ApplyGlobalVariables();
 
+		// ロックオン対象を先に更新し、以降のカメラ更新で同じ対象を使う
+		UpdateLockOn();
+
 		// 回避成功後コンボの受付時間を毎フレーム減らす
 		if (dodgeSuccessComboTimer_ > 0.0f) {
 			dodgeSuccessComboTimer_ -= GetTime();
@@ -25260,7 +25297,6 @@ namespace Character {
 		// 必殺技
 		special_->Update();
 
-		attackController_->GeyLockOnSysutem()->SetTargets(targetCharacters);
 		// 攻撃制御更新
 		attackController_->Update(ctx);
 		// 応答システム
@@ -25305,6 +25341,33 @@ namespace Character {
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 		ui_->Update(GetTime());
 
+	}
+
+	void NormalPlayer::UpdateLockOn() {
+		if (!attackController_) {
+			// 攻撃制御が未生成ならロックオンシステムも使えない
+			return;
+		}
+
+		LockOnSystem* lockOnSystem = attackController_->GeyLockOnSysutem();
+		if (!lockOnSystem) {
+			// ロックオンシステムが無い場合はカメラだけ解除しておく
+			if (followCamera) {
+				followCamera->LockOn(nullptr);
+			}
+			return;
+		}
+
+		// キャラクターマネージャーから渡された最新の敵一覧をロックオン候補にする
+		lockOnSystem->SetTargets(targetCharacters);
+
+		const PlayerInputData inputData = inputSystem ? inputSystem->GetPlayerInputData() : PlayerInputData{};
+		const BaseCharacter* target = lockOnSystem->UpdateLockOn(inputData.lockOnHeld);
+
+		// フォローカメラへ対象のワールドトランスフォームを渡し、解除時はnullptrに戻す
+		if (followCamera) {
+			followCamera->LockOn(target ? target->GetConstWorldTransform() : nullptr);
+		}
 	}
 
 	void NormalPlayer::Draw2D() {
@@ -25482,6 +25545,9 @@ namespace Character {
 
 	private:
 		void InitAttack();
+
+		// ロックオン入力とカメラの対象を同期
+		void UpdateLockOn();
 
 		// 攻撃要求
 		bool RequestAttack(ActionInput input);
@@ -29761,6 +29827,12 @@ void InputManager::BuildGameplayActions(){
     pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f);
     released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f);
     value1_[Idx(Action::Dash)] = input_->GetGamePadLeftTrigger(); // アナログ値も欲しい場合
+
+    // ---- LockOn（RT 押している間）----
+    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f);
+    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f);
+    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f);
+    value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
 
    
     // ---- Pause（Esc or Start）----
