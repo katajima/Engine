@@ -2685,6 +2685,8 @@ namespace Combo {
 		std::string groundHit = "";
 		std::string airMiss = "";
 		std::string airHit = "";
+		std::string lockOn = "";
+		std::string noLockOn = "";
 	};
 
 	struct GlobalConnection {
@@ -2775,6 +2777,17 @@ namespace Combo {
 			return nullptr;
 		}
 
+		const bool isLockOn =
+			owner &&
+			owner->GetAttackController() &&
+			owner->GetAttackController()->GeyLockOnSysutem() &&
+			owner->GetAttackController()->GeyLockOnSysutem()->IsLockOn();
+		const std::weak_ptr<NodeState>& lockOnTarget = isLockOn ? it->second.lockOn : it->second.noLockOn;
+		if (auto next = lockOnTarget.lock()) {
+			// ロックオン用の分岐が設定されている場合は、地上/空中やヒット状態より優先する
+			return next;
+		}
+
 		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
 		const std::weak_ptr<NodeState>& conditionalTarget =
 			onGround ? (hasHit_ ? it->second.groundHit : it->second.groundMiss)
@@ -2800,6 +2813,12 @@ namespace Combo {
 		case TransitionCondition::AirHit:
 			targets.airHit = next;
 			break;
+		case TransitionCondition::LockOn:
+			targets.lockOn = next;
+			break;
+		case TransitionCondition::NoLockOn:
+			targets.noLockOn = next;
+			break;
 		default:
 			targets.defaultTarget = next;
 			break;
@@ -2809,7 +2828,8 @@ namespace Combo {
 	bool NodeState::HasNextState() const {
 		for (const auto& [input, targets] : nextStates) {
 			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
-				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired()) {
+				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
+				!targets.lockOn.expired() || !targets.noLockOn.expired()) {
 				return true;
 			}
 		}
@@ -2823,7 +2843,8 @@ namespace Combo {
 		}
 		const TransitionTargets& targets = it->second;
 		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
-			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired();
+			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
+			!targets.lockOn.expired() || !targets.noLockOn.expired();
 	}
 
 	// 更新
@@ -2988,6 +3009,8 @@ namespace Combo {
 		GroundHit,
 		AirMiss,
 		AirHit,
+		LockOn,
+		NoLockOn,
 	};
 
     /// <summary>
@@ -3121,6 +3144,8 @@ namespace Combo {
             std::weak_ptr<NodeState> groundHit;
             std::weak_ptr<NodeState> airMiss;
             std::weak_ptr<NodeState> airHit;
+            std::weak_ptr<NodeState> lockOn;
+            std::weak_ptr<NodeState> noLockOn;
         };
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;
@@ -3399,6 +3424,8 @@ namespace Combo {
 				renameTarget(targets.groundHit);
 				renameTarget(targets.airMiss);
 				renameTarget(targets.airHit);
+				renameTarget(targets.lockOn);
+				renameTarget(targets.noLockOn);
 			};
 			renameTarget(data.connection.lightAttack);
 			renameTarget(data.connection.heavyAttack);
@@ -3688,14 +3715,20 @@ namespace Combo {
 			globalVariables->AddItem(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
 			globalVariables->AddItem(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
 			globalVariables->AddItem(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->AddItem(name, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
+			globalVariables->AddItem(name, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
 			globalVariables->AddItem(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
 			globalVariables->AddItem(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
 			globalVariables->AddItem(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
 			globalVariables->AddItem(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->AddItem(name, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
+			globalVariables->AddItem(name, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
 			globalVariables->AddItem(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
 			globalVariables->AddItem(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
 			globalVariables->AddItem(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
 			globalVariables->AddItem(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
+			globalVariables->AddItem(name, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
+			globalVariables->AddItem(name, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
 		}
 		// 条件
 		{
@@ -3735,7 +3768,8 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
-			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->AddItem(name, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
+			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.lockOnRadius);
 			globalVariables->AddItem(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
 
 			globalVariables->AddEnumItem(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
@@ -3920,14 +3954,20 @@ namespace Combo {
 			data.connection.lightCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-地上-ヒット)");
 			data.connection.lightCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-未ヒット)");
 			data.connection.lightCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-ヒット)");
+			data.connection.lightCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオン中)");
+			data.connection.lightCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオンなし)");
 			data.connection.heavyCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-未ヒット)");
 			data.connection.heavyCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-ヒット)");
 			data.connection.heavyCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-未ヒット)");
 			data.connection.heavyCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-ヒット)");
+			data.connection.heavyCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオン中)");
+			data.connection.heavyCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオンなし)");
 			data.connection.skillCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-未ヒット)");
 			data.connection.skillCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-ヒット)");
 			data.connection.skillCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-未ヒット)");
 			data.connection.skillCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-ヒット)");
+			data.connection.skillCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオン中)");
+			data.connection.skillCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオンなし)");
 		}
 		// 条件
 		{
@@ -3967,7 +4007,8 @@ namespace Combo {
 			data.move.moveWindow.endTime = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
 			data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 			data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
-			data.move.lockOnData.radius = globalVariables->GetValue<float>(name, "ロックオン半径");
+			data.move.lockOnData.softLockRadius = globalVariables->GetValue<float>(name, "ソフトロックオン半径");
+			data.move.lockOnData.lockOnRadius = globalVariables->GetValue<float>(name, "ロックオン半径");
 			data.move.lockOnData.moveTargetRadius = globalVariables->GetValue<float>(name, "ロックオンターゲット接近半径");
 			data.move.lockOnData.type = globalVariables->GetEnumValue<LockOnType>(name, "ロックオンタイプ");
 			data.move.lockOnData.targetMoveType = globalVariables->GetEnumValue<TargetMoveType>(name, "ターゲット移動タイプ");
@@ -4146,14 +4187,20 @@ namespace Combo {
 			globalVariables->SetValue(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
 			globalVariables->SetValue(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
 			globalVariables->SetValue(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			globalVariables->SetValue(name, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
+			globalVariables->SetValue(name, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
 			globalVariables->SetValue(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
 			globalVariables->SetValue(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
 			globalVariables->SetValue(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
 			globalVariables->SetValue(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			globalVariables->SetValue(name, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
+			globalVariables->SetValue(name, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
 			globalVariables->SetValue(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
 			globalVariables->SetValue(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
 			globalVariables->SetValue(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
 			globalVariables->SetValue(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
+			globalVariables->SetValue(name, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
+			globalVariables->SetValue(name, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
 		}
 		// 条件
 		{
@@ -4195,7 +4242,8 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
-			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->SetValue(name, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
+			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.lockOnRadius);
 			globalVariables->SetValue(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
 
 			globalVariables->SetEnumValue(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
@@ -4373,6 +4421,12 @@ namespace Combo {
 	void System::ConnectSavedCombos() {
 		for (const auto& [nodeName, data] : comboGlobalDatas_) {
 			auto connectConditional = [&](ActionInput input, const GlobalConditionalConnection& targets) {
+				if (!targets.lockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.lockOn, TransitionCondition::LockOn);
+				}
+				if (!targets.noLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.noLockOn, TransitionCondition::NoLockOn);
+				}
 				if (!targets.groundMiss.empty()) {
 					ConnectCombo(nodeName, input, targets.groundMiss, TransitionCondition::GroundMiss);
 				}
@@ -4731,8 +4785,10 @@ namespace Combo {
 			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ data.GetComboMotion().GetComboMove().GetTargetPosition(),3 }, { 0,1,1,1 }, 8, 8);
 
 
-			// ロックオン半径
-			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.radius }, { 0,1,0,1 }, 8, 8);
+			// ソフトロックオン半径
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.softLockRadius }, { 0,1,0,1 }, 8, 8);
+			// 手動ロックオン半径
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.lockOnRadius }, { 1,1,0,1 }, 8, 8);
 
 
 			// 方向
@@ -4745,6 +4801,7 @@ namespace Combo {
 
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h
@@ -5156,6 +5213,10 @@ namespace Combo {
 					drawConnectionCombo("空中 / 未ヒット", targets.airMiss);
 					ImGui::SetNextItemWidth(260.0f);
 					drawConnectionCombo("空中 / ヒット", targets.airHit);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("ロックオン中", targets.lockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("ロックオンなし", targets.noLockOn);
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
@@ -5382,6 +5443,8 @@ namespace Combo {
 				clearTarget(targets.groundHit);
 				clearTarget(targets.airMiss);
 				clearTarget(targets.airHit);
+				clearTarget(targets.lockOn);
+				clearTarget(targets.noLockOn);
 			};
 			clearTarget(data.connection.lightAttack);
 			clearTarget(data.connection.heavyAttack);
@@ -6112,7 +6175,8 @@ namespace Combo {
 				"近い相手",
 				};
 				Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.move.lockOnData.type);
-				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.softLockRadius, 0.0f, 100.0f);
+				ImGui::SliderFloat("手動ロックオン半径", &data_.move.lockOnData.lockOnRadius, 0.0f, 100.0f);
 				static const char* TargetMoveTypeLabels[] = {
 				"なし",
 				"移動",
@@ -6240,6 +6304,8 @@ namespace Combo {
 					drawConnection("地上 / ヒット", conditionalTargets.groundHit);
 					drawConnection("空中 / 未ヒット", conditionalTargets.airMiss);
 					drawConnection("空中 / ヒット", conditionalTargets.airHit);
+					drawConnection("ロックオン中", conditionalTargets.lockOn);
+					drawConnection("ロックオンなし", conditionalTargets.noLockOn);
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
@@ -10876,8 +10942,10 @@ enum class TargetMoveType {
 
 // ロックオンデータ
 struct LockOnData {
-	// 半径察知
-	float radius = 7.0f;
+	// 攻撃や移動で一時的にターゲットを選ぶソフトロック半径
+	float softLockRadius = 7.0f;
+	// RTなどで保持する手動ロックオン半径
+	float lockOnRadius = 30.0f;
 	// ロックオン	
 	LockOnType type = LockOnType::kNear;
 	// ターゲットの距離でどこまで近づくか
@@ -10910,9 +10978,9 @@ const Character::BaseCharacter* LockOnSystem::UpdateLockOn(bool isLockOnRequest)
 		return nullptr;
 	}
 
-	if (!IsValidTarget(currentTarget_)) {
+	if (!IsValidTarget(currentTarget_, data_.lockOnRadius)) {
 		// 現在の対象が無効なら、カメラ前方に近い相手を探し直す
-		currentTarget_ = SoftLockOn();
+		currentTarget_ = GetNearLockOn(data_.lockOnRadius);
 	}
 
 	isLockOn_ = currentTarget_ != nullptr;
@@ -10955,7 +11023,7 @@ Vector3 LockOnSystem::GetOwnerPos() const {
 	return owner->GetWorldPosition();
 }
 
-bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
+bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target, float radius) const {
 	if (!owner || !target) {
 		// 所有者か対象が無ければロックオンを維持できない
 		return false;
@@ -10967,7 +11035,7 @@ bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
 		return false;
 	}
 
-	if (data_.radius < target->GetWorldPosition().Distance(GetOwnerPos())) {
+	if (radius < target->GetWorldPosition().Distance(GetOwnerPos())) {
 		// 設定半径の外へ出た相手は解除する
 		return false;
 	}
@@ -10977,6 +11045,10 @@ bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
 }
 
 const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
+	return GetNearLockOn(data_.softLockRadius);
+}
+
+const Character::BaseCharacter* LockOnSystem::GetNearLockOn(float radius) const {
 	if (targetCharacters.empty())
 	{
 		return nullptr;
@@ -10999,7 +11071,7 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 	float bestScore = (std::numeric_limits<float>::max)();
 
 	for (const Character::BaseCharacter* target : targetCharacters) {
-		if (!IsValidTarget(target)) {
+		if (!IsValidTarget(target, radius)) {
 			// 無効な候補はスコア計算に含めない
 			continue;
 		}
@@ -11026,7 +11098,7 @@ const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
 		// 最後にヒットしたタグ番号と一致し、現在も有効な敵を優先する
 		if (target->GetTagNumber() == hitTag && target->GetAlive() && !target->GetDelete() &&
 			target->GetCurrentMainState() != Character::CharacterMainState::Die) {
-			if (data_.radius >= target->GetWorldPosition().Distance(ownerPos)) {
+			if (data_.softLockRadius >= target->GetWorldPosition().Distance(ownerPos)) {
 				return target;
 			}
 		}
@@ -11118,9 +11190,11 @@ public:
 
 private:
 	// ロックオン対象として有効か確認
-	bool IsValidTarget(const Character::BaseCharacter* target) const;
+	bool IsValidTarget(const Character::BaseCharacter* target, float radius) const;
 	// 範囲内の近くの相手を取得
 	const Character::BaseCharacter* GetNearLockOn() const;
+	// 指定半径内の近くの相手を取得
+	const Character::BaseCharacter* GetNearLockOn(float radius) const;
 	// 最後に当てた相手を取得
 	const Character::BaseCharacter* GetHitLockOn() const;
 
