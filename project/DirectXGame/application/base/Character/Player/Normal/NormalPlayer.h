@@ -74,6 +74,9 @@ namespace Character {
 	private:
 		void InitAttack();
 
+		// ロックオン入力とカメラの対象を同期
+		void UpdateLockOn();
+
 		// 攻撃要求
 		bool RequestAttack(ActionInput input);
 

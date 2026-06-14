@@ -1,11 +1,30 @@
 #include "LockOnSystem.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include <algorithm>
+#include <limits>
 
 void LockOnSystem::Initialize(Character::BaseCharacter* owner) {
 	// ロックオンを行う攻撃者と、その視線基準になるカメラ管理を保持する
 	this->owner = owner;
 	cameraManager = owner->GetCameraManager();
+}
+
+const Character::BaseCharacter* LockOnSystem::UpdateLockOn(bool isLockOnRequest) {
+	if (!isLockOnRequest) {
+		// 入力が無い時は保持中のターゲットを解除する
+		isLockOn_ = false;
+		currentTarget_ = nullptr;
+		return nullptr;
+	}
+
+	if (!IsValidTarget(currentTarget_)) {
+		// 現在の対象が無効なら、カメラ前方に近い相手を探し直す
+		currentTarget_ = SoftLockOn();
+	}
+
+	isLockOn_ = currentTarget_ != nullptr;
+	return currentTarget_;
 }
 
 const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
@@ -44,6 +63,26 @@ Vector3 LockOnSystem::GetOwnerPos() const {
 	return owner->GetWorldPosition();
 }
 
+bool LockOnSystem::IsValidTarget(const Character::BaseCharacter* target) const {
+	if (!owner || !target) {
+		// 所有者か対象が無ければロックオンを維持できない
+		return false;
+	}
+
+	if (!target->GetAlive() || target->GetDelete() ||
+		target->GetCurrentMainState() == Character::CharacterMainState::Die) {
+		// 死亡・削除済みの相手はロックオン対象から外す
+		return false;
+	}
+
+	if (data_.radius < target->GetWorldPosition().Distance(GetOwnerPos())) {
+		// 設定半径の外へ出た相手は解除する
+		return false;
+	}
+
+	// 現在の候補リストに残っている相手だけを有効にする
+	return std::find(targetCharacters.begin(), targetCharacters.end(), target) != targetCharacters.end();
+}
 
 const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 	if (targetCharacters.empty())
@@ -64,40 +103,24 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 	}
 	aimDir = aimDir.Normalize();
 
-	// 角度と距離のスコアが最も小さい有効な敵を探す
-	auto it = std::min_element(
-		targetCharacters.begin(),
-		targetCharacters.end(),
-		[&](const Character::BaseCharacter* a, const Character::BaseCharacter* b)
-		{
-			if (!a || !b) return false;
+	const Character::BaseCharacter* bestTarget = nullptr;
+	float bestScore = (std::numeric_limits<float>::max)();
 
-			bool is = a->GetAlive() && a->GetCurrentMainState() != Character::CharacterMainState::Die;
-			bool is2 = b->GetAlive() && b->GetCurrentMainState() != Character::CharacterMainState::Die;
-			if (is && is2) {
-				float scoreA = CalcSoftLockScore(ownerPos, aimDir, a);
-				float scoreB = CalcSoftLockScore(ownerPos, aimDir, b);
-
-				return scoreA < scoreB;
-			}
-			else {
-				return false;
-			}
+	for (const Character::BaseCharacter* target : targetCharacters) {
+		if (!IsValidTarget(target)) {
+			// 無効な候補はスコア計算に含めない
+			continue;
 		}
-	);
 
-	if (it == targetCharacters.end())
-	{
-		return nullptr;
+		const float score = CalcSoftLockScore(ownerPos, aimDir, target);
+		if (score < bestScore) {
+			// 角度と距離のスコアが一番小さい相手を採用する
+			bestScore = score;
+			bestTarget = target;
+		}
 	}
 
-	const Character::BaseCharacter* bestTarget = *it;
-	if (bestTarget && data_.radius >= bestTarget->GetWorldPosition().Distance(ownerPos)) {
-		// 半径内かつ生存中の敵だけをロックオン対象として返す
-		if (bestTarget->GetAlive() && !bestTarget->GetDelete())
-			return bestTarget;
-	}
-	return nullptr;
+	return bestTarget;
 }
 
 const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
@@ -131,7 +154,7 @@ float LockOnSystem::CalcSoftLockScore(
 	toEnemy.y = 0.0f;
 
 	float distSq = toEnemy.LengthSq();
-	if (distSq < 1e-6f) return FLT_MAX;
+	if (distSq < 1e-6f) return (std::numeric_limits<float>::max)();
 
 	// 方向ベクトルに正規化して、カメラ前方との角度を計算する
 	Vector3 dir = toEnemy / std::sqrt(distSq);

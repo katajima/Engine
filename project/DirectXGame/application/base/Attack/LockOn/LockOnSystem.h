@@ -19,10 +19,17 @@ public:
 	// 初期化
 	void Initialize(Character::BaseCharacter* owner);
 
+	// 入力状態に合わせてロックオン対象を更新
+	const Character::BaseCharacter* UpdateLockOn(bool isLockOnRequest);
+
 	// ロックオン相手を選別
 	const Character::BaseCharacter* SoftLockOn() const;
 	// ターゲット取得
 	const Character::BaseCharacter* GetTarget() const;
+	// 現在ロックオン中のターゲット取得
+	const Character::BaseCharacter* GetLockOnTarget() const { return currentTarget_; }
+	// ロックオン中か取得
+	bool IsLockOn() const { return isLockOn_; }
 public:
 
 	// ターゲット指定
@@ -41,6 +48,8 @@ public:
 	void ClearTag() { hitTag = -1; }
 
 private:
+	// ロックオン対象として有効か確認
+	bool IsValidTarget(const Character::BaseCharacter* target) const;
 	// 範囲内の近くの相手を取得
 	const Character::BaseCharacter* GetNearLockOn() const;
 	// 最後に当てた相手を取得
@@ -60,8 +69,10 @@ private:
 private:
 	// ロックオンデータ
 	LockOnData data_;
-	//
+	// 現在ロックオン中か
 	bool isLockOn_ = false;
+	// 現在ロックオンしている相手
+	const Character::BaseCharacter* currentTarget_ = nullptr;
 	// 当てた相手
 	uint32_t hitTag = -1;
 };

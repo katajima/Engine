@@ -123,6 +123,12 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f);
     value1_[Idx(Action::Dash)] = input_->GetGamePadLeftTrigger(); // アナログ値も欲しい場合
 
+    // ---- LockOn（RT 押している間）----
+    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f);
+    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f);
+    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f);
+    value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
+
    
     // ---- Pause（Esc or Start）----
     triggered_[Idx(Action::Pause)] =

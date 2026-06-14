@@ -198,6 +198,9 @@ namespace Character {
 		UpdateBaseGetValue(); //保存機能 基本値の更新
 		ApplyGlobalVariables();
 
+		// ロックオン対象を先に更新し、以降のカメラ更新で同じ対象を使う
+		UpdateLockOn();
+
 		// 回避成功後コンボの受付時間を毎フレーム減らす
 		if (dodgeSuccessComboTimer_ > 0.0f) {
 			dodgeSuccessComboTimer_ -= GetTime();
@@ -239,7 +242,6 @@ namespace Character {
 		// 必殺技
 		special_->Update();
 
-		attackController_->GeyLockOnSysutem()->SetTargets(targetCharacters);
 		// 攻撃制御更新
 		attackController_->Update(ctx);
 		// 応答システム
@@ -284,6 +286,33 @@ namespace Character {
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 		ui_->Update(GetTime());
 
+	}
+
+	void NormalPlayer::UpdateLockOn() {
+		if (!attackController_) {
+			// 攻撃制御が未生成ならロックオンシステムも使えない
+			return;
+		}
+
+		LockOnSystem* lockOnSystem = attackController_->GeyLockOnSysutem();
+		if (!lockOnSystem) {
+			// ロックオンシステムが無い場合はカメラだけ解除しておく
+			if (followCamera) {
+				followCamera->LockOn(nullptr);
+			}
+			return;
+		}
+
+		// キャラクターマネージャーから渡された最新の敵一覧をロックオン候補にする
+		lockOnSystem->SetTargets(targetCharacters);
+
+		const PlayerInputData inputData = inputSystem ? inputSystem->GetPlayerInputData() : PlayerInputData{};
+		const BaseCharacter* target = lockOnSystem->UpdateLockOn(inputData.lockOnHeld);
+
+		// フォローカメラへ対象のワールドトランスフォームを渡し、解除時はnullptrに戻す
+		if (followCamera) {
+			followCamera->LockOn(target ? target->GetConstWorldTransform() : nullptr);
+		}
 	}
 
 	void NormalPlayer::Draw2D() {
