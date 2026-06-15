@@ -1,23 +1,5 @@
-#pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
-
-
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
+﻿#pragma once
+#include "BaseStage.h"
 
 // 前方宣言
 namespace Engine {
@@ -30,11 +12,47 @@ class EffectSystem;
 /// <summary>
 /// チュートリアル用ステージ
 /// </summary>
-class TutorialStage {
+class TutorialStage : public BaseStage {
 public:
+	// 初期化
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
+	// 更新
+	void Update(float dt) override;
 
+	///< summary>
+	/// 描画
+	///</summary>
+	void Draw() override {};
 
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
+	void DrawEffect() override {};
+
+	/// <summary>
+	/// 描画2d
+	/// </summary>
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
+
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
+	/// <summary>
+	/// エフェクト
+	/// </summary>
+	/// <param name="effect"></param>
+	void SetEffect(EffectSystem* effect) {
+		this->effect = effect;
+	}
 private:
 
 };

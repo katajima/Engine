@@ -1,10 +1,38 @@
-#pragma once
+﻿#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/Utility/TimerUtility.h"
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
+// application
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/StageCamera.h"
+
+#include"DirectXGame/application/base/Stage/MainStage.h"
+#include"DirectXGame/application/base/UI/GameUI.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include"DirectXGame/application/base/Effect/Effect.h"
+
+
+#include "DirectXGame/application/base/Input/InputHander.h"
+#include <DirectXGame/application/base/Input/InputManager.h>
+#include "DirectXGame/application/base/Input/InputSystem.h"
+
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+#include "DirectXGame/application/base/Stage/StageColliderSystem.h"
+
+#include <DirectXGame/application/base/Game/Tutorial/TutorialSystem.h>
+#include <DirectXGame/application/base/Stage/TutorialStage.h>
+#include <DirectXGame/application/base/UI/TutorialUI.h>
+
+#include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
+#include <DirectXGame/application/base/UI/PoseUI.h>
 
 class TutorialScene : public Engine::BaseScene {
 public:
@@ -24,7 +52,59 @@ public:
 	void Draw2D() override;
 
 private:
+	// ImGui更新
+	void UpdateImGui();
 
+	// グローバルバリアブル適応
+	void ApplyGlobalVariables();
 
+	/// <summary>
+	/// 衝突判定と応答
+	/// </summary>
+	void CheckAllCollisions();
+private:
+	Engine::Input* input = nullptr;
+	Engine::Audio* audio = nullptr;
+	// インプットハンドラ
+	std::unique_ptr < Character::InputHander> inputHander_;
+	Character::ICommand* iCommand_;
+
+	// インプットマネージャ
+	std::unique_ptr<InputManager> inputManager_;
+
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_;
+
+	//追従カメラ
+	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
+
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
+	// スペシャルポイント管理クラス
+	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
+	
+	// キャラクター管理
+	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
+	// 弾
+	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
+	// ヒットボックスシステム
+	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
+
+private:
+	// 衝突マネージャ
+	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
+private:
+	// チュートリアルステージ
+	std::unique_ptr<TutorialStage> tutorialStage_;
+	// チュートリアルシステム
+	std::unique_ptr<TutorialSystem> tutorialSystem_;
+	// チュートリアルUI
+	std::unique_ptr<TutorialUI> tutorialUI_;
+	// ポーズシステム
+	std::unique_ptr<PoseSystem> poseSystem_;
+	// ポーズUI
+	std::unique_ptr<PoseUI> poseUI_;
 
 };

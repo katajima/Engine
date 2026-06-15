@@ -38,10 +38,10 @@ void SelectSystem::Update(float dt) {
 			sceneManager->ChangeScene("GAMEPLAY");
 		}
 		else if (selectedIndex == 1) {
-			sceneManager->ChangeScene("CUSTOM");
+			sceneManager->ChangeScene("TUTORIAL");
 		}
 		else if (selectedIndex == 2) {
-			//	sceneManager->ChangeScene("OPERATION");
+			sceneManager->ChangeScene("CUSTOM");
 		}
 		else if (selectedIndex == 3) {
 			sceneManager->ChangeScene("TITLE");

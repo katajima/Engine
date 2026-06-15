@@ -28,6 +28,9 @@
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
 
+#include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
+#include <DirectXGame/application/base/UI/PoseUI.h>
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
@@ -78,6 +81,11 @@ private:
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
+
+	// ポーズシステム
+	std::unique_ptr<PoseSystem> poseSystem_;
+	// ポーズUI
+	std::unique_ptr<PoseUI> poseUI_;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_ = nullptr;

@@ -140,6 +140,12 @@ void GamePlayScene::Initialize() {
 	gameUI = std::make_unique<GameUI>();
 	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 	
+	poseSystem_ = std::make_unique<PoseSystem>();
+	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
+	poseUI_ = std::make_unique<PoseUI>();
+	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -249,6 +255,11 @@ void GamePlayScene::Update()
 	gameUI->SetPlayer(characterManager_->GetPlayer());
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
+	// ポーズシステム更新
+	poseSystem_->Update(GetTime());
+	// ポーズUI更新
+	poseUI_->Update(GetTime());
+
 	// カメラ管理の更新
 	cameraManager_->Update();
 }
@@ -275,6 +286,8 @@ void GamePlayScene::Draw2D(){
 	bulletManager_->Draw2D();
 	// ゲーム進行UI
 	gameFlowController_->Draw2D();
+	// ポーズUI
+	poseUI_->Draw();
 }
 
 // 調整項目
