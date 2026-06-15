@@ -331,12 +331,20 @@
     └── └── └── └── ├── GameEventController.h
     └── └── └── └── ├── GameFlowController.cpp
     └── └── └── └── ├── GameFlowController.h
+    └── └── └── └── ├── Pose/
+    └── └── └── └── └── ├── PoseSystem.cpp
+    └── └── └── └── └── └── PoseSystem.h
     └── └── └── └── ├── Result/
     └── └── └── └── └── ├── ResultSystem.cpp
     └── └── └── └── └── └── ResultSystem.h
-    └── └── └── └── └── Select/
-    └── └── └── └──     ├── SelectSystem.cpp
-    └── └── └── └──     └── SelectSystem.h
+    └── └── └── └── ├── Select/
+    └── └── └── └── └── ├── SelectSystem.cpp
+    └── └── └── └── └── └── SelectSystem.h
+    └── └── └── └── └── Tutorial/
+    └── └── └── └──     ├── TutorialStep.cpp
+    └── └── └── └──     ├── TutorialStep.h
+    └── └── └── └──     ├── TutorialSystem.cpp
+    └── └── └── └──     └── TutorialSystem.h
     └── └── └── ├── Input/
     └── └── └── └── ├── InputData.h
     └── └── └── └── ├── InputHander.cpp
@@ -391,6 +399,7 @@
     └── └── └── └── ├── StageColliderSystem.h
     └── └── └── └── ├── TitleStage.cpp
     └── └── └── └── ├── TitleStage.h
+    └── └── └── └── ├── TutorialStage.cpp
     └── └── └── └── └── TutorialStage.h
     └── └── └── ├── UI/
     └── └── └── └── ├── Base/
@@ -406,6 +415,8 @@
     └── └── └── └── ├── GameUI.h
     └── └── └── └── ├── PlayerUI.cpp
     └── └── └── └── ├── PlayerUI.h
+    └── └── └── └── ├── PoseUI.cpp
+    └── └── └── └── ├── PoseUI.h
     └── └── └── └── ├── ResultScoreUI.cpp
     └── └── └── └── ├── ResultScoreUI.h
     └── └── └── └── ├── ResultUI.cpp
@@ -413,7 +424,9 @@
     └── └── └── └── ├── SelectUI.cpp
     └── └── └── └── ├── SelectUI.h
     └── └── └── └── ├── TitleUI.cpp
-    └── └── └── └── └── TitleUI.h
+    └── └── └── └── ├── TitleUI.h
+    └── └── └── └── ├── TutorialUI.cpp
+    └── └── └── └── └── TutorialUI.h
     └── └── └── └── Weapon/
     └── └── └──     ├── Base/
     └── └── └──     └── ├── BaseWeapon.cpp
@@ -29344,6 +29357,65 @@ private: // 貰いもの
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Game/Pose/PoseSystem.cpp
+============================================================
+﻿#include "PoseSystem.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/engine/scene/SceneManager.h"
+
+// 初期化
+void PoseSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables) {
+    this->sceneManager = sceneManager;
+    this->input = input;
+    this->entityManager = entityManager;
+    this->globalVariables = globalVariables;
+
+}
+
+// 更新
+void PoseSystem::Update(float dt) {
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Pose/PoseSystem.h
+============================================================
+﻿#pragma once
+
+namespace Engine {
+	class DirectXCommon;
+	class EntityManager;
+	class GlobalVariables;
+	class SceneManager;
+}
+
+namespace Character {
+	class BaseCharacter;
+	struct CharacterContext;
+}
+class InputSystem;
+
+class PoseSystem {
+public:
+	PoseSystem() {}
+	~PoseSystem() {}
+	// 初期化
+	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables);
+	// 更新
+	void Update(float dt);
+
+private:
+	Engine::EntityManager* entityManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
+	Engine::SceneManager* sceneManager = nullptr;
+	InputSystem* input = nullptr;
+};
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.cpp
 ============================================================
 #include "ResultSystem.h"
@@ -29501,10 +29573,10 @@ void SelectSystem::Update(float dt) {
 			sceneManager->ChangeScene("GAMEPLAY");
 		}
 		else if (selectedIndex == 1) {
-			sceneManager->ChangeScene("CUSTOM");
+			sceneManager->ChangeScene("TUTORIAL");
 		}
 		else if (selectedIndex == 2) {
-			//	sceneManager->ChangeScene("OPERATION");
+			sceneManager->ChangeScene("CUSTOM");
 		}
 		else if (selectedIndex == 3) {
 			sceneManager->ChangeScene("TITLE");
@@ -29579,6 +29651,451 @@ private:
 	Engine::SceneManager* sceneManager = nullptr;
 	InputSystem* input = nullptr;
 };
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialStep.cpp
+============================================================
+﻿#include "TutorialStep.h"
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+
+// 移動チュートリアルの更新
+void TutorialMoveStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+
+// 更新
+void TutorialCameraStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialJumpStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialDodgeStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialAttackStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialComboStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialSkillStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialSpecialStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialEnemyDefeatedStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+
+// 更新
+void TutorialLockOnStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+// 更新
+void TutorialOpenMenuStep::Update(float dt, Character::BaseCharacter* character) {
+
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialStep.h
+============================================================
+﻿#pragma once
+
+namespace Engine {
+	class DirectXCommon;
+	class EntityManager;
+	class GlobalVariables;
+	class SceneManager;
+}
+
+namespace Character {
+	class BaseCharacter;
+	struct CharacterContext;
+}
+
+// イベントタイプ
+enum class TutorialEventType {
+    Move,   // 移動
+	Camera, // カメラ操作
+    Jump,   // ジャンプ
+    Dodge,  // 回避
+    Attack, // 攻撃
+    Combo,  // コンボ
+    Skill,  // スキル
+    Special, // 特殊技
+    EnemyDefeated,  // 敵撃破
+    LockOn,         // ロックオン
+	OpenMenu,       // メニューを開いた
+};
+
+/// <summary>
+/// イベントデータ
+/// </summary>
+struct TutorialEvent {
+    TutorialEventType type;
+
+    int value = 1;     // 敵撃破数など
+};
+
+/// <summary>
+/// チュートリアルにイベント基底クラス
+/// </summary>
+class TutorialStep {
+public:
+
+    virtual ~TutorialStep() = default;
+
+    virtual void Enter() {}
+
+    virtual void Update(float dt ,Character::BaseCharacter* character) {}
+
+    virtual void Exit() {}
+
+    virtual void OnEvent(const TutorialEvent& event) {}
+
+    virtual bool IsCompleted() const = 0;
+protected:
+    bool completed_ = false;
+};
+
+// 移動チュートリアル
+class TutorialMoveStep : public TutorialStep {
+public:
+    void Enter() override {
+        completed_ = false;
+    }
+
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+    void OnEvent(const TutorialEvent& event) override {
+        if (event.type == TutorialEventType::Move) {
+            completed_ = true;
+        }
+    }
+
+    bool IsCompleted() const override {
+        return completed_;
+    }
+};
+
+// カメラ操作チュートリアル
+class TutorialCameraStep : public TutorialStep {
+public:
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::Camera) {
+			completed_ = true;
+		}
+	}
+	bool IsCompleted() const override {
+		return completed_;
+	}
+};
+
+// ジャンプチュートリアル
+class TutorialJumpStep : public TutorialStep {
+public:
+    void Enter() override {
+        completed_ = false;
+    }
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+    void OnEvent(const TutorialEvent& event) override {
+        if (event.type == TutorialEventType::Jump) {
+            completed_ = true;
+        }
+    }
+    bool IsCompleted() const override {
+        return completed_;
+    }
+};
+
+// 回避
+class TutorialDodgeStep : public TutorialStep {
+public:
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::Dodge) {
+			completed_ = true;
+		}
+	}
+	bool IsCompleted() const override {
+		return completed_;
+	}
+};
+
+
+// 攻撃
+class TutorialAttackStep : public TutorialStep {
+public:
+
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::Attack) {
+			completed_ = true;
+		}
+	}
+	bool IsCompleted() const override {
+		return completed_;
+	}
+};
+
+// コンボ
+class TutorialComboStep : public TutorialStep {
+public:
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::Combo) {
+			completed_ = true;
+		}
+	}
+	bool IsCompleted() const override {
+		return completed_;
+	}
+};
+
+// スキル
+class TutorialSkillStep : public TutorialStep {
+public:
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::Skill) {
+			completed_ = true;
+		}
+	}
+	bool IsCompleted() const override {
+		return completed_;
+	}
+
+};
+
+// 特殊技
+class TutorialSpecialStep : public TutorialStep {
+public:
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::Special) {
+			completed_ = true;
+		}
+	}
+
+	bool IsCompleted() const override {
+		return completed_;
+	}
+
+private:
+
+};
+
+// 敵撃破
+class TutorialEnemyDefeatedStep : public TutorialStep {
+public:
+
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::EnemyDefeated && event.value >= 5) {
+			completed_ = true;
+		}
+	}
+	bool IsCompleted() const override {
+		return completed_;
+	}
+
+};
+
+// ロックオン
+class TutorialLockOnStep : public TutorialStep {
+public:
+
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::LockOn) {
+			completed_ = true;
+		}
+	}
+
+	bool IsCompleted() const override {
+		return completed_;
+	}
+};
+
+// メニューを開く
+class TutorialOpenMenuStep : public TutorialStep {
+
+	void Enter() override {
+		completed_ = false;
+	}
+	// 更新
+	void Update(float dt, Character::BaseCharacter* character) override;
+
+	void OnEvent(const TutorialEvent& event) override {
+		if (event.type == TutorialEventType::OpenMenu) {
+			completed_ = true;
+		}
+	}
+
+	void Exit() override {
+		// メニューを閉じるなどのクリーンアップ処理が必要な場合はここで行います
+	}
+
+	bool IsCompleted() const override {
+		return completed_;
+	}
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialSystem.cpp
+============================================================
+﻿#include "TutorialSystem.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/engine/scene/SceneManager.h"
+
+void TutorialSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager, 
+    Engine::GlobalVariables* globalVariables, Character::BaseCharacter* character) {
+    this->sceneManager = sceneManager;
+    this->input = input;
+    this->entityManager = entityManager;
+    this->globalVariables = globalVariables;
+    this->character = character;
+
+
+}
+
+void TutorialSystem::Update(float dt){
+    if (currentStep_ >= steps_.size()) {
+        return;
+    }
+
+    steps_[currentStep_]->Update(dt, character);
+
+    if (steps_[currentStep_]->IsCompleted()) {
+
+        steps_[currentStep_]->Exit();
+
+        currentStep_++;
+
+        if (currentStep_ < steps_.size()) {
+            steps_[currentStep_]->Enter();
+        }
+    }
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialSystem.h
+============================================================
+﻿#pragma once
+#include <list>
+// engine
+#include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/2d/Sprite.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
+#include"DirectXGame/engine/input/Input.h"
+#include"DirectXGame/engine/effect/Ocean/Ocean.h"
+#include<DirectXGame/engine/Effect/EffectComponent.h>
+#include "DirectXGame/application/base/Light/BaseLights.h"
+
+#include "TutorialStep.h"
+
+// 前方宣言
+namespace Engine {
+    class DirectXCommon;
+    class EntityManager;
+    class GlobalVariables;
+    class SceneManager;
+}
+
+namespace Character {
+	class BaseCharacter;
+}
+
+class EffectSystem;
+class InputSystem;
+
+
+class TutorialSystem {
+public:
+    TutorialSystem() {}
+    ~TutorialSystem() {}
+
+	// 初期化
+    void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
+        Engine::GlobalVariables* globalVariables, Character::BaseCharacter* character);
+    
+    // 更新
+    void Update(float dt);
+
+	// イベント送信
+    void SendEvent(const TutorialEvent& event);
+
+
+private:
+    std::vector<std::unique_ptr<TutorialStep>> steps_;
+
+    uint32_t currentStep_ = 0;
+private:
+    Engine::EntityManager* entityManager = nullptr;
+    Engine::GlobalVariables* globalVariables = nullptr;
+    Engine::SceneManager* sceneManager = nullptr;
+    Character::BaseCharacter* character = nullptr;
+    InputSystem* input = nullptr;
+};
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputData.h
@@ -32867,28 +33384,31 @@ private:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Stage/TutorialStage.cpp
+============================================================
+﻿#include "TutorialStage.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/engine/3d/Object/Object3d.h"
+
+// 初期化
+void TutorialStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+	this->entityManager = entityManager;
+	this->cameraManager = cameraManager;
+}
+
+// 更新
+void TutorialStage::Update(float dt) {
+
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Stage/TutorialStage.h
 ============================================================
-#pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
-
-
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
+﻿#pragma once
+#include "BaseStage.h"
 
 // 前方宣言
 namespace Engine {
@@ -32901,14 +33421,51 @@ class EffectSystem;
 /// <summary>
 /// チュートリアル用ステージ
 /// </summary>
-class TutorialStage {
+class TutorialStage : public BaseStage {
 public:
+	// 初期化
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
+	// 更新
+	void Update(float dt) override;
 
+	///< summary>
+	/// 描画
+	///</summary>
+	void Draw() override {};
 
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
+	void DrawEffect() override {};
+
+	/// <summary>
+	/// 描画2d
+	/// </summary>
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
+
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
+	/// <summary>
+	/// エフェクト
+	/// </summary>
+	/// <param name="effect"></param>
+	void SetEffect(EffectSystem* effect) {
+		this->effect = effect;
+	}
 private:
 
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/UI/Base/BaseUI.cpp
@@ -34020,6 +34577,63 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/UI/PoseUI.cpp
+============================================================
+﻿#include "PoseUI.h"
+
+
+//初期化
+void PoseUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
+
+}
+
+//更新
+void PoseUI::Update(float dt) {
+
+}
+
+// 描画
+void PoseUI::Draw() {
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/PoseUI.h
+============================================================
+﻿#pragma once
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
+
+// 前方宣言
+namespace Character {
+	class BasePlayer;
+}
+
+/// <summary>
+/// ポーズUI
+/// </summary>
+class PoseUI : public BaseUI {
+public:
+
+	//初期化
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
+
+	//更新
+	void Update(float dt) override;
+
+	// 描画
+	void Draw() override;
+
+private:
+
+private:
+
+};
+
+
+
+============================================================
 File Path: project/DirectXGame/application/base/UI/ResultScoreUI.cpp
 ============================================================
 #include "ResultScoreUI.h"
@@ -34565,6 +35179,62 @@ private:
 private:
 	// 
 	bool isAction_ = false;
+
+};
+
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/TutorialUI.cpp
+============================================================
+﻿#include "TutorialUI.h"
+
+//初期化
+void TutorialUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
+
+}
+
+//更新
+void TutorialUI::Update(float dt) {
+
+}
+
+// 描画
+void TutorialUI::Draw() {
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/TutorialUI.h
+============================================================
+﻿#pragma once
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
+
+// 前方宣言
+namespace Character {
+	class BasePlayer;
+}
+
+/// <summary>
+/// チュートリアルUI
+/// </summary>
+class TutorialUI : public BaseUI {
+public:
+
+	//初期化
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
+
+	//更新
+	void Update(float dt) override;
+
+	// 描画
+	void Draw() override;
+
+private:
+
+private:
 
 };
 
@@ -36697,6 +37367,12 @@ void GamePlayScene::Initialize() {
 	gameUI = std::make_unique<GameUI>();
 	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 	
+	poseSystem_ = std::make_unique<PoseSystem>();
+	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
+	poseUI_ = std::make_unique<PoseUI>();
+	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -36806,6 +37482,11 @@ void GamePlayScene::Update()
 	gameUI->SetPlayer(characterManager_->GetPlayer());
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
+	// ポーズシステム更新
+	poseSystem_->Update(GetTime());
+	// ポーズUI更新
+	poseUI_->Update(GetTime());
+
 	// カメラ管理の更新
 	cameraManager_->Update();
 }
@@ -36832,6 +37513,8 @@ void GamePlayScene::Draw2D(){
 	bulletManager_->Draw2D();
 	// ゲーム進行UI
 	gameFlowController_->Draw2D();
+	// ポーズUI
+	poseUI_->Draw();
 }
 
 // 調整項目
@@ -36912,6 +37595,9 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
 
+#include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
+#include <DirectXGame/application/base/UI/PoseUI.h>
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
@@ -36962,6 +37648,11 @@ private:
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
+
+	// ポーズシステム
+	std::unique_ptr<PoseSystem> poseSystem_;
+	// ポーズUI
+	std::unique_ptr<PoseUI> poseUI_;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
@@ -38730,39 +39421,306 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/TutorialScene.cpp
 ============================================================
-#include "TutorialScene.h"
+﻿#include "TutorialScene.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
-void TutorialScene::Initialize()
-{
+void TutorialScene::Initialize() {
+	// Input
+	input = GetInput();
+
+	// インプットマネージャー初期化
+	inputManager_ = std::make_unique<InputManager>();
+	inputManager_->Initialize(input);
+
+
+	// インプットハンドラー初期化
+	inputHander_ = std::make_unique<Character::InputHander>();
+	inputHander_->Initialize(input);
+
+
+	inputManager_->Triggered(InputManager::Action::Jump);
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
+		std::make_unique<Character::JampCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
+		std::make_unique<Character::AttackCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
+		std::make_unique<Character::HeavyAttackCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
+		std::make_unique<Character::SkillAttackCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
+		std::make_unique<Character::MoveCommand>());
+
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
+
+	// エフェクト
+	effect_ = std::make_unique<EffectSystem>();
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
+
+	// フォローカメラ
+	followCamera_ = std::make_unique<FollowCamera>();
+	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+
+	// カメラ管理
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	// カメラ追加
+	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
+
+
+	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+
+	// ヒットボックスシステム初期化
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(GetEntityManager());
+
+	// 弾管理クラス
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(GetEntityManager(), GetGlobalVariables(), nullptr);
+	bulletManager_->SetEffect(effect_.get());
+
+	// スペシャルポイント管理クラス
+	specalPointManager_ = std::make_unique<SpecalPointManager>();
+	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
+
+
+	// キャラクター管理 
+	characterManager_ = std::make_unique<Character::CharacterManager>();
+	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->SetEffect(effect_.get());
+	characterManager_->SetFollowCamera(followCamera_.get());
+	characterManager_->SetBulletManager(bulletManager_.get());
+	characterManager_->SetCameraManager(cameraManager_.get());
+	characterManager_->SetSpecialPointManager(specalPointManager_.get());
+
+
+	// プレイヤー生成
+	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+
+	// 追従カメラtarget設定
+	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+
+
+	tutorialStage_ = std::make_unique<TutorialStage>();
+	tutorialStage_->Initialize(GetEntityManager(), cameraManager_.get());
+
+	tutorialSystem_ = std::make_unique<TutorialSystem>();
+	tutorialSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
+
+	tutorialUI_ = std::make_unique<TutorialUI>();
+	tutorialUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
+	poseSystem_ = std::make_unique<PoseSystem>();
+	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
+	poseUI_ = std::make_unique<PoseUI>();
+	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
+
+
+	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
+	//sp->SetStage(stage_.get());
+
+	// 衝突マネージャの生成
+	Vector3 sizeAABB = { 300,25,300 };
+	collisionManager_ = std::make_unique<Engine::CollisionManager>();
+	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
+
+
+	
+
+	// カメラ設定
+	SetCamera(cameraManager_->GetCamera());
+
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+
+	inputManager_->SetOwner(characterManager_->GetPlayer());
 }
 
-void TutorialScene::Finalize()
-{
+void TutorialScene::Finalize() {
+	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	collisionManager_->Clear();
 }
 
-void TutorialScene::Update()
-{
+void TutorialScene::Update() {
+	inputManager_->SetOwner(characterManager_->GetPlayer());
+	// 入力システム更新
+	inputSystem_->Update(GetTime());
+
+	// リトライ
+	if (input->IsTriggerKey(DIK_R)) {
+		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+	}
+	if (input->IsTriggerKey(DIK_T)) {
+		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+	}
+
+	// インプットマネージャー更新
+	inputManager_->Update(GetTime());
+
+	// コマンド
+	iCommand_ = inputHander_->HandleInput();
+	if (this->iCommand_ && characterManager_->GetPlayer()) {
+		iCommand_->Exec(*characterManager_->GetPlayer());
+	}
+
+
+	// 調整項目
+	ApplyGlobalVariables();
+
+	// ImGuiの更新
+	UpdateImGui();
+	// キャラクターマネージャー更新
+	characterManager_->Update(GetTime(),true);
+	// 必殺技ポイント管理クラス
+	specalPointManager_->SetTarget(characterManager_->GetPlayer());
+	specalPointManager_->Update(GetTime());
+	// 弾マネージャ
+	bulletManager_->Update();
+	// ステージ
+	tutorialStage_->Update(GetTime());
+	// ヒットボックスシステム更新
+	hitBoxSystem_->Update(GetTime());
+	// 当たり判定
+	CheckAllCollisions();
+	// Effect更新
+	effect_->Update(GetTime());
+	// チュートリアルシステム更新
+	tutorialSystem_->Update(GetTime());
+	// チュートリアルUI更新
+	tutorialUI_->Update(GetTime());
+	// ポーズシステム更新
+	poseSystem_->Update(GetTime());
+	// ポーズUI更新
+	poseUI_->Update(GetTime());
+	
+	
+	// カメラ管理の更新
+	cameraManager_->Update();
 }
 
-void TutorialScene::Draw3D()
-{
+void TutorialScene::Draw3D() {
+	////3Dオブジェクトの描画
+	bulletManager_->DrawEffect();
 }
 
-void TutorialScene::Draw2D()
-{
+void TutorialScene::Draw2D() {
+	// チュートリアルUI描画
+	tutorialUI_->Draw();
+	// ポーズUI描画
+	poseUI_->Draw();
+	// キャラクター
+	characterManager_->Draw2D();
+	// 弾マネージャ
+	bulletManager_->Draw2D();
+	
+}
+
+// ImGui更新
+void TutorialScene::UpdateImGui() {
+	// ImGuiの更新ロジック
+
+}
+
+// グローバルバリアブル適応
+void TutorialScene::ApplyGlobalVariables() {
+	// グローバルバリアブルの適応ロジック
+
+}
+
+/// <summary>
+/// 衝突判定と応答
+/// </summary>
+void TutorialScene::CheckAllCollisions() {
+	// 衝突判定と応答のロジック
+	// キャラクターセット
+	for (auto caracter : characterManager_->GetCharacters()) {
+		if (caracter->GetColliderComponent()) {
+			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
+				collisionManager_->Register(caracter->GetColliderComponent());
+
+		}
+	}
+
+	// ヒットボックス
+	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+
+	// 弾のコライダー追加
+	for (const auto& bullet : bulletManager_->GetBullets()) {
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
+	}
+
+	// SPポイントのコライダー追加
+	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
+		if (point->GetColliderComponent()) {
+			collisionManager_->Register(point->GetColliderComponent());
+		}
+	}
+
+	// 描画
+	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
+	// 判定チェック
+	collisionManager_->CheckAll();
+	// 動的コライダー削除
+	collisionManager_->ClearDynamic();
 }
 
 
 ============================================================
 File Path: project/DirectXGame/application/scene/TutorialScene.h
 ============================================================
-#pragma once
+﻿#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/Utility/TimerUtility.h"
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
+// application
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/StageCamera.h"
+
+#include"DirectXGame/application/base/Stage/MainStage.h"
+#include"DirectXGame/application/base/UI/GameUI.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include"DirectXGame/application/base/Effect/Effect.h"
+
+
+#include "DirectXGame/application/base/Input/InputHander.h"
+#include <DirectXGame/application/base/Input/InputManager.h>
+#include "DirectXGame/application/base/Input/InputSystem.h"
+
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+#include "DirectXGame/application/base/Stage/StageColliderSystem.h"
+
+#include <DirectXGame/application/base/Game/Tutorial/TutorialSystem.h>
+#include <DirectXGame/application/base/Stage/TutorialStage.h>
+#include <DirectXGame/application/base/UI/TutorialUI.h>
+
+#include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
+#include <DirectXGame/application/base/UI/PoseUI.h>
 
 class TutorialScene : public Engine::BaseScene {
 public:
@@ -38782,10 +39740,63 @@ public:
 	void Draw2D() override;
 
 private:
+	// ImGui更新
+	void UpdateImGui();
 
+	// グローバルバリアブル適応
+	void ApplyGlobalVariables();
 
+	/// <summary>
+	/// 衝突判定と応答
+	/// </summary>
+	void CheckAllCollisions();
+private:
+	Engine::Input* input = nullptr;
+	Engine::Audio* audio = nullptr;
+	// インプットハンドラ
+	std::unique_ptr < Character::InputHander> inputHander_;
+	Character::ICommand* iCommand_;
+
+	// インプットマネージャ
+	std::unique_ptr<InputManager> inputManager_;
+
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_;
+
+	//追従カメラ
+	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
+
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
+	// スペシャルポイント管理クラス
+	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
+	
+	// キャラクター管理
+	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
+	// 弾
+	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
+	// ヒットボックスシステム
+	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
+
+private:
+	// 衝突マネージャ
+	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
+private:
+	// チュートリアルステージ
+	std::unique_ptr<TutorialStage> tutorialStage_;
+	// チュートリアルシステム
+	std::unique_ptr<TutorialSystem> tutorialSystem_;
+	// チュートリアルUI
+	std::unique_ptr<TutorialUI> tutorialUI_;
+	// ポーズシステム
+	std::unique_ptr<PoseSystem> poseSystem_;
+	// ポーズUI
+	std::unique_ptr<PoseUI> poseUI_;
 
 };
+
 
 ============================================================
 File Path: project/DirectXGame/engine/2d/Primitive2D.cpp
@@ -81332,8 +82343,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\Pose\PoseSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.cpp" />
@@ -81362,13 +82376,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\TutorialStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\CustomUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\PoseUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\GameStartUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\TutorialUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
@@ -81780,9 +82797,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Pose\PoseSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\PoseUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\TutorialUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
@@ -82075,7 +83097,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -83169,6 +84190,24 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\CustomUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\TutorialUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Pose\PoseSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\PoseUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\TutorialStage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -84460,6 +85499,21 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\DodgeSuccessEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\TutorialUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Pose\PoseSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\PoseUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -84470,7 +85524,6 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
-
 
 ============================================================
 File Path: project/main.cpp
