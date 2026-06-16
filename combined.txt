@@ -39519,7 +39519,7 @@ void TutorialScene::Initialize() {
 
 	tutorialUI_ = std::make_unique<TutorialUI>();
 	tutorialUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
-
+	
 	poseSystem_ = std::make_unique<PoseSystem>();
 	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 
