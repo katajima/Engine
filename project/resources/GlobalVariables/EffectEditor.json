@@ -1,0 +1,104 @@
+{
+    "EffectEditor": {
+        "EmitterAnimatedCube": {
+            "type": "string",
+            "value": "EmitterAnimatedCube"
+        },
+        "EmitterDeathEnemyExp": {
+            "type": "string",
+            "value": "EmitterDeathEnemyExp"
+        },
+        "EmitterDeathEnemyScrapGear": {
+            "type": "string",
+            "value": "EmitterDeathEnemyScrapGear"
+        },
+        "EmitterDeathEnemyScrapIronRod": {
+            "type": "string",
+            "value": "EmitterDeathEnemyScrapIronRod"
+        },
+        "EmitterDeathEnemyScrapScrew": {
+            "type": "string",
+            "value": "EmitterDeathEnemyScrapScrew"
+        },
+        "EmitterDeathEnemySmoke": {
+            "type": "string",
+            "value": "EmitterDeathEnemySmoke"
+        },
+        "EmitterDust": {
+            "type": "string",
+            "value": "EmitterDust"
+        },
+        "EmitterExpPlane01": {
+            "type": "string",
+            "value": "EmitterExpPlane01"
+        },
+        "EmitterExpSpark": {
+            "type": "string",
+            "value": "EmitterExpSpark"
+        },
+        "EmitterHitEffect": {
+            "type": "string",
+            "value": "EmitterHitEffect"
+        },
+        "EmitterHitEmit": {
+            "type": "string",
+            "value": "EmitterHitEmit"
+        },
+        "EmitterMissileHit": {
+            "type": "string",
+            "value": "EmitterMissileHit"
+        },
+        "EmitterMissileHitCylinder": {
+            "type": "string",
+            "value": "EmitterMissileHitCylinder"
+        },
+        "EmitterPlayerHitDamageEffect": {
+            "type": "string",
+            "value": "EmitterPlayerHitDamageEffect"
+        },
+        "EmitterRingEmit": {
+            "type": "string",
+            "value": "EmitterRingEmit"
+        },
+        "EmitterRingHit": {
+            "type": "string",
+            "value": "EmitterRingHit"
+        },
+        "EmitterScrapBasis": {
+            "type": "string",
+            "value": "EmitterScrapBasis"
+        },
+        "EmitterScrapGear": {
+            "type": "string",
+            "value": "EmitterScrapGear"
+        },
+        "EmitterScrapIronRod": {
+            "type": "string",
+            "value": "EmitterScrapIronRod"
+        },
+        "EmitterScrapScrew": {
+            "type": "string",
+            "value": "EmitterScrapScrew"
+        },
+        "EmitterScrapTire": {
+            "type": "string",
+            "value": "EmitterScrapTire"
+        },
+        "EmitterSmokePlaneExpSmoke": {
+            "type": "string",
+            "value": "EmitterSmokePlaneExpSmoke"
+        },
+        "EmitterStarEmit": {
+            "type": "string",
+            "value": "EmitterStarEmit"
+        },
+        "EmitterStratSmoke01": {
+            "type": "string",
+            "value": "EmitterStratSmoke01"
+        },
+        "EmitterTireDust": {
+            "type": "string",
+            "value": "EmitterTireDust"
+        }
+    }
+}

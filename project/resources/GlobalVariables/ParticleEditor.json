@@ -1,0 +1,220 @@
+{
+    "ParticleEditor": {
+        "AnimatedCube": {
+            "type": "string",
+            "value": "AnimatedCube"
+        },
+        "cartridge": {
+            "type": "string",
+            "value": "cartridge"
+        },
+        "cc": {
+            "type": "string",
+            "value": "cc"
+        },
+        "cloudDust": {
+            "type": "string",
+            "value": "cloudDust"
+        },
+        "cloudDust2": {
+            "type": "string",
+            "value": "cloudDust2"
+        },
+        "cloudDust3": {
+            "type": "string",
+            "value": "cloudDust3"
+        },
+        "dashEmit": {
+            "type": "string",
+            "value": "dashEmit"
+        },
+        "dust": {
+            "type": "string",
+            "value": "dust"
+        },
+        "dust2": {
+            "type": "string",
+            "value": "dust2"
+        },
+        "dust3": {
+            "type": "string",
+            "value": "dust3"
+        },
+        "dustt": {
+            "type": "string",
+            "value": "dustt"
+        },
+        "enemyDuct": {
+            "type": "string",
+            "value": "enemyDuct"
+        },
+        "enemyDust": {
+            "type": "string",
+            "value": "enemyDust"
+        },
+        "enemyFence": {
+            "type": "string",
+            "value": "enemyFence"
+        },
+        "enemyGear": {
+            "type": "string",
+            "value": "enemyGear"
+        },
+        "enemyGround": {
+            "type": "string",
+            "value": "enemyGround"
+        },
+        "enemyPlank": {
+            "type": "string",
+            "value": "enemyPlank"
+        },
+        "enemyTire": {
+            "type": "string",
+            "value": "enemyTire"
+        },
+        "expPlane01": {
+            "type": "string",
+            "value": "expPlane01"
+        },
+        "expSpark": {
+            "type": "string",
+            "value": "expSpark"
+        },
+        "explosionSmoke": {
+            "type": "string",
+            "value": "explosionSmoke"
+        },
+        "hit": {
+            "type": "string",
+            "value": "hit"
+        },
+        "hitEffect": {
+            "type": "string",
+            "value": "hitEffect"
+        },
+        "hitEffect2": {
+            "type": "string",
+            "value": "hitEffect2"
+        },
+        "hitStar": {
+            "type": "string",
+            "value": "hitStar"
+        },
+        "hitTrai": {
+            "type": "string",
+            "value": "hitTrai"
+        },
+        "missileHit": {
+            "type": "string",
+            "value": "missileHit"
+        },
+        "missileHitCylinder": {
+            "type": "string",
+            "value": "missileHitCylinder"
+        },
+        "moveLimit": {
+            "type": "string",
+            "value": "moveLimit"
+        },
+        "primi": {
+            "type": "string",
+            "value": "primi"
+        },
+        "primiPlane": {
+            "type": "string",
+            "value": "primiPlane"
+        },
+        "ringEmit": {
+            "type": "string",
+            "value": "ringEmit"
+        },
+        "ringHit": {
+            "type": "string",
+            "value": "ringHit"
+        },
+        "scrapBasis": {
+            "type": "string",
+            "value": "scrapBasis"
+        },
+        "scrapGear": {
+            "type": "string",
+            "value": "scrapGear"
+        },
+        "scrapIronRod": {
+            "type": "string",
+            "value": "scrapIronRod"
+        },
+        "scrapScrew": {
+            "type": "string",
+            "value": "scrapScrew"
+        },
+        "scrapTire": {
+            "type": "string",
+            "value": "scrapTire"
+        },
+        "shipDust": {
+            "type": "string",
+            "value": "shipDust"
+        },
+        "smoke": {
+            "type": "string",
+            "value": "smoke"
+        },
+        "smokePlane01": {
+            "type": "string",
+            "value": "smokePlane01"
+        },
+        "smokePlane01_1": {
+            "type": "string",
+            "value": "smokePlane01_1"
+        },
+        "smokePlane01_2": {
+            "type": "string",
+            "value": "smokePlane01_2"
+        },
+        "smokePlane02": {
+            "type": "string",
+            "value": "smokePlane02"
+        },
+        "smokePlane02_1": {
+            "type": "string",
+            "value": "smokePlane02_1"
+        },
+        "smokePlane02_2": {
+            "type": "string",
+            "value": "smokePlane02_2"
+        },
+        "smokePlane03": {
+            "type": "string",
+            "value": "smokePlane03"
+        },
+        "smokePlane03_1": {
+            "type": "string",
+            "value": "smokePlane03_1"
+        },
+        "smokePlane03_2": {
+            "type": "string",
+            "value": "smokePlane03_2"
+        },
+        "smokePlane04": {
+            "type": "string",
+            "value": "smokePlane04"
+        },
+        "smokePlane05": {
+            "type": "string",
+            "value": "smokePlane05"
+        },
+        "test": {
+            "type": "string",
+            "value": "test"
+        },
+        "test2": {
+            "type": "string",
+            "value": "test2"
+        },
+        "trainDust": {
+            "type": "string",
+            "value": "trainDust"
+        }
+    }
+}

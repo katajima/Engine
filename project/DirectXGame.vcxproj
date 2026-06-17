@@ -368,6 +368,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiUtility.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp" />
@@ -889,6 +890,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h" />
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiUtility.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h" />

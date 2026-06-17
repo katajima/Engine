@@ -1,4 +1,4 @@
-#include "ParticleManager.h"
+﻿#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -14,6 +14,76 @@
 #include <limits>
 #include <windows.h>
 
+namespace {
+	std::unique_ptr<Engine::BasePrimitive> CreateEditorPrimitive(Engine::ShapeParameter::ShapeType shapeType) {
+		// エディタで選ばれた形状に合わせ、ParticleManagerが寿命を持つプリミティブを生成する。
+		switch (shapeType)
+		{
+		case Engine::ShapeParameter::ShapeType::Triangle:
+			return std::make_unique<Engine::TrianglePrimitive>();
+		case Engine::ShapeParameter::ShapeType::Cross:
+			return std::make_unique<Engine::CrossPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Cube:
+			return std::make_unique<Engine::CubePrimitive>();
+		case Engine::ShapeParameter::ShapeType::Circle:
+			return std::make_unique<Engine::CirclePrimitive>();
+		case Engine::ShapeParameter::ShapeType::Star:
+			return std::make_unique<Engine::StarPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Crescent:
+			return std::make_unique<Engine::CrescentPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Ring:
+			return std::make_unique<Engine::RingPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Sphere:
+			return std::make_unique<Engine::SpherePrimitive>();
+		case Engine::ShapeParameter::ShapeType::Arrow:
+			return std::make_unique<Engine::ArrowPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Cylinder:
+			return std::make_unique<Engine::CylinderPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Tube:
+			return std::make_unique<Engine::TubePrimitive>();
+		case Engine::ShapeParameter::ShapeType::Pyramid:
+			return std::make_unique<Engine::PyramidPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Torus:
+			return std::make_unique<Engine::TorusPrimitive>();
+		case Engine::ShapeParameter::ShapeType::Plane:
+		default:
+			return std::make_unique<Engine::PlanePrimitive>();
+		}
+	}
+
+	Engine::ParticleGroupEditorData CaptureParticleGroupData(
+		const Engine::ParticleGroup& group, const Engine::ParticleGroupEditorData& baseData) {
+		// 既存の保存メタデータに、現在のパーティクル群実体の編集値を重ねて外部保存用データにする。
+		Engine::ParticleGroupEditorData data = baseData;
+		data.rasterizerType = group.rasteType;
+		data.blendType = group.blendType;
+		data.isUVClamp = group.isUVClamp;
+		data.uvTransformVelocity = group.uvTransformVeloctiy_;
+		data.isFlag = group.isFlag;
+		data.emitType = group.emitType;
+		data.topBottom = group.topBottom;
+		data.gravitationalAcceleration = group.kGravitationalAcceleration;
+
+		if (group.material) {
+			// マテリアルはGPU転送用の実データから取得し、次回起動時に同じ見た目へ戻せるようにする。
+			MaterialInstance& material = group.material->GetMaterialInstance();
+			data.texturePath = group.material->tex_.diffuseFilePath;
+			data.materialTransform = material.transform;
+			data.materialColor = material.color.ToVector4();
+			data.materialEnableLighting = material.enableLighting_ != 0;
+			data.materialEnvironmentCoefficient = material.environmentCoefficient_;
+			data.materialShininess = material.shininess_;
+			data.materialUseLig = material.useLig_ != 0;
+			data.materialUseNormalMap = material.useNormalMap_ != 0;
+			data.materialUseSpeculerMap = material.useSpeculerMap_ != 0;
+			data.materialUseEnvironment = material.useEnvironment_;
+			data.materialAlphaClipping = material.alphaClipping_;
+			data.materialAlpha = material.alpha_;
+		}
+		return data;
+	}
+}
+
 void Engine::ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
 {
 	this->dxCommon = dxCommon;							// DX共通クラス
@@ -25,7 +95,7 @@ void Engine::ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* 
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
-	
+
 	// パイプライン生成
 	CreateGraphicsPipeline();
 }
@@ -104,8 +174,11 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Engine::ParticleManager::Update()
-{
+void Engine::ParticleManager::Update() {
+
+	if (particleGroups.empty()) {
+		return;
+	}
 #ifdef _DEBUG
 	ImGui::Begin("Field");
 	for (auto& acc : fieldEffect_) {
@@ -152,6 +225,7 @@ void Engine::ParticleManager::Update()
 				++particleIterator;
 			}
 			// マテリアルデータ
+			if(group.material)
 			ParticleFanction::MaterialEffect(group);
 		});
 }
@@ -197,6 +271,13 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 
 	// パーティクルグループ生成
 	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, model->GetModelData().mesh[0].get(), rasteType, blendType);
+	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
+		.texturePath = textureFilePath,
+		.shapeType = ShapeParameter::ShapeType::Plane,
+		.rasterizerType = rasteType,
+		.blendType = blendType,
+		.isEditorPrimitive = false,
+	};
 	debugTimer_.EndTimer(); // デバッグ用タイマー終了
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }
@@ -215,9 +296,146 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 
 	// パーティクルグループ生成
 	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, primitive->GetModelMesh(), rasteType, blendType);
+	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
+		.texturePath = textureFilePath,
+		.shapeType = ShapeParameter::ShapeType::Plane,
+		.rasterizerType = rasteType,
+		.blendType = blendType,
+		.isEditorPrimitive = false,
+	};
 
 	debugTimer_.EndTimer(); // デバッグ用タイマー終了
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
+}
+
+bool Engine::ParticleManager::CreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data)
+{
+	if (name.empty() || particleGroups.Contains(name) || primitiveCommon == nullptr) {
+		return false;
+	}
+
+	// パーティクル群が参照するメッシュの寿命を保つため、プリミティブをManager側で所有する。
+	auto primitive = CreateEditorPrimitive(data.shapeType);
+	primitive->Initialize(primitiveCommon, data.texturePath);
+	primitive->MeshInitialize();
+
+	BasePrimitive* primitivePtr = primitive.get();
+	editorParticlePrimitives_[name] = std::move(primitive);
+	ParticleFanction::Create(particleGroups[name], name, data.texturePath, kNumMaxInstance,
+		dxCommon, primitivePtr->GetModelMesh(), data.rasterizerType, data.blendType);
+	editorParticleGroupDatas_[name] = data;
+	editorParticleGroupDatas_[name].isEditorPrimitive = true;
+	ApplyEditorParticleGroupData(name, editorParticleGroupDatas_[name]);
+	return true;
+}
+
+bool Engine::ParticleManager::RecreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data)
+{
+	if (name.empty() || !particleGroups.Contains(name)) {
+		return false;
+	}
+
+	RemoveParticleGroup(name);
+	return CreateEditorParticleGroup(name, data);
+}
+
+bool Engine::ParticleManager::RemoveParticleGroup(const std::string& name)
+{
+	if (!particleGroups.Contains(name)) {
+		return false;
+	}
+
+	particleGroups.data.erase(name);
+	editorParticlePrimitives_.erase(name);
+	editorParticleGroupDatas_.erase(name);
+	return true;
+}
+
+bool Engine::ParticleManager::RenameParticleGroup(const std::string& oldName, const std::string& newName)
+{
+	if (oldName.empty() || newName.empty() || oldName == newName ||
+		!particleGroups.Contains(oldName) || particleGroups.Contains(newName)) {
+		return false;
+	}
+
+	auto node = particleGroups.data.extract(oldName);
+	node.key() = newName;
+	particleGroups.data.insert(std::move(node));
+	particleGroups.data[newName].name = newName;
+
+	auto primitiveIt = editorParticlePrimitives_.find(oldName);
+	if (primitiveIt != editorParticlePrimitives_.end()) {
+		editorParticlePrimitives_[newName] = std::move(primitiveIt->second);
+		editorParticlePrimitives_.erase(primitiveIt);
+	}
+
+	auto dataIt = editorParticleGroupDatas_.find(oldName);
+	if (dataIt != editorParticleGroupDatas_.end()) {
+		editorParticleGroupDatas_[newName] = dataIt->second;
+		editorParticleGroupDatas_.erase(dataIt);
+	}
+	return true;
+}
+
+Engine::ParticleGroupEditorData Engine::ParticleManager::GetEditorParticleGroupData(const std::string& name) const
+{
+	ParticleGroupEditorData data;
+	auto dataIt = editorParticleGroupDatas_.find(name);
+	if (dataIt != editorParticleGroupDatas_.end()) {
+		data = dataIt->second;
+	}
+
+	auto groupIt = particleGroups.data.find(name);
+	if (groupIt != particleGroups.data.end()) {
+		return CaptureParticleGroupData(groupIt->second, data);
+	}
+	return data;
+}
+
+void Engine::ParticleManager::SetEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data)
+{
+	editorParticleGroupDatas_[name] = data;
+}
+
+void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data)
+{
+	if (!particleGroups.Contains(name)) {
+		return;
+	}
+
+	// 保存データをパーティクル群の実体へ反映し、次回保存時にも同じ値を取り出せるよう保持する。
+	ParticleGroup& group = particleGroups[name];
+	group.rasteType = data.rasterizerType;
+	group.blendType = data.blendType;
+	group.isUVClamp = data.isUVClamp;
+	group.uvTransformVeloctiy_ = data.uvTransformVelocity;
+	group.isFlag = data.isFlag;
+	group.emitType = data.emitType;
+	group.topBottom = data.topBottom;
+	group.kGravitationalAcceleration = data.gravitationalAcceleration;
+
+	if (group.material) {
+		// テクスチャとマテリアル値を再設定し、GPU転送データにも反映する。
+		MaterialInstance& material = group.material->GetMaterialInstance();
+		if (group.material->tex_.diffuseFilePath != data.texturePath) {
+			group.material->tex_.diffuseFilePath = data.texturePath;
+			group.material->LoadTex();
+		}
+		material.transform = data.materialTransform;
+		material.color = Color(data.materialColor.x, data.materialColor.y, data.materialColor.z, data.materialColor.w);
+		material.enableLighting_ = data.materialEnableLighting;
+		material.environmentCoefficient_ = data.materialEnvironmentCoefficient;
+		material.shininess_ = data.materialShininess;
+		material.useLig_ = data.materialUseLig;
+		material.useNormalMap_ = data.materialUseNormalMap;
+		material.useSpeculerMap_ = data.materialUseSpeculerMap;
+		material.useEnvironment_ = data.materialUseEnvironment;
+		material.alphaClipping_ = data.materialAlphaClipping;
+		material.alpha_ = data.materialAlpha;
+		group.material->GPUData();
+	}
+
+	editorParticleGroupDatas_[name] = CaptureParticleGroupData(group, data);
 }
 
 #pragma region PSO
@@ -253,9 +471,9 @@ void Engine::ParticleManager::CreateRootSignature()
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
-	
+
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	
+
 	psoManager_->SetRootSignature(rootSignature2, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 }
@@ -272,7 +490,7 @@ void Engine::ParticleManager::CreateGraphicsPipeline()
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	
+
 	// インプットレイアウト
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);

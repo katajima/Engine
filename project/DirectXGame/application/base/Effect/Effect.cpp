@@ -16,10 +16,14 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 
 	// パーティクル初期化
 	InitParticle();
+	// ImGuiから追加したパーティクル群を保存済みレジストリと保存ファイルから復元
+	effectEditor_->LoadRegisteredParticleGroups();
 	// 範囲弾パーティクル初期化 
 	InitRangeBombingBullet();
 	// 通常弾初期化
 	InitBullet();
+	// ImGuiから追加したエフェクトを保存済みレジストリから復元
+	effectEditor_->LoadRegisteredEffectGlobalDatas();
 	
 	for (auto& [name, data] : effectEditor_->GetEffectGlobalDatas()) {
 		CreateEffect(name, data.shapeType, data);
@@ -27,56 +31,10 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 }
 
 
-void EffectSystem::InitParticle() {
-	// ヒットエミッター(形状:★)
-	effectEditor_->AddEffectGlobalData("EmitterStarEmit", "hitStar");
-	// ヒットエミッター(形状:Plane)
-	effectEditor_->AddEffectGlobalData("EmitterHitEmit", "hit");
-	// ヒットエミッター(形状:Plane)
-	effectEditor_->AddEffectGlobalData("EmitterHitEffect", "hitEffect2");
-	// ヒットエミッター(形状:Ring)
-	effectEditor_->AddEffectGlobalData("EmitterRingHit", "ringHit");
-	// タイトル用砂パーティクル
-	effectEditor_->AddEffectGlobalData("EmitterDust", "dust3");
-	// タイヤ砂埃パーティクル
-	effectEditor_->AddEffectGlobalData("EmitterTireDust", "dust3");
-	
-	// タイヤエミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapTire", "scrapTire");
-	// ねじエミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapScrew", "scrapScrew");
-	// 鉄の棒エミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapIronRod", "scrapIronRod");
-	// 歯車エミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapGear", "scrapGear");
-	// 基盤エミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapBasis", "scrapBasis");
-
-	// 死んだとき
-
-	// ねじエミッター
-	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyScrapScrew", "scrapScrew");
-	// 鉄の棒エミッター
-	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyScrapIronRod", "scrapIronRod");
-	// 歯車エミッター
-	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyScrapGear", "scrapGear");
-	// 煙エミッター
-	effectEditor_->AddEffectGlobalData("EmitterDeathEnemySmoke", "smokePlane05");
-	// 爆破エミッター
-	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyExp", "expPlane01");
-
-	// プレイヤー食らいエフェクト
-	effectEditor_->AddEffectGlobalData("EmitterPlayerHitDamageEffect", "hit");
-
-}
+void EffectSystem::InitParticle() {}
 
 void EffectSystem::InitRangeBombingBullet() {
-	// ミサイルヒットシリンダエミッター
-	effectEditor_->AddEffectGlobalData("EmitterMissileHitCylinder", "missileHitCylinder");
-	// 初期煙エミッター
-	effectEditor_->AddEffectGlobalData("EmitterStratSmoke01", "smokePlane01");
-
-
+	
 	{
 		effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
 		Engine::PointParticleEmitter* missileHitCylinder = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("missileHitCylinder");

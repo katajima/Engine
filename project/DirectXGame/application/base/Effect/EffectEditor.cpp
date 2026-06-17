@@ -1,56 +1,90 @@
 #include "EffectEditor.h"
+#include "DirectXGame/engine/Base/Imgui/ImGuiUtility.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <set>
+
+namespace {
+	const char* kEffectRegistryGroup = "EffectEditor";
+	const char* kDeletedEffectRegistryGroup = "EffectEditorDeleted";
+	const char* kParticleRegistryGroup = "ParticleEditor";
+	const char* kDeletedParticleRegistryGroup = "ParticleEditorDeleted";
+	const char* kParticleDataPrefix = "ParticleGroup_";
+}
 
 void EffectEditor::Initialize(Engine::EffectComponent* effectComponent, 
 	Engine::GlobalVariables* globalVariables) {
 
 	this->effectComponent = effectComponent;
 	this->globalVariables = globalVariables;
+	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
 
 }
 
 // 更新
 void EffectEditor::Update(float dt) {
-	if (effectGlobalDatas_.empty()) return;
 #ifdef _DEBUG
 	ImGui::Begin("Effect");
-	
-	// エディターに表示変更するエフェクト選定
-	Engine::ImGuiManager::Select("Selected Effect", selectedBlockName_, effectGlobalDatas_);
-	ImGui::Separator();
-	ImGui::Text("Editing: %s", selectedBlockName_.c_str());
-	ImGui::Checkbox("出現", &isSpawnEmit);
-	ImGui::DragFloat3("位置", &spawnEmitPos.x, 0.1f);
-	ImGui::DragFloat("頻度", &frequency, 0.01f);
 
-	if (isSpawnEmit) {
-		timer += dt;
-		if (frequency < timer) {
-			Emit(selectedBlockName_, spawnEmitPos);
-			timer = 0.0f;
+	DrawParticleGroupEditor();
+	DrawEffectManagement();
+	
+	if (effectGlobalDatas_.empty()) {
+		ImGui::TextDisabled("エフェクトを追加してください。");
+	}
+	else {
+		// エディターに表示変更するエフェクト選定
+		Engine::ImGuiUtility::SelectMapKey("Selected Effect", selectedBlockName_, effectGlobalDatas_);
+		ImGui::Separator();
+		ImGui::Text("Editing: %s", selectedBlockName_.c_str());
+		ImGui::Checkbox("出現", &isSpawnEmit);
+		ImGui::DragFloat3("位置", &spawnEmitPos.x, 0.1f);
+		ImGui::DragFloat("頻度", &frequency, 0.01f);
+
+		if (isSpawnEmit) {
+			timer += dt;
+			if (frequency < timer) {
+				Emit(selectedBlockName_, spawnEmitPos);
+				timer = 0.0f;
+			}
 		}
-	}
 	
 
-	// --- 選択されているブロックだけ表示 ---
-	for (auto& combo : effectGlobalDatas_) {
-		const std::string& name = combo.first;
+		// --- 選択されているブロックだけ表示 ---
+		for (auto& combo : effectGlobalDatas_) {
+			const std::string& name = combo.first;
 
-		// 選択中だけ表示
-		const bool nowChoice = (name == selectedBlockName_);
+			// 選択中だけ表示
+			const bool nowChoice = (name == selectedBlockName_);
 
-		if (!nowChoice) continue;
+			if (!nowChoice) continue;
 
-		// エディターでの調整
-		AAAA(name,combo.second);
-		// データの保存
-		SetValue(name, combo.second);
-	}
+			// エディターでの調整
+			AAAA(name,combo.second);
+			// データの保存
+			SetValue(name, combo.second);
+		}
 
-	// セーブ
-	if (ImGui::Button("Save")) {
-		for (auto& it : effectGlobalDatas_) {
-			globalVariables->SaveFile(it.first);
+		// セーブ
+		if (ImGui::Button("Save")) {
+			for (auto& it : effectGlobalDatas_) {
+				globalVariables->SaveFile(it.first);
+			}
+			for (auto& particle : effectComponent->GetParticleManager()->GetParticleGroups()) {
+				// 手動セーブ時は現在のパーティクル群実体を外部保存データへ反映してから書き出す。
+				Engine::ParticleGroupEditorData particleData =
+					effectComponent->GetParticleManager()->GetEditorParticleGroupData(particle.first);
+				AddParticleGroupItem(particle.first, particleData);
+				SetParticleGroupValue(particle.first, particleData);
+				globalVariables->SaveFile(kParticleDataPrefix + particle.first);
+			}
+			globalVariables->SaveFile(kEffectRegistryGroup);
+			globalVariables->SaveFile(kDeletedEffectRegistryGroup);
+			globalVariables->SaveFile(kParticleRegistryGroup);
+			globalVariables->SaveFile(kDeletedParticleRegistryGroup);
 		}
 	}
 	
@@ -134,6 +168,10 @@ void EffectEditor::AddEffectGlobalData(const std::string& name, const std::strin
 		// すでに存在する場合
 		return;
 	}
+	if (IsDeletedEffectName(name)) {
+		// UIで削除した初期エフェクトは、次回起動時の固定登録で復活させない。
+		return;
+	}
 	EffectGlobalData data;
 	data.particleName = particleName;
 	// 保存項目に追加
@@ -142,6 +180,834 @@ void EffectEditor::AddEffectGlobalData(const std::string& name, const std::strin
 	GetValue(name, data);
 	// データを保存
 	effectGlobalDatas_[name] = data;
+	// エフェクト一覧として保存し、次回起動時にUI追加分も復元できるようにする。
+	RegisterEffectName(name);
+}
+
+void EffectEditor::LoadRegisteredEffectGlobalDatas() {
+	// レジストリグループがなければ作成し、以降の追加保存に備える。
+	globalVariables->CreateGroup(kEffectRegistryGroup);
+	globalVariables->CreateGroup(kDeletedEffectRegistryGroup);
+
+	for (const std::string& effectName : globalVariables->GetKeys(kEffectRegistryGroup)) {
+		if (effectGlobalDatas_.find(effectName) != effectGlobalDatas_.end() ||
+			IsDeletedEffectName(effectName) ||
+			!globalVariables->HasGroup(effectName)) {
+			continue;
+		}
+
+		// 保存済みエフェクト本体のグループからデータを読み戻す。
+		EffectGlobalData data;
+		GetValue(effectName, data);
+		effectGlobalDatas_[effectName] = data;
+	}
+}
+
+void EffectEditor::LoadRegisteredParticleGroups() {
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+
+	// レジストリグループがなければ作成し、以降の追加保存に備える。
+	globalVariables->CreateGroup(kParticleRegistryGroup);
+	globalVariables->CreateGroup(kDeletedParticleRegistryGroup);
+
+	// 削除済みとして保存されている既存パーティクル群を、ハードコード生成後に取り除く。
+	for (const std::string& particleName : globalVariables->GetKeys(kDeletedParticleRegistryGroup)) {
+		particleManager->RemoveParticleGroup(particleName);
+	}
+
+	std::set<std::string> particleNames;
+	for (const std::string& particleName : globalVariables->GetKeys(kParticleRegistryGroup)) {
+		// レジストリに登録されている名前は、従来通り復元対象にする。
+		particleNames.insert(particleName);
+	}
+	for (const std::string& groupName : globalVariables->GetGroupNames()) {
+		if (groupName.rfind(kParticleDataPrefix, 0) != 0) {
+			continue;
+		}
+
+		// ParticleGroup_<名前> の保存ファイルがある場合は、レジストリ漏れでも復元できるようにする。
+		particleNames.insert(groupName.substr(std::strlen(kParticleDataPrefix)));
+	}
+
+	for (const std::string& particleName : particleNames) {
+		if (IsDeletedParticleGroupName(particleName)) {
+			continue;
+		}
+
+		const std::string dataGroupName = kParticleDataPrefix + particleName;
+		if (!globalVariables->HasGroup(dataGroupName)) {
+			continue;
+		}
+
+		// 保存済みメタデータから、エディタ所有プリミティブのパーティクル群を復元する。
+		Engine::ParticleGroupEditorData data;
+		GetParticleGroupValue(particleName, data);
+		if (!particleManager->GetParticleGroups().Contains(particleName)) {
+			particleManager->CreateEditorParticleGroup(particleName, data);
+		}
+		else {
+			particleManager->SetEditorParticleGroupData(particleName, data);
+			particleManager->ApplyEditorParticleGroupData(particleName, data);
+		}
+		RegisterParticleGroupName(particleName);
+	}
+}
+
+void EffectEditor::DrawEffectManagement() {
+	ImGui::SeparatorText("Effect Management");
+
+	// 新規追加名とパーティクルを選択してエフェクトを作成する。
+	Engine::ImGuiUtility::InputText("New Effect Name", newEffectNameBuffer_);
+	Engine::ImGuiUtility::SelectMapKey("New Particle", newEffectParticleName_,
+		effectComponent->GetParticleManager()->GetParticleGroups(), "No Particle");
+	ImGui::SameLine();
+	if (ImGui::Button("Add Effect")) {
+		AddEffectFromEditor();
+	}
+
+	if (!selectedBlockName_.empty() &&
+		effectGlobalDatas_.find(selectedBlockName_) != effectGlobalDatas_.end()) {
+		ImGui::Text("Selected: %s", selectedBlockName_.c_str());
+		if (ImGui::Button("Rename Selected Effect")) {
+			pendingRenameEffectName_ = selectedBlockName_;
+			strncpy_s(renameEffectNameBuffer_.data(), renameEffectNameBuffer_.size(),
+				selectedBlockName_.c_str(), _TRUNCATE);
+			ImGui::OpenPopup("Confirm Effect Rename");
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Selected Effect")) {
+			pendingDeleteEffectName_ = selectedBlockName_;
+			ImGui::OpenPopup("Confirm Effect Delete");
+		}
+	}
+
+	if (!managementMessage_.empty()) {
+		ImGui::TextWrapped("%s", managementMessage_.c_str());
+	}
+
+	if (ImGui::BeginPopupModal("Confirm Effect Delete", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Delete effect '%s'?", pendingDeleteEffectName_.c_str());
+		ImGui::TextWrapped("This removes the emitter, saved data, and effect registry entry.");
+		ImGui::Separator();
+		if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+			pendingDeleteEffectName_.clear();
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Permanently", ImVec2(160.0f, 0.0f))) {
+			DeleteEffect(pendingDeleteEffectName_);
+			pendingDeleteEffectName_.clear();
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+
+	if (ImGui::BeginPopupModal("Confirm Effect Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Rename effect '%s'", pendingRenameEffectName_.c_str());
+		Engine::ImGuiUtility::InputText("New Effect Name", renameEffectNameBuffer_);
+		ImGui::TextWrapped("This renames the saved data group and recreates the emitter with the new name.");
+		ImGui::Separator();
+		if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+			pendingRenameEffectName_.clear();
+			renameEffectNameBuffer_.fill('\0');
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Apply Rename", ImVec2(160.0f, 0.0f))) {
+			RenameEffect(pendingRenameEffectName_, renameEffectNameBuffer_.data());
+			if (managementMessage_.rfind("Renamed effect:", 0) == 0) {
+				pendingRenameEffectName_.clear();
+				renameEffectNameBuffer_.fill('\0');
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		ImGui::EndPopup();
+	}
+
+	ImGui::Separator();
+}
+
+void EffectEditor::DrawParticleGroupEditor() {
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+
+	if (!ImGui::CollapsingHeader("Particle Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
+		return;
+	}
+
+	ImGui::SeparatorText("Particle Group Management");
+	Engine::ImGuiUtility::InputText("New Particle Group Name", newParticleGroupNameBuffer_);
+	Engine::ImGuiUtility::InputText("New Texture Path", newParticleTexturePathBuffer_);
+
+	static const char* ShapeLabels[] = {
+		"None",
+		"Plane",
+		"Triangle",
+		"Cross",
+		"Cube",
+		"Circle",
+		"Star",
+		"Crescent",
+		"Ring",
+		"Sphere",
+		"Arrow",
+		"Cylinder",
+		"Tube",
+		"Pyramid",
+		"Torus",
+	};
+	Engine::ImGuiUtility::SelectEnum("New Shape", ShapeLabels, newParticleGroupData_.shapeType);
+
+	static const char* RasterizerLabels[] = {
+		"Solid Back",
+		"Solid None",
+	};
+	Engine::ImGuiUtility::SelectEnum("New Rasterizer", RasterizerLabels, newParticleGroupData_.rasterizerType);
+
+	static const char* BlendLabels[] = {
+		"Add",
+		"Subtract",
+		"Multiply",
+	};
+	Engine::ImGuiUtility::SelectEnum("New Blend", BlendLabels, newParticleGroupData_.blendType);
+
+	if (ImGui::Button("Add Particle Group")) {
+		AddParticleGroupFromEditor();
+	}
+
+	if (!particleManagementMessage_.empty()) {
+		ImGui::TextWrapped("%s", particleManagementMessage_.c_str());
+	}
+
+	if (Engine::ImGuiUtility::SelectMapKey("Selected Particle Group", selectedParticleGroupName_,
+		particleManager->GetParticleGroups(), "No Particle Group")) {
+		editParticleTexturePathBuffer_.fill('\0');
+	}
+
+	if (!selectedParticleGroupName_.empty() &&
+		particleManager->GetParticleGroups().Contains(selectedParticleGroupName_)) {
+		ImGui::Text("Selected: %s", selectedParticleGroupName_.c_str());
+		if (ImGui::Button("Rename Selected Particle Group")) {
+			pendingRenameParticleGroupName_ = selectedParticleGroupName_;
+			Engine::ImGuiUtility::SetInputTextBuffer(renameParticleGroupNameBuffer_, selectedParticleGroupName_);
+			ImGui::OpenPopup("Confirm Particle Group Rename");
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Selected Particle Group")) {
+			pendingDeleteParticleGroupName_ = selectedParticleGroupName_;
+			ImGui::OpenPopup("Confirm Particle Group Delete");
+		}
+
+		if (Engine::ImGuiUtility::ConfirmModal("Confirm Particle Group Delete",
+			"Delete this particle group? Effects that use it will be cleared.",
+			"Delete Permanently")) {
+			DeleteParticleGroup(pendingDeleteParticleGroupName_);
+			pendingDeleteParticleGroupName_.clear();
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Particle Group Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Rename particle group '%s'", pendingRenameParticleGroupName_.c_str());
+			Engine::ImGuiUtility::InputText("New Particle Group Name", renameParticleGroupNameBuffer_);
+			ImGui::TextWrapped("This updates effects that reference this particle group.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingRenameParticleGroupName_.clear();
+				renameParticleGroupNameBuffer_.fill('\0');
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Apply Rename", ImVec2(160.0f, 0.0f))) {
+				RenameParticleGroup(pendingRenameParticleGroupName_, renameParticleGroupNameBuffer_.data());
+				if (particleManagementMessage_.rfind("Renamed particle group:", 0) == 0) {
+					pendingRenameParticleGroupName_.clear();
+					renameParticleGroupNameBuffer_.fill('\0');
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			ImGui::EndPopup();
+		}
+
+		DrawParticleGroupDetail(selectedParticleGroupName_, particleManager->GetParticleGroups(selectedParticleGroupName_));
+	}
+
+	ImGui::Separator();
+}
+
+void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engine::ParticleGroup& group) {
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+	Engine::ParticleGroupEditorData data = particleManager->GetEditorParticleGroupData(particleName);
+	if (editParticleTexturePathBuffer_[0] == '\0') {
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
+	}
+
+	ImGui::SeparatorText("Particle Group Detail");
+	bool recreate = false;
+	bool saveData = false;
+
+	if (Engine::ImGuiUtility::InputText("Texture Path", editParticleTexturePathBuffer_)) {
+		data.texturePath = editParticleTexturePathBuffer_.data();
+		saveData = true;
+	}
+	if (ImGui::Button("Apply Texture")) {
+		data.texturePath = editParticleTexturePathBuffer_.data();
+		if (group.material) {
+			group.material->tex_.diffuseFilePath = data.texturePath;
+			group.material->LoadTex();
+		}
+		saveData = true;
+	}
+	Engine::ImGuiUtility::HelpMarker("Texture Path is applied immediately with Apply Texture. Shape changes recreate the group.");
+
+	static const char* ShapeLabels[] = {
+		"None",
+		"Plane",
+		"Triangle",
+		"Cross",
+		"Cube",
+		"Circle",
+		"Star",
+		"Crescent",
+		"Ring",
+		"Sphere",
+		"Arrow",
+		"Cylinder",
+		"Tube",
+		"Pyramid",
+		"Torus",
+	};
+	if (Engine::ImGuiUtility::SelectEnum("Shape", ShapeLabels, data.shapeType)) {
+		recreate = true;
+	}
+
+	static const char* RasterizerLabels[] = {
+		"Solid Back",
+		"Solid None",
+	};
+	if (Engine::ImGuiUtility::SelectEnum("Rasterizer", RasterizerLabels, data.rasterizerType)) {
+		saveData = true;
+	}
+
+	static const char* BlendLabels[] = {
+		"Add",
+		"Subtract",
+		"Multiply",
+	};
+	if (Engine::ImGuiUtility::SelectEnum("Blend", BlendLabels, data.blendType)) {
+		saveData = true;
+	}
+
+	if (ImGui::Checkbox("UV Clamp", &data.isUVClamp)) {
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Translate Velocity", &data.uvTransformVelocity.translate.x, 0.001f)) {
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Rotate Velocity", &data.uvTransformVelocity.rotate.x, 0.001f)) {
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Scale Velocity", &data.uvTransformVelocity.scale.x, 0.001f)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Billboard", &data.isFlag.usebillboard)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Billboard Y", &data.isFlag.usebillboardY)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Billboard Z Rotation", &data.isFlag.billboardRotZ)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Alpha Over Life", &data.isFlag.isAlpha)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Gravity", &data.isFlag.isGravity)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Bounce", &data.isFlag.isBounce)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Life Time Scale", &data.isFlag.isLifeTimeScale_)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Scaling", &data.isFlag.isScaling_)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Rotate Velocity", &data.isFlag.isRotateVelocity)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("Acceleration", &data.isFlag.isAcceleration)) {
+		saveData = true;
+	}
+	if (ImGui::DragFloat("Gravity Acceleration", &data.gravitationalAcceleration, 0.01f)) {
+		saveData = true;
+	}
+
+	if (group.material) {
+		if (ImGui::CollapsingHeader("Material")) {
+			if (ImGui::ColorEdit4("Color", &data.materialColor.x)) {
+				saveData = true;
+			}
+			if (ImGui::DragFloat("Alpha Clipping", &data.materialAlphaClipping, 0.01f, 0.0f, 1.0f)) {
+				saveData = true;
+			}
+			if (ImGui::DragFloat("Alpha", &data.materialAlpha, 0.01f, 0.0f, 1.0f)) {
+				saveData = true;
+			}
+			if (ImGui::Checkbox("Enable Lighting", &data.materialEnableLighting)) {
+				saveData = true;
+			}
+			if (ImGui::DragFloat("Environment Coefficient", &data.materialEnvironmentCoefficient, 0.01f, 0.0f, 10.0f)) {
+				saveData = true;
+			}
+			if (ImGui::DragFloat("Shininess", &data.materialShininess, 0.1f, 0.0f, 512.0f)) {
+				saveData = true;
+			}
+			if (ImGui::Checkbox("Use Environment", &data.materialUseEnvironment)) {
+				saveData = true;
+			}
+			if (ImGui::Checkbox("Use Light", &data.materialUseLig)) {
+				saveData = true;
+			}
+			if (ImGui::Checkbox("Use Normal Map", &data.materialUseNormalMap)) {
+				saveData = true;
+			}
+			if (ImGui::Checkbox("Use Specular Map", &data.materialUseSpeculerMap)) {
+				saveData = true;
+			}
+		}
+	}
+
+	if (recreate) {
+		data.texturePath = editParticleTexturePathBuffer_.data();
+		particleManager->RecreateEditorParticleGroup(particleName, data);
+		selectedParticleGroupName_ = particleName;
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
+		saveData = true;
+	}
+
+	if (saveData) {
+		particleManager->ApplyEditorParticleGroupData(particleName, data);
+		data = particleManager->GetEditorParticleGroupData(particleName);
+		AddParticleGroupItem(particleName, data);
+		SetParticleGroupValue(particleName, data);
+		globalVariables->SaveFile(kParticleDataPrefix + particleName);
+		globalVariables->SaveFile(kParticleRegistryGroup);
+	}
+}
+
+bool EffectEditor::ValidateNewEffectName(const std::string& effectName) {
+	if (effectName.empty()) {
+		managementMessage_ = "Effect name is required.";
+		return false;
+	}
+	for (const unsigned char c : effectName) {
+		if (!std::isalnum(c) && c != '_') {
+			managementMessage_ = "Use only letters, numbers, and underscores in effect names.";
+			return false;
+		}
+	}
+	if (effectGlobalDatas_.find(effectName) != effectGlobalDatas_.end() ||
+		globalVariables->HasGroup(effectName)) {
+		managementMessage_ = "An effect or saved data with that name already exists.";
+		return false;
+	}
+	return true;
+}
+
+void EffectEditor::AddEffectFromEditor() {
+	const std::string effectName = newEffectNameBuffer_.data();
+	if (!ValidateNewEffectName(effectName)) {
+		return;
+	}
+	if (newEffectParticleName_.empty()) {
+		managementMessage_ = "Particle name is required.";
+		return;
+	}
+
+	// 同名で過去に削除していた場合は、再追加できるよう削除済みリストから外す。
+	UnregisterDeletedEffectName(effectName);
+	EffectGlobalData data;
+	data.particleName = newEffectParticleName_;
+	AddItem(effectName, data);
+	GetValue(effectName, data);
+	effectGlobalDatas_[effectName] = data;
+	RegisterEffectName(effectName);
+	effectComponent->AddEmitter(effectName, data.particleName, data.shapeType);
+	SetEffectGlobalData(effectName, data.shapeType, data);
+
+	selectedBlockName_ = effectName;
+	newEffectNameBuffer_.fill('\0');
+	globalVariables->SaveFile(effectName);
+	globalVariables->SaveFile(kEffectRegistryGroup);
+	globalVariables->SaveFile(kDeletedEffectRegistryGroup);
+	managementMessage_ = "Added effect: " + effectName;
+}
+
+void EffectEditor::RenameEffect(const std::string& oldName, const std::string& newName) {
+	if (oldName.empty() || effectGlobalDatas_.find(oldName) == effectGlobalDatas_.end()) {
+		managementMessage_ = "The selected effect no longer exists.";
+		return;
+	}
+	if (!ValidateNewEffectName(newName)) {
+		return;
+	}
+
+	SetValue(oldName, effectGlobalDatas_[oldName]);
+	if (!globalVariables->RenameGroup(oldName, newName)) {
+		managementMessage_ = "Could not rename the saved effect data.";
+		return;
+	}
+
+	EffectGlobalData data = effectGlobalDatas_[oldName];
+	effectGlobalDatas_.erase(oldName);
+	effectGlobalDatas_[newName] = data;
+
+	// エミッター名はmapキーなので、名前変更時は同じデータで作り直す。
+	effectComponent->RemoveEmitter(oldName);
+	effectComponent->AddEmitter(newName, data.particleName, data.shapeType);
+	SetEffectGlobalData(newName, data.shapeType, data);
+
+	UnregisterEffectName(oldName);
+	RegisterEffectName(newName);
+	RegisterDeletedEffectName(oldName);
+	UnregisterDeletedEffectName(newName);
+
+	globalVariables->SaveFile(newName);
+	globalVariables->SaveFile(kEffectRegistryGroup);
+	globalVariables->SaveFile(kDeletedEffectRegistryGroup);
+	globalVariables->RemoveSavedFile(oldName);
+	selectedBlockName_ = newName;
+	managementMessage_ = "Renamed effect: " + oldName + " -> " + newName;
+}
+
+void EffectEditor::DeleteEffect(const std::string& effectName) {
+	if (effectName.empty() || effectGlobalDatas_.find(effectName) == effectGlobalDatas_.end()) {
+		managementMessage_ = "The selected effect no longer exists.";
+		return;
+	}
+
+	effectComponent->RemoveEmitter(effectName);
+	effectGlobalDatas_.erase(effectName);
+	UnregisterEffectName(effectName);
+	RegisterDeletedEffectName(effectName);
+	globalVariables->RemoveGroup(effectName);
+	const bool removedFile = globalVariables->RemoveSavedFile(effectName);
+	globalVariables->SaveFile(kEffectRegistryGroup);
+	globalVariables->SaveFile(kDeletedEffectRegistryGroup);
+
+	if (!effectGlobalDatas_.empty()) {
+		selectedBlockName_ = effectGlobalDatas_.begin()->first;
+	}
+	else {
+		selectedBlockName_.clear();
+		isSpawnEmit = false;
+	}
+
+	managementMessage_ = removedFile
+		? "Deleted effect: " + effectName
+		: "Removed effect from the editor, but its JSON file could not be deleted: " + effectName;
+}
+
+void EffectEditor::RegisterEffectName(const std::string& name) {
+	// レジストリはキー名だけを一覧として使うため、値にも同じ名前を保存する。
+	globalVariables->CreateGroup(kEffectRegistryGroup);
+	globalVariables->AddItem(kEffectRegistryGroup, name, name);
+}
+
+void EffectEditor::UnregisterEffectName(const std::string& name) {
+	globalVariables->RemoveItem(kEffectRegistryGroup, name);
+}
+
+void EffectEditor::RegisterDeletedEffectName(const std::string& name) {
+	globalVariables->CreateGroup(kDeletedEffectRegistryGroup);
+	globalVariables->AddItem(kDeletedEffectRegistryGroup, name, name);
+}
+
+void EffectEditor::UnregisterDeletedEffectName(const std::string& name) {
+	globalVariables->RemoveItem(kDeletedEffectRegistryGroup, name);
+}
+
+bool EffectEditor::IsDeletedEffectName(const std::string& name) const {
+	return globalVariables && globalVariables->HasKey(kDeletedEffectRegistryGroup, name);
+}
+
+bool EffectEditor::ValidateNewParticleGroupName(const std::string& particleName) {
+	if (particleName.empty()) {
+		particleManagementMessage_ = "Particle group name is required.";
+		return false;
+	}
+	for (const unsigned char c : particleName) {
+		if (!std::isalnum(c) && c != '_') {
+			particleManagementMessage_ = "Use only letters, numbers, and underscores in particle group names.";
+			return false;
+		}
+	}
+	if (effectComponent->GetParticleManager()->GetParticleGroups().Contains(particleName) ||
+		globalVariables->HasGroup(kParticleDataPrefix + particleName)) {
+		particleManagementMessage_ = "A particle group or saved particle data with that name already exists.";
+		return false;
+	}
+	return true;
+}
+
+void EffectEditor::AddParticleGroupFromEditor() {
+	const std::string particleName = newParticleGroupNameBuffer_.data();
+	if (!ValidateNewParticleGroupName(particleName)) {
+		return;
+	}
+
+	newParticleGroupData_.texturePath = newParticleTexturePathBuffer_.data();
+	if (newParticleGroupData_.texturePath.empty()) {
+		particleManagementMessage_ = "Texture path is required.";
+		return;
+	}
+	if (newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::None ||
+		newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::Max) {
+		particleManagementMessage_ = "Choose a valid primitive shape.";
+		return;
+	}
+
+	UnregisterDeletedParticleGroupName(particleName);
+	if (!effectComponent->GetParticleManager()->CreateEditorParticleGroup(particleName, newParticleGroupData_)) {
+		particleManagementMessage_ = "Could not create particle group.";
+		return;
+	}
+
+	RegisterParticleGroupName(particleName);
+	Engine::ParticleGroupEditorData savedData =
+		effectComponent->GetParticleManager()->GetEditorParticleGroupData(particleName);
+	AddParticleGroupItem(particleName, savedData);
+	SetParticleGroupValue(particleName, savedData);
+	globalVariables->SaveFile(kParticleRegistryGroup);
+	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
+	globalVariables->SaveFile(kParticleDataPrefix + particleName);
+
+	selectedParticleGroupName_ = particleName;
+	newParticleGroupNameBuffer_.fill('\0');
+	editParticleTexturePathBuffer_.fill('\0');
+	particleManagementMessage_ = "Added particle group: " + particleName;
+}
+
+void EffectEditor::RenameParticleGroup(const std::string& oldName, const std::string& newName) {
+	if (oldName.empty() || !effectComponent->GetParticleManager()->GetParticleGroups().Contains(oldName)) {
+		particleManagementMessage_ = "The selected particle group no longer exists.";
+		return;
+	}
+	if (!ValidateNewParticleGroupName(newName)) {
+		return;
+	}
+
+	Engine::ParticleGroupEditorData data = effectComponent->GetParticleManager()->GetEditorParticleGroupData(oldName);
+	if (!effectComponent->GetParticleManager()->RenameParticleGroup(oldName, newName)) {
+		particleManagementMessage_ = "Could not rename particle group.";
+		return;
+	}
+
+	RenameParticleReferences(oldName, newName);
+	UnregisterParticleGroupName(oldName);
+	RegisterParticleGroupName(newName);
+	RegisterDeletedParticleGroupName(oldName);
+	UnregisterDeletedParticleGroupName(newName);
+
+	globalVariables->RemoveGroup(kParticleDataPrefix + oldName);
+	globalVariables->RemoveSavedFile(kParticleDataPrefix + oldName);
+	AddParticleGroupItem(newName, data);
+	SetParticleGroupValue(newName, data);
+	globalVariables->SaveFile(kParticleDataPrefix + newName);
+	globalVariables->SaveFile(kParticleRegistryGroup);
+	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
+	for (auto& [effectName, effectData] : effectGlobalDatas_) {
+		if (effectData.particleName == newName) {
+			SetValue(effectName, effectData);
+			globalVariables->SaveFile(effectName);
+		}
+	}
+
+	selectedParticleGroupName_ = newName;
+	editParticleTexturePathBuffer_.fill('\0');
+	particleManagementMessage_ = "Renamed particle group: " + oldName + " -> " + newName;
+}
+
+void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
+	if (particleName.empty() || !effectComponent->GetParticleManager()->GetParticleGroups().Contains(particleName)) {
+		particleManagementMessage_ = "The selected particle group no longer exists.";
+		return;
+	}
+
+	for (auto& [effectName, effectData] : effectGlobalDatas_) {
+		if (effectData.particleName == particleName) {
+			effectData.particleName.clear();
+			SetValue(effectName, effectData);
+			globalVariables->SaveFile(effectName);
+		}
+	}
+
+	effectComponent->GetParticleManager()->RemoveParticleGroup(particleName);
+	UnregisterParticleGroupName(particleName);
+	RegisterDeletedParticleGroupName(particleName);
+	globalVariables->RemoveGroup(kParticleDataPrefix + particleName);
+	globalVariables->RemoveSavedFile(kParticleDataPrefix + particleName);
+	globalVariables->SaveFile(kParticleRegistryGroup);
+	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
+
+	if (!effectComponent->GetParticleManager()->GetParticleGroups().empty()) {
+		selectedParticleGroupName_ = effectComponent->GetParticleManager()->GetParticleGroups().begin()->first;
+	}
+	else {
+		selectedParticleGroupName_.clear();
+	}
+	editParticleTexturePathBuffer_.fill('\0');
+	particleManagementMessage_ = "Deleted particle group: " + particleName;
+}
+
+void EffectEditor::AddParticleGroupItem(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
+	const std::string groupName = kParticleDataPrefix + particleName;
+	globalVariables->CreateGroup(groupName);
+	// パーティクル群を外部ファイルから復元するため、生成情報と実行時の編集値をまとめて登録する。
+	globalVariables->AddItem(groupName, "texturePath", data.texturePath);
+	globalVariables->AddEnumItem<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
+	globalVariables->AddEnumItem<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
+	globalVariables->AddEnumItem<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
+	globalVariables->AddItem(groupName, "isEditorPrimitive", data.isEditorPrimitive);
+	globalVariables->AddItem(groupName, "isUVClamp", data.isUVClamp);
+	globalVariables->AddItem(groupName, "uvTransformVelocity", data.uvTransformVelocity);
+	globalVariables->AddItem(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
+	globalVariables->AddItem(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
+	globalVariables->AddItem(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
+	globalVariables->AddItem(groupName, "isFlag.isAlpha", data.isFlag.isAlpha);
+	globalVariables->AddItem(groupName, "isFlag.isLine", data.isFlag.isLine);
+	globalVariables->AddItem(groupName, "isFlag.isGravity", data.isFlag.isGravity);
+	globalVariables->AddItem(groupName, "isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
+	globalVariables->AddItem(groupName, "isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
+	globalVariables->AddItem(groupName, "isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
+	globalVariables->AddItem(groupName, "isFlag.isBounce", data.isFlag.isBounce);
+	globalVariables->AddItem(groupName, "isFlag.isAcceleration", data.isFlag.isAcceleration);
+	globalVariables->AddItem(groupName, "isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
+	globalVariables->AddItem(groupName, "isFlag.isScaling", data.isFlag.isScaling_);
+	globalVariables->AddEnumItem<EmitData::EmitType>(groupName, "emitType", data.emitType, "EmitType");
+	globalVariables->AddEnumItem<EmitData::TopBottom>(groupName, "topBottom", data.topBottom, "TopBottom");
+	globalVariables->AddItem(groupName, "gravitationalAcceleration", data.gravitationalAcceleration);
+	globalVariables->AddItem(groupName, "material.transform", data.materialTransform);
+	globalVariables->AddItem(groupName, "material.color", data.materialColor);
+	globalVariables->AddItem(groupName, "material.enableLighting", data.materialEnableLighting);
+	globalVariables->AddItem(groupName, "material.environmentCoefficient", data.materialEnvironmentCoefficient);
+	globalVariables->AddItem(groupName, "material.shininess", data.materialShininess);
+	globalVariables->AddItem(groupName, "material.useLig", data.materialUseLig);
+	globalVariables->AddItem(groupName, "material.useNormalMap", data.materialUseNormalMap);
+	globalVariables->AddItem(groupName, "material.useSpeculerMap", data.materialUseSpeculerMap);
+	globalVariables->AddItem(groupName, "material.useEnvironment", data.materialUseEnvironment);
+	globalVariables->AddItem(groupName, "material.alphaClipping", data.materialAlphaClipping);
+	globalVariables->AddItem(groupName, "material.alpha", data.materialAlpha);
+}
+
+void EffectEditor::GetParticleGroupValue(const std::string& particleName, Engine::ParticleGroupEditorData& data) {
+	const std::string groupName = kParticleDataPrefix + particleName;
+	// 旧形式の保存ファイルでも読み込めるよう、追加項目はキーがある場合だけ上書きする。
+	data.texturePath = globalVariables->GetValue<std::string>(groupName, "texturePath");
+	data.shapeType = globalVariables->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
+	data.rasterizerType = globalVariables->GetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType");
+	data.blendType = globalVariables->GetEnumValue<EmitData::BlendType>(groupName, "blendType");
+	data.isEditorPrimitive = globalVariables->GetValue<bool>(groupName, "isEditorPrimitive");
+	if (globalVariables->HasKey(groupName, "isUVClamp")) data.isUVClamp = globalVariables->GetValue<bool>(groupName, "isUVClamp");
+	if (globalVariables->HasKey(groupName, "uvTransformVelocity")) data.uvTransformVelocity = globalVariables->GetValue<Transform>(groupName, "uvTransformVelocity");
+	if (globalVariables->HasKey(groupName, "isFlag.usebillboard")) data.isFlag.usebillboard = globalVariables->GetValue<bool>(groupName, "isFlag.usebillboard");
+	if (globalVariables->HasKey(groupName, "isFlag.usebillboardY")) data.isFlag.usebillboardY = globalVariables->GetValue<bool>(groupName, "isFlag.usebillboardY");
+	if (globalVariables->HasKey(groupName, "isFlag.billboardRotZ")) data.isFlag.billboardRotZ = globalVariables->GetValue<bool>(groupName, "isFlag.billboardRotZ");
+	if (globalVariables->HasKey(groupName, "isFlag.isAlpha")) data.isFlag.isAlpha = globalVariables->GetValue<bool>(groupName, "isFlag.isAlpha");
+	if (globalVariables->HasKey(groupName, "isFlag.isLine")) data.isFlag.isLine = globalVariables->GetValue<bool>(groupName, "isFlag.isLine");
+	if (globalVariables->HasKey(groupName, "isFlag.isGravity")) data.isFlag.isGravity = globalVariables->GetValue<bool>(groupName, "isFlag.isGravity");
+	if (globalVariables->HasKey(groupName, "isFlag.isLifeTimeScale")) data.isFlag.isLifeTimeScale_ = globalVariables->GetValue<bool>(groupName, "isFlag.isLifeTimeScale");
+	if (globalVariables->HasKey(groupName, "isFlag.isRotateVelocity")) data.isFlag.isRotateVelocity = globalVariables->GetValue<bool>(groupName, "isFlag.isRotateVelocity");
+	if (globalVariables->HasKey(groupName, "isFlag.isLifeTimeVelocity")) data.isFlag.isLifeTimeVelocity = globalVariables->GetValue<bool>(groupName, "isFlag.isLifeTimeVelocity");
+	if (globalVariables->HasKey(groupName, "isFlag.isBounce")) data.isFlag.isBounce = globalVariables->GetValue<bool>(groupName, "isFlag.isBounce");
+	if (globalVariables->HasKey(groupName, "isFlag.isAcceleration")) data.isFlag.isAcceleration = globalVariables->GetValue<bool>(groupName, "isFlag.isAcceleration");
+	if (globalVariables->HasKey(groupName, "isFlag.isLineInterpolation")) data.isFlag.isLineInterpolation = globalVariables->GetValue<bool>(groupName, "isFlag.isLineInterpolation");
+	if (globalVariables->HasKey(groupName, "isFlag.isScaling")) data.isFlag.isScaling_ = globalVariables->GetValue<bool>(groupName, "isFlag.isScaling");
+	if (globalVariables->HasKey(groupName, "emitType")) data.emitType = globalVariables->GetEnumValue<EmitData::EmitType>(groupName, "emitType");
+	if (globalVariables->HasKey(groupName, "topBottom")) data.topBottom = globalVariables->GetEnumValue<EmitData::TopBottom>(groupName, "topBottom");
+	if (globalVariables->HasKey(groupName, "gravitationalAcceleration")) data.gravitationalAcceleration = globalVariables->GetValue<float>(groupName, "gravitationalAcceleration");
+	if (globalVariables->HasKey(groupName, "material.transform")) data.materialTransform = globalVariables->GetValue<Transform>(groupName, "material.transform");
+	if (globalVariables->HasKey(groupName, "material.color")) data.materialColor = globalVariables->GetValue<Vector4>(groupName, "material.color");
+	if (globalVariables->HasKey(groupName, "material.enableLighting")) data.materialEnableLighting = globalVariables->GetValue<bool>(groupName, "material.enableLighting");
+	if (globalVariables->HasKey(groupName, "material.environmentCoefficient")) data.materialEnvironmentCoefficient = globalVariables->GetValue<float>(groupName, "material.environmentCoefficient");
+	if (globalVariables->HasKey(groupName, "material.shininess")) data.materialShininess = globalVariables->GetValue<float>(groupName, "material.shininess");
+	if (globalVariables->HasKey(groupName, "material.useLig")) data.materialUseLig = globalVariables->GetValue<bool>(groupName, "material.useLig");
+	if (globalVariables->HasKey(groupName, "material.useNormalMap")) data.materialUseNormalMap = globalVariables->GetValue<bool>(groupName, "material.useNormalMap");
+	if (globalVariables->HasKey(groupName, "material.useSpeculerMap")) data.materialUseSpeculerMap = globalVariables->GetValue<bool>(groupName, "material.useSpeculerMap");
+	if (globalVariables->HasKey(groupName, "material.useEnvironment")) data.materialUseEnvironment = globalVariables->GetValue<bool>(groupName, "material.useEnvironment");
+	if (globalVariables->HasKey(groupName, "material.alphaClipping")) data.materialAlphaClipping = globalVariables->GetValue<float>(groupName, "material.alphaClipping");
+	if (globalVariables->HasKey(groupName, "material.alpha")) data.materialAlpha = globalVariables->GetValue<float>(groupName, "material.alpha");
+}
+
+void EffectEditor::SetParticleGroupValue(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
+	const std::string groupName = kParticleDataPrefix + particleName;
+	// AddItemでキーを揃えたあと、現在の編集内容で外部保存用データを上書きする。
+	globalVariables->SetValue(groupName, "texturePath", data.texturePath);
+	globalVariables->SetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
+	globalVariables->SetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
+	globalVariables->SetEnumValue<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
+	globalVariables->SetValue(groupName, "isEditorPrimitive", data.isEditorPrimitive);
+	globalVariables->SetValue(groupName, "isUVClamp", data.isUVClamp);
+	globalVariables->SetValue(groupName, "uvTransformVelocity", data.uvTransformVelocity);
+	globalVariables->SetValue(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
+	globalVariables->SetValue(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
+	globalVariables->SetValue(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
+	globalVariables->SetValue(groupName, "isFlag.isAlpha", data.isFlag.isAlpha);
+	globalVariables->SetValue(groupName, "isFlag.isLine", data.isFlag.isLine);
+	globalVariables->SetValue(groupName, "isFlag.isGravity", data.isFlag.isGravity);
+	globalVariables->SetValue(groupName, "isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
+	globalVariables->SetValue(groupName, "isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
+	globalVariables->SetValue(groupName, "isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
+	globalVariables->SetValue(groupName, "isFlag.isBounce", data.isFlag.isBounce);
+	globalVariables->SetValue(groupName, "isFlag.isAcceleration", data.isFlag.isAcceleration);
+	globalVariables->SetValue(groupName, "isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
+	globalVariables->SetValue(groupName, "isFlag.isScaling", data.isFlag.isScaling_);
+	globalVariables->SetEnumValue<EmitData::EmitType>(groupName, "emitType", data.emitType, "EmitType");
+	globalVariables->SetEnumValue<EmitData::TopBottom>(groupName, "topBottom", data.topBottom, "TopBottom");
+	globalVariables->SetValue(groupName, "gravitationalAcceleration", data.gravitationalAcceleration);
+	globalVariables->SetValue(groupName, "material.transform", data.materialTransform);
+	globalVariables->SetValue(groupName, "material.color", data.materialColor);
+	globalVariables->SetValue(groupName, "material.enableLighting", data.materialEnableLighting);
+	globalVariables->SetValue(groupName, "material.environmentCoefficient", data.materialEnvironmentCoefficient);
+	globalVariables->SetValue(groupName, "material.shininess", data.materialShininess);
+	globalVariables->SetValue(groupName, "material.useLig", data.materialUseLig);
+	globalVariables->SetValue(groupName, "material.useNormalMap", data.materialUseNormalMap);
+	globalVariables->SetValue(groupName, "material.useSpeculerMap", data.materialUseSpeculerMap);
+	globalVariables->SetValue(groupName, "material.useEnvironment", data.materialUseEnvironment);
+	globalVariables->SetValue(groupName, "material.alphaClipping", data.materialAlphaClipping);
+	globalVariables->SetValue(groupName, "material.alpha", data.materialAlpha);
+}
+
+void EffectEditor::RegisterParticleGroupName(const std::string& name) {
+	globalVariables->CreateGroup(kParticleRegistryGroup);
+	globalVariables->AddItem(kParticleRegistryGroup, name, name);
+}
+
+void EffectEditor::UnregisterParticleGroupName(const std::string& name) {
+	globalVariables->RemoveItem(kParticleRegistryGroup, name);
+}
+
+void EffectEditor::RegisterDeletedParticleGroupName(const std::string& name) {
+	globalVariables->CreateGroup(kDeletedParticleRegistryGroup);
+	globalVariables->AddItem(kDeletedParticleRegistryGroup, name, name);
+}
+
+void EffectEditor::UnregisterDeletedParticleGroupName(const std::string& name) {
+	globalVariables->RemoveItem(kDeletedParticleRegistryGroup, name);
+}
+
+bool EffectEditor::IsDeletedParticleGroupName(const std::string& name) const {
+	return globalVariables && globalVariables->HasKey(kDeletedParticleRegistryGroup, name);
+}
+
+void EffectEditor::RenameParticleReferences(const std::string& oldName, const std::string& newName) {
+	for (auto& [effectName, effectData] : effectGlobalDatas_) {
+		if (effectData.particleName == oldName) {
+			effectData.particleName = newName;
+			if (Engine::BaseParticleEmitter* emitter = effectComponent->GetBaseEmitter(effectName)) {
+				emitter->SetParticleName(newName);
+			}
+		}
+	}
 }
 
 void EffectEditor::AddItem(const std::string& name, const EffectGlobalData& data) {

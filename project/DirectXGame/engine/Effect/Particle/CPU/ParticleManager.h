@@ -23,17 +23,44 @@
 
 
 #include "DirectXGame/engine/Utility/MapUtility.h"
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 
 
 namespace Engine {
 	// 前方宣言
 	class LightManager;
 	class Material;
-	class BasePrimitive;
 	class DirectXCommon;
 	class SrvManager;
 	class EffectManager;
 	class LineCommon;
+	class PrimitiveCommon;
+
+	// エディタから復元・編集するためのパーティクル群メタデータ
+	struct ParticleGroupEditorData {
+		std::string texturePath = "resources/Texture/Image.dds";										// 使用するテクスチャ
+		ShapeParameter::ShapeType shapeType = ShapeParameter::ShapeType::Plane;						// エディタ作成時のプリミティブ形状
+		EmitData::RasterizerType rasterizerType = EmitData::RasterizerType::MODE_SOLID_BACK;			// カリング設定
+		EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD;								// ブレンド設定
+		bool isEditorPrimitive = false;																// エディタ所有プリミティブで作ったか
+		bool isUVClamp = false;																		// UVクランプ描画を使うか
+		Transform uvTransformVelocity{ {}, {}, {0.0f, 0.0f, 0.0f} };									// UVトランスフォームの速度
+		EmitData::IsFlag isFlag{};																	// パーティクル挙動フラグ
+		EmitData::EmitType emitType = EmitData::EmitType::kRandom;									// メッシュからの発生方法
+		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;								// ライフタイムスケールの基準
+		float gravitationalAcceleration = 9.8f;														// 重力加速度
+		Transform materialTransform{};																// マテリアルUVトランスフォーム
+		Vector4 materialColor = { 1.0f, 1.0f, 1.0f, 1.0f };											// マテリアルカラー
+		bool materialEnableLighting = true;															// ライティングを使うか
+		float materialEnvironmentCoefficient = 0.5f;													// 環境マップ係数
+		float materialShininess = 20.0f;																// スペキュラの強さ
+		bool materialUseLig = false;																	// ライト計算を使うか
+		bool materialUseNormalMap = false;															// ノーマルマップを使うか
+		bool materialUseSpeculerMap = false;															// スペキュラマップを使うか
+		bool materialUseEnvironment = false;															// 環境マップを使うか
+		float materialAlphaClipping = 0.5f;															// アルファクリッピング値
+		float materialAlpha = 1.0f;																	// 全体アルファ
+	};
 
 	/// <summary>
 	/// パーティクル3dマネージャー
@@ -48,6 +75,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager);
+		// エディタ作成パーティクルのプリミティブを生成する共通クラスを設定
+		void SetPrimitiveCommon(PrimitiveCommon* primitiveCommon) { this->primitiveCommon = primitiveCommon; }
 		// 更新
 		void Update();
 		// 描画
@@ -77,6 +106,21 @@ namespace Engine {
 		// パーティクルグループ作り(プリミティブ)
 		void CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive,
 			EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
+
+		// エディタ用プリミティブを所有してパーティクルグループを作成
+		bool CreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data);
+		// エディタ用メタデータに合わせて既存パーティクルグループを作り直す
+		bool RecreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data);
+		// パーティクルグループを削除
+		bool RemoveParticleGroup(const std::string& name);
+		// パーティクルグループ名を変更
+		bool RenameParticleGroup(const std::string& oldName, const std::string& newName);
+		// エディタ用メタデータ取得
+		ParticleGroupEditorData GetEditorParticleGroupData(const std::string& name) const;
+		// エディタ用メタデータ設定
+		void SetEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
+		// エディタ用保存データを実際のパーティクル群へ反映
+		void ApplyEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
 
 		// カメラセット
 		void SetCamera(Camera* camera) { this->camera = camera; }
@@ -118,6 +162,7 @@ namespace Engine {
 		SrvManager* srvManager = nullptr;		// SRV
 		EffectManager* efectManager = nullptr;	// エフェクト
 		LineCommon* lineCommon = nullptr;		// ライン
+		PrimitiveCommon* primitiveCommon = nullptr; // エディタ用プリミティブ生成
 		Camera* camera = nullptr;				// カメラ
 	private:
 		// PSO設定
@@ -127,6 +172,10 @@ namespace Engine {
 		std::mt19937 randomEngine_;
 
 		UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
+		// エディタ作成プリミティブの寿命をパーティクルグループと合わせて保持
+		std::map<std::string, std::unique_ptr<BasePrimitive>> editorParticlePrimitives_;
+		// エディタで保存・復元するためのパーティクル群メタデータ
+		std::map<std::string, ParticleGroupEditorData> editorParticleGroupDatas_;
 
 		// 最大パーティクル量
 		const uint32_t kNumMaxInstance = 1024 * 2;

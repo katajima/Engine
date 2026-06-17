@@ -10,6 +10,7 @@ void Engine::EffectComponent::Init(EntityManager* entityManager, GlobalVariables
 	this->particleManager = entityManager->GetEffectManager()->GetParticleManager();
 	this->gpuParticleManager = entityManager->GetEffectManager()->GetGpuParticleManager();
 	this->primitiveCommon = entityManager->GetPrimitiveCommon();
+	this->particleManager->SetPrimitiveCommon(this->primitiveCommon);
 }
 
 void Engine::EffectComponent::AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype, WorldTransform* parent)

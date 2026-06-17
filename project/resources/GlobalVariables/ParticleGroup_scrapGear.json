@@ -1,0 +1,182 @@
+{
+    "ParticleGroup_scrapGear": {
+        "blendType": {
+            "enumType": "BlendType",
+            "type": "enum",
+            "value": 0
+        },
+        "emitType": {
+            "enumType": "EmitType",
+            "type": "enum",
+            "value": 0
+        },
+        "gravitationalAcceleration": {
+            "type": "float",
+            "value": 9.800000190734863
+        },
+        "isEditorPrimitive": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.billboardRotZ": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isAcceleration": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isAlpha": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isBounce": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isGravity": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isLifeTimeScale": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isLifeTimeVelocity": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isLine": {
+            "type": "bool",
+            "value": true
+        },
+        "isFlag.isLineInterpolation": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isRotateVelocity": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isScaling": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.usebillboard": {
+            "type": "bool",
+            "value": true
+        },
+        "isFlag.usebillboardY": {
+            "type": "bool",
+            "value": false
+        },
+        "isUVClamp": {
+            "type": "bool",
+            "value": false
+        },
+        "material.alpha": {
+            "type": "float",
+            "value": 1.0
+        },
+        "material.alphaClipping": {
+            "type": "float",
+            "value": 0.5
+        },
+        "material.color": {
+            "type": "Vector4",
+            "value": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "material.enableLighting": {
+            "type": "bool",
+            "value": false
+        },
+        "material.environmentCoefficient": {
+            "type": "float",
+            "value": 0.5
+        },
+        "material.shininess": {
+            "type": "float",
+            "value": 20.0
+        },
+        "material.transform": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        "material.useEnvironment": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useLig": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useNormalMap": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useSpeculerMap": {
+            "type": "bool",
+            "value": false
+        },
+        "rasterizerType": {
+            "enumType": "RasterizerType",
+            "type": "enum",
+            "value": 0
+        },
+        "shapeType": {
+            "enumType": "ShapeType",
+            "type": "enum",
+            "value": 0
+        },
+        "texturePath": {
+            "type": "string",
+            "value": "resources/Models/Scrap/Gear/color.png"
+        },
+        "topBottom": {
+            "enumType": "TopBottom",
+            "type": "enum",
+            "value": 1
+        },
+        "uvTransformVelocity": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        }
+    }
+}

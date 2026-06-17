@@ -657,6 +657,9 @@
     <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp">
       <Filter>ソース ファイル\engine\base\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiUtility.cpp">
+      <Filter>ソース ファイル\engine\base\imgui</Filter>
+    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
@@ -1518,6 +1521,9 @@
       <Filter>ヘッダー ファイル\engine\base\imgui</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h">
+      <Filter>ヘッダー ファイル\engine\base\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiUtility.h">
       <Filter>ヘッダー ファイル\engine\base\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\ImGuizmo.h">
