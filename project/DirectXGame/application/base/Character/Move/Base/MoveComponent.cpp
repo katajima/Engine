@@ -66,6 +66,7 @@ void MovementComponent::Update(Engine::WorldTransform& object, Engine::RigidBody
 
 void MovementComponent::ApplyGlobalData(const std::string& name) {
 
+	globalVariables->SetGroupCategory(name, "Character/Parameter");
 	globalVariables->CreateGroup(name);
 
 

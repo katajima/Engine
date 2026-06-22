@@ -1,6 +1,7 @@
 #include "GlobalVariables.h"
 #include "Windows.h"
 #include "imgui.h"
+#include <algorithm>
 #include <limits>
 
 
@@ -141,7 +142,23 @@ bool Engine::GlobalVariables::RenameGroup(const std::string& oldName, const std:
 		groupKeys_[newName] = std::move(keyIt->second);
 		groupKeys_.erase(keyIt);
 	}
+	auto categoryIt = groupCategories_.find(oldName);
+	if (categoryIt != groupCategories_.end()) {
+		// リネーム後も同じカテゴリへ保存されるよう、カテゴリ設定も移動する。
+		groupCategories_[newName] = std::move(categoryIt->second);
+		groupCategories_.erase(categoryIt);
+	}
 	return true;
+}
+
+void Engine::GlobalVariables::SetGroupCategory(const std::string& groupName, const std::string& categoryName)
+{
+	if (groupName.empty() || categoryName.empty()) {
+		return;
+	}
+
+	// 外部保存時にグループをどのフォルダへ出すか指定する。
+	groupCategories_[groupName] = categoryName;
 }
 
 /// <summary>
@@ -193,6 +210,76 @@ std::string Engine::GlobalVariables::MakeUniqueKey(const std::string& baseKey, c
 	return newKey;
 }
 
+std::string Engine::GlobalVariables::ResolveCategory(const std::string& groupName) const
+{
+	auto categoryIt = groupCategories_.find(groupName);
+	if (categoryIt != groupCategories_.end() && !categoryIt->second.empty()) {
+		return categoryIt->second;
+	}
+
+	// よく使うグループ名は自動で分類し、既存のSaveFile呼び出しをそのまま使えるようにする。
+	if (groupName == "EffectEditor" || groupName == "EffectEditorDeleted" ||
+		groupName.rfind("Emitter", 0) == 0) {
+		return "Effect";
+	}
+	if (groupName == "ParticleEditor" || groupName == "ParticleEditorDeleted" ||
+		groupName.rfind("ParticleGroup_", 0) == 0) {
+		return "Effect/Particle";
+	}
+	if (groupName == "ComboPlayer" ||
+		groupName.find("Attack") != std::string::npos ||
+		groupName.find("Combo") != std::string::npos ||
+		groupName.find("Skill") != std::string::npos ||
+		groupName.find("Launch") != std::string::npos) {
+		return "Character/Combo";
+	}
+	if (groupName.rfind("MoveData", 0) == 0 ||
+		groupName == "Player" ||
+		groupName.find("Enemy") != std::string::npos) {
+		return "Character/Parameter";
+	}
+	return "Misc";
+}
+
+std::filesystem::path Engine::GlobalVariables::GetCategoryDirectory(const std::string& groupName) const
+{
+	// カテゴリ名はスラッシュ区切りも許可し、階層フォルダとして扱う。
+	return std::filesystem::path(kDirectoryPath) / std::filesystem::path(ResolveCategory(groupName));
+}
+
+std::filesystem::path Engine::GlobalVariables::GetSaveFilePath(const std::string& groupName) const
+{
+	return GetCategoryDirectory(groupName) / (groupName + ".json");
+}
+
+std::filesystem::path Engine::GlobalVariables::FindExistingFilePath(const std::string& groupName) const
+{
+	const std::filesystem::path categoryPath = GetSaveFilePath(groupName);
+	if (std::filesystem::exists(categoryPath)) {
+		return categoryPath;
+	}
+
+	// 旧形式の直下保存ファイルも読めるように残す。
+	const std::filesystem::path legacyPath = std::filesystem::path(kDirectoryPath) / (groupName + ".json");
+	if (std::filesystem::exists(legacyPath)) {
+		return legacyPath;
+	}
+
+	if (!std::filesystem::exists(kDirectoryPath)) {
+		return categoryPath;
+	}
+
+	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(kDirectoryPath)) {
+		if (!entry.is_regular_file() || entry.path().extension() != ".json") {
+			continue;
+		}
+		if (entry.path().stem().string() == groupName) {
+			return entry.path();
+		}
+	}
+	return categoryPath;
+}
+
 
 
 
@@ -229,13 +316,13 @@ void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
 	}
 	// ディレクトリがなければ作成する
 	// 書き込みはループの外で1回だけ行う
-	std::filesystem::path dir(kDirectoryPath);
+	std::filesystem::path dir = GetCategoryDirectory(groupName);
 	if (!std::filesystem::exists(dir)) {
-		std::filesystem::create_directory(dir);
+		std::filesystem::create_directories(dir);
 	}
 
 	// 書き込むJSONファイルのフルパスを合成する
-	std::string filePath = kDirectoryPath + groupName + ".json";
+	std::filesystem::path filePath = GetSaveFilePath(groupName);
 
 	// 書き込み用ファイルストリーム
 	std::ofstream ofs;
@@ -256,7 +343,7 @@ void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
 }
 
 bool Engine::GlobalVariables::RemoveSavedFile(const std::string& groupName) {
-	const std::filesystem::path filePath = std::filesystem::path(kDirectoryPath) / (groupName + ".json");
+	const std::filesystem::path filePath = FindExistingFilePath(groupName);
 	std::error_code error;
 	const bool removed = std::filesystem::remove(filePath, error);
 	return removed && !error;
@@ -273,8 +360,11 @@ void Engine::GlobalVariables::LoadFiles() {
 		return;
 	}
 
-	std::filesystem::directory_iterator dir_it(kDirectoryPath);
+	std::filesystem::recursive_directory_iterator dir_it(kDirectoryPath);
 	for (const std::filesystem::directory_entry& entry : dir_it) {
+		if (!entry.is_regular_file()) {
+			continue;
+		}
 		// ファイルパスを取得
 		const std::filesystem::path& filePath = entry.path();
 
@@ -285,8 +375,19 @@ void Engine::GlobalVariables::LoadFiles() {
 			continue;
 		}
 
-		// ファイル読み込み
-		LoadFile(filePath.stem().string());
+		std::ifstream ifs(filePath);
+		if (ifs.fail()) {
+			continue;
+		}
+
+		// JSON内のルートキーをグループ名として読み込み、ファイル配置変更後も名前衝突を避ける。
+		GvData::json root;
+		ifs >> root;
+		ifs.close();
+		if (!root.is_object() || root.empty()) {
+			continue;
+		}
+		LoadFile(root.begin().key());
 	}
 }
 
@@ -294,7 +395,7 @@ void Engine::GlobalVariables::LoadFiles() {
 /// グループロード
 /// </summary>
 void Engine::GlobalVariables::LoadFile(const std::string& groupName) {
-	std::string filePath = kDirectoryPath + groupName + ".json";
+	std::filesystem::path filePath = FindExistingFilePath(groupName);
 	std::ifstream ifs(filePath);
 	if (ifs.fail()) {
 		MessageBoxA(nullptr, "Failed open data file for read.", "GlobalVariables", 0);

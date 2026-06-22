@@ -40,6 +40,20 @@ namespace Engine {
 	struct ParticleGroupEditorData {
 		std::string texturePath = "resources/Texture/Image.dds";										// 使用するテクスチャ
 		ShapeParameter::ShapeType shapeType = ShapeParameter::ShapeType::Plane;						// エディタ作成時のプリミティブ形状
+		ShapeParameter::ShapePlane plane{};															// 平面パラメータ
+		ShapeParameter::ShapeTriangle triangle{};														// 三角形パラメータ
+		ShapeParameter::ShapeCross cross{};															// 十字パラメータ
+		ShapeParameter::ShapeCube cube{};															// 立方体パラメータ
+		ShapeParameter::Circle circle{};																// 円パラメータ
+		ShapeParameter::Star star{};																	// 星パラメータ
+		ShapeParameter::Crescent crescent{};															// 三日月パラメータ
+		ShapeParameter::Ring ring{};																	// リングパラメータ
+		ShapeParameter::ShapeSphere sphere{};															// 球パラメータ
+		ShapeParameter::ShapeArrow arrow{};															// 矢印パラメータ
+		ShapeParameter::Cylinder cylinder{};															// 円柱パラメータ
+		ShapeParameter::Tube tube{};																	// 筒パラメータ
+		ShapeParameter::Pyramid pyramid{};															// 角錐パラメータ
+		ShapeParameter::Torus torus{};																// トーラスパラメータ
 		EmitData::RasterizerType rasterizerType = EmitData::RasterizerType::MODE_SOLID_BACK;			// カリング設定
 		EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD;								// ブレンド設定
 		bool isEditorPrimitive = false;																// エディタ所有プリミティブで作ったか

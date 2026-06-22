@@ -1,4 +1,4 @@
-﻿#include "ParticleManager.h"
+#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -48,6 +48,117 @@ namespace {
 		case Engine::ShapeParameter::ShapeType::Plane:
 		default:
 			return std::make_unique<Engine::PlanePrimitive>();
+		}
+	}
+
+	void ApplyPrimitiveShapeData(Engine::BasePrimitive* primitive, const Engine::ParticleGroupEditorData& data) {
+		if (primitive == nullptr) {
+			return;
+		}
+
+		// 保存済み形状パラメータを、現在のプリミティブ型に合わせて反映する。
+		switch (data.shapeType)
+		{
+		case Engine::ShapeParameter::ShapeType::Plane:
+			if (auto* typed = dynamic_cast<Engine::PlanePrimitive*>(primitive)) typed->Data() = data.plane;
+			break;
+		case Engine::ShapeParameter::ShapeType::Triangle:
+			if (auto* typed = dynamic_cast<Engine::TrianglePrimitive*>(primitive)) typed->Data() = data.triangle;
+			break;
+		case Engine::ShapeParameter::ShapeType::Cross:
+			if (auto* typed = dynamic_cast<Engine::CrossPrimitive*>(primitive)) typed->Data() = data.cross;
+			break;
+		case Engine::ShapeParameter::ShapeType::Cube:
+			if (auto* typed = dynamic_cast<Engine::CubePrimitive*>(primitive)) typed->Data() = data.cube;
+			break;
+		case Engine::ShapeParameter::ShapeType::Circle:
+			if (auto* typed = dynamic_cast<Engine::CirclePrimitive*>(primitive)) typed->Data() = data.circle;
+			break;
+		case Engine::ShapeParameter::ShapeType::Star:
+			if (auto* typed = dynamic_cast<Engine::StarPrimitive*>(primitive)) typed->Data() = data.star;
+			break;
+		case Engine::ShapeParameter::ShapeType::Crescent:
+			if (auto* typed = dynamic_cast<Engine::CrescentPrimitive*>(primitive)) typed->Data() = data.crescent;
+			break;
+		case Engine::ShapeParameter::ShapeType::Ring:
+			if (auto* typed = dynamic_cast<Engine::RingPrimitive*>(primitive)) typed->Data() = data.ring;
+			break;
+		case Engine::ShapeParameter::ShapeType::Sphere:
+			if (auto* typed = dynamic_cast<Engine::SpherePrimitive*>(primitive)) typed->Data() = data.sphere;
+			break;
+		case Engine::ShapeParameter::ShapeType::Arrow:
+			if (auto* typed = dynamic_cast<Engine::ArrowPrimitive*>(primitive)) typed->Data() = data.arrow;
+			break;
+		case Engine::ShapeParameter::ShapeType::Cylinder:
+			if (auto* typed = dynamic_cast<Engine::CylinderPrimitive*>(primitive)) typed->Data() = data.cylinder;
+			break;
+		case Engine::ShapeParameter::ShapeType::Tube:
+			if (auto* typed = dynamic_cast<Engine::TubePrimitive*>(primitive)) typed->Data() = data.tube;
+			break;
+		case Engine::ShapeParameter::ShapeType::Pyramid:
+			if (auto* typed = dynamic_cast<Engine::PyramidPrimitive*>(primitive)) typed->Data() = data.pyramid;
+			break;
+		case Engine::ShapeParameter::ShapeType::Torus:
+			if (auto* typed = dynamic_cast<Engine::TorusPrimitive*>(primitive)) typed->Data() = data.torus;
+			break;
+		default:
+			break;
+		}
+		primitive->MeshInitialize();
+	}
+
+	void CapturePrimitiveShapeData(const Engine::BasePrimitive* primitive, Engine::ParticleGroupEditorData& data) {
+		if (primitive == nullptr) {
+			return;
+		}
+
+		// エディタ所有プリミティブの現在値を保存用データへ吸い上げる。
+		switch (data.shapeType)
+		{
+		case Engine::ShapeParameter::ShapeType::Plane:
+			if (auto* typed = dynamic_cast<const Engine::PlanePrimitive*>(primitive)) data.plane = const_cast<Engine::PlanePrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Triangle:
+			if (auto* typed = dynamic_cast<const Engine::TrianglePrimitive*>(primitive)) data.triangle = const_cast<Engine::TrianglePrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Cross:
+			if (auto* typed = dynamic_cast<const Engine::CrossPrimitive*>(primitive)) data.cross = const_cast<Engine::CrossPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Cube:
+			if (auto* typed = dynamic_cast<const Engine::CubePrimitive*>(primitive)) data.cube = const_cast<Engine::CubePrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Circle:
+			if (auto* typed = dynamic_cast<const Engine::CirclePrimitive*>(primitive)) data.circle = const_cast<Engine::CirclePrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Star:
+			if (auto* typed = dynamic_cast<const Engine::StarPrimitive*>(primitive)) data.star = const_cast<Engine::StarPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Crescent:
+			if (auto* typed = dynamic_cast<const Engine::CrescentPrimitive*>(primitive)) data.crescent = const_cast<Engine::CrescentPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Ring:
+			if (auto* typed = dynamic_cast<const Engine::RingPrimitive*>(primitive)) data.ring = const_cast<Engine::RingPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Sphere:
+			if (auto* typed = dynamic_cast<const Engine::SpherePrimitive*>(primitive)) data.sphere = const_cast<Engine::SpherePrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Arrow:
+			if (auto* typed = dynamic_cast<const Engine::ArrowPrimitive*>(primitive)) data.arrow = const_cast<Engine::ArrowPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Cylinder:
+			if (auto* typed = dynamic_cast<const Engine::CylinderPrimitive*>(primitive)) data.cylinder = const_cast<Engine::CylinderPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Tube:
+			if (auto* typed = dynamic_cast<const Engine::TubePrimitive*>(primitive)) data.tube = const_cast<Engine::TubePrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Pyramid:
+			if (auto* typed = dynamic_cast<const Engine::PyramidPrimitive*>(primitive)) data.pyramid = const_cast<Engine::PyramidPrimitive*>(typed)->Data();
+			break;
+		case Engine::ShapeParameter::ShapeType::Torus:
+			if (auto* typed = dynamic_cast<const Engine::TorusPrimitive*>(primitive)) data.torus = const_cast<Engine::TorusPrimitive*>(typed)->Data();
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -317,7 +428,7 @@ bool Engine::ParticleManager::CreateEditorParticleGroup(const std::string& name,
 	// パーティクル群が参照するメッシュの寿命を保つため、プリミティブをManager側で所有する。
 	auto primitive = CreateEditorPrimitive(data.shapeType);
 	primitive->Initialize(primitiveCommon, data.texturePath);
-	primitive->MeshInitialize();
+	ApplyPrimitiveShapeData(primitive.get(), data);
 
 	BasePrimitive* primitivePtr = primitive.get();
 	editorParticlePrimitives_[name] = std::move(primitive);
@@ -387,7 +498,12 @@ Engine::ParticleGroupEditorData Engine::ParticleManager::GetEditorParticleGroupD
 
 	auto groupIt = particleGroups.data.find(name);
 	if (groupIt != particleGroups.data.end()) {
-		return CaptureParticleGroupData(groupIt->second, data);
+		data = CaptureParticleGroupData(groupIt->second, data);
+		auto primitiveIt = editorParticlePrimitives_.find(name);
+		if (primitiveIt != editorParticlePrimitives_.end()) {
+			CapturePrimitiveShapeData(primitiveIt->second.get(), data);
+		}
+		return data;
 	}
 	return data;
 }
@@ -405,6 +521,12 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 
 	// 保存データをパーティクル群の実体へ反映し、次回保存時にも同じ値を取り出せるよう保持する。
 	ParticleGroup& group = particleGroups[name];
+	auto primitiveIt = editorParticlePrimitives_.find(name);
+	if (primitiveIt != editorParticlePrimitives_.end()) {
+		// プリミティブ形状を変更した場合は、パーティクル群が参照するメッシュも再生成する。
+		ApplyPrimitiveShapeData(primitiveIt->second.get(), data);
+		group.mesh = primitiveIt->second->GetModelMesh();
+	}
 	group.rasteType = data.rasterizerType;
 	group.blendType = data.blendType;
 	group.isUVClamp = data.isUVClamp;

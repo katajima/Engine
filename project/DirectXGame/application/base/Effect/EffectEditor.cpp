@@ -13,6 +13,95 @@ namespace {
 	const char* kParticleRegistryGroup = "ParticleEditor";
 	const char* kDeletedParticleRegistryGroup = "ParticleEditorDeleted";
 	const char* kParticleDataPrefix = "ParticleGroup_";
+
+	bool DrawPrimitiveShapeParameters(Engine::ParticleGroupEditorData& data) {
+		// 選択中プリミティブに対応した形状パラメータだけを表示し、変更があれば保存対象にする。
+		bool changed = false;
+		if (!ImGui::CollapsingHeader("Primitive Shape")) {
+			return changed;
+		}
+
+		switch (data.shapeType)
+		{
+		case Engine::ShapeParameter::ShapeType::Plane:
+			changed |= ImGui::DragFloat("Plane Width", &data.plane.width, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Plane Height", &data.plane.height, 0.01f, 0.01f, 1000.0f);
+			break;
+		case Engine::ShapeParameter::ShapeType::Triangle:
+			changed |= ImGui::DragFloat2("Triangle Up", &data.triangle.upPos.x, 0.01f);
+			changed |= ImGui::DragFloat2("Triangle Left", &data.triangle.leftPos.x, 0.01f);
+			changed |= ImGui::DragFloat2("Triangle Right", &data.triangle.rightPos.x, 0.01f);
+			break;
+		case Engine::ShapeParameter::ShapeType::Cross:
+			changed |= ImGui::DragFloat("Cross Arm Length", &data.cross.armLength, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Cross Arm Width", &data.cross.armWidth, 0.01f, 0.01f, 1000.0f);
+			break;
+		case Engine::ShapeParameter::ShapeType::Cube:
+			changed |= ImGui::DragFloat3("Cube Size", &data.cube.size.x, 0.01f, 0.01f, 1000.0f);
+			break;
+		case Engine::ShapeParameter::ShapeType::Circle:
+			changed |= ImGui::DragFloat("Circle Radius", &data.circle.radius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Circle Segments", &data.circle.segments, 1, 3, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Star:
+			changed |= ImGui::DragFloat("Star Inner Radius", &data.star.innerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Star Outer Radius", &data.star.outerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Star Segments", &data.star.segments, 1, 3, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Crescent:
+			changed |= ImGui::DragFloat("Crescent Inner Radius", &data.crescent.innerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Crescent Outer Radius", &data.crescent.outerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Crescent Distance", &data.crescent.distance, 0.01f, 0.0001f, 1000.0f);
+			changed |= ImGui::DragInt("Crescent Segments", &data.crescent.segments, 1, 8, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Ring:
+			changed |= ImGui::DragFloat("Ring Inner Radius", &data.ring.innerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Ring Outer Radius", &data.ring.outerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Ring Segments", &data.ring.segments, 1, 5, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Sphere:
+			changed |= ImGui::DragFloat("Sphere Radius", &data.sphere.radius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Sphere Latitude", &data.sphere.latitudeSegments, 1, 3, 256);
+			changed |= ImGui::DragInt("Sphere Longitude", &data.sphere.longitudeSegments, 1, 3, 256);
+			changed |= ImGui::Checkbox("Sphere Top Based", &data.sphere.isTopBased);
+			break;
+		case Engine::ShapeParameter::ShapeType::Arrow:
+			changed |= ImGui::DragFloat("Arrow Shaft Length", &data.arrow.shaftLength, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Arrow Shaft Radius", &data.arrow.shaftRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Arrow Head Length", &data.arrow.headLength, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Arrow Head Radius", &data.arrow.headRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Arrow Segments", &data.arrow.segments, 1, 3, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Cylinder:
+			changed |= ImGui::DragFloat("Cylinder Inner Radius", &data.cylinder.innerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Cylinder Outer Radius", &data.cylinder.outerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Cylinder Height", &data.cylinder.height, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Cylinder Segments", &data.cylinder.segments, 1, 3, 256);
+			changed |= ImGui::Checkbox("Cylinder Cover", &data.cylinder.isCover);
+			break;
+		case Engine::ShapeParameter::ShapeType::Tube:
+			changed |= ImGui::DragFloat("Tube Radius", &data.tube.radius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Tube Inner Radius", &data.tube.innerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Tube Height", &data.tube.height, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Tube Segments", &data.tube.segments, 1, 3, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Pyramid:
+			changed |= ImGui::DragFloat("Pyramid Radius", &data.pyramid.radius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Pyramid Height", &data.pyramid.height, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Pyramid Segments", &data.pyramid.segments, 1, 3, 256);
+			break;
+		case Engine::ShapeParameter::ShapeType::Torus:
+			changed |= ImGui::DragFloat("Torus Inner Radius", &data.torus.innerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragFloat("Torus Outer Radius", &data.torus.outerRadius, 0.01f, 0.01f, 1000.0f);
+			changed |= ImGui::DragInt("Torus Segments", &data.torus.segments, 1, 3, 256);
+			changed |= ImGui::DragInt("Torus Tube Segments", &data.torus.tubeSegments, 1, 3, 256);
+			break;
+		default:
+			ImGui::TextDisabled("No primitive shape parameters.");
+			break;
+		}
+		return changed;
+	}
 }
 
 void EffectEditor::Initialize(Engine::EffectComponent* effectComponent, 
@@ -174,6 +263,7 @@ void EffectEditor::AddEffectGlobalData(const std::string& name, const std::strin
 	}
 	EffectGlobalData data;
 	data.particleName = particleName;
+	globalVariables->SetGroupCategory(name, "Effect");
 	// 保存項目に追加
 	AddItem(name, data);
 	// データを取得
@@ -188,6 +278,8 @@ void EffectEditor::LoadRegisteredEffectGlobalDatas() {
 	// レジストリグループがなければ作成し、以降の追加保存に備える。
 	globalVariables->CreateGroup(kEffectRegistryGroup);
 	globalVariables->CreateGroup(kDeletedEffectRegistryGroup);
+	globalVariables->SetGroupCategory(kEffectRegistryGroup, "Effect");
+	globalVariables->SetGroupCategory(kDeletedEffectRegistryGroup, "Effect");
 
 	for (const std::string& effectName : globalVariables->GetKeys(kEffectRegistryGroup)) {
 		if (effectGlobalDatas_.find(effectName) != effectGlobalDatas_.end() ||
@@ -198,6 +290,7 @@ void EffectEditor::LoadRegisteredEffectGlobalDatas() {
 
 		// 保存済みエフェクト本体のグループからデータを読み戻す。
 		EffectGlobalData data;
+		globalVariables->SetGroupCategory(effectName, "Effect");
 		GetValue(effectName, data);
 		effectGlobalDatas_[effectName] = data;
 	}
@@ -209,6 +302,8 @@ void EffectEditor::LoadRegisteredParticleGroups() {
 	// レジストリグループがなければ作成し、以降の追加保存に備える。
 	globalVariables->CreateGroup(kParticleRegistryGroup);
 	globalVariables->CreateGroup(kDeletedParticleRegistryGroup);
+	globalVariables->SetGroupCategory(kParticleRegistryGroup, "Effect/Particle");
+	globalVariables->SetGroupCategory(kDeletedParticleRegistryGroup, "Effect/Particle");
 
 	// 削除済みとして保存されている既存パーティクル群を、ハードコード生成後に取り除く。
 	for (const std::string& particleName : globalVariables->GetKeys(kDeletedParticleRegistryGroup)) {
@@ -241,6 +336,7 @@ void EffectEditor::LoadRegisteredParticleGroups() {
 
 		// 保存済みメタデータから、エディタ所有プリミティブのパーティクル群を復元する。
 		Engine::ParticleGroupEditorData data;
+		globalVariables->SetGroupCategory(dataGroupName, "Effect/Particle");
 		GetParticleGroupValue(particleName, data);
 		if (!particleManager->GetParticleGroups().Contains(particleName)) {
 			particleManager->CreateEditorParticleGroup(particleName, data);
@@ -477,6 +573,9 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	if (Engine::ImGuiUtility::SelectEnum("Shape", ShapeLabels, data.shapeType)) {
 		recreate = true;
 	}
+	if (DrawPrimitiveShapeParameters(data)) {
+		saveData = true;
+	}
 
 	static const char* RasterizerLabels[] = {
 		"Solid Back",
@@ -627,6 +726,7 @@ void EffectEditor::AddEffectFromEditor() {
 	UnregisterDeletedEffectName(effectName);
 	EffectGlobalData data;
 	data.particleName = newEffectParticleName_;
+	globalVariables->SetGroupCategory(effectName, "Effect");
 	AddItem(effectName, data);
 	GetValue(effectName, data);
 	effectGlobalDatas_[effectName] = data;
@@ -709,6 +809,7 @@ void EffectEditor::DeleteEffect(const std::string& effectName) {
 
 void EffectEditor::RegisterEffectName(const std::string& name) {
 	// レジストリはキー名だけを一覧として使うため、値にも同じ名前を保存する。
+	globalVariables->SetGroupCategory(kEffectRegistryGroup, "Effect");
 	globalVariables->CreateGroup(kEffectRegistryGroup);
 	globalVariables->AddItem(kEffectRegistryGroup, name, name);
 }
@@ -718,6 +819,7 @@ void EffectEditor::UnregisterEffectName(const std::string& name) {
 }
 
 void EffectEditor::RegisterDeletedEffectName(const std::string& name) {
+	globalVariables->SetGroupCategory(kDeletedEffectRegistryGroup, "Effect");
 	globalVariables->CreateGroup(kDeletedEffectRegistryGroup);
 	globalVariables->AddItem(kDeletedEffectRegistryGroup, name, name);
 }
@@ -861,10 +963,56 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 
 void EffectEditor::AddParticleGroupItem(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
 	const std::string groupName = kParticleDataPrefix + particleName;
+	globalVariables->SetGroupCategory(groupName, "Effect/Particle");
 	globalVariables->CreateGroup(groupName);
 	// パーティクル群を外部ファイルから復元するため、生成情報と実行時の編集値をまとめて登録する。
 	globalVariables->AddItem(groupName, "texturePath", data.texturePath);
 	globalVariables->AddEnumItem<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
+	globalVariables->AddItem(groupName, "shape.plane.width", data.plane.width);
+	globalVariables->AddItem(groupName, "shape.plane.height", data.plane.height);
+	globalVariables->AddItem(groupName, "shape.triangle.upPos", data.triangle.upPos);
+	globalVariables->AddItem(groupName, "shape.triangle.leftPos", data.triangle.leftPos);
+	globalVariables->AddItem(groupName, "shape.triangle.rightPos", data.triangle.rightPos);
+	globalVariables->AddItem(groupName, "shape.cross.armLength", data.cross.armLength);
+	globalVariables->AddItem(groupName, "shape.cross.armWidth", data.cross.armWidth);
+	globalVariables->AddItem(groupName, "shape.cube.size", data.cube.size);
+	globalVariables->AddItem(groupName, "shape.circle.radius", data.circle.radius);
+	globalVariables->AddItem(groupName, "shape.circle.segments", data.circle.segments);
+	globalVariables->AddItem(groupName, "shape.star.innerRadius", data.star.innerRadius);
+	globalVariables->AddItem(groupName, "shape.star.outerRadius", data.star.outerRadius);
+	globalVariables->AddItem(groupName, "shape.star.segments", data.star.segments);
+	globalVariables->AddItem(groupName, "shape.crescent.innerRadius", data.crescent.innerRadius);
+	globalVariables->AddItem(groupName, "shape.crescent.outerRadius", data.crescent.outerRadius);
+	globalVariables->AddItem(groupName, "shape.crescent.distance", data.crescent.distance);
+	globalVariables->AddItem(groupName, "shape.crescent.segments", data.crescent.segments);
+	globalVariables->AddItem(groupName, "shape.ring.innerRadius", data.ring.innerRadius);
+	globalVariables->AddItem(groupName, "shape.ring.outerRadius", data.ring.outerRadius);
+	globalVariables->AddItem(groupName, "shape.ring.segments", data.ring.segments);
+	globalVariables->AddItem(groupName, "shape.sphere.radius", data.sphere.radius);
+	globalVariables->AddItem(groupName, "shape.sphere.latitudeSegments", data.sphere.latitudeSegments);
+	globalVariables->AddItem(groupName, "shape.sphere.longitudeSegments", data.sphere.longitudeSegments);
+	globalVariables->AddItem(groupName, "shape.sphere.isTopBased", data.sphere.isTopBased);
+	globalVariables->AddItem(groupName, "shape.arrow.shaftLength", data.arrow.shaftLength);
+	globalVariables->AddItem(groupName, "shape.arrow.shaftRadius", data.arrow.shaftRadius);
+	globalVariables->AddItem(groupName, "shape.arrow.headLength", data.arrow.headLength);
+	globalVariables->AddItem(groupName, "shape.arrow.headRadius", data.arrow.headRadius);
+	globalVariables->AddItem(groupName, "shape.arrow.segments", data.arrow.segments);
+	globalVariables->AddItem(groupName, "shape.cylinder.innerRadius", data.cylinder.innerRadius);
+	globalVariables->AddItem(groupName, "shape.cylinder.outerRadius", data.cylinder.outerRadius);
+	globalVariables->AddItem(groupName, "shape.cylinder.height", data.cylinder.height);
+	globalVariables->AddItem(groupName, "shape.cylinder.segments", data.cylinder.segments);
+	globalVariables->AddItem(groupName, "shape.cylinder.isCover", data.cylinder.isCover);
+	globalVariables->AddItem(groupName, "shape.tube.radius", data.tube.radius);
+	globalVariables->AddItem(groupName, "shape.tube.innerRadius", data.tube.innerRadius);
+	globalVariables->AddItem(groupName, "shape.tube.height", data.tube.height);
+	globalVariables->AddItem(groupName, "shape.tube.segments", data.tube.segments);
+	globalVariables->AddItem(groupName, "shape.pyramid.radius", data.pyramid.radius);
+	globalVariables->AddItem(groupName, "shape.pyramid.height", data.pyramid.height);
+	globalVariables->AddItem(groupName, "shape.pyramid.segments", data.pyramid.segments);
+	globalVariables->AddItem(groupName, "shape.torus.innerRadius", data.torus.innerRadius);
+	globalVariables->AddItem(groupName, "shape.torus.outerRadius", data.torus.outerRadius);
+	globalVariables->AddItem(groupName, "shape.torus.segments", data.torus.segments);
+	globalVariables->AddItem(groupName, "shape.torus.tubeSegments", data.torus.tubeSegments);
 	globalVariables->AddEnumItem<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
 	globalVariables->AddEnumItem<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
 	globalVariables->AddItem(groupName, "isEditorPrimitive", data.isEditorPrimitive);
@@ -904,6 +1052,51 @@ void EffectEditor::GetParticleGroupValue(const std::string& particleName, Engine
 	// 旧形式の保存ファイルでも読み込めるよう、追加項目はキーがある場合だけ上書きする。
 	data.texturePath = globalVariables->GetValue<std::string>(groupName, "texturePath");
 	data.shapeType = globalVariables->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
+	if (globalVariables->HasKey(groupName, "shape.plane.width")) data.plane.width = globalVariables->GetValue<float>(groupName, "shape.plane.width");
+	if (globalVariables->HasKey(groupName, "shape.plane.height")) data.plane.height = globalVariables->GetValue<float>(groupName, "shape.plane.height");
+	if (globalVariables->HasKey(groupName, "shape.triangle.upPos")) data.triangle.upPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.upPos");
+	if (globalVariables->HasKey(groupName, "shape.triangle.leftPos")) data.triangle.leftPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.leftPos");
+	if (globalVariables->HasKey(groupName, "shape.triangle.rightPos")) data.triangle.rightPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.rightPos");
+	if (globalVariables->HasKey(groupName, "shape.cross.armLength")) data.cross.armLength = globalVariables->GetValue<float>(groupName, "shape.cross.armLength");
+	if (globalVariables->HasKey(groupName, "shape.cross.armWidth")) data.cross.armWidth = globalVariables->GetValue<float>(groupName, "shape.cross.armWidth");
+	if (globalVariables->HasKey(groupName, "shape.cube.size")) data.cube.size = globalVariables->GetValue<Vector3>(groupName, "shape.cube.size");
+	if (globalVariables->HasKey(groupName, "shape.circle.radius")) data.circle.radius = globalVariables->GetValue<float>(groupName, "shape.circle.radius");
+	if (globalVariables->HasKey(groupName, "shape.circle.segments")) data.circle.segments = globalVariables->GetValue<int32_t>(groupName, "shape.circle.segments");
+	if (globalVariables->HasKey(groupName, "shape.star.innerRadius")) data.star.innerRadius = globalVariables->GetValue<float>(groupName, "shape.star.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.star.outerRadius")) data.star.outerRadius = globalVariables->GetValue<float>(groupName, "shape.star.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.star.segments")) data.star.segments = globalVariables->GetValue<int32_t>(groupName, "shape.star.segments");
+	if (globalVariables->HasKey(groupName, "shape.crescent.innerRadius")) data.crescent.innerRadius = globalVariables->GetValue<float>(groupName, "shape.crescent.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.crescent.outerRadius")) data.crescent.outerRadius = globalVariables->GetValue<float>(groupName, "shape.crescent.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.crescent.distance")) data.crescent.distance = globalVariables->GetValue<float>(groupName, "shape.crescent.distance");
+	if (globalVariables->HasKey(groupName, "shape.crescent.segments")) data.crescent.segments = globalVariables->GetValue<int32_t>(groupName, "shape.crescent.segments");
+	if (globalVariables->HasKey(groupName, "shape.ring.innerRadius")) data.ring.innerRadius = globalVariables->GetValue<float>(groupName, "shape.ring.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.ring.outerRadius")) data.ring.outerRadius = globalVariables->GetValue<float>(groupName, "shape.ring.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.ring.segments")) data.ring.segments = globalVariables->GetValue<int32_t>(groupName, "shape.ring.segments");
+	if (globalVariables->HasKey(groupName, "shape.sphere.radius")) data.sphere.radius = globalVariables->GetValue<float>(groupName, "shape.sphere.radius");
+	if (globalVariables->HasKey(groupName, "shape.sphere.latitudeSegments")) data.sphere.latitudeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.sphere.latitudeSegments");
+	if (globalVariables->HasKey(groupName, "shape.sphere.longitudeSegments")) data.sphere.longitudeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.sphere.longitudeSegments");
+	if (globalVariables->HasKey(groupName, "shape.sphere.isTopBased")) data.sphere.isTopBased = globalVariables->GetValue<bool>(groupName, "shape.sphere.isTopBased");
+	if (globalVariables->HasKey(groupName, "shape.arrow.shaftLength")) data.arrow.shaftLength = globalVariables->GetValue<float>(groupName, "shape.arrow.shaftLength");
+	if (globalVariables->HasKey(groupName, "shape.arrow.shaftRadius")) data.arrow.shaftRadius = globalVariables->GetValue<float>(groupName, "shape.arrow.shaftRadius");
+	if (globalVariables->HasKey(groupName, "shape.arrow.headLength")) data.arrow.headLength = globalVariables->GetValue<float>(groupName, "shape.arrow.headLength");
+	if (globalVariables->HasKey(groupName, "shape.arrow.headRadius")) data.arrow.headRadius = globalVariables->GetValue<float>(groupName, "shape.arrow.headRadius");
+	if (globalVariables->HasKey(groupName, "shape.arrow.segments")) data.arrow.segments = globalVariables->GetValue<int32_t>(groupName, "shape.arrow.segments");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.innerRadius")) data.cylinder.innerRadius = globalVariables->GetValue<float>(groupName, "shape.cylinder.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.outerRadius")) data.cylinder.outerRadius = globalVariables->GetValue<float>(groupName, "shape.cylinder.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.height")) data.cylinder.height = globalVariables->GetValue<float>(groupName, "shape.cylinder.height");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.segments")) data.cylinder.segments = globalVariables->GetValue<int32_t>(groupName, "shape.cylinder.segments");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.isCover")) data.cylinder.isCover = globalVariables->GetValue<bool>(groupName, "shape.cylinder.isCover");
+	if (globalVariables->HasKey(groupName, "shape.tube.radius")) data.tube.radius = globalVariables->GetValue<float>(groupName, "shape.tube.radius");
+	if (globalVariables->HasKey(groupName, "shape.tube.innerRadius")) data.tube.innerRadius = globalVariables->GetValue<float>(groupName, "shape.tube.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.tube.height")) data.tube.height = globalVariables->GetValue<float>(groupName, "shape.tube.height");
+	if (globalVariables->HasKey(groupName, "shape.tube.segments")) data.tube.segments = globalVariables->GetValue<int32_t>(groupName, "shape.tube.segments");
+	if (globalVariables->HasKey(groupName, "shape.pyramid.radius")) data.pyramid.radius = globalVariables->GetValue<float>(groupName, "shape.pyramid.radius");
+	if (globalVariables->HasKey(groupName, "shape.pyramid.height")) data.pyramid.height = globalVariables->GetValue<float>(groupName, "shape.pyramid.height");
+	if (globalVariables->HasKey(groupName, "shape.pyramid.segments")) data.pyramid.segments = globalVariables->GetValue<int32_t>(groupName, "shape.pyramid.segments");
+	if (globalVariables->HasKey(groupName, "shape.torus.innerRadius")) data.torus.innerRadius = globalVariables->GetValue<float>(groupName, "shape.torus.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.torus.outerRadius")) data.torus.outerRadius = globalVariables->GetValue<float>(groupName, "shape.torus.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.torus.segments")) data.torus.segments = globalVariables->GetValue<int32_t>(groupName, "shape.torus.segments");
+	if (globalVariables->HasKey(groupName, "shape.torus.tubeSegments")) data.torus.tubeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.torus.tubeSegments");
 	data.rasterizerType = globalVariables->GetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType");
 	data.blendType = globalVariables->GetEnumValue<EmitData::BlendType>(groupName, "blendType");
 	data.isEditorPrimitive = globalVariables->GetValue<bool>(groupName, "isEditorPrimitive");
@@ -943,6 +1136,51 @@ void EffectEditor::SetParticleGroupValue(const std::string& particleName, const 
 	// AddItemでキーを揃えたあと、現在の編集内容で外部保存用データを上書きする。
 	globalVariables->SetValue(groupName, "texturePath", data.texturePath);
 	globalVariables->SetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
+	globalVariables->SetValue(groupName, "shape.plane.width", data.plane.width);
+	globalVariables->SetValue(groupName, "shape.plane.height", data.plane.height);
+	globalVariables->SetValue(groupName, "shape.triangle.upPos", data.triangle.upPos);
+	globalVariables->SetValue(groupName, "shape.triangle.leftPos", data.triangle.leftPos);
+	globalVariables->SetValue(groupName, "shape.triangle.rightPos", data.triangle.rightPos);
+	globalVariables->SetValue(groupName, "shape.cross.armLength", data.cross.armLength);
+	globalVariables->SetValue(groupName, "shape.cross.armWidth", data.cross.armWidth);
+	globalVariables->SetValue(groupName, "shape.cube.size", data.cube.size);
+	globalVariables->SetValue(groupName, "shape.circle.radius", data.circle.radius);
+	globalVariables->SetValue(groupName, "shape.circle.segments", data.circle.segments);
+	globalVariables->SetValue(groupName, "shape.star.innerRadius", data.star.innerRadius);
+	globalVariables->SetValue(groupName, "shape.star.outerRadius", data.star.outerRadius);
+	globalVariables->SetValue(groupName, "shape.star.segments", data.star.segments);
+	globalVariables->SetValue(groupName, "shape.crescent.innerRadius", data.crescent.innerRadius);
+	globalVariables->SetValue(groupName, "shape.crescent.outerRadius", data.crescent.outerRadius);
+	globalVariables->SetValue(groupName, "shape.crescent.distance", data.crescent.distance);
+	globalVariables->SetValue(groupName, "shape.crescent.segments", data.crescent.segments);
+	globalVariables->SetValue(groupName, "shape.ring.innerRadius", data.ring.innerRadius);
+	globalVariables->SetValue(groupName, "shape.ring.outerRadius", data.ring.outerRadius);
+	globalVariables->SetValue(groupName, "shape.ring.segments", data.ring.segments);
+	globalVariables->SetValue(groupName, "shape.sphere.radius", data.sphere.radius);
+	globalVariables->SetValue(groupName, "shape.sphere.latitudeSegments", data.sphere.latitudeSegments);
+	globalVariables->SetValue(groupName, "shape.sphere.longitudeSegments", data.sphere.longitudeSegments);
+	globalVariables->SetValue(groupName, "shape.sphere.isTopBased", data.sphere.isTopBased);
+	globalVariables->SetValue(groupName, "shape.arrow.shaftLength", data.arrow.shaftLength);
+	globalVariables->SetValue(groupName, "shape.arrow.shaftRadius", data.arrow.shaftRadius);
+	globalVariables->SetValue(groupName, "shape.arrow.headLength", data.arrow.headLength);
+	globalVariables->SetValue(groupName, "shape.arrow.headRadius", data.arrow.headRadius);
+	globalVariables->SetValue(groupName, "shape.arrow.segments", data.arrow.segments);
+	globalVariables->SetValue(groupName, "shape.cylinder.innerRadius", data.cylinder.innerRadius);
+	globalVariables->SetValue(groupName, "shape.cylinder.outerRadius", data.cylinder.outerRadius);
+	globalVariables->SetValue(groupName, "shape.cylinder.height", data.cylinder.height);
+	globalVariables->SetValue(groupName, "shape.cylinder.segments", data.cylinder.segments);
+	globalVariables->SetValue(groupName, "shape.cylinder.isCover", data.cylinder.isCover);
+	globalVariables->SetValue(groupName, "shape.tube.radius", data.tube.radius);
+	globalVariables->SetValue(groupName, "shape.tube.innerRadius", data.tube.innerRadius);
+	globalVariables->SetValue(groupName, "shape.tube.height", data.tube.height);
+	globalVariables->SetValue(groupName, "shape.tube.segments", data.tube.segments);
+	globalVariables->SetValue(groupName, "shape.pyramid.radius", data.pyramid.radius);
+	globalVariables->SetValue(groupName, "shape.pyramid.height", data.pyramid.height);
+	globalVariables->SetValue(groupName, "shape.pyramid.segments", data.pyramid.segments);
+	globalVariables->SetValue(groupName, "shape.torus.innerRadius", data.torus.innerRadius);
+	globalVariables->SetValue(groupName, "shape.torus.outerRadius", data.torus.outerRadius);
+	globalVariables->SetValue(groupName, "shape.torus.segments", data.torus.segments);
+	globalVariables->SetValue(groupName, "shape.torus.tubeSegments", data.torus.tubeSegments);
 	globalVariables->SetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
 	globalVariables->SetEnumValue<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
 	globalVariables->SetValue(groupName, "isEditorPrimitive", data.isEditorPrimitive);
@@ -978,6 +1216,7 @@ void EffectEditor::SetParticleGroupValue(const std::string& particleName, const 
 }
 
 void EffectEditor::RegisterParticleGroupName(const std::string& name) {
+	globalVariables->SetGroupCategory(kParticleRegistryGroup, "Effect/Particle");
 	globalVariables->CreateGroup(kParticleRegistryGroup);
 	globalVariables->AddItem(kParticleRegistryGroup, name, name);
 }
@@ -987,6 +1226,7 @@ void EffectEditor::UnregisterParticleGroupName(const std::string& name) {
 }
 
 void EffectEditor::RegisterDeletedParticleGroupName(const std::string& name) {
+	globalVariables->SetGroupCategory(kDeletedParticleRegistryGroup, "Effect/Particle");
 	globalVariables->CreateGroup(kDeletedParticleRegistryGroup);
 	globalVariables->AddItem(kDeletedParticleRegistryGroup, name, name);
 }
@@ -1011,6 +1251,7 @@ void EffectEditor::RenameParticleReferences(const std::string& oldName, const st
 }
 
 void EffectEditor::AddItem(const std::string& name, const EffectGlobalData& data) {
+	globalVariables->SetGroupCategory(name, "Effect");
 	globalVariables->CreateGroup(name);
 	globalVariables->AddItem(name, "particleName", data.particleName);
 	globalVariables->AddItem(name, "frequency", data.frequency);

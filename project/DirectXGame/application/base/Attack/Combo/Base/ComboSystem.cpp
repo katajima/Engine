@@ -419,6 +419,8 @@ namespace Combo {
 #pragma region Global
 
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
+		globalVariables->SetGroupCategory(this->name, "Character/Combo");
+		globalVariables->SetGroupCategory(name, "Character/Combo");
 		globalVariables->CreateGroup(name);
 
 		// 既に存在する場合は追加しない

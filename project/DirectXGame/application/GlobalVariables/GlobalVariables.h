@@ -1,5 +1,6 @@
 #pragma once
 #include"GlobalVariablesFanction.h"
+#include <filesystem>
 
 
 namespace Engine {
@@ -64,6 +65,8 @@ namespace Engine {
 		void RemoveGroup(const std::string& groupName);
 		// グループ名変更
 		bool RenameGroup(const std::string& oldName, const std::string& newName);
+		// 保存カテゴリを設定
+		void SetGroupCategory(const std::string& groupName, const std::string& categoryName);
 
 		// 複製
 		bool DuplicateItem(
@@ -112,9 +115,19 @@ namespace Engine {
 		// 全データ
 		std::map<std::string, GvData::Group> datas_;
 		std::map<std::string, std::vector<std::string>> groupKeys_; // 順序を保持するためのリスト
+		std::map<std::string, std::string> groupCategories_; // グループごとの保存先カテゴリ
 
 		//グローバル変数の保存先
 		const std::string kDirectoryPath = "resources/GlobalVariables/";
+
+		// 保存カテゴリ名を取得
+		std::string ResolveCategory(const std::string& groupName) const;
+		// 保存カテゴリのフォルダパスを取得
+		std::filesystem::path GetCategoryDirectory(const std::string& groupName) const;
+		// グループの保存ファイルパスを取得
+		std::filesystem::path GetSaveFilePath(const std::string& groupName) const;
+		// 旧形式を含めた既存保存ファイルパスを探す
+		std::filesystem::path FindExistingFilePath(const std::string& groupName) const;
 	};
 
 

@@ -72,6 +72,7 @@ namespace Character {
 	// 保存生成
 	void  BaseCharacter::CreateGroup(const std::string name) {
 		objectComponent_->SetName(name);
+		globalVariables->SetGroupCategory(name, "Character/Parameter");
 		globalVariables->CreateGroup(name);
 	}
 
