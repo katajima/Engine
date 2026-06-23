@@ -53,80 +53,118 @@ void InputManager::BuildGameplayActions(){
 
     move = ClampLen1(move);
     value2_[Idx(Action::Move)] = move;
+    pressed_[Idx(Action::Move)] = move.x != 0.0f || move.y != 0.0f;
+    triggered_[Idx(Action::Move)] = pressed_[Idx(Action::Move)] && !isDown_[Idx(Action::Move)];
+    released_[Idx(Action::Move)] = !pressed_[Idx(Action::Move)] && isDown_[Idx(Action::Move)];
 
-    // ---- Look（RightStick だけ例）----
-    value2_[Idx(Action::Look)] = input_->GetGamePadRightStick();
+    // ---- Look（RightStick + 矢印キー + 右クリック中のマウス移動）----
+    Vector2 look = input_->GetGamePadRightStick();
+    if (input_->IsPushKey(DIK_LEFT)) look.x -= 1.0f;
+    if (input_->IsPushKey(DIK_RIGHT)) look.x += 1.0f;
+    if (input_->IsPushKey(DIK_UP)) look.y += 1.0f;
+    if (input_->IsPushKey(DIK_DOWN)) look.y -= 1.0f;
+    if (input_->IsMousePressed(1)) {
+        const Vector2 mouseDelta = input_->GetMouseMoveDelta();
+        look.x += mouseDelta.x * 0.05f;
+        look.y -= mouseDelta.y * 0.05f;
+    }
+    look = ClampLen1(look);
+    value2_[Idx(Action::Look)] = look;
+    pressed_[Idx(Action::Look)] = look.x != 0.0f || look.y != 0.0f;
+    triggered_[Idx(Action::Look)] = pressed_[Idx(Action::Look)] && !isDown_[Idx(Action::Look)];
+    released_[Idx(Action::Look)] = !pressed_[Idx(Action::Look)] && isDown_[Idx(Action::Look)];
 
-    // ---- Attack（Pad X）----
+    // ---- Attack（Pad X / 左クリック / J）----
     triggered_[Idx(Action::LightAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X) ||
+        input_->IsMouseTriggered(0) ||
+        input_->IsTriggerKey(DIK_J);
 
     pressed_[Idx(Action::LightAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_X);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_X) ||
+        input_->IsMousePressed(0) ||
+        input_->IsPushKey(DIK_J);
 
     released_[Idx(Action::LightAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_X);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_X) ||
+        input_->IsMouseReleased(0) ||
+        input_->IsKeyReleased(DIK_J);
 
-    // ---- Attack（Pad Y）----
+    // ---- Attack（Pad Y / K）----
     triggered_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y) ||
+        input_->IsTriggerKey(DIK_K);
 
     pressed_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y) ||
+        input_->IsPushKey(DIK_K);
 
     released_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y) ||
+        input_->IsKeyReleased(DIK_K);
 
-    // ---- Attack（Pad A）----
+    // ---- Jump（Pad A / Space）----
     triggered_[Idx(Action::Jump)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A) ||
+        input_->IsTriggerKey(DIK_SPACE);
 
     pressed_[Idx(Action::Jump)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_A);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_A) ||
+        input_->IsPushKey(DIK_SPACE);
 
     released_[Idx(Action::Jump)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_A);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_A) ||
+        input_->IsKeyReleased(DIK_SPACE);
 
-    // ---- Attack（Pad RB）----
+    // ---- Special（Pad RB / R）----
     triggered_[Idx(Action::Special)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
+        input_->IsTriggerKey(DIK_R);
 
     pressed_[Idx(Action::Special)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_RB);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_RB) ||
+        input_->IsPushKey(DIK_R);
 
     released_[Idx(Action::Special)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB) ||
+        input_->IsKeyReleased(DIK_R);
 
-    // ---- Attack（Pad B）----
+    // ---- Skill（Pad B / E）----
     triggered_[Idx(Action::Skill)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
+        input_->IsTriggerKey(DIK_E);
 
     pressed_[Idx(Action::Skill)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B) ||
+        input_->IsPushKey(DIK_E);
 
     released_[Idx(Action::Skill)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B) ||
+        input_->IsKeyReleased(DIK_E);
 
-    // ---- Dodge（Pad LB）----
+    // ---- Dodge（Pad LB / LeftShift）----
     triggered_[Idx(Action::Dodge)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB) ||
+        input_->IsTriggerKey(DIK_LSHIFT);
 
     pressed_[Idx(Action::Dodge)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB) ||
+        input_->IsPushKey(DIK_LSHIFT);
 
     released_[Idx(Action::Dodge)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB) ||
+        input_->IsKeyReleased(DIK_LSHIFT);
 
-    // ---- Dash（LT 押した瞬間）----
-    triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f);
-    pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f);
-    released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f);
+    // ---- Dash（LT / LeftShift）----
+    triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_LSHIFT);
+    pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f) || input_->IsPushKey(DIK_LSHIFT);
+    released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_LSHIFT);
     value1_[Idx(Action::Dash)] = input_->GetGamePadLeftTrigger(); // アナログ値も欲しい場合
 
-    // ---- LockOn（RT 押している間）----
-    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f);
-    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f);
-    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f);
+    // ---- LockOn（RT / Q）----
+    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_Q);
+    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f) || input_->IsPushKey(DIK_Q);
+    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_Q);
     value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
 
    

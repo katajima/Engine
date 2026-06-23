@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -83,6 +83,13 @@ namespace Combo {
 		kButton,	// ボタン入力で回収
 		kTimer,		// 時間経過で回収
 		kNearOwner,	// 投擲物に近づいたら回収
+	};
+
+	// コンボ演出の発生条件
+	enum class ComboEffectTriggerType {
+		kTimeWindow,	// 指定時間範囲中に頻度ごと発生
+		kTimer,			// 指定時間経過で一回発生
+		kLanding,		// 着地した瞬間に一回発生
 	};
 
 	// 保存項目用遠距離攻撃データ
@@ -258,6 +265,7 @@ namespace Combo {
 	struct ComboEffectEntry {
 		std::string effectName = "";					// 発生させるエフェクト名
 		std::string parentName = "Player";				// 発生位置の追従先
+		ComboEffectTriggerType triggerType = ComboEffectTriggerType::kTimeWindow;	// 発生条件
 		float startTime = 0.0f;							// コンボ開始から発生開始までの時間
 		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
 		float interval = 0.1f;							// 発生頻度

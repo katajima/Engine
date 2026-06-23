@@ -7,6 +7,111 @@
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "DirectXGame/engine/Math/Random.h"
 
+namespace {
+	constexpr float kEmitterEpsilon = 0.0001f;
+	constexpr float kTwoPi = 6.28318530718f;
+
+	Vector3 SafeNormalize(const Vector3& value, const Vector3& fallback = { 0.0f,1.0f,0.0f })
+	{
+		// ゼロベクトルを方向として使わないように保険をかける
+		if (value.LengthSq() <= kEmitterEpsilon * kEmitterEpsilon) {
+			return fallback;
+		}
+		return value.Normalize();
+	}
+
+	float Random01(std::mt19937& randomEngine)
+	{
+		// 0から1の範囲でエミット位置の補間率を作る
+		return Random::RandFloat(Range<float>{ 0.0f,1.0f }, randomEngine);
+	}
+
+	float ResolveDirectionSpeed(const Engine::EffectEmitData& emitData, std::mt19937& randomEngine)
+	{
+		// 既存の速度レンジから速さだけを取り出し、形状方向へ向け直す
+		const Vector3 randomVelocity = Random::RandVector3(emitData.velocity, randomEngine);
+		float speed = randomVelocity.Length();
+		if (speed <= kEmitterEpsilon) {
+			speed = emitData.velocity.median.Length();
+		}
+		if (speed <= kEmitterEpsilon) {
+			speed = 1.0f;
+		}
+		return speed;
+	}
+
+	Vector3 BuildShapeVelocity(
+		const Engine::EffectEmitData& emitData,
+		EmitData::DirectionType directionType,
+		std::mt19937& randomEngine,
+		const Vector3& emitPos,
+		const Vector3& centerPos,
+		const Vector3& normal)
+	{
+		// 形状からの出方に応じて、ランダム速度か形状基準の速度を選ぶ
+		switch (directionType)
+		{
+		case EmitData::DirectionType::kNormal:
+			return SafeNormalize(normal) * ResolveDirectionSpeed(emitData, randomEngine);
+		case EmitData::DirectionType::kInverse:
+			return SafeNormalize(centerPos - emitPos, -SafeNormalize(normal)) * ResolveDirectionSpeed(emitData, randomEngine);
+		case EmitData::DirectionType::kFixed:
+			return emitData.velocity.median;
+		case EmitData::DirectionType::kNone:
+			return Vector3{};
+		case EmitData::DirectionType::kVelocity:
+		case EmitData::DirectionType::kVelocityBase:
+		case EmitData::DirectionType::kRandom:
+		default:
+			return Random::RandVector3(emitData.velocity, randomEngine);
+		}
+	}
+
+	void CreateShapeParticle(
+		Engine::ParticleGroup& particleGroup,
+		const Engine::EffectEmitData& emitData,
+		EmitData::DirectionType directionType,
+		std::mt19937& randomEngine,
+		const Vector3& emitPos,
+		const Vector3& centerPos,
+		const Vector3& normal)
+	{
+		// ランダム速度以外は専用方向の速度で生成する
+		if (directionType == EmitData::DirectionType::kRandom ||
+			directionType == EmitData::DirectionType::kVelocity ||
+			directionType == EmitData::DirectionType::kVelocityBase) {
+			Engine::EmitFanction::CreateParticle(particleGroup, emitData, randomEngine, emitPos);
+			return;
+		}
+
+		const Vector3 velocity = BuildShapeVelocity(emitData, directionType, randomEngine, emitPos, centerPos, normal);
+		Engine::EmitFanction::CreateParticle(particleGroup, emitData, randomEngine, emitPos, velocity);
+	}
+
+	Vector3 SampleTriangleSurface(const Triangle& triangle, std::mt19937& randomEngine)
+	{
+		// 三角形の面内を均一に選ぶため、はみ出した重心座標を折り返す
+		float u = Random01(randomEngine);
+		float v = Random01(randomEngine);
+		if (u + v > 1.0f) {
+			u = 1.0f - u;
+			v = 1.0f - v;
+		}
+		return triangle.vertices[0] +
+			(triangle.vertices[1] - triangle.vertices[0]) * u +
+			(triangle.vertices[2] - triangle.vertices[0]) * v;
+	}
+
+	Vector3 SampleTriangleEdge(const Triangle& triangle, std::mt19937& randomEngine)
+	{
+		// 三角形の3辺から1本を選び、その辺上を補間する
+		const int edgeIndex = Random::RandomInt32_t(0, 2);
+		const Vector3& start = triangle.vertices[edgeIndex];
+		const Vector3& end = triangle.vertices[(edgeIndex + 1) % 3];
+		return Lerp(start, end, Random01(randomEngine));
+	}
+}
+
 #pragma region Point
 void Engine::PointParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
@@ -55,8 +160,12 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 	ApplyGlobalVariablesUniqe();
 
 	Vector3 pos{};
+	Vector3 normal{};
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 	if (emitType_ == EmitData::EmitType::kRandom) {	// ランダム
-		pos = transform_.worldMat_.GetWorldPosition() + Random::RandVector3(range_, particleManager->GetRandomEngine());
+		const Vector3 localPos = Random::RandVector3(range_, particleManager->GetRandomEngine());
+		pos = centerPos + localPos;
+		normal = SafeNormalize(localPos);
 	}
 	else if (emitType_ == EmitData::EmitType::kSurface) { // 表面
 		// AABBの最小・最大座標
@@ -69,37 +178,43 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 		switch (face) {
 		case 0: // +X面
 			pos.x = max.x;
+			normal = { 1.0f,0.0f,0.0f };
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 1: // -X面
 			pos.x = min.x;
+			normal = { -1.0f,0.0f,0.0f };
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 2: // +Y面
 			pos.y = max.y;
+			normal = { 0.0f,1.0f,0.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 3: // -Y面
 			pos.y = min.y;
+			normal = { 0.0f,-1.0f,0.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 4: // +Z面
 			pos.z = max.z;
+			normal = { 0.0f,0.0f,1.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			break;
 		case 5: // -Z面
 			pos.z = min.z;
+			normal = { 0.0f,0.0f,-1.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			break;
 		}
 		// ワールド座標系に変換
-		pos = transform_.worldMat_.GetWorldPosition() + pos;
+		pos = centerPos + pos;
 
 	}
 	else if (emitType_ == EmitData::EmitType::kEdge) { // 辺
@@ -130,22 +245,13 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 
 		// 補間してランダム位置
 		float t = std::uniform_real_distribution<float>(0.0f, 1.0f)(rnd);
-		pos = Lerp(p0, p1, t);
+		const Vector3 localPos = Lerp(p0, p1, t);
 
-		pos = transform_.worldMat_.GetWorldPosition() + pos;
+		pos = centerPos + localPos;
+		normal = SafeNormalize(localPos);
 	}
 
-
-	Vector3 dire{};
-	if (directionType_ == EmitData::DirectionType::kRandom) {
-		dire = Random::RandVector3(emitData_.velocity, particleManager->GetRandomEngine());
-	}
-	else if (directionType_ == EmitData::DirectionType::kNormal) {
-
-	}
-
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	CreateShapeParticle(particleGroup, emitData_, directionType_, particleManager->GetRandomEngine(), pos, centerPos, normal);
 }
 
 
@@ -202,10 +308,24 @@ void Engine::SphereParticleEmitter::EmitUniqe() {
 	ApplyGlobalVariablesUniqe();
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
+	auto& randomEngine = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + Random::RandomUnitVector3(particleManager->GetRandomEngine()) * radius_;
+	Vector3 normal = Random::RandomUnitVector3(randomEngine);
+	float distance = radius_;
+	if (emitType_ == EmitData::EmitType::kRandom) {
+		// 球内部に均一に近い分布で出す
+		distance = radius_ * std::cbrt(Random01(randomEngine));
+	}
+	else if (emitType_ == EmitData::EmitType::kEdge) {
+		// 球の辺相当としてローカルXZ平面の赤道リングから出す
+		const float angle = Random01(randomEngine) * kTwoPi;
+		const Vector3 localNormal = { std::cos(angle),0.0f,std::sin(angle) };
+		normal = MakeRotateXYZ(transform_.rotate_).Transform(localNormal).Normalize();
+	}
+	Vector3 pos = centerPos + normal * distance;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 //
 void Engine::SphereParticleEmitter::DebugImGui()
@@ -254,35 +374,34 @@ void Engine::CornerParticleEmitter::DrawEmitterLine() { lineCommon->GetDebugLine
 // パーティクル発生
 void Engine::CornerParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
-	float angleStep;
-	std::vector<Vector3> vertices;
-	// 頂点を計算
-	angleStep = DirectX::XM_2PI / corner.segment; // 360° を segment 分割
-
-	// 回転行列を作成
+	auto& randomEngine = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 	Matrix4x4 rotationMatrix = MakeRotateXYZ(transform_.rotate_);
-	for (int i = 0; i < corner.segment; ++i)
-	{
-		float angle = i * angleStep; // 各頂点の角度
-		Vector3 localVertex;
-		localVertex.x = cos(angle) * corner.radius;
-		localVertex.y = 0.0f;
-		localVertex.z = sin(angle) * corner.radius;
 
-		// 回転を適用
-		Vector3 rotatedVertex = rotationMatrix.Transform(localVertex);
-
-		// ワールド座標へ変換
-		Vector3 worldVertex = rotatedVertex;
-		vertices.push_back(worldVertex);
+	Vector3 localPos{};
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		// 円周上を分割辺として選ぶ
+		const float angleStep = kTwoPi / static_cast<float>(corner.segment);
+		const int32_t index = Random::RandomInt32_t(0, corner.segment - 1);
+		const float startAngle = static_cast<float>(index) * angleStep;
+		const float endAngle = static_cast<float>((index + 1) % corner.segment) * angleStep;
+		const Vector3 start = { std::cos(startAngle) * corner.radius,0.0f,std::sin(startAngle) * corner.radius };
+		const Vector3 end = { std::cos(endAngle) * corner.radius,0.0f,std::sin(endAngle) * corner.radius };
+		localPos = Lerp(start, end, Random01(randomEngine));
 	}
-	int32_t index = Random::RandomInt32_t(0, corner.segment - 1);
+	else {
+		// ランダム/面は円盤内から出す
+		const float angle = Random01(randomEngine) * kTwoPi;
+		const float distance = corner.radius * std::sqrt(Random01(randomEngine));
+		localPos = { std::cos(angle) * distance,0.0f,std::sin(angle) * distance };
+	}
 
-	Vector3 pos = Lerp(vertices[index], vertices[(index + 1) % corner.segment], Random::RandFloat(Range{ 0.0f,1.0f }, particleManager->GetRandomEngine()))
-		+ transform_.worldMat_.GetWorldPosition();
-
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	const Vector3 rotatedPos = rotationMatrix.Transform(localPos);
+	const Vector3 pos = centerPos + rotatedPos;
+	const Vector3 normal = emitType_ == EmitData::EmitType::kEdge
+		? SafeNormalize(rotatedPos)
+		: rotationMatrix.Transform({ 0.0f,1.0f,0.0f }).Normalize();
+	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 
 void Engine::CornerParticleEmitter::DebugImGui()
@@ -455,27 +574,22 @@ void Engine::TriangleParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 
-	// 三角形の頂点 (ローカル空間想定)
-	Vector3 A = triangle_.vertices[0];
-	Vector3 B = triangle_.vertices[1];
-	Vector3 C = triangle_.vertices[2];
-
-	// ランダム重心座標
-	float u = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-	float v = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-
-	if (u + v > 1.0f) {
-		u = 1.0f - u;
-		v = 1.0f - v;
+	Vector3 localPos{};
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		localPos = SampleTriangleEdge(triangle_, rng);
+	}
+	else {
+		localPos = SampleTriangleSurface(triangle_, rng);
 	}
 
-	// ローカル座標での位置
-	Vector3 localPos = A + (B - A) * u + (C - A) * v;
-
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + localPos;
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	Vector3 pos = centerPos + localPos;
+	Vector3 normal = triangle_.GetNormal();
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		normal = SafeNormalize(localPos - triangle_.GetCentroid(), normal);
+	}
+	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
 
 void Engine::TriangleParticleEmitter::DebugImGui()
@@ -505,6 +619,9 @@ void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 }
 // デバック線描画
 void Engine::MeshParticleEmitter::DrawEmitterLine() {
+	if (!modelMesh_) {
+		return;
+	}
 
 	for (auto& tri : modelMesh_->GetTriangles()) {
 		lineCommon->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
@@ -512,33 +629,32 @@ void Engine::MeshParticleEmitter::DrawEmitterLine() {
 }
 // パーティクル発生
 void Engine::MeshParticleEmitter::EmitUniqe() {
+	if (!modelMesh_ || modelMesh_->GetTriangles().empty()) {
+		return;
+	}
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 
 	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->GetTriangles().size() - 1));
 
 	Triangle tri = modelMesh_->GetTriangle(index);
-	// 三角形の頂点 (ローカル空間想定)
-	Vector3 A = tri.vertices[0];
-	Vector3 B = tri.vertices[1];
-	Vector3 C = tri.vertices[2];
-
-	// ランダム重心座標
-	float u = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-	float v = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-
-	if (u + v > 1.0f) {
-		u = 1.0f - u;
-		v = 1.0f - v;
+	Vector3 localPos{};
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		localPos = SampleTriangleEdge(tri, rng);
+	}
+	else {
+		localPos = SampleTriangleSurface(tri, rng);
 	}
 
-	// ローカル座標での位置
-	Vector3 localPos = A + (B - A) * u + (C - A) * v;
+	Vector3 pos = centerPos + localPos;
+	Vector3 normal = tri.GetNormal();
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		normal = SafeNormalize(localPos - tri.GetCentroid(), normal);
+	}
 
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + localPos;
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
 
 void Engine::MeshParticleEmitter::DebugImGui()

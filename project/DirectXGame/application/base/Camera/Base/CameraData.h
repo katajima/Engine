@@ -1,4 +1,5 @@
-#pragma once
+﻿#pragma once
+#include "DirectXGame/engine/struct/Structs3D.h"
 #include <string>
 
 // カメラ保存データ
@@ -9,10 +10,18 @@ struct GlobalCameraData {
 	bool isChangeCamera = false;
 	// 移動補間
 	float interpolation = 0.0f;
+	// カメラ切り替え開始時間
+	float changeCameraStartTime = 0.0f;
 	// カメラをシェイクするか
 	bool isShake = false;
 	// シェイク量
 	float shakeCameraPower = 0.0f;
+	// シェイク開始時間
+	float shakeStartTime = 0.0f;
+	// シェイク継続時間
+	float shakeDuration = 0.0f;
+	// カメラ基準のシェイク幅
+	Vector3 shakeOffset = { 0.0f, 0.0f, 0.0f };
 	
 	// カメラをズームするか
 	bool isZoom = false;
@@ -33,6 +42,8 @@ struct GlobalCameraData {
 	bool isLockOnRotate = true;
 	// ロックオン補間速度
 	float lockOnInterpolation = 0.5f;
+	// ロックオン解除時間(0以下なら解除しない)
+	float lockOnEndTime = 0.0f;
 };
 
 

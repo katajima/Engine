@@ -1,4 +1,4 @@
-#include "ComboSystem.h"
+﻿#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -52,6 +52,11 @@ namespace Combo {
 			{ "ボタン", static_cast<int64_t>(RangeRecallTriggerType::kButton) },
 			{ "時間経過", static_cast<int64_t>(RangeRecallTriggerType::kTimer) },
 			{ "近づく", static_cast<int64_t>(RangeRecallTriggerType::kNearOwner) },
+			});
+		EnumRegistry::Instance().Register("ComboEffectTriggerType", {
+			{ "時間範囲", static_cast<int64_t>(ComboEffectTriggerType::kTimeWindow) },
+			{ "時間経過", static_cast<int64_t>(ComboEffectTriggerType::kTimer) },
+			{ "着地したら", static_cast<int64_t>(ComboEffectTriggerType::kLanding) },
 			});
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
@@ -486,6 +491,7 @@ namespace Combo {
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				globalVariables->AddItem(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
 				globalVariables->AddItem(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->AddEnumItem(name, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
 				globalVariables->AddItem(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
 				globalVariables->AddItem(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				globalVariables->AddItem(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
@@ -639,6 +645,12 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラロックオン", data.camera.isLockOn);
 			globalVariables->AddItem(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
 			globalVariables->AddItem(name, "カメラロックオン回転引き継ぎ", data.camera.isLockOnRotate);
+			globalVariables->AddItem(name, "カメラロックオン解除時間", data.camera.lockOnEndTime);
+
+			globalVariables->AddItem(name, "カメラ切り替え", data.camera.isChangeCamera);
+			globalVariables->AddItem(name, "カメラ切り替え名", data.camera.cameraName);
+			globalVariables->AddItem(name, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
+			globalVariables->AddItem(name, "カメラ切り替え補間時間", data.camera.interpolation);
 			
 			globalVariables->AddItem(name, "カメラズーム", data.camera.isZoom);
 			globalVariables->AddItem(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
@@ -647,6 +659,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラズーム開始時間", data.camera.zoomStartTime);
 			globalVariables->AddItem(name, "カメラズーム量", data.camera.zoomTargetDistance);
 
+			globalVariables->AddItem(name, "カメラシェイク", data.camera.isShake);
+			globalVariables->AddItem(name, "カメラシェイク量", data.camera.shakeCameraPower);
+			globalVariables->AddItem(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
+			globalVariables->AddItem(name, "カメラシェイク時間", data.camera.shakeDuration);
+			globalVariables->AddItem(name, "カメラシェイク幅", data.camera.shakeOffset);
 
 		}
 
@@ -718,6 +735,9 @@ namespace Combo {
 				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
 				if (globalVariables->HasKey(name, MakeComboEffectParentKey(i))) {
 					entry.parentName = globalVariables->GetValue<std::string>(name, MakeComboEffectParentKey(i));
+				}
+				if (globalVariables->HasKey(name, MakeComboEffectTriggerTypeKey(i))) {
+					entry.triggerType = globalVariables->GetEnumValue<ComboEffectTriggerType>(name, MakeComboEffectTriggerTypeKey(i));
 				}
 				if (globalVariables->HasKey(name, MakeComboEffectEndTimeKey(i))) {
 					entry.endTime = globalVariables->GetValue<float>(name, MakeComboEffectEndTimeKey(i));
@@ -889,6 +909,12 @@ namespace Combo {
 			data.camera.isLockOn = globalVariables->GetValue<bool>(name, "カメラロックオン");
 			data.camera.lockOnInterpolation = globalVariables->GetValue<float>(name, "カメラロックオン補間速度");
 			data.camera.isLockOnRotate = globalVariables->GetValue<bool>(name, "カメラロックオン回転引き継ぎ");
+			data.camera.lockOnEndTime = globalVariables->GetValue<float>(name, "カメラロックオン解除時間");
+
+			data.camera.isChangeCamera = globalVariables->GetValue<bool>(name, "カメラ切り替え");
+			data.camera.cameraName = globalVariables->GetValue<std::string>(name, "カメラ切り替え名");
+			data.camera.changeCameraStartTime = globalVariables->GetValue<float>(name, "カメラ切り替え開始時間");
+			data.camera.interpolation = globalVariables->GetValue<float>(name, "カメラ切り替え補間時間");
 
 			data.camera.isZoom = globalVariables->GetValue<bool>(name, "カメラズーム");
 			data.camera.isLockOnZoom = globalVariables->GetValue<bool>(name, "カメラロックオンズーム");
@@ -896,6 +922,12 @@ namespace Combo {
 			data.camera.zoomDuration = globalVariables->GetValue<float>(name, "カメラズーム時間");
 			data.camera.zoomStartTime = globalVariables->GetValue<float>(name, "カメラズーム開始時間");
 			data.camera.zoomTargetDistance = globalVariables->GetValue<float>(name, "カメラズーム量");
+
+			data.camera.isShake = globalVariables->GetValue<bool>(name, "カメラシェイク");
+			data.camera.shakeCameraPower = globalVariables->GetValue<float>(name, "カメラシェイク量");
+			data.camera.shakeStartTime = globalVariables->GetValue<float>(name, "カメラシェイク開始時間");
+			data.camera.shakeDuration = globalVariables->GetValue<float>(name, "カメラシェイク時間");
+			data.camera.shakeOffset = globalVariables->GetValue<Vector3>(name, "カメラシェイク幅");
 			
 		}
 	}
@@ -958,6 +990,7 @@ namespace Combo {
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				globalVariables->SetValue(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
 				globalVariables->SetValue(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->SetEnumValue(name, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
 				globalVariables->SetValue(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
 				globalVariables->SetValue(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				globalVariables->SetValue(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
@@ -1118,6 +1151,12 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラロックオン", data.camera.isLockOn);
 			globalVariables->SetValue(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
 			globalVariables->SetValue(name, "カメラロックオン回転引き継ぎ",data.camera.isLockOnRotate);
+			globalVariables->SetValue(name, "カメラロックオン解除時間", data.camera.lockOnEndTime);
+
+			globalVariables->SetValue(name, "カメラ切り替え", data.camera.isChangeCamera);
+			globalVariables->SetValue(name, "カメラ切り替え名", data.camera.cameraName);
+			globalVariables->SetValue(name, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
+			globalVariables->SetValue(name, "カメラ切り替え補間時間", data.camera.interpolation);
 
 			globalVariables->SetValue(name, "カメラズーム", data.camera.isZoom);
 			globalVariables->SetValue(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
@@ -1125,6 +1164,12 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラズーム時間", data.camera.zoomDuration);
 			globalVariables->SetValue(name, "カメラズーム開始時間", data.camera.zoomStartTime);
 			globalVariables->SetValue(name, "カメラズーム量", data.camera.zoomTargetDistance);
+
+			globalVariables->SetValue(name, "カメラシェイク", data.camera.isShake);
+			globalVariables->SetValue(name, "カメラシェイク量", data.camera.shakeCameraPower);
+			globalVariables->SetValue(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
+			globalVariables->SetValue(name, "カメラシェイク時間", data.camera.shakeDuration);
+			globalVariables->SetValue(name, "カメラシェイク幅", data.camera.shakeOffset);
 
 		}
 	}

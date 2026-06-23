@@ -101,6 +101,12 @@ namespace Engine {
 		/// <returns></returns>
 		Vector2 GetMousePosition() const;
 
+		/// <summary>
+		/// 前回更新からのマウス移動量を取得
+		/// </summary>
+		/// <returns>マウスの相対移動量</returns>
+		Vector2 GetMouseMoveDelta() const;
+
 
 		/// <summary>
 		/// ゲームパッド押した瞬間

@@ -176,6 +176,15 @@ Vector2 Engine::Input::GetMousePosition() const
 	return result;
 }
 
+Vector2 Engine::Input::GetMouseMoveDelta() const
+{
+	// DirectInput の相対移動量をそのままゲーム側へ渡す
+	Vector2 result{};
+	result.x = static_cast<float>(mouse_.lX);
+	result.y = static_cast<float>(mouse_.lY);
+	return result;
+}
+
 
 // ゲームパッド
 bool Engine::Input::IsGamePadTriggered(GamePadButton button) const

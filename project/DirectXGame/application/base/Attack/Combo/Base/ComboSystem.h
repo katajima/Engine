@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -37,6 +37,10 @@ namespace Combo {
 
 	static std::string MakeComboEffectParentKey(int index) {
 		return "コンボエフェクト追従先" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectTriggerTypeKey(int index) {
+		return "コンボエフェクト発生条件" + std::to_string(index);
 	}
 
 	static std::string MakeComboEffectOffsetKey(int index) {

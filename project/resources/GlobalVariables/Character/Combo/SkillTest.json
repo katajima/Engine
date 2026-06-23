@@ -117,27 +117,27 @@
         },
         "コンボエフェクト名前0": {
             "type": "string",
-            "value": "EmitterHitEffect"
+            "value": "EmitSkillEffect"
         },
         "コンボエフェクト数": {
             "type": "int32_t",
-            "value": 0
+            "value": 1
         },
         "コンボエフェクト終了時間0": {
             "type": "float",
-            "value": 0.11666666716337204
+            "value": 1.0
         },
         "コンボエフェクト追従先0": {
             "type": "string",
-            "value": "Player"
+            "value": "SubWeapon"
         },
         "コンボエフェクト開始時間0": {
             "type": "float",
-            "value": 0.11666666716337204
+            "value": 0.20000000298023224
         },
         "コンボエフェクト頻度0": {
             "type": "float",
-            "value": 0.10000000149011612
+            "value": 0.0010000000474974513
         },
         "コンボキャンセル受付終了時間": {
             "type": "float",

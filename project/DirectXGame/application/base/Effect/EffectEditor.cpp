@@ -197,6 +197,8 @@ void EffectEditor::SetEffectGlobalData(const std::string& name, EmitterShapeType
 	emit->SetAlphaClipping(data.alphaClipping);		// アルファクリッピング
 	emit->SetEnableLighting(data.enableLighting);	// ライティングの有無
 	emit->SetLifeTimeScaleTopBottom(data.topBottom);// ライフタイムスケールの基準
+	emit->SetEmitType(data.emitType);				// 形状内の出現場所
+	emit->SetEmitDirectionType(data.directionType);	// 形状に対する初速方向
 
 
 	switch (shapeType)
@@ -1303,6 +1305,8 @@ void EffectEditor::AddItem(const std::string& name, const EffectGlobalData& data
 	globalVariables->AddItem(name, "emitData.segment", data.segment);
 
 	globalVariables->AddEnumItem<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
+	globalVariables->AddEnumItem<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
+	globalVariables->AddEnumItem<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
 	globalVariables->AddEnumItem<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
 }
 
@@ -1358,6 +1362,12 @@ void EffectEditor::GetValue(const std::string& name, EffectGlobalData& data) {
 	data.segment = globalVariables->GetValue<int>(name, "emitData.segment");
 
 	data.shapeType = globalVariables->GetEnumValue<EmitterShapeType>(name, "emitData.shapeType");
+	if (globalVariables->HasKey(name, "emitData.emitType")) {
+		data.emitType = globalVariables->GetEnumValue<EmitData::EmitType>(name, "emitData.emitType");
+	}
+	if (globalVariables->HasKey(name, "emitData.directionType")) {
+		data.directionType = globalVariables->GetEnumValue<EmitData::DirectionType>(name, "emitData.directionType");
+	}
 	data.topBottom = globalVariables->GetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom");
 }
 
@@ -1412,6 +1422,8 @@ void EffectEditor::SetValue(const std::string& name, const EffectGlobalData& dat
 	globalVariables->SetValue(name, "emitData.segment", data.segment);
 
 	globalVariables->SetEnumValue<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
+	globalVariables->SetEnumValue<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
+	globalVariables->SetEnumValue<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
 	globalVariables->SetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
 }
 
@@ -1439,6 +1451,24 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		effectComponent->AddEmitter(name, data.particleName, data.shapeType);
 		SetEffectGlobalData(name, data.shapeType, data);
 	}
+	static const char* EmitTypeLabels[] = {
+		"ランダム",
+		"面",
+		"辺",
+	};
+	Engine::ImGuiManager::Select("出現場所", EmitTypeLabels, data.emitType);
+
+	static const char* DirectionTypeLabels[] = {
+		"なし",
+		"外向き/法線",
+		"速度方向",
+		"中心向き",
+		"ランダム",
+		"固定",
+		"速度依存",
+	};
+	Engine::ImGuiManager::Select("初速方向", DirectionTypeLabels, data.directionType);
+
 	// 出現
 	ImGui::DragInt("出現量(中央値)", &data.emitData.count.median, 0.1f);
 	ImGui::DragInt("出現量(振れ幅)", &data.emitData.count.range, 0.1f); 
@@ -1519,15 +1549,16 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		break;
 		case EmitterShapeType::SPHERE:
 		{
-			Engine::SphereParticleEmitter* sphereEmit = effectComponent->GetEmitterAs<Engine::SphereParticleEmitter>(name);
-			sphereEmit->SetRadius(data.radius);
+			ImGui::DragFloat("球の半径", &data.radius, 0.1f, 0.0f, 1000.0f);
 		}
 		break;
 		case EmitterShapeType::CIRCLE:
 		{
-			Engine::CornerParticleEmitter* circleEmit = effectComponent->GetEmitterAs<Engine::CornerParticleEmitter>(name);
-			circleEmit->SetRadius(data.radius);
-			circleEmit->SetSegment(data.segment);
+			ImGui::DragFloat("円の半径", &data.radius, 0.1f, 0.0f, 1000.0f);
+			ImGui::SliderInt("円の分割数", &data.segment, 3, 128);
+			if (data.segment < 3) {
+				data.segment = 3;
+			}
 		}
 		break;
 		case EmitterShapeType::POINT:
@@ -1537,8 +1568,8 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		break;
 		case EmitterShapeType::LINE:
 		{
-			Engine::LineParticleEmitter* lineEmit = effectComponent->GetEmitterAs<Engine::LineParticleEmitter>(name);
-			lineEmit->SetSegment(data.lineStart, data.lineEnd);
+			ImGui::DragFloat3("線の開始位置", &data.lineStart.x, 0.1f);
+			ImGui::DragFloat3("線の終了位置", &data.lineEnd.x, 0.1f);
 		}
 		break;
 		case EmitterShapeType::SPLINE:
@@ -1551,8 +1582,9 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		break;
 		case EmitterShapeType::TRIANGLE:
 		{
-			Engine::TriangleParticleEmitter* triangleEmit = effectComponent->GetEmitterAs<Engine::TriangleParticleEmitter>(name);
-			triangleEmit->SetTriangle(data.triangle);
+			ImGui::DragFloat3("三角形 頂点0", &data.triangle.vertices[0].x, 0.1f);
+			ImGui::DragFloat3("三角形 頂点1", &data.triangle.vertices[1].x, 0.1f);
+			ImGui::DragFloat3("三角形 頂点2", &data.triangle.vertices[2].x, 0.1f);
 		}
 		break;
 		case EmitterShapeType::MESH:

@@ -30,9 +30,6 @@ namespace Character {
 	{
 		if (!input_) return nullptr;
 
-		// 未接続なら何もしない（必要ならキーマウも混ぜる）
-		if (!input_->IsControllerConnected()) return nullptr;
-
 		// 上から順に評価して、最初に成立したコマンドを返す
 		for (auto& b : bindings_)
 		{

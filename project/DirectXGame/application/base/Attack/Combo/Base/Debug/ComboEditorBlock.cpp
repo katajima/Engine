@@ -1,4 +1,4 @@
-#include "ComboEditorBlock.h"
+﻿#include "ComboEditorBlock.h"
 
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
@@ -6,6 +6,7 @@
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <cctype>
+#include <cstring>
 
 namespace Combo {
 
@@ -550,16 +551,45 @@ namespace Combo {
 	// カメラ設定
 	void  EditorBlock::ImGuiCamera() {
 		if (ImGui::CollapsingHeader("カメラ関係")) {
-			ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
-			ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
-			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation, 0.01f, 0.0f, 10.0f);
+			if (ImGui::TreeNode("カメラ切り替え")) {
+				ImGui::Checkbox("攻撃中にカメラを切り替える", &data_.camera.isChangeCamera);
+				char cameraNameBuffer[128]{};
+				strncpy_s(cameraNameBuffer, data_.camera.cameraName.c_str(), sizeof(cameraNameBuffer) - 1);
+				if (ImGui::InputText("切り替え先カメラ名", cameraNameBuffer, sizeof(cameraNameBuffer))) {
+					// CameraManagerに登録されている名前を保存する
+					data_.camera.cameraName = cameraNameBuffer;
+				}
+				ImGui::DragFloat("カメラ切り替え開始時間", &data_.camera.changeCameraStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラ切り替え補間時間", &data_.camera.interpolation, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
 
-			ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
-			ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
-			ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
-			ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration, 0.01f, 0.0f, 60.0f);
-			ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
-			ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
+			if (ImGui::TreeNode("ロックオン演出")) {
+				ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
+				ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
+				ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("ロックオン解除時間(0以下で解除しない)", &data_.camera.lockOnEndTime, 0.01f, 0.0f, 60.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("ズーム演出")) {
+				ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
+				ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
+				ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
+				ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("シェイク演出")) {
+				ImGui::Checkbox("カメラをシェイクするか", &data_.camera.isShake);
+				ImGui::DragFloat("カメラシェイク開始時間", &data_.camera.shakeStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラシェイク時間", &data_.camera.shakeDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラシェイク量", &data_.camera.shakeCameraPower, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat3("カメラシェイク幅", &data_.camera.shakeOffset.x, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
 
 		}
 	};
@@ -704,7 +734,7 @@ namespace Combo {
 	void EditorBlock::DrawComboEffectEditor(GloblEffectData& effect,
 		const std::map<std::string, EffectGlobalData>& effectDatas) {
 		ImGui::SeparatorText("コンボエフェクト");
-		ImGui::TextWrapped("コンボ開始から指定秒数で、使用者位置 + オフセットに一度だけ発生します。");
+		ImGui::TextWrapped("条件に応じて、追従先位置 + オフセットへコンボエフェクトを発生させます。");
 
 		int removeIndex = -1;
 		bool shouldSyncSequence = false;
@@ -734,9 +764,20 @@ namespace Combo {
 				ImGui::EndCombo();
 			}
 
+			static const char* ComboEffectTriggerTypeLabels[] = {
+				"時間範囲",
+				"時間経過",
+				"着地したら",
+			};
+			Engine::ImGuiManager::Select("発生条件", ComboEffectTriggerTypeLabels, entry.triggerType);
+
 			shouldSyncSequence |= ImGui::DragFloat("開始時間", &entry.startTime, 0.01f, 0.0f, 60.0f, "%.2f");
-			shouldSyncSequence |= ImGui::DragFloat("終了時間", &entry.endTime, 0.01f, 0.0f, 60.0f, "%.2f");
-			ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+			if (entry.triggerType != ComboEffectTriggerType::kTimer) {
+				shouldSyncSequence |= ImGui::DragFloat("終了時間", &entry.endTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			}
+			if (entry.triggerType == ComboEffectTriggerType::kTimeWindow) {
+				ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+			}
 			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
 			if (entry.endTime < entry.startTime) {
 				entry.endTime = entry.startTime;
@@ -762,6 +803,7 @@ namespace Combo {
 			effect.comboEffects.push_back(ComboEffectEntry{
 				.effectName = "",
 				.parentName = "Player",
+				.triggerType = ComboEffectTriggerType::kTimeWindow,
 				.startTime = 0.0f,
 				.endTime = 0.0f,
 				.interval = 0.1f,

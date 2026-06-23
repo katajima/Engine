@@ -56,7 +56,7 @@ namespace Combo {
 		if(useCamera)
 		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
-		effect.Update(timer_, ctx.dt);
+		effect.Update(ctx, timer_, ctx.dt);
 	}
 
 	// 終了

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
@@ -12,6 +12,7 @@ class CameraManager;		// カメラ管理
 class BaseCamera;			// カメラ
 namespace Character {
 	class BaseCharacter;		// キャラクター
+	struct CharacterContext;	// キャラクター状態
 }
 class BaseWeapon;			// 武器
 class EffectSystem;			// エフェクト管理
@@ -42,6 +43,10 @@ namespace Combo {
 		CameraManager* cameraManager = nullptr;	// カメラ管理
 		// カメラデータ
 		GlobalCameraData data_;
+		bool isCameraChanged_ = false;			// カメラ切り替えを実行済みか
+		bool isZoomRequested_ = false;			// ズーム演出を実行済みか
+		bool isShakeRequested_ = false;			// シェイク演出を実行済みか
+		bool isLockOnReleased_ = false;			// ロックオン解除を実行済みか
 	};
 
 	/// <summary>
@@ -53,7 +58,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(float timer, float dt);
+		void Update(const Character::CharacterContext& ctx, float timer, float dt);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
@@ -68,7 +73,11 @@ namespace Combo {
 		GloblEffectData& GetData() { return data_; }
 	private:
 		// 指定時間内のコンボエフェクトを頻度に応じて発生させる
-		void EmitComboEffects(float timer);
+		void EmitComboEffects(const Character::CharacterContext& ctx, float timer);
+		// 演出条件の時間範囲を満たしているか確認する
+		bool IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const;
+		// 指定演出を現在位置へ発生させる
+		void EmitEntry(const ComboEffectEntry& entry);
 		// エフェクトの発生基準位置を取得する
 		Vector3 GetEffectBasePosition(const ComboEffectEntry& entry) const;
 	private:
@@ -80,5 +89,7 @@ namespace Combo {
 		EffectSystem* effectSystem = nullptr;		// エフェクト発生先
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;	// 追従先Transform一覧
 		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
+		std::vector<bool> emittedFlags_;				// 一回発生条件が発生済みか
+		bool wasOnGround_ = false;					// 前フレームの接地状態
 	};
 }

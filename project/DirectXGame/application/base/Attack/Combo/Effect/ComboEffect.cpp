@@ -1,6 +1,8 @@
-#include "ComboEffect.h"
+﻿#include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
+#include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -14,21 +16,46 @@ namespace Combo {
 
 	// 開始
 	void ComboCamera::Enter(Character::BaseCharacter* owner) {
-		cameraManager = owner->GetCameraManager();
-		if (data_.isLockOn) {
-			cameraManager->GetBaseCamera()->GetCameraController()->
-				GetCameraLockOn()->GetData() = CameraLockOnData{nullptr,data_ .lockOnInterpolation,data_.isLockOn };
-			cameraManager->GetBaseCamera()->LockOn(target);
+		// 攻撃開始ごとに一回だけ発生するカメラ演出の状態を初期化する
+		isCameraChanged_ = false;
+		isZoomRequested_ = false;
+		isShakeRequested_ = false;
+		isLockOnReleased_ = false;
+		cameraManager = owner ? owner->GetCameraManager() : nullptr;
+		camera = cameraManager ? cameraManager->GetBaseCamera() : nullptr;
+		if (camera && data_.isLockOn) {
+			// 攻撃中だけ対象を注視するため、ロックオン用の補間と引き継ぎ設定を渡す
+			camera->GetCameraController()->GetCameraLockOn()->GetData() =
+				CameraLockOnData{ target,data_.lockOnInterpolation,data_.isLockOn,data_.isLockOnRotate };
+			camera->LockOn(target);
 		}
 	}
 
 	// 更新
 	void ComboCamera::Update(float timer, float dt) {
-		
-		// ロックオン処理
-		if (data_.lockOnInterpolation <= timer && data_.isLockOn) {
-			cameraManager->GetBaseCamera()->LockOn(nullptr);
+		if (!cameraManager) {
+			return;
+		}
+		camera = cameraManager->GetBaseCamera();
+		if (!camera) {
+			return;
+		}
 
+		// 指定時間になったら、攻撃演出用のカメラへ一回だけ切り替える
+		if (data_.isChangeCamera && !isCameraChanged_ && data_.changeCameraStartTime <= timer &&
+			!data_.cameraName.empty() && data_.cameraName != "no") {
+			cameraManager->SetUseCamera(data_.cameraName, data_.interpolation);
+			camera = cameraManager->GetBaseCamera();
+			isCameraChanged_ = true;
+			if (!camera) {
+				return;
+			}
+		}
+
+		// 終了時間が設定されている場合だけ、攻撃中のロックオンを解除する
+		if (data_.lockOnEndTime > 0.0f && data_.lockOnEndTime <= timer && data_.isLockOn && !isLockOnReleased_) {
+			camera->LockOn(nullptr);
+			isLockOnReleased_ = true;
 		}
 
 		bool isZoom =  data_.isZoom;
@@ -36,16 +63,32 @@ namespace Combo {
 			isZoom = data_.isLockOn && target;
 		}
 
-		// ズーム処理
-		if (data_.zoomStartTime <= timer && isZoom)
-			
-			cameraManager->GetBaseCamera()->GetCameraController()->GetZoom()->
-			Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
+		// 指定時間になったら、攻撃の寄り演出を一回だけ開始する
+		if (data_.zoomStartTime <= timer && isZoom && !isZoomRequested_) {
+			camera->GetCameraController()->GetZoom()->Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
+			isZoomRequested_ = true;
+		}
+
+		// 指定時間になったら、攻撃の衝撃用シェイクを一回だけ開始する
+		if (data_.isShake && !isShakeRequested_ && data_.shakeStartTime <= timer) {
+			Vector3 shakeOffset = data_.shakeOffset;
+			if (shakeOffset.x == 0.0f && shakeOffset.y == 0.0f && shakeOffset.z == 0.0f) {
+				shakeOffset = { data_.shakeCameraPower,data_.shakeCameraPower,data_.shakeCameraPower };
+			}
+			if (data_.shakeDuration > 0.0f) {
+				camera->GetCameraController()->GetShake()->Request({ data_.shakeDuration,shakeOffset });
+			}
+			isShakeRequested_ = true;
+		}
 	}
 
 	// 終了
 	void ComboCamera::Exit() {
-		cameraManager->GetBaseCamera()->LockOn(nullptr);
+		if (cameraManager && cameraManager->GetBaseCamera()) {
+			// 攻撃が終わったら攻撃用ロックオンを解除して通常操作へ戻す
+			cameraManager->GetBaseCamera()->LockOn(nullptr);
+		}
+		camera = nullptr;
 	}
 
 #pragma endregion // コンボカメラ
@@ -59,9 +102,12 @@ namespace Combo {
 		this->owner = owner;
 		effectSystem = owner ? owner->GetEffect() : nullptr;
 		nextEmitTimes_.clear();
+		emittedFlags_.clear();
 		for (const ComboEffectEntry& entry : data_.comboEffects) {
 			nextEmitTimes_.push_back(entry.startTime);
+			emittedFlags_.push_back(false);
 		}
+		wasOnGround_ = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
 		// 武器情報取得
 		weapon = owner ? owner->GetWeapon() : nullptr;
 		if (!weapon) {
@@ -74,9 +120,10 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboEffect::Update(float timer, float dt) {
+	void ComboEffect::Update(const Character::CharacterContext& ctx, float timer, float dt) {
 		// 指定時間になったコンボエフェクトを発生させる
-		EmitComboEffects(timer);
+		EmitComboEffects(ctx, timer);
+		wasOnGround_ = ctx.onGround;
 
 		if (!weapon) {
 			return;
@@ -99,35 +146,77 @@ namespace Combo {
 		}
 		// 次のコンボ開始時に発生状態を作り直す
 		nextEmitTimes_.clear();
+		emittedFlags_.clear();
 		effectSystem = nullptr;
 		this->owner = nullptr;
 		weapon = nullptr;
+		wasOnGround_ = false;
 	}
 
-	void ComboEffect::EmitComboEffects(float timer) {
+	void ComboEffect::EmitComboEffects(const Character::CharacterContext& ctx, float timer) {
 		if (!owner || !effectSystem) {
 			return;
 		}
 		if (nextEmitTimes_.size() != data_.comboEffects.size()) {
 			nextEmitTimes_.clear();
+			emittedFlags_.clear();
 			for (const ComboEffectEntry& entry : data_.comboEffects) {
 				nextEmitTimes_.push_back(entry.startTime);
+				emittedFlags_.push_back(false);
 			}
 		}
 
+		const bool landingTriggered = !wasOnGround_ && ctx.onGround;
 		for (int i = 0; i < static_cast<int>(data_.comboEffects.size()); ++i) {
 			ComboEffectEntry& entry = data_.comboEffects[i];
-			const float endTime = (std::max)(entry.startTime, entry.endTime);
 			const float interval = (std::max)(entry.interval, 0.001f);
-			if (entry.effectName.empty() || timer < entry.startTime || timer > endTime || timer < nextEmitTimes_[i]) {
+			if (entry.effectName.empty()) {
 				continue;
 			}
 
-			// 追従先の現在位置にオフセットを足した場所へ発生させる
-			const Vector3 emitPosition = GetEffectBasePosition(entry) + entry.offset;
-			effectSystem->Emit(entry.effectName, emitPosition);
-			nextEmitTimes_[i] += interval;
+			switch (entry.triggerType)
+			{
+			case ComboEffectTriggerType::kTimer:
+				// 指定時間を過ぎた最初の1回だけ発生させる
+				if (!emittedFlags_[i] && timer >= entry.startTime) {
+					EmitEntry(entry);
+					emittedFlags_[i] = true;
+				}
+				break;
+			case ComboEffectTriggerType::kLanding:
+				// 受付時間を満たした状態で着地した瞬間に1回だけ発生させる
+				if (!emittedFlags_[i] && landingTriggered && IsTriggerTimeValid(entry, timer)) {
+					EmitEntry(entry);
+					emittedFlags_[i] = true;
+				}
+				break;
+			case ComboEffectTriggerType::kTimeWindow:
+			default:
+				// 指定時間範囲中は発生頻度ごとに繰り返し発生させる
+				if (IsTriggerTimeValid(entry, timer) && timer >= nextEmitTimes_[i]) {
+					EmitEntry(entry);
+					nextEmitTimes_[i] += interval;
+				}
+				break;
+			}
 		}
+	}
+
+	bool ComboEffect::IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const {
+		// endTimeがstartTime以下なら、開始後は終了制限なしとして扱う
+		if (timer < entry.startTime) {
+			return false;
+		}
+		if (entry.endTime <= entry.startTime) {
+			return true;
+		}
+		return timer <= entry.endTime;
+	}
+
+	void ComboEffect::EmitEntry(const ComboEffectEntry& entry) {
+		// 追従先の現在位置にオフセットを足した場所へ発生させる
+		const Vector3 emitPosition = GetEffectBasePosition(entry) + entry.offset;
+		effectSystem->Emit(entry.effectName, emitPosition);
 	}
 
 	Vector3 ComboEffect::GetEffectBasePosition(const ComboEffectEntry& entry) const {

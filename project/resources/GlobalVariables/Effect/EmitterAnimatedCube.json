@@ -46,6 +46,16 @@
             "type": "int32_t",
             "value": 0
         },
+        "emitData.directionType": {
+            "enumType": "DirectionType",
+            "type": "enum",
+            "value": 4
+        },
+        "emitData.emitType": {
+            "enumType": "EmitType",
+            "type": "enum",
+            "value": 0
+        },
         "emitData.enableLighting": {
             "type": "int32_t",
             "value": 0

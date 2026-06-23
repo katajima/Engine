@@ -349,7 +349,7 @@
         "topBottom": {
             "enumType": "TopBottom",
             "type": "enum",
-            "value": 1
+            "value": 0
         },
         "uvTransformVelocity": {
             "type": "Transform",

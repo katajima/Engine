@@ -174,6 +174,6 @@ namespace Engine {
 	public:
 
 	private:
-		ModelMesh* modelMesh_;
+		ModelMesh* modelMesh_ = nullptr; // メッシュ未設定時にエミット処理を安全に止めるためnullptrで初期化
 	};
 }

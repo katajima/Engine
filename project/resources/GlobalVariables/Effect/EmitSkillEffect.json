@@ -1,5 +1,5 @@
 {
-    "EmitterExpPlane01": {
+    "EmitSkillEffect": {
         "emitData.acceleration.median": {
             "type": "Vector3",
             "value": [
@@ -40,7 +40,7 @@
         },
         "emitData.count.median": {
             "type": "int32_t",
-            "value": 1
+            "value": 5
         },
         "emitData.count.range": {
             "type": "int32_t",
@@ -49,12 +49,12 @@
         "emitData.directionType": {
             "enumType": "DirectionType",
             "type": "enum",
-            "value": 4
+            "value": 3
         },
         "emitData.emitType": {
             "enumType": "EmitType",
             "type": "enum",
-            "value": 0
+            "value": 1
         },
         "emitData.enableLighting": {
             "type": "int32_t",
@@ -114,7 +114,7 @@
         },
         "emitData.lifeTime.median": {
             "type": "float",
-            "value": 1.0
+            "value": 0.25
         },
         "emitData.lifeTime.range": {
             "type": "float",
@@ -138,7 +138,7 @@
         },
         "emitData.radius": {
             "type": "float",
-            "value": 0.0
+            "value": 8.0
         },
         "emitData.rangeMax": {
             "type": "Vector3",
@@ -195,13 +195,13 @@
         "emitData.shapeType": {
             "enumType": "EmitterShapeType",
             "type": "enum",
-            "value": 3
+            "value": 1
         },
         "emitData.size.median": {
             "type": "Vector3",
             "value": [
-                1.0,
-                1.0,
+                0.4000000059604645,
+                0.4000000059604645,
                 1.0
             ]
         },
@@ -232,14 +232,14 @@
         "emitData.topBottom": {
             "enumType": "TopBottom",
             "type": "enum",
-            "value": -858993460
+            "value": 0
         },
         "emitData.velocity.median": {
             "type": "Vector3",
             "value": [
-                0.0,
-                0.0,
-                0.0
+                10.0,
+                10.0,
+                10.0
             ]
         },
         "emitData.velocity.range": {
@@ -256,7 +256,7 @@
         },
         "particleName": {
             "type": "string",
-            "value": "expPlane01"
+            "value": "smoke"
         }
     }
 }
