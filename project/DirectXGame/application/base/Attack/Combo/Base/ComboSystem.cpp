@@ -53,6 +53,12 @@ namespace Combo {
 			{ "時間経過", static_cast<int64_t>(RangeRecallTriggerType::kTimer) },
 			{ "近づく", static_cast<int64_t>(RangeRecallTriggerType::kNearOwner) },
 			});
+		EnumRegistry::Instance().Register("MoveSpeedCurveType", {
+			{ "一定", static_cast<int64_t>(MoveSpeedCurveType::kConstant) },
+			{ "加速", static_cast<int64_t>(MoveSpeedCurveType::kEaseIn) },
+			{ "減速", static_cast<int64_t>(MoveSpeedCurveType::kEaseOut) },
+			{ "加速して減速", static_cast<int64_t>(MoveSpeedCurveType::kEaseInOut) },
+			});
 		EnumRegistry::Instance().Register("ComboEffectTriggerType", {
 			{ "時間範囲", static_cast<int64_t>(ComboEffectTriggerType::kTimeWindow) },
 			{ "時間経過", static_cast<int64_t>(ComboEffectTriggerType::kTimer) },
@@ -570,7 +576,11 @@ namespace Combo {
 
 			globalVariables->AddItem(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->AddItem(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
+			globalVariables->AddItem(name, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
 			globalVariables->AddItem(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
+			globalVariables->AddEnumItem(name, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
+			globalVariables->AddItem(name, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
+			globalVariables->AddItem(name, "コンボ中の縦方向移動", data.move.isVerticalMove);
 			globalVariables->AddItem(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
 			globalVariables->AddItem(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
 
@@ -822,7 +832,11 @@ namespace Combo {
 
 			data.move.localMoveVector = globalVariables->GetValue<Vector3>(name, "コンボ中の移動方向");
 			data.move.isUpdateDirectionEachFrame = globalVariables->GetValue<bool>(name, "コンボ中の移動毎フレーム方向を更新");
+			data.move.isUpdateTargetPositionEachFrame = globalVariables->GetValue<bool>(name, "コンボ中の移動毎フレームターゲット位置を更新");
 			data.move.isNormalizeLocalMove = globalVariables->GetValue<bool>(name, "コンボ中の移動方向を正規化してから使うか");
+			data.move.speedCurveType = globalVariables->GetEnumValue<MoveSpeedCurveType>(name, "コンボ中の移動速度カーブ");
+			data.move.speedCurvePower = globalVariables->GetValue<float>(name, "コンボ中の移動速度カーブ強度");
+			data.move.isVerticalMove = globalVariables->GetValue<bool>(name, "コンボ中の縦方向移動");
 			data.move.isFlattenTargetDirection = globalVariables->GetValue<bool>(name, "コンボ中の移動基準前方を水平化");
 			data.move.alignCharacterToMovement = globalVariables->GetValue<bool>(name, "移動方向とキャラクターの向く方向を一致させるか");
 
@@ -1071,7 +1085,11 @@ namespace Combo {
 
 			globalVariables->SetValue(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->SetValue(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
+			globalVariables->SetValue(name, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
 			globalVariables->SetValue(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
+			globalVariables->SetEnumValue(name, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
+			globalVariables->SetValue(name, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
+			globalVariables->SetValue(name, "コンボ中の縦方向移動", data.move.isVerticalMove);
 			globalVariables->SetValue(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
 			globalVariables->SetValue(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
 

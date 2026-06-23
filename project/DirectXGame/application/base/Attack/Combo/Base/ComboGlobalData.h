@@ -31,6 +31,14 @@ namespace Combo {
 		kLockAt,	// カメラ方向基準
 	};
 
+	// 攻撃移動の速度カーブ
+	enum class MoveSpeedCurveType {
+		kConstant,		// 一定速度
+		kEaseIn,		// 徐々に加速
+		kEaseOut,		// 徐々に減速
+		kEaseInOut,		// 加速してから減速
+	};
+
 
 	// コンボタイプ
 	enum class Type {
@@ -198,6 +206,19 @@ namespace Combo {
 		// 移動中も毎フレーム方向を更新するか
 		// ターゲット追尾や入力追従系で有効
 		bool isUpdateDirectionEachFrame = true;
+
+		// ターゲット位置も毎フレーム更新するか
+		// 動く敵への吸い付きや接近技で有効
+		bool isUpdateTargetPositionEachFrame = true;
+
+		// 攻撃移動の速度カーブ
+		MoveSpeedCurveType speedCurveType = MoveSpeedCurveType::kConstant;
+
+		// 速度カーブの強さ
+		float speedCurvePower = 1.0f;
+
+		// 縦方向の攻撃移動を許可するか
+		bool isVerticalMove = true;
 
 		// ターゲット方向を使うとき、基準前方を水平化するか
 		// trueなら従来通り地面基準に近い挙動

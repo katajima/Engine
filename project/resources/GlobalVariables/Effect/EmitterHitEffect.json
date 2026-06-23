@@ -46,6 +46,16 @@
             "type": "int32_t",
             "value": 0
         },
+        "emitData.directionType": {
+            "enumType": "DirectionType",
+            "type": "enum",
+            "value": 4
+        },
+        "emitData.emitType": {
+            "enumType": "EmitType",
+            "type": "enum",
+            "value": 0
+        },
         "emitData.enableLighting": {
             "type": "int32_t",
             "value": 0
@@ -190,9 +200,9 @@
         "emitData.size.median": {
             "type": "Vector3",
             "value": [
-                8.0,
-                8.0,
-                8.0
+                3.0,
+                3.0,
+                5.0
             ]
         },
         "emitData.size.range": {

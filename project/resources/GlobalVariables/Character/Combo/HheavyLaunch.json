@@ -44,7 +44,27 @@
             "type": "bool",
             "value": true
         },
+        "カメラシェイク": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラシェイク幅": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "カメラシェイク時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラシェイク開始時間": {
             "type": "float",
             "value": 0.0
         },
@@ -83,6 +103,26 @@
         "カメラロックオン補間速度": {
             "type": "float",
             "value": 0.25
+        },
+        "カメラロックオン解除時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ切り替え": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラ切り替え名": {
+            "type": "string",
+            "value": "no"
+        },
+        "カメラ切り替え補間時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ切り替え開始時間": {
+            "type": "float",
+            "value": 0.0
         },
         "ガードポイント": {
             "type": "bool",
@@ -156,6 +196,10 @@
             "type": "bool",
             "value": true
         },
+        "コンボ中の移動毎フレームターゲット位置を更新": {
+            "type": "bool",
+            "value": true
+        },
         "コンボ中の移動毎フレーム方向を更新": {
             "type": "bool",
             "value": true
@@ -164,9 +208,22 @@
             "type": "float",
             "value": 0.20000000298023224
         },
+        "コンボ中の移動速度カーブ": {
+            "enumType": "MoveSpeedCurveType",
+            "type": "enum",
+            "value": 0
+        },
+        "コンボ中の移動速度カーブ強度": {
+            "type": "float",
+            "value": 1.0
+        },
         "コンボ中の移動開始時間": {
             "type": "float",
             "value": 0.0
+        },
+        "コンボ中の縦方向移動": {
+            "type": "bool",
+            "value": true
         },
         "コンボ中の重力": {
             "type": "bool",
@@ -327,12 +384,12 @@
             "value": [
                 0.0,
                 0.0,
-                0.0
+                17.200000762939453
             ]
         },
         "ターゲットなし移動上書き": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "ターゲットなし移動方向": {
             "type": "Vector3",

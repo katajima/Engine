@@ -1,4 +1,4 @@
-#include "ComboMove.h"
+﻿#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -64,6 +64,10 @@ namespace Combo {
 	void ComboMove::Update(const Character::CharacterContext& ctx, float timer) {
 		// ゲームパッドの左スティックを動かしているか
 		const bool isMoveStick = ctx.worldStickDirection.Length() != 0.0f;
+		if (data_.isUpdateTargetPositionEachFrame && targetWorldTransform) {
+			// 動くターゲットを追い続けられるように、現在のターゲット座標を更新する
+			targetPos_ = targetWorldTransform->GetWorldPosition();
+		}
 
 		// 強制的に移動
 		if (data_.isCompulsionMove) {
@@ -143,6 +147,11 @@ namespace Combo {
 			if (canMove) {
 				if (data_.moveType != MoveType::kTraget || !traget) {
 					request.velocity = Multiply(moveDirection_, dt);
+				}
+				// 攻撃ごとの踏み込み感を作るため、時間進行に応じた速度倍率を掛ける
+				request.velocity = request.velocity * CalculateMoveCurveScale(timer);
+				if (!data_.isVerticalMove) {
+					request.velocity.y = 0.0f;
 				}
 				request.priority = 0;
 				if (data_.alignCharacterToMovement) {
@@ -311,7 +320,39 @@ namespace Combo {
 			return false;
 		}
 
+		if (!data_.isVerticalMove) {
+			request.velocity.y = 0.0f;
+		}
 		return targetMoveType == TargetMoveType::kTeleport || request.velocity.Length() > 0.0001f;
+	}
+
+	float ComboMove::CalculateMoveCurveScale(float timer) const {
+		// 移動時間が無い場合は従来通り等速で扱う
+		const float duration = data_.moveWindow.endTime - data_.moveWindow.startTime;
+		if (duration <= 0.0001f) {
+			return 1.0f;
+		}
+
+		const float t = std::clamp((timer - data_.moveWindow.startTime) / duration, 0.0f, 1.0f);
+		const float power = (std::max)(data_.speedCurvePower, 0.001f);
+		switch (data_.speedCurveType)
+		{
+		case MoveSpeedCurveType::kEaseIn:
+			// 出始めを抑えて、後半で伸びる踏み込みにする
+			return std::pow(t, power);
+		case MoveSpeedCurveType::kEaseOut:
+			// 出始めを速くして、後半で止まりやすい踏み込みにする
+			return 1.0f - std::pow(1.0f - t, power);
+		case MoveSpeedCurveType::kEaseInOut:
+		{
+			// 前半は加速、後半は減速する山なりの速度にする
+			const float phase = t < 0.5f ? t * 2.0f : (1.0f - t) * 2.0f;
+			return std::pow((std::max)(phase, 0.0f), power);
+		}
+		case MoveSpeedCurveType::kConstant:
+		default:
+			return 1.0f;
+		}
 	}
 
 	Vector3 ComboMove::GetActiveMoveSpeed() const {

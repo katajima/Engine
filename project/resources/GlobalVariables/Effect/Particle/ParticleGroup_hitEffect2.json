@@ -60,7 +60,7 @@
         },
         "isFlag.isScaling": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.usebillboard": {
             "type": "bool",
@@ -80,7 +80,7 @@
         },
         "material.alphaClipping": {
             "type": "float",
-            "value": 0.5
+            "value": 0.15000000596046448
         },
         "material.color": {
             "type": "Vector4",

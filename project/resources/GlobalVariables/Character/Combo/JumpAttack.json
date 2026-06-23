@@ -44,13 +44,33 @@
             "type": "bool",
             "value": true
         },
+        "カメラシェイク": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラシェイク幅": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "カメラシェイク時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラシェイク開始時間": {
             "type": "float",
             "value": 0.0
         },
         "カメラズーム": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "カメラズーム時間": {
             "type": "float",
@@ -58,11 +78,11 @@
         },
         "カメラズーム速度": {
             "type": "float",
-            "value": 0.0
+            "value": 5.289999961853027
         },
         "カメラズーム量": {
             "type": "float",
-            "value": 0.0
+            "value": 0.800000011920929
         },
         "カメラズーム開始時間": {
             "type": "float",
@@ -83,6 +103,26 @@
         "カメラロックオン補間速度": {
             "type": "float",
             "value": 0.5
+        },
+        "カメラロックオン解除時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ切り替え": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラ切り替え名": {
+            "type": "string",
+            "value": "no"
+        },
+        "カメラ切り替え補間時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ切り替え開始時間": {
+            "type": "float",
+            "value": 0.0
         },
         "ガードポイント": {
             "type": "bool",
@@ -189,6 +229,10 @@
             "type": "bool",
             "value": true
         },
+        "コンボ中の移動毎フレームターゲット位置を更新": {
+            "type": "bool",
+            "value": true
+        },
         "コンボ中の移動毎フレーム方向を更新": {
             "type": "bool",
             "value": true
@@ -197,9 +241,22 @@
             "type": "float",
             "value": 0.15000000596046448
         },
+        "コンボ中の移動速度カーブ": {
+            "enumType": "MoveSpeedCurveType",
+            "type": "enum",
+            "value": 0
+        },
+        "コンボ中の移動速度カーブ強度": {
+            "type": "float",
+            "value": 1.0
+        },
         "コンボ中の移動開始時間": {
             "type": "float",
             "value": 0.0
+        },
+        "コンボ中の縦方向移動": {
+            "type": "bool",
+            "value": true
         },
         "コンボ中の重力": {
             "type": "bool",
@@ -240,7 +297,7 @@
         },
         "コンボ移動キャンセル受付開始時間": {
             "type": "float",
-            "value": 0.9833333492279053
+            "value": 0.9333333373069763
         },
         "コンボ移動キャンセル可能": {
             "type": "bool",

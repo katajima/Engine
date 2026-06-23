@@ -458,6 +458,16 @@ namespace Combo {
 			clampLocalMoveVector(data_.move.localMoveVector);
 			ImGui::Checkbox("ローカル移動ベクトルを正規化してから使うか", &data_.move.isNormalizeLocalMove);
 			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
+			ImGui::Checkbox("移動中も毎フレームターゲット位置を更新するか", &data_.move.isUpdateTargetPositionEachFrame);
+			static const char* MoveSpeedCurveTypeLabels[] = {
+			"一定",
+			"加速",
+			"減速",
+			"加速して減速",
+			};
+			Engine::ImGuiManager::Select("速度カーブ", MoveSpeedCurveTypeLabels, data_.move.speedCurveType);
+			ImGui::DragFloat("速度カーブ強度", &data_.move.speedCurvePower, 0.01f, 0.001f, 10.0f);
+			ImGui::Checkbox("縦方向の攻撃移動を許可するか", &data_.move.isVerticalMove);
 			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
 			ImGui::Checkbox("移動方向とキャラクターの向く方向を一致させるか", &data_.move.alignCharacterToMovement);
 

@@ -44,7 +44,27 @@
             "type": "bool",
             "value": true
         },
+        "カメラシェイク": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラシェイク幅": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "カメラシェイク時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラシェイク量": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラシェイク開始時間": {
             "type": "float",
             "value": 0.0
         },
@@ -84,6 +104,26 @@
             "type": "float",
             "value": 0.5
         },
+        "カメラロックオン解除時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ切り替え": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラ切り替え名": {
+            "type": "string",
+            "value": "no"
+        },
+        "カメラ切り替え補間時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ切り替え開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "ガードポイント": {
             "type": "bool",
             "value": false
@@ -121,7 +161,7 @@
         },
         "コンボエフェクト数": {
             "type": "int32_t",
-            "value": 1
+            "value": 0
         },
         "コンボエフェクト終了時間0": {
             "type": "float",

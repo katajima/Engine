@@ -56,6 +56,10 @@
             "type": "string",
             "value": "LaunchAttack"
         },
+        "LaunchRangeAttack": {
+            "type": "string",
+            "value": "LaunchRangeAttack"
+        },
         "LightDashAttack": {
             "type": "string",
             "value": "LightDashAttack"
@@ -67,6 +71,10 @@
         "LightDashAttack3": {
             "type": "string",
             "value": "LightDashAttack3"
+        },
+        "LightHitAttack": {
+            "type": "string",
+            "value": "LightHitAttack"
         },
         "MeleeAttack1": {
             "type": "string",
