@@ -2424,7 +2424,7 @@ namespace Combo {
 		if(useCamera)
 		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
-		effect.Update(timer_, ctx.dt);
+		effect.Update(ctx, timer_, ctx.dt);
 	}
 
 	// 終了
@@ -2530,7 +2530,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -2615,6 +2615,13 @@ namespace Combo {
 		kButton,	// ボタン入力で回収
 		kTimer,		// 時間経過で回収
 		kNearOwner,	// 投擲物に近づいたら回収
+	};
+
+	// コンボ演出の発生条件
+	enum class ComboEffectTriggerType {
+		kTimeWindow,	// 指定時間範囲中に頻度ごと発生
+		kTimer,			// 指定時間経過で一回発生
+		kLanding,		// 着地した瞬間に一回発生
 	};
 
 	// 保存項目用遠距離攻撃データ
@@ -2790,6 +2797,7 @@ namespace Combo {
 	struct ComboEffectEntry {
 		std::string effectName = "";					// 発生させるエフェクト名
 		std::string parentName = "Player";				// 発生位置の追従先
+		ComboEffectTriggerType triggerType = ComboEffectTriggerType::kTimeWindow;	// 発生条件
 		float startTime = 0.0f;							// コンボ開始から発生開始までの時間
 		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
 		float interval = 0.1f;							// 発生頻度
@@ -3343,7 +3351,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cpp
 ============================================================
-#include "ComboSystem.h"
+﻿#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -3397,6 +3405,11 @@ namespace Combo {
 			{ "ボタン", static_cast<int64_t>(RangeRecallTriggerType::kButton) },
 			{ "時間経過", static_cast<int64_t>(RangeRecallTriggerType::kTimer) },
 			{ "近づく", static_cast<int64_t>(RangeRecallTriggerType::kNearOwner) },
+			});
+		EnumRegistry::Instance().Register("ComboEffectTriggerType", {
+			{ "時間範囲", static_cast<int64_t>(ComboEffectTriggerType::kTimeWindow) },
+			{ "時間経過", static_cast<int64_t>(ComboEffectTriggerType::kTimer) },
+			{ "着地したら", static_cast<int64_t>(ComboEffectTriggerType::kLanding) },
 			});
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
@@ -3831,6 +3844,7 @@ namespace Combo {
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				globalVariables->AddItem(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
 				globalVariables->AddItem(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->AddEnumItem(name, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
 				globalVariables->AddItem(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
 				globalVariables->AddItem(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				globalVariables->AddItem(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
@@ -3984,6 +3998,12 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラロックオン", data.camera.isLockOn);
 			globalVariables->AddItem(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
 			globalVariables->AddItem(name, "カメラロックオン回転引き継ぎ", data.camera.isLockOnRotate);
+			globalVariables->AddItem(name, "カメラロックオン解除時間", data.camera.lockOnEndTime);
+
+			globalVariables->AddItem(name, "カメラ切り替え", data.camera.isChangeCamera);
+			globalVariables->AddItem(name, "カメラ切り替え名", data.camera.cameraName);
+			globalVariables->AddItem(name, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
+			globalVariables->AddItem(name, "カメラ切り替え補間時間", data.camera.interpolation);
 			
 			globalVariables->AddItem(name, "カメラズーム", data.camera.isZoom);
 			globalVariables->AddItem(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
@@ -3992,6 +4012,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラズーム開始時間", data.camera.zoomStartTime);
 			globalVariables->AddItem(name, "カメラズーム量", data.camera.zoomTargetDistance);
 
+			globalVariables->AddItem(name, "カメラシェイク", data.camera.isShake);
+			globalVariables->AddItem(name, "カメラシェイク量", data.camera.shakeCameraPower);
+			globalVariables->AddItem(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
+			globalVariables->AddItem(name, "カメラシェイク時間", data.camera.shakeDuration);
+			globalVariables->AddItem(name, "カメラシェイク幅", data.camera.shakeOffset);
 
 		}
 
@@ -4063,6 +4088,9 @@ namespace Combo {
 				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
 				if (globalVariables->HasKey(name, MakeComboEffectParentKey(i))) {
 					entry.parentName = globalVariables->GetValue<std::string>(name, MakeComboEffectParentKey(i));
+				}
+				if (globalVariables->HasKey(name, MakeComboEffectTriggerTypeKey(i))) {
+					entry.triggerType = globalVariables->GetEnumValue<ComboEffectTriggerType>(name, MakeComboEffectTriggerTypeKey(i));
 				}
 				if (globalVariables->HasKey(name, MakeComboEffectEndTimeKey(i))) {
 					entry.endTime = globalVariables->GetValue<float>(name, MakeComboEffectEndTimeKey(i));
@@ -4234,6 +4262,12 @@ namespace Combo {
 			data.camera.isLockOn = globalVariables->GetValue<bool>(name, "カメラロックオン");
 			data.camera.lockOnInterpolation = globalVariables->GetValue<float>(name, "カメラロックオン補間速度");
 			data.camera.isLockOnRotate = globalVariables->GetValue<bool>(name, "カメラロックオン回転引き継ぎ");
+			data.camera.lockOnEndTime = globalVariables->GetValue<float>(name, "カメラロックオン解除時間");
+
+			data.camera.isChangeCamera = globalVariables->GetValue<bool>(name, "カメラ切り替え");
+			data.camera.cameraName = globalVariables->GetValue<std::string>(name, "カメラ切り替え名");
+			data.camera.changeCameraStartTime = globalVariables->GetValue<float>(name, "カメラ切り替え開始時間");
+			data.camera.interpolation = globalVariables->GetValue<float>(name, "カメラ切り替え補間時間");
 
 			data.camera.isZoom = globalVariables->GetValue<bool>(name, "カメラズーム");
 			data.camera.isLockOnZoom = globalVariables->GetValue<bool>(name, "カメラロックオンズーム");
@@ -4241,6 +4275,12 @@ namespace Combo {
 			data.camera.zoomDuration = globalVariables->GetValue<float>(name, "カメラズーム時間");
 			data.camera.zoomStartTime = globalVariables->GetValue<float>(name, "カメラズーム開始時間");
 			data.camera.zoomTargetDistance = globalVariables->GetValue<float>(name, "カメラズーム量");
+
+			data.camera.isShake = globalVariables->GetValue<bool>(name, "カメラシェイク");
+			data.camera.shakeCameraPower = globalVariables->GetValue<float>(name, "カメラシェイク量");
+			data.camera.shakeStartTime = globalVariables->GetValue<float>(name, "カメラシェイク開始時間");
+			data.camera.shakeDuration = globalVariables->GetValue<float>(name, "カメラシェイク時間");
+			data.camera.shakeOffset = globalVariables->GetValue<Vector3>(name, "カメラシェイク幅");
 			
 		}
 	}
@@ -4303,6 +4343,7 @@ namespace Combo {
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				globalVariables->SetValue(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
 				globalVariables->SetValue(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				globalVariables->SetEnumValue(name, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
 				globalVariables->SetValue(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
 				globalVariables->SetValue(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				globalVariables->SetValue(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
@@ -4463,6 +4504,12 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラロックオン", data.camera.isLockOn);
 			globalVariables->SetValue(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
 			globalVariables->SetValue(name, "カメラロックオン回転引き継ぎ",data.camera.isLockOnRotate);
+			globalVariables->SetValue(name, "カメラロックオン解除時間", data.camera.lockOnEndTime);
+
+			globalVariables->SetValue(name, "カメラ切り替え", data.camera.isChangeCamera);
+			globalVariables->SetValue(name, "カメラ切り替え名", data.camera.cameraName);
+			globalVariables->SetValue(name, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
+			globalVariables->SetValue(name, "カメラ切り替え補間時間", data.camera.interpolation);
 
 			globalVariables->SetValue(name, "カメラズーム", data.camera.isZoom);
 			globalVariables->SetValue(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
@@ -4470,6 +4517,12 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラズーム時間", data.camera.zoomDuration);
 			globalVariables->SetValue(name, "カメラズーム開始時間", data.camera.zoomStartTime);
 			globalVariables->SetValue(name, "カメラズーム量", data.camera.zoomTargetDistance);
+
+			globalVariables->SetValue(name, "カメラシェイク", data.camera.isShake);
+			globalVariables->SetValue(name, "カメラシェイク量", data.camera.shakeCameraPower);
+			globalVariables->SetValue(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
+			globalVariables->SetValue(name, "カメラシェイク時間", data.camera.shakeDuration);
+			globalVariables->SetValue(name, "カメラシェイク幅", data.camera.shakeOffset);
 
 		}
 	}
@@ -4633,7 +4686,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -4672,6 +4725,10 @@ namespace Combo {
 
 	static std::string MakeComboEffectParentKey(int index) {
 		return "コンボエフェクト追従先" + std::to_string(index);
+	}
+
+	static std::string MakeComboEffectTriggerTypeKey(int index) {
+		return "コンボエフェクト発生条件" + std::to_string(index);
 	}
 
 	static std::string MakeComboEffectOffsetKey(int index) {
@@ -5832,7 +5889,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditorBlock.cpp
 ============================================================
-#include "ComboEditorBlock.h"
+﻿#include "ComboEditorBlock.h"
 
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
@@ -5840,6 +5897,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEdi
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <cctype>
+#include <cstring>
 
 namespace Combo {
 
@@ -6384,16 +6442,45 @@ namespace Combo {
 	// カメラ設定
 	void  EditorBlock::ImGuiCamera() {
 		if (ImGui::CollapsingHeader("カメラ関係")) {
-			ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
-			ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
-			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation, 0.01f, 0.0f, 10.0f);
+			if (ImGui::TreeNode("カメラ切り替え")) {
+				ImGui::Checkbox("攻撃中にカメラを切り替える", &data_.camera.isChangeCamera);
+				char cameraNameBuffer[128]{};
+				strncpy_s(cameraNameBuffer, data_.camera.cameraName.c_str(), sizeof(cameraNameBuffer) - 1);
+				if (ImGui::InputText("切り替え先カメラ名", cameraNameBuffer, sizeof(cameraNameBuffer))) {
+					// CameraManagerに登録されている名前を保存する
+					data_.camera.cameraName = cameraNameBuffer;
+				}
+				ImGui::DragFloat("カメラ切り替え開始時間", &data_.camera.changeCameraStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラ切り替え補間時間", &data_.camera.interpolation, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
 
-			ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
-			ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
-			ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
-			ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration, 0.01f, 0.0f, 60.0f);
-			ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
-			ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
+			if (ImGui::TreeNode("ロックオン演出")) {
+				ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
+				ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
+				ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("ロックオン解除時間(0以下で解除しない)", &data_.camera.lockOnEndTime, 0.01f, 0.0f, 60.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("ズーム演出")) {
+				ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
+				ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
+				ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
+				ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("シェイク演出")) {
+				ImGui::Checkbox("カメラをシェイクするか", &data_.camera.isShake);
+				ImGui::DragFloat("カメラシェイク開始時間", &data_.camera.shakeStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラシェイク時間", &data_.camera.shakeDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("カメラシェイク量", &data_.camera.shakeCameraPower, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat3("カメラシェイク幅", &data_.camera.shakeOffset.x, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
 
 		}
 	};
@@ -6538,7 +6625,7 @@ namespace Combo {
 	void EditorBlock::DrawComboEffectEditor(GloblEffectData& effect,
 		const std::map<std::string, EffectGlobalData>& effectDatas) {
 		ImGui::SeparatorText("コンボエフェクト");
-		ImGui::TextWrapped("コンボ開始から指定秒数で、使用者位置 + オフセットに一度だけ発生します。");
+		ImGui::TextWrapped("条件に応じて、追従先位置 + オフセットへコンボエフェクトを発生させます。");
 
 		int removeIndex = -1;
 		bool shouldSyncSequence = false;
@@ -6568,9 +6655,20 @@ namespace Combo {
 				ImGui::EndCombo();
 			}
 
+			static const char* ComboEffectTriggerTypeLabels[] = {
+				"時間範囲",
+				"時間経過",
+				"着地したら",
+			};
+			Engine::ImGuiManager::Select("発生条件", ComboEffectTriggerTypeLabels, entry.triggerType);
+
 			shouldSyncSequence |= ImGui::DragFloat("開始時間", &entry.startTime, 0.01f, 0.0f, 60.0f, "%.2f");
-			shouldSyncSequence |= ImGui::DragFloat("終了時間", &entry.endTime, 0.01f, 0.0f, 60.0f, "%.2f");
-			ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+			if (entry.triggerType != ComboEffectTriggerType::kTimer) {
+				shouldSyncSequence |= ImGui::DragFloat("終了時間", &entry.endTime, 0.01f, 0.0f, 60.0f, "%.2f");
+			}
+			if (entry.triggerType == ComboEffectTriggerType::kTimeWindow) {
+				ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
+			}
 			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
 			if (entry.endTime < entry.startTime) {
 				entry.endTime = entry.startTime;
@@ -6596,6 +6694,7 @@ namespace Combo {
 			effect.comboEffects.push_back(ComboEffectEntry{
 				.effectName = "",
 				.parentName = "Player",
+				.triggerType = ComboEffectTriggerType::kTimeWindow,
 				.startTime = 0.0f,
 				.endTime = 0.0f,
 				.interval = 0.1f,
@@ -7094,9 +7193,11 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.cpp
 ============================================================
-#include "ComboEffect.h"
+﻿#include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
+#include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -7110,21 +7211,46 @@ namespace Combo {
 
 	// 開始
 	void ComboCamera::Enter(Character::BaseCharacter* owner) {
-		cameraManager = owner->GetCameraManager();
-		if (data_.isLockOn) {
-			cameraManager->GetBaseCamera()->GetCameraController()->
-				GetCameraLockOn()->GetData() = CameraLockOnData{nullptr,data_ .lockOnInterpolation,data_.isLockOn };
-			cameraManager->GetBaseCamera()->LockOn(target);
+		// 攻撃開始ごとに一回だけ発生するカメラ演出の状態を初期化する
+		isCameraChanged_ = false;
+		isZoomRequested_ = false;
+		isShakeRequested_ = false;
+		isLockOnReleased_ = false;
+		cameraManager = owner ? owner->GetCameraManager() : nullptr;
+		camera = cameraManager ? cameraManager->GetBaseCamera() : nullptr;
+		if (camera && data_.isLockOn) {
+			// 攻撃中だけ対象を注視するため、ロックオン用の補間と引き継ぎ設定を渡す
+			camera->GetCameraController()->GetCameraLockOn()->GetData() =
+				CameraLockOnData{ target,data_.lockOnInterpolation,data_.isLockOn,data_.isLockOnRotate };
+			camera->LockOn(target);
 		}
 	}
 
 	// 更新
 	void ComboCamera::Update(float timer, float dt) {
-		
-		// ロックオン処理
-		if (data_.lockOnInterpolation <= timer && data_.isLockOn) {
-			cameraManager->GetBaseCamera()->LockOn(nullptr);
+		if (!cameraManager) {
+			return;
+		}
+		camera = cameraManager->GetBaseCamera();
+		if (!camera) {
+			return;
+		}
 
+		// 指定時間になったら、攻撃演出用のカメラへ一回だけ切り替える
+		if (data_.isChangeCamera && !isCameraChanged_ && data_.changeCameraStartTime <= timer &&
+			!data_.cameraName.empty() && data_.cameraName != "no") {
+			cameraManager->SetUseCamera(data_.cameraName, data_.interpolation);
+			camera = cameraManager->GetBaseCamera();
+			isCameraChanged_ = true;
+			if (!camera) {
+				return;
+			}
+		}
+
+		// 終了時間が設定されている場合だけ、攻撃中のロックオンを解除する
+		if (data_.lockOnEndTime > 0.0f && data_.lockOnEndTime <= timer && data_.isLockOn && !isLockOnReleased_) {
+			camera->LockOn(nullptr);
+			isLockOnReleased_ = true;
 		}
 
 		bool isZoom =  data_.isZoom;
@@ -7132,16 +7258,32 @@ namespace Combo {
 			isZoom = data_.isLockOn && target;
 		}
 
-		// ズーム処理
-		if (data_.zoomStartTime <= timer && isZoom)
-			
-			cameraManager->GetBaseCamera()->GetCameraController()->GetZoom()->
-			Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
+		// 指定時間になったら、攻撃の寄り演出を一回だけ開始する
+		if (data_.zoomStartTime <= timer && isZoom && !isZoomRequested_) {
+			camera->GetCameraController()->GetZoom()->Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
+			isZoomRequested_ = true;
+		}
+
+		// 指定時間になったら、攻撃の衝撃用シェイクを一回だけ開始する
+		if (data_.isShake && !isShakeRequested_ && data_.shakeStartTime <= timer) {
+			Vector3 shakeOffset = data_.shakeOffset;
+			if (shakeOffset.x == 0.0f && shakeOffset.y == 0.0f && shakeOffset.z == 0.0f) {
+				shakeOffset = { data_.shakeCameraPower,data_.shakeCameraPower,data_.shakeCameraPower };
+			}
+			if (data_.shakeDuration > 0.0f) {
+				camera->GetCameraController()->GetShake()->Request({ data_.shakeDuration,shakeOffset });
+			}
+			isShakeRequested_ = true;
+		}
 	}
 
 	// 終了
 	void ComboCamera::Exit() {
-		cameraManager->GetBaseCamera()->LockOn(nullptr);
+		if (cameraManager && cameraManager->GetBaseCamera()) {
+			// 攻撃が終わったら攻撃用ロックオンを解除して通常操作へ戻す
+			cameraManager->GetBaseCamera()->LockOn(nullptr);
+		}
+		camera = nullptr;
 	}
 
 #pragma endregion // コンボカメラ
@@ -7155,9 +7297,12 @@ namespace Combo {
 		this->owner = owner;
 		effectSystem = owner ? owner->GetEffect() : nullptr;
 		nextEmitTimes_.clear();
+		emittedFlags_.clear();
 		for (const ComboEffectEntry& entry : data_.comboEffects) {
 			nextEmitTimes_.push_back(entry.startTime);
+			emittedFlags_.push_back(false);
 		}
+		wasOnGround_ = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
 		// 武器情報取得
 		weapon = owner ? owner->GetWeapon() : nullptr;
 		if (!weapon) {
@@ -7170,9 +7315,10 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboEffect::Update(float timer, float dt) {
+	void ComboEffect::Update(const Character::CharacterContext& ctx, float timer, float dt) {
 		// 指定時間になったコンボエフェクトを発生させる
-		EmitComboEffects(timer);
+		EmitComboEffects(ctx, timer);
+		wasOnGround_ = ctx.onGround;
 
 		if (!weapon) {
 			return;
@@ -7195,35 +7341,77 @@ namespace Combo {
 		}
 		// 次のコンボ開始時に発生状態を作り直す
 		nextEmitTimes_.clear();
+		emittedFlags_.clear();
 		effectSystem = nullptr;
 		this->owner = nullptr;
 		weapon = nullptr;
+		wasOnGround_ = false;
 	}
 
-	void ComboEffect::EmitComboEffects(float timer) {
+	void ComboEffect::EmitComboEffects(const Character::CharacterContext& ctx, float timer) {
 		if (!owner || !effectSystem) {
 			return;
 		}
 		if (nextEmitTimes_.size() != data_.comboEffects.size()) {
 			nextEmitTimes_.clear();
+			emittedFlags_.clear();
 			for (const ComboEffectEntry& entry : data_.comboEffects) {
 				nextEmitTimes_.push_back(entry.startTime);
+				emittedFlags_.push_back(false);
 			}
 		}
 
+		const bool landingTriggered = !wasOnGround_ && ctx.onGround;
 		for (int i = 0; i < static_cast<int>(data_.comboEffects.size()); ++i) {
 			ComboEffectEntry& entry = data_.comboEffects[i];
-			const float endTime = (std::max)(entry.startTime, entry.endTime);
 			const float interval = (std::max)(entry.interval, 0.001f);
-			if (entry.effectName.empty() || timer < entry.startTime || timer > endTime || timer < nextEmitTimes_[i]) {
+			if (entry.effectName.empty()) {
 				continue;
 			}
 
-			// 追従先の現在位置にオフセットを足した場所へ発生させる
-			const Vector3 emitPosition = GetEffectBasePosition(entry) + entry.offset;
-			effectSystem->Emit(entry.effectName, emitPosition);
-			nextEmitTimes_[i] += interval;
+			switch (entry.triggerType)
+			{
+			case ComboEffectTriggerType::kTimer:
+				// 指定時間を過ぎた最初の1回だけ発生させる
+				if (!emittedFlags_[i] && timer >= entry.startTime) {
+					EmitEntry(entry);
+					emittedFlags_[i] = true;
+				}
+				break;
+			case ComboEffectTriggerType::kLanding:
+				// 受付時間を満たした状態で着地した瞬間に1回だけ発生させる
+				if (!emittedFlags_[i] && landingTriggered && IsTriggerTimeValid(entry, timer)) {
+					EmitEntry(entry);
+					emittedFlags_[i] = true;
+				}
+				break;
+			case ComboEffectTriggerType::kTimeWindow:
+			default:
+				// 指定時間範囲中は発生頻度ごとに繰り返し発生させる
+				if (IsTriggerTimeValid(entry, timer) && timer >= nextEmitTimes_[i]) {
+					EmitEntry(entry);
+					nextEmitTimes_[i] += interval;
+				}
+				break;
+			}
 		}
+	}
+
+	bool ComboEffect::IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const {
+		// endTimeがstartTime以下なら、開始後は終了制限なしとして扱う
+		if (timer < entry.startTime) {
+			return false;
+		}
+		if (entry.endTime <= entry.startTime) {
+			return true;
+		}
+		return timer <= entry.endTime;
+	}
+
+	void ComboEffect::EmitEntry(const ComboEffectEntry& entry) {
+		// 追従先の現在位置にオフセットを足した場所へ発生させる
+		const Vector3 emitPosition = GetEffectBasePosition(entry) + entry.offset;
+		effectSystem->Emit(entry.effectName, emitPosition);
 	}
 
 	Vector3 ComboEffect::GetEffectBasePosition(const ComboEffectEntry& entry) const {
@@ -7245,7 +7433,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
@@ -7259,6 +7447,7 @@ class CameraManager;		// カメラ管理
 class BaseCamera;			// カメラ
 namespace Character {
 	class BaseCharacter;		// キャラクター
+	struct CharacterContext;	// キャラクター状態
 }
 class BaseWeapon;			// 武器
 class EffectSystem;			// エフェクト管理
@@ -7289,6 +7478,10 @@ namespace Combo {
 		CameraManager* cameraManager = nullptr;	// カメラ管理
 		// カメラデータ
 		GlobalCameraData data_;
+		bool isCameraChanged_ = false;			// カメラ切り替えを実行済みか
+		bool isZoomRequested_ = false;			// ズーム演出を実行済みか
+		bool isShakeRequested_ = false;			// シェイク演出を実行済みか
+		bool isLockOnReleased_ = false;			// ロックオン解除を実行済みか
 	};
 
 	/// <summary>
@@ -7300,7 +7493,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(float timer, float dt);
+		void Update(const Character::CharacterContext& ctx, float timer, float dt);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
@@ -7315,7 +7508,11 @@ namespace Combo {
 		GloblEffectData& GetData() { return data_; }
 	private:
 		// 指定時間内のコンボエフェクトを頻度に応じて発生させる
-		void EmitComboEffects(float timer);
+		void EmitComboEffects(const Character::CharacterContext& ctx, float timer);
+		// 演出条件の時間範囲を満たしているか確認する
+		bool IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const;
+		// 指定演出を現在位置へ発生させる
+		void EmitEntry(const ComboEffectEntry& entry);
 		// エフェクトの発生基準位置を取得する
 		Vector3 GetEffectBasePosition(const ComboEffectEntry& entry) const;
 	private:
@@ -7327,6 +7524,8 @@ namespace Combo {
 		EffectSystem* effectSystem = nullptr;		// エフェクト発生先
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;	// 追従先Transform一覧
 		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
+		std::vector<bool> emittedFlags_;				// 一回発生条件が発生済みか
+		bool wasOnGround_ = false;					// 前フレームの接地状態
 	};
 }
 
@@ -14424,7 +14623,8 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraData.h
 ============================================================
-#pragma once
+﻿#pragma once
+#include "DirectXGame/engine/struct/Structs3D.h"
 #include <string>
 
 // カメラ保存データ
@@ -14435,10 +14635,18 @@ struct GlobalCameraData {
 	bool isChangeCamera = false;
 	// 移動補間
 	float interpolation = 0.0f;
+	// カメラ切り替え開始時間
+	float changeCameraStartTime = 0.0f;
 	// カメラをシェイクするか
 	bool isShake = false;
 	// シェイク量
 	float shakeCameraPower = 0.0f;
+	// シェイク開始時間
+	float shakeStartTime = 0.0f;
+	// シェイク継続時間
+	float shakeDuration = 0.0f;
+	// カメラ基準のシェイク幅
+	Vector3 shakeOffset = { 0.0f, 0.0f, 0.0f };
 	
 	// カメラをズームするか
 	bool isZoom = false;
@@ -14459,6 +14667,8 @@ struct GlobalCameraData {
 	bool isLockOnRotate = true;
 	// ロックオン補間速度
 	float lockOnInterpolation = 0.5f;
+	// ロックオン解除時間(0以下なら解除しない)
+	float lockOnEndTime = 0.0f;
 };
 
 
@@ -27923,6 +28133,8 @@ void EffectEditor::SetEffectGlobalData(const std::string& name, EmitterShapeType
 	emit->SetAlphaClipping(data.alphaClipping);		// アルファクリッピング
 	emit->SetEnableLighting(data.enableLighting);	// ライティングの有無
 	emit->SetLifeTimeScaleTopBottom(data.topBottom);// ライフタイムスケールの基準
+	emit->SetEmitType(data.emitType);				// 形状内の出現場所
+	emit->SetEmitDirectionType(data.directionType);	// 形状に対する初速方向
 
 
 	switch (shapeType)
@@ -29029,6 +29241,8 @@ void EffectEditor::AddItem(const std::string& name, const EffectGlobalData& data
 	globalVariables->AddItem(name, "emitData.segment", data.segment);
 
 	globalVariables->AddEnumItem<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
+	globalVariables->AddEnumItem<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
+	globalVariables->AddEnumItem<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
 	globalVariables->AddEnumItem<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
 }
 
@@ -29084,6 +29298,12 @@ void EffectEditor::GetValue(const std::string& name, EffectGlobalData& data) {
 	data.segment = globalVariables->GetValue<int>(name, "emitData.segment");
 
 	data.shapeType = globalVariables->GetEnumValue<EmitterShapeType>(name, "emitData.shapeType");
+	if (globalVariables->HasKey(name, "emitData.emitType")) {
+		data.emitType = globalVariables->GetEnumValue<EmitData::EmitType>(name, "emitData.emitType");
+	}
+	if (globalVariables->HasKey(name, "emitData.directionType")) {
+		data.directionType = globalVariables->GetEnumValue<EmitData::DirectionType>(name, "emitData.directionType");
+	}
 	data.topBottom = globalVariables->GetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom");
 }
 
@@ -29138,6 +29358,8 @@ void EffectEditor::SetValue(const std::string& name, const EffectGlobalData& dat
 	globalVariables->SetValue(name, "emitData.segment", data.segment);
 
 	globalVariables->SetEnumValue<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
+	globalVariables->SetEnumValue<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
+	globalVariables->SetEnumValue<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
 	globalVariables->SetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
 }
 
@@ -29165,6 +29387,24 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		effectComponent->AddEmitter(name, data.particleName, data.shapeType);
 		SetEffectGlobalData(name, data.shapeType, data);
 	}
+	static const char* EmitTypeLabels[] = {
+		"ランダム",
+		"面",
+		"辺",
+	};
+	Engine::ImGuiManager::Select("出現場所", EmitTypeLabels, data.emitType);
+
+	static const char* DirectionTypeLabels[] = {
+		"なし",
+		"外向き/法線",
+		"速度方向",
+		"中心向き",
+		"ランダム",
+		"固定",
+		"速度依存",
+	};
+	Engine::ImGuiManager::Select("初速方向", DirectionTypeLabels, data.directionType);
+
 	// 出現
 	ImGui::DragInt("出現量(中央値)", &data.emitData.count.median, 0.1f);
 	ImGui::DragInt("出現量(振れ幅)", &data.emitData.count.range, 0.1f); 
@@ -29245,15 +29485,16 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		break;
 		case EmitterShapeType::SPHERE:
 		{
-			Engine::SphereParticleEmitter* sphereEmit = effectComponent->GetEmitterAs<Engine::SphereParticleEmitter>(name);
-			sphereEmit->SetRadius(data.radius);
+			ImGui::DragFloat("球の半径", &data.radius, 0.1f, 0.0f, 1000.0f);
 		}
 		break;
 		case EmitterShapeType::CIRCLE:
 		{
-			Engine::CornerParticleEmitter* circleEmit = effectComponent->GetEmitterAs<Engine::CornerParticleEmitter>(name);
-			circleEmit->SetRadius(data.radius);
-			circleEmit->SetSegment(data.segment);
+			ImGui::DragFloat("円の半径", &data.radius, 0.1f, 0.0f, 1000.0f);
+			ImGui::SliderInt("円の分割数", &data.segment, 3, 128);
+			if (data.segment < 3) {
+				data.segment = 3;
+			}
 		}
 		break;
 		case EmitterShapeType::POINT:
@@ -29263,8 +29504,8 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		break;
 		case EmitterShapeType::LINE:
 		{
-			Engine::LineParticleEmitter* lineEmit = effectComponent->GetEmitterAs<Engine::LineParticleEmitter>(name);
-			lineEmit->SetSegment(data.lineStart, data.lineEnd);
+			ImGui::DragFloat3("線の開始位置", &data.lineStart.x, 0.1f);
+			ImGui::DragFloat3("線の終了位置", &data.lineEnd.x, 0.1f);
 		}
 		break;
 		case EmitterShapeType::SPLINE:
@@ -29277,8 +29518,9 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 		break;
 		case EmitterShapeType::TRIANGLE:
 		{
-			Engine::TriangleParticleEmitter* triangleEmit = effectComponent->GetEmitterAs<Engine::TriangleParticleEmitter>(name);
-			triangleEmit->SetTriangle(data.triangle);
+			ImGui::DragFloat3("三角形 頂点0", &data.triangle.vertices[0].x, 0.1f);
+			ImGui::DragFloat3("三角形 頂点1", &data.triangle.vertices[1].x, 0.1f);
+			ImGui::DragFloat3("三角形 頂点2", &data.triangle.vertices[2].x, 0.1f);
 		}
 		break;
 		case EmitterShapeType::MESH:
@@ -31450,9 +31692,6 @@ namespace Character {
 	{
 		if (!input_) return nullptr;
 
-		// 未接続なら何もしない（必要ならキーマウも混ぜる）
-		if (!input_->IsControllerConnected()) return nullptr;
-
 		// 上から順に評価して、最初に成立したコマンドを返す
 		for (auto& b : bindings_)
 		{
@@ -31621,80 +31860,118 @@ void InputManager::BuildGameplayActions(){
 
     move = ClampLen1(move);
     value2_[Idx(Action::Move)] = move;
+    pressed_[Idx(Action::Move)] = move.x != 0.0f || move.y != 0.0f;
+    triggered_[Idx(Action::Move)] = pressed_[Idx(Action::Move)] && !isDown_[Idx(Action::Move)];
+    released_[Idx(Action::Move)] = !pressed_[Idx(Action::Move)] && isDown_[Idx(Action::Move)];
 
-    // ---- Look（RightStick だけ例）----
-    value2_[Idx(Action::Look)] = input_->GetGamePadRightStick();
+    // ---- Look（RightStick + 矢印キー + 右クリック中のマウス移動）----
+    Vector2 look = input_->GetGamePadRightStick();
+    if (input_->IsPushKey(DIK_LEFT)) look.x -= 1.0f;
+    if (input_->IsPushKey(DIK_RIGHT)) look.x += 1.0f;
+    if (input_->IsPushKey(DIK_UP)) look.y += 1.0f;
+    if (input_->IsPushKey(DIK_DOWN)) look.y -= 1.0f;
+    if (input_->IsMousePressed(1)) {
+        const Vector2 mouseDelta = input_->GetMouseMoveDelta();
+        look.x += mouseDelta.x * 0.05f;
+        look.y -= mouseDelta.y * 0.05f;
+    }
+    look = ClampLen1(look);
+    value2_[Idx(Action::Look)] = look;
+    pressed_[Idx(Action::Look)] = look.x != 0.0f || look.y != 0.0f;
+    triggered_[Idx(Action::Look)] = pressed_[Idx(Action::Look)] && !isDown_[Idx(Action::Look)];
+    released_[Idx(Action::Look)] = !pressed_[Idx(Action::Look)] && isDown_[Idx(Action::Look)];
 
-    // ---- Attack（Pad X）----
+    // ---- Attack（Pad X / 左クリック / J）----
     triggered_[Idx(Action::LightAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X) ||
+        input_->IsMouseTriggered(0) ||
+        input_->IsTriggerKey(DIK_J);
 
     pressed_[Idx(Action::LightAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_X);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_X) ||
+        input_->IsMousePressed(0) ||
+        input_->IsPushKey(DIK_J);
 
     released_[Idx(Action::LightAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_X);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_X) ||
+        input_->IsMouseReleased(0) ||
+        input_->IsKeyReleased(DIK_J);
 
-    // ---- Attack（Pad Y）----
+    // ---- Attack（Pad Y / K）----
     triggered_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y) ||
+        input_->IsTriggerKey(DIK_K);
 
     pressed_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y) ||
+        input_->IsPushKey(DIK_K);
 
     released_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y) ||
+        input_->IsKeyReleased(DIK_K);
 
-    // ---- Attack（Pad A）----
+    // ---- Jump（Pad A / Space）----
     triggered_[Idx(Action::Jump)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A) ||
+        input_->IsTriggerKey(DIK_SPACE);
 
     pressed_[Idx(Action::Jump)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_A);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_A) ||
+        input_->IsPushKey(DIK_SPACE);
 
     released_[Idx(Action::Jump)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_A);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_A) ||
+        input_->IsKeyReleased(DIK_SPACE);
 
-    // ---- Attack（Pad RB）----
+    // ---- Special（Pad RB / R）----
     triggered_[Idx(Action::Special)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
+        input_->IsTriggerKey(DIK_R);
 
     pressed_[Idx(Action::Special)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_RB);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_RB) ||
+        input_->IsPushKey(DIK_R);
 
     released_[Idx(Action::Special)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB) ||
+        input_->IsKeyReleased(DIK_R);
 
-    // ---- Attack（Pad B）----
+    // ---- Skill（Pad B / E）----
     triggered_[Idx(Action::Skill)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
+        input_->IsTriggerKey(DIK_E);
 
     pressed_[Idx(Action::Skill)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B) ||
+        input_->IsPushKey(DIK_E);
 
     released_[Idx(Action::Skill)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B) ||
+        input_->IsKeyReleased(DIK_E);
 
-    // ---- Dodge（Pad LB）----
+    // ---- Dodge（Pad LB / LeftShift）----
     triggered_[Idx(Action::Dodge)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB) ||
+        input_->IsTriggerKey(DIK_LSHIFT);
 
     pressed_[Idx(Action::Dodge)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB) ||
+        input_->IsPushKey(DIK_LSHIFT);
 
     released_[Idx(Action::Dodge)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB);
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB) ||
+        input_->IsKeyReleased(DIK_LSHIFT);
 
-    // ---- Dash（LT 押した瞬間）----
-    triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f);
-    pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f);
-    released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f);
+    // ---- Dash（LT / LeftShift）----
+    triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_LSHIFT);
+    pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f) || input_->IsPushKey(DIK_LSHIFT);
+    released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_LSHIFT);
     value1_[Idx(Action::Dash)] = input_->GetGamePadLeftTrigger(); // アナログ値も欲しい場合
 
-    // ---- LockOn（RT 押している間）----
-    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f);
-    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f);
-    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f);
+    // ---- LockOn（RT / Q）----
+    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_Q);
+    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f) || input_->IsPushKey(DIK_Q);
+    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_Q);
     value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
 
    
@@ -31946,6 +32223,24 @@ private:
 File Path: project/DirectXGame/application/base/Input/InputSystem.cpp
 ============================================================
 #include "InputSystem.h"
+#include <cmath>
+
+namespace {
+	// ベクトルの長さを1以下にして斜め入力だけ速くならないようにする
+	Vector2 ClampLen1(const Vector2& value) {
+		const float lengthSq = value.x * value.x + value.y * value.y;
+		if (lengthSq <= 1.0f) {
+			return value;
+		}
+
+		const float length = std::sqrt(lengthSq);
+		if (length <= 1e-6f) {
+			return Vector2{};
+		}
+
+		return Vector2{ value.x / length, value.y / length };
+	}
+}
 
 void InputSystem::Initialize(Engine::Input* input) {
 	this->input = input;
@@ -31962,44 +32257,96 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();
 
-	// 移動スティック取得
-	playerInputData_.moveShick = input->GetGamePadLeftStick();
+	// キーボード移動入力を作成
+	Vector2 keyboardMove{};
+	if (input->IsPushKey(DIK_A)) keyboardMove.x -= 1.0f;
+	if (input->IsPushKey(DIK_D)) keyboardMove.x += 1.0f;
+	if (input->IsPushKey(DIK_W)) keyboardMove.y += 1.0f;
+	if (input->IsPushKey(DIK_S)) keyboardMove.y -= 1.0f;
 
-	// 視点スティック取得
-	playerInputData_.lookStick = input->GetGamePadRightStick();
+	// 左スティックとキーボード移動入力を合成
+	Vector2 moveStick = input->GetGamePadLeftStick();
+	moveStick.x += keyboardMove.x;
+	moveStick.y += keyboardMove.y;
+	playerInputData_.moveShick = ClampLen1(moveStick);
+
+	// キーボード視点入力を作成
+	Vector2 keyboardLook{};
+	if (input->IsPushKey(DIK_LEFT)) keyboardLook.x -= 1.0f;
+	if (input->IsPushKey(DIK_RIGHT)) keyboardLook.x += 1.0f;
+	if (input->IsPushKey(DIK_UP)) keyboardLook.y += 1.0f;
+	if (input->IsPushKey(DIK_DOWN)) keyboardLook.y -= 1.0f;
+
+	// 右クリック中だけマウス移動を視点入力として扱う
+	Vector2 mouseLook{};
+	if (input->IsMousePressed(1)) {
+		const Vector2 mouseDelta = input->GetMouseMoveDelta();
+		mouseLook.x = mouseDelta.x * 0.05f;
+		mouseLook.y = -mouseDelta.y * 0.05f;
+	}
+
+	// 右スティック、矢印キー、マウス視点入力を合成
+	Vector2 lookStick = input->GetGamePadRightStick();
+	lookStick.x += keyboardLook.x + mouseLook.x;
+	lookStick.y += keyboardLook.y + mouseLook.y;
+	playerInputData_.lookStick = ClampLen1(lookStick);
 
 	// ジャンプ入力押している間
-	playerInputData_.jumpPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
+	playerInputData_.jumpPressed =
+		input->IsGamePadPressed(GamePadButton::GAMEPAD_A) ||
+		input->IsPushKey(DIK_SPACE);
 	// ジャンプ入力押した瞬間
-	playerInputData_.jumpTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
+	playerInputData_.jumpTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_A) ||
+		input->IsTriggerKey(DIK_SPACE);
 
 	// 回避入力押した瞬間
-	playerInputData_.dodgeTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
+	playerInputData_.dodgeTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_LB) ||
+		input->IsTriggerKey(DIK_LSHIFT);
 
 	// ダッシュ入力している間
 	float lt = input->GetGamePadLeftTrigger();
 	const float triggerDeadZone = 0.2f;
-	playerInputData_.dashHeld = lt > triggerDeadZone;
+	playerInputData_.dashHeld =
+		lt > triggerDeadZone ||
+		input->IsPushKey(DIK_LSHIFT);
 
 	// ロックオン入力している間
 	float rt = input->GetGamePadRightTrigger();
-	playerInputData_.lockOnHeld = rt > triggerDeadZone;
+	playerInputData_.lockOnHeld =
+		rt > triggerDeadZone ||
+		input->IsPushKey(DIK_Q);
 
 	// スキル入力押した瞬間
-	playerInputData_.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+	playerInputData_.skillTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
+		input->IsTriggerKey(DIK_E);
 
 	// 必殺技入力押した瞬間
-	playerInputData_.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+	playerInputData_.specialTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
+		input->IsTriggerKey(DIK_R);
 
 }
 
 void InputSystem::GameInputUpdate(float dt) {
-	// 移動スティック取得
-	gameInputData_.moveShick = input->GetGamePadLeftStick();
+	// ゲームUI用の移動入力を作成
+	Vector2 gameMove = input->GetGamePadLeftStick();
+	if (input->IsPushKey(DIK_A)) gameMove.x -= 1.0f;
+	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
+	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
+	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
+	gameInputData_.moveShick = ClampLen1(gameMove);
 	// 決定入力押した瞬間
-	gameInputData_.decisionTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+	gameInputData_.decisionTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
+		input->IsTriggerKey(DIK_RETURN) ||
+		input->IsTriggerKey(DIK_SPACE);
 	// ポーズ入力押した瞬間
-	gameInputData_.pauseTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Back);
+	gameInputData_.pauseTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_Back) ||
+		input->IsTriggerKey(DIK_ESCAPE);
 }
 
 bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
@@ -58183,6 +58530,10 @@ struct EffectGlobalData {
 	EmitData::IsFlag isFlag;
 	// 拡縮データ
 	EmitData::TopBottom topBottom;
+	// エミッタ形状内のどこから出すか
+	EmitData::EmitType emitType = EmitData::EmitType::kRandom;
+	// エミット位置に応じた初速方向
+	EmitData::DirectionType directionType = EmitData::DirectionType::kRandom;
 	// 出現データ
 	Engine::EffectEmitData emitData;
 	// UVトランスフォーム
@@ -58198,18 +58549,18 @@ struct EffectGlobalData {
 
 
 	// AABB用
-	Vector3 rangeMin = {};
-	Vector3 rangeMax = {};
+	Vector3 rangeMin = { -1.0f,-1.0f,-1.0f };
+	Vector3 rangeMax = { 1.0f,1.0f,1.0f };
 
 	// 球用
-	float radius = 0.0f;
+	float radius = 1.0f;
 
 	// 円用
 	int segment = 3;
 
 	// 線用
 	Vector3 lineStart = {};
-	Vector3 lineEnd = {};
+	Vector3 lineEnd = { 1.0f,0.0f,0.0f };
 
 	// スプライン用
 	std::vector<Vector3> splinePoints = {};
@@ -61875,6 +62226,111 @@ File Path: project/DirectXGame/engine/Effect/Particle/Emit/ParticleEmitter.cpp
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "DirectXGame/engine/Math/Random.h"
 
+namespace {
+	constexpr float kEmitterEpsilon = 0.0001f;
+	constexpr float kTwoPi = 6.28318530718f;
+
+	Vector3 SafeNormalize(const Vector3& value, const Vector3& fallback = { 0.0f,1.0f,0.0f })
+	{
+		// ゼロベクトルを方向として使わないように保険をかける
+		if (value.LengthSq() <= kEmitterEpsilon * kEmitterEpsilon) {
+			return fallback;
+		}
+		return value.Normalize();
+	}
+
+	float Random01(std::mt19937& randomEngine)
+	{
+		// 0から1の範囲でエミット位置の補間率を作る
+		return Random::RandFloat(Range<float>{ 0.0f,1.0f }, randomEngine);
+	}
+
+	float ResolveDirectionSpeed(const Engine::EffectEmitData& emitData, std::mt19937& randomEngine)
+	{
+		// 既存の速度レンジから速さだけを取り出し、形状方向へ向け直す
+		const Vector3 randomVelocity = Random::RandVector3(emitData.velocity, randomEngine);
+		float speed = randomVelocity.Length();
+		if (speed <= kEmitterEpsilon) {
+			speed = emitData.velocity.median.Length();
+		}
+		if (speed <= kEmitterEpsilon) {
+			speed = 1.0f;
+		}
+		return speed;
+	}
+
+	Vector3 BuildShapeVelocity(
+		const Engine::EffectEmitData& emitData,
+		EmitData::DirectionType directionType,
+		std::mt19937& randomEngine,
+		const Vector3& emitPos,
+		const Vector3& centerPos,
+		const Vector3& normal)
+	{
+		// 形状からの出方に応じて、ランダム速度か形状基準の速度を選ぶ
+		switch (directionType)
+		{
+		case EmitData::DirectionType::kNormal:
+			return SafeNormalize(normal) * ResolveDirectionSpeed(emitData, randomEngine);
+		case EmitData::DirectionType::kInverse:
+			return SafeNormalize(centerPos - emitPos, -SafeNormalize(normal)) * ResolveDirectionSpeed(emitData, randomEngine);
+		case EmitData::DirectionType::kFixed:
+			return emitData.velocity.median;
+		case EmitData::DirectionType::kNone:
+			return Vector3{};
+		case EmitData::DirectionType::kVelocity:
+		case EmitData::DirectionType::kVelocityBase:
+		case EmitData::DirectionType::kRandom:
+		default:
+			return Random::RandVector3(emitData.velocity, randomEngine);
+		}
+	}
+
+	void CreateShapeParticle(
+		Engine::ParticleGroup& particleGroup,
+		const Engine::EffectEmitData& emitData,
+		EmitData::DirectionType directionType,
+		std::mt19937& randomEngine,
+		const Vector3& emitPos,
+		const Vector3& centerPos,
+		const Vector3& normal)
+	{
+		// ランダム速度以外は専用方向の速度で生成する
+		if (directionType == EmitData::DirectionType::kRandom ||
+			directionType == EmitData::DirectionType::kVelocity ||
+			directionType == EmitData::DirectionType::kVelocityBase) {
+			Engine::EmitFanction::CreateParticle(particleGroup, emitData, randomEngine, emitPos);
+			return;
+		}
+
+		const Vector3 velocity = BuildShapeVelocity(emitData, directionType, randomEngine, emitPos, centerPos, normal);
+		Engine::EmitFanction::CreateParticle(particleGroup, emitData, randomEngine, emitPos, velocity);
+	}
+
+	Vector3 SampleTriangleSurface(const Triangle& triangle, std::mt19937& randomEngine)
+	{
+		// 三角形の面内を均一に選ぶため、はみ出した重心座標を折り返す
+		float u = Random01(randomEngine);
+		float v = Random01(randomEngine);
+		if (u + v > 1.0f) {
+			u = 1.0f - u;
+			v = 1.0f - v;
+		}
+		return triangle.vertices[0] +
+			(triangle.vertices[1] - triangle.vertices[0]) * u +
+			(triangle.vertices[2] - triangle.vertices[0]) * v;
+	}
+
+	Vector3 SampleTriangleEdge(const Triangle& triangle, std::mt19937& randomEngine)
+	{
+		// 三角形の3辺から1本を選び、その辺上を補間する
+		const int edgeIndex = Random::RandomInt32_t(0, 2);
+		const Vector3& start = triangle.vertices[edgeIndex];
+		const Vector3& end = triangle.vertices[(edgeIndex + 1) % 3];
+		return Lerp(start, end, Random01(randomEngine));
+	}
+}
+
 #pragma region Point
 void Engine::PointParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
@@ -61923,8 +62379,12 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 	ApplyGlobalVariablesUniqe();
 
 	Vector3 pos{};
+	Vector3 normal{};
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 	if (emitType_ == EmitData::EmitType::kRandom) {	// ランダム
-		pos = transform_.worldMat_.GetWorldPosition() + Random::RandVector3(range_, particleManager->GetRandomEngine());
+		const Vector3 localPos = Random::RandVector3(range_, particleManager->GetRandomEngine());
+		pos = centerPos + localPos;
+		normal = SafeNormalize(localPos);
 	}
 	else if (emitType_ == EmitData::EmitType::kSurface) { // 表面
 		// AABBの最小・最大座標
@@ -61937,37 +62397,43 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 		switch (face) {
 		case 0: // +X面
 			pos.x = max.x;
+			normal = { 1.0f,0.0f,0.0f };
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 1: // -X面
 			pos.x = min.x;
+			normal = { -1.0f,0.0f,0.0f };
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 2: // +Y面
 			pos.y = max.y;
+			normal = { 0.0f,1.0f,0.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 3: // -Y面
 			pos.y = min.y;
+			normal = { 0.0f,-1.0f,0.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.z = std::uniform_real_distribution<float>(min.z, max.z)(rnd);
 			break;
 		case 4: // +Z面
 			pos.z = max.z;
+			normal = { 0.0f,0.0f,1.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			break;
 		case 5: // -Z面
 			pos.z = min.z;
+			normal = { 0.0f,0.0f,-1.0f };
 			pos.x = std::uniform_real_distribution<float>(min.x, max.x)(rnd);
 			pos.y = std::uniform_real_distribution<float>(min.y, max.y)(rnd);
 			break;
 		}
 		// ワールド座標系に変換
-		pos = transform_.worldMat_.GetWorldPosition() + pos;
+		pos = centerPos + pos;
 
 	}
 	else if (emitType_ == EmitData::EmitType::kEdge) { // 辺
@@ -61998,22 +62464,13 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 
 		// 補間してランダム位置
 		float t = std::uniform_real_distribution<float>(0.0f, 1.0f)(rnd);
-		pos = Lerp(p0, p1, t);
+		const Vector3 localPos = Lerp(p0, p1, t);
 
-		pos = transform_.worldMat_.GetWorldPosition() + pos;
+		pos = centerPos + localPos;
+		normal = SafeNormalize(localPos);
 	}
 
-
-	Vector3 dire{};
-	if (directionType_ == EmitData::DirectionType::kRandom) {
-		dire = Random::RandVector3(emitData_.velocity, particleManager->GetRandomEngine());
-	}
-	else if (directionType_ == EmitData::DirectionType::kNormal) {
-
-	}
-
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	CreateShapeParticle(particleGroup, emitData_, directionType_, particleManager->GetRandomEngine(), pos, centerPos, normal);
 }
 
 
@@ -62070,10 +62527,24 @@ void Engine::SphereParticleEmitter::EmitUniqe() {
 	ApplyGlobalVariablesUniqe();
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
+	auto& randomEngine = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + Random::RandomUnitVector3(particleManager->GetRandomEngine()) * radius_;
+	Vector3 normal = Random::RandomUnitVector3(randomEngine);
+	float distance = radius_;
+	if (emitType_ == EmitData::EmitType::kRandom) {
+		// 球内部に均一に近い分布で出す
+		distance = radius_ * std::cbrt(Random01(randomEngine));
+	}
+	else if (emitType_ == EmitData::EmitType::kEdge) {
+		// 球の辺相当としてローカルXZ平面の赤道リングから出す
+		const float angle = Random01(randomEngine) * kTwoPi;
+		const Vector3 localNormal = { std::cos(angle),0.0f,std::sin(angle) };
+		normal = MakeRotateXYZ(transform_.rotate_).Transform(localNormal).Normalize();
+	}
+	Vector3 pos = centerPos + normal * distance;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 //
 void Engine::SphereParticleEmitter::DebugImGui()
@@ -62122,35 +62593,34 @@ void Engine::CornerParticleEmitter::DrawEmitterLine() { lineCommon->GetDebugLine
 // パーティクル発生
 void Engine::CornerParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
-	float angleStep;
-	std::vector<Vector3> vertices;
-	// 頂点を計算
-	angleStep = DirectX::XM_2PI / corner.segment; // 360° を segment 分割
-
-	// 回転行列を作成
+	auto& randomEngine = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 	Matrix4x4 rotationMatrix = MakeRotateXYZ(transform_.rotate_);
-	for (int i = 0; i < corner.segment; ++i)
-	{
-		float angle = i * angleStep; // 各頂点の角度
-		Vector3 localVertex;
-		localVertex.x = cos(angle) * corner.radius;
-		localVertex.y = 0.0f;
-		localVertex.z = sin(angle) * corner.radius;
 
-		// 回転を適用
-		Vector3 rotatedVertex = rotationMatrix.Transform(localVertex);
-
-		// ワールド座標へ変換
-		Vector3 worldVertex = rotatedVertex;
-		vertices.push_back(worldVertex);
+	Vector3 localPos{};
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		// 円周上を分割辺として選ぶ
+		const float angleStep = kTwoPi / static_cast<float>(corner.segment);
+		const int32_t index = Random::RandomInt32_t(0, corner.segment - 1);
+		const float startAngle = static_cast<float>(index) * angleStep;
+		const float endAngle = static_cast<float>((index + 1) % corner.segment) * angleStep;
+		const Vector3 start = { std::cos(startAngle) * corner.radius,0.0f,std::sin(startAngle) * corner.radius };
+		const Vector3 end = { std::cos(endAngle) * corner.radius,0.0f,std::sin(endAngle) * corner.radius };
+		localPos = Lerp(start, end, Random01(randomEngine));
 	}
-	int32_t index = Random::RandomInt32_t(0, corner.segment - 1);
+	else {
+		// ランダム/面は円盤内から出す
+		const float angle = Random01(randomEngine) * kTwoPi;
+		const float distance = corner.radius * std::sqrt(Random01(randomEngine));
+		localPos = { std::cos(angle) * distance,0.0f,std::sin(angle) * distance };
+	}
 
-	Vector3 pos = Lerp(vertices[index], vertices[(index + 1) % corner.segment], Random::RandFloat(Range{ 0.0f,1.0f }, particleManager->GetRandomEngine()))
-		+ transform_.worldMat_.GetWorldPosition();
-
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	const Vector3 rotatedPos = rotationMatrix.Transform(localPos);
+	const Vector3 pos = centerPos + rotatedPos;
+	const Vector3 normal = emitType_ == EmitData::EmitType::kEdge
+		? SafeNormalize(rotatedPos)
+		: rotationMatrix.Transform({ 0.0f,1.0f,0.0f }).Normalize();
+	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 
 void Engine::CornerParticleEmitter::DebugImGui()
@@ -62323,27 +62793,22 @@ void Engine::TriangleParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 
-	// 三角形の頂点 (ローカル空間想定)
-	Vector3 A = triangle_.vertices[0];
-	Vector3 B = triangle_.vertices[1];
-	Vector3 C = triangle_.vertices[2];
-
-	// ランダム重心座標
-	float u = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-	float v = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-
-	if (u + v > 1.0f) {
-		u = 1.0f - u;
-		v = 1.0f - v;
+	Vector3 localPos{};
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		localPos = SampleTriangleEdge(triangle_, rng);
+	}
+	else {
+		localPos = SampleTriangleSurface(triangle_, rng);
 	}
 
-	// ローカル座標での位置
-	Vector3 localPos = A + (B - A) * u + (C - A) * v;
-
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + localPos;
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	Vector3 pos = centerPos + localPos;
+	Vector3 normal = triangle_.GetNormal();
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		normal = SafeNormalize(localPos - triangle_.GetCentroid(), normal);
+	}
+	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
 
 void Engine::TriangleParticleEmitter::DebugImGui()
@@ -62373,6 +62838,9 @@ void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 }
 // デバック線描画
 void Engine::MeshParticleEmitter::DrawEmitterLine() {
+	if (!modelMesh_) {
+		return;
+	}
 
 	for (auto& tri : modelMesh_->GetTriangles()) {
 		lineCommon->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
@@ -62380,33 +62848,32 @@ void Engine::MeshParticleEmitter::DrawEmitterLine() {
 }
 // パーティクル発生
 void Engine::MeshParticleEmitter::EmitUniqe() {
+	if (!modelMesh_ || modelMesh_->GetTriangles().empty()) {
+		return;
+	}
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager->GetRandomEngine();
+	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
 
 	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->GetTriangles().size() - 1));
 
 	Triangle tri = modelMesh_->GetTriangle(index);
-	// 三角形の頂点 (ローカル空間想定)
-	Vector3 A = tri.vertices[0];
-	Vector3 B = tri.vertices[1];
-	Vector3 C = tri.vertices[2];
-
-	// ランダム重心座標
-	float u = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-	float v = Random::RandFloat(Range{ 0.0f, 1.0f }, rng);
-
-	if (u + v > 1.0f) {
-		u = 1.0f - u;
-		v = 1.0f - v;
+	Vector3 localPos{};
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		localPos = SampleTriangleEdge(tri, rng);
+	}
+	else {
+		localPos = SampleTriangleSurface(tri, rng);
 	}
 
-	// ローカル座標での位置
-	Vector3 localPos = A + (B - A) * u + (C - A) * v;
+	Vector3 pos = centerPos + localPos;
+	Vector3 normal = tri.GetNormal();
+	if (emitType_ == EmitData::EmitType::kEdge) {
+		normal = SafeNormalize(localPos - tri.GetCentroid(), normal);
+	}
 
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + localPos;
-
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
 
 void Engine::MeshParticleEmitter::DebugImGui()
@@ -62600,9 +63067,10 @@ namespace Engine {
 	public:
 
 	private:
-		ModelMesh* modelMesh_;
+		ModelMesh* modelMesh_ = nullptr; // メッシュ未設定時にエミット処理を安全に止めるためnullptrで初期化
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/GPU/GPUParticleEmitter.cpp
@@ -79420,6 +79888,15 @@ Vector2 Engine::Input::GetMousePosition() const
 	return result;
 }
 
+Vector2 Engine::Input::GetMouseMoveDelta() const
+{
+	// DirectInput の相対移動量をそのままゲーム側へ渡す
+	Vector2 result{};
+	result.x = static_cast<float>(mouse_.lX);
+	result.y = static_cast<float>(mouse_.lY);
+	return result;
+}
+
 
 // ゲームパッド
 bool Engine::Input::IsGamePadTriggered(GamePadButton button) const
@@ -79614,6 +80091,12 @@ namespace Engine {
 		/// <returns></returns>
 		Vector2 GetMousePosition() const;
 
+		/// <summary>
+		/// 前回更新からのマウス移動量を取得
+		/// </summary>
+		/// <returns>マウスの相対移動量</returns>
+		Vector2 GetMouseMoveDelta() const;
+
 
 		/// <summary>
 		/// ゲームパッド押した瞬間
@@ -79704,6 +80187,7 @@ namespace Engine {
 		float prevRightTrigger_ = 0.0f;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/scene/AbstractSceneFactory.h
