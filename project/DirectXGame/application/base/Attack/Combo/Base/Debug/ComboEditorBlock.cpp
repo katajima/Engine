@@ -1,4 +1,4 @@
-﻿#include "ComboEditorBlock.h"
+#include "ComboEditorBlock.h"
 
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
@@ -598,6 +598,38 @@ namespace Combo {
 				ImGui::DragFloat("カメラシェイク時間", &data_.camera.shakeDuration, 0.01f, 0.0f, 60.0f);
 				ImGui::DragFloat("カメラシェイク量", &data_.camera.shakeCameraPower, 0.01f, 0.0f, 10.0f);
 				ImGui::DragFloat3("カメラシェイク幅", &data_.camera.shakeOffset.x, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("注視点オフセット演出")) {
+				ImGui::Checkbox("攻撃中に注視点をずらすか", &data_.camera.isActionTargetOffset);
+				ImGui::DragFloat("注視点オフセット開始時間", &data_.camera.actionTargetOffsetStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("注視点オフセット時間", &data_.camera.actionTargetOffsetDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("注視点オフセット補間速度", &data_.camera.actionTargetOffsetBlendSpeed, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat3("注視点オフセット量", &data_.camera.actionTargetOffset.x, 0.01f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("先読み演出")) {
+				ImGui::Checkbox("攻撃中に速度方向を先読みするか", &data_.camera.isLookAhead);
+				ImGui::DragFloat("先読み開始時間", &data_.camera.lookAheadStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("先読み時間", &data_.camera.lookAheadDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("先読み距離", &data_.camera.lookAheadDistance, 0.01f, 0.0f, 100.0f);
+				ImGui::DragFloat("先読み最小速度", &data_.camera.lookAheadMinSpeed, 0.01f, 0.0f, 1000.0f);
+				ImGui::DragFloat("先読み最大速度", &data_.camera.lookAheadMaxSpeed, 0.01f, 0.0f, 1000.0f);
+				ImGui::DragFloat("先読み補間速度", &data_.camera.lookAheadSmoothSpeed, 0.01f, 0.0f, 60.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("速度ズーム演出")) {
+				ImGui::Checkbox("攻撃中に速度でカメラ距離を変えるか", &data_.camera.isSpeedZoom);
+				ImGui::DragFloat("速度ズーム開始時間", &data_.camera.speedZoomStartTime, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("速度ズーム時間", &data_.camera.speedZoomDuration, 0.01f, 0.0f, 60.0f);
+				ImGui::DragFloat("速度ズーム最小速度", &data_.camera.speedZoomMinSpeed, 0.01f, 0.0f, 1000.0f);
+				ImGui::DragFloat("速度ズーム最大速度", &data_.camera.speedZoomMaxSpeed, 0.01f, 0.0f, 1000.0f);
+				ImGui::DragFloat("低速時距離補正", &data_.camera.speedZoomNearOffsetZ, 0.01f, -100.0f, 100.0f);
+				ImGui::DragFloat("高速時距離補正", &data_.camera.speedZoomFarOffsetZ, 0.01f, -100.0f, 100.0f);
+				ImGui::DragFloat("速度ズーム補間速度", &data_.camera.speedZoomSmoothSpeed, 0.01f, 0.0f, 60.0f);
 				ImGui::TreePop();
 			}
 

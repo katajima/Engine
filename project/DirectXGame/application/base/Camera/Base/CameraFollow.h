@@ -19,6 +19,10 @@ public:
 	Vector3 GetDefultOffsetPos() const { return defultOffst; }
 	// カメラオフセット位置設定
 	void SetOffsetPos(const Vector3& offset) { data_.offset = offset; }
+	// 追従ターゲットに足すワールド座標オフセット設定
+	void SetTargetOffset(const Vector3& offset) { data_.targetOffset = offset; }
+	// 追従ターゲットに足すワールド座標オフセット取得
+	Vector3 GetTargetOffset() const { return data_.targetOffset; }
 	// カメラ位置取得
 	Vector3 GetPos() const { return currentPos_; }
 	// データ取得

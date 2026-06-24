@@ -11,6 +11,8 @@ class InputSystem;
 struct CameraFollowData {
 	// プレイヤーからの相対位置
 	Vector3 offset{};
+	// 追従ターゲットに加えるワールド座標オフセット
+	Vector3 targetOffset{};
 	// 追従補間速度
 	float followSpeed = 0.0f;
 	// スムーズ追従
@@ -77,5 +79,45 @@ struct CameraLagData {
 	float positionLagSpeed = 10.0f;
 	// 回転遅延の補間速度
 	float rotationLagSpeed = 10.0f;
+};
+
+// カメラ先読みデータ
+struct CameraLookAheadData {
+	// 先読みを有効にするか
+	bool enable = false;
+	// 最大先読み距離
+	float distance = 0.0f;
+	// 先読みを始めるターゲット速度
+	float minSpeed = 0.0f;
+	// 最大先読み距離になるターゲット速度
+	float maxSpeed = 30.0f;
+	// 先読み位置の補間速度
+	float smoothSpeed = 8.0f;
+};
+
+// 速度に応じた追従距離データ
+struct CameraSpeedZoomData {
+	// 速度ズームを有効にするか
+	bool enable = false;
+	// ズームを始めるターゲット速度
+	float minSpeed = 0.0f;
+	// 最大ズームになるターゲット速度
+	float maxSpeed = 30.0f;
+	// 低速時に足すカメラ距離
+	float nearOffsetZ = 0.0f;
+	// 高速時に足すカメラ距離
+	float farOffsetZ = -8.0f;
+	// 距離変化の補間速度
+	float smoothSpeed = 8.0f;
+};
+
+// 攻撃演出などで一時的に注視点をずらすデータ
+struct CameraActionOffsetData {
+	// 追従ターゲットへ加えるワールド座標オフセット
+	Vector3 targetOffset{};
+	// オフセットの補間速度
+	float blendSpeed = 8.0f;
+	// オフセットを維持する時間
+	float duration = 0.0f;
 };
 

@@ -1,4 +1,4 @@
-﻿#include "ComboSystem.h"
+#include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
@@ -675,6 +675,29 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラシェイク時間", data.camera.shakeDuration);
 			globalVariables->AddItem(name, "カメラシェイク幅", data.camera.shakeOffset);
 
+			globalVariables->AddItem(name, "カメラ注視点オフセット", data.camera.isActionTargetOffset);
+			globalVariables->AddItem(name, "カメラ注視点オフセット開始時間", data.camera.actionTargetOffsetStartTime);
+			globalVariables->AddItem(name, "カメラ注視点オフセット時間", data.camera.actionTargetOffsetDuration);
+			globalVariables->AddItem(name, "カメラ注視点オフセット補間速度", data.camera.actionTargetOffsetBlendSpeed);
+			globalVariables->AddItem(name, "カメラ注視点オフセット量", data.camera.actionTargetOffset);
+
+			globalVariables->AddItem(name, "カメラ先読み", data.camera.isLookAhead);
+			globalVariables->AddItem(name, "カメラ先読み開始時間", data.camera.lookAheadStartTime);
+			globalVariables->AddItem(name, "カメラ先読み時間", data.camera.lookAheadDuration);
+			globalVariables->AddItem(name, "カメラ先読み距離", data.camera.lookAheadDistance);
+			globalVariables->AddItem(name, "カメラ先読み最小速度", data.camera.lookAheadMinSpeed);
+			globalVariables->AddItem(name, "カメラ先読み最大速度", data.camera.lookAheadMaxSpeed);
+			globalVariables->AddItem(name, "カメラ先読み補間速度", data.camera.lookAheadSmoothSpeed);
+
+			globalVariables->AddItem(name, "カメラ速度ズーム", data.camera.isSpeedZoom);
+			globalVariables->AddItem(name, "カメラ速度ズーム開始時間", data.camera.speedZoomStartTime);
+			globalVariables->AddItem(name, "カメラ速度ズーム時間", data.camera.speedZoomDuration);
+			globalVariables->AddItem(name, "カメラ速度ズーム最小速度", data.camera.speedZoomMinSpeed);
+			globalVariables->AddItem(name, "カメラ速度ズーム最大速度", data.camera.speedZoomMaxSpeed);
+			globalVariables->AddItem(name, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
+			globalVariables->AddItem(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
+			globalVariables->AddItem(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
+
 		}
 
 
@@ -942,7 +965,30 @@ namespace Combo {
 			data.camera.shakeStartTime = globalVariables->GetValue<float>(name, "カメラシェイク開始時間");
 			data.camera.shakeDuration = globalVariables->GetValue<float>(name, "カメラシェイク時間");
 			data.camera.shakeOffset = globalVariables->GetValue<Vector3>(name, "カメラシェイク幅");
-			
+
+			data.camera.isActionTargetOffset = globalVariables->GetValue<bool>(name, "カメラ注視点オフセット");
+			data.camera.actionTargetOffsetStartTime = globalVariables->GetValue<float>(name, "カメラ注視点オフセット開始時間");
+			data.camera.actionTargetOffsetDuration = globalVariables->GetValue<float>(name, "カメラ注視点オフセット時間");
+			data.camera.actionTargetOffsetBlendSpeed = globalVariables->GetValue<float>(name, "カメラ注視点オフセット補間速度");
+			data.camera.actionTargetOffset = globalVariables->GetValue<Vector3>(name, "カメラ注視点オフセット量");
+
+			data.camera.isLookAhead = globalVariables->GetValue<bool>(name, "カメラ先読み");
+			data.camera.lookAheadStartTime = globalVariables->GetValue<float>(name, "カメラ先読み開始時間");
+			data.camera.lookAheadDuration = globalVariables->GetValue<float>(name, "カメラ先読み時間");
+			data.camera.lookAheadDistance = globalVariables->GetValue<float>(name, "カメラ先読み距離");
+			data.camera.lookAheadMinSpeed = globalVariables->GetValue<float>(name, "カメラ先読み最小速度");
+			data.camera.lookAheadMaxSpeed = globalVariables->GetValue<float>(name, "カメラ先読み最大速度");
+			data.camera.lookAheadSmoothSpeed = globalVariables->GetValue<float>(name, "カメラ先読み補間速度");
+
+			data.camera.isSpeedZoom = globalVariables->GetValue<bool>(name, "カメラ速度ズーム");
+			data.camera.speedZoomStartTime = globalVariables->GetValue<float>(name, "カメラ速度ズーム開始時間");
+			data.camera.speedZoomDuration = globalVariables->GetValue<float>(name, "カメラ速度ズーム時間");
+			data.camera.speedZoomMinSpeed = globalVariables->GetValue<float>(name, "カメラ速度ズーム最小速度");
+			data.camera.speedZoomMaxSpeed = globalVariables->GetValue<float>(name, "カメラ速度ズーム最大速度");
+			data.camera.speedZoomNearOffsetZ = globalVariables->GetValue<float>(name, "カメラ速度ズーム近距離補正");
+			data.camera.speedZoomFarOffsetZ = globalVariables->GetValue<float>(name, "カメラ速度ズーム遠距離補正");
+			data.camera.speedZoomSmoothSpeed = globalVariables->GetValue<float>(name, "カメラ速度ズーム補間速度");
+
 		}
 	}
 
@@ -1188,6 +1234,29 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
 			globalVariables->SetValue(name, "カメラシェイク時間", data.camera.shakeDuration);
 			globalVariables->SetValue(name, "カメラシェイク幅", data.camera.shakeOffset);
+
+			globalVariables->SetValue(name, "カメラ注視点オフセット", data.camera.isActionTargetOffset);
+			globalVariables->SetValue(name, "カメラ注視点オフセット開始時間", data.camera.actionTargetOffsetStartTime);
+			globalVariables->SetValue(name, "カメラ注視点オフセット時間", data.camera.actionTargetOffsetDuration);
+			globalVariables->SetValue(name, "カメラ注視点オフセット補間速度", data.camera.actionTargetOffsetBlendSpeed);
+			globalVariables->SetValue(name, "カメラ注視点オフセット量", data.camera.actionTargetOffset);
+
+			globalVariables->SetValue(name, "カメラ先読み", data.camera.isLookAhead);
+			globalVariables->SetValue(name, "カメラ先読み開始時間", data.camera.lookAheadStartTime);
+			globalVariables->SetValue(name, "カメラ先読み時間", data.camera.lookAheadDuration);
+			globalVariables->SetValue(name, "カメラ先読み距離", data.camera.lookAheadDistance);
+			globalVariables->SetValue(name, "カメラ先読み最小速度", data.camera.lookAheadMinSpeed);
+			globalVariables->SetValue(name, "カメラ先読み最大速度", data.camera.lookAheadMaxSpeed);
+			globalVariables->SetValue(name, "カメラ先読み補間速度", data.camera.lookAheadSmoothSpeed);
+
+			globalVariables->SetValue(name, "カメラ速度ズーム", data.camera.isSpeedZoom);
+			globalVariables->SetValue(name, "カメラ速度ズーム開始時間", data.camera.speedZoomStartTime);
+			globalVariables->SetValue(name, "カメラ速度ズーム時間", data.camera.speedZoomDuration);
+			globalVariables->SetValue(name, "カメラ速度ズーム最小速度", data.camera.speedZoomMinSpeed);
+			globalVariables->SetValue(name, "カメラ速度ズーム最大速度", data.camera.speedZoomMaxSpeed);
+			globalVariables->SetValue(name, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
+			globalVariables->SetValue(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
+			globalVariables->SetValue(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
 
 		}
 	}

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
@@ -46,6 +46,9 @@ namespace Combo {
 		bool isCameraChanged_ = false;			// カメラ切り替えを実行済みか
 		bool isZoomRequested_ = false;			// ズーム演出を実行済みか
 		bool isShakeRequested_ = false;			// シェイク演出を実行済みか
+		bool isTargetOffsetRequested_ = false;	// 注視点オフセットを実行済みか
+		bool isLookAheadRequested_ = false;		// 先読み演出を実行済みか
+		bool isSpeedZoomRequested_ = false;		// 速度ズーム演出を実行済みか
 		bool isLockOnReleased_ = false;			// ロックオン解除を実行済みか
 	};
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <string>
 
@@ -22,6 +22,49 @@ struct GlobalCameraData {
 	float shakeDuration = 0.0f;
 	// カメラ基準のシェイク幅
 	Vector3 shakeOffset = { 0.0f, 0.0f, 0.0f };
+
+	// 攻撃中に注視点をずらすか
+	bool isActionTargetOffset = false;
+	// 注視点オフセット開始時間
+	float actionTargetOffsetStartTime = 0.0f;
+	// 注視点オフセット継続時間
+	float actionTargetOffsetDuration = 0.0f;
+	// 注視点オフセット補間速度
+	float actionTargetOffsetBlendSpeed = 8.0f;
+	// 追従ターゲットに加えるワールド座標オフセット
+	Vector3 actionTargetOffset = { 0.0f, 0.0f, 0.0f };
+
+	// 攻撃中に速度方向の先読みを使うか
+	bool isLookAhead = false;
+	// 先読み開始時間
+	float lookAheadStartTime = 0.0f;
+	// 先読み継続時間
+	float lookAheadDuration = 0.0f;
+	// 先読み最大距離
+	float lookAheadDistance = 0.0f;
+	// 先読みを始める速度
+	float lookAheadMinSpeed = 0.0f;
+	// 最大先読みになる速度
+	float lookAheadMaxSpeed = 30.0f;
+	// 先読み補間速度
+	float lookAheadSmoothSpeed = 8.0f;
+
+	// 攻撃中に速度でカメラ距離を変えるか
+	bool isSpeedZoom = false;
+	// 速度ズーム開始時間
+	float speedZoomStartTime = 0.0f;
+	// 速度ズーム継続時間
+	float speedZoomDuration = 0.0f;
+	// 速度ズームを始める速度
+	float speedZoomMinSpeed = 0.0f;
+	// 最大速度ズームになる速度
+	float speedZoomMaxSpeed = 30.0f;
+	// 低速時に足すカメラ距離
+	float speedZoomNearOffsetZ = 0.0f;
+	// 高速時に足すカメラ距離
+	float speedZoomFarOffsetZ = -8.0f;
+	// 速度ズーム補間速度
+	float speedZoomSmoothSpeed = 8.0f;
 	
 	// カメラをズームするか
 	bool isZoom = false;

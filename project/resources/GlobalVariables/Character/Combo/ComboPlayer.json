@@ -128,6 +128,10 @@
             "type": "string",
             "value": "testAttack02"
         },
+        "testCameraAttack": {
+            "type": "string",
+            "value": "testCameraAttack"
+        },
         "開始コンボ(回避中スキル)": {
             "type": "string",
             "value": "SkillAttack01"
@@ -158,7 +162,7 @@
         },
         "開始コンボ(地上弱攻撃)": {
             "type": "string",
-            "value": "MeleeAttack1"
+            "value": "testCameraAttack"
         },
         "開始コンボ(地上強攻撃)": {
             "type": "string",

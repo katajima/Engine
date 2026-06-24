@@ -1,4 +1,4 @@
-﻿#include "ComboEffect.h"
+#include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
@@ -20,6 +20,9 @@ namespace Combo {
 		isCameraChanged_ = false;
 		isZoomRequested_ = false;
 		isShakeRequested_ = false;
+		isTargetOffsetRequested_ = false;
+		isLookAheadRequested_ = false;
+		isSpeedZoomRequested_ = false;
 		isLockOnReleased_ = false;
 		cameraManager = owner ? owner->GetCameraManager() : nullptr;
 		camera = cameraManager ? cameraManager->GetBaseCamera() : nullptr;
@@ -80,6 +83,42 @@ namespace Combo {
 			}
 			isShakeRequested_ = true;
 		}
+
+		// 指定時間になったら、攻撃中だけ注視点をずらして構図を作る
+		if (data_.isActionTargetOffset && !isTargetOffsetRequested_ &&
+			data_.actionTargetOffsetStartTime <= timer) {
+			camera->GetCameraController()->RequestActionTargetOffset({
+				data_.actionTargetOffset,
+				data_.actionTargetOffsetBlendSpeed,
+				data_.actionTargetOffsetDuration
+				});
+			isTargetOffsetRequested_ = true;
+		}
+
+		// 指定時間になったら、移動方向への先読みを一時的に強くする
+		if (data_.isLookAhead && !isLookAheadRequested_ && data_.lookAheadStartTime <= timer) {
+			camera->GetCameraController()->RequestLookAhead({
+				true,
+				data_.lookAheadDistance,
+				data_.lookAheadMinSpeed,
+				data_.lookAheadMaxSpeed,
+				data_.lookAheadSmoothSpeed
+				}, data_.lookAheadDuration);
+			isLookAheadRequested_ = true;
+		}
+
+		// 指定時間になったら、速度に応じて一時的にカメラを引く
+		if (data_.isSpeedZoom && !isSpeedZoomRequested_ && data_.speedZoomStartTime <= timer) {
+			camera->GetCameraController()->RequestSpeedZoom({
+				true,
+				data_.speedZoomMinSpeed,
+				data_.speedZoomMaxSpeed,
+				data_.speedZoomNearOffsetZ,
+				data_.speedZoomFarOffsetZ,
+				data_.speedZoomSmoothSpeed
+				}, data_.speedZoomDuration);
+			isSpeedZoomRequested_ = true;
+		}
 	}
 
 	// 終了
@@ -87,6 +126,7 @@ namespace Combo {
 		if (cameraManager && cameraManager->GetBaseCamera()) {
 			// 攻撃が終わったら攻撃用ロックオンを解除して通常操作へ戻す
 			cameraManager->GetBaseCamera()->LockOn(nullptr);
+			cameraManager->GetBaseCamera()->GetCameraController()->ClearActionAssist();
 		}
 		camera = nullptr;
 	}

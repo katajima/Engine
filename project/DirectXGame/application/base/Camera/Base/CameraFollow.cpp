@@ -30,8 +30,11 @@ void CameraFollow::Update(Transform& transform,float dt) {
 
 	Vector3 rotatedOffset = TransformNormal(data_.offset, rotateMatrix);
 
+	// 追従先の基準位置に、演出用の注視点オフセットを加える
+	Vector3 targetPosition = Add(target->GetWorldPosition(), data_.targetOffset);
+
 	// 目標カメラ位置
-	Vector3 desiredCameraPos = Add(target->GetWorldPosition(), rotatedOffset);
+	Vector3 desiredCameraPos = Add(targetPosition, rotatedOffset);
 
 
 	// 初回は補間せず即座に合わせる
