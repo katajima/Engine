@@ -2563,6 +2563,14 @@ namespace Combo {
 		kLockAt,	// カメラ方向基準
 	};
 
+	// 攻撃移動の速度カーブ
+	enum class MoveSpeedCurveType {
+		kConstant,		// 一定速度
+		kEaseIn,		// 徐々に加速
+		kEaseOut,		// 徐々に減速
+		kEaseInOut,		// 加速してから減速
+	};
+
 
 	// コンボタイプ
 	enum class Type {
@@ -2730,6 +2738,19 @@ namespace Combo {
 		// 移動中も毎フレーム方向を更新するか
 		// ターゲット追尾や入力追従系で有効
 		bool isUpdateDirectionEachFrame = true;
+
+		// ターゲット位置も毎フレーム更新するか
+		// 動く敵への吸い付きや接近技で有効
+		bool isUpdateTargetPositionEachFrame = true;
+
+		// 攻撃移動の速度カーブ
+		MoveSpeedCurveType speedCurveType = MoveSpeedCurveType::kConstant;
+
+		// 速度カーブの強さ
+		float speedCurvePower = 1.0f;
+
+		// 縦方向の攻撃移動を許可するか
+		bool isVerticalMove = true;
 
 		// ターゲット方向を使うとき、基準前方を水平化するか
 		// trueなら従来通り地面基準に近い挙動
@@ -3406,6 +3427,12 @@ namespace Combo {
 			{ "時間経過", static_cast<int64_t>(RangeRecallTriggerType::kTimer) },
 			{ "近づく", static_cast<int64_t>(RangeRecallTriggerType::kNearOwner) },
 			});
+		EnumRegistry::Instance().Register("MoveSpeedCurveType", {
+			{ "一定", static_cast<int64_t>(MoveSpeedCurveType::kConstant) },
+			{ "加速", static_cast<int64_t>(MoveSpeedCurveType::kEaseIn) },
+			{ "減速", static_cast<int64_t>(MoveSpeedCurveType::kEaseOut) },
+			{ "加速して減速", static_cast<int64_t>(MoveSpeedCurveType::kEaseInOut) },
+			});
 		EnumRegistry::Instance().Register("ComboEffectTriggerType", {
 			{ "時間範囲", static_cast<int64_t>(ComboEffectTriggerType::kTimeWindow) },
 			{ "時間経過", static_cast<int64_t>(ComboEffectTriggerType::kTimer) },
@@ -3923,7 +3950,11 @@ namespace Combo {
 
 			globalVariables->AddItem(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->AddItem(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
+			globalVariables->AddItem(name, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
 			globalVariables->AddItem(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
+			globalVariables->AddEnumItem(name, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
+			globalVariables->AddItem(name, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
+			globalVariables->AddItem(name, "コンボ中の縦方向移動", data.move.isVerticalMove);
 			globalVariables->AddItem(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
 			globalVariables->AddItem(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
 
@@ -4175,7 +4206,11 @@ namespace Combo {
 
 			data.move.localMoveVector = globalVariables->GetValue<Vector3>(name, "コンボ中の移動方向");
 			data.move.isUpdateDirectionEachFrame = globalVariables->GetValue<bool>(name, "コンボ中の移動毎フレーム方向を更新");
+			data.move.isUpdateTargetPositionEachFrame = globalVariables->GetValue<bool>(name, "コンボ中の移動毎フレームターゲット位置を更新");
 			data.move.isNormalizeLocalMove = globalVariables->GetValue<bool>(name, "コンボ中の移動方向を正規化してから使うか");
+			data.move.speedCurveType = globalVariables->GetEnumValue<MoveSpeedCurveType>(name, "コンボ中の移動速度カーブ");
+			data.move.speedCurvePower = globalVariables->GetValue<float>(name, "コンボ中の移動速度カーブ強度");
+			data.move.isVerticalMove = globalVariables->GetValue<bool>(name, "コンボ中の縦方向移動");
 			data.move.isFlattenTargetDirection = globalVariables->GetValue<bool>(name, "コンボ中の移動基準前方を水平化");
 			data.move.alignCharacterToMovement = globalVariables->GetValue<bool>(name, "移動方向とキャラクターの向く方向を一致させるか");
 
@@ -4424,7 +4459,11 @@ namespace Combo {
 
 			globalVariables->SetValue(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->SetValue(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
+			globalVariables->SetValue(name, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
 			globalVariables->SetValue(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
+			globalVariables->SetEnumValue(name, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
+			globalVariables->SetValue(name, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
+			globalVariables->SetValue(name, "コンボ中の縦方向移動", data.move.isVerticalMove);
 			globalVariables->SetValue(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
 			globalVariables->SetValue(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
 
@@ -6349,6 +6388,16 @@ namespace Combo {
 			clampLocalMoveVector(data_.move.localMoveVector);
 			ImGui::Checkbox("ローカル移動ベクトルを正規化してから使うか", &data_.move.isNormalizeLocalMove);
 			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
+			ImGui::Checkbox("移動中も毎フレームターゲット位置を更新するか", &data_.move.isUpdateTargetPositionEachFrame);
+			static const char* MoveSpeedCurveTypeLabels[] = {
+			"一定",
+			"加速",
+			"減速",
+			"加速して減速",
+			};
+			Engine::ImGuiManager::Select("速度カーブ", MoveSpeedCurveTypeLabels, data_.move.speedCurveType);
+			ImGui::DragFloat("速度カーブ強度", &data_.move.speedCurvePower, 0.01f, 0.001f, 10.0f);
+			ImGui::Checkbox("縦方向の攻撃移動を許可するか", &data_.move.isVerticalMove);
 			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
 			ImGui::Checkbox("移動方向とキャラクターの向く方向を一致させるか", &data_.move.alignCharacterToMovement);
 
@@ -8175,7 +8224,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cpp
 ============================================================
-#include "ComboMove.h"
+﻿#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -8241,6 +8290,10 @@ namespace Combo {
 	void ComboMove::Update(const Character::CharacterContext& ctx, float timer) {
 		// ゲームパッドの左スティックを動かしているか
 		const bool isMoveStick = ctx.worldStickDirection.Length() != 0.0f;
+		if (data_.isUpdateTargetPositionEachFrame && targetWorldTransform) {
+			// 動くターゲットを追い続けられるように、現在のターゲット座標を更新する
+			targetPos_ = targetWorldTransform->GetWorldPosition();
+		}
 
 		// 強制的に移動
 		if (data_.isCompulsionMove) {
@@ -8320,6 +8373,11 @@ namespace Combo {
 			if (canMove) {
 				if (data_.moveType != MoveType::kTraget || !traget) {
 					request.velocity = Multiply(moveDirection_, dt);
+				}
+				// 攻撃ごとの踏み込み感を作るため、時間進行に応じた速度倍率を掛ける
+				request.velocity = request.velocity * CalculateMoveCurveScale(timer);
+				if (!data_.isVerticalMove) {
+					request.velocity.y = 0.0f;
 				}
 				request.priority = 0;
 				if (data_.alignCharacterToMovement) {
@@ -8488,7 +8546,39 @@ namespace Combo {
 			return false;
 		}
 
+		if (!data_.isVerticalMove) {
+			request.velocity.y = 0.0f;
+		}
 		return targetMoveType == TargetMoveType::kTeleport || request.velocity.Length() > 0.0001f;
+	}
+
+	float ComboMove::CalculateMoveCurveScale(float timer) const {
+		// 移動時間が無い場合は従来通り等速で扱う
+		const float duration = data_.moveWindow.endTime - data_.moveWindow.startTime;
+		if (duration <= 0.0001f) {
+			return 1.0f;
+		}
+
+		const float t = std::clamp((timer - data_.moveWindow.startTime) / duration, 0.0f, 1.0f);
+		const float power = (std::max)(data_.speedCurvePower, 0.001f);
+		switch (data_.speedCurveType)
+		{
+		case MoveSpeedCurveType::kEaseIn:
+			// 出始めを抑えて、後半で伸びる踏み込みにする
+			return std::pow(t, power);
+		case MoveSpeedCurveType::kEaseOut:
+			// 出始めを速くして、後半で止まりやすい踏み込みにする
+			return 1.0f - std::pow(1.0f - t, power);
+		case MoveSpeedCurveType::kEaseInOut:
+		{
+			// 前半は加速、後半は減速する山なりの速度にする
+			const float phase = t < 0.5f ? t * 2.0f : (1.0f - t) * 2.0f;
+			return std::pow((std::max)(phase, 0.0f), power);
+		}
+		case MoveSpeedCurveType::kConstant:
+		default:
+			return 1.0f;
+		}
 	}
 
 	Vector3 ComboMove::GetActiveMoveSpeed() const {
@@ -8545,7 +8635,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <DirectXGame/engine/struct/Vector3.h>
 
@@ -8606,6 +8696,8 @@ namespace Combo {
 		Vector3 BuildTargetMoveGoal() const;
 		// ターゲット移動タイプによる移動処理
 		bool ApplyTargetMove(MoveRequest& request, float dt);
+		// 移動時間内の進行度から速度倍率を計算する
+		float CalculateMoveCurveScale(float timer) const;
 		// ターゲット有無に応じた移動速度取得
 		Vector3 GetActiveMoveSpeed() const;
 		// ターゲット有無に応じたローカル移動方向取得
