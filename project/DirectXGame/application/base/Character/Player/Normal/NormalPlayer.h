@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
@@ -86,11 +86,12 @@ namespace Character {
 
 		// 調整項目の適用
 		void ApplyGlobalVariables() {};
-	private:
-		std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
-
+	
+		// コンボデータリロード
 		void ReloadComboData();
-
+	private:
+		// プレイヤー用UI
+		std::unique_ptr<PlayerUI> ui_;		
 		// ジャンプ可能か
 		bool isCanJump = false;
 		//必殺技中か

@@ -1,8 +1,9 @@
-#include "SmallMeleeEnemy.h"
+﻿#include "SmallMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 namespace Character {
 	void SmallMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
@@ -19,12 +20,14 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,0.0f,1.0f };
 
+
+		//ReloadComboData();
+
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
-	void SmallMeleeEnemy::InitStateMachine()
-	{
+	void SmallMeleeEnemy::InitStateMachine() { 
 		// ステートマシーン初期化
 		stateMachine_ = std::make_unique<CharacterStateMachine>();
 		stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
@@ -42,4 +45,16 @@ namespace Character {
 
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
+
+
+	void SmallMeleeEnemy::ReloadComboData() {
+		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
+		// コンボノードクリア
+		comboSystem->ClearNode();
+		comboSystem->SetParentTransform("Enemy", &objectComponent_->GetObject3D()->GetWorldTransform());
+		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
+		comboSystem->SetParentTransform("NoParent", nullptr);
+		comboSystem->Create("ComboSmallMeleeEnemy");
+	}
+
 }

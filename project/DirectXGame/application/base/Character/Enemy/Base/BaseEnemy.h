@@ -39,6 +39,8 @@ namespace Character {
 		virtual void Jump(){};
 		// 攻撃
 		virtual void Attack(){};
+		// リロード
+		virtual void Reload() {};
 		// ターゲット取得
 		const BaseCharacter* GetTarget();
 

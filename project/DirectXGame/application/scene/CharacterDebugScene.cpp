@@ -1,4 +1,4 @@
-#include "CharacterDebugScene.h"
+﻿#include "CharacterDebugScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -122,9 +122,7 @@ void CharacterDebugScene::Initialize()
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
-	//collisionManager_->BuildStaticSceneOctree();
-
+	
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
 

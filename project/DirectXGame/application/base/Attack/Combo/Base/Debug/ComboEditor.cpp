@@ -1,4 +1,4 @@
-#include "ComboEditor.h"
+﻿#include "ComboEditor.h"
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -35,11 +35,10 @@ namespace Combo {
 		DrawComboNodeGraph();
 		// リロード
 		if (ImGui::Button("Relord")) {
-			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
 			// グローバルデータ設定
 			SetGlobalData();
 			// リロード
-			player->Reload();
+			owner->Reload();
 			// コンボエディター
 			ApplyComboEditorToSystem();
 		}

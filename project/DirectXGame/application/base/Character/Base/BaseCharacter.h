@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
@@ -66,7 +66,8 @@ namespace Character {
 		virtual void SkillAttack() {};
 		/// ステートマシーン初期化
 		virtual void InitStateMachine() {};
-
+		// リロード
+		virtual void Reload() {};
 	public:
 		// キャラクタータイプ設定
 		void SetCharacterType(Type type);
