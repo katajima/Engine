@@ -8,14 +8,16 @@ namespace Combo {
 	public:
 
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem,
-			Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner,
-			EffectSystem* effectSystem);
+		void Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, 
+			Character::CharacterManager* characterManager,Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		// 更新 
 		void Update(float dt);
 
 		// コンボエディターがアクティブか取得
 		bool IsActive() const { return isComboEditorActive_; }
+
+		// 所有者設定
+		void SetOwner(Character::BaseCharacter* owner);
 
 	private:
 		// 更新
@@ -50,15 +52,24 @@ namespace Combo {
 
 		// コンボ削除
 		void DeleteComboNode(const std::string& comboName);
+
+		// セーブ
+		void DrawSaveComboNode();
 	private:
 		// コンボエディターブロック作成
 		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
 	private: // もらいもの
 		// コンボシステム
 		Combo::System* comboSystem = nullptr;
+		// 保存項目
 		Engine::GlobalVariables* globalVariables = nullptr;
+		// ライン描画共通
 		Engine::LineCommon* lineCommon = nullptr;
+		// 所有者
 		Character::BaseCharacter* owner = nullptr;
+		// キャラクター管理
+		Character::CharacterManager* characterManager = nullptr;
+		// エフェクト管理
 		EffectSystem* effectSystem = nullptr;
 	private:
 		// コンボエディターブロックマップ

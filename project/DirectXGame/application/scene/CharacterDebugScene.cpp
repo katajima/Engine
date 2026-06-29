@@ -99,15 +99,8 @@ void CharacterDebugScene::Initialize()
 	characterManager_->SetBulletManager(bulletManager_.get());
 	characterManager_->SetCameraManager(cameraManager_.get());
 	characterManager_->SetSpecialPointManager(specalPointManager_.get());
-
-	// プレイヤー生成
-	if (GetSceneData().playerID == 1) {
-		characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
-	}
-	else {
-		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
-	}
-
+	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+	
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
@@ -144,8 +137,7 @@ void CharacterDebugScene::Initialize()
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
 	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), 
-		characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), 
-		GetGlobalVariables(), characterManager_->GetPlayer(),effect_.get());
+		GetGlobalVariables(), characterManager_.get(), characterManager_->GetPlayer(), effect_.get());
 
 	// 弾デバッグ初期化
 	projectileDebug_ = std::make_unique<Projectile::ProjectileDebug>();

@@ -1,8 +1,8 @@
 ﻿#include "ComboEditor.h"
-
+#include <DirectXGame/application/base/Character/Base/CharacterManeger.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
-
+#include "DirectXGame/application/base/Attack/AttackController.h"
 #include "imnodes.h"
 
 #include <algorithm>
@@ -12,67 +12,49 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Engine::LineCommon* lineCommon,
-		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables,
-		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
-		this->comboSystem = comboSystem;
+	void Editor::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables,
+		Character::CharacterManager* characterManager, Character::BaseCharacter* owner, EffectSystem* effectSystem) {
+		// 所有者設定		
+		SetOwner(owner);
+		//	キャラクター管理
+		this->characterManager = characterManager;
+		// ライン描画共通
 		this->lineCommon = lineCommon;
+		// グローバル変数
 		this->globalVariables = globalVariables;
-		this->owner = owner;
+		// エフェクトシステム
 		this->effectSystem = effectSystem;
+	}
 
+	// 所有者設定
+	void Editor::SetOwner(Character::BaseCharacter* owner) { 
+		// 所有者設定
+		this->owner = owner; 
+		// 所有者の攻撃制御からコンボシステムを取得
+		this->comboSystem = owner->GetAttackController()->GetComboSystem();
 		// コンボシステムからコンボエディターブロックを作成
 		ApplyComboEditorToSystem();
 	}
+
 
 	void Editor::Update(float dt) {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
 		comboSystem->SertIsDebug(isComboEditorActive_);
+		
+		// ノード管理の描画
 		DrawNodeManagement();
+		// 開始コンボ設定の描画
 		DrawStartComboSettings();
-		DrawComboNodeGraph();
-		// リロード
-		if (ImGui::Button("Relord")) {
-			// グローバルデータ設定
-			SetGlobalData();
-			// リロード
-			owner->Reload();
-			// コンボエディター
-			ApplyComboEditorToSystem();
-		}
+		// ノードグラフ描画
+		//DrawComboNodeGraph();
+		// セーブとリロードImGui描画
+		DrawSaveComboNode();
 
-		ImGui::Separator();
-		if (ImGui::Button("SaveComboName")) {
-			globalVariables->SaveFile(comboSystem->GetName());
-		}
-		ImGui::Separator();
-
-
-		// 全てセーブ
-		if (ImGui::Button("AllSave")) {
-			SetGlobalData();
-			globalVariables->SaveFile(comboSystem->GetName());
-			for (auto& it : comboSystem->GetComboNodeStates()) {
-				globalVariables->SaveFile(it.first);
-			}
-		}
-		// セーブ
-		if (ImGui::Button("Save")) {
-			SetGlobalData();
-			globalVariables->SaveFile(comboSystem->GetName());
-			for (auto& it : comboSystem->GetComboNodeStates()) {
-				if (it.first == selectedComboEditorBlockName_)
-					globalVariables->SaveFile(it.first);
-			}
-		}
-
-
+		// コンボエディターがアクティブな場合、ComboNode内のImGuiの更新を行う
 		if (isComboEditorActive_)
 			UpdateImGui(dt);
-
-
 
 		ImGui::End();
 #endif // _DEBUG
@@ -627,6 +609,43 @@ namespace Combo {
 		nodeManagementMessage_ = removedFile
 			? "Deleted combo: " + comboName
 			: "Removed combo from the list, but its JSON file could not be deleted: " + comboName;
+	}
+
+	void Editor::DrawSaveComboNode() {
+		// リロード
+		if (ImGui::Button("Relord")) {
+			// グローバルデータ設定
+			SetGlobalData();
+			// リロード
+			owner->Reload();
+			// コンボエディター
+			ApplyComboEditorToSystem();
+		}
+
+		ImGui::Separator();
+		if (ImGui::Button("SaveComboName")) {
+			globalVariables->SaveFile(comboSystem->GetName());
+		}
+		ImGui::Separator();
+
+
+		// 全てセーブ
+		if (ImGui::Button("AllSave")) {
+			SetGlobalData();
+			globalVariables->SaveFile(comboSystem->GetName());
+			for (auto& it : comboSystem->GetComboNodeStates()) {
+				globalVariables->SaveFile(it.first);
+			}
+		}
+		// セーブ
+		if (ImGui::Button("Save")) {
+			SetGlobalData();
+			globalVariables->SaveFile(comboSystem->GetName());
+			for (auto& it : comboSystem->GetComboNodeStates()) {
+				if (it.first == selectedComboEditorBlockName_)
+					globalVariables->SaveFile(it.first);
+			}
+		}
 	}
 
 	void Editor::UpdateImGui(float dt) {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include  "ComboImGui.h"
 #include <array>
 #include "map"
@@ -10,8 +10,9 @@ namespace Engine {
 }
 // 前方宣言
 namespace Character {
-	class BaseCharacter;
-	class BasePlayer;
+	class CharacterManager;	// キャラクターマネージャー
+	class BaseCharacter;	// キャラクター基底クラス
+	class BasePlayer;		// プレイヤー
 }
 class EffectSystem;
 
