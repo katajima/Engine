@@ -25,7 +25,7 @@ void CharacterDebugScene::Initialize() {
 	InitializeCharacter();
 	// デバッグ関係初期化
 	InitializeDebug();
-
+	// デバッグ対象設定
 	SetDebugTarget(tagNumber);
 
 	// カメラ設定
