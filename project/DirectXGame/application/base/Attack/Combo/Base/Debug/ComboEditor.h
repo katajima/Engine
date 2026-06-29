@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
@@ -20,19 +20,35 @@ namespace Combo {
 	private:
 		// 更新
 		void UpdateImGui(float dt);
+		
 		// コンボエディターブロックをコンボシステムに適応
 		void ApplyComboEditorToSystem();
+		
 		// グローバルデータ設定
 		void SetGlobalData();
+		
 		// コンボノードの管理
 		void DrawNodeManagement();
+		
+		// コンボ開始設定のデバッグ描画
 		void DrawStartComboSettings();
+		
 		// コンボ全体の流れをノードとして表示、接続を編集
 		void DrawComboNodeGraph();
+		
+		// コンボ追加
 		void AddComboNode();
+
+		// コンボ追加時にコピーするか
 		void AddCopiedComboNode();
+
+		// 新しいコンボ名のバリデーション
 		bool ValidateNewComboName(const std::string& comboName);
+
+		// コンボ名前変更
 		void RenameComboNode(const std::string& oldName, const std::string& newName);
+
+		// コンボ削除
 		void DeleteComboNode(const std::string& comboName);
 	private:
 		// コンボエディターブロック作成

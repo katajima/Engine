@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -70,15 +70,15 @@ public:
 	// カメラ使用フラグ設定
 	void SetUseCamera(bool is) { useCamera = is; }
 protected:
+	// カメラ使用フラグ
 	bool useCamera = false;
-
-	std::unique_ptr<Engine::Camera> uniqueCamera_;	// 固有カメラ
-	
+	// 固有カメラ
+	std::unique_ptr<Engine::Camera> uniqueCamera_;	
 	// 統括
 	std::unique_ptr<CameraController> controller = nullptr;
-
-
-	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	float timeSpeed_ = 1.0f;	
+	// 名前
 	std::string name_;
 protected:
 	const Engine::WorldTransform* target = nullptr;		// ロックオン対象

@@ -246,8 +246,8 @@ namespace Character {
 	void PlayerStateAttack::Exit()
 	{
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		// 武器
-		character->GetWeapon()->GetObject3D()->SetIsDraw(false);// 武器描画しない
+		// 武器描画しない
+		character->GetWeapon()->GetObject3D()->SetIsDraw(false);
 
 		character->GetCameraManager()->GetBaseCamera()->LockOn(nullptr);
 

@@ -1,7 +1,6 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "EnemyData.h"
-#include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>

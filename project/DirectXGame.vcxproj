@@ -286,7 +286,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\MainStage.cpp" />
@@ -808,7 +807,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
     <ClInclude Include="DirectXGame\engine\Base\pch.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Vision\VisionComponent.h" />
     <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />

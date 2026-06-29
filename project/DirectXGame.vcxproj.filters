@@ -549,9 +549,6 @@
     <ClCompile Include="DirectXGame\engine\Transform\Transfomation\Transfomation.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp">
-      <Filter>ソース ファイル\application\base</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
@@ -1822,9 +1819,6 @@
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Utility\ConvertUtility.h">
       <Filter>ヘッダー ファイル\engine\base\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Vision\VisionComponent.h">
-      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h">
       <Filter>ヘッダー ファイル\application\base\camera</Filter>
