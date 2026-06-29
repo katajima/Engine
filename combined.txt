@@ -299,17 +299,14 @@
     └── └── └── └── └── ├── CharacterSpawnDirector.h
     └── └── └── └── └── ├── CharacterSpawnManager.cpp
     └── └── └── └── └── └── CharacterSpawnManager.h
-    └── └── └── └── ├── State/
-    └── └── └── └── └── ├── BaseMainState.cpp
-    └── └── └── └── └── ├── BaseMainState.h
-    └── └── └── └── └── ├── BaseSubState.h
-    └── └── └── └── └── ├── CharacterStateMachine.cpp
-    └── └── └── └── └── ├── CharacterStateMachine.h
-    └── └── └── └── └── ├── MainState.h
-    └── └── └── └── └── └── SubStateMachine.h
-    └── └── └── └── └── Vision/
-    └── └── └── └──     ├── VisionComponent.cpp
-    └── └── └── └──     └── VisionComponent.h
+    └── └── └── └── └── State/
+    └── └── └── └──     ├── BaseMainState.cpp
+    └── └── └── └──     ├── BaseMainState.h
+    └── └── └── └──     ├── BaseSubState.h
+    └── └── └── └──     ├── CharacterStateMachine.cpp
+    └── └── └── └──     ├── CharacterStateMachine.h
+    └── └── └── └──     ├── MainState.h
+    └── └── └── └──     └── SubStateMachine.h
     └── └── └── ├── Effect/
     └── └── └── └── ├── Effect.cpp
     └── └── └── └── ├── Effect.h
@@ -5921,7 +5918,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
@@ -5943,19 +5940,35 @@ namespace Combo {
 	private:
 		// 更新
 		void UpdateImGui(float dt);
+		
 		// コンボエディターブロックをコンボシステムに適応
 		void ApplyComboEditorToSystem();
+		
 		// グローバルデータ設定
 		void SetGlobalData();
+		
 		// コンボノードの管理
 		void DrawNodeManagement();
+		
+		// コンボ開始設定のデバッグ描画
 		void DrawStartComboSettings();
+		
 		// コンボ全体の流れをノードとして表示、接続を編集
 		void DrawComboNodeGraph();
+		
+		// コンボ追加
 		void AddComboNode();
+
+		// コンボ追加時にコピーするか
 		void AddCopiedComboNode();
+
+		// 新しいコンボ名のバリデーション
 		bool ValidateNewComboName(const std::string& comboName);
+
+		// コンボ名前変更
 		void RenameComboNode(const std::string& oldName, const std::string& newName);
+
+		// コンボ削除
 		void DeleteComboNode(const std::string& comboName);
 	private:
 		// コンボエディターブロック作成
@@ -14469,7 +14482,7 @@ float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpee
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -14541,15 +14554,15 @@ public:
 	// カメラ使用フラグ設定
 	void SetUseCamera(bool is) { useCamera = is; }
 protected:
+	// カメラ使用フラグ
 	bool useCamera = false;
-
-	std::unique_ptr<Engine::Camera> uniqueCamera_;	// 固有カメラ
-	
+	// 固有カメラ
+	std::unique_ptr<Engine::Camera> uniqueCamera_;	
 	// 統括
 	std::unique_ptr<CameraController> controller = nullptr;
-
-
-	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	float timeSpeed_ = 1.0f;	
+	// 名前
 	std::string name_;
 protected:
 	const Engine::WorldTransform* target = nullptr;		// ロックオン対象
@@ -22003,10 +22016,9 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "EnemyData.h"
-#include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
@@ -26745,8 +26757,8 @@ namespace Character {
 	void PlayerStateAttack::Exit()
 	{
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		// 武器
-		character->GetWeapon()->GetObject3D()->SetIsDraw(false);// 武器描画しない
+		// 武器描画しない
+		character->GetWeapon()->GetObject3D()->SetIsDraw(false);
 
 		character->GetCameraManager()->GetBaseCamera()->LockOn(nullptr);
 
@@ -27944,155 +27956,6 @@ namespace Character {
         BaseCharacter* character_ = nullptr;
     };
 }
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Vision/VisionComponent.cpp
-============================================================
-#include "VisionComponent.h"
-#include <DirectXGame/engine/Math/MathFunctions.h>
-#include "DirectXGame/engine/line/lineCommon.h"
-
-// オブジェクトが入っているか
-inline bool IsObjectVisible(
-    const Vector3& enemyPos,
-    const Vector3& enemyDir, // Z+ forward方向
-    const Vector3& playerPos,
-    float viewRadius,
-    float viewAngleDegree, // 例: 90°
-    std::function<bool(Vector3 origin, Vector3 dir, float maxDist)> raycastFunc // 障害物チェック
-)
-{
-    // プレイヤーとの距離
-    Vector3 toPlayer = playerPos - enemyPos;
-    float distance = Length(toPlayer);
-    if (distance > viewRadius) return false;
-
-    // プレイヤーの方向
-    Vector3 toPlayerDir = Normalize(toPlayer);
-    float dot = Dot(enemyDir, toPlayerDir);
-    float angleCos = cosf(Math::DegreesToRadians(viewAngleDegree * 0.5f));
-    if (dot < angleCos) return false;
-
-    // 視界内 → Raycastで壁をチェック
-    if (raycastFunc(enemyPos, toPlayerDir, distance)) {
-        return false; // 壁で遮られている
-    }
-
-    return true;
-}
-
-void VisionComponent::DrawDireLine(Vector3 selfPos, Vector3 selfDir, Vector3 targetPos, float viewDistance)
-{
-    if (gLineDrawer) {
-        Vector3 end = selfPos + Normalize(targetPos - selfPos) * viewDistance;
-        gLineDrawer->GetDebugLineMeshData().AddLine(selfPos, end, { 1.0f, 1.0f, 0.0f,1.0f }); // 黄色線
-    }
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Vision/VisionComponent.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/struct/Vector3.h"
-
-#include"functional"
-
-
-// オブジェクトが入っているか
-inline bool IsObjectVisible(
-    const Vector3& enemyPos,
-    const Vector3& enemyDir, // Z+ forward方向
-    const Vector3& playerPos,
-    float viewRadius,
-    float viewAngleDegree, // 例: 90°
-    std::function<bool(Vector3 origin, Vector3 dir, float maxDist)> raycastFunc // 障害物チェック
-);
-
-// 外部から利用できるよう公開
-enum class VisionMode {
-    Alert,
-    Combat
-};
-
-// 前方宣言
-namespace Engine {
-    class LineCommon;
-}
-/// <summary>
-/// 視界コンポーネントクラス
-/// </summary>
-class VisionComponent
-{
-public:
-    std::function<bool(Vector3, Vector3, float)> raycastFunc;
-private:
-    VisionMode currentMode = VisionMode::Alert;
-    float alertViewAngle = 90.0f;
-    float combatViewAngle = 120.0f;
-    float alertViewDistance = 10.0f;
-    float combatViewDistance = 20.0f;
-
-   
-    float lastSeenTime = -1.0f; // 最後に視界に入った時間
-    const float maxLostTime = 2.0f; // 見失われてから最大待機時間（秒）
-
-    bool canSeePlayer = false;
-
-
-    Engine::LineCommon* gLineDrawer = nullptr;
-public:
-    //ライン共通クラス設定
-    void SetLineCommon(Engine::LineCommon* line) { gLineDrawer = line; }
-
-    // アングル設定
-    void SetAlertView(float angle,float distance) { 
-        alertViewAngle = angle; 
-        alertViewDistance = distance;
-    }
-
-    // アングル設定
-    void SetCombatView(float angle,float distance) {
-        combatViewAngle = angle;
-        combatViewDistance = distance;
-    }
-    
-    // ビューモード設定
-    void SetMode(VisionMode mode) { currentMode = mode; }
-    // ビューモード取得
-    VisionMode GetMode() const { return currentMode; }
-    
-    // プレイヤー視界
-    bool IsPlayerVisible() const { return canSeePlayer; }
-
-    // 更新
-    void Update(float deltaTime, Vector3 selfPos, Vector3 selfDir, Vector3 targetPos)
-    {
-        float viewAngle = (currentMode == VisionMode::Combat) ? combatViewAngle : alertViewAngle;
-        float viewDistance = (currentMode == VisionMode::Combat) ? combatViewDistance : alertViewDistance;
-
-        bool visible = IsObjectVisible(selfPos, selfDir, targetPos, viewDistance, viewAngle, raycastFunc);
-
-        // 入っているなら
-        if (visible)
-        {
-            canSeePlayer = true;
-            lastSeenTime = 0.0f;
-        }
-        else if (canSeePlayer)
-        {
-            lastSeenTime += deltaTime;
-            if (lastSeenTime > maxLostTime)
-                canSeePlayer = false;
-        }       
-    }
-private:
-    // ライン描画
-    void DrawDireLine(Vector3 selfPos, Vector3 selfDir, Vector3 targetPos, float viewDistance);
-
-};
-
 
 
 ============================================================
@@ -85161,7 +85024,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\MainStage.cpp" />
@@ -85683,7 +85545,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
     <ClInclude Include="DirectXGame\engine\Base\pch.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Vision\VisionComponent.h" />
     <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
@@ -86389,9 +86250,6 @@ File Path: project/DirectXGame.vcxproj.filters
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Transform\Transfomation\Transfomation.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp">
-      <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
       <Filter>ソース ファイル\application\base</Filter>
@@ -87663,9 +87521,6 @@ File Path: project/DirectXGame.vcxproj.filters
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Utility\ConvertUtility.h">
       <Filter>ヘッダー ファイル\engine\base\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Vision\VisionComponent.h">
-      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h">
       <Filter>ヘッダー ファイル\application\base\camera</Filter>
