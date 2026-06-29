@@ -104,6 +104,9 @@ void CharacterDebugScene::Initialize()
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
+	
+	
+	
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
 	stage_->Initialize(GetEntityManager(), cameraManager_.get());
@@ -118,7 +121,6 @@ void CharacterDebugScene::Initialize()
 	
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
-
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
@@ -151,55 +153,22 @@ void CharacterDebugScene::Finalize(){
 }
 
 void CharacterDebugScene::Update(){
-	
-	inputSystem_->Update(GetTime());
-
-	// デバッグモード設定
-	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
-
-	// コンボエディター更新
-	comboEditor_->Update(GetTime());
-	// 弾デバッグ更新
-	projectileDebug_->Update();
-
-	// インプットマネージャー更新
-	inputManager_->Update(GetTime());
-
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_) {
-		iCommand_->Exec(*characterManager_->GetPlayer());
-	}
-
+	// 時間
+	float dt = GetTime();
 	// 調整項目
 	ApplyGlobalVariables();
-
 	// ImGuiの更新
 	UpdateImGui();
-
-
-	// キャラクターマネージャー更新
-	characterManager_->Update(GetTime(),true);
-
-	characterManager_->GetPlayer()->GetBasicParameters()->HP.value = 200;
-
-
-	// 必殺技ポイント管理クラス
-	specalPointManager_->Update(GetTime());
-
-	
-	// カメラ管理の更新
-	cameraManager_->Update();
-	// 弾マネージャ
-	bulletManager_->Update();
-	// ステージ
-	stage_->Update(GetTime());
-	// ヒットボックスシステム更新
-	hitBoxSystem_->Update(GetTime());
-	// 当たり判定
-	CheckAllCollisions();
-	// Effect更新
-	effect_->Update(GetTime());
+	// コンボエディター更新
+	comboEditor_->Update(dt);
+	// 弾デバッグ更新
+	projectileDebug_->Update();
+	// 入力更新
+	UpdateInput(dt);
+	// キャラクター更新
+	UpdateCharacter(dt);
+	// 基本的な更新
+	UpdateBase(dt);
 }
 
 void CharacterDebugScene::Draw3D(){
@@ -215,7 +184,46 @@ void CharacterDebugScene::Draw2D(){
 	// 弾マネージャ
 	bulletManager_->Draw2D();
 }
+// 入力関係更新
+void CharacterDebugScene::UpdateInput(float dt){
+	// 入力管理
+	inputSystem_->Update(dt);
+	// インプットマネージャー更新
+	inputManager_->Update(dt);
+	// コマンド
+	iCommand_ = inputHander_->HandleInput();
+	if (this->iCommand_) {
+		iCommand_->Exec(*characterManager_->GetPlayer());
+	}
 
+}
+// キャラクター関係更新
+void CharacterDebugScene::UpdateCharacter(float dt){
+	// デバッグモード設定
+	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
+	// キャラクターマネージャー更新
+	characterManager_->Update(dt, true);
+	// プレイヤーのHPを200に設定（デバッグ用）
+	characterManager_->GetPlayer()->GetBasicParameters()->HP.value = 200;
+}
+// 基本的な更新
+void CharacterDebugScene::UpdateBase(float dt){
+
+	// 必殺技ポイント管理クラス
+	specalPointManager_->Update(dt);
+	// カメラ管理の更新
+	cameraManager_->Update();
+	// 弾マネージャ
+	bulletManager_->Update();
+	// ステージ
+	stage_->Update(dt);
+	// ヒットボックスシステム更新
+	hitBoxSystem_->Update(dt);
+	// 当たり判定
+	CheckAllCollisions();
+	// Effect更新
+	effect_->Update(dt);
+}
 // ImGui更新
 void CharacterDebugScene::UpdateImGui() {
 
@@ -240,14 +248,10 @@ void CharacterDebugScene::UpdateImGui() {
 	ImGui::End();
 #endif // _DEBUG
 }
-
 // グローバルバリアブル適応
 void CharacterDebugScene::ApplyGlobalVariables() {
 }
-
-/// <summary>
-/// 衝突判定と応答
-/// </summary>
+// 衝突判定と応答
 void CharacterDebugScene::CheckAllCollisions() {
 	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
 		if (objects->GetColliderComponent()) {
@@ -287,7 +291,6 @@ void CharacterDebugScene::CheckAllCollisions() {
 			collisionManager_->Register(point->GetColliderComponent());
 		}
 	}
-
 
 	collisionManager_->CheckAll();
 	collisionManager_->ClearDynamic();

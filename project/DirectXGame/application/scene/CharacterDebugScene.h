@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -46,15 +46,18 @@ public:
 	void Draw2D() override;
 
 private:
+	// 入力関係
+	void UpdateInput(float dt);
+	// キャラクター関係更新
+	void UpdateCharacter(float dt);
+	// 基本的は更新
+	void UpdateBase(float dt);
+
 	// ImGui更新
 	void UpdateImGui();
-
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
-
-	/// <summary>
-	/// 衝突判定と応答
-	/// </summary>
+	// 衝突判定と応答
 	void CheckAllCollisions();
 
 private:
