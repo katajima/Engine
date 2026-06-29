@@ -1,4 +1,4 @@
-#include "CharacterManeger.h"
+﻿#include "CharacterManeger.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -144,7 +144,7 @@ namespace Character {
 		}
 	}
 
-	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
+	uint32_t CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
 		const CrowdBehaviorSettings& crowdBehavior) {
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
@@ -183,7 +183,7 @@ namespace Character {
 		enemy->GetObjectComponent()->Update();	// ワールド行列更新
 		character_.push_back(std::move(enemy));
 		characterCount_++;
-		return characterCount_ - 1; // 生成した敵のタグ番号を返す
+		return static_cast<uint32_t>(characterCount_ - 1); // 生成した敵のタグ番号を返す
 	}
 
 	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){

@@ -14,8 +14,6 @@ namespace Combo {
 
 	void Editor::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables,
 		Character::CharacterManager* characterManager, Character::BaseCharacter* owner, EffectSystem* effectSystem) {
-		// 所有者設定		
-		SetOwner(owner);
 		//	キャラクター管理
 		this->characterManager = characterManager;
 		// ライン描画共通

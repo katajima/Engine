@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
 
@@ -26,6 +26,8 @@ namespace Projectile {
 			EffectSystem* effectSystem, BulletManager* bulletManager, Character::BaseCharacter* target);
 		// ImGui上で発射位置や定義を編集し、任意タイミングで試射する
 		void Update();
+		// ターゲット設定
+		void SetTarget(Character::BaseCharacter* target) { spawnInfo_.target = target; };
 
 	private:
 		// デバッグ試射用の発射処理。通常のキャラクター所有のBulletSpawnとは分けて扱う。

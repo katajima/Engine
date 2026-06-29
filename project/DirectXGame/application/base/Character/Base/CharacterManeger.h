@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -97,10 +97,18 @@ namespace Character {
 			}
 			return nullptr;
 		}
-
+		// キャラクター取得
+		BaseCharacter* GetCharacter(uint32_t tagNumber) {
+			for (auto& character : character_) {
+				if (character->GetTagNumber() == tagNumber) {
+					return static_cast<BaseCharacter*>(character.get());
+				}
+			}
+			return nullptr;
+		}
 	public: // 生成系
 		// キャラクター生成(敵)
-		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
+		uint32_t CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
 			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 		// キャラクター生成(プレイヤー)
 		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);

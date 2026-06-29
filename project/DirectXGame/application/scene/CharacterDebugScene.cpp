@@ -12,139 +12,26 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
-void CharacterDebugScene::Initialize()
-{
-	// Input
-	input_ = GetInput();
+void CharacterDebugScene::Initialize() {
+	// 入力関係初期化
+	InitializeInput();
+	// エフェクト関係初期化
+	InitializeEffect();
+	// カメラ関係初期化
+	InitializeCamera();
+	// 基本的な初期化
+	InitializeBase();
+	// キャラクター関係初期化
+	InitializeCharacter();
+	// デバッグ関係初期化
+	InitializeDebug();
 
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input_);
+	SetDebugTarget(tagNumber);
 
-
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input_);
-
-
-	inputManager_->Triggered(InputManager::Action::Jump);
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-	
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
-
-
-	// エフェクト
-	effect_ = std::make_unique<EffectSystem>();
-	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-	// フォローカメラ
-	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
-	// 宇宙カメラ
-	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
-	// 固定カメラ
-	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
-
-	// カメラ管理
-	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
-	// カメラ追加
-	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
-	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
-	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
-
-
-
-	// 弾管理クラス
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntityManager(),GetGlobalVariables(), nullptr);
-	bulletManager_->SetEffect(effect_.get());
-
-	// ヒットボックスシステム初期化
-	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(GetEntityManager());
-
-	// スペシャルポイント管理クラス
-	specalPointManager_ = std::make_unique<SpecalPointManager>();
-	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-
-	// キャラクター管理 
-	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
-	characterManager_->SetEffect(effect_.get());
-	characterManager_->SetFollowCamera(followCamera_.get());
-	characterManager_->SetBulletManager(bulletManager_.get());
-	characterManager_->SetCameraManager(cameraManager_.get());
-	characterManager_->SetSpecialPointManager(specalPointManager_.get());
-	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
-	
-	// 追従カメラtarget設定
-	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
-
-	
-	
-	
-	// ステージ
-	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetEntityManager(), cameraManager_.get());
-
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
-	sp->SetStage(stage_.get());
-
-	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 1000,1000,1000 };
-	collisionManager_ = std::make_unique<Engine::CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
-
-	// エフェクトコンポーネント初期化
-	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(GetEntityManager(), GetGlobalVariables());
-
-
-	inputManager_->SetOwner(characterManager_->GetPlayer());
-
-
-
-	// ダミー敵生成
-	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
-
-	// コンボエディター初期化
-	comboEditor_ = std::make_unique<Combo::Editor>();
-	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), 
-		GetGlobalVariables(), characterManager_.get(), characterManager_->GetPlayer(), effect_.get());
-
-	// 弾デバッグ初期化
-	projectileDebug_ = std::make_unique<Projectile::ProjectileDebug>();
-	projectileDebug_->Initialize(GetEntityManager(), GetGlobalVariables(), effect_.get(),
-		bulletManager_.get(), characterManager_->GetPlayer());
 }
 
 void CharacterDebugScene::Finalize(){
@@ -157,12 +44,8 @@ void CharacterDebugScene::Update(){
 	float dt = GetTime();
 	// 調整項目
 	ApplyGlobalVariables();
-	// ImGuiの更新
-	UpdateImGui();
-	// コンボエディター更新
-	comboEditor_->Update(dt);
-	// 弾デバッグ更新
-	projectileDebug_->Update();
+	// デバッグ関係更新
+	UpdateDebug(dt);
 	// 入力更新
 	UpdateInput(dt);
 	// キャラクター更新
@@ -184,6 +67,126 @@ void CharacterDebugScene::Draw2D(){
 	// 弾マネージャ
 	bulletManager_->Draw2D();
 }
+
+// 入力関係初期化
+void CharacterDebugScene::InitializeInput(){
+	// Input
+	input_ = GetInput();
+	// インプットマネージャー初期化
+	inputManager_ = std::make_unique<InputManager>();
+	inputManager_->Initialize(input_);
+	// インプットハンドラー初期化
+	inputHander_ = std::make_unique<Character::InputHander>();
+	inputHander_->Initialize(input_);
+	inputManager_->Triggered(InputManager::Action::Jump);
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
+		std::make_unique<Character::JampCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
+		std::make_unique<Character::AttackCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
+		std::make_unique<Character::HeavyAttackCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
+		std::make_unique<Character::SkillAttackCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
+		std::make_unique<Character::MoveCommand>());
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
+}
+// キャラクター関係初期化
+void CharacterDebugScene::InitializeCharacter(){
+	// キャラクター管理 
+	characterManager_ = std::make_unique<Character::CharacterManager>();
+	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->SetEffect(effect_.get());
+	characterManager_->SetFollowCamera(followCamera_.get());
+	characterManager_->SetBulletManager(bulletManager_.get());
+	characterManager_->SetCameraManager(cameraManager_.get());
+	characterManager_->SetSpecialPointManager(specalPointManager_.get());
+
+	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+	// ダミー敵生成
+	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	// スモール敵生成
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
+	
+	// 必殺技
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
+	sp->SetStage(stage_.get());
+}
+// カメラ関係初期化
+void CharacterDebugScene::InitializeCamera(){
+	// フォローカメラ
+	followCamera_ = std::make_unique<FollowCamera>();
+	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	// 宇宙カメラ
+	universeCamera_ = std::make_unique<UniverseCamera>();
+	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	// 固定カメラ
+	fixedCamera_ = std::make_unique<FixedCamera>();
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+
+	// カメラ管理
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	// カメラ追加
+	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
+	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
+	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+}
+// エフェクト関係初期化
+void CharacterDebugScene::InitializeEffect(){
+	// エフェクト
+	effect_ = std::make_unique<EffectSystem>();
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
+	// エフェクトコンポーネント初期化
+	effectComponent_ = std::make_unique<Engine::EffectComponent>();
+	effectComponent_->Init(GetEntityManager(), GetGlobalVariables());
+}
+// 基本的な初期化
+void CharacterDebugScene::InitializeBase(){
+	// 弾管理クラス
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(GetEntityManager(), GetGlobalVariables(), nullptr);
+	bulletManager_->SetEffect(effect_.get());
+
+	// ヒットボックスシステム初期化
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(GetEntityManager());
+
+	// スペシャルポイント管理クラス
+	specalPointManager_ = std::make_unique<SpecalPointManager>();
+	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
+
+	// ステージ
+	stage_ = std::make_unique<MainStage>();
+	stage_->Initialize(GetEntityManager(), cameraManager_.get());
+
+	// 衝突マネージャの生成
+	Vector3 sizeAABB = { 1000,1000,1000 };
+	collisionManager_ = std::make_unique<Engine::CollisionManager>();
+	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
+}
+// デバック関係初期化
+void CharacterDebugScene::InitializeDebug(){
+	// コンボエディター初期化
+	comboEditor_ = std::make_unique<Combo::Editor>();
+	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(),
+		GetGlobalVariables(), characterManager_.get(), nullptr, effect_.get());
+
+	// 弾デバッグ初期化
+	projectileDebug_ = std::make_unique<Projectile::ProjectileDebug>();
+	projectileDebug_->Initialize(GetEntityManager(), GetGlobalVariables(), effect_.get(),
+		bulletManager_.get(), nullptr);
+}
+
+
 // 入力関係更新
 void CharacterDebugScene::UpdateInput(float dt){
 	// 入力管理
@@ -193,18 +196,18 @@ void CharacterDebugScene::UpdateInput(float dt){
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
-		iCommand_->Exec(*characterManager_->GetPlayer());
+		iCommand_->Exec(*debugTarget);
 	}
 
 }
 // キャラクター関係更新
 void CharacterDebugScene::UpdateCharacter(float dt){
 	// デバッグモード設定
-	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
+	debugTarget->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
 	// キャラクターマネージャー更新
 	characterManager_->Update(dt, true);
 	// プレイヤーのHPを200に設定（デバッグ用）
-	characterManager_->GetPlayer()->GetBasicParameters()->HP.value = 200;
+	debugTarget->GetBasicParameters()->HP.value = 200;
 }
 // 基本的な更新
 void CharacterDebugScene::UpdateBase(float dt){
@@ -223,6 +226,15 @@ void CharacterDebugScene::UpdateBase(float dt){
 	CheckAllCollisions();
 	// Effect更新
 	effect_->Update(dt);
+}
+// デバッグ関係更新
+void CharacterDebugScene::UpdateDebug(float dt){
+	// ImGuiの更新
+	UpdateImGui();
+	// コンボエディター更新
+	comboEditor_->Update(dt);
+	// 弾デバッグ更新
+	projectileDebug_->Update();
 }
 // ImGui更新
 void CharacterDebugScene::UpdateImGui() {
@@ -294,5 +306,18 @@ void CharacterDebugScene::CheckAllCollisions() {
 
 	collisionManager_->CheckAll();
 	collisionManager_->ClearDynamic();
+}
+
+void CharacterDebugScene::SetDebugTarget(uint32_t tag){
+	// デバック対象設定
+	debugTarget = characterManager_->GetCharacter(tag);
+	// 追従カメラtarget設定
+	followCamera_->SetTarget(&debugTarget->GetObjectComponent()->GetWorldTransform());
+	// 入力管理所有者設定
+	inputManager_->SetOwner(debugTarget);
+	// コンボエディタのターゲット設定
+	comboEditor_->SetOwner(debugTarget);
+	// ターゲット設定
+	projectileDebug_->SetTarget(debugTarget);
 }
 

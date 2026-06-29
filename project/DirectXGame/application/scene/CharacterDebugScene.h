@@ -44,7 +44,19 @@ public:
 	void Draw3D() override;
 	// 描画2d
 	void Draw2D() override;
-
+private:
+	// 入力関係初期化
+	void InitializeInput();
+	// キャラクター関係初期化
+	void InitializeCharacter();
+	// カメラ関係初期化
+	void InitializeCamera();
+	// エフェクト関係初期化
+	void InitializeEffect();
+	// 基本的な初期化
+	void InitializeBase();
+	// デバック関係初期化
+	void InitializeDebug();
 private:
 	// 入力関係
 	void UpdateInput(float dt);
@@ -52,13 +64,17 @@ private:
 	void UpdateCharacter(float dt);
 	// 基本的は更新
 	void UpdateBase(float dt);
-
+	// デバッグ関係更新
+	void UpdateDebug(float dt);
 	// ImGui更新
 	void UpdateImGui();
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
 	// 衝突判定と応答
 	void CheckAllCollisions();
+
+	// デバッグ対象設定
+	void SetDebugTarget(uint32_t tag);
 
 private:
 	Engine::Input* input_ = nullptr;
@@ -85,15 +101,12 @@ private:
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
 	std::unique_ptr<CameraManager> cameraManager_;
-
+	// エフェクト
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
-
-	// 
+	// エフェクト
 	std::unique_ptr<EffectSystem> effect_;
-
 	// スペシャルポイント管理クラス
 	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
-
 private:
 	// キャラクター管理
 	std::unique_ptr<Character::CharacterManager> characterManager_;
@@ -103,12 +116,6 @@ private:
 	std::unique_ptr<BulletManager> bulletManager_;
 	// ヒットボックスシステム
 	std::unique_ptr<HitBox::System> hitBoxSystem_;
-
-
-	Character::EnemyType enemyType = Character::EnemyType::kSmallMelee;
-	Vector3 enemyPos{};
-	uint32_t tagNumber = 0;
-
 	// シェイク
 	CameraShakeData shakeData{};
 	// ズーム
@@ -124,4 +131,9 @@ private:
 	std::unique_ptr<Combo::Editor> comboEditor_;
 	// 弾デバッグ
 	std::unique_ptr<Projectile::ProjectileDebug> projectileDebug_;
+	// デバック対象
+	Character::BaseCharacter* debugTarget = nullptr;
+	// タグ
+	uint32_t tagNumber = 0;
+
 };
