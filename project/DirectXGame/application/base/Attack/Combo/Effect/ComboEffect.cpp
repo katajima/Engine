@@ -121,6 +121,33 @@ namespace Combo {
 		}
 	}
 
+	// 攻撃が命中した瞬間に、コンボごとに設定されたシェイクとズームを再生する
+	void ComboCamera::OnHit() {
+		if (!data_.isHitCameraEffect || !cameraManager) {
+			return;
+		}
+
+		// カメラ切り替え後も現在使用中のカメラへ確実に演出を適用する
+		camera = cameraManager->GetBaseCamera();
+		if (!camera) {
+			return;
+		}
+
+		// 命中の衝撃をカメラ基準の揺れとして再生する
+		if (data_.isHitShake && data_.hitShakeDuration > 0.0f) {
+			camera->GetCameraController()->GetShake()->Request({ data_.hitShakeDuration, data_.hitShakeOffset });
+		}
+
+		// 命中時だけ一時的にカメラ距離を変えて打撃感を強調する
+		if (data_.isHitZoom && data_.hitZoomDuration > 0.0f) {
+			camera->GetCameraController()->GetZoom()->Request({
+				data_.hitZoomTargetDistance,
+				data_.hitZoomSpeed,
+				data_.hitZoomDuration
+				});
+		}
+	}
+
 	// 終了
 	void ComboCamera::Exit() {
 		if (cameraManager && cameraManager->GetBaseCamera()) {

@@ -633,6 +633,19 @@ namespace Combo {
 				ImGui::TreePop();
 			}
 
+			if (ImGui::TreeNode("ヒット時カメラ演出")) {
+				// 命中通知を受けた瞬間に再生する演出をコンボ単位で編集する
+				ImGui::Checkbox("ヒット時カメラ演出を使う", &data_.camera.isHitCameraEffect);
+				ImGui::Checkbox("ヒット時にシェイクする", &data_.camera.isHitShake);
+				ImGui::DragFloat("ヒット時シェイク時間", &data_.camera.hitShakeDuration, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat3("ヒット時シェイク幅", &data_.camera.hitShakeOffset.x, 0.01f, 0.0f, 10.0f);
+				ImGui::Checkbox("ヒット時にズームする", &data_.camera.isHitZoom);
+				ImGui::DragFloat("ヒット時ズーム距離", &data_.camera.hitZoomTargetDistance, 0.01f, -100.0f, 100.0f);
+				ImGui::DragFloat("ヒット時ズーム速度", &data_.camera.hitZoomSpeed, 0.01f, 0.0f, 100.0f);
+				ImGui::DragFloat("ヒット時ズーム時間", &data_.camera.hitZoomDuration, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
+
 		}
 	};
 

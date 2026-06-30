@@ -698,6 +698,16 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
 			globalVariables->AddItem(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
 
+			// 命中を契機に再生するカメラ演出をコンボデータへ登録する
+			globalVariables->AddItem(name, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
+			globalVariables->AddItem(name, "ヒット時カメラシェイク", data.camera.isHitShake);
+			globalVariables->AddItem(name, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
+			globalVariables->AddItem(name, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
+			globalVariables->AddItem(name, "ヒット時カメラズーム", data.camera.isHitZoom);
+			globalVariables->AddItem(name, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
+			globalVariables->AddItem(name, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
+			globalVariables->AddItem(name, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
+
 		}
 
 
@@ -989,6 +999,16 @@ namespace Combo {
 			data.camera.speedZoomFarOffsetZ = globalVariables->GetValue<float>(name, "カメラ速度ズーム遠距離補正");
 			data.camera.speedZoomSmoothSpeed = globalVariables->GetValue<float>(name, "カメラ速度ズーム補間速度");
 
+			// 保存済みの命中時カメラ演出をランタイムデータへ復元する
+			data.camera.isHitCameraEffect = globalVariables->GetValue<bool>(name, "ヒット時カメラ演出");
+			data.camera.isHitShake = globalVariables->GetValue<bool>(name, "ヒット時カメラシェイク");
+			data.camera.hitShakeDuration = globalVariables->GetValue<float>(name, "ヒット時カメラシェイク時間");
+			data.camera.hitShakeOffset = globalVariables->GetValue<Vector3>(name, "ヒット時カメラシェイク幅");
+			data.camera.isHitZoom = globalVariables->GetValue<bool>(name, "ヒット時カメラズーム");
+			data.camera.hitZoomTargetDistance = globalVariables->GetValue<float>(name, "ヒット時カメラズーム距離");
+			data.camera.hitZoomSpeed = globalVariables->GetValue<float>(name, "ヒット時カメラズーム速度");
+			data.camera.hitZoomDuration = globalVariables->GetValue<float>(name, "ヒット時カメラズーム時間");
+
 		}
 	}
 
@@ -1257,6 +1277,16 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
 			globalVariables->SetValue(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
 			globalVariables->SetValue(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
+
+			// エディターで変更した命中時カメラ演出を永続化する
+			globalVariables->SetValue(name, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
+			globalVariables->SetValue(name, "ヒット時カメラシェイク", data.camera.isHitShake);
+			globalVariables->SetValue(name, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
+			globalVariables->SetValue(name, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
+			globalVariables->SetValue(name, "ヒット時カメラズーム", data.camera.isHitZoom);
+			globalVariables->SetValue(name, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
+			globalVariables->SetValue(name, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
+			globalVariables->SetValue(name, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
 
 		}
 	}

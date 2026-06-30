@@ -87,6 +87,23 @@ struct GlobalCameraData {
 	float lockOnInterpolation = 0.5f;
 	// ロックオン解除時間(0以下なら解除しない)
 	float lockOnEndTime = 0.0f;
+
+	// 攻撃がヒットした瞬間に専用のカメラ演出を再生するか
+	bool isHitCameraEffect = false;
+	// ヒット時にカメラをシェイクするか
+	bool isHitShake = true;
+	// ヒット時シェイクの継続時間
+	float hitShakeDuration = 0.1f;
+	// ヒット時のカメラ基準シェイク幅
+	Vector3 hitShakeOffset = { 0.2f, 0.2f, 0.2f };
+	// ヒット時にカメラをズームするか
+	bool isHitZoom = false;
+	// ヒット時ズームの距離
+	float hitZoomTargetDistance = 0.0f;
+	// ヒット時ズームの補間速度
+	float hitZoomSpeed = 8.0f;
+	// ヒット時ズームの継続時間
+	float hitZoomDuration = 0.1f;
 };
 
 

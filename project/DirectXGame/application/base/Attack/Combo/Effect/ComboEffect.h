@@ -28,6 +28,8 @@ namespace Combo {
 
 		// 更新
 		void Update(float timer, float dt);
+		// 攻撃が命中した瞬間のカメラ演出を再生する
+		void OnHit();
 
 		// 終了
 		void Exit();
