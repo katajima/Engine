@@ -110,11 +110,11 @@ void CharacterDebugScene::InitializeCharacter(){
 	characterManager_->SetCameraManager(cameraManager_.get());
 	characterManager_->SetSpecialPointManager(specalPointManager_.get());
 
-	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+	tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	// ダミー敵生成
 	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 	// スモール敵生成
-	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
+	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
 	
 	// 必殺技
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
@@ -206,8 +206,8 @@ void CharacterDebugScene::UpdateCharacter(float dt){
 	debugTarget->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
 	// キャラクターマネージャー更新
 	characterManager_->Update(dt, true);
-	// プレイヤーのHPを200に設定（デバッグ用）
-	debugTarget->GetBasicParameters()->HP.value = 200;
+	// デバッグ対象ののHP設定
+	debugTarget->GetBasicParameters()->HP.value = hp;
 }
 // 基本的な更新
 void CharacterDebugScene::UpdateBase(float dt){

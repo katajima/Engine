@@ -162,7 +162,7 @@
         },
         "開始コンボ(地上弱攻撃)": {
             "type": "string",
-            "value": "testCameraAttack"
+            "value": "MeleeAttack1"
         },
         "開始コンボ(地上強攻撃)": {
             "type": "string",

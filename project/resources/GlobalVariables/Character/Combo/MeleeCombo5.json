@@ -70,23 +70,23 @@
         },
         "カメラズーム": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "カメラズーム時間": {
             "type": "float",
-            "value": 0.0
+            "value": 0.5
         },
         "カメラズーム速度": {
             "type": "float",
-            "value": 0.0
+            "value": 13.220000267028809
         },
         "カメラズーム量": {
             "type": "float",
-            "value": 0.0
+            "value": 1.5
         },
         "カメラズーム開始時間": {
             "type": "float",
-            "value": 0.0
+            "value": 0.20000000298023224
         },
         "カメラロックオン": {
             "type": "bool",
@@ -108,6 +108,34 @@
             "type": "float",
             "value": 0.0
         },
+        "カメラ先読み": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラ先読み時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ先読み最大速度": {
+            "type": "float",
+            "value": 30.0
+        },
+        "カメラ先読み最小速度": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ先読み補間速度": {
+            "type": "float",
+            "value": 8.0
+        },
+        "カメラ先読み距離": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ先読み開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "カメラ切り替え": {
             "type": "bool",
             "value": false
@@ -121,6 +149,62 @@
             "value": 0.0
         },
         "カメラ切り替え開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ注視点オフセット": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラ注視点オフセット時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ注視点オフセット補間速度": {
+            "type": "float",
+            "value": 8.0
+        },
+        "カメラ注視点オフセット量": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "カメラ注視点オフセット開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ速度ズーム": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラ速度ズーム時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ速度ズーム最大速度": {
+            "type": "float",
+            "value": 30.0
+        },
+        "カメラ速度ズーム最小速度": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ速度ズーム補間速度": {
+            "type": "float",
+            "value": 8.0
+        },
+        "カメラ速度ズーム近距離補正": {
+            "type": "float",
+            "value": 0.0
+        },
+        "カメラ速度ズーム遠距離補正": {
+            "type": "float",
+            "value": -8.0
+        },
+        "カメラ速度ズーム開始時間": {
             "type": "float",
             "value": 0.0
         },

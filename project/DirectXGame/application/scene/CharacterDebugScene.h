@@ -135,5 +135,6 @@ private:
 	Character::BaseCharacter* debugTarget = nullptr;
 	// タグ
 	uint32_t tagNumber = 0;
-
+	// HP
+	float hp = 9999;
 };

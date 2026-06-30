@@ -111,7 +111,7 @@ namespace Character {
 		uint32_t CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
 			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 		// キャラクター生成(プレイヤー)
-		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
+		uint32_t CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
 		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb,
 			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());

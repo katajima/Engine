@@ -186,7 +186,7 @@ namespace Character {
 		return static_cast<uint32_t>(characterCount_ - 1); // 生成した敵のタグ番号を返す
 	}
 
-	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){
+	uint32_t CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){
 		std::unique_ptr<BasePlayer> player;
 
 		player = std::make_unique<NormalPlayer>();
@@ -201,6 +201,7 @@ namespace Character {
 		player->SetCharacterType(Type::Player);// キャラクターのタイプをプレイヤーに
 		character_.push_back(std::move(player));	// キャラクターに追加 
 		characterCount_++;
+		return static_cast<uint32_t>(characterCount_ - 1); // 生成した敵のタグ番号を返す
 	}
 
 	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb,
