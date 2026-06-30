@@ -3237,9 +3237,10 @@ namespace Combo {
         // 次のステート
         void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
         void NotifyHit() {
-            // ヒット発生をキャンセル条件と遠距離投擲物の制御へ伝える
+            // ヒット発生をキャンセル条件、遠距離投擲物、カメラ演出へ伝える
             hasHit_ = true;
             comboData.GetComboRange().NotifyHit();
+            comboData.GetComboCamera().OnHit();
         }
         bool HasHit() const { return hasHit_; }
         std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);
@@ -4069,6 +4070,16 @@ namespace Combo {
 			globalVariables->AddItem(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
 			globalVariables->AddItem(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
 
+			// 命中を契機に再生するカメラ演出をコンボデータへ登録する
+			globalVariables->AddItem(name, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
+			globalVariables->AddItem(name, "ヒット時カメラシェイク", data.camera.isHitShake);
+			globalVariables->AddItem(name, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
+			globalVariables->AddItem(name, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
+			globalVariables->AddItem(name, "ヒット時カメラズーム", data.camera.isHitZoom);
+			globalVariables->AddItem(name, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
+			globalVariables->AddItem(name, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
+			globalVariables->AddItem(name, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
+
 		}
 
 
@@ -4360,6 +4371,16 @@ namespace Combo {
 			data.camera.speedZoomFarOffsetZ = globalVariables->GetValue<float>(name, "カメラ速度ズーム遠距離補正");
 			data.camera.speedZoomSmoothSpeed = globalVariables->GetValue<float>(name, "カメラ速度ズーム補間速度");
 
+			// 保存済みの命中時カメラ演出をランタイムデータへ復元する
+			data.camera.isHitCameraEffect = globalVariables->GetValue<bool>(name, "ヒット時カメラ演出");
+			data.camera.isHitShake = globalVariables->GetValue<bool>(name, "ヒット時カメラシェイク");
+			data.camera.hitShakeDuration = globalVariables->GetValue<float>(name, "ヒット時カメラシェイク時間");
+			data.camera.hitShakeOffset = globalVariables->GetValue<Vector3>(name, "ヒット時カメラシェイク幅");
+			data.camera.isHitZoom = globalVariables->GetValue<bool>(name, "ヒット時カメラズーム");
+			data.camera.hitZoomTargetDistance = globalVariables->GetValue<float>(name, "ヒット時カメラズーム距離");
+			data.camera.hitZoomSpeed = globalVariables->GetValue<float>(name, "ヒット時カメラズーム速度");
+			data.camera.hitZoomDuration = globalVariables->GetValue<float>(name, "ヒット時カメラズーム時間");
+
 		}
 	}
 
@@ -4628,6 +4649,16 @@ namespace Combo {
 			globalVariables->SetValue(name, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
 			globalVariables->SetValue(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
 			globalVariables->SetValue(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
+
+			// エディターで変更した命中時カメラ演出を永続化する
+			globalVariables->SetValue(name, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
+			globalVariables->SetValue(name, "ヒット時カメラシェイク", data.camera.isHitShake);
+			globalVariables->SetValue(name, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
+			globalVariables->SetValue(name, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
+			globalVariables->SetValue(name, "ヒット時カメラズーム", data.camera.isHitZoom);
+			globalVariables->SetValue(name, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
+			globalVariables->SetValue(name, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
+			globalVariables->SetValue(name, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
 
 		}
 	}
@@ -6672,6 +6703,19 @@ namespace Combo {
 				ImGui::TreePop();
 			}
 
+			if (ImGui::TreeNode("ヒット時カメラ演出")) {
+				// 命中通知を受けた瞬間に再生する演出をコンボ単位で編集する
+				ImGui::Checkbox("ヒット時カメラ演出を使う", &data_.camera.isHitCameraEffect);
+				ImGui::Checkbox("ヒット時にシェイクする", &data_.camera.isHitShake);
+				ImGui::DragFloat("ヒット時シェイク時間", &data_.camera.hitShakeDuration, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat3("ヒット時シェイク幅", &data_.camera.hitShakeOffset.x, 0.01f, 0.0f, 10.0f);
+				ImGui::Checkbox("ヒット時にズームする", &data_.camera.isHitZoom);
+				ImGui::DragFloat("ヒット時ズーム距離", &data_.camera.hitZoomTargetDistance, 0.01f, -100.0f, 100.0f);
+				ImGui::DragFloat("ヒット時ズーム速度", &data_.camera.hitZoomSpeed, 0.01f, 0.0f, 100.0f);
+				ImGui::DragFloat("ヒット時ズーム時間", &data_.camera.hitZoomDuration, 0.01f, 0.0f, 10.0f);
+				ImGui::TreePop();
+			}
+
 		}
 	};
 
@@ -7507,6 +7551,33 @@ namespace Combo {
 		}
 	}
 
+	// 攻撃が命中した瞬間に、コンボごとに設定されたシェイクとズームを再生する
+	void ComboCamera::OnHit() {
+		if (!data_.isHitCameraEffect || !cameraManager) {
+			return;
+		}
+
+		// カメラ切り替え後も現在使用中のカメラへ確実に演出を適用する
+		camera = cameraManager->GetBaseCamera();
+		if (!camera) {
+			return;
+		}
+
+		// 命中の衝撃をカメラ基準の揺れとして再生する
+		if (data_.isHitShake && data_.hitShakeDuration > 0.0f) {
+			camera->GetCameraController()->GetShake()->Request({ data_.hitShakeDuration, data_.hitShakeOffset });
+		}
+
+		// 命中時だけ一時的にカメラ距離を変えて打撃感を強調する
+		if (data_.isHitZoom && data_.hitZoomDuration > 0.0f) {
+			camera->GetCameraController()->GetZoom()->Request({
+				data_.hitZoomTargetDistance,
+				data_.hitZoomSpeed,
+				data_.hitZoomDuration
+				});
+		}
+	}
+
 	// 終了
 	void ComboCamera::Exit() {
 		if (cameraManager && cameraManager->GetBaseCamera()) {
@@ -7694,6 +7765,8 @@ namespace Combo {
 
 		// 更新
 		void Update(float timer, float dt);
+		// 攻撃が命中した瞬間のカメラ演出を再生する
+		void OnHit();
 
 		// 終了
 		void Exit();
@@ -15204,6 +15277,23 @@ struct GlobalCameraData {
 	float lockOnInterpolation = 0.5f;
 	// ロックオン解除時間(0以下なら解除しない)
 	float lockOnEndTime = 0.0f;
+
+	// 攻撃がヒットした瞬間に専用のカメラ演出を再生するか
+	bool isHitCameraEffect = false;
+	// ヒット時にカメラをシェイクするか
+	bool isHitShake = true;
+	// ヒット時シェイクの継続時間
+	float hitShakeDuration = 0.1f;
+	// ヒット時のカメラ基準シェイク幅
+	Vector3 hitShakeOffset = { 0.2f, 0.2f, 0.2f };
+	// ヒット時にカメラをズームするか
+	bool isHitZoom = false;
+	// ヒット時ズームの距離
+	float hitZoomTargetDistance = 0.0f;
+	// ヒット時ズームの補間速度
+	float hitZoomSpeed = 8.0f;
+	// ヒット時ズームの継続時間
+	float hitZoomDuration = 0.1f;
 };
 
 
