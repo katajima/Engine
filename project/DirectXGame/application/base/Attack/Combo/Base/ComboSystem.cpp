@@ -556,6 +556,7 @@ namespace Combo {
 		}
 		// 移動
 		{
+			globalVariables->AddItem(name, "コンボ中の移動慣性", data.move.inheritMoveInertia);
 			globalVariables->AddItem(name, "コンボ中の重力", data.move.isGravity);
 			globalVariables->AddItem(name, "コンボ中の重力強度", data.move.gravityScale);
 			globalVariables->AddItem(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
@@ -846,6 +847,7 @@ namespace Combo {
 		}
 		// 移動
 		{
+			data.move.inheritMoveInertia = globalVariables->GetValue<bool>(name, "コンボ中の移動慣性");
 			data.move.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
 			data.move.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
 			data.move.maxFallSpeed = globalVariables->GetValue<float>(name, "コンボ中の最大落下速度");
@@ -1131,6 +1133,7 @@ namespace Combo {
 		}
 		// 移動
 		{
+			globalVariables->SetValue(name, "コンボ中の移動慣性", data.move.inheritMoveInertia);
 			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
 			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->SetValue(name, "移動スピード", data.move.moveSpeed);

@@ -1,4 +1,4 @@
-﻿#include "ComboEditor.h"
+#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManeger.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -50,9 +50,9 @@ namespace Combo {
 		// セーブとリロードImGui描画
 		DrawSaveComboNode();
 
-		// コンボエディターがアクティブな場合、ComboNode内のImGuiの更新を行う
-		if (isComboEditorActive_)
-			UpdateImGui(dt);
+		// 自動攻撃が停止中でも編集できるよう、詳細エディタのImGuiは常に更新する
+		// isComboEditorActive_ はプレビュー再生と攻撃デバッグ処理の有効状態として渡す
+		UpdateImGui(dt);
 
 		ImGui::End();
 #endif // _DEBUG

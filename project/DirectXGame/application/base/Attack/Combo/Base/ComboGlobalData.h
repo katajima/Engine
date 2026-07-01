@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -174,6 +174,8 @@ namespace Combo {
 	};
 
 	struct GlobalMove {
+		// 攻撃開始直前の通常移動速度をコンボ中も維持するか
+		bool inheritMoveInertia = false;
 		// 受付時間
 		StateTime moveWindow{};
 		// 移動速度（軸ごと）

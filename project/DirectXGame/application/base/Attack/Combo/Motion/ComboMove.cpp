@@ -1,4 +1,4 @@
-﻿#include "ComboMove.h"
+#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -39,6 +39,9 @@ namespace Combo {
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 		moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
 		camera = owner->GetCameraManager()->GetCamera();
+		// 設定が有効なコンボだけ、攻撃へ入る直前の通常移動速度を水平慣性として保持する
+		moveInertiaVelocity_ = data_.inheritMoveInertia ? moveComponent->GetVelocity() : Vector3{};
+		moveInertiaVelocity_.y = 0.0f;
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData;
 		traget = lockOnSystem->SoftLockOn();
@@ -93,6 +96,8 @@ namespace Combo {
 
 		// 移動処理
 		MoveTypeProcess(timer, ctx.dt);
+		// コンボ固有の踏み込みとは別に、開始前の移動慣性を加算する
+		RequestMoveInertia(ctx.dt);
 	}
 
 	// 終了
@@ -102,6 +107,19 @@ namespace Combo {
 		lockOnSystem->ClearTag();
 		stickDirection_ = {};
 		moveDirection_ = {};
+		moveInertiaVelocity_ = {};
+	}
+
+	void ComboMove::RequestMoveInertia(float dt) {
+		// 慣性を使用しないコンボ、または停止状態から始めたコンボでは要求を追加しない
+		if (!data_.inheritMoveInertia || moveInertiaVelocity_.LengthSq() <= 0.000001f) {
+			return;
+		}
+
+		MoveRequest request{};
+		request.velocity = moveInertiaVelocity_ * dt;
+		request.priority = 1;
+		moveRequestSystem->SetRequest(request);
 	}
 
 	// 移動処理

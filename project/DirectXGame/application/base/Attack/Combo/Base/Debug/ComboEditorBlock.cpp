@@ -451,6 +451,8 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
+			// 攻撃開始前の走行速度を維持するか、コンボ単位で切り替える
+			ImGui::Checkbox("攻撃開始前の移動慣性を引き継ぐ", &data_.move.inheritMoveInertia);
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
 			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
 

@@ -296,6 +296,10 @@
             "type": "bool",
             "value": true
         },
+        "コンボ中の移動慣性": {
+            "type": "bool",
+            "value": false
+        },
         "コンボ中の移動方向": {
             "type": "Vector3",
             "value": [

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <DirectXGame/engine/struct/Vector3.h>
 
@@ -61,6 +61,8 @@ namespace Combo {
 		bool ApplyTargetMove(MoveRequest& request, float dt);
 		// 移動時間内の進行度から速度倍率を計算する
 		float CalculateMoveCurveScale(float timer) const;
+		// 攻撃開始前から引き継いだ移動慣性を今フレームの移動要求へ追加する
+		void RequestMoveInertia(float dt);
 		// ターゲット有無に応じた移動速度取得
 		Vector3 GetActiveMoveSpeed() const;
 		// ターゲット有無に応じたローカル移動方向取得
@@ -95,6 +97,8 @@ namespace Combo {
 		Vector3 direction_ = {};
 		// 最終移動方向
 		Vector3 moveDirection_ = {};
+		// 攻撃開始直前から引き継ぐ水平移動速度
+		Vector3 moveInertiaVelocity_ = {};
 		// 移動出来るか
 		bool isMove_ = true;
 		// ターゲット瞬間移動を実行したか
