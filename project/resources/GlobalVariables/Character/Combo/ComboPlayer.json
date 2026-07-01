@@ -16,6 +16,10 @@
             "type": "string",
             "value": "Attack9"
         },
+        "FixedAttack": {
+            "type": "string",
+            "value": "FixedAttack"
+        },
         "HeavyDashAttack": {
             "type": "string",
             "value": "HeavyDashAttack"
