@@ -2527,7 +2527,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
@@ -2703,6 +2703,8 @@ namespace Combo {
 	};
 
 	struct GlobalMove {
+		// 攻撃開始直前の通常移動速度をコンボ中も維持するか
+		bool inheritMoveInertia = false;
 		// 受付時間
 		StateTime moveWindow{};
 		// 移動速度（軸ごと）
@@ -3928,6 +3930,7 @@ namespace Combo {
 		}
 		// 移動
 		{
+			globalVariables->AddItem(name, "コンボ中の移動慣性", data.move.inheritMoveInertia);
 			globalVariables->AddItem(name, "コンボ中の重力", data.move.isGravity);
 			globalVariables->AddItem(name, "コンボ中の重力強度", data.move.gravityScale);
 			globalVariables->AddItem(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
@@ -4218,6 +4221,7 @@ namespace Combo {
 		}
 		// 移動
 		{
+			data.move.inheritMoveInertia = globalVariables->GetValue<bool>(name, "コンボ中の移動慣性");
 			data.move.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
 			data.move.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
 			data.move.maxFallSpeed = globalVariables->GetValue<float>(name, "コンボ中の最大落下速度");
@@ -4503,6 +4507,7 @@ namespace Combo {
 		}
 		// 移動
 		{
+			globalVariables->SetValue(name, "コンボ中の移動慣性", data.move.inheritMoveInertia);
 			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
 			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->SetValue(name, "移動スピード", data.move.moveSpeed);
@@ -5165,7 +5170,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.cpp
 ============================================================
-﻿#include "ComboEditor.h"
+#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManeger.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -5217,9 +5222,9 @@ namespace Combo {
 		// セーブとリロードImGui描画
 		DrawSaveComboNode();
 
-		// コンボエディターがアクティブな場合、ComboNode内のImGuiの更新を行う
-		if (isComboEditorActive_)
-			UpdateImGui(dt);
+		// 自動攻撃が停止中でも編集できるよう、詳細エディタのImGuiは常に更新する
+		// isComboEditorActive_ はプレビュー再生と攻撃デバッグ処理の有効状態として渡す
+		UpdateImGui(dt);
 
 		ImGui::End();
 #endif // _DEBUG
@@ -6521,6 +6526,8 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
+			// 攻撃開始前の走行速度を維持するか、コンボ単位で切り替える
+			ImGui::Checkbox("攻撃開始前の移動慣性を引き継ぐ", &data_.move.inheritMoveInertia);
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
 			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
 
@@ -8482,7 +8489,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cpp
 ============================================================
-﻿#include "ComboMove.h"
+#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -8523,6 +8530,9 @@ namespace Combo {
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 		moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
 		camera = owner->GetCameraManager()->GetCamera();
+		// 設定が有効なコンボだけ、攻撃へ入る直前の通常移動速度を水平慣性として保持する
+		moveInertiaVelocity_ = data_.inheritMoveInertia ? moveComponent->GetVelocity() : Vector3{};
+		moveInertiaVelocity_.y = 0.0f;
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData;
 		traget = lockOnSystem->SoftLockOn();
@@ -8577,6 +8587,8 @@ namespace Combo {
 
 		// 移動処理
 		MoveTypeProcess(timer, ctx.dt);
+		// コンボ固有の踏み込みとは別に、開始前の移動慣性を加算する
+		RequestMoveInertia(ctx.dt);
 	}
 
 	// 終了
@@ -8586,6 +8598,19 @@ namespace Combo {
 		lockOnSystem->ClearTag();
 		stickDirection_ = {};
 		moveDirection_ = {};
+		moveInertiaVelocity_ = {};
+	}
+
+	void ComboMove::RequestMoveInertia(float dt) {
+		// 慣性を使用しないコンボ、または停止状態から始めたコンボでは要求を追加しない
+		if (!data_.inheritMoveInertia || moveInertiaVelocity_.LengthSq() <= 0.000001f) {
+			return;
+		}
+
+		MoveRequest request{};
+		request.velocity = moveInertiaVelocity_ * dt;
+		request.priority = 1;
+		moveRequestSystem->SetRequest(request);
 	}
 
 	// 移動処理
@@ -8893,7 +8918,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <DirectXGame/engine/struct/Vector3.h>
 
@@ -8956,6 +8981,8 @@ namespace Combo {
 		bool ApplyTargetMove(MoveRequest& request, float dt);
 		// 移動時間内の進行度から速度倍率を計算する
 		float CalculateMoveCurveScale(float timer) const;
+		// 攻撃開始前から引き継いだ移動慣性を今フレームの移動要求へ追加する
+		void RequestMoveInertia(float dt);
 		// ターゲット有無に応じた移動速度取得
 		Vector3 GetActiveMoveSpeed() const;
 		// ターゲット有無に応じたローカル移動方向取得
@@ -8990,6 +9017,8 @@ namespace Combo {
 		Vector3 direction_ = {};
 		// 最終移動方向
 		Vector3 moveDirection_ = {};
+		// 攻撃開始直前から引き継ぐ水平移動速度
+		Vector3 moveInertiaVelocity_ = {};
 		// 移動出来るか
 		bool isMove_ = true;
 		// ターゲット瞬間移動を実行したか
