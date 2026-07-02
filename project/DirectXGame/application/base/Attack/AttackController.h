@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <DirectXGame/application/base/Attack/Hit/HitCounter.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
@@ -47,6 +47,9 @@ public:
 public:
 	// デバッグ中か設定
 	void SetIsDebug(bool isDebug) { isDebugEditor_ = isDebug; };
+
+	// デバッグ中か取得
+	bool IsDebug() const { return isDebugEditor_; };
 
 private:
 	// 攻撃ヒットカウンター

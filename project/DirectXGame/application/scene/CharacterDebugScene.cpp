@@ -110,15 +110,15 @@ void CharacterDebugScene::InitializeCharacter(){
 	characterManager_->SetCameraManager(cameraManager_.get());
 	characterManager_->SetSpecialPointManager(specalPointManager_.get());
 
-	tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+	//tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	// ダミー敵生成
 	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 	// スモール敵生成
-	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
 	
 	// 必殺技
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
-	sp->SetStage(stage_.get());
+	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
+	//sp->SetStage(stage_.get());
 }
 // カメラ関係初期化
 void CharacterDebugScene::InitializeCamera(){

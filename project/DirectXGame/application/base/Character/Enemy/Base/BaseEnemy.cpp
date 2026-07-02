@@ -1,4 +1,4 @@
-#include "BaseEnemy.h"
+﻿#include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -230,6 +230,7 @@ namespace Character {
 
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
+		if (GetAttackController()->IsDebug()) return;
 
 		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う
 		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
@@ -248,7 +249,7 @@ namespace Character {
 		}
 		else if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this)) {
 			slotPos = crowdSlot->position;
-		}
+		}		
 
 		attackSystem_->Update(
 			GetTime(),
