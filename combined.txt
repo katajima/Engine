@@ -17229,6 +17229,15 @@ namespace Character {
 
 	void BaseCharacter::UpdateBaseGetValue() {}
 
+	// 攻撃リクエスト
+	bool BaseCharacter::RequestAttack(ActionInput input) {
+		auto* ac = GetAttackController();
+		if (ac && ac->GetComboSystem()) {
+			return ac->GetComboSystem()->RequestAttack(input);
+		}
+		return false;
+	}
+
 	// 名前取得
 	std::string BaseCharacter::GetName() const { return objectComponent_->GetName(); }
 
@@ -17299,11 +17308,12 @@ namespace Character {
 	const Engine::WorldTransform* BaseCharacter::GetConstWorldTransform() const { return &objectComponent_->GetWorldTransform(); };
 	// ワールド座標取得
 	Vector3 BaseCharacter::GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
-
+	// 入力をセット
 	void BaseCharacter::SetInputSystem(InputSystem* inputSystem){
 		this->inputSystem = inputSystem;
 		contextSystem_->SetInputSystem(inputSystem);
 	}
+	// カメラ設定
 	void BaseCharacter::SetCamera(Engine::Camera* camera){	this->camera = camera;	}
 }
 
@@ -17315,7 +17325,7 @@ File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.h
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
-
+#include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 
 class HitResponse;
 class HitMotionSystem;
@@ -17371,12 +17381,12 @@ namespace Character {
 		virtual void OnDodgeSuccess() {};
 		/// 回避成功後のコンボ受付中か
 		virtual bool IsDodgeSuccessComboWindow() const { return false; };
-		/// 攻撃(弱攻撃)
-		virtual void Attack() = 0;
+		// 攻撃(弱攻撃)
+		void Attack() { RequestAttack(ActionInput::LightAttack); };
 		/// 攻撃(強攻撃)
-		virtual void HeavyAttack() {};
-		/// 攻撃(スキル攻撃)
-		virtual void SkillAttack() {};
+		void HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
+		// 攻撃(スキル)
+		void SkillAttack() { RequestAttack(ActionInput::Skill); };
 		/// ステートマシーン初期化
 		virtual void InitStateMachine() {};
 		// リロード
@@ -17496,6 +17506,10 @@ namespace Character {
 		void InitializeBaseAddItem();
 		// 更新保存項目
 		void UpdateBaseGetValue();
+
+
+		// 攻撃要求
+		bool RequestAttack(ActionInput input);
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
@@ -22242,8 +22256,6 @@ namespace Character {
 		virtual void Move();
 		// ジャンプ
 		virtual void Jump(){};
-		// 攻撃
-		virtual void Attack(){};
 		// リロード
 		virtual void Reload() {};
 		// ターゲット取得
@@ -22749,8 +22761,6 @@ namespace Character {
 		void Move() override {};
 		// ジャンプ
 		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
@@ -23556,7 +23566,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemy.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallCartEnemyState.h"
 
@@ -23584,8 +23594,6 @@ namespace Character {
 		void Move() override;
 		// ジャンプ
 		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
@@ -23597,6 +23605,7 @@ namespace Character {
 		float moveSpeed_ = 1.0f;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemyState.cpp
@@ -25914,7 +25923,7 @@ bool Character::BasePlayer::GetIsSpecial() const { return special_->GetIsSpecial
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Base/BasePlayer.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/UI/PlayerUI.h"
 
@@ -25959,14 +25968,6 @@ namespace Character {
 		virtual void OnDodgeSuccess() override {};
 		// 回避成功後のコンボ受付中か
 		virtual bool IsDodgeSuccessComboWindow() const override { return false; };
-		// 攻撃(弱攻撃)
-		virtual void Attack() = 0;
-		// 攻撃(強攻撃)
-		virtual void HeavyAttack() {};
-		/// 攻撃(スキル攻撃)
-		virtual void SkillAttack() {};
-
-
 
 		// ターゲットキャラクターを設定
 		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
@@ -26192,7 +26193,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -26565,27 +26566,6 @@ namespace Character {
 #pragma endregion //移動関係
 
 #pragma region MyRegion
-
-	// 攻撃(弱攻撃)
-	void NormalPlayer::Attack() { RequestAttack(ActionInput::LightAttack); };
-
-	/// 攻撃(強攻撃)
-	void NormalPlayer::HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
-
-	// 攻撃(スキル)
-	void NormalPlayer::SkillAttack() {
-		// スキル攻撃もコンボ側で管理する
-		RequestAttack(ActionInput::Skill);
-	};
-
-	bool NormalPlayer::RequestAttack(ActionInput input) {
-		auto* ac = GetAttackController();
-		if (ac && ac->GetComboSystem()) {
-			return ac->GetComboSystem()->RequestAttack(input);
-		}
-		return false;
-	}
-
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
 		// コンボノードクリア
@@ -26664,16 +26644,6 @@ namespace Character {
 
 		// 回避成功後のコンボ受付中か
 		bool IsDodgeSuccessComboWindow() const override;
-
-		// 攻撃(弱攻撃)
-		void Attack() override;
-
-		/// 攻撃(強攻撃)
-		void HeavyAttack() override;
-
-		// 攻撃(スキル)
-		void SkillAttack() override;
-
 		// リロード
 		void Reload() override;
 
@@ -26687,10 +26657,6 @@ namespace Character {
 
 		// ロックオン入力とカメラの対象を同期
 		void UpdateLockOn();
-
-		// 攻撃要求
-		bool RequestAttack(ActionInput input);
-
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
@@ -38931,15 +38897,15 @@ void CharacterDebugScene::InitializeCharacter(){
 	characterManager_->SetCameraManager(cameraManager_.get());
 	characterManager_->SetSpecialPointManager(specalPointManager_.get());
 
-	//tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+	tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	// ダミー敵生成
 	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 	// スモール敵生成
-	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
+	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
 	
 	// 必殺技
-	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
-	//sp->SetStage(stage_.get());
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetCharacter(tagNumber)->GetSpecial());
+	sp->SetStage(stage_.get());
 }
 // カメラ関係初期化
 void CharacterDebugScene::InitializeCamera(){
