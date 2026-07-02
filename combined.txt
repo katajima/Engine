@@ -17193,7 +17193,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.cpp
 ============================================================
-#include "BaseCharacter.h"
+﻿#include "BaseCharacter.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
@@ -17299,6 +17299,12 @@ namespace Character {
 	const Engine::WorldTransform* BaseCharacter::GetConstWorldTransform() const { return &objectComponent_->GetWorldTransform(); };
 	// ワールド座標取得
 	Vector3 BaseCharacter::GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
+
+	void BaseCharacter::SetInputSystem(InputSystem* inputSystem){
+		this->inputSystem = inputSystem;
+		contextSystem_->SetInputSystem(inputSystem);
+	}
+	void BaseCharacter::SetCamera(Engine::Camera* camera){	this->camera = camera;	}
 }
 
 
@@ -17445,8 +17451,12 @@ namespace Character {
 		SpecalPointManager* GetSpecalPointManager() { return this->specalPointManager; }
 		// 入力システム取得
 		InputSystem* GetInputSystem() { return inputSystem; };
+		// 入力システム設定
+		void SetInputSystem(InputSystem* inputSystem);
 		// カメラ取得
 		Engine::Camera* GetCamera() const { return camera; }
+		// カメラ設定
+		void SetCamera(Engine::Camera* camera);
 		//エフェクト設定
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		//
@@ -17547,7 +17557,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.cpp
 ============================================================
-#include "CharacterContext.h"
+﻿#include "CharacterContext.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"
@@ -17661,6 +17671,9 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 	default:
 		break;
 	}
+
+	// デバッグ中か
+	ctx.isDebug = owner->GetAttackController()->IsDebug();
 }
 
 // 重力処理
@@ -17751,7 +17764,7 @@ void Character::CharacterContextSystem::CreateContextInput(BaseCharacter* owner,
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
 #include "DirectXGame/application/base/Character/State/MainState.h"
@@ -17859,6 +17872,9 @@ namespace Character {
 		Vector3 moveTarget{};
 		// moveTargetを使うか
 		bool hasMoveTarget = false;
+
+		// デバッグ用
+		bool isDebug = false;
 	};
 
 	/// <summary>
@@ -17870,6 +17886,10 @@ namespace Character {
 		// 初期化
 		void Initialize(BaseCharacter* owner, const InputSystem* input);
 
+		// 入力システム設定
+		void SetInputSystem(const InputSystem* input) { this->input = input; }
+
+		// コンテキスト生成
 		CharacterContext CreateContext(BaseCharacter* owner, float dt);
 	private:
 
@@ -18180,6 +18200,7 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/engine/Math/Random.h>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,
@@ -18250,7 +18271,7 @@ namespace Character {
 
 				if (enemy->GetAlive() && !enemy->IsWaveExiting()) {
 					debugEnemies.push_back(enemy);
-					if (hasEnemyTarget) {
+					if (hasEnemyTarget || enemy->GetAttackController()->IsDebug()) {
 						// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
 						enemy->SetTargetCharacters(player);
 						target.push_back(enemy);
@@ -22074,6 +22095,8 @@ namespace Character {
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 		// 移動コンポーネント更新
+		if (ctx.isDebug) moveComponent_->SetControlType(MovementComponent::ControlType::Manual); 
+		else moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 		moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(), ctx);
 
 		// コライダのワールドトランスフォーム更新
@@ -22115,8 +22138,9 @@ namespace Character {
 
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
-		if (GetAttackController()->IsDebug()) return;
-
+		if (GetAttackController()->IsDebug()) {
+			return;
+		}
 		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う
 		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
 
@@ -25589,7 +25613,7 @@ struct MoveData
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Move/Move/MoveSystem.cpp
 ============================================================
-#include "MoveSystem.h"
+﻿#include "MoveSystem.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
 void MoveSystem::Initialize() {}
@@ -25646,10 +25670,7 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 
 void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	// 攻撃中は通常移動しない
-	if (ctx.isAttacking) {
-		return;
-	}
-
+	if (ctx.isAttacking) return;
 	MoveRequest request{};
 
 	// =========================
@@ -39108,7 +39129,7 @@ void CharacterDebugScene::CheckAllCollisions() {
 	collisionManager_->ClearDynamic();
 }
 
-void CharacterDebugScene::SetDebugTarget(uint32_t tag){
+void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 	// デバック対象設定
 	debugTarget = characterManager_->GetCharacter(tag);
 	// 追従カメラtarget設定
@@ -39119,6 +39140,10 @@ void CharacterDebugScene::SetDebugTarget(uint32_t tag){
 	comboEditor_->SetOwner(debugTarget);
 	// ターゲット設定
 	projectileDebug_->SetTarget(debugTarget);
+	// 入力システム設定
+	debugTarget->SetInputSystem(inputSystem_.get());
+	// カメラ管理取得
+	debugTarget->SetCamera(cameraManager_->GetCamera());
 }
 
 
