@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/UI/PlayerUI.h"
 
@@ -43,14 +43,6 @@ namespace Character {
 		virtual void OnDodgeSuccess() override {};
 		// 回避成功後のコンボ受付中か
 		virtual bool IsDodgeSuccessComboWindow() const override { return false; };
-		// 攻撃(弱攻撃)
-		virtual void Attack() = 0;
-		// 攻撃(強攻撃)
-		virtual void HeavyAttack() {};
-		/// 攻撃(スキル攻撃)
-		virtual void SkillAttack() {};
-
-
 
 		// ターゲットキャラクターを設定
 		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }

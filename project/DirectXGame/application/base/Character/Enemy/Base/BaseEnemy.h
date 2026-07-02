@@ -37,8 +37,6 @@ namespace Character {
 		virtual void Move();
 		// ジャンプ
 		virtual void Jump(){};
-		// 攻撃
-		virtual void Attack(){};
 		// リロード
 		virtual void Reload() {};
 		// ターゲット取得

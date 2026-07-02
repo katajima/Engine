@@ -34,6 +34,15 @@ namespace Character {
 
 	void BaseCharacter::UpdateBaseGetValue() {}
 
+	// 攻撃リクエスト
+	bool BaseCharacter::RequestAttack(ActionInput input) {
+		auto* ac = GetAttackController();
+		if (ac && ac->GetComboSystem()) {
+			return ac->GetComboSystem()->RequestAttack(input);
+		}
+		return false;
+	}
+
 	// 名前取得
 	std::string BaseCharacter::GetName() const { return objectComponent_->GetName(); }
 
@@ -104,10 +113,11 @@ namespace Character {
 	const Engine::WorldTransform* BaseCharacter::GetConstWorldTransform() const { return &objectComponent_->GetWorldTransform(); };
 	// ワールド座標取得
 	Vector3 BaseCharacter::GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
-
+	// 入力をセット
 	void BaseCharacter::SetInputSystem(InputSystem* inputSystem){
 		this->inputSystem = inputSystem;
 		contextSystem_->SetInputSystem(inputSystem);
 	}
+	// カメラ設定
 	void BaseCharacter::SetCamera(Engine::Camera* camera){	this->camera = camera;	}
 }

@@ -53,16 +53,6 @@ namespace Character {
 
 		// 回避成功後のコンボ受付中か
 		bool IsDodgeSuccessComboWindow() const override;
-
-		// 攻撃(弱攻撃)
-		void Attack() override;
-
-		/// 攻撃(強攻撃)
-		void HeavyAttack() override;
-
-		// 攻撃(スキル)
-		void SkillAttack() override;
-
 		// リロード
 		void Reload() override;
 
@@ -76,10 +66,6 @@ namespace Character {
 
 		// ロックオン入力とカメラの対象を同期
 		void UpdateLockOn();
-
-		// 攻撃要求
-		bool RequestAttack(ActionInput input);
-
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;

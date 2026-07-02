@@ -2,7 +2,7 @@
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
-
+#include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 
 class HitResponse;
 class HitMotionSystem;
@@ -58,12 +58,12 @@ namespace Character {
 		virtual void OnDodgeSuccess() {};
 		/// 回避成功後のコンボ受付中か
 		virtual bool IsDodgeSuccessComboWindow() const { return false; };
-		/// 攻撃(弱攻撃)
-		virtual void Attack() = 0;
+		// 攻撃(弱攻撃)
+		void Attack() { RequestAttack(ActionInput::LightAttack); };
 		/// 攻撃(強攻撃)
-		virtual void HeavyAttack() {};
-		/// 攻撃(スキル攻撃)
-		virtual void SkillAttack() {};
+		void HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
+		// 攻撃(スキル)
+		void SkillAttack() { RequestAttack(ActionInput::Skill); };
 		/// ステートマシーン初期化
 		virtual void InitStateMachine() {};
 		// リロード
@@ -183,6 +183,10 @@ namespace Character {
 		void InitializeBaseAddItem();
 		// 更新保存項目
 		void UpdateBaseGetValue();
+
+
+		// 攻撃要求
+		bool RequestAttack(ActionInput input);
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;

@@ -1,4 +1,4 @@
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -371,27 +371,6 @@ namespace Character {
 #pragma endregion //移動関係
 
 #pragma region MyRegion
-
-	// 攻撃(弱攻撃)
-	void NormalPlayer::Attack() { RequestAttack(ActionInput::LightAttack); };
-
-	/// 攻撃(強攻撃)
-	void NormalPlayer::HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
-
-	// 攻撃(スキル)
-	void NormalPlayer::SkillAttack() {
-		// スキル攻撃もコンボ側で管理する
-		RequestAttack(ActionInput::Skill);
-	};
-
-	bool NormalPlayer::RequestAttack(ActionInput input) {
-		auto* ac = GetAttackController();
-		if (ac && ac->GetComboSystem()) {
-			return ac->GetComboSystem()->RequestAttack(input);
-		}
-		return false;
-	}
-
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
 		// コンボノードクリア

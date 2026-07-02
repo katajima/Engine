@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallCartEnemyState.h"
 
@@ -26,8 +26,6 @@ namespace Character {
 		void Move() override;
 		// ジャンプ
 		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
