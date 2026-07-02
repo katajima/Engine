@@ -1886,7 +1886,7 @@ void AttackController::Update(const Character::CharacterContext& ctx) {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/AttackController.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <DirectXGame/application/base/Attack/Hit/HitCounter.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
@@ -1935,6 +1935,9 @@ public:
 public:
 	// デバッグ中か設定
 	void SetIsDebug(bool isDebug) { isDebugEditor_ = isDebug; };
+
+	// デバッグ中か取得
+	bool IsDebug() const { return isDebugEditor_; };
 
 private:
 	// 攻撃ヒットカウンター
@@ -21880,7 +21883,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.cpp
 ============================================================
-#include "BaseEnemy.h"
+﻿#include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -22112,6 +22115,7 @@ namespace Character {
 
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
+		if (GetAttackController()->IsDebug()) return;
 
 		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う
 		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
@@ -22130,7 +22134,7 @@ namespace Character {
 		}
 		else if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this)) {
 			slotPos = crowdSlot->position;
-		}
+		}		
 
 		attackSystem_->Update(
 			GetTime(),
@@ -38906,15 +38910,15 @@ void CharacterDebugScene::InitializeCharacter(){
 	characterManager_->SetCameraManager(cameraManager_.get());
 	characterManager_->SetSpecialPointManager(specalPointManager_.get());
 
-	tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
+	//tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	// ダミー敵生成
 	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 	// スモール敵生成
-	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
 	
 	// 必殺技
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
-	sp->SetStage(stage_.get());
+	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
+	//sp->SetStage(stage_.get());
 }
 // カメラ関係初期化
 void CharacterDebugScene::InitializeCamera(){
