@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
 #include "DirectXGame/application/base/Character/State/MainState.h"
@@ -106,6 +106,9 @@ namespace Character {
 		Vector3 moveTarget{};
 		// moveTargetを使うか
 		bool hasMoveTarget = false;
+
+		// デバッグ用
+		bool isDebug = false;
 	};
 
 	/// <summary>

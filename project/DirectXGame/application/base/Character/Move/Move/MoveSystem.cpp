@@ -1,4 +1,4 @@
-#include "MoveSystem.h"
+﻿#include "MoveSystem.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
 void MoveSystem::Initialize() {}
@@ -54,11 +54,15 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 }
 
 void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
-	// 攻撃中は通常移動しない
-	if (ctx.isAttacking) {
+	// デバッグ中はこっちの処理を使う
+	if (ctx.isDebug) {
+		Update(ctx,coordinator);
 		return;
 	}
 
+
+	// 攻撃中は通常移動しない
+	if (ctx.isAttacking) return;
 	MoveRequest request{};
 
 	// =========================

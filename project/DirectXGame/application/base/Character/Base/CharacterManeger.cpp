@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/engine/Math/Random.h>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,
@@ -75,7 +76,7 @@ namespace Character {
 
 				if (enemy->GetAlive() && !enemy->IsWaveExiting()) {
 					debugEnemies.push_back(enemy);
-					if (hasEnemyTarget) {
+					if (hasEnemyTarget || enemy->GetAttackController()->IsDebug()) {
 						// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
 						enemy->SetTargetCharacters(player);
 						target.push_back(enemy);

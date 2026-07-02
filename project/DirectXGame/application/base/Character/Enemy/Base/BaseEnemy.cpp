@@ -230,8 +230,10 @@ namespace Character {
 
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
-		if (GetAttackController()->IsDebug()) return;
-
+		if (GetAttackController()->IsDebug()) {
+		
+			return;
+		}
 		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う
 		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
 
