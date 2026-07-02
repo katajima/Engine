@@ -1,4 +1,4 @@
-#include "BaseCharacter.h"
+﻿#include "BaseCharacter.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
@@ -104,4 +104,10 @@ namespace Character {
 	const Engine::WorldTransform* BaseCharacter::GetConstWorldTransform() const { return &objectComponent_->GetWorldTransform(); };
 	// ワールド座標取得
 	Vector3 BaseCharacter::GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
+
+	void BaseCharacter::SetInputSystem(InputSystem* inputSystem){
+		this->inputSystem = inputSystem;
+		contextSystem_->SetInputSystem(inputSystem);
+	}
+	void BaseCharacter::SetCamera(Engine::Camera* camera){	this->camera = camera;	}
 }

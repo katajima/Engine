@@ -54,13 +54,6 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 }
 
 void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
-	// デバッグ中はこっちの処理を使う
-	if (ctx.isDebug) {
-		Update(ctx,coordinator);
-		return;
-	}
-
-
 	// 攻撃中は通常移動しない
 	if (ctx.isAttacking) return;
 	MoveRequest request{};

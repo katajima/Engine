@@ -189,6 +189,8 @@ namespace Character {
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 		// 移動コンポーネント更新
+		if (ctx.isDebug) moveComponent_->SetControlType(MovementComponent::ControlType::Manual); 
+		else moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 		moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(), ctx);
 
 		// コライダのワールドトランスフォーム更新
@@ -231,7 +233,6 @@ namespace Character {
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
 		if (GetAttackController()->IsDebug()) {
-		
 			return;
 		}
 		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う

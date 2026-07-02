@@ -120,6 +120,10 @@ namespace Character {
 		// 初期化
 		void Initialize(BaseCharacter* owner, const InputSystem* input);
 
+		// 入力システム設定
+		void SetInputSystem(const InputSystem* input) { this->input = input; }
+
+		// コンテキスト生成
 		CharacterContext CreateContext(BaseCharacter* owner, float dt);
 	private:
 

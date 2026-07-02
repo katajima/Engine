@@ -138,8 +138,12 @@ namespace Character {
 		SpecalPointManager* GetSpecalPointManager() { return this->specalPointManager; }
 		// 入力システム取得
 		InputSystem* GetInputSystem() { return inputSystem; };
+		// 入力システム設定
+		void SetInputSystem(InputSystem* inputSystem);
 		// カメラ取得
 		Engine::Camera* GetCamera() const { return camera; }
+		// カメラ設定
+		void SetCamera(Engine::Camera* camera);
 		//エフェクト設定
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		//

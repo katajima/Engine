@@ -308,7 +308,7 @@ void CharacterDebugScene::CheckAllCollisions() {
 	collisionManager_->ClearDynamic();
 }
 
-void CharacterDebugScene::SetDebugTarget(uint32_t tag){
+void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 	// デバック対象設定
 	debugTarget = characterManager_->GetCharacter(tag);
 	// 追従カメラtarget設定
@@ -319,5 +319,9 @@ void CharacterDebugScene::SetDebugTarget(uint32_t tag){
 	comboEditor_->SetOwner(debugTarget);
 	// ターゲット設定
 	projectileDebug_->SetTarget(debugTarget);
+	// 入力システム設定
+	debugTarget->SetInputSystem(inputSystem_.get());
+	// カメラ管理取得
+	debugTarget->SetCamera(cameraManager_->GetCamera());
 }
 
