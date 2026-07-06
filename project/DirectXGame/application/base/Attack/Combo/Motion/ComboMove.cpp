@@ -1,4 +1,4 @@
-#include "ComboMove.h"
+﻿#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -38,7 +38,11 @@ namespace Combo {
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 		moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
+		
+		// カメラ取得
+		if(owner->GetCameraManager())
 		camera = owner->GetCameraManager()->GetCamera();
+
 		// 設定が有効なコンボだけ、攻撃へ入る直前の通常移動速度を水平慣性として保持する
 		moveInertiaVelocity_ = data_.inheritMoveInertia ? moveComponent->GetVelocity() : Vector3{};
 		moveInertiaVelocity_.y = 0.0f;

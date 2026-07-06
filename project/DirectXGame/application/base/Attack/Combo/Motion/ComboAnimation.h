@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 // 前方宣言
@@ -45,8 +45,11 @@ namespace Combo {
 		const MovementComponent* movementComponent = nullptr;
 		// 終了条件
 		EndConditionType endType = EndConditionType::kOnTimer;
-		//
+		// 着地しているか
 		bool onGlound = true;
+		// アニメーションが存在しているか
+		bool isAnimation = false;
+
 	};
 
 
