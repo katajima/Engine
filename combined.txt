@@ -8655,37 +8655,16 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cpp
 ============================================================
-﻿#include "ComboMove.h"
+#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/engine/Math/MathFunctions.h"
 #include <algorithm>
 #include <cmath>
-
-namespace {
-
-	Vector3 NormalizeSafe(const Vector3& v, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }) {
-		if (v.Length() <= 0.0001f) {
-			return fallback;
-		}
-		return v.Normalize();
-	}
-
-	// X=Right Y=Up Z=Forward
-	// Up(0,1,0) と Forward から Right を作る
-	Vector3 MakeRightFromForward(const Vector3& forward) {
-		Vector3 f = forward;
-		f.y = 0.0f;
-		f = NormalizeSafe(f, Vector3{ 0.0f,0.0f,1.0f });
-
-		// right = cross(up, forward)
-		// up=(0,1,0), forward=(fx,fy,fz) -> (fz,0,-fx)
-		return NormalizeSafe(Vector3{ f.z, 0.0f, -f.x }, Vector3{ 1.0f,0.0f,0.0f });
-	}
-}
 
 namespace Combo {
 
@@ -8847,7 +8826,7 @@ namespace Combo {
 		case MoveType::kInput: // 入力方向
 		{
 			if (stickDirection_.Length() != 0.0f) {
-				direction_ = NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
+				direction_ = Math::NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
 			}
 			else {
 				direction_ = {};
@@ -8857,7 +8836,7 @@ namespace Combo {
 
 		case MoveType::kForward: // 所有者の向いている方向
 		{
-			direction_ = NormalizeSafe(moveComponent->GetDirection());
+			direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 			break;
 		}
 
@@ -8870,14 +8849,14 @@ namespace Combo {
 					direction_.y = 0.0f;
 				}
 
-				direction_ = NormalizeSafe(direction_, NormalizeSafe(moveComponent->GetDirection()));
+				direction_ = Math::NormalizeSafe(direction_, Math::NormalizeSafe(moveComponent->GetDirection()));
 			}
 			else {
 				if (stickDirection_.Length() != 0.0f) {
-					direction_ = NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
+					direction_ = Math::NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
 				}
 				else {
-					direction_ = NormalizeSafe(moveComponent->GetDirection());
+					direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 				}
 			}
 			break;
@@ -8887,13 +8866,13 @@ namespace Combo {
 		{
 			// 今のコードベースだと camera の forward 取得関数が見えないので
 			// 既存挙動を維持して所有者前方を使う
-			direction_ = NormalizeSafe(moveComponent->GetDirection());
+			direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 			break;
 		}
 
 		default:
 		{
-			direction_ = NormalizeSafe(moveComponent->GetDirection());
+			direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 			break;
 		}
 		}
@@ -8907,7 +8886,7 @@ namespace Combo {
 			return {};
 		}
 
-		baseForward = NormalizeSafe(baseForward, Vector3{ 0.0f,0.0f,1.0f });
+		baseForward = Math::NormalizeSafe(baseForward, Vector3{ 0.0f,0.0f,1.0f });
 
 		// ローカル入力
 		Vector3 local = GetActiveLocalMoveVector();
@@ -8917,7 +8896,7 @@ namespace Combo {
 
 		// 基底
 		const Vector3 up = Vector3{ 0.0f,1.0f,0.0f };
-		const Vector3 right = MakeRightFromForward(baseForward);
+		const Vector3 right = Math::MakeRightFromForwardXZ(baseForward);
 
 		// ★ここが重要（速度を掛ける）
 		const Vector3 moveSpeed = GetActiveMoveSpeed();
@@ -8938,7 +8917,7 @@ namespace Combo {
 			toTarget.y = 0.0f;
 		}
 
-		Vector3 toTargetDir = NormalizeSafe(toTarget, NormalizeSafe(moveComponent->GetDirection()));
+		Vector3 toTargetDir = Math::NormalizeSafe(toTarget, Math::NormalizeSafe(moveComponent->GetDirection()));
 		return targetPos - toTargetDir * GetActiveMoveTargetRadius();
 	}
 
@@ -10516,6 +10495,7 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
 
@@ -10704,12 +10684,12 @@ float HitMotionSystem::GetGravityScale() const {
 
 // 速度
 Vector3 HitMotionSystem::BuildMoveVelocity() const {
-	Vector3 dir = NormalizeSafe(data_.normal);
+	Vector3 dir = Math::NormalizeSafe(data_.normal);
 
 	// 基本は地面に沿う方向で使う
 	Vector3 horizontalDir = dir;
 	horizontalDir.y = 0.0f;
-	horizontalDir = NormalizeSafe(horizontalDir);
+	horizontalDir = Math::NormalizeSafe(horizontalDir);
 
 	Vector3 velocity{};
 
@@ -10770,15 +10750,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const {
 	return velocity;
 }
 
-// 
-Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const {
-	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
-	if (lenSq <= 0.000001f) {
-		return Vector3{ 0.0f, 0.0f, 1.0f };
-	}
-	return v.Normalize();
-}
-
 // 移動リクエスト
 void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	if (!moveRequestSystem) {
@@ -10789,7 +10760,7 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	request.layer = MoveLayer::kBase;
 	request.speedMultiplier = 1.0f;
 	request.velocity = velocity;
-	request.direction = NormalizeSafe(data_.normal);
+	request.direction = Math::NormalizeSafe(data_.normal);
 	request.priority = 100;
 	request.invincible = false;
 	request.isLanding = false;
@@ -10929,8 +10900,6 @@ private:
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
-	// 方向指定
-	Vector3 NormalizeSafe(const Vector3& v) const;
 	// 移動システムにリクエストする
 	void SendReactionMoveRequest(const Vector3& velocity);
 	// リアクション終了
@@ -32506,7 +32475,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Input/InputManager.cpp
 ============================================================
 #include "InputManager.h"
-#include <cmath>
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 
 
@@ -32558,7 +32527,7 @@ void InputManager::BuildGameplayActions(){
     move.x += ls.x;
     move.y += ls.y;
 
-    move = ClampLen1(move);
+    move = Math::ClampLength(move);
     value2_[Idx(Action::Move)] = move;
     pressed_[Idx(Action::Move)] = move.x != 0.0f || move.y != 0.0f;
     triggered_[Idx(Action::Move)] = pressed_[Idx(Action::Move)] && !isDown_[Idx(Action::Move)];
@@ -32575,7 +32544,7 @@ void InputManager::BuildGameplayActions(){
         look.x += mouseDelta.x * 0.05f;
         look.y -= mouseDelta.y * 0.05f;
     }
-    look = ClampLen1(look);
+    look = Math::ClampLength(look);
     value2_[Idx(Action::Look)] = look;
     pressed_[Idx(Action::Look)] = look.x != 0.0f || look.y != 0.0f;
     triggered_[Idx(Action::Look)] = pressed_[Idx(Action::Look)] && !isDown_[Idx(Action::Look)];
@@ -32682,16 +32651,6 @@ void InputManager::BuildGameplayActions(){
 }
 
 void InputManager::BuildUIActions(){
-}
-
-Vector2 InputManager::ClampLen1(const Vector2& v){
-    const float lenSq = v.x * v.x + v.y * v.y;
-    if (lenSq <= 1.0f) return v;
-
-    const float len = std::sqrt(lenSq);
-    if (len <= 1e-6f) return Vector2{ 0,0 };
-
-    return Vector2{ v.x / len, v.y / len };
 }
 
 void InputManager::RecordBufferedEvents(){
@@ -32860,7 +32819,6 @@ private:
 	void BuildUIActions(); // 必要なら
 
 	// 入力合成ユーティリティ
-	static Vector2 ClampLen1(const Vector2& v);
 
 
 	void RecordBufferedEvents();
@@ -32923,24 +32881,7 @@ private:
 File Path: project/DirectXGame/application/base/Input/InputSystem.cpp
 ============================================================
 #include "InputSystem.h"
-#include <cmath>
-
-namespace {
-	// ベクトルの長さを1以下にして斜め入力だけ速くならないようにする
-	Vector2 ClampLen1(const Vector2& value) {
-		const float lengthSq = value.x * value.x + value.y * value.y;
-		if (lengthSq <= 1.0f) {
-			return value;
-		}
-
-		const float length = std::sqrt(lengthSq);
-		if (length <= 1e-6f) {
-			return Vector2{};
-		}
-
-		return Vector2{ value.x / length, value.y / length };
-	}
-}
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 void InputSystem::Initialize(Engine::Input* input) {
 	this->input = input;
@@ -32968,7 +32909,7 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	Vector2 moveStick = input->GetGamePadLeftStick();
 	moveStick.x += keyboardMove.x;
 	moveStick.y += keyboardMove.y;
-	playerInputData_.moveShick = ClampLen1(moveStick);
+	playerInputData_.moveShick = Math::ClampLength(moveStick);
 
 	// キーボード視点入力を作成
 	Vector2 keyboardLook{};
@@ -32989,7 +32930,7 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	Vector2 lookStick = input->GetGamePadRightStick();
 	lookStick.x += keyboardLook.x + mouseLook.x;
 	lookStick.y += keyboardLook.y + mouseLook.y;
-	playerInputData_.lookStick = ClampLen1(lookStick);
+	playerInputData_.lookStick = Math::ClampLength(lookStick);
 
 	// ジャンプ入力押している間
 	playerInputData_.jumpPressed =
@@ -33037,7 +32978,7 @@ void InputSystem::GameInputUpdate(float dt) {
 	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
 	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
 	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
-	gameInputData_.moveShick = ClampLen1(gameMove);
+	gameInputData_.moveShick = Math::ClampLength(gameMove);
 	// 決定入力押した瞬間
 	gameInputData_.decisionTrigger =
 		input->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
@@ -63005,19 +62946,11 @@ File Path: project/DirectXGame/engine/Effect/Particle/Emit/ParticleEmitter.cpp
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "DirectXGame/engine/Math/Random.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 namespace {
 	constexpr float kEmitterEpsilon = 0.0001f;
 	constexpr float kTwoPi = 6.28318530718f;
-
-	Vector3 SafeNormalize(const Vector3& value, const Vector3& fallback = { 0.0f,1.0f,0.0f })
-	{
-		// ゼロベクトルを方向として使わないように保険をかける
-		if (value.LengthSq() <= kEmitterEpsilon * kEmitterEpsilon) {
-			return fallback;
-		}
-		return value.Normalize();
-	}
 
 	float Random01(std::mt19937& randomEngine)
 	{
@@ -63051,9 +62984,9 @@ namespace {
 		switch (directionType)
 		{
 		case EmitData::DirectionType::kNormal:
-			return SafeNormalize(normal) * ResolveDirectionSpeed(emitData, randomEngine);
+			return Math::NormalizeSafe(normal, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon) * ResolveDirectionSpeed(emitData, randomEngine);
 		case EmitData::DirectionType::kInverse:
-			return SafeNormalize(centerPos - emitPos, -SafeNormalize(normal)) * ResolveDirectionSpeed(emitData, randomEngine);
+			return Math::NormalizeSafe(centerPos - emitPos, -Math::NormalizeSafe(normal, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon), kEmitterEpsilon) * ResolveDirectionSpeed(emitData, randomEngine);
 		case EmitData::DirectionType::kFixed:
 			return emitData.velocity.median;
 		case EmitData::DirectionType::kNone:
@@ -63164,7 +63097,7 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 	if (emitType_ == EmitData::EmitType::kRandom) {	// ランダム
 		const Vector3 localPos = Random::RandVector3(range_, particleManager->GetRandomEngine());
 		pos = centerPos + localPos;
-		normal = SafeNormalize(localPos);
+		normal = Math::NormalizeSafe(localPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon);
 	}
 	else if (emitType_ == EmitData::EmitType::kSurface) { // 表面
 		// AABBの最小・最大座標
@@ -63247,7 +63180,7 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 		const Vector3 localPos = Lerp(p0, p1, t);
 
 		pos = centerPos + localPos;
-		normal = SafeNormalize(localPos);
+		normal = Math::NormalizeSafe(localPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon);
 	}
 
 	CreateShapeParticle(particleGroup, emitData_, directionType_, particleManager->GetRandomEngine(), pos, centerPos, normal);
@@ -63398,7 +63331,7 @@ void Engine::CornerParticleEmitter::EmitUniqe() {
 	const Vector3 rotatedPos = rotationMatrix.Transform(localPos);
 	const Vector3 pos = centerPos + rotatedPos;
 	const Vector3 normal = emitType_ == EmitData::EmitType::kEdge
-		? SafeNormalize(rotatedPos)
+		? Math::NormalizeSafe(rotatedPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon)
 		: rotationMatrix.Transform({ 0.0f,1.0f,0.0f }).Normalize();
 	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
@@ -63586,7 +63519,7 @@ void Engine::TriangleParticleEmitter::EmitUniqe() {
 	Vector3 pos = centerPos + localPos;
 	Vector3 normal = triangle_.GetNormal();
 	if (emitType_ == EmitData::EmitType::kEdge) {
-		normal = SafeNormalize(localPos - triangle_.GetCentroid(), normal);
+		normal = Math::NormalizeSafe(localPos - triangle_.GetCentroid(), normal, kEmitterEpsilon);
 	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
@@ -63650,7 +63583,7 @@ void Engine::MeshParticleEmitter::EmitUniqe() {
 	Vector3 pos = centerPos + localPos;
 	Vector3 normal = tri.GetNormal();
 	if (emitType_ == EmitData::EmitType::kEdge) {
-		normal = SafeNormalize(localPos - tri.GetCentroid(), normal);
+		normal = Math::NormalizeSafe(localPos - tri.GetCentroid(), normal, kEmitterEpsilon);
 	}
 
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
@@ -72862,6 +72795,48 @@ float Math::NormalizeClamp(float value, float minValue, float maxValue)
 	float t = (value - minValue) / (maxValue - minValue);
 	return Math::Clamp(t,0.0f, 1.0f);
 }
+
+Vector2 Math::ClampLength(const Vector2& value, float maxLength) {
+	// 負の最大長は扱えないため、0以上へ補正する。
+	const float clampedMaxLength = (std::max)(maxLength, 0.0f);
+	const float lengthSquared = Dot(value, value);
+	const float maxLengthSquared = clampedMaxLength * clampedMaxLength;
+	if (lengthSquared <= maxLengthSquared) {
+		return value;
+	}
+
+	// ゼロ除算を避けつつ、指定された最大長まで縮小する。
+	const float length = std::sqrt(lengthSquared);
+	if (length <= 0.000001f) {
+		return Vector2{};
+	}
+	return value * (clampedMaxLength / length);
+}
+
+Vector3 Math::NormalizeSafe(const Vector3& value, const Vector3& fallback, float epsilon) {
+	// 許容値以下のベクトルは方向を持たないため、指定方向を返す。
+	const float safeEpsilon = (std::max)(epsilon, 0.0f);
+	if (value.LengthSq() <= safeEpsilon * safeEpsilon) {
+		return fallback;
+	}
+	return value.Normalize();
+}
+
+Vector3 Math::MakeRightFromForwardXZ(const Vector3& forward) {
+	// 高さ成分を除外し、XZ平面上の前方向へ揃える。
+	Vector3 horizontalForward = forward;
+	horizontalForward.y = 0.0f;
+	horizontalForward = NormalizeSafe(horizontalForward, Vector3{ 0.0f,0.0f,1.0f });
+
+	// 上方向と前方向の外積に相当する右方向を生成する。
+	return NormalizeSafe(Vector3{ horizontalForward.z, 0.0f, -horizontalForward.x }, Vector3{ 1.0f,0.0f,0.0f });
+}
+
+Vector2 Math::TransformPointToLocal(const Vector2& worldPosition, const Matrix3x3& worldMatrix) {
+	// ワールド行列の逆行列で座標を変換し、ローカル位置を求める。
+	const Matrix3x3 inverseWorldMatrix = Inverse(worldMatrix);
+	return Transforms(worldPosition, inverseWorldMatrix);
+}
 // 反射
 Vector3 Math::Reflect(const Vector3& input, const Vector3& normal)
 {
@@ -73263,6 +73238,14 @@ namespace Math {
 	float Clamp(float t, float min, float max);
 	// 正規化クランプ
 	float NormalizeClamp(float value, float minValue, float maxValue);
+	// 最大長を超えないように2Dベクトルを制限
+	Vector2 ClampLength(const Vector2& value, float maxLength = 1.0f);
+	// ゼロに近い3Dベクトルをフォールバック方向で安全に正規化
+	Vector3 NormalizeSafe(const Vector3& value, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }, float epsilon = 0.0001f);
+	// XZ平面の前方向から右方向を生成
+	Vector3 MakeRightFromForwardXZ(const Vector3& forward);
+	// 2Dワールド行列を使って座標をローカル空間へ変換
+	Vector2 TransformPointToLocal(const Vector2& worldPosition, const Matrix3x3& worldMatrix);
 
 	// 反射関数
 	Vector3 Reflect(const Vector3& input, const Vector3& normal);
@@ -79100,12 +79083,7 @@ File Path: project/DirectXGame/engine/UI/UIElement.cpp
 ============================================================
 #include "UIElement.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-
-
-static Vector2 ToLocalSpace(const Vector2& worldPos, const Engine::WorldTransform2d& parentTransform) {
-	Matrix3x3 invMat = Inverse(parentTransform.worldMat_);
-	return Transforms(worldPos, invMat);
-}
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 void Engine::UIElement::Init(EntityManager* entityManager, std::string name)
 {
@@ -79326,7 +79304,7 @@ void Engine::UISlider::Update(float deltaTime) {
 		float rightLimit = size.x - rightHalf *2;
 
 		// マウス座標を背景スプライトのローカル座標に変換
-		Vector2 localMousePos = ToLocalSpace(mouse, backgroundSprite->GetSprite()->GetWorldTransform2d());
+		Vector2 localMousePos = Math::TransformPointToLocal(mouse, backgroundSprite->GetSprite()->GetWorldTransform2d().worldMat_);
 		float mouseX = localMousePos.x;
 
 
