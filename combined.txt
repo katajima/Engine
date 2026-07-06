@@ -510,7 +510,8 @@
     └──     └──     └── UVAnimationComponent.h
     └──     ├── Audio/
     └──     └── ├── Audio.cpp
-    └──     └── └── Audio.h
+    └──     └── ├── Audio.h
+    └──     └── └── AudioData.h
     └──     ├── Base/
     └──     └── ├── Editor/
     └──     └── └── └── Editor.h
@@ -1859,7 +1860,8 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 
 	// コンボシステムの初期化
 	comboSystem_ = std::make_unique<Combo::System>();
-	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables);
+	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables,
+		entityManager->GetAudioManager());
 
 	// ロックオンシステム初期化
 	lockOnSystem_ = std::make_unique<LockOnSystem>();
@@ -2339,9 +2341,6 @@ struct HitReactionData {
 	int hitPriority = 0;
 	// カメラシェイク量
 	float cameraShakePower = 0.0f;
-	// ヒット音
-	std::string hitSoundName = "";
-
 	// リアクション移動の有効時間
 	float duration = 0.25f;
 	// 行動不能時間
@@ -2366,7 +2365,7 @@ struct HitReactionData {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.cpp
 ============================================================
-﻿#include "ComboData.h"
+#include "ComboData.h"
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
@@ -2397,6 +2396,8 @@ namespace Combo {
 		}
 		// コンボ用エフェクトクラス開始
 		effect.Enter(owner);
+		// コンボ用オーディオクラス開始
+		audio.Enter(owner);
 	}
 
 	// 更新
@@ -2425,6 +2426,8 @@ namespace Combo {
 		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
 		effect.Update(ctx, timer_, ctx.dt);
+		// 指定された攻撃タイミングの音を更新する
+		audio.Update(ctx, timer_, ctx.dt);
 	}
 
 	// 終了
@@ -2446,6 +2449,8 @@ namespace Combo {
 		camera.Exit();
 		// コンボ用エフェクトクラス終了
 		effect.Exit(owner);
+		// コンボ終了タイミングの音を再生して状態を破棄する
+		audio.Exit(owner);
 	}
 
 #pragma endregion // コンボデータ
@@ -2688,7 +2693,17 @@ namespace Combo {
 		// 攻撃演出の追加フック。
 		float hitPauseScale = 1.0f;
 		float cameraShakePower = 0.0f;
-		std::string soundName = "";
+	};
+
+	// コンボノード内で再生する音を一か所にまとめた保存用データ。
+	struct GlobalAudio {
+		std::string attackSoundName = ""; // 攻撃動作中に指定時刻で再生する音ID。
+		std::string hitSoundName = "";    // 攻撃が相手へ命中した瞬間に再生する音ID。
+		std::string finishSoundName = ""; // コンボノードが終了した瞬間に再生する音ID。
+		float attackStartTime = 0.0f;      // コンボ開始から攻撃音を鳴らすまでの時間。
+		float attackVolume = 1.0f;         // 攻撃音の音量。
+		float hitVolume = 1.0f;            // ヒット音の音量。
+		float finishVolume = 1.0f;         // 終了音の音量。
 	};
 	// 時間
 	struct StateTime {
@@ -2881,6 +2896,8 @@ namespace Combo {
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
+		// 攻撃、ヒット、終了タイミングで使用する音声設定
+		GlobalAudio audio{};
 		// 攻撃ノード単位の調整項目
 		GlobalAction action{};
 		// 攻撃タイプ
@@ -3267,6 +3284,8 @@ namespace Combo {
             hasHit_ = true;
             comboData.GetComboRange().NotifyHit();
             comboData.GetComboCamera().OnHit();
+			// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
+			comboData.GetComboAudio().OnHit();
         }
         bool HasHit() const { return hasHit_; }
         std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);
@@ -3407,8 +3426,11 @@ namespace Combo {
 
 #pragma region main
 
-	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables) {
+	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon,
+		Engine::GlobalVariables* globalVariables, Engine::AudioManager* audioManager) {
 		this->globalVariables = globalVariables;
+		// 実行時再生とコンボエディタの音一覧で共有する音声管理を保持する。
+		audioManager_ = audioManager;
 		owner = character;	// 所有者設定
 
 		// コンボ保存項目で使用するenumをグローバル変数エディタへ登録する
@@ -3852,7 +3874,13 @@ namespace Combo {
 			globalVariables->AddItem(name, "着地時のみキャンセル", data.action.landingCancel);
 			globalVariables->AddItem(name, "ヒットポーズ倍率", data.action.hitPauseScale);
 			globalVariables->AddItem(name, "カメラシェイク量", data.action.cameraShakePower);
-			globalVariables->AddItem(name, "攻撃音", data.action.soundName);
+			globalVariables->AddItem(name, "攻撃音", data.audio.attackSoundName);
+			globalVariables->AddItem(name, "攻撃音再生時間", data.audio.attackStartTime);
+			globalVariables->AddItem(name, "攻撃音音量", data.audio.attackVolume);
+			globalVariables->AddItem(name, "ヒット音", data.audio.hitSoundName);
+			globalVariables->AddItem(name, "ヒット音音量", data.audio.hitVolume);
+			globalVariables->AddItem(name, "攻撃終了音", data.audio.finishSoundName);
+			globalVariables->AddItem(name, "攻撃終了音音量", data.audio.finishVolume);
 
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
@@ -4040,7 +4068,6 @@ namespace Combo {
 			globalVariables->AddEnumItem(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
 			globalVariables->AddItem(name, "ヒット優先度", data.hitReaction.hitPriority);
 			globalVariables->AddItem(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
-			globalVariables->AddItem(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -4142,7 +4169,13 @@ namespace Combo {
 			data.action.landingCancel = globalVariables->GetValue<bool>(name, "着地時のみキャンセル");
 			data.action.hitPauseScale = globalVariables->GetValue<float>(name, "ヒットポーズ倍率");
 			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
-			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
+			data.audio.attackSoundName = globalVariables->GetValue<std::string>(name, "攻撃音");
+			data.audio.attackStartTime = globalVariables->GetValue<float>(name, "攻撃音再生時間");
+			data.audio.attackVolume = globalVariables->GetValue<float>(name, "攻撃音音量");
+			data.audio.hitSoundName = globalVariables->GetValue<std::string>(name, "ヒット音");
+			data.audio.hitVolume = globalVariables->GetValue<float>(name, "ヒット音音量");
+			data.audio.finishSoundName = globalVariables->GetValue<std::string>(name, "攻撃終了音");
+			data.audio.finishVolume = globalVariables->GetValue<float>(name, "攻撃終了音音量");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
 			data.range.offsetTargetType = globalVariables->GetEnumValue<Combo::RangeOffsetTargetType>(name, "遠距離オフセットタイプ");
@@ -4320,7 +4353,6 @@ namespace Combo {
 			data.hitReaction.attribute = globalVariables->GetEnumValue<AttackAttribute>(name, "攻撃属性");
 			data.hitReaction.hitPriority = globalVariables->GetValue<int>(name, "ヒット優先度");
 			data.hitReaction.cameraShakePower = globalVariables->GetValue<float>(name, "ヒットカメラシェイク量");
-			data.hitReaction.hitSoundName = globalVariables->GetValue<std::string>(name, "ヒット音");
 			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
 			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
@@ -4449,7 +4481,13 @@ namespace Combo {
 			globalVariables->SetValue(name, "着地時のみキャンセル", data.action.landingCancel);
 			globalVariables->SetValue(name, "ヒットポーズ倍率", data.action.hitPauseScale);
 			globalVariables->SetValue(name, "カメラシェイク量", data.action.cameraShakePower);
-			globalVariables->SetValue(name, "攻撃音", data.action.soundName);
+			globalVariables->SetValue(name, "攻撃音", data.audio.attackSoundName);
+			globalVariables->SetValue(name, "攻撃音再生時間", data.audio.attackStartTime);
+			globalVariables->SetValue(name, "攻撃音音量", data.audio.attackVolume);
+			globalVariables->SetValue(name, "ヒット音", data.audio.hitSoundName);
+			globalVariables->SetValue(name, "ヒット音音量", data.audio.hitVolume);
+			globalVariables->SetValue(name, "攻撃終了音", data.audio.finishSoundName);
+			globalVariables->SetValue(name, "攻撃終了音音量", data.audio.finishVolume);
 
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
@@ -4618,7 +4656,6 @@ namespace Combo {
 			globalVariables->SetEnumValue(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
 			globalVariables->SetValue(name, "ヒット優先度", data.hitReaction.hitPriority);
 			globalVariables->SetValue(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
-			globalVariables->SetValue(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -4734,6 +4771,9 @@ namespace Combo {
 	void System::SetData(ComboData& data, const GlobalData& gData) {
 		// 攻撃タイプと遠距離攻撃
 		data.GetActionData() = gData.action;
+		// 音声設定と共有AudioManagerを実行用コンボへ適用する。
+		data.GetComboAudio().GetData() = gData.audio;
+		data.GetComboAudio().Initialize(audioManager_);
 		data.SetType(gData.type);
 		data.GetComboRange().GetData() = gData.range;
 		// ヒットボックスとリアクションデータ 
@@ -4884,7 +4924,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -4978,7 +5018,8 @@ namespace Combo {
 		}
 
 		// 初期化
-		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables);
+		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon,
+			Engine::GlobalVariables* globalVariables, Engine::AudioManager* audioManager);
 
 		// コンボ更新
 		void Update(const Character::CharacterContext& ctx);
@@ -5071,6 +5112,8 @@ namespace Combo {
 	public:
 		// データ設定
 		void SetData(ComboData& data, const GlobalData& gData);
+		// コンボエディタの音一覧とプレビューで使用する音声管理を取得する。
+		Engine::AudioManager* GetAudioManager() { return audioManager_; }
 
 		// グローバルデータ取得
 		GlobalData& GetComboGlobalData(const std::string& comboNodeName) {
@@ -5119,6 +5162,8 @@ namespace Combo {
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
+		// Frameworkが所有する音声管理への非所有ポインター。
+		Engine::AudioManager* audioManager_ = nullptr;
 
 		bool isDebug = false;
 		std::optional<ActionInput> pendingCostInput_;
@@ -5957,6 +6002,8 @@ namespace Combo {
 
 			// リアクション
 			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
+			// エディタで選択した音ID、再生時間、音量を保存データへ反映する。
+			data.audio = comboEditorBlocks_[it.first].GetData().audio;
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
 			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
@@ -6137,6 +6184,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEdi
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Audio/Audio.h"
 #include <cctype>
 #include <cstring>
 
@@ -6210,6 +6258,8 @@ namespace Combo {
 		ImGuiRange();
 		// 演出設定
 		ImGuiEffect();
+		// 攻撃、命中、終了タイミングの音声設定
+		ImGuiAudio();
 		// 移動関係設定
 		ImGuiMove();
 		// リアクション設定
@@ -6508,6 +6558,58 @@ namespace Combo {
 		}
 		if (data_.range.throwStayTime < 0.0f) {
 			data_.range.throwStayTime = 0.0f;
+		}
+	}
+
+	void EditorBlock::ImGuiAudio() {
+		if (!ImGui::CollapsingHeader("サウンド")) {
+			return;
+		}
+
+		// 攻撃動作中、命中時、ノード終了時の3か所を同じ音一覧から設定する。
+		ImGui::SeparatorText("攻撃時");
+		DrawSoundSelector("攻撃音", data_.audio.attackSoundName, data_.audio.attackVolume);
+		ImGui::DragFloat("攻撃音再生時間", &data_.audio.attackStartTime, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::SliderFloat("攻撃音音量", &data_.audio.attackVolume, 0.0f, 2.0f, "%.2f");
+
+		ImGui::SeparatorText("ヒットリアクション時");
+		DrawSoundSelector("ヒット音", data_.audio.hitSoundName, data_.audio.hitVolume);
+		ImGui::SliderFloat("ヒット音音量", &data_.audio.hitVolume, 0.0f, 2.0f, "%.2f");
+
+		ImGui::SeparatorText("コンボ終了時");
+		DrawSoundSelector("攻撃終了音", data_.audio.finishSoundName, data_.audio.finishVolume);
+		ImGui::SliderFloat("攻撃終了音音量", &data_.audio.finishVolume, 0.0f, 2.0f, "%.2f");
+	}
+
+	void EditorBlock::DrawSoundSelector(const char* label, std::string& soundId, float volume) {
+		Engine::AudioManager* audioManager = comboSystem ? comboSystem->GetAudioManager() : nullptr;
+		const char* previewName = soundId.empty() ? "なし" : soundId.c_str();
+		if (ImGui::BeginCombo(label, previewName)) {
+			// 「なし」を選ぶと、そのタイミングでは音を再生しない。
+			const bool isNoneSelected = soundId.empty();
+			if (ImGui::Selectable("なし", isNoneSelected)) {
+				soundId.clear();
+			}
+
+			if (audioManager) {
+				for (const Engine::SoundFileInfo& soundFile : audioManager->GetSoundFiles()) {
+					const bool isSelected = soundId == soundFile.id;
+					if (ImGui::Selectable(soundFile.id.c_str(), isSelected)) {
+						soundId = soundFile.id;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		// 同じラベルの複数ボタンが衝突しないよう、選択UIのラベルをIDに含める。
+		ImGui::SameLine();
+		const std::string previewButtonId = std::string("試聴##") + label;
+		if (ImGui::Button(previewButtonId.c_str()) && audioManager && !soundId.empty()) {
+			audioManager->Play(soundId, false, volume);
 		}
 	}
 
@@ -6844,6 +6946,8 @@ namespace Combo {
 		data_.hitBox = comboData.GetComboHitBox().GetCollData().hitBoxData;
 		// リアクションデータ
 		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
+		// 保存済みの攻撃・ヒット・終了音をエディタへ反映する。
+		data_.audio = comboData.GetComboAudio().GetData();
 		// アニメーション
 		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
 		// 条件
@@ -7028,7 +7132,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditorBlock.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include  "ComboImGui.h"
 #include <array>
 #include "map"
@@ -7086,6 +7190,8 @@ namespace Combo {
 		void ImGuiRange();
 		// 演出設定
 		void ImGuiEffect();
+		// 攻撃、命中、終了時の音声設定
+		void ImGuiAudio();
 		// 移動関係設定
 		void ImGuiMove();
 		// リアクション設定
@@ -7104,6 +7210,8 @@ namespace Combo {
 			const std::map<std::string, EffectGlobalData>& effectDatas);
 		// コンボエフェクトの設定をシーケンサー表示へ反映する
 		void SyncComboEffectSequenceEvents();
+		// Soundディレクトリの一覧から音源を選択し、試聴できるUIを描画する。
+		void DrawSoundSelector(const char* label, std::string& soundId, float volume);
 
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;
@@ -7511,7 +7619,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.cpp
 ============================================================
-﻿#include "ComboEffect.h"
+#include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
@@ -7521,6 +7629,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/engine/3d/Object/Object3d.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/engine/Audio/Audio.h>
 #include <algorithm>
 
 namespace Combo {
@@ -7814,18 +7923,45 @@ namespace Combo {
 
 #pragma region Audio
 
-	void ComboAudio::Enter(Character::BaseCharacter* owner){
-	
+	void ComboAudio::Initialize(Engine::AudioManager* audioManager) {
+		// AudioManagerの所有権はFramework側にあるため、再生に使う参照だけを保持する。
+		audioManager_ = audioManager;
 	}
 
-	void ComboAudio::Update(const Character::CharacterContext& ctx, float timer, float dt){
-	
+	void ComboAudio::Enter(Character::BaseCharacter* owner) {
+		// コンボ開始ごとに攻撃音の発火状態を初期化する。
+		(void)owner;
+		isAttackSoundPlayed_ = false;
 	}
 
-	void ComboAudio::Exit(Character::BaseCharacter * owner){
-	
+	void ComboAudio::Update(const Character::CharacterContext& ctx, float timer, float dt) {
+		// ヒットストップ中でも攻撃音を重複再生しないよう、一度だけ発火する。
+		(void)ctx;
+		(void)dt;
+		if (isAttackSoundPlayed_ || timer < data_.attackStartTime) {
+			return;
+		}
+		if (audioManager_ && !data_.attackSoundName.empty()) {
+			audioManager_->Play(data_.attackSoundName, false, data_.attackVolume);
+		}
+		isAttackSoundPlayed_ = true;
 	}
 
+	void ComboAudio::Exit(Character::BaseCharacter* owner) {
+		// 攻撃の振り終わりや着地など、ノード終了へ割り当てた音を再生する。
+		(void)owner;
+		if (audioManager_ && !data_.finishSoundName.empty()) {
+			audioManager_->Play(data_.finishSoundName, false, data_.finishVolume);
+		}
+		isAttackSoundPlayed_ = false;
+	}
+
+	void ComboAudio::OnHit() {
+		// 命中が確定した回数だけヒット音を鳴らし、多段攻撃にも対応する。
+		if (audioManager_ && !data_.hitSoundName.empty()) {
+			audioManager_->Play(data_.hitSoundName, false, data_.hitVolume);
+		}
+	}
 
 #pragma endregion // 音
 
@@ -7837,13 +7973,14 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
 
 namespace Engine {
 	class WorldTransform;
+	class AudioManager;
 }
 
 
@@ -7943,6 +8080,9 @@ namespace Combo {
 	/// </summary>
 	class ComboAudio {
 	public:
+		// ゲーム全体で共有する音声管理と、このコンボの音声設定を適用する。
+		void Initialize(Engine::AudioManager* audioManager);
+
 		// 開始
 		void Enter(Character::BaseCharacter* owner);
 
@@ -7952,10 +8092,17 @@ namespace Combo {
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
 
+		// 攻撃が相手へ命中した瞬間の音を再生する。
+		void OnHit();
+
+		// 保存・エディタ編集対象となる音声設定を取得する。
+		GlobalAudio& GetData() { return data_; }
+
 
 	private:
-
-
+		GlobalAudio data_{};                         // コンボノードごとの音声設定。
+		Engine::AudioManager* audioManager_ = nullptr; // ゲーム全体の音声管理（非所有）。
+		bool isAttackSoundPlayed_ = false;            // 攻撃音の多重発火を防ぐフラグ。
 	};
 
 
@@ -11348,6 +11495,10 @@ namespace HitBox {
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
+		// 敵側コンボにも命中を通知し、ヒット音と命中条件を同じタイミングで処理する。
+		if (result.notifyComboHit) {
+			enemy->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		}
 	}
 
 	void HitBoxFunction::UpdateTypeOther() {}
@@ -48376,222 +48527,366 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Audio/Audio.cpp
 ============================================================
-#include"Audio.h"
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include "DirectXGame/engine/base/WinApp/WinApp.h"
+#include "Audio.h"
 
-void Engine::Audio::Initialize()
-{
+#include <algorithm>
+#include <cassert>
+#include <cctype>
+#include <cstring>
+#include <fstream>
+#include <system_error>
 
-	HRESULT hr;
-
-	// XAudioエンジンのインスタンスを生成
-	hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	assert(SUCCEEDED(hr));
-	// マスターボイスを生成
-	hr = xAudio2->CreateMasteringVoice(&masterVoice);
-	assert(SUCCEEDED(hr));
+namespace {
+	// AudioManagerが直接読み込める拡張子か判定する。
+	bool IsSupportedAudioFile(const std::filesystem::path& filePath) {
+		std::string extension = filePath.extension().string();
+		std::transform(extension.begin(), extension.end(), extension.begin(),
+			[](unsigned char character) { return static_cast<char>(std::tolower(character)); });
+		return extension == ".wav";
+	}
 }
 
-void Engine::Audio::Finalize()
-{
-	// 再生中の全てのソースボイスを破棄
-	for (auto& kv : playingVoices) {
-		if (kv.second) {
-			kv.second->Stop();
-			kv.second->FlushSourceBuffers();
-			kv.second->DestroyVoice();
-		}
-	}
-	playingVoices.clear();
+void Engine::AudioManager::Initialize(const std::string& directoryPath) {
+	// 二重初期化された場合にもVoiceや音源を残さないよう、先に既存状態を解放する。
+	Finalize();
+	directoryPath_ = directoryPath;
 
-	// サウンドデータ解放
-	for (auto& kv : soundDatas) {
-		SoundUnload(&kv.second);
-	}
-	soundDatas.clear();
-
-	if (masterVoice) {
-		masterVoice->DestroyVoice();
-		masterVoice = nullptr;
-	}
-	xAudio2.Reset();
-}
-
-Engine::SoundData Engine::Audio::SoundLoadWave(const char* filename) {
-
-
-
-	//HRESULT result;
-
-	// ファイル入力ストリームのインスタンス
-	std::ifstream file;
-	// .wavファイルをバイナリモードで開く
-	file.open(filename, std::ios_base::binary);
-	// ファイルオープン失敗を検出
-	assert(file.is_open());
-
-	////2
-	// RIFFヘッダーの読み込み
-	RiffHeader riff;
-	file.read((char*)&riff, sizeof(riff));
-	// ファイルがRIFFかチェック
-	if (strncmp(riff.chunk.id, "RIFF", 4) != 0) {
-		assert(0);
-	}
-	// タイプがWAVEかチェック
-	if (strncmp(riff.type, "WAVE", 4) != 0) {
-		assert(0);
-	}
-	// Formatチャンクの読み込み
-	FormatChunk format = {};
-	// チャンクヘッダーの確認
-	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
-		assert(0);
-	}
-	// チャンク本体の読み込み
-	assert(format.chunk.size <= sizeof(format.fmt));
-	file.read((char*)&format.fmt, format.chunk.size);
-
-	// Dataチャンクの読み込み
-	ChunkHeader data;
-	file.read((char*)&data, sizeof(data));
-	// JUNKチャンクを検出した場合
-	if (strncmp(data.id, "JUNK", 4) == 0) {
-		// 読み取り位置をJUNKチャンクの終わりまで進める
-		file.seekg(data.size, std::ios_base::cur);
-		// 再読み込み
-		file.read((char*)&data, sizeof(data));
-	}
-
-	if (strncmp(data.id, "data", 4) != 0) {
-		assert(0);
-	}
-
-	// Dataチャンクのデータ部（波形データ）の読み込み
-	char* pBuffer = new char[data.size];
-	file.read(pBuffer, data.size);
-
-	// Waveファイルを閉じる
-	file.close();
-
-
-	////4
-	// returnする為の音声データ
-	SoundData soundData = {};
-	soundData.wfex = format.fmt;
-	soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
-	soundData.bufferSize = data.size;
-
-	return soundData;
-}
-
-// 音声データ解放
-void Engine::Audio::SoundUnload(SoundData* soundData)
-{
-	// バッファのメモリを解放
-	delete[] soundData->pBuffer;
-	soundData->pBuffer = 0;
-	soundData->bufferSize = 0;
-	soundData->wfex = {};
-}
-
-void Engine::Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
-
-	HRESULT result;
-
-	// 波形フォーマットを元にSourceVoiceの生成
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	// XAudio2本体と最終出力先のマスターボイスを生成する。
+	HRESULT result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	assert(SUCCEEDED(result));
-
-	// 再生する波形データ設定
-	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = soundData.pBuffer;
-	buf.AudioBytes = soundData.bufferSize;
-	buf.Flags = XAUDIO2_END_OF_STREAM;
-
-	// 波形データ再生
-	result = pSourceVoice->SubmitSourceBuffer(&buf);
-	result = pSourceVoice->Start();
-}
-
-uint32_t Engine::Audio::LoadWave(const char* filename)
-{
-	SoundData sd = SoundLoadWave(filename);
-	if (!sd.pBuffer || sd.bufferSize == 0) {
-		return 0; // 失敗
-	}
-	uint32_t handle = nextHandle++;
-	soundDatas.emplace(handle, sd);
-	return handle;
-}
-
-void Engine::Audio::UnloadWave(uint32_t soundDataHandle)
-{
-	auto it = soundDatas.find(soundDataHandle);
-	if (it == soundDatas.end()) return;
-	SoundUnload(&it->second);
-	soundDatas.erase(it);
-}
-
-
-void Engine::Audio::PlayWave(uint32_t soundDataHandle, bool loop, float volume)
-{
-	HRESULT hresult = S_FALSE;
-
-	// 該当データが存在しなければ return
-	auto it = soundDatas.find(soundDataHandle);
-	if (it == soundDatas.end()) {
+	if (FAILED(result)) {
 		return;
 	}
 
-	SoundData& data = it->second;
-
-	// SourceVoice作成
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	hresult = xAudio2->CreateSourceVoice(&pSourceVoice, &data.wfex);
-	assert(SUCCEEDED(hresult));
-
-	// バッファ設定
-	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = data.pBuffer;
-	buf.AudioBytes = data.bufferSize;
-	buf.Flags = XAUDIO2_END_OF_STREAM;
-	if (loop) {
-		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
+	result = xAudio2_->CreateMasteringVoice(&masterVoice_);
+	assert(SUCCEEDED(result));
+	if (FAILED(result)) {
+		xAudio2_.Reset();
+		return;
 	}
 
-	// バッファ送信
-	hresult = pSourceVoice->SubmitSourceBuffer(&buf);
-	assert(SUCCEEDED(hresult));
-
-	// 音量設定（Start 前に）
-	hresult = pSourceVoice->SetVolume(volume);
-	assert(SUCCEEDED(hresult));
-
-	// 再生開始
-	hresult = pSourceVoice->Start();
-	assert(SUCCEEDED(hresult));
-
-	// 再生中リストに登録
-	playingVoices[soundDataHandle] = pSourceVoice;
 }
 
-void Engine::Audio::StopWave(uint32_t soundDataHandle) {
-	auto it = playingVoices.find(soundDataHandle);
-	if (it == playingVoices.end()) return;
+void Engine::AudioManager::Finalize() {
+	// SourceVoiceはXAudio2本体より先にすべて破棄する必要がある。
+	StopAll();
 
-	it->second->Stop();
-
-	IXAudio2SourceVoice* src = it->second;
-	if (src) {
-		src->Stop();
-		src->FlushSourceBuffers();
-		src->DestroyVoice();
+	// 読み込んだPCMバッファをそれぞれ解放する。
+	for (auto& [soundHandle, soundData] : soundDatas_) {
+		(void)soundHandle;
+		UnloadSoundData(soundData);
 	}
-	playingVoices.erase(it);
+	soundDatas_.clear();
+	soundFiles_.clear();
+	soundIdToHandle_.clear();
+
+	// 出力VoiceとXAudio2エンジンを終了する。
+	if (masterVoice_ != nullptr) {
+		masterVoice_->DestroyVoice();
+		masterVoice_ = nullptr;
+	}
+	xAudio2_.Reset();
+	nextSoundHandle_ = 1;
+	nextVoiceHandle_ = 1;
+}
+
+void Engine::AudioManager::Update() {
+	// キュー内のバッファがなくなった非ループVoiceを再生終了として回収する。
+	for (auto voiceIterator = playingVoices_.begin(); voiceIterator != playingVoices_.end();) {
+		XAUDIO2_VOICE_STATE voiceState{};
+		voiceIterator->second.sourceVoice->GetState(&voiceState);
+		if (voiceState.BuffersQueued == 0) {
+			DestroyVoice(voiceIterator->second.sourceVoice);
+			voiceIterator = playingVoices_.erase(voiceIterator);
+		} else {
+			++voiceIterator;
+		}
+	}
+}
+
+void Engine::AudioManager::ReloadSoundFiles() {
+	// 再走査前に既存のVoiceと音源を解放し、一覧と実データの対応を維持する。
+	StopAll();
+	for (auto& [soundHandle, soundData] : soundDatas_) {
+		(void)soundHandle;
+		UnloadSoundData(soundData);
+	}
+	soundDatas_.clear();
+	soundFiles_.clear();
+	soundIdToHandle_.clear();
+	nextSoundHandle_ = 1;
+
+	// フォルダが未作成でも起動を継続し、空の一覧として扱う。
+	const std::filesystem::path rootPath(directoryPath_);
+	std::error_code fileSystemError;
+	if (!std::filesystem::exists(rootPath, fileSystemError)) {
+		return;
+	}
+
+	// サブフォルダも含めてWAVファイルを収集する。
+	std::vector<std::filesystem::path> filePaths;
+	std::filesystem::recursive_directory_iterator iterator(
+		rootPath, std::filesystem::directory_options::skip_permission_denied, fileSystemError);
+	const std::filesystem::recursive_directory_iterator endIterator;
+	for (; iterator != endIterator; iterator.increment(fileSystemError)) {
+		if (fileSystemError) {
+			fileSystemError.clear();
+			continue;
+		}
+		if (iterator->is_regular_file(fileSystemError) && IsSupportedAudioFile(iterator->path())) {
+			filePaths.push_back(iterator->path());
+		}
+	}
+
+	// OSの列挙順に依存しない一覧にして、コンボボックスの並び順を安定させる。
+	std::sort(filePaths.begin(), filePaths.end(),
+		[](const std::filesystem::path& left, const std::filesystem::path& right) {
+			return left.generic_string() < right.generic_string();
+		});
+
+	// 各ファイルをロードし、保存用IDと実行時ハンドルを関連付ける。
+	for (const std::filesystem::path& filePath : filePaths) {
+		const SoundHandle soundHandle = LoadWave(filePath.string());
+		if (soundHandle == 0) {
+			continue;
+		}
+
+		SoundFileInfo fileInfo{};
+		fileInfo.handle = soundHandle;
+		fileInfo.id = std::filesystem::relative(filePath, rootPath, fileSystemError).generic_string();
+		if (fileSystemError) {
+			fileSystemError.clear();
+			fileInfo.id = filePath.filename().generic_string();
+		}
+		fileInfo.name = filePath.filename().string();
+		fileInfo.fullPath = filePath.generic_string();
+
+		soundIdToHandle_[NormalizeSoundId(fileInfo.id)] = soundHandle;
+		soundFiles_.push_back(std::move(fileInfo));
+	}
+}
+
+Engine::SoundHandle Engine::AudioManager::LoadWave(const std::string& filename) {
+	// 初期化前、または読み込みに失敗したファイルには無効ハンドルを返す。
+	if (xAudio2_ == nullptr) {
+		return 0;
+	}
+
+	SoundData soundData{};
+	if (!LoadWaveData(filename, soundData)) {
+		return 0;
+	}
+
+	// 0を無効値として予約し、正常な音源には1以上のハンドルを割り当てる。
+	const SoundHandle soundHandle = nextSoundHandle_++;
+	soundDatas_.emplace(soundHandle, soundData);
+	return soundHandle;
+}
+
+void Engine::AudioManager::UnloadWave(SoundHandle soundHandle) {
+	// 音源バッファを解放する前に、それを参照するVoiceをすべて停止する。
+	StopAll(soundHandle);
+	auto soundIterator = soundDatas_.find(soundHandle);
+	if (soundIterator == soundDatas_.end()) {
+		return;
+	}
+
+	UnloadSoundData(soundIterator->second);
+	soundDatas_.erase(soundIterator);
+
+	// 公開一覧とID索引からも同じ音源を削除する。
+	std::erase_if(soundFiles_, [soundHandle](const SoundFileInfo& fileInfo) {
+		return fileInfo.handle == soundHandle;
+	});
+	for (auto idIterator = soundIdToHandle_.begin(); idIterator != soundIdToHandle_.end();) {
+		if (idIterator->second == soundHandle) {
+			idIterator = soundIdToHandle_.erase(idIterator);
+		} else {
+			++idIterator;
+		}
+	}
+}
+
+Engine::VoiceHandle Engine::AudioManager::Play(SoundHandle soundHandle, bool loop, float volume) {
+	// 指定音源が存在しない場合は再生せず、無効な再生ハンドルを返す。
+	auto soundIterator = soundDatas_.find(soundHandle);
+	if (soundIterator == soundDatas_.end() || xAudio2_ == nullptr) {
+		return 0;
+	}
+
+	// 音量はXAudio2で扱いやすい0以上の値に制限する。
+	volume = (std::max)(volume, 0.0f);
+	IXAudio2SourceVoice* sourceVoice = nullptr;
+	HRESULT result = xAudio2_->CreateSourceVoice(&sourceVoice, &soundIterator->second.wfex);
+	if (FAILED(result)) {
+		return 0;
+	}
+
+	// ループ指定時だけ無限ループを設定し、通常再生はバッファ末尾で終了させる。
+	XAUDIO2_BUFFER audioBuffer{};
+	audioBuffer.pAudioData = soundIterator->second.pBuffer;
+	audioBuffer.AudioBytes = soundIterator->second.bufferSize;
+	audioBuffer.Flags = XAUDIO2_END_OF_STREAM;
+	audioBuffer.LoopCount = loop ? XAUDIO2_LOOP_INFINITE : 0;
+
+	result = sourceVoice->SubmitSourceBuffer(&audioBuffer);
+	if (SUCCEEDED(result)) {
+		result = sourceVoice->SetVolume(volume);
+	}
+	if (SUCCEEDED(result)) {
+		result = sourceVoice->Start();
+	}
+	if (FAILED(result)) {
+		DestroyVoice(sourceVoice);
+		return 0;
+	}
+
+	// 同じ音源の多重再生を個別に管理できるよう、再生ごとにハンドルを発行する。
+	const VoiceHandle voiceHandle = nextVoiceHandle_++;
+	playingVoices_.emplace(voiceHandle, PlayingVoice{ sourceVoice, soundHandle });
+	return voiceHandle;
+}
+
+Engine::VoiceHandle Engine::AudioManager::Play(const std::string& soundId, bool loop, float volume) {
+	// JSON等へ保存された相対パスIDを実行時ハンドルへ変換して再生する。
+	return Play(FindSoundHandle(soundId), loop, volume);
+}
+
+void Engine::AudioManager::Stop(VoiceHandle voiceHandle) {
+	// 指定された1回分のVoiceだけを停止・破棄する。
+	auto voiceIterator = playingVoices_.find(voiceHandle);
+	if (voiceIterator == playingVoices_.end()) {
+		return;
+	}
+
+	DestroyVoice(voiceIterator->second.sourceVoice);
+	playingVoices_.erase(voiceIterator);
+}
+
+void Engine::AudioManager::StopAll(SoundHandle soundHandle) {
+	// 同じ音源から作られたVoiceをすべて検索して破棄する。
+	for (auto voiceIterator = playingVoices_.begin(); voiceIterator != playingVoices_.end();) {
+		if (voiceIterator->second.soundHandle == soundHandle) {
+			DestroyVoice(voiceIterator->second.sourceVoice);
+			voiceIterator = playingVoices_.erase(voiceIterator);
+		} else {
+			++voiceIterator;
+		}
+	}
+}
+
+void Engine::AudioManager::StopAll() {
+	// XAudio2終了時にも使えるよう、全Voiceを確実に破棄してコンテナを空にする。
+	for (auto& [voiceHandle, playingVoice] : playingVoices_) {
+		(void)voiceHandle;
+		DestroyVoice(playingVoice.sourceVoice);
+	}
+	playingVoices_.clear();
+}
+
+const Engine::SoundFileInfo* Engine::AudioManager::FindSound(const std::string& soundId) const {
+	// ID検索後、公開一覧から対応する詳細情報を返す。
+	const SoundHandle soundHandle = FindSoundHandle(soundId);
+	for (const SoundFileInfo& fileInfo : soundFiles_) {
+		if (fileInfo.handle == soundHandle) {
+			return &fileInfo;
+		}
+	}
+	return nullptr;
+}
+
+Engine::SoundHandle Engine::AudioManager::FindSoundHandle(const std::string& soundId) const {
+	// 大文字小文字と区切り文字の差を吸収して保存済みIDを検索する。
+	const auto idIterator = soundIdToHandle_.find(NormalizeSoundId(soundId));
+	return idIterator != soundIdToHandle_.end() ? idIterator->second : 0;
+}
+
+bool Engine::AudioManager::LoadWaveData(const std::string& filename, SoundData& soundData) const {
+	// WAVをバイナリで開き、最低限必要なRIFF/WAVE構造を検証する。
+	std::ifstream file(filename, std::ios_base::binary);
+	if (!file.is_open()) {
+		return false;
+	}
+
+	RiffHeader riffHeader{};
+	file.read(reinterpret_cast<char*>(&riffHeader), sizeof(riffHeader));
+	if (!file || std::memcmp(riffHeader.chunk.id, "RIFF", 4) != 0 ||
+		std::memcmp(riffHeader.type, "WAVE", 4) != 0) {
+		return false;
+	}
+
+	// fmtとdataを順不同のチャンクから探し、未知チャンクは読み飛ばす。
+	WAVEFORMATEX waveFormat{};
+	bool foundFormat = false;
+	std::vector<BYTE> audioBytes;
+	while (file && (!foundFormat || audioBytes.empty())) {
+		ChunkHeader chunkHeader{};
+		file.read(reinterpret_cast<char*>(&chunkHeader), sizeof(chunkHeader));
+		if (!file || chunkHeader.size < 0) {
+			break;
+		}
+
+		if (std::memcmp(chunkHeader.id, "fmt ", 4) == 0) {
+			// WAVEFORMATEXへ収まる範囲だけ読み、拡張領域があれば後ろを読み飛ばす。
+			const std::streamsize readSize = std::min<std::streamsize>(chunkHeader.size, sizeof(waveFormat));
+			file.read(reinterpret_cast<char*>(&waveFormat), readSize);
+			if (chunkHeader.size > readSize) {
+				file.seekg(chunkHeader.size - readSize, std::ios_base::cur);
+			}
+			foundFormat = static_cast<bool>(file);
+		} else if (std::memcmp(chunkHeader.id, "data", 4) == 0) {
+			// PCMデータは一時vectorへ読み込み、検証成功後にSoundDataへ所有権を移す。
+			audioBytes.resize(static_cast<size_t>(chunkHeader.size));
+			file.read(reinterpret_cast<char*>(audioBytes.data()), chunkHeader.size);
+		} else {
+			// LISTやJUNKなど、再生に不要なチャンクを読み飛ばす。
+			file.seekg(chunkHeader.size, std::ios_base::cur);
+		}
+
+		// RIFFチャンクは偶数バイト境界へパディングされる。
+		if (chunkHeader.size % 2 != 0) {
+			file.seekg(1, std::ios_base::cur);
+		}
+	}
+
+	if (!foundFormat || audioBytes.empty() || !file) {
+		return false;
+	}
+
+	// 読み込み成功後だけヒープを確保し、呼び出し側へ音源データを返す。
+	soundData.wfex = waveFormat;
+	soundData.bufferSize = static_cast<unsigned int>(audioBytes.size());
+	soundData.pBuffer = new BYTE[soundData.bufferSize];
+	std::copy(audioBytes.begin(), audioBytes.end(), soundData.pBuffer);
+	return true;
+}
+
+void Engine::AudioManager::UnloadSoundData(SoundData& soundData) const {
+	// 所有するPCMバッファを解放し、二重解放されない空状態へ戻す。
+	delete[] soundData.pBuffer;
+	soundData.pBuffer = nullptr;
+	soundData.bufferSize = 0;
+	soundData.wfex = {};
+}
+
+void Engine::AudioManager::DestroyVoice(IXAudio2SourceVoice*& sourceVoice) const {
+	// nullptrを許容し、停止・キュー破棄・Voice破棄を一か所で行う。
+	if (sourceVoice == nullptr) {
+		return;
+	}
+	sourceVoice->Stop();
+	sourceVoice->FlushSourceBuffers();
+	sourceVoice->DestroyVoice();
+	sourceVoice = nullptr;
+}
+
+std::string Engine::AudioManager::NormalizeSoundId(const std::string& soundId) const {
+	// WindowsとJSONで区切り文字が異なっても同じ音源として検索できるよう統一する。
+	std::string normalizedId = soundId;
+	std::replace(normalizedId.begin(), normalizedId.end(), '\\', '/');
+	std::transform(normalizedId.begin(), normalizedId.end(), normalizedId.begin(),
+		[](unsigned char character) { return static_cast<char>(std::tolower(character)); });
+	return normalizedId;
 }
 
 
@@ -48599,108 +48894,153 @@ void Engine::Audio::StopWave(uint32_t soundDataHandle) {
 File Path: project/DirectXGame/engine/Audio/Audio.h
 ============================================================
 #pragma once
-#include<cstdint>
-#include <xaudio2.h>
-#pragma comment(lib,"xaudio2.lib")
-#include<fstream>
-#include<sstream>
-#include<wrl.h>
-#include<cassert>
-#include<unordered_map>
+
+#include "AudioData.h"
+
+#include <filesystem>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <wrl.h>
 
 namespace Engine {
-	// チャンクヘッダ
-	struct ChunkHeader
-	{
-		char id[4]; // チャンク毎のID
-		int32_t size; // チャンクサイズ
-	};
-
-
-	// RIFFヘッダチャンク
-	struct RiffHeader
-	{
-		ChunkHeader chunk; // "RIFF"
-		char type[4];
-	};
-
-	// FMIチャンク
-	struct FormatChunk
-	{
-		ChunkHeader chunk; // "fmt"
-		WAVEFORMATEX fmt; // 波形フォーマット
-	};
-
-	// 音声データ
-	struct SoundData
-	{
-		// 波形フォーマット
-		WAVEFORMATEX wfex;
-		// バッファの先頭アドレス
-		BYTE* pBuffer;
-		// バッファのサイズ
-		unsigned int bufferSize;
-	};
-
-
-	// 前方宣言
-	class WinApp;
-	class DirectXCommon;
-
 	/// <summary>
-	/// 音クラス
+	/// 音源の検索、ロード、再生、停止をゲーム全体で一元管理するクラス。
 	/// </summary>
-	class Audio
-	{
+	class AudioManager {
 	public:
-		Audio() = default;
-		~Audio() {
-			Finalize();
-		};
+		// XAudio2を初期化し、音声を再生できる状態にする。
+		void Initialize(const std::string& directoryPath = "Resources/Sound/");
 
-		/// <summary>
-		/// 初期化
-		/// </summary>
-		void Initialize();
-
-		/// <summary>
-		/// 終了
-		/// </summary>
+		// 再生Voiceと読み込み済み音源をすべて解放する。
 		void Finalize();
 
-		// サウンドデータ取得
-		SoundData SoundLoadWave(const char* filename);
+		// 再生終了済みVoiceを検出して解放する。ゲームループから毎フレーム呼び出す。
+		void Update();
 
-		// サウンドアップロード
-		void SoundUnload(SoundData* soundData);
+		// Soundディレクトリを再走査し、音源一覧を最新状態へ更新する。
+		void ReloadSoundFiles();
 
-		// 再生
-		void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
+		// 指定したWAVファイルを読み込み、利用可能な音源ハンドルを返す。
+		SoundHandle LoadWave(const std::string& filename);
 
-		// 返り値: サウンドハンドル（0 は無効）
-		uint32_t LoadWave(const char* filename);
+		// 指定した音源を解放する。再生中の場合は該当するVoiceも停止する。
+		void UnloadWave(SoundHandle soundHandle);
 
-		// アンロード
-		void UnloadWave(uint32_t soundDataHandle);
+		// 指定音源を再生し、個別停止に使える再生ハンドルを返す。
+		VoiceHandle Play(SoundHandle soundHandle, bool loop = false, float volume = 1.0f);
 
-		// 多重再生可能
-		void PlayWave(uint32_t soundDataHandle, bool loop = false, float volume = 1.0f);
+		// 保存用音IDから音源を検索して再生する。
+		VoiceHandle Play(const std::string& soundId, bool loop = false, float volume = 1.0f);
 
-		// ストップ
-		void StopWave(uint32_t soundDataHandle);
+		// 指定した1回の再生を停止してVoiceを解放する。
+		void Stop(VoiceHandle voiceHandle);
+
+		// 指定音源から開始されたすべての再生を停止する。
+		void StopAll(SoundHandle soundHandle);
+
+		// 現在再生しているすべてのVoiceを停止する。
+		void StopAll();
+
+		// エディタ表示に使用できる、読み込み済み音源情報の一覧を返す。
+		const std::vector<SoundFileInfo>& GetSoundFiles() const { return soundFiles_; }
+
+		// 保存用音IDに対応する音源情報を返す。見つからない場合はnullptrを返す。
+		const SoundFileInfo* FindSound(const std::string& soundId) const;
+
+		// 保存用音IDに対応するハンドルを返す。見つからない場合は0を返す。
+		SoundHandle FindSoundHandle(const std::string& soundId) const;
+
+		// 音源一覧の基準となるSoundディレクトリを返す。
+		const std::string& GetDirectoryPath() const { return directoryPath_; }
+
 	private:
-		//////------音--------///////
+		// 再生中のSourceVoiceと元音源の対応を保持する内部データ。
+		struct PlayingVoice {
+			IXAudio2SourceVoice* sourceVoice = nullptr; // XAudio2の再生Voice。
+			SoundHandle soundHandle = 0;                // Voiceが参照している音源。
+		};
 
-		Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
-		IXAudio2MasteringVoice* masterVoice;
+		// WAVファイルをメモリへ読み込む。
+		bool LoadWaveData(const std::string& filename, SoundData& soundData) const;
+
+		// SoundDataが所有するPCMバッファを解放する。
+		void UnloadSoundData(SoundData& soundData) const;
+
+		// Voiceを停止し、安全に破棄する。
+		void DestroyVoice(IXAudio2SourceVoice*& sourceVoice) const;
+
+		// パス区切りと大文字小文字を統一して検索用音IDを生成する。
+		std::string NormalizeSoundId(const std::string& soundId) const;
+
+		Microsoft::WRL::ComPtr<IXAudio2> xAudio2_; // XAudio2エンジン本体。
+		IXAudio2MasteringVoice* masterVoice_ = nullptr; // 全音声の出力先となるマスターボイス。
+		std::unordered_map<SoundHandle, SoundData> soundDatas_; // ハンドル別の音源データ。
+		std::unordered_map<VoiceHandle, PlayingVoice> playingVoices_; // 再生ハンドル別のVoice。
+		std::vector<SoundFileInfo> soundFiles_; // エディタへ公開する音源一覧。
+		std::unordered_map<std::string, SoundHandle> soundIdToHandle_; // 正規化IDから音源への索引。
+		SoundHandle nextSoundHandle_ = 1; // 次に発行する音源ハンドル。
+		VoiceHandle nextVoiceHandle_ = 1; // 次に発行する再生ハンドル。
+		std::string directoryPath_ = "Resources/Sound/"; // 音源を検索する基準ディレクトリ。
+	};
+
+	/// <summary>
+	/// 旧コードとの互換性を保つためのAudioManager派生クラス。
+	/// </summary>
+	class Audio : public AudioManager {
+	};
+}
 
 
-		std::unordered_map<uint32_t, SoundData> soundDatas;
-		std::unordered_map<uint32_t, IXAudio2SourceVoice*> playingVoices;
-		uint32_t nextHandle = 1;
+============================================================
+File Path: project/DirectXGame/engine/Audio/AudioData.h
+============================================================
+#pragma once
 
-		std::string directoryPath = "Resources/sound/";
+#include <cstdint>
+#include <string>
+#include <xaudio2.h>
 
+#pragma comment(lib, "xaudio2.lib")
+
+namespace Engine {
+	// 音源データを識別するハンドル型。0 は無効な音源を表す。
+	using SoundHandle = uint32_t;
+
+	// 1回ごとの再生を識別するハンドル型。多重再生の個別停止に使用する。
+	using VoiceHandle = uint32_t;
+
+	// RIFFファイル内の各チャンクに共通するヘッダー情報。
+	struct ChunkHeader {
+		char id[4];       // チャンクの種類を表す4文字のID。
+		int32_t size;     // チャンク本体のバイト数。
+	};
+
+	// WAVファイル先頭に格納されているRIFFヘッダー情報。
+	struct RiffHeader {
+		ChunkHeader chunk; // RIFFチャンクのヘッダー。
+		char type[4];      // WAVでは「WAVE」が格納される。
+	};
+
+	// WAVファイルの再生フォーマットを保持するfmtチャンク情報。
+	struct FormatChunk {
+		ChunkHeader chunk; // fmtチャンクのヘッダー。
+		WAVEFORMATEX fmt;  // XAudio2へ渡す波形フォーマット。
+	};
+
+	// メモリへ読み込んだ1つのWAV音源データ。
+	struct SoundData {
+		WAVEFORMATEX wfex{};          // 音源の波形フォーマット。
+		BYTE* pBuffer = nullptr;       // PCMデータを保持するバッファ。
+		unsigned int bufferSize = 0;   // PCMデータのバイト数。
+	};
+
+	// エディタの音一覧表示と保存に使用する音源情報。
+	struct SoundFileInfo {
+		SoundHandle handle = 0; // 実行中に音源へアクセスするためのハンドル。
+		std::string id;         // Soundフォルダ基準の相対パス。保存用の安定したID。
+		std::string name;       // 拡張子を含むファイル名。エディタ表示に使用する。
+		std::string fullPath;   // 音源ロードに使用したファイルパス。
 	};
 }
 
@@ -70996,6 +71336,7 @@ namespace Engine {
 	class DirectXCommon;
 	class ShadowMap;
 	class TrailEffect;
+	class AudioManager;
 
 	/// <summary>
 	/// エンティティマネージャー
@@ -71023,6 +71364,8 @@ namespace Engine {
 		void DrawShadowMap(ShadowMap* shadowMap);
 
 	public: //セッター
+		// ゲーム全体で共有するオーディオマネージャーを設定する。
+		void SetAudioManager(AudioManager* audioManager) { audioManager_ = audioManager; }
 		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
 		Object3d* CreateObject3D(const std::string& name, ObjectModelType type, const Vector3& pos, Engine::Camera* camera) {
 			std::unique_ptr<Object3d> object;
@@ -71116,6 +71459,8 @@ namespace Engine {
 		PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
 		// エフェクトマネージャークラス取得
 		EffectManager* GetEffectManager() { return effectManager_.get(); }
+		// コンボやゲームオブジェクトから共有音源へアクセスする。
+		AudioManager* GetAudioManager() { return audioManager_; }
 	public:
 		// スプライト共通クラス取得
 		SpriteCommon* GetSpriteCommon() { return spriteCommon_.get(); }
@@ -71131,6 +71476,8 @@ namespace Engine {
 	private:
 		// DirectX
 		DirectXCommon* dxCommon = nullptr;
+		// Frameworkが所有するオーディオマネージャーへの非所有ポインター。
+		AudioManager* audioManager_ = nullptr;
 
 		// オーシャンシェーダー
 		std::unique_ptr<OceanManager> oceanManager_ = nullptr;
@@ -74711,6 +75058,11 @@ void Engine::Framework::Initialize()
 	input_ = std::make_unique<Input>();
 	input_->Intialize(winApp_.get());
 
+	// 音
+	audioManager_ = std::make_unique<AudioManager>();
+	audioManager_->Initialize();
+
+
 	// グローバル
 	globalVariables_ = std::make_unique<GlobalVariables>();
 	
@@ -74722,6 +75074,8 @@ void Engine::Framework::Initialize()
 	// 3D全般
 	entityManager_ = std::make_unique<EntityManager>();
 	entityManager_->Initialize(dxCommon_.get());
+	// コンボや各ゲームオブジェクトから共通の音声管理へアクセスできるよう関連付ける。
+	entityManager_->SetAudioManager(audioManager_.get());
 	entityManager_->GetCameraCommon()->SetInput(input_.get());
 }
 
@@ -74733,10 +75087,16 @@ void Engine::Framework::Finalize()
 	// DirectX
 	dxCommon_->Finalize();
 
+	// 音
+	audioManager_->Finalize();
+
 }
 
 void Engine::Framework::Update()
 {
+	// 再生が完了した音声Voiceを毎フレーム回収する。
+	audioManager_->Update();
+
 	// Input
 	input_->Update();
 
@@ -74770,10 +75130,11 @@ void Engine::Framework::Run()
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/Framework.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
+#include <DirectXGame/engine/Audio/Audio.h>
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
@@ -74820,8 +75181,10 @@ namespace Engine {
 
 		std::unique_ptr <WinApp> winApp_ = nullptr;
 
-		//
+		// 入力
 		std::unique_ptr<Input> input_ = nullptr;
+		// 音
+		std::unique_ptr<AudioManager> audioManager_ = nullptr;
 
 		// ダイレクトX
 		std::unique_ptr <DirectXCommon> dxCommon_ = nullptr;
@@ -74846,7 +75209,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/MyGame.cpp
 ============================================================
-﻿#include "MyGame.h"
+#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
@@ -74881,6 +75244,8 @@ void Engine::MyGame::Initialize() {
 	// シーンマネージャーに最初のシーンをセット
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
 	sceneManager_->SetInput(input_.get());
+	// 各シーンから共通の音源一覧と再生機能を参照できるよう設定する。
+	sceneManager_->SetAudioManager(audioManager_.get());
 	sceneManager_->SetWinApp(winApp_.get());
 	sceneManager_->SetGlobalVariables(globalVariables_.get());
 	sceneManager_->SetDirectXCommon(dxCommon_.get());
@@ -75008,6 +75373,9 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 	// テクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
+
+	// Resources/Sound以下の全WAVファイルを取得し、音源一覧と再生データを構築する。
+	audioManager_->ReloadSoundFiles();
 		
 	// ModelData;
 	LoadModel();
@@ -81075,6 +81443,7 @@ namespace Engine {
 	class DirectXCommon;
 	class GlobalVariables;
 	class Camera;
+	class AudioManager;
 
 	/// <summary>
 	/// シーン基底クラス「
@@ -81116,6 +81485,8 @@ namespace Engine {
 		void SetInput(Engine::Input* input) { this->input = input; }
 		// winApp設定
 		void SetWinApp(Engine::WinApp* winApp) { this->winApp = winApp; }
+		// オーディオマネージャー設定
+		void SetAudioManager(Engine::AudioManager* audioManager) { this->audioManager = audioManager; }
 		// DirectX共通クラス取得
 		virtual Engine::DirectXCommon* GetDxCommon() { return dxCommon; }
 		// エンティティマネージャー取得
@@ -81128,6 +81499,8 @@ namespace Engine {
 		Engine::Input* GetInput() { return input; }
 		//
 		Engine::WinApp* GetWinApp() { return winApp; }
+		// オーディオマネージャー取得
+		Engine::AudioManager* GetAudioManager() { return audioManager; }
 		// カメラ設定
 		void SetCamera(Engine::Camera* camera) { this->camera = camera; };
 		// カメラ取得
@@ -81151,6 +81524,7 @@ namespace Engine {
 		Engine::WinApp* winApp = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::Camera* camera = nullptr;
+		Engine::AudioManager* audioManager = nullptr;
 	protected:
 		bool initialized_ = false;
 	};
@@ -81434,6 +81808,8 @@ void Engine::SceneManager::Update()
 			scene_->SetDirectXCommon(dxCommon);
 			scene_->SetEntityManager(entityManager);
 			scene_->SetWinApp(winApp);
+			// シーンやエディタから音源一覧と再生機能を利用できるよう共有する。
+			scene_->SetAudioManager(audioManager);
 
 			dxCommon->GetPostEffectManager()->ClearPostEffectBlock();
 			entityManager->GetObject3dInstansManager()->ClearObject();
@@ -81555,6 +81931,7 @@ namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
 	class Camera;
+	class AudioManager;
 
 	/// <summary>
 	/// シーンマネージャークラス
@@ -81594,6 +81971,8 @@ namespace Engine {
 		GlobalVariables* GetGlobalVariables() { return globalVariables; }
 		// Input設定
 		void SetInput(Input* input) { this->input = input; }
+		// オーディオマネージャー設定
+		void SetAudioManager(AudioManager* audioManager) { this->audioManager = audioManager; }
 		// Input取得
 		Input* GetInput() { return input; }
 		// カメラ設定
@@ -81643,6 +82022,7 @@ namespace Engine {
 		Input* input = nullptr;
 		GlobalVariables* globalVariables = nullptr;
 		Camera* camera = nullptr;
+		AudioManager* audioManager = nullptr;
 		WinApp* winApp = nullptr;
 	};
 }
@@ -85848,6 +86228,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\TutorialUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
+    <ClInclude Include="DirectXGame\engine\Audio\AudioData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
@@ -88554,6 +88935,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\PoseUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Audio\AudioData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
