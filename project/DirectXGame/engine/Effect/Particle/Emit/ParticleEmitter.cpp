@@ -6,19 +6,11 @@
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "DirectXGame/engine/Math/Random.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 namespace {
 	constexpr float kEmitterEpsilon = 0.0001f;
 	constexpr float kTwoPi = 6.28318530718f;
-
-	Vector3 SafeNormalize(const Vector3& value, const Vector3& fallback = { 0.0f,1.0f,0.0f })
-	{
-		// ゼロベクトルを方向として使わないように保険をかける
-		if (value.LengthSq() <= kEmitterEpsilon * kEmitterEpsilon) {
-			return fallback;
-		}
-		return value.Normalize();
-	}
 
 	float Random01(std::mt19937& randomEngine)
 	{
@@ -52,9 +44,9 @@ namespace {
 		switch (directionType)
 		{
 		case EmitData::DirectionType::kNormal:
-			return SafeNormalize(normal) * ResolveDirectionSpeed(emitData, randomEngine);
+			return Math::NormalizeSafe(normal, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon) * ResolveDirectionSpeed(emitData, randomEngine);
 		case EmitData::DirectionType::kInverse:
-			return SafeNormalize(centerPos - emitPos, -SafeNormalize(normal)) * ResolveDirectionSpeed(emitData, randomEngine);
+			return Math::NormalizeSafe(centerPos - emitPos, -Math::NormalizeSafe(normal, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon), kEmitterEpsilon) * ResolveDirectionSpeed(emitData, randomEngine);
 		case EmitData::DirectionType::kFixed:
 			return emitData.velocity.median;
 		case EmitData::DirectionType::kNone:
@@ -165,7 +157,7 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 	if (emitType_ == EmitData::EmitType::kRandom) {	// ランダム
 		const Vector3 localPos = Random::RandVector3(range_, particleManager->GetRandomEngine());
 		pos = centerPos + localPos;
-		normal = SafeNormalize(localPos);
+		normal = Math::NormalizeSafe(localPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon);
 	}
 	else if (emitType_ == EmitData::EmitType::kSurface) { // 表面
 		// AABBの最小・最大座標
@@ -248,7 +240,7 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 		const Vector3 localPos = Lerp(p0, p1, t);
 
 		pos = centerPos + localPos;
-		normal = SafeNormalize(localPos);
+		normal = Math::NormalizeSafe(localPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon);
 	}
 
 	CreateShapeParticle(particleGroup, emitData_, directionType_, particleManager->GetRandomEngine(), pos, centerPos, normal);
@@ -399,7 +391,7 @@ void Engine::CornerParticleEmitter::EmitUniqe() {
 	const Vector3 rotatedPos = rotationMatrix.Transform(localPos);
 	const Vector3 pos = centerPos + rotatedPos;
 	const Vector3 normal = emitType_ == EmitData::EmitType::kEdge
-		? SafeNormalize(rotatedPos)
+		? Math::NormalizeSafe(rotatedPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon)
 		: rotationMatrix.Transform({ 0.0f,1.0f,0.0f }).Normalize();
 	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
@@ -587,7 +579,7 @@ void Engine::TriangleParticleEmitter::EmitUniqe() {
 	Vector3 pos = centerPos + localPos;
 	Vector3 normal = triangle_.GetNormal();
 	if (emitType_ == EmitData::EmitType::kEdge) {
-		normal = SafeNormalize(localPos - triangle_.GetCentroid(), normal);
+		normal = Math::NormalizeSafe(localPos - triangle_.GetCentroid(), normal, kEmitterEpsilon);
 	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
@@ -651,7 +643,7 @@ void Engine::MeshParticleEmitter::EmitUniqe() {
 	Vector3 pos = centerPos + localPos;
 	Vector3 normal = tri.GetNormal();
 	if (emitType_ == EmitData::EmitType::kEdge) {
-		normal = SafeNormalize(localPos - tri.GetCentroid(), normal);
+		normal = Math::NormalizeSafe(localPos - tri.GetCentroid(), normal, kEmitterEpsilon);
 	}
 
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);

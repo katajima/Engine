@@ -140,7 +140,6 @@ private:
 	void BuildUIActions(); // 必要なら
 
 	// 入力合成ユーティリティ
-	static Vector2 ClampLen1(const Vector2& v);
 
 
 	void RecordBufferedEvents();

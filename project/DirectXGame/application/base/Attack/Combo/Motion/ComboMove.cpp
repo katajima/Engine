@@ -1,34 +1,13 @@
-﻿#include "ComboMove.h"
+#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/engine/Math/MathFunctions.h"
 #include <algorithm>
 #include <cmath>
-
-namespace {
-
-	Vector3 NormalizeSafe(const Vector3& v, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }) {
-		if (v.Length() <= 0.0001f) {
-			return fallback;
-		}
-		return v.Normalize();
-	}
-
-	// X=Right Y=Up Z=Forward
-	// Up(0,1,0) と Forward から Right を作る
-	Vector3 MakeRightFromForward(const Vector3& forward) {
-		Vector3 f = forward;
-		f.y = 0.0f;
-		f = NormalizeSafe(f, Vector3{ 0.0f,0.0f,1.0f });
-
-		// right = cross(up, forward)
-		// up=(0,1,0), forward=(fx,fy,fz) -> (fz,0,-fx)
-		return NormalizeSafe(Vector3{ f.z, 0.0f, -f.x }, Vector3{ 1.0f,0.0f,0.0f });
-	}
-}
 
 namespace Combo {
 
@@ -190,7 +169,7 @@ namespace Combo {
 		case MoveType::kInput: // 入力方向
 		{
 			if (stickDirection_.Length() != 0.0f) {
-				direction_ = NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
+				direction_ = Math::NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
 			}
 			else {
 				direction_ = {};
@@ -200,7 +179,7 @@ namespace Combo {
 
 		case MoveType::kForward: // 所有者の向いている方向
 		{
-			direction_ = NormalizeSafe(moveComponent->GetDirection());
+			direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 			break;
 		}
 
@@ -213,14 +192,14 @@ namespace Combo {
 					direction_.y = 0.0f;
 				}
 
-				direction_ = NormalizeSafe(direction_, NormalizeSafe(moveComponent->GetDirection()));
+				direction_ = Math::NormalizeSafe(direction_, Math::NormalizeSafe(moveComponent->GetDirection()));
 			}
 			else {
 				if (stickDirection_.Length() != 0.0f) {
-					direction_ = NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
+					direction_ = Math::NormalizeSafe(Vector3{ stickDirection_.x, 0.0f, stickDirection_.y });
 				}
 				else {
-					direction_ = NormalizeSafe(moveComponent->GetDirection());
+					direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 				}
 			}
 			break;
@@ -230,13 +209,13 @@ namespace Combo {
 		{
 			// 今のコードベースだと camera の forward 取得関数が見えないので
 			// 既存挙動を維持して所有者前方を使う
-			direction_ = NormalizeSafe(moveComponent->GetDirection());
+			direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 			break;
 		}
 
 		default:
 		{
-			direction_ = NormalizeSafe(moveComponent->GetDirection());
+			direction_ = Math::NormalizeSafe(moveComponent->GetDirection());
 			break;
 		}
 		}
@@ -250,7 +229,7 @@ namespace Combo {
 			return {};
 		}
 
-		baseForward = NormalizeSafe(baseForward, Vector3{ 0.0f,0.0f,1.0f });
+		baseForward = Math::NormalizeSafe(baseForward, Vector3{ 0.0f,0.0f,1.0f });
 
 		// ローカル入力
 		Vector3 local = GetActiveLocalMoveVector();
@@ -260,7 +239,7 @@ namespace Combo {
 
 		// 基底
 		const Vector3 up = Vector3{ 0.0f,1.0f,0.0f };
-		const Vector3 right = MakeRightFromForward(baseForward);
+		const Vector3 right = Math::MakeRightFromForwardXZ(baseForward);
 
 		// ★ここが重要（速度を掛ける）
 		const Vector3 moveSpeed = GetActiveMoveSpeed();
@@ -281,7 +260,7 @@ namespace Combo {
 			toTarget.y = 0.0f;
 		}
 
-		Vector3 toTargetDir = NormalizeSafe(toTarget, NormalizeSafe(moveComponent->GetDirection()));
+		Vector3 toTargetDir = Math::NormalizeSafe(toTarget, Math::NormalizeSafe(moveComponent->GetDirection()));
 		return targetPos - toTargetDir * GetActiveMoveTargetRadius();
 	}
 

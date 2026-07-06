@@ -77,8 +77,6 @@ private:
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
-	// 方向指定
-	Vector3 NormalizeSafe(const Vector3& v) const;
 	// 移動システムにリクエストする
 	void SendReactionMoveRequest(const Vector3& velocity);
 	// リアクション終了

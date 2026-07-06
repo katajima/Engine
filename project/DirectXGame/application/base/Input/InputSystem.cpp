@@ -1,22 +1,5 @@
 #include "InputSystem.h"
-#include <cmath>
-
-namespace {
-	// ベクトルの長さを1以下にして斜め入力だけ速くならないようにする
-	Vector2 ClampLen1(const Vector2& value) {
-		const float lengthSq = value.x * value.x + value.y * value.y;
-		if (lengthSq <= 1.0f) {
-			return value;
-		}
-
-		const float length = std::sqrt(lengthSq);
-		if (length <= 1e-6f) {
-			return Vector2{};
-		}
-
-		return Vector2{ value.x / length, value.y / length };
-	}
-}
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 void InputSystem::Initialize(Engine::Input* input) {
 	this->input = input;
@@ -44,7 +27,7 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	Vector2 moveStick = input->GetGamePadLeftStick();
 	moveStick.x += keyboardMove.x;
 	moveStick.y += keyboardMove.y;
-	playerInputData_.moveShick = ClampLen1(moveStick);
+	playerInputData_.moveShick = Math::ClampLength(moveStick);
 
 	// キーボード視点入力を作成
 	Vector2 keyboardLook{};
@@ -65,7 +48,7 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	Vector2 lookStick = input->GetGamePadRightStick();
 	lookStick.x += keyboardLook.x + mouseLook.x;
 	lookStick.y += keyboardLook.y + mouseLook.y;
-	playerInputData_.lookStick = ClampLen1(lookStick);
+	playerInputData_.lookStick = Math::ClampLength(lookStick);
 
 	// ジャンプ入力押している間
 	playerInputData_.jumpPressed =
@@ -113,7 +96,7 @@ void InputSystem::GameInputUpdate(float dt) {
 	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
 	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
 	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
-	gameInputData_.moveShick = ClampLen1(gameMove);
+	gameInputData_.moveShick = Math::ClampLength(gameMove);
 	// 決定入力押した瞬間
 	gameInputData_.decisionTrigger =
 		input->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||

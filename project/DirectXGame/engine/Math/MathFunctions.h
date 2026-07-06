@@ -32,6 +32,14 @@ namespace Math {
 	float Clamp(float t, float min, float max);
 	// 正規化クランプ
 	float NormalizeClamp(float value, float minValue, float maxValue);
+	// 最大長を超えないように2Dベクトルを制限
+	Vector2 ClampLength(const Vector2& value, float maxLength = 1.0f);
+	// ゼロに近い3Dベクトルをフォールバック方向で安全に正規化
+	Vector3 NormalizeSafe(const Vector3& value, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }, float epsilon = 0.0001f);
+	// XZ平面の前方向から右方向を生成
+	Vector3 MakeRightFromForwardXZ(const Vector3& forward);
+	// 2Dワールド行列を使って座標をローカル空間へ変換
+	Vector2 TransformPointToLocal(const Vector2& worldPosition, const Matrix3x3& worldMatrix);
 
 	// 反射関数
 	Vector3 Reflect(const Vector3& input, const Vector3& normal);

@@ -54,6 +54,48 @@ float Math::NormalizeClamp(float value, float minValue, float maxValue)
 	float t = (value - minValue) / (maxValue - minValue);
 	return Math::Clamp(t,0.0f, 1.0f);
 }
+
+Vector2 Math::ClampLength(const Vector2& value, float maxLength) {
+	// 負の最大長は扱えないため、0以上へ補正する。
+	const float clampedMaxLength = (std::max)(maxLength, 0.0f);
+	const float lengthSquared = Dot(value, value);
+	const float maxLengthSquared = clampedMaxLength * clampedMaxLength;
+	if (lengthSquared <= maxLengthSquared) {
+		return value;
+	}
+
+	// ゼロ除算を避けつつ、指定された最大長まで縮小する。
+	const float length = std::sqrt(lengthSquared);
+	if (length <= 0.000001f) {
+		return Vector2{};
+	}
+	return value * (clampedMaxLength / length);
+}
+
+Vector3 Math::NormalizeSafe(const Vector3& value, const Vector3& fallback, float epsilon) {
+	// 許容値以下のベクトルは方向を持たないため、指定方向を返す。
+	const float safeEpsilon = (std::max)(epsilon, 0.0f);
+	if (value.LengthSq() <= safeEpsilon * safeEpsilon) {
+		return fallback;
+	}
+	return value.Normalize();
+}
+
+Vector3 Math::MakeRightFromForwardXZ(const Vector3& forward) {
+	// 高さ成分を除外し、XZ平面上の前方向へ揃える。
+	Vector3 horizontalForward = forward;
+	horizontalForward.y = 0.0f;
+	horizontalForward = NormalizeSafe(horizontalForward, Vector3{ 0.0f,0.0f,1.0f });
+
+	// 上方向と前方向の外積に相当する右方向を生成する。
+	return NormalizeSafe(Vector3{ horizontalForward.z, 0.0f, -horizontalForward.x }, Vector3{ 1.0f,0.0f,0.0f });
+}
+
+Vector2 Math::TransformPointToLocal(const Vector2& worldPosition, const Matrix3x3& worldMatrix) {
+	// ワールド行列の逆行列で座標を変換し、ローカル位置を求める。
+	const Matrix3x3 inverseWorldMatrix = Inverse(worldMatrix);
+	return Transforms(worldPosition, inverseWorldMatrix);
+}
 // 反射
 Vector3 Math::Reflect(const Vector3& input, const Vector3& normal)
 {

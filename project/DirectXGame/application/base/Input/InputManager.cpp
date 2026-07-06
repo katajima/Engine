@@ -1,5 +1,5 @@
 #include "InputManager.h"
-#include <cmath>
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 
 
@@ -51,7 +51,7 @@ void InputManager::BuildGameplayActions(){
     move.x += ls.x;
     move.y += ls.y;
 
-    move = ClampLen1(move);
+    move = Math::ClampLength(move);
     value2_[Idx(Action::Move)] = move;
     pressed_[Idx(Action::Move)] = move.x != 0.0f || move.y != 0.0f;
     triggered_[Idx(Action::Move)] = pressed_[Idx(Action::Move)] && !isDown_[Idx(Action::Move)];
@@ -68,7 +68,7 @@ void InputManager::BuildGameplayActions(){
         look.x += mouseDelta.x * 0.05f;
         look.y -= mouseDelta.y * 0.05f;
     }
-    look = ClampLen1(look);
+    look = Math::ClampLength(look);
     value2_[Idx(Action::Look)] = look;
     pressed_[Idx(Action::Look)] = look.x != 0.0f || look.y != 0.0f;
     triggered_[Idx(Action::Look)] = pressed_[Idx(Action::Look)] && !isDown_[Idx(Action::Look)];
@@ -175,16 +175,6 @@ void InputManager::BuildGameplayActions(){
 }
 
 void InputManager::BuildUIActions(){
-}
-
-Vector2 InputManager::ClampLen1(const Vector2& v){
-    const float lenSq = v.x * v.x + v.y * v.y;
-    if (lenSq <= 1.0f) return v;
-
-    const float len = std::sqrt(lenSq);
-    if (len <= 1e-6f) return Vector2{ 0,0 };
-
-    return Vector2{ v.x / len, v.y / len };
 }
 
 void InputManager::RecordBufferedEvents(){

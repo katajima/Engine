@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
 
@@ -192,12 +193,12 @@ float HitMotionSystem::GetGravityScale() const {
 
 // 速度
 Vector3 HitMotionSystem::BuildMoveVelocity() const {
-	Vector3 dir = NormalizeSafe(data_.normal);
+	Vector3 dir = Math::NormalizeSafe(data_.normal);
 
 	// 基本は地面に沿う方向で使う
 	Vector3 horizontalDir = dir;
 	horizontalDir.y = 0.0f;
-	horizontalDir = NormalizeSafe(horizontalDir);
+	horizontalDir = Math::NormalizeSafe(horizontalDir);
 
 	Vector3 velocity{};
 
@@ -258,15 +259,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const {
 	return velocity;
 }
 
-// 
-Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const {
-	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
-	if (lenSq <= 0.000001f) {
-		return Vector3{ 0.0f, 0.0f, 1.0f };
-	}
-	return v.Normalize();
-}
-
 // 移動リクエスト
 void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	if (!moveRequestSystem) {
@@ -277,7 +269,7 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	request.layer = MoveLayer::kBase;
 	request.speedMultiplier = 1.0f;
 	request.velocity = velocity;
-	request.direction = NormalizeSafe(data_.normal);
+	request.direction = Math::NormalizeSafe(data_.normal);
 	request.priority = 100;
 	request.invincible = false;
 	request.isLanding = false;

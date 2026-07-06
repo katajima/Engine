@@ -1,11 +1,6 @@
 #include "UIElement.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-
-
-static Vector2 ToLocalSpace(const Vector2& worldPos, const Engine::WorldTransform2d& parentTransform) {
-	Matrix3x3 invMat = Inverse(parentTransform.worldMat_);
-	return Transforms(worldPos, invMat);
-}
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 void Engine::UIElement::Init(EntityManager* entityManager, std::string name)
 {
@@ -226,7 +221,7 @@ void Engine::UISlider::Update(float deltaTime) {
 		float rightLimit = size.x - rightHalf *2;
 
 		// マウス座標を背景スプライトのローカル座標に変換
-		Vector2 localMousePos = ToLocalSpace(mouse, backgroundSprite->GetSprite()->GetWorldTransform2d());
+		Vector2 localMousePos = Math::TransformPointToLocal(mouse, backgroundSprite->GetSprite()->GetWorldTransform2d().worldMat_);
 		float mouseX = localMousePos.x;
 
 
