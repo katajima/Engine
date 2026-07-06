@@ -2788,6 +2788,24 @@ namespace Combo {
 		bool animationStop = false;
 		// アニメーションの止めるタイミング
 		float animationStopTime = 1.0f;
+
+
+		// アニメーションのルートモーションを使うか？
+		bool isAnimationRootMotion = false;
+
+		// コンボ中にキャラクター本体のTransformアニメーションを使用するか
+		bool isTransformAnimation = false;
+		// Transformアニメーションの開始時間
+		float transformStartTime = 0.0f;
+		// Transformアニメーションの終了時間
+		float transformEndTime = 0.5f;
+		// 開始時に加算するTransformオフセット
+		Transform transformStart = { {}, {}, {} };
+		// 終了時に加算するTransformオフセット
+		Transform transformEnd = { {}, {}, {} };
+		// コンボ終了時に適用中のTransformオフセットを取り除くか
+		bool restoreTransformOnExit = true;
+
 	};
 
 	// 保存項目条件データ
@@ -3930,6 +3948,17 @@ namespace Combo {
 			globalVariables->AddItem(name, "アニメーションループ", data.animation.animationLoop);
 			globalVariables->AddItem(name, "アニメーションを一定時間で止めるか", data.animation.animationStop);
 			globalVariables->AddItem(name, "アニメーション停止時間", data.animation.animationStopTime);
+			// Transformアニメーション設定をコンボ単位で保存対象へ登録する
+			globalVariables->AddItem(name, "Transformアニメーション使用", data.animation.isTransformAnimation);
+			globalVariables->AddItem(name, "Transformアニメーション開始時間", data.animation.transformStartTime);
+			globalVariables->AddItem(name, "Transformアニメーション終了時間", data.animation.transformEndTime);
+			globalVariables->AddItem(name, "Transform開始スケール加算値", data.animation.transformStart.scale);
+			globalVariables->AddItem(name, "Transform開始回転加算値", data.animation.transformStart.rotate);
+			globalVariables->AddItem(name, "Transform開始位置加算値", data.animation.transformStart.translate);
+			globalVariables->AddItem(name, "Transform終了スケール加算値", data.animation.transformEnd.scale);
+			globalVariables->AddItem(name, "Transform終了回転加算値", data.animation.transformEnd.rotate);
+			globalVariables->AddItem(name, "Transform終了位置加算値", data.animation.transformEnd.translate);
+			globalVariables->AddItem(name, "Transform終了時復元", data.animation.restoreTransformOnExit);
 		}
 		// 移動
 		{
@@ -4221,6 +4250,17 @@ namespace Combo {
 			data.animation.animationLoop = globalVariables->GetValue<bool>(name, "アニメーションループ");
 			data.animation.animationStop = globalVariables->GetValue<bool>(name, "アニメーションを一定時間で止めるか");
 			data.animation.animationStopTime = globalVariables->GetValue<float>(name, "アニメーション停止時間");
+			// 保存済みのTransformアニメーション設定を実行データへ読み込む
+			data.animation.isTransformAnimation = globalVariables->GetValue<bool>(name, "Transformアニメーション使用");
+			data.animation.transformStartTime = globalVariables->GetValue<float>(name, "Transformアニメーション開始時間");
+			data.animation.transformEndTime = globalVariables->GetValue<float>(name, "Transformアニメーション終了時間");
+			data.animation.transformStart.scale = globalVariables->GetValue<Vector3>(name, "Transform開始スケール加算値");
+			data.animation.transformStart.rotate = globalVariables->GetValue<Vector3>(name, "Transform開始回転加算値");
+			data.animation.transformStart.translate = globalVariables->GetValue<Vector3>(name, "Transform開始位置加算値");
+			data.animation.transformEnd.scale = globalVariables->GetValue<Vector3>(name, "Transform終了スケール加算値");
+			data.animation.transformEnd.rotate = globalVariables->GetValue<Vector3>(name, "Transform終了回転加算値");
+			data.animation.transformEnd.translate = globalVariables->GetValue<Vector3>(name, "Transform終了位置加算値");
+			data.animation.restoreTransformOnExit = globalVariables->GetValue<bool>(name, "Transform終了時復元");
 		}
 		// 移動
 		{
@@ -4505,6 +4545,17 @@ namespace Combo {
 			globalVariables->SetValue(name, "アニメーションループ", data.animation.animationLoop);
 			globalVariables->SetValue(name, "アニメーションを一定時間で止めるか", data.animation.animationStop);
 			globalVariables->SetValue(name, "アニメーション停止時間", data.animation.animationStopTime);
+			// エディター上のTransformアニメーション設定を保存値へ反映する
+			globalVariables->SetValue(name, "Transformアニメーション使用", data.animation.isTransformAnimation);
+			globalVariables->SetValue(name, "Transformアニメーション開始時間", data.animation.transformStartTime);
+			globalVariables->SetValue(name, "Transformアニメーション終了時間", data.animation.transformEndTime);
+			globalVariables->SetValue(name, "Transform開始スケール加算値", data.animation.transformStart.scale);
+			globalVariables->SetValue(name, "Transform開始回転加算値", data.animation.transformStart.rotate);
+			globalVariables->SetValue(name, "Transform開始位置加算値", data.animation.transformStart.translate);
+			globalVariables->SetValue(name, "Transform終了スケール加算値", data.animation.transformEnd.scale);
+			globalVariables->SetValue(name, "Transform終了回転加算値", data.animation.transformEnd.rotate);
+			globalVariables->SetValue(name, "Transform終了位置加算値", data.animation.transformEnd.translate);
+			globalVariables->SetValue(name, "Transform終了時復元", data.animation.restoreTransformOnExit);
 
 
 		}
@@ -7100,6 +7151,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboImG
 ============================================================
 #include "ComboImGui.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
+#include <algorithm>
 
 void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 	int& currentFrame, int& firstFrame, int& maxFrame) {
@@ -7148,6 +7200,24 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 
 		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
+
+		// キャラクター本体へ加算するTransformアニメーションを編集する
+		ImGui::SeparatorText("トランスフォームアニメーション");
+		ImGui::Checkbox("Transformアニメーションを使用", &animationData.isTransformAnimation);
+		if (animationData.isTransformAnimation) {
+			ImGui::DragFloat("Transform開始時間", &animationData.transformStartTime, 0.01f, 0.0f, endTime, "%.2f");
+			ImGui::DragFloat("Transform終了時間", &animationData.transformEndTime, 0.01f, 0.0f, endTime, "%.2f");
+			// 終了時間が開始時間より前にならないよう編集値を補正する
+			animationData.transformEndTime = (std::max)(animationData.transformEndTime, animationData.transformStartTime);
+
+			ImGui::DragFloat3("開始スケール加算値", &animationData.transformStart.scale.x, 0.01f);
+			ImGui::DragFloat3("開始回転加算値(rad)", &animationData.transformStart.rotate.x, 0.01f);
+			ImGui::DragFloat3("開始位置加算値", &animationData.transformStart.translate.x, 0.01f);
+			ImGui::DragFloat3("終了スケール加算値", &animationData.transformEnd.scale.x, 0.01f);
+			ImGui::DragFloat3("終了回転加算値(rad)", &animationData.transformEnd.rotate.x, 0.01f);
+			ImGui::DragFloat3("終了位置加算値", &animationData.transformEnd.translate.x, 0.01f);
+			ImGui::Checkbox("コンボ終了時にTransformを戻す", &animationData.restoreTransformOnExit);
+		}
 
 		// BeginComboでの選択
 		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
@@ -8278,25 +8348,33 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboAnimation.cpp
 ============================================================
-﻿#include "ComboAnimation.h"
+#include "ComboAnimation.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+#include <algorithm>
 
 namespace Combo {
 
 	// 開始
 	void ComboAnimation::Enter(Character::BaseCharacter* owner) {
+		// 前回のコンボで保持していた実行状態を初期化する
+		isAnimation = false;
+		worldTransform_ = &owner->GetObjectComponent()->GetWorldTransform();
+		appliedTransformOffset_ = Transform{};
+		appliedTransformOffset_.scale = {};
+
 		// アニメーションの設定
 		if(owner->GetObjectComponent()->GetObject3D())
 		animationComponent = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		if (animationComponent) isAnimation = true;
-		// アニメーションが存在しないなら終了
-		if (!isAnimation) return;
 
 		// 移動コンポーネント取得
 		movementComponent = owner->GetMoveComponent();
+		// スケルタルアニメーションが存在しなくてもTransformアニメーションは処理する
+		if (!isAnimation) return;
 		// アニメーションが存在するならアニメーション設定
 		animationComponent->SetAnimation(data_.animationName, data_.animationBlendTime);	// 再生するアニメーション設定
 		animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
@@ -8307,11 +8385,14 @@ namespace Combo {
 
 	// 更新
 	void ComboAnimation::Update(const Character::CharacterContext& ctx, float timer, bool isDebug) {
+		// コンボ時間に合わせてTransformオフセットを更新する
+		ApplyTransformAnimation(timer);
+
 		// アニメーションが存在しないなら終了
 		if (!isAnimation) return;
 
 		// 着地状態か 
-		onGlound = movementComponent->GetIsLanding();
+		onGlound = movementComponent ? movementComponent->GetIsLanding() : true;
 
 		// アニメーションスピード設定
 		animationComponent->SetAnimationSpeed(data_.animationSpeed);
@@ -8352,10 +8433,65 @@ namespace Combo {
 
 	// 終了
 	void ComboAnimation::Exit(Character::BaseCharacter* owner) {
+		// 設定に応じてコンボ中に加算したTransformオフセットを除去する
+		if (data_.restoreTransformOnExit) {
+			RemoveTransformAnimationOffset();
+		}
+		worldTransform_ = nullptr;
+
 		// アニメーションが存在しないなら終了
 		if (!isAnimation) return;
 		animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定
 		animationComponent->SetIsPlaying(true);
+	}
+
+	float ComboAnimation::CalculateTransformAnimationRate(float timer) const {
+		// 時間幅が無い設定では終了値を即時適用する
+		const float duration = data_.transformEndTime - data_.transformStartTime;
+		if (duration <= 0.0001f) {
+			return timer >= data_.transformStartTime ? 1.0f : 0.0f;
+		}
+
+		// Transformの開始・終了時間を0～1の補間率へ変換する
+		return std::clamp((timer - data_.transformStartTime) / duration, 0.0f, 1.0f);
+	}
+
+	void ComboAnimation::ApplyTransformAnimation(float timer) {
+		// 適用先が無い場合はTransformを変更しない
+		if (!worldTransform_) {
+			return;
+		}
+		// エディターで無効化された場合は、それまでのオフセットを即座に除去する
+		if (!data_.isTransformAnimation) {
+			RemoveTransformAnimationOffset();
+			return;
+		}
+
+		// 開始値と終了値をコンボ時間で補間する
+		const float rate = CalculateTransformAnimationRate(timer);
+		const Transform currentOffset = data_.transformStart.LerpTransform(data_.transformEnd, rate);
+
+		// 差分だけを加算し、ComboMoveなどが行った移動・回転を維持する
+		worldTransform_->scale_ += currentOffset.scale - appliedTransformOffset_.scale;
+		worldTransform_->rotate_ += currentOffset.rotate - appliedTransformOffset_.rotate;
+		worldTransform_->translate_ += currentOffset.translate - appliedTransformOffset_.translate;
+		appliedTransformOffset_ = currentOffset;
+		worldTransform_->Update();
+	}
+
+	void ComboAnimation::RemoveTransformAnimationOffset() {
+		// 適用先が無い場合は除去処理を行わない
+		if (!worldTransform_) {
+			return;
+		}
+
+		// 最後に加算したオフセットだけを戻し、他システムのTransform変更を保持する
+		worldTransform_->scale_ -= appliedTransformOffset_.scale;
+		worldTransform_->rotate_ -= appliedTransformOffset_.rotate;
+		worldTransform_->translate_ -= appliedTransformOffset_.translate;
+		appliedTransformOffset_ = Transform{};
+		appliedTransformOffset_.scale = {};
+		worldTransform_->Update();
 	}
 }
 
@@ -8363,13 +8499,14 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboAnimation.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 // 前方宣言
 namespace Engine {
 	class AnimationComponent;	// アニメーション
 	class RigidBodyComponent;	// リジットボディー
+	class WorldTransform;		// Transformアニメーションの適用先
 }
 
 
@@ -8402,6 +8539,14 @@ namespace Combo {
 		// 終了条件設定
 		void SetEndConditionType(EndConditionType type) { endType = type; }
 	private:
+		// 指定時間からTransformアニメーションの補間率を計算する
+		float CalculateTransformAnimationRate(float timer) const;
+		// 前フレームとの差分でTransformアニメーションを適用する
+		void ApplyTransformAnimation(float timer);
+		// 現在適用中のTransformオフセットを取り除く
+		void RemoveTransformAnimationOffset();
+
+	private:
 		GlobalAnimation data_;
 	private:
 		// アニメーション
@@ -8414,6 +8559,10 @@ namespace Combo {
 		bool onGlound = true;
 		// アニメーションが存在しているか
 		bool isAnimation = false;
+		// Transformアニメーションの適用先
+		Engine::WorldTransform* worldTransform_ = nullptr;
+		// 前フレームまでに適用したTransformオフセット
+		Transform appliedTransformOffset_{};
 
 	};
 
