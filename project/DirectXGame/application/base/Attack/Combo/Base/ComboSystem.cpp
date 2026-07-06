@@ -553,6 +553,17 @@ namespace Combo {
 			globalVariables->AddItem(name, "アニメーションループ", data.animation.animationLoop);
 			globalVariables->AddItem(name, "アニメーションを一定時間で止めるか", data.animation.animationStop);
 			globalVariables->AddItem(name, "アニメーション停止時間", data.animation.animationStopTime);
+			// Transformアニメーション設定をコンボ単位で保存対象へ登録する
+			globalVariables->AddItem(name, "Transformアニメーション使用", data.animation.isTransformAnimation);
+			globalVariables->AddItem(name, "Transformアニメーション開始時間", data.animation.transformStartTime);
+			globalVariables->AddItem(name, "Transformアニメーション終了時間", data.animation.transformEndTime);
+			globalVariables->AddItem(name, "Transform開始スケール加算値", data.animation.transformStart.scale);
+			globalVariables->AddItem(name, "Transform開始回転加算値", data.animation.transformStart.rotate);
+			globalVariables->AddItem(name, "Transform開始位置加算値", data.animation.transformStart.translate);
+			globalVariables->AddItem(name, "Transform終了スケール加算値", data.animation.transformEnd.scale);
+			globalVariables->AddItem(name, "Transform終了回転加算値", data.animation.transformEnd.rotate);
+			globalVariables->AddItem(name, "Transform終了位置加算値", data.animation.transformEnd.translate);
+			globalVariables->AddItem(name, "Transform終了時復元", data.animation.restoreTransformOnExit);
 		}
 		// 移動
 		{
@@ -844,6 +855,17 @@ namespace Combo {
 			data.animation.animationLoop = globalVariables->GetValue<bool>(name, "アニメーションループ");
 			data.animation.animationStop = globalVariables->GetValue<bool>(name, "アニメーションを一定時間で止めるか");
 			data.animation.animationStopTime = globalVariables->GetValue<float>(name, "アニメーション停止時間");
+			// 保存済みのTransformアニメーション設定を実行データへ読み込む
+			data.animation.isTransformAnimation = globalVariables->GetValue<bool>(name, "Transformアニメーション使用");
+			data.animation.transformStartTime = globalVariables->GetValue<float>(name, "Transformアニメーション開始時間");
+			data.animation.transformEndTime = globalVariables->GetValue<float>(name, "Transformアニメーション終了時間");
+			data.animation.transformStart.scale = globalVariables->GetValue<Vector3>(name, "Transform開始スケール加算値");
+			data.animation.transformStart.rotate = globalVariables->GetValue<Vector3>(name, "Transform開始回転加算値");
+			data.animation.transformStart.translate = globalVariables->GetValue<Vector3>(name, "Transform開始位置加算値");
+			data.animation.transformEnd.scale = globalVariables->GetValue<Vector3>(name, "Transform終了スケール加算値");
+			data.animation.transformEnd.rotate = globalVariables->GetValue<Vector3>(name, "Transform終了回転加算値");
+			data.animation.transformEnd.translate = globalVariables->GetValue<Vector3>(name, "Transform終了位置加算値");
+			data.animation.restoreTransformOnExit = globalVariables->GetValue<bool>(name, "Transform終了時復元");
 		}
 		// 移動
 		{
@@ -1128,6 +1150,17 @@ namespace Combo {
 			globalVariables->SetValue(name, "アニメーションループ", data.animation.animationLoop);
 			globalVariables->SetValue(name, "アニメーションを一定時間で止めるか", data.animation.animationStop);
 			globalVariables->SetValue(name, "アニメーション停止時間", data.animation.animationStopTime);
+			// エディター上のTransformアニメーション設定を保存値へ反映する
+			globalVariables->SetValue(name, "Transformアニメーション使用", data.animation.isTransformAnimation);
+			globalVariables->SetValue(name, "Transformアニメーション開始時間", data.animation.transformStartTime);
+			globalVariables->SetValue(name, "Transformアニメーション終了時間", data.animation.transformEndTime);
+			globalVariables->SetValue(name, "Transform開始スケール加算値", data.animation.transformStart.scale);
+			globalVariables->SetValue(name, "Transform開始回転加算値", data.animation.transformStart.rotate);
+			globalVariables->SetValue(name, "Transform開始位置加算値", data.animation.transformStart.translate);
+			globalVariables->SetValue(name, "Transform終了スケール加算値", data.animation.transformEnd.scale);
+			globalVariables->SetValue(name, "Transform終了回転加算値", data.animation.transformEnd.rotate);
+			globalVariables->SetValue(name, "Transform終了位置加算値", data.animation.transformEnd.translate);
+			globalVariables->SetValue(name, "Transform終了時復元", data.animation.restoreTransformOnExit);
 
 
 		}

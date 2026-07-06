@@ -256,6 +256,24 @@ namespace Combo {
 		bool animationStop = false;
 		// アニメーションの止めるタイミング
 		float animationStopTime = 1.0f;
+
+
+		// アニメーションのルートモーションを使うか？
+		bool isAnimationRootMotion = false;
+
+		// コンボ中にキャラクター本体のTransformアニメーションを使用するか
+		bool isTransformAnimation = false;
+		// Transformアニメーションの開始時間
+		float transformStartTime = 0.0f;
+		// Transformアニメーションの終了時間
+		float transformEndTime = 0.5f;
+		// 開始時に加算するTransformオフセット
+		Transform transformStart = { {}, {}, {} };
+		// 終了時に加算するTransformオフセット
+		Transform transformEnd = { {}, {}, {} };
+		// コンボ終了時に適用中のTransformオフセットを取り除くか
+		bool restoreTransformOnExit = true;
+
 	};
 
 	// 保存項目条件データ

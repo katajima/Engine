@@ -1,10 +1,11 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 // 前方宣言
 namespace Engine {
 	class AnimationComponent;	// アニメーション
 	class RigidBodyComponent;	// リジットボディー
+	class WorldTransform;		// Transformアニメーションの適用先
 }
 
 
@@ -37,6 +38,14 @@ namespace Combo {
 		// 終了条件設定
 		void SetEndConditionType(EndConditionType type) { endType = type; }
 	private:
+		// 指定時間からTransformアニメーションの補間率を計算する
+		float CalculateTransformAnimationRate(float timer) const;
+		// 前フレームとの差分でTransformアニメーションを適用する
+		void ApplyTransformAnimation(float timer);
+		// 現在適用中のTransformオフセットを取り除く
+		void RemoveTransformAnimationOffset();
+
+	private:
 		GlobalAnimation data_;
 	private:
 		// アニメーション
@@ -49,6 +58,10 @@ namespace Combo {
 		bool onGlound = true;
 		// アニメーションが存在しているか
 		bool isAnimation = false;
+		// Transformアニメーションの適用先
+		Engine::WorldTransform* worldTransform_ = nullptr;
+		// 前フレームまでに適用したTransformオフセット
+		Transform appliedTransformOffset_{};
 
 	};
 

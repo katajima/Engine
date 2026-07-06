@@ -1,5 +1,6 @@
 #include "ComboImGui.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
+#include <algorithm>
 
 void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 	int& currentFrame, int& firstFrame, int& maxFrame) {
@@ -48,6 +49,24 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 
 		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
+
+		// キャラクター本体へ加算するTransformアニメーションを編集する
+		ImGui::SeparatorText("トランスフォームアニメーション");
+		ImGui::Checkbox("Transformアニメーションを使用", &animationData.isTransformAnimation);
+		if (animationData.isTransformAnimation) {
+			ImGui::DragFloat("Transform開始時間", &animationData.transformStartTime, 0.01f, 0.0f, endTime, "%.2f");
+			ImGui::DragFloat("Transform終了時間", &animationData.transformEndTime, 0.01f, 0.0f, endTime, "%.2f");
+			// 終了時間が開始時間より前にならないよう編集値を補正する
+			animationData.transformEndTime = (std::max)(animationData.transformEndTime, animationData.transformStartTime);
+
+			ImGui::DragFloat3("開始スケール加算値", &animationData.transformStart.scale.x, 0.01f);
+			ImGui::DragFloat3("開始回転加算値(rad)", &animationData.transformStart.rotate.x, 0.01f);
+			ImGui::DragFloat3("開始位置加算値", &animationData.transformStart.translate.x, 0.01f);
+			ImGui::DragFloat3("終了スケール加算値", &animationData.transformEnd.scale.x, 0.01f);
+			ImGui::DragFloat3("終了回転加算値(rad)", &animationData.transformEnd.rotate.x, 0.01f);
+			ImGui::DragFloat3("終了位置加算値", &animationData.transformEnd.translate.x, 0.01f);
+			ImGui::Checkbox("コンボ終了時にTransformを戻す", &animationData.restoreTransformOnExit);
+		}
 
 		// BeginComboでの選択
 		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
