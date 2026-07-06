@@ -15628,16 +15628,10 @@ private:
 File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.cpp
 ============================================================
 #include "CameraLockOn.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include <algorithm>
 #include <cmath>
-
-namespace {
-float LerpShortAngle(float current, float target, float t) {
-	const float diff = std::atan2(std::sin(target - current), std::cos(target - current));
-	return current + diff * t;
-}
-}
 
 Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 	if (!data.target) {
@@ -15660,8 +15654,8 @@ Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 	const float t = 1.0f - std::pow(1.0f - lerpRate, dt * 60.0f);
 
 	Vector3 result = transform.rotate;
-	result.x = LerpShortAngle(result.x, targetRotate.x, t);
-	result.y = LerpShortAngle(result.y, targetRotate.y, t);
+	result.x = Math::LerpShortAngle(result.x, targetRotate.x, t);
+	result.y = Math::LerpShortAngle(result.y, targetRotate.y, t);
 	result.z = 0.0f;
 
 	return result;
@@ -50588,7 +50582,7 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 		std::unique_ptr<BaseCamera> camera = std::make_unique<FixedCamera>();
 		camera->Initialize(nullptr, entityManager, nullptr, {});
 		camera->GetUniqueCamera()->SetTransform({ cameraData.scale,
-			DegreesToRadians(cameraData.rotation),cameraData.position });
+			Math::DegreesToRadians(cameraData.rotation),cameraData.position });
 		
 		camera->SetName(cameraData.fileName);
 
@@ -64807,7 +64801,7 @@ void Engine::GpuParticleManager::Draw()
 
 		// パーティクル描画
 
-		dxCommon->GetCommandList()->SetPipelineState(particleDraw.graphicsPipelineState.Get());
+		dxCommon->GetCommandList()->SetPipelineState(particleDraw.pipelineState.Get());
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(particleDraw.rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
@@ -64820,7 +64814,7 @@ void Engine::GpuParticleManager::Draw()
 
 		// トレイル描画
 
-		dxCommon->GetCommandList()->SetPipelineState(trailDraw.graphicsPipelineState.Get());
+		dxCommon->GetCommandList()->SetPipelineState(trailDraw.pipelineState.Get());
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(trailDraw.rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
@@ -65117,7 +65111,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
-	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 
@@ -65152,7 +65146,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 	psoTrailManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/GPU/GpuParticleTrail.PS.hlsl");
 
 	psoTrailManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
-	psoTrailManager_->GraphicsPipelineState(trailDraw.rootSignature, trailDraw.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoTrailManager_->GraphicsPipelineState(trailDraw.rootSignature, trailDraw.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 
@@ -65169,6 +65163,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 	csTrailUpdatePsoManager_->ComputePipelineState();
 
 };
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/GPU/GpuParticleManager.h
@@ -66557,37 +66552,37 @@ void Engine::PrimitiveCommon::DrawCommonSetting(PsoType type)
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defalt_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defalt_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kRingClamp:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(defaltRing_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defaltRing_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defaltRing_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCull:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(noCull_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(noCull_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(noCull_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCullRingClamp:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(noCullRing_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(noCullRing_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(noCullRing_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCullWireFrame:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(noCullWireFrame_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(noCullWireFrame_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(noCullWireFrame_.pipelineState.Get()); //PSOを設定
 		break;
 	default:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defalt_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defalt_.pipelineState.Get()); //PSOを設定
 		break;
 	}
 
@@ -66673,16 +66668,16 @@ void Engine::PrimitiveCommon::CreateGraphicsPipeline()
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(defalt_.rootSignature, defalt_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(defaltRing_.rootSignature, defaltRing_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(defalt_.rootSignature, defalt_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(defaltRing_.rootSignature, defaltRing_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(noCull_.rootSignature, noCull_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(noCullRing_.rootSignature, noCullRing_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCull_.rootSignature, noCull_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCullRing_.rootSignature, noCullRing_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME);
-	psoManager_->GraphicsPipelineState(noCullWireFrame_.rootSignature, noCullWireFrame_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCullWireFrame_.rootSignature, noCullWireFrame_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 }
@@ -66740,18 +66735,11 @@ namespace Engine {
 
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-		struct PrimitivePSO
-		{
-			//ルートシグネチャ
-			Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-			// グラフィックスパイプラインステート
-			Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
-		};
-		PrimitivePSO defalt_;
-		PrimitivePSO defaltRing_;
-		PrimitivePSO noCull_;
-		PrimitivePSO noCullRing_;
-		PrimitivePSO noCullWireFrame_;
+		PSRS defalt_;           // 標準プリミティブ用PSO
+		PSRS defaltRing_;       // リング用PSO
+		PSRS noCull_;           // カリングなし用PSO
+		PSRS noCullRing_;       // カリングなしリング用PSO
+		PSRS noCullWireFrame_;  // カリングなしワイヤーフレーム用PSO
 
 	public:
 
@@ -72826,6 +72814,12 @@ File Path: project/DirectXGame/engine/Math/MathFunctions.cpp
 
 #pragma region Math
 
+float Math::LerpShortAngle(float current, float target, float t) {
+	// sin/cosから[-PI, PI]の角度差を求め、常に最短方向へ補間する。
+	const float difference = std::atan2(std::sin(target - current), std::cos(target - current));
+	return current + difference * t;
+}
+
 float Math::Length(const float& v) {
 	float result;
 
@@ -72858,9 +72852,6 @@ float Math::Clamp(float t, float min, float max) {
 	return t;
 }
 
-float Math::Clamp3(float value, float min, float max) {
-	return (std::max)(min, (std::min)(value, max));
-}
 float Math::NormalizeClamp(float value, float minValue, float maxValue)
 
 {
@@ -73015,7 +73006,7 @@ Vector3 ClosestPoint::PointSegment(const Segment& segment, const Vector3& point)
 	}
 
 	float t = Dot(point - segment.origin, diff) / lenSq;
-	t = Math::Clamp3(t, 0.0f, 1.0f);
+	t = Math::Clamp(t, 0.0f, 1.0f);
 
 	return segment.origin - Multiply(diff, t);
 }
@@ -73118,8 +73109,8 @@ Vector3 ClosestPoint::SegmentSegment(const Segment& seg1, const Segment& seg2, V
 	// ゼロ除算の回避
 	float s = 0.0f, t = 0.0f;
 	if (denom != 0.0f) {
-		s = Math::Clamp3((b * e - c * d) / denom, 0.0f, 1.0f);
-		t = Math::Clamp3((a * e - b * d) / denom, 0.0f, 1.0f);
+		s = Math::Clamp((b * e - c * d) / denom, 0.0f, 1.0f);
+		t = Math::Clamp((a * e - b * d) / denom, 0.0f, 1.0f);
 	}
 
 	Vector3 closestOnSeg1 = Add(seg1.origin, Multiply(u, s));
@@ -73262,33 +73253,14 @@ namespace Math {
 		return value;
 	}
 
-	// 角度補間
-	static float LerpShortAngle(float a, float b, float t) {
-		// 角度差分を求める
-		float diff = b - a;
-
-		// 角度を [-2*PI, +2*PI] に補正する
-		diff = float(fmod(double(diff + 2.0f) * M_PI, double(4.0f) * M_PI)) - 2.0f * float(M_PI);
-
-		// 角度を [-PI, +PI] に補正する
-		if (diff > float(M_PI)) {
-			diff -= 2 * float(M_PI);
-		}
-		if (diff < -float(M_PI)) {
-
-			diff += 2 * float(M_PI);
-		}
-
-		return Lerp(a, a + diff, t);
-	}
+	// 最短方向で角度を補間する
+	float LerpShortAngle(float current, float target, float t);
 	// 長さ
 	float Length(const float& v);
 	// クランプ
 	float Clamp(float t);
 	// クランプ
 	float Clamp(float t, float min, float max);
-	// クランプ
-	float Clamp3(float value, float min, float max);
 	// 正規化クランプ
 	float NormalizeClamp(float value, float minValue, float maxValue);
 
@@ -75414,7 +75386,7 @@ void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 	std::string name = "resources/shaders/Offscreen/" + psName + ".PS.hlsl";
 
 	psoManager_->SetShaderFileName(ShaderFileName::PS, StringUtility::ConvertString(name));
-	psoManager_->GraphicsPipelineState(posteffect_.rootSignature, posteffect_.graphicsPipelineState, blendDesc, depthStencilDesc);
+	psoManager_->GraphicsPipelineState(posteffect_.rootSignature, posteffect_.pipelineState, blendDesc, depthStencilDesc);
 
 }
 
@@ -75423,7 +75395,7 @@ void Engine::IPostEffect::DrawSetting()
 {
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(posteffect_.rootSignature.Get());
 
-	dxCommon_->GetCommandList()->SetPipelineState(posteffect_.graphicsPipelineState.Get()); //PSOを設定
+	dxCommon_->GetCommandList()->SetPipelineState(posteffect_.pipelineState.Get()); //PSOを設定
 
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -75892,15 +75864,6 @@ namespace Engine {
 	class IPostEffect
 	{
 	public:
-		// ルートシグネチャとグラフィックパイプラインをまとめた構造体
-		struct Rendering
-		{
-			//ルートシグネチャ
-			Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-			// グラフィックスパイプラインステート
-			Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
-		};
-
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon, std::string psName);
 
@@ -75915,12 +75878,12 @@ namespace Engine {
 		//  DirectX共通クラス取得
 		DirectXCommon* GetDxCommon() const { return dxCommon_; }
 		// グラフィックパイプラインとルートシグネチャ取得
-		Rendering& GetRendering() { return posteffect_; };
+		PSRS& GetRendering() { return posteffect_; };
 	protected:
 		// ルートシグネチャの作成
 		virtual void CreateRootSignature() = 0;
 	protected:
-		Rendering posteffect_;
+		PSRS posteffect_; // ポストエフェクト用ルートシグネチャとPSO
 		std::unique_ptr<PSOManager> psoManager_;
 		DirectXCommon* dxCommon_ = nullptr;
 	};
@@ -76039,6 +76002,7 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Offscreen/PostEffectBlock.cpp
@@ -77046,30 +77010,30 @@ void Engine::CSPSOManager::ComputePipelineState()
 
 	
 	hr_ = dxgiDevice->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
-		IID_PPV_ARGS(&computePSRS_.computePipelineState));
+		IID_PPV_ARGS(&computePSRS_.pipelineState));
 
 }
 
 void Engine::CSPSOManager::PreComputePSRS()
 {
 	command->GetList()->SetComputeRootSignature(computePSRS_.rootSignature.Get());
-	command->GetList()->SetPipelineState(computePSRS_.computePipelineState.Get());
+	command->GetList()->SetPipelineState(computePSRS_.pipelineState.Get());
 }
 
 void Engine::CSPSOManager::SetShaderFileName(std::wstring filename)
 {
-	shderFile_.commpute.filePach = filename;
+	shaderFiles_.compute.filePath = filename;
 }
 
 void Engine::CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
 {
-	if (shderFile_.commpute.filePach != L"") {
+	if (shaderFiles_.compute.filePath != L"") {
 		// Shaderをコンパイルする
-		CS = dxcCompiler->CompileShader(shderFile_.commpute.filePach,
+		shaderBlobs_.CS = dxcCompiler->CompileShader(shaderFiles_.compute.filePath,
 			L"cs_6_0");
-		assert(CS != nullptr);
-		graphicsPipeline.CS = { CS->GetBufferPointer(),
-		CS->GetBufferSize() }; // VertexShader
+		assert(shaderBlobs_.CS != nullptr);
+		graphicsPipeline.CS = { shaderBlobs_.CS->GetBufferPointer(),
+		shaderBlobs_.CS->GetBufferSize() }; // ComputeShader
 	}
 }
 
@@ -77079,11 +77043,7 @@ void Engine::CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& g
 File Path: project/DirectXGame/engine/PSO/CSPSOManager.h
 ============================================================
 #pragma once
-#include "PSOFanction.h"
-
-
-#include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
+#include "psoData.h"
 
 
 namespace Engine {
@@ -77098,14 +77058,6 @@ namespace Engine {
 	class CSPSOManager
 	{
 	public:
-		// パイプラインステート＋ルートシグネチャ
-		struct PSRS {
-			////ルートシグネチャ
-			Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-			//// グラフィックスパイプラインステート
-			Microsoft::WRL::ComPtr < ID3D12PipelineState> computePipelineState;
-		};
-
 		// 初期化
 		void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
@@ -77123,29 +77075,19 @@ namespace Engine {
 		DXGIDevice* dxgiDevice = nullptr;
 		DXCCompiler* dxcCompiler = nullptr;
 
-		// ファイル名
-		struct fileName {
-			std::wstring filePach;
-		};
-
-		// シェーダーファイル
-		struct ShaderFile
-		{
-			fileName commpute;
-		};
-
-		Microsoft::WRL::ComPtr < IDxcBlob> CS;
+		ShaderBlobSet shaderBlobs_; // コンパイル済みシェーダーの共通保持領域
 
 		HRESULT hr_;
 
 
-		PSRS computePSRS_;
+		PSRS computePSRS_; // コンピュート用ルートシグネチャとPSO
 
-		ShaderFile shderFile_;
+		ShaderFileSet shaderFiles_; // 全シェーダーステージの共通ファイルパス
 	public:
 		void SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline);
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/PSO/PSOFanction.cpp
@@ -77329,48 +77271,48 @@ void Engine::PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DX
 
 void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
 {
-	ShaderBlob shaderBlob{};
+	ShaderBlobSet shaderBlob{}; // コンパイル済みグラフィックスシェーダー一式
 
 
-	if (shderFile_.vertex.filePach != L"") {
+	if (shaderFiles_.vertex.filePath != L"") {
 		// Shaderをコンパイルする
-		shaderBlob.VS = dxcCompiler->CompileShader(shderFile_.vertex.filePach,
+		shaderBlob.VS = dxcCompiler->CompileShader(shaderFiles_.vertex.filePath,
 			L"vs_6_0");
 		assert(shaderBlob.VS != nullptr);
 		graphicsPipeline.VS = { shaderBlob.VS->GetBufferPointer(),
 		shaderBlob.VS->GetBufferSize() }; // VertexShader
 	}
-	if (shderFile_.pixel.filePach != L"") {
-		shaderBlob.PS = dxcCompiler->CompileShader(shderFile_.pixel.filePach,
+	if (shaderFiles_.pixel.filePath != L"") {
+		shaderBlob.PS = dxcCompiler->CompileShader(shaderFiles_.pixel.filePath,
 			L"ps_6_0");
 		assert(shaderBlob.PS != nullptr);
 		graphicsPipeline.PS = { shaderBlob.PS->GetBufferPointer(),
 		shaderBlob.PS->GetBufferSize() }; // PixelShader
 	}
-	if (shderFile_.domain.filePach != L"") {
-		shaderBlob.DS = dxcCompiler->CompileShader(shderFile_.domain.filePach,
+	if (shaderFiles_.domain.filePath != L"") {
+		shaderBlob.DS = dxcCompiler->CompileShader(shaderFiles_.domain.filePath,
 			L"ds_6_0");
 		assert(shaderBlob.DS != nullptr);
 		graphicsPipeline.DS = { shaderBlob.DS->GetBufferPointer(),
 		shaderBlob.DS->GetBufferSize() }; // DomainShader
 	}
-	if (shderFile_.hull.filePach != L"") {
-		shaderBlob.HS = dxcCompiler->CompileShader(shderFile_.hull.filePach,
+	if (shaderFiles_.hull.filePath != L"") {
+		shaderBlob.HS = dxcCompiler->CompileShader(shaderFiles_.hull.filePath,
 			L"hs_6_0");
 		assert(shaderBlob.HS != nullptr);
 		graphicsPipeline.HS = { shaderBlob.HS->GetBufferPointer(),
 		shaderBlob.HS->GetBufferSize() }; // HullShader
 	}
-	if (shderFile_.geometry.filePach != L"") {
-		shaderBlob.GS = dxcCompiler->CompileShader(shderFile_.geometry.filePach,
+	if (shaderFiles_.geometry.filePath != L"") {
+		shaderBlob.GS = dxcCompiler->CompileShader(shaderFiles_.geometry.filePath,
 			L"gs_6_0");
 		assert(shaderBlob.GS != nullptr);
 		graphicsPipeline.GS = { shaderBlob.GS->GetBufferPointer(),
 		shaderBlob.GS->GetBufferSize() }; // GeometryShader
 	}
-	if (shderFile_.mesh.filePach != L"") {
+	if (shaderFiles_.mesh.filePath != L"") {
 	}
-	if (shderFile_.amplification.filePach != L"") {	
+	if (shaderFiles_.amplification.filePath != L"") {
 	}
 
 
@@ -77478,25 +77420,25 @@ void Engine::PSOManager::SetShaderFileName(ShaderFileName shaderFileName, std::w
 	switch (shaderFileName)
 	{
 	case ShaderFileName::PS:
-		shderFile_.pixel.filePach = filename;
+		shaderFiles_.pixel.filePath = filename;
 		break;
 	case ShaderFileName::VS:
-		shderFile_.vertex.filePach = filename;
+		shaderFiles_.vertex.filePath = filename;
 		break;
 	case ShaderFileName::DS:
-		shderFile_.domain.filePach = filename;
+		shaderFiles_.domain.filePath = filename;
 		break;
 	case ShaderFileName::HS:
-		shderFile_.hull.filePach = filename;
+		shaderFiles_.hull.filePath = filename;
 		break;
 	case ShaderFileName::GS:
-		shderFile_.geometry.filePach = filename;
+		shaderFiles_.geometry.filePath = filename;
 		break;
 	case ShaderFileName::AS:
-		shderFile_.amplification.filePach = filename;
+		shaderFiles_.amplification.filePath = filename;
 		break;
 	case ShaderFileName::MS:
-		shderFile_.domain.filePach = filename;
+		shaderFiles_.domain.filePath = filename;
 		break;
 	default:
 		break;
@@ -77537,7 +77479,7 @@ void Engine::PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topol
 
 	// 読み込み済みモデルを検索
 	if (psoRoots_.contains(type)) {
-		command->GetList()->SetPipelineState(psoRoots_[type].graphicsPipelineState.Get());
+		command->GetList()->SetPipelineState(psoRoots_[type].pipelineState.Get());
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		command->GetList()->SetGraphicsRootSignature(psoRoots_[type].rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
@@ -77557,7 +77499,7 @@ void Engine::PSOManager::CreatePso(
 
 	SetRootSignature(psoRoots_[type].rootSignature, rootParameter, rootNum, samplerDesc, samplerNum);
 	SetRasterizerDesc(cull, fill);
-	GraphicsPipelineState(psoRoots_[type].rootSignature, psoRoots_[type].graphicsPipelineState, blendDesc, depthStencilDesc, topologyType);
+	GraphicsPipelineState(psoRoots_[type].rootSignature, psoRoots_[type].pipelineState, blendDesc, depthStencilDesc, topologyType);
 }
 
 
@@ -77625,35 +77567,6 @@ namespace Engine {
 		DXGIDevice* dxgiDevice = nullptr;
 		DXCCompiler* dxcCompiler = nullptr;
 
-		// ファイル名
-		struct fileName {
-			std::wstring filePach;
-		};
-
-		// シェーダファイル
-		struct ShaderFile
-		{
-			fileName pixel;
-			fileName vertex;
-			fileName domain;
-			fileName hull;
-			fileName geometry;
-			fileName amplification;
-			fileName mesh;
-		};
-
-		// シェイプバルブ
-		struct ShaderBlob {
-			Microsoft::WRL::ComPtr < IDxcBlob> PS;
-			Microsoft::WRL::ComPtr < IDxcBlob> VS;
-			Microsoft::WRL::ComPtr < IDxcBlob> DS;
-			Microsoft::WRL::ComPtr < IDxcBlob> HS;
-			Microsoft::WRL::ComPtr < IDxcBlob> GS;
-			Microsoft::WRL::ComPtr < IDxcBlob> AS;
-			Microsoft::WRL::ComPtr < IDxcBlob> MS;
-		};
-
-
 		//
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc_{};
 		std::vector<std::string> semanticNames_; // SemanticName を保持するための vector
@@ -77668,7 +77581,7 @@ namespace Engine {
 		DXGI_FORMAT dsvFormat_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 
-		ShaderFile shderFile_;
+		ShaderFileSet shaderFiles_; // 全シェーダーステージのファイルパス
 
 
 		bool useInputLayout_ = true;
@@ -77748,10 +77661,39 @@ namespace Engine {
 
 	// パイプラインステート＋ルートシグネチャ
 	struct PSRS {
-		////ルートシグネチャ
+		// グラフィックス・コンピュートの両方で使用するルートシグネチャ
 		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-		//// グラフィックスパイプラインステート
-		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
+		// グラフィックス・コンピュートの両方で使用するパイプラインステート
+		Microsoft::WRL::ComPtr < ID3D12PipelineState> pipelineState;
+	};
+
+	// 各シェーダーステージのファイルパスを共通管理する構造体
+	struct ShaderFilePath {
+		std::wstring filePath; // コンパイル対象となるシェーダーファイルのパス
+	};
+
+	// グラフィックス・コンピュートで使用するシェーダーファイル一式
+	struct ShaderFileSet {
+		ShaderFilePath pixel;         // ピクセルシェーダー
+		ShaderFilePath vertex;        // 頂点シェーダー
+		ShaderFilePath domain;        // ドメインシェーダー
+		ShaderFilePath hull;          // ハルシェーダー
+		ShaderFilePath geometry;      // ジオメトリシェーダー
+		ShaderFilePath amplification; // アンプリフィケーションシェーダー
+		ShaderFilePath mesh;          // メッシュシェーダー
+		ShaderFilePath compute;       // コンピュートシェーダー
+	};
+
+	// コンパイル済みシェーダーを一時保持する共通構造体
+	struct ShaderBlobSet {
+		Microsoft::WRL::ComPtr < IDxcBlob> PS; // ピクセルシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> VS; // 頂点シェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> DS; // ドメインシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> HS; // ハルシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> GS; // ジオメトリシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> AS; // アンプリフィケーションシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> MS; // メッシュシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> CS; // コンピュートシェーダー
 	};
 }
 
@@ -84977,32 +84919,11 @@ static Vector3 Perpendicular(const Vector3& vector) {
 	return { 0.0f,-vector.z,vector.y };
 }
 
-// Degree変換
-static Vector3 RadiansToDegrees(Vector3 radians) {
-	Vector3 resurt;
-
-	resurt.x = float(radians.x * (180.0 / (float)M_PI));
-	resurt.y = float(radians.y * (180.0 / (float)M_PI));
-	resurt.z = float(radians.z * (180.0 / (float)M_PI));
-
-	return resurt;
-}
-
-// radian変換
-static Vector3 DegreesToRadians(Vector3 degrees) {
-	Vector3 resurt;
-
-	resurt.x = float(degrees.x * ((float)M_PI / 180.0));
-	resurt.y = float(degrees.y * ((float)M_PI / 180.0));
-	resurt.z = float(degrees.z * ((float)M_PI / 180.0));
-
-	return resurt;
-}
-
 // absDot
 static float AbsDot(const Vector3& a, const Vector3& b) {
 	return std::abs(Dot(a, b));
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/struct/Vector4.h
@@ -85183,7 +85104,7 @@ File Path: project/DirectXGame.vcxproj
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect;$(ProjectDir)externals\imnodes</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
@@ -85211,7 +85132,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect;$(ProjectDir)externals\imnodes</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
