@@ -1,4 +1,4 @@
-﻿#include "ComboEffect.h"
+#include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
@@ -8,6 +8,7 @@
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/engine/3d/Object/Object3d.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/engine/Audio/Audio.h>
 #include <algorithm>
 
 namespace Combo {
@@ -301,18 +302,45 @@ namespace Combo {
 
 #pragma region Audio
 
-	void ComboAudio::Enter(Character::BaseCharacter* owner){
-	
+	void ComboAudio::Initialize(Engine::AudioManager* audioManager) {
+		// AudioManagerの所有権はFramework側にあるため、再生に使う参照だけを保持する。
+		audioManager_ = audioManager;
 	}
 
-	void ComboAudio::Update(const Character::CharacterContext& ctx, float timer, float dt){
-	
+	void ComboAudio::Enter(Character::BaseCharacter* owner) {
+		// コンボ開始ごとに攻撃音の発火状態を初期化する。
+		(void)owner;
+		isAttackSoundPlayed_ = false;
 	}
 
-	void ComboAudio::Exit(Character::BaseCharacter * owner){
-	
+	void ComboAudio::Update(const Character::CharacterContext& ctx, float timer, float dt) {
+		// ヒットストップ中でも攻撃音を重複再生しないよう、一度だけ発火する。
+		(void)ctx;
+		(void)dt;
+		if (isAttackSoundPlayed_ || timer < data_.attackStartTime) {
+			return;
+		}
+		if (audioManager_ && !data_.attackSoundName.empty()) {
+			audioManager_->Play(data_.attackSoundName, false, data_.attackVolume);
+		}
+		isAttackSoundPlayed_ = true;
 	}
 
+	void ComboAudio::Exit(Character::BaseCharacter* owner) {
+		// 攻撃の振り終わりや着地など、ノード終了へ割り当てた音を再生する。
+		(void)owner;
+		if (audioManager_ && !data_.finishSoundName.empty()) {
+			audioManager_->Play(data_.finishSoundName, false, data_.finishVolume);
+		}
+		isAttackSoundPlayed_ = false;
+	}
+
+	void ComboAudio::OnHit() {
+		// 命中が確定した回数だけヒット音を鳴らし、多段攻撃にも対応する。
+		if (audioManager_ && !data_.hitSoundName.empty()) {
+			audioManager_->Play(data_.hitSoundName, false, data_.hitVolume);
+		}
+	}
 
 #pragma endregion // 音
 

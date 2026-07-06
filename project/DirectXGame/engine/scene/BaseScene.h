@@ -12,6 +12,7 @@ namespace Engine {
 	class DirectXCommon;
 	class GlobalVariables;
 	class Camera;
+	class AudioManager;
 
 	/// <summary>
 	/// シーン基底クラス「
@@ -53,6 +54,8 @@ namespace Engine {
 		void SetInput(Engine::Input* input) { this->input = input; }
 		// winApp設定
 		void SetWinApp(Engine::WinApp* winApp) { this->winApp = winApp; }
+		// オーディオマネージャー設定
+		void SetAudioManager(Engine::AudioManager* audioManager) { this->audioManager = audioManager; }
 		// DirectX共通クラス取得
 		virtual Engine::DirectXCommon* GetDxCommon() { return dxCommon; }
 		// エンティティマネージャー取得
@@ -65,6 +68,8 @@ namespace Engine {
 		Engine::Input* GetInput() { return input; }
 		//
 		Engine::WinApp* GetWinApp() { return winApp; }
+		// オーディオマネージャー取得
+		Engine::AudioManager* GetAudioManager() { return audioManager; }
 		// カメラ設定
 		void SetCamera(Engine::Camera* camera) { this->camera = camera; };
 		// カメラ取得
@@ -88,6 +93,7 @@ namespace Engine {
 		Engine::WinApp* winApp = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::Camera* camera = nullptr;
+		Engine::AudioManager* audioManager = nullptr;
 	protected:
 		bool initialized_ = false;
 	};

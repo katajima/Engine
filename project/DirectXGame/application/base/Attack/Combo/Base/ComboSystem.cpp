@@ -9,8 +9,11 @@ namespace Combo {
 
 #pragma region main
 
-	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables) {
+	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon,
+		Engine::GlobalVariables* globalVariables, Engine::AudioManager* audioManager) {
 		this->globalVariables = globalVariables;
+		// 実行時再生とコンボエディタの音一覧で共有する音声管理を保持する。
+		audioManager_ = audioManager;
 		owner = character;	// 所有者設定
 
 		// コンボ保存項目で使用するenumをグローバル変数エディタへ登録する
@@ -454,7 +457,13 @@ namespace Combo {
 			globalVariables->AddItem(name, "着地時のみキャンセル", data.action.landingCancel);
 			globalVariables->AddItem(name, "ヒットポーズ倍率", data.action.hitPauseScale);
 			globalVariables->AddItem(name, "カメラシェイク量", data.action.cameraShakePower);
-			globalVariables->AddItem(name, "攻撃音", data.action.soundName);
+			globalVariables->AddItem(name, "攻撃音", data.audio.attackSoundName);
+			globalVariables->AddItem(name, "攻撃音再生時間", data.audio.attackStartTime);
+			globalVariables->AddItem(name, "攻撃音音量", data.audio.attackVolume);
+			globalVariables->AddItem(name, "ヒット音", data.audio.hitSoundName);
+			globalVariables->AddItem(name, "ヒット音音量", data.audio.hitVolume);
+			globalVariables->AddItem(name, "攻撃終了音", data.audio.finishSoundName);
+			globalVariables->AddItem(name, "攻撃終了音音量", data.audio.finishVolume);
 
 			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
@@ -642,7 +651,6 @@ namespace Combo {
 			globalVariables->AddEnumItem(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
 			globalVariables->AddItem(name, "ヒット優先度", data.hitReaction.hitPriority);
 			globalVariables->AddItem(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
-			globalVariables->AddItem(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -744,7 +752,13 @@ namespace Combo {
 			data.action.landingCancel = globalVariables->GetValue<bool>(name, "着地時のみキャンセル");
 			data.action.hitPauseScale = globalVariables->GetValue<float>(name, "ヒットポーズ倍率");
 			data.action.cameraShakePower = globalVariables->GetValue<float>(name, "カメラシェイク量");
-			data.action.soundName = globalVariables->GetValue<std::string>(name, "攻撃音");
+			data.audio.attackSoundName = globalVariables->GetValue<std::string>(name, "攻撃音");
+			data.audio.attackStartTime = globalVariables->GetValue<float>(name, "攻撃音再生時間");
+			data.audio.attackVolume = globalVariables->GetValue<float>(name, "攻撃音音量");
+			data.audio.hitSoundName = globalVariables->GetValue<std::string>(name, "ヒット音");
+			data.audio.hitVolume = globalVariables->GetValue<float>(name, "ヒット音音量");
+			data.audio.finishSoundName = globalVariables->GetValue<std::string>(name, "攻撃終了音");
+			data.audio.finishVolume = globalVariables->GetValue<float>(name, "攻撃終了音音量");
 			data.range.rangeType = globalVariables->GetEnumValue<Combo::RangeType>(name, "遠距離タイプ");
 			data.range.lockOnType = globalVariables->GetEnumValue<Combo::RangeLockOnType>(name, "遠距離狙いタイプ");
 			data.range.offsetTargetType = globalVariables->GetEnumValue<Combo::RangeOffsetTargetType>(name, "遠距離オフセットタイプ");
@@ -922,7 +936,6 @@ namespace Combo {
 			data.hitReaction.attribute = globalVariables->GetEnumValue<AttackAttribute>(name, "攻撃属性");
 			data.hitReaction.hitPriority = globalVariables->GetValue<int>(name, "ヒット優先度");
 			data.hitReaction.cameraShakePower = globalVariables->GetValue<float>(name, "ヒットカメラシェイク量");
-			data.hitReaction.hitSoundName = globalVariables->GetValue<std::string>(name, "ヒット音");
 			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
 			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
@@ -1051,7 +1064,13 @@ namespace Combo {
 			globalVariables->SetValue(name, "着地時のみキャンセル", data.action.landingCancel);
 			globalVariables->SetValue(name, "ヒットポーズ倍率", data.action.hitPauseScale);
 			globalVariables->SetValue(name, "カメラシェイク量", data.action.cameraShakePower);
-			globalVariables->SetValue(name, "攻撃音", data.action.soundName);
+			globalVariables->SetValue(name, "攻撃音", data.audio.attackSoundName);
+			globalVariables->SetValue(name, "攻撃音再生時間", data.audio.attackStartTime);
+			globalVariables->SetValue(name, "攻撃音音量", data.audio.attackVolume);
+			globalVariables->SetValue(name, "ヒット音", data.audio.hitSoundName);
+			globalVariables->SetValue(name, "ヒット音音量", data.audio.hitVolume);
+			globalVariables->SetValue(name, "攻撃終了音", data.audio.finishSoundName);
+			globalVariables->SetValue(name, "攻撃終了音音量", data.audio.finishVolume);
 
 			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
 			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
@@ -1220,7 +1239,6 @@ namespace Combo {
 			globalVariables->SetEnumValue(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
 			globalVariables->SetValue(name, "ヒット優先度", data.hitReaction.hitPriority);
 			globalVariables->SetValue(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
-			globalVariables->SetValue(name, "ヒット音", data.hitReaction.hitSoundName);
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
@@ -1336,6 +1354,9 @@ namespace Combo {
 	void System::SetData(ComboData& data, const GlobalData& gData) {
 		// 攻撃タイプと遠距離攻撃
 		data.GetActionData() = gData.action;
+		// 音声設定と共有AudioManagerを実行用コンボへ適用する。
+		data.GetComboAudio().GetData() = gData.audio;
+		data.GetComboAudio().Initialize(audioManager_);
 		data.SetType(gData.type);
 		data.GetComboRange().GetData() = gData.range;
 		// ヒットボックスとリアクションデータ 

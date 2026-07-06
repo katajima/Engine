@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
+#include <DirectXGame/engine/Audio/Audio.h>
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
@@ -48,8 +49,10 @@ namespace Engine {
 
 		std::unique_ptr <WinApp> winApp_ = nullptr;
 
-		//
+		// 入力
 		std::unique_ptr<Input> input_ = nullptr;
+		// 音
+		std::unique_ptr<AudioManager> audioManager_ = nullptr;
 
 		// ダイレクトX
 		std::unique_ptr <DirectXCommon> dxCommon_ = nullptr;

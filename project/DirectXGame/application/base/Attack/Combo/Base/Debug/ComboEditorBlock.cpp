@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Audio/Audio.h"
 #include <cctype>
 #include <cstring>
 
@@ -78,6 +79,8 @@ namespace Combo {
 		ImGuiRange();
 		// 演出設定
 		ImGuiEffect();
+		// 攻撃、命中、終了タイミングの音声設定
+		ImGuiAudio();
 		// 移動関係設定
 		ImGuiMove();
 		// リアクション設定
@@ -376,6 +379,58 @@ namespace Combo {
 		}
 		if (data_.range.throwStayTime < 0.0f) {
 			data_.range.throwStayTime = 0.0f;
+		}
+	}
+
+	void EditorBlock::ImGuiAudio() {
+		if (!ImGui::CollapsingHeader("サウンド")) {
+			return;
+		}
+
+		// 攻撃動作中、命中時、ノード終了時の3か所を同じ音一覧から設定する。
+		ImGui::SeparatorText("攻撃時");
+		DrawSoundSelector("攻撃音", data_.audio.attackSoundName, data_.audio.attackVolume);
+		ImGui::DragFloat("攻撃音再生時間", &data_.audio.attackStartTime, 0.01f, 0.0f, 60.0f, "%.2f");
+		ImGui::SliderFloat("攻撃音音量", &data_.audio.attackVolume, 0.0f, 2.0f, "%.2f");
+
+		ImGui::SeparatorText("ヒットリアクション時");
+		DrawSoundSelector("ヒット音", data_.audio.hitSoundName, data_.audio.hitVolume);
+		ImGui::SliderFloat("ヒット音音量", &data_.audio.hitVolume, 0.0f, 2.0f, "%.2f");
+
+		ImGui::SeparatorText("コンボ終了時");
+		DrawSoundSelector("攻撃終了音", data_.audio.finishSoundName, data_.audio.finishVolume);
+		ImGui::SliderFloat("攻撃終了音音量", &data_.audio.finishVolume, 0.0f, 2.0f, "%.2f");
+	}
+
+	void EditorBlock::DrawSoundSelector(const char* label, std::string& soundId, float volume) {
+		Engine::AudioManager* audioManager = comboSystem ? comboSystem->GetAudioManager() : nullptr;
+		const char* previewName = soundId.empty() ? "なし" : soundId.c_str();
+		if (ImGui::BeginCombo(label, previewName)) {
+			// 「なし」を選ぶと、そのタイミングでは音を再生しない。
+			const bool isNoneSelected = soundId.empty();
+			if (ImGui::Selectable("なし", isNoneSelected)) {
+				soundId.clear();
+			}
+
+			if (audioManager) {
+				for (const Engine::SoundFileInfo& soundFile : audioManager->GetSoundFiles()) {
+					const bool isSelected = soundId == soundFile.id;
+					if (ImGui::Selectable(soundFile.id.c_str(), isSelected)) {
+						soundId = soundFile.id;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		// 同じラベルの複数ボタンが衝突しないよう、選択UIのラベルをIDに含める。
+		ImGui::SameLine();
+		const std::string previewButtonId = std::string("試聴##") + label;
+		if (ImGui::Button(previewButtonId.c_str()) && audioManager && !soundId.empty()) {
+			audioManager->Play(soundId, false, volume);
 		}
 	}
 
@@ -712,6 +767,8 @@ namespace Combo {
 		data_.hitBox = comboData.GetComboHitBox().GetCollData().hitBoxData;
 		// リアクションデータ
 		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
+		// 保存済みの攻撃・ヒット・終了音をエディタへ反映する。
+		data_.audio = comboData.GetComboAudio().GetData();
 		// アニメーション
 		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
 		// 条件

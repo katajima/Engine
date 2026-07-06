@@ -153,7 +153,17 @@ namespace Combo {
 		// 攻撃演出の追加フック。
 		float hitPauseScale = 1.0f;
 		float cameraShakePower = 0.0f;
-		std::string soundName = "";
+	};
+
+	// コンボノード内で再生する音を一か所にまとめた保存用データ。
+	struct GlobalAudio {
+		std::string attackSoundName = ""; // 攻撃動作中に指定時刻で再生する音ID。
+		std::string hitSoundName = "";    // 攻撃が相手へ命中した瞬間に再生する音ID。
+		std::string finishSoundName = ""; // コンボノードが終了した瞬間に再生する音ID。
+		float attackStartTime = 0.0f;      // コンボ開始から攻撃音を鳴らすまでの時間。
+		float attackVolume = 1.0f;         // 攻撃音の音量。
+		float hitVolume = 1.0f;            // ヒット音の音量。
+		float finishVolume = 1.0f;         // 終了音の音量。
 	};
 	// 時間
 	struct StateTime {
@@ -346,6 +356,8 @@ namespace Combo {
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
+		// 攻撃、ヒット、終了タイミングで使用する音声設定
+		GlobalAudio audio{};
 		// 攻撃ノード単位の調整項目
 		GlobalAction action{};
 		// 攻撃タイプ

@@ -10,6 +10,11 @@ void Engine::Framework::Initialize()
 	input_ = std::make_unique<Input>();
 	input_->Intialize(winApp_.get());
 
+	// 音
+	audioManager_ = std::make_unique<AudioManager>();
+	audioManager_->Initialize();
+
+
 	// グローバル
 	globalVariables_ = std::make_unique<GlobalVariables>();
 	
@@ -21,6 +26,8 @@ void Engine::Framework::Initialize()
 	// 3D全般
 	entityManager_ = std::make_unique<EntityManager>();
 	entityManager_->Initialize(dxCommon_.get());
+	// コンボや各ゲームオブジェクトから共通の音声管理へアクセスできるよう関連付ける。
+	entityManager_->SetAudioManager(audioManager_.get());
 	entityManager_->GetCameraCommon()->SetInput(input_.get());
 }
 
@@ -32,10 +39,16 @@ void Engine::Framework::Finalize()
 	// DirectX
 	dxCommon_->Finalize();
 
+	// 音
+	audioManager_->Finalize();
+
 }
 
 void Engine::Framework::Update()
 {
+	// 再生が完了した音声Voiceを毎フレーム回収する。
+	audioManager_->Update();
+
 	// Input
 	input_->Update();
 

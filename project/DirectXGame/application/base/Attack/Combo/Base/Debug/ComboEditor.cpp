@@ -728,6 +728,8 @@ namespace Combo {
 
 			// リアクション
 			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
+			// エディタで選択した音ID、再生時間、音量を保存データへ反映する。
+			data.audio = comboEditorBlocks_[it.first].GetData().audio;
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
 			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -92,7 +92,8 @@ namespace Combo {
 		}
 
 		// 初期化
-		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables);
+		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon,
+			Engine::GlobalVariables* globalVariables, Engine::AudioManager* audioManager);
 
 		// コンボ更新
 		void Update(const Character::CharacterContext& ctx);
@@ -185,6 +186,8 @@ namespace Combo {
 	public:
 		// データ設定
 		void SetData(ComboData& data, const GlobalData& gData);
+		// コンボエディタの音一覧とプレビューで使用する音声管理を取得する。
+		Engine::AudioManager* GetAudioManager() { return audioManager_; }
 
 		// グローバルデータ取得
 		GlobalData& GetComboGlobalData(const std::string& comboNodeName) {
@@ -233,6 +236,8 @@ namespace Combo {
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
+		// Frameworkが所有する音声管理への非所有ポインター。
+		Engine::AudioManager* audioManager_ = nullptr;
 
 		bool isDebug = false;
 		std::optional<ActionInput> pendingCostInput_;

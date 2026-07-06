@@ -189,9 +189,6 @@ struct HitReactionData {
 	int hitPriority = 0;
 	// カメラシェイク量
 	float cameraShakePower = 0.0f;
-	// ヒット音
-	std::string hitSoundName = "";
-
 	// リアクション移動の有効時間
 	float duration = 0.25f;
 	// 行動不能時間

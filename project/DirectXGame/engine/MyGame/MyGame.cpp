@@ -1,4 +1,4 @@
-﻿#include "MyGame.h"
+#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
@@ -33,6 +33,8 @@ void Engine::MyGame::Initialize() {
 	// シーンマネージャーに最初のシーンをセット
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
 	sceneManager_->SetInput(input_.get());
+	// 各シーンから共通の音源一覧と再生機能を参照できるよう設定する。
+	sceneManager_->SetAudioManager(audioManager_.get());
 	sceneManager_->SetWinApp(winApp_.get());
 	sceneManager_->SetGlobalVariables(globalVariables_.get());
 	sceneManager_->SetDirectXCommon(dxCommon_.get());
@@ -160,6 +162,9 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 	// テクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/");
+
+	// Resources/Sound以下の全WAVファイルを取得し、音源一覧と再生データを構築する。
+	audioManager_->ReloadSoundFiles();
 		
 	// ModelData;
 	LoadModel();

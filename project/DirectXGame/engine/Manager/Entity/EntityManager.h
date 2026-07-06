@@ -34,6 +34,7 @@ namespace Engine {
 	class DirectXCommon;
 	class ShadowMap;
 	class TrailEffect;
+	class AudioManager;
 
 	/// <summary>
 	/// エンティティマネージャー
@@ -61,6 +62,8 @@ namespace Engine {
 		void DrawShadowMap(ShadowMap* shadowMap);
 
 	public: //セッター
+		// ゲーム全体で共有するオーディオマネージャーを設定する。
+		void SetAudioManager(AudioManager* audioManager) { audioManager_ = audioManager; }
 		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
 		Object3d* CreateObject3D(const std::string& name, ObjectModelType type, const Vector3& pos, Engine::Camera* camera) {
 			std::unique_ptr<Object3d> object;
@@ -154,6 +157,8 @@ namespace Engine {
 		PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
 		// エフェクトマネージャークラス取得
 		EffectManager* GetEffectManager() { return effectManager_.get(); }
+		// コンボやゲームオブジェクトから共有音源へアクセスする。
+		AudioManager* GetAudioManager() { return audioManager_; }
 	public:
 		// スプライト共通クラス取得
 		SpriteCommon* GetSpriteCommon() { return spriteCommon_.get(); }
@@ -169,6 +174,8 @@ namespace Engine {
 	private:
 		// DirectX
 		DirectXCommon* dxCommon = nullptr;
+		// Frameworkが所有するオーディオマネージャーへの非所有ポインター。
+		AudioManager* audioManager_ = nullptr;
 
 		// オーシャンシェーダー
 		std::unique_ptr<OceanManager> oceanManager_ = nullptr;

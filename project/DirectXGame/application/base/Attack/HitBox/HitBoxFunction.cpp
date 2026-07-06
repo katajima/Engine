@@ -144,6 +144,10 @@ namespace HitBox {
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
+		// 敵側コンボにも命中を通知し、ヒット音と命中条件を同じタイミングで処理する。
+		if (result.notifyComboHit) {
+			enemy->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		}
 	}
 
 	void HitBoxFunction::UpdateTypeOther() {}

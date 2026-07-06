@@ -667,6 +667,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\TutorialUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
+    <ClInclude Include="DirectXGame\engine\Audio\AudioData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />

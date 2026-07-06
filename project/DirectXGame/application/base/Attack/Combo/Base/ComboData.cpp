@@ -1,4 +1,4 @@
-﻿#include "ComboData.h"
+#include "ComboData.h"
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
@@ -29,6 +29,8 @@ namespace Combo {
 		}
 		// コンボ用エフェクトクラス開始
 		effect.Enter(owner);
+		// コンボ用オーディオクラス開始
+		audio.Enter(owner);
 	}
 
 	// 更新
@@ -57,6 +59,8 @@ namespace Combo {
 		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
 		effect.Update(ctx, timer_, ctx.dt);
+		// 指定された攻撃タイミングの音を更新する
+		audio.Update(ctx, timer_, ctx.dt);
 	}
 
 	// 終了
@@ -78,6 +82,8 @@ namespace Combo {
 		camera.Exit();
 		// コンボ用エフェクトクラス終了
 		effect.Exit(owner);
+		// コンボ終了タイミングの音を再生して状態を破棄する
+		audio.Exit(owner);
 	}
 
 #pragma endregion // コンボデータ

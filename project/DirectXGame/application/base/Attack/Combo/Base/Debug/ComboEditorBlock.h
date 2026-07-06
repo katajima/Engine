@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include  "ComboImGui.h"
 #include <array>
 #include "map"
@@ -56,6 +56,8 @@ namespace Combo {
 		void ImGuiRange();
 		// 演出設定
 		void ImGuiEffect();
+		// 攻撃、命中、終了時の音声設定
+		void ImGuiAudio();
 		// 移動関係設定
 		void ImGuiMove();
 		// リアクション設定
@@ -74,6 +76,8 @@ namespace Combo {
 			const std::map<std::string, EffectGlobalData>& effectDatas);
 		// コンボエフェクトの設定をシーケンサー表示へ反映する
 		void SyncComboEffectSequenceEvents();
+		// Soundディレクトリの一覧から音源を選択し、試聴できるUIを描画する。
+		void DrawSoundSelector(const char* label, std::string& soundId, float volume);
 
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;

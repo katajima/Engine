@@ -13,6 +13,7 @@ namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
 	class Camera;
+	class AudioManager;
 
 	/// <summary>
 	/// シーンマネージャークラス
@@ -52,6 +53,8 @@ namespace Engine {
 		GlobalVariables* GetGlobalVariables() { return globalVariables; }
 		// Input設定
 		void SetInput(Input* input) { this->input = input; }
+		// オーディオマネージャー設定
+		void SetAudioManager(AudioManager* audioManager) { this->audioManager = audioManager; }
 		// Input取得
 		Input* GetInput() { return input; }
 		// カメラ設定
@@ -101,6 +104,7 @@ namespace Engine {
 		Input* input = nullptr;
 		GlobalVariables* globalVariables = nullptr;
 		Camera* camera = nullptr;
+		AudioManager* audioManager = nullptr;
 		WinApp* winApp = nullptr;
 	};
 }

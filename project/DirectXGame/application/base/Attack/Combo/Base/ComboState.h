@@ -87,6 +87,8 @@ namespace Combo {
             hasHit_ = true;
             comboData.GetComboRange().NotifyHit();
             comboData.GetComboCamera().OnHit();
+			// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
+			comboData.GetComboAudio().OnHit();
         }
         bool HasHit() const { return hasHit_; }
         std::shared_ptr<NodeState> ResolveNextState(Character::BaseCharacter* owner, ActionInput input);

@@ -1,10 +1,11 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
 
 namespace Engine {
 	class WorldTransform;
+	class AudioManager;
 }
 
 
@@ -104,6 +105,9 @@ namespace Combo {
 	/// </summary>
 	class ComboAudio {
 	public:
+		// ゲーム全体で共有する音声管理と、このコンボの音声設定を適用する。
+		void Initialize(Engine::AudioManager* audioManager);
+
 		// 開始
 		void Enter(Character::BaseCharacter* owner);
 
@@ -113,10 +117,17 @@ namespace Combo {
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
 
+		// 攻撃が相手へ命中した瞬間の音を再生する。
+		void OnHit();
+
+		// 保存・エディタ編集対象となる音声設定を取得する。
+		GlobalAudio& GetData() { return data_; }
+
 
 	private:
-
-
+		GlobalAudio data_{};                         // コンボノードごとの音声設定。
+		Engine::AudioManager* audioManager_ = nullptr; // ゲーム全体の音声管理（非所有）。
+		bool isAttackSoundPlayed_ = false;            // 攻撃音の多重発火を防ぐフラグ。
 	};
 
 

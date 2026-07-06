@@ -13,7 +13,8 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 
 	// コンボシステムの初期化
 	comboSystem_ = std::make_unique<Combo::System>();
-	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables);
+	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables,
+		entityManager->GetAudioManager());
 
 	// ロックオンシステム初期化
 	lockOnSystem_ = std::make_unique<LockOnSystem>();
