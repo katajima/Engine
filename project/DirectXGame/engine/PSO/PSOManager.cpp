@@ -14,48 +14,48 @@ void Engine::PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DX
 
 void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
 {
-	ShaderBlob shaderBlob{};
+	ShaderBlobSet shaderBlob{}; // コンパイル済みグラフィックスシェーダー一式
 
 
-	if (shderFile_.vertex.filePach != L"") {
+	if (shaderFiles_.vertex.filePath != L"") {
 		// Shaderをコンパイルする
-		shaderBlob.VS = dxcCompiler->CompileShader(shderFile_.vertex.filePach,
+		shaderBlob.VS = dxcCompiler->CompileShader(shaderFiles_.vertex.filePath,
 			L"vs_6_0");
 		assert(shaderBlob.VS != nullptr);
 		graphicsPipeline.VS = { shaderBlob.VS->GetBufferPointer(),
 		shaderBlob.VS->GetBufferSize() }; // VertexShader
 	}
-	if (shderFile_.pixel.filePach != L"") {
-		shaderBlob.PS = dxcCompiler->CompileShader(shderFile_.pixel.filePach,
+	if (shaderFiles_.pixel.filePath != L"") {
+		shaderBlob.PS = dxcCompiler->CompileShader(shaderFiles_.pixel.filePath,
 			L"ps_6_0");
 		assert(shaderBlob.PS != nullptr);
 		graphicsPipeline.PS = { shaderBlob.PS->GetBufferPointer(),
 		shaderBlob.PS->GetBufferSize() }; // PixelShader
 	}
-	if (shderFile_.domain.filePach != L"") {
-		shaderBlob.DS = dxcCompiler->CompileShader(shderFile_.domain.filePach,
+	if (shaderFiles_.domain.filePath != L"") {
+		shaderBlob.DS = dxcCompiler->CompileShader(shaderFiles_.domain.filePath,
 			L"ds_6_0");
 		assert(shaderBlob.DS != nullptr);
 		graphicsPipeline.DS = { shaderBlob.DS->GetBufferPointer(),
 		shaderBlob.DS->GetBufferSize() }; // DomainShader
 	}
-	if (shderFile_.hull.filePach != L"") {
-		shaderBlob.HS = dxcCompiler->CompileShader(shderFile_.hull.filePach,
+	if (shaderFiles_.hull.filePath != L"") {
+		shaderBlob.HS = dxcCompiler->CompileShader(shaderFiles_.hull.filePath,
 			L"hs_6_0");
 		assert(shaderBlob.HS != nullptr);
 		graphicsPipeline.HS = { shaderBlob.HS->GetBufferPointer(),
 		shaderBlob.HS->GetBufferSize() }; // HullShader
 	}
-	if (shderFile_.geometry.filePach != L"") {
-		shaderBlob.GS = dxcCompiler->CompileShader(shderFile_.geometry.filePach,
+	if (shaderFiles_.geometry.filePath != L"") {
+		shaderBlob.GS = dxcCompiler->CompileShader(shaderFiles_.geometry.filePath,
 			L"gs_6_0");
 		assert(shaderBlob.GS != nullptr);
 		graphicsPipeline.GS = { shaderBlob.GS->GetBufferPointer(),
 		shaderBlob.GS->GetBufferSize() }; // GeometryShader
 	}
-	if (shderFile_.mesh.filePach != L"") {
+	if (shaderFiles_.mesh.filePath != L"") {
 	}
-	if (shderFile_.amplification.filePach != L"") {	
+	if (shaderFiles_.amplification.filePath != L"") {
 	}
 
 
@@ -163,25 +163,25 @@ void Engine::PSOManager::SetShaderFileName(ShaderFileName shaderFileName, std::w
 	switch (shaderFileName)
 	{
 	case ShaderFileName::PS:
-		shderFile_.pixel.filePach = filename;
+		shaderFiles_.pixel.filePath = filename;
 		break;
 	case ShaderFileName::VS:
-		shderFile_.vertex.filePach = filename;
+		shaderFiles_.vertex.filePath = filename;
 		break;
 	case ShaderFileName::DS:
-		shderFile_.domain.filePach = filename;
+		shaderFiles_.domain.filePath = filename;
 		break;
 	case ShaderFileName::HS:
-		shderFile_.hull.filePach = filename;
+		shaderFiles_.hull.filePath = filename;
 		break;
 	case ShaderFileName::GS:
-		shderFile_.geometry.filePach = filename;
+		shaderFiles_.geometry.filePath = filename;
 		break;
 	case ShaderFileName::AS:
-		shderFile_.amplification.filePach = filename;
+		shaderFiles_.amplification.filePath = filename;
 		break;
 	case ShaderFileName::MS:
-		shderFile_.domain.filePach = filename;
+		shaderFiles_.domain.filePath = filename;
 		break;
 	default:
 		break;
@@ -222,7 +222,7 @@ void Engine::PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topol
 
 	// 読み込み済みモデルを検索
 	if (psoRoots_.contains(type)) {
-		command->GetList()->SetPipelineState(psoRoots_[type].graphicsPipelineState.Get());
+		command->GetList()->SetPipelineState(psoRoots_[type].pipelineState.Get());
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		command->GetList()->SetGraphicsRootSignature(psoRoots_[type].rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
@@ -242,6 +242,6 @@ void Engine::PSOManager::CreatePso(
 
 	SetRootSignature(psoRoots_[type].rootSignature, rootParameter, rootNum, samplerDesc, samplerNum);
 	SetRasterizerDesc(cull, fill);
-	GraphicsPipelineState(psoRoots_[type].rootSignature, psoRoots_[type].graphicsPipelineState, blendDesc, depthStencilDesc, topologyType);
+	GraphicsPipelineState(psoRoots_[type].rootSignature, psoRoots_[type].pipelineState, blendDesc, depthStencilDesc, topologyType);
 }
 

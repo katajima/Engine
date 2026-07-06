@@ -47,18 +47,11 @@ namespace Engine {
 
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-		struct PrimitivePSO
-		{
-			//ルートシグネチャ
-			Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-			// グラフィックスパイプラインステート
-			Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
-		};
-		PrimitivePSO defalt_;
-		PrimitivePSO defaltRing_;
-		PrimitivePSO noCull_;
-		PrimitivePSO noCullRing_;
-		PrimitivePSO noCullWireFrame_;
+		PSRS defalt_;           // 標準プリミティブ用PSO
+		PSRS defaltRing_;       // リング用PSO
+		PSRS noCull_;           // カリングなし用PSO
+		PSRS noCullRing_;       // カリングなしリング用PSO
+		PSRS noCullWireFrame_;  // カリングなしワイヤーフレーム用PSO
 
 	public:
 

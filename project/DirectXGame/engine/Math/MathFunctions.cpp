@@ -6,6 +6,12 @@
 
 #pragma region Math
 
+float Math::LerpShortAngle(float current, float target, float t) {
+	// sin/cosから[-PI, PI]の角度差を求め、常に最短方向へ補間する。
+	const float difference = std::atan2(std::sin(target - current), std::cos(target - current));
+	return current + difference * t;
+}
+
 float Math::Length(const float& v) {
 	float result;
 
@@ -38,9 +44,6 @@ float Math::Clamp(float t, float min, float max) {
 	return t;
 }
 
-float Math::Clamp3(float value, float min, float max) {
-	return (std::max)(min, (std::min)(value, max));
-}
 float Math::NormalizeClamp(float value, float minValue, float maxValue)
 
 {
@@ -195,7 +198,7 @@ Vector3 ClosestPoint::PointSegment(const Segment& segment, const Vector3& point)
 	}
 
 	float t = Dot(point - segment.origin, diff) / lenSq;
-	t = Math::Clamp3(t, 0.0f, 1.0f);
+	t = Math::Clamp(t, 0.0f, 1.0f);
 
 	return segment.origin - Multiply(diff, t);
 }
@@ -298,8 +301,8 @@ Vector3 ClosestPoint::SegmentSegment(const Segment& seg1, const Segment& seg2, V
 	// ゼロ除算の回避
 	float s = 0.0f, t = 0.0f;
 	if (denom != 0.0f) {
-		s = Math::Clamp3((b * e - c * d) / denom, 0.0f, 1.0f);
-		t = Math::Clamp3((a * e - b * d) / denom, 0.0f, 1.0f);
+		s = Math::Clamp((b * e - c * d) / denom, 0.0f, 1.0f);
+		t = Math::Clamp((a * e - b * d) / denom, 0.0f, 1.0f);
 	}
 
 	Vector3 closestOnSeg1 = Add(seg1.origin, Multiply(u, s));

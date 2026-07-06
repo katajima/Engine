@@ -58,35 +58,6 @@ namespace Engine {
 		DXGIDevice* dxgiDevice = nullptr;
 		DXCCompiler* dxcCompiler = nullptr;
 
-		// ファイル名
-		struct fileName {
-			std::wstring filePach;
-		};
-
-		// シェーダファイル
-		struct ShaderFile
-		{
-			fileName pixel;
-			fileName vertex;
-			fileName domain;
-			fileName hull;
-			fileName geometry;
-			fileName amplification;
-			fileName mesh;
-		};
-
-		// シェイプバルブ
-		struct ShaderBlob {
-			Microsoft::WRL::ComPtr < IDxcBlob> PS;
-			Microsoft::WRL::ComPtr < IDxcBlob> VS;
-			Microsoft::WRL::ComPtr < IDxcBlob> DS;
-			Microsoft::WRL::ComPtr < IDxcBlob> HS;
-			Microsoft::WRL::ComPtr < IDxcBlob> GS;
-			Microsoft::WRL::ComPtr < IDxcBlob> AS;
-			Microsoft::WRL::ComPtr < IDxcBlob> MS;
-		};
-
-
 		//
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc_{};
 		std::vector<std::string> semanticNames_; // SemanticName を保持するための vector
@@ -101,7 +72,7 @@ namespace Engine {
 		DXGI_FORMAT dsvFormat_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 
-		ShaderFile shderFile_;
+		ShaderFileSet shaderFiles_; // 全シェーダーステージのファイルパス
 
 
 		bool useInputLayout_ = true;

@@ -420,28 +420,6 @@ static Vector3 Perpendicular(const Vector3& vector) {
 	return { 0.0f,-vector.z,vector.y };
 }
 
-// Degree変換
-static Vector3 RadiansToDegrees(Vector3 radians) {
-	Vector3 resurt;
-
-	resurt.x = float(radians.x * (180.0 / (float)M_PI));
-	resurt.y = float(radians.y * (180.0 / (float)M_PI));
-	resurt.z = float(radians.z * (180.0 / (float)M_PI));
-
-	return resurt;
-}
-
-// radian変換
-static Vector3 DegreesToRadians(Vector3 degrees) {
-	Vector3 resurt;
-
-	resurt.x = float(degrees.x * ((float)M_PI / 180.0));
-	resurt.y = float(degrees.y * ((float)M_PI / 180.0));
-	resurt.z = float(degrees.z * ((float)M_PI / 180.0));
-
-	return resurt;
-}
-
 // absDot
 static float AbsDot(const Vector3& a, const Vector3& b) {
 	return std::abs(Dot(a, b));

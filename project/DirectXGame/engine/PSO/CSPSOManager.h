@@ -1,9 +1,5 @@
 #pragma once
-#include "PSOFanction.h"
-
-
-#include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
+#include "psoData.h"
 
 
 namespace Engine {
@@ -18,14 +14,6 @@ namespace Engine {
 	class CSPSOManager
 	{
 	public:
-		// パイプラインステート＋ルートシグネチャ
-		struct PSRS {
-			////ルートシグネチャ
-			Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-			//// グラフィックスパイプラインステート
-			Microsoft::WRL::ComPtr < ID3D12PipelineState> computePipelineState;
-		};
-
 		// 初期化
 		void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
@@ -43,25 +31,14 @@ namespace Engine {
 		DXGIDevice* dxgiDevice = nullptr;
 		DXCCompiler* dxcCompiler = nullptr;
 
-		// ファイル名
-		struct fileName {
-			std::wstring filePach;
-		};
-
-		// シェーダーファイル
-		struct ShaderFile
-		{
-			fileName commpute;
-		};
-
-		Microsoft::WRL::ComPtr < IDxcBlob> CS;
+		ShaderBlobSet shaderBlobs_; // コンパイル済みシェーダーの共通保持領域
 
 		HRESULT hr_;
 
 
-		PSRS computePSRS_;
+		PSRS computePSRS_; // コンピュート用ルートシグネチャとPSO
 
-		ShaderFile shderFile_;
+		ShaderFileSet shaderFiles_; // 全シェーダーステージの共通ファイルパス
 	public:
 		void SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline);
 	};

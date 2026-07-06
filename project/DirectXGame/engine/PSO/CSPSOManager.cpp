@@ -34,30 +34,30 @@ void Engine::CSPSOManager::ComputePipelineState()
 
 	
 	hr_ = dxgiDevice->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
-		IID_PPV_ARGS(&computePSRS_.computePipelineState));
+		IID_PPV_ARGS(&computePSRS_.pipelineState));
 
 }
 
 void Engine::CSPSOManager::PreComputePSRS()
 {
 	command->GetList()->SetComputeRootSignature(computePSRS_.rootSignature.Get());
-	command->GetList()->SetPipelineState(computePSRS_.computePipelineState.Get());
+	command->GetList()->SetPipelineState(computePSRS_.pipelineState.Get());
 }
 
 void Engine::CSPSOManager::SetShaderFileName(std::wstring filename)
 {
-	shderFile_.commpute.filePach = filename;
+	shaderFiles_.compute.filePath = filename;
 }
 
 void Engine::CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
 {
-	if (shderFile_.commpute.filePach != L"") {
+	if (shaderFiles_.compute.filePath != L"") {
 		// Shaderをコンパイルする
-		CS = dxcCompiler->CompileShader(shderFile_.commpute.filePach,
+		shaderBlobs_.CS = dxcCompiler->CompileShader(shaderFiles_.compute.filePath,
 			L"cs_6_0");
-		assert(CS != nullptr);
-		graphicsPipeline.CS = { CS->GetBufferPointer(),
-		CS->GetBufferSize() }; // VertexShader
+		assert(shaderBlobs_.CS != nullptr);
+		graphicsPipeline.CS = { shaderBlobs_.CS->GetBufferPointer(),
+		shaderBlobs_.CS->GetBufferSize() }; // ComputeShader
 	}
 }
 

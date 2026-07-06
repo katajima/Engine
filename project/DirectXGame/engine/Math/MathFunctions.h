@@ -22,33 +22,14 @@ namespace Math {
 		return value;
 	}
 
-	// 角度補間
-	static float LerpShortAngle(float a, float b, float t) {
-		// 角度差分を求める
-		float diff = b - a;
-
-		// 角度を [-2*PI, +2*PI] に補正する
-		diff = float(fmod(double(diff + 2.0f) * M_PI, double(4.0f) * M_PI)) - 2.0f * float(M_PI);
-
-		// 角度を [-PI, +PI] に補正する
-		if (diff > float(M_PI)) {
-			diff -= 2 * float(M_PI);
-		}
-		if (diff < -float(M_PI)) {
-
-			diff += 2 * float(M_PI);
-		}
-
-		return Lerp(a, a + diff, t);
-	}
+	// 最短方向で角度を補間する
+	float LerpShortAngle(float current, float target, float t);
 	// 長さ
 	float Length(const float& v);
 	// クランプ
 	float Clamp(float t);
 	// クランプ
 	float Clamp(float t, float min, float max);
-	// クランプ
-	float Clamp3(float value, float min, float max);
 	// 正規化クランプ
 	float NormalizeClamp(float value, float minValue, float maxValue);
 

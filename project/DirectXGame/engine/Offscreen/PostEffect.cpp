@@ -272,7 +272,7 @@ void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 	std::string name = "resources/shaders/Offscreen/" + psName + ".PS.hlsl";
 
 	psoManager_->SetShaderFileName(ShaderFileName::PS, StringUtility::ConvertString(name));
-	psoManager_->GraphicsPipelineState(posteffect_.rootSignature, posteffect_.graphicsPipelineState, blendDesc, depthStencilDesc);
+	psoManager_->GraphicsPipelineState(posteffect_.rootSignature, posteffect_.pipelineState, blendDesc, depthStencilDesc);
 
 }
 
@@ -281,7 +281,7 @@ void Engine::IPostEffect::DrawSetting()
 {
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(posteffect_.rootSignature.Get());
 
-	dxCommon_->GetCommandList()->SetPipelineState(posteffect_.graphicsPipelineState.Get()); //PSOを設定
+	dxCommon_->GetCommandList()->SetPipelineState(posteffect_.pipelineState.Get()); //PSOを設定
 
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

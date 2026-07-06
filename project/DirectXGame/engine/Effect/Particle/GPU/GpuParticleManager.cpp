@@ -160,7 +160,7 @@ void Engine::GpuParticleManager::Draw()
 
 		// パーティクル描画
 
-		dxCommon->GetCommandList()->SetPipelineState(particleDraw.graphicsPipelineState.Get());
+		dxCommon->GetCommandList()->SetPipelineState(particleDraw.pipelineState.Get());
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(particleDraw.rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
@@ -173,7 +173,7 @@ void Engine::GpuParticleManager::Draw()
 
 		// トレイル描画
 
-		dxCommon->GetCommandList()->SetPipelineState(trailDraw.graphicsPipelineState.Get());
+		dxCommon->GetCommandList()->SetPipelineState(trailDraw.pipelineState.Get());
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(trailDraw.rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
@@ -470,7 +470,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
-	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 
@@ -505,7 +505,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 	psoTrailManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/GPU/GpuParticleTrail.PS.hlsl");
 
 	psoTrailManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
-	psoTrailManager_->GraphicsPipelineState(trailDraw.rootSignature, trailDraw.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoTrailManager_->GraphicsPipelineState(trailDraw.rootSignature, trailDraw.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 

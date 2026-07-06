@@ -54,9 +54,38 @@ namespace Engine {
 
 	// パイプラインステート＋ルートシグネチャ
 	struct PSRS {
-		////ルートシグネチャ
+		// グラフィックス・コンピュートの両方で使用するルートシグネチャ
 		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-		//// グラフィックスパイプラインステート
-		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
+		// グラフィックス・コンピュートの両方で使用するパイプラインステート
+		Microsoft::WRL::ComPtr < ID3D12PipelineState> pipelineState;
+	};
+
+	// 各シェーダーステージのファイルパスを共通管理する構造体
+	struct ShaderFilePath {
+		std::wstring filePath; // コンパイル対象となるシェーダーファイルのパス
+	};
+
+	// グラフィックス・コンピュートで使用するシェーダーファイル一式
+	struct ShaderFileSet {
+		ShaderFilePath pixel;         // ピクセルシェーダー
+		ShaderFilePath vertex;        // 頂点シェーダー
+		ShaderFilePath domain;        // ドメインシェーダー
+		ShaderFilePath hull;          // ハルシェーダー
+		ShaderFilePath geometry;      // ジオメトリシェーダー
+		ShaderFilePath amplification; // アンプリフィケーションシェーダー
+		ShaderFilePath mesh;          // メッシュシェーダー
+		ShaderFilePath compute;       // コンピュートシェーダー
+	};
+
+	// コンパイル済みシェーダーを一時保持する共通構造体
+	struct ShaderBlobSet {
+		Microsoft::WRL::ComPtr < IDxcBlob> PS; // ピクセルシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> VS; // 頂点シェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> DS; // ドメインシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> HS; // ハルシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> GS; // ジオメトリシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> AS; // アンプリフィケーションシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> MS; // メッシュシェーダー
+		Microsoft::WRL::ComPtr < IDxcBlob> CS; // コンピュートシェーダー
 	};
 }

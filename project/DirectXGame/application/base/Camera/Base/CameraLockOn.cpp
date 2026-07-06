@@ -1,14 +1,8 @@
 #include "CameraLockOn.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include <algorithm>
 #include <cmath>
-
-namespace {
-float LerpShortAngle(float current, float target, float t) {
-	const float diff = std::atan2(std::sin(target - current), std::cos(target - current));
-	return current + diff * t;
-}
-}
 
 Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 	if (!data.target) {
@@ -31,8 +25,8 @@ Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 	const float t = 1.0f - std::pow(1.0f - lerpRate, dt * 60.0f);
 
 	Vector3 result = transform.rotate;
-	result.x = LerpShortAngle(result.x, targetRotate.x, t);
-	result.y = LerpShortAngle(result.y, targetRotate.y, t);
+	result.x = Math::LerpShortAngle(result.x, targetRotate.x, t);
+	result.y = Math::LerpShortAngle(result.y, targetRotate.y, t);
 	result.z = 0.0f;
 
 	return result;

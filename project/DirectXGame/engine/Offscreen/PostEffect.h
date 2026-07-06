@@ -84,15 +84,6 @@ namespace Engine {
 	class IPostEffect
 	{
 	public:
-		// ルートシグネチャとグラフィックパイプラインをまとめた構造体
-		struct Rendering
-		{
-			//ルートシグネチャ
-			Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-			// グラフィックスパイプラインステート
-			Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
-		};
-
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon, std::string psName);
 
@@ -107,12 +98,12 @@ namespace Engine {
 		//  DirectX共通クラス取得
 		DirectXCommon* GetDxCommon() const { return dxCommon_; }
 		// グラフィックパイプラインとルートシグネチャ取得
-		Rendering& GetRendering() { return posteffect_; };
+		PSRS& GetRendering() { return posteffect_; };
 	protected:
 		// ルートシグネチャの作成
 		virtual void CreateRootSignature() = 0;
 	protected:
-		Rendering posteffect_;
+		PSRS posteffect_; // ポストエフェクト用ルートシグネチャとPSO
 		std::unique_ptr<PSOManager> psoManager_;
 		DirectXCommon* dxCommon_ = nullptr;
 	};

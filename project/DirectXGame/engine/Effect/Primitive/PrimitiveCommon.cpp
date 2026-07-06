@@ -22,37 +22,37 @@ void Engine::PrimitiveCommon::DrawCommonSetting(PsoType type)
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defalt_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defalt_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kRingClamp:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(defaltRing_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defaltRing_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defaltRing_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCull:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(noCull_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(noCull_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(noCull_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCullRingClamp:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(noCullRing_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(noCullRing_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(noCullRing_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCullWireFrame:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(noCullWireFrame_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(noCullWireFrame_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(noCullWireFrame_.pipelineState.Get()); //PSOを設定
 		break;
 	default:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defalt_.graphicsPipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defalt_.pipelineState.Get()); //PSOを設定
 		break;
 	}
 
@@ -138,16 +138,16 @@ void Engine::PrimitiveCommon::CreateGraphicsPipeline()
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(defalt_.rootSignature, defalt_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(defaltRing_.rootSignature, defaltRing_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(defalt_.rootSignature, defalt_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(defaltRing_.rootSignature, defaltRing_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(noCull_.rootSignature, noCull_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(noCullRing_.rootSignature, noCullRing_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCull_.rootSignature, noCull_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCullRing_.rootSignature, noCullRing_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME);
-	psoManager_->GraphicsPipelineState(noCullWireFrame_.rootSignature, noCullWireFrame_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCullWireFrame_.rootSignature, noCullWireFrame_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 }
