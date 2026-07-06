@@ -30,6 +30,8 @@ namespace Combo {
 		ComboHitBox& GetComboHitBox() { return hitBox; }
 		// コンボエフェクトクラス取得
 		ComboEffect& GetComboEffect() { return effect; }
+		// コンボオーディオクラス取得
+		ComboAudio& GetComboAudio() { return audio; }
 		// コンボ遠距離クラス取得
 		ComboRange& GetComboRange() { return range; }
 		// コンボタイプ取得
@@ -54,6 +56,7 @@ namespace Combo {
 		ComboCamera camera{};					// コンボ用カメラクラス
 		ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 		ComboEffect effect{};					// コンボ用エフェクト
+		ComboAudio audio{};						// コンボ用オーディオクラス
 		ComboRange range{};						// コンボ用遠距離クラス（弾など）
 		GlobalAction action{};					// 攻撃ノード単位の調整項目
 		float timer_ = 0.0f;					// 時間

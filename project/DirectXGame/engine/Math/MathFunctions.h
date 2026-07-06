@@ -32,6 +32,20 @@ namespace Math {
 	float Clamp(float t, float min, float max);
 	// 正規化クランプ
 	float NormalizeClamp(float value, float minValue, float maxValue);
+	// 浮動小数点値が許容誤差内で等しいか判定
+	bool NearlyEqual(float left, float right, float epsilon = 0.000001f);
+	// 区間内の値を0から1の補間率へ変換
+	float InverseLerp(float start, float end, float value);
+	// 値を元の区間から別の区間へ変換
+	float Remap(float value, float sourceMin, float sourceMax, float destinationMin, float destinationMax, bool clamp = false);
+	// 現在値を最大変化量の範囲で目標値へ近づける
+	float MoveTowards(float current, float target, float maxDelta);
+	// 現在位置を最大移動量の範囲で目標位置へ近づける
+	Vector3 MoveTowards(const Vector3& current, const Vector3& target, float maxDistanceDelta);
+	// 値を0以上length未満の範囲で繰り返す
+	float Repeat(float value, float length);
+	// 値を0からlengthの間で往復させる
+	float PingPong(float value, float length);
 	// 最大長を超えないように2Dベクトルを制限
 	Vector2 ClampLength(const Vector2& value, float maxLength = 1.0f);
 	// ゼロに近い3Dベクトルをフォールバック方向で安全に正規化

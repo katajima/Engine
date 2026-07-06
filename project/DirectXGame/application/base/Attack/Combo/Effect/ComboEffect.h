@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
@@ -97,4 +97,27 @@ namespace Combo {
 		std::vector<bool> emittedFlags_;				// 一回発生条件が発生済みか
 		bool wasOnGround_ = false;					// 前フレームの接地状態
 	};
+
+
+	/// <summary>
+	/// コンボ用音
+	/// </summary>
+	class ComboAudio {
+	public:
+		// 開始
+		void Enter(Character::BaseCharacter* owner);
+
+		// 更新
+		void Update(const Character::CharacterContext& ctx, float timer, float dt);
+
+		// 終了
+		void Exit(Character::BaseCharacter* owner);
+
+
+	private:
+
+
+	};
+
+
 }

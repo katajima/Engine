@@ -55,6 +55,71 @@ float Math::NormalizeClamp(float value, float minValue, float maxValue)
 	return Math::Clamp(t,0.0f, 1.0f);
 }
 
+bool Math::NearlyEqual(float left, float right, float epsilon) {
+	// 負の許容誤差が渡されても同じ意味になるよう絶対値を使用する。
+	const float safeEpsilon = std::abs(epsilon);
+	return std::abs(left - right) <= safeEpsilon;
+}
+
+float Math::InverseLerp(float start, float end, float value) {
+	// 幅のない区間ではゼロ除算を避け、開始位置の補間率を返す。
+	const float range = end - start;
+	if (NearlyEqual(range, 0.0f)) {
+		return 0.0f;
+	}
+	return (value - start) / range;
+}
+
+float Math::Remap(float value, float sourceMin, float sourceMax, float destinationMin, float destinationMax, bool clamp) {
+	// 元区間での補間率を求め、必要な場合だけ0から1へ制限する。
+	float interpolation = InverseLerp(sourceMin, sourceMax, value);
+	if (clamp) {
+		interpolation = Math::Clamp(interpolation, 0.0f, 1.0f);
+	}
+	return destinationMin + (destinationMax - destinationMin) * interpolation;
+}
+
+float Math::MoveTowards(float current, float target, float maxDelta) {
+	// 負の移動量で目標から離れないよう、最大変化量を0以上に制限する。
+	const float safeMaxDelta = (std::max)(maxDelta, 0.0f);
+	const float difference = target - current;
+	if (std::abs(difference) <= safeMaxDelta) {
+		return target;
+	}
+	return current + std::copysign(safeMaxDelta, difference);
+}
+
+Vector3 Math::MoveTowards(const Vector3& current, const Vector3& target, float maxDistanceDelta) {
+	// 目標までの距離が最大移動量以下なら、行き過ぎず目標位置を返す。
+	const float safeMaxDistance = (std::max)(maxDistanceDelta, 0.0f);
+	const Vector3 difference = target - current;
+	const float distanceSquared = difference.LengthSq();
+	if (distanceSquared <= safeMaxDistance * safeMaxDistance || NearlyEqual(distanceSquared, 0.0f)) {
+		return target;
+	}
+
+	// 正規化した方向へ最大移動量だけ進める。
+	const float distance = std::sqrt(distanceSquared);
+	return current + difference * (safeMaxDistance / distance);
+}
+
+float Math::Repeat(float value, float length) {
+	// 長さが0以下の場合は有効な周期を作れないため0を返す。
+	if (length <= 0.0f) {
+		return 0.0f;
+	}
+	return value - std::floor(value / length) * length;
+}
+
+float Math::PingPong(float value, float length) {
+	// 2倍の周期で繰り返した値を中央から折り返す。
+	if (length <= 0.0f) {
+		return 0.0f;
+	}
+	const float repeated = Repeat(value, length * 2.0f);
+	return length - std::abs(repeated - length);
+}
+
 Vector2 Math::ClampLength(const Vector2& value, float maxLength) {
 	// 負の最大長は扱えないため、0以上へ補正する。
 	const float clampedMaxLength = (std::max)(maxLength, 0.0f);

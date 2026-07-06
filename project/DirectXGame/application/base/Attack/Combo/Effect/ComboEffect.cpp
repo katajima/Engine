@@ -1,4 +1,4 @@
-#include "ComboEffect.h"
+﻿#include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
@@ -299,4 +299,23 @@ namespace Combo {
 
 #pragma endregion //コンボエフェクト
 
+#pragma region Audio
+
+	void ComboAudio::Enter(Character::BaseCharacter* owner){
+	
+	}
+
+	void ComboAudio::Update(const Character::CharacterContext& ctx, float timer, float dt){
+	
+	}
+
+	void ComboAudio::Exit(Character::BaseCharacter * owner){
+	
+	}
+
+
+#pragma endregion // 音
+
+
+	
 }

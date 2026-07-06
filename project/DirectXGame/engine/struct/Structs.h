@@ -1,5 +1,44 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
+
+// グリッド・マップ・配列座標に使用する整数2次元ベクトル
+struct Vector2Int {
+	int x = 0; // 横方向の整数座標
+	int y = 0; // 縦方向の整数座標
+
+	// ゼロ座標を生成するデフォルトコンストラクタ
+	constexpr Vector2Int() = default;
+	// 指定した横・縦座標から生成するコンストラクタ
+	constexpr Vector2Int(int xValue, int yValue) : x(xValue), y(yValue) {}
+
+	// 2つの整数座標が一致するか判定する
+	constexpr bool operator==(const Vector2Int& other) const {
+		return x == other.x && y == other.y;
+	}
+
+	// 整数座標同士を加算する
+	constexpr Vector2Int operator+(const Vector2Int& other) const {
+		return Vector2Int{ x + other.x, y + other.y };
+	}
+
+	// 整数座標同士を減算する
+	constexpr Vector2Int operator-(const Vector2Int& other) const {
+		return Vector2Int{ x - other.x, y - other.y };
+	}
+};
+
+// Vector2Intをunordered_mapやunordered_setのキーに使うためのハッシュ
+struct Vector2IntHash {
+	// 2つの整数座標を1つのハッシュ値へ結合する
+	std::size_t operator()(const Vector2Int& value) const noexcept {
+		const std::size_t xHash = std::hash<int>{}(value.x); // 横座標のハッシュ
+		const std::size_t yHash = std::hash<int>{}(value.y); // 縦座標のハッシュ
+		return xHash ^ (yHash + 0x9e3779b9u + (xHash << 6u) + (xHash >> 2u));
+	}
+};
+
 // 最小値と最大値を保持する構造体
 template<typename T>
 struct Range
