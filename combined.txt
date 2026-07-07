@@ -343,6 +343,7 @@
     └── └── └── └──     ├── TutorialSystem.cpp
     └── └── └── └──     └── TutorialSystem.h
     └── └── └── ├── Input/
+    └── └── └── └── ├── InputCoordinator.h
     └── └── └── └── ├── InputData.h
     └── └── └── └── ├── InputHander.cpp
     └── └── └── └── ├── InputHander.h
@@ -32237,6 +32238,113 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Input/InputCoordinator.h
+============================================================
+#pragma once
+
+#include <memory>
+
+#include "DirectXGame/application/base/Input/InputHander.h"
+#include "DirectXGame/application/base/Input/InputManager.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+
+namespace Engine {
+	class Input;
+}
+
+namespace Character {
+	class BaseCharacter;
+}
+
+/// <summary>
+/// 物理入力、アクション入力、キャラクターコマンドを一括管理するクラス
+/// </summary>
+class InputCoordinator {
+public:
+	/// <summary>
+	/// 3系統の入力管理を初期化し、標準キャラクターコマンドを登録する
+	/// </summary>
+	void Initialize(Engine::Input* input) {
+		inputSystem_ = std::make_unique<InputSystem>();
+		inputSystem_->Initialize(input);
+
+		inputManager_ = std::make_unique<InputManager>();
+		inputManager_->Initialize(input);
+
+		inputHandler_ = std::make_unique<Character::InputHander>();
+		inputHandler_->Initialize(input);
+		RegisterDefaultCharacterCommands();
+	}
+
+	/// <summary>
+	/// 入力状態だけを更新する
+	/// </summary>
+	void Update(float deltaTime) {
+		inputSystem_->Update(deltaTime);
+		inputManager_->Update(deltaTime);
+	}
+
+	/// <summary>
+	/// 入力状態を更新し、成立した標準コマンドを対象キャラクターへ実行する
+	/// </summary>
+	void Update(float deltaTime, Character::BaseCharacter* owner) {
+		SetOwner(owner);
+		Update(deltaTime);
+
+		Character::ICommand* command = inputHandler_->HandleInput();
+		if (command && owner) {
+			command->Exec(*owner);
+		}
+	}
+
+	/// <summary>
+	/// キャラクターコマンドの実行対象を設定する
+	/// </summary>
+	void SetOwner(Character::BaseCharacter* owner) {
+		inputManager_->SetOwner(owner);
+	}
+
+	/// <summary>
+	/// カメラ、UI、ゲームシステムへ渡す従来形式の入力状態を取得する
+	/// </summary>
+	InputSystem* GetInputSystem() { return inputSystem_.get(); }
+	const InputSystem* GetInputSystem() const { return inputSystem_.get(); }
+
+	/// <summary>
+	/// アクション入力管理を取得する
+	/// </summary>
+	InputManager* GetInputManager() { return inputManager_.get(); }
+
+private:
+	/// <summary>
+	/// 全プレイヤーシーンで共通のアクションとコマンドを登録する
+	/// </summary>
+	void RegisterDefaultCharacterCommands() {
+		inputHandler_->Bind(
+			[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
+			std::make_unique<Character::JampCommand>());
+		inputHandler_->Bind(
+			[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
+			std::make_unique<Character::AttackCommand>());
+		inputHandler_->Bind(
+			[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
+			std::make_unique<Character::HeavyAttackCommand>());
+		inputHandler_->Bind(
+			[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
+			std::make_unique<Character::SkillAttackCommand>());
+		inputHandler_->Bind(
+			[this] { return inputManager_->Triggered(InputManager::Action::Move); },
+			std::make_unique<Character::MoveCommand>());
+	}
+
+private:
+	std::unique_ptr<InputSystem> inputSystem_ = nullptr; // ゲーム全体が参照する入力状態
+	std::unique_ptr<InputManager> inputManager_ = nullptr; // アクションへ変換した入力状態
+	std::unique_ptr<Character::InputHander> inputHandler_ = nullptr; // 入力からコマンドを選択するハンドラー
+};
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Input/InputData.h
 ============================================================
 #pragma once
@@ -39047,38 +39155,15 @@ void CharacterDebugScene::Draw2D(){
 void CharacterDebugScene::InitializeInput(){
 	// Input
 	input_ = GetInput();
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input_);
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input_);
-	inputManager_->Triggered(InputManager::Action::Jump);
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// デバッグシーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input_);
 }
 // キャラクター関係初期化
 void CharacterDebugScene::InitializeCharacter(){
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -39099,17 +39184,17 @@ void CharacterDebugScene::InitializeCharacter(){
 void CharacterDebugScene::InitializeCamera(){
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -39159,15 +39244,8 @@ void CharacterDebugScene::InitializeDebug(){
 
 // 入力関係更新
 void CharacterDebugScene::UpdateInput(float dt){
-	// 入力管理
-	inputSystem_->Update(dt);
-	// インプットマネージャー更新
-	inputManager_->Update(dt);
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_) {
-		iCommand_->Exec(*debugTarget);
-	}
+	// 入力更新とデバッグ対象へのコマンド実行を一括で行う
+	inputCoordinator_->Update(dt, debugTarget);
 
 }
 // キャラクター関係更新
@@ -39237,13 +39315,13 @@ void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&debugTarget->GetObjectComponent()->GetWorldTransform());
 	// 入力管理所有者設定
-	inputManager_->SetOwner(debugTarget);
+	inputCoordinator_->SetOwner(debugTarget);
 	// コンボエディタのターゲット設定
 	comboEditor_->SetOwner(debugTarget);
 	// ターゲット設定
 	projectileDebug_->SetTarget(debugTarget);
 	// 入力システム設定
-	debugTarget->SetInputSystem(inputSystem_.get());
+	debugTarget->SetInputSystem(inputCoordinator_->GetInputSystem());
 	// カメラ管理取得
 	debugTarget->SetCamera(cameraManager_->GetCamera());
 }
@@ -39275,8 +39353,7 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
-#include "DirectXGame/application/base/Input/InputHander.h"
-#include <DirectXGame/application/base/Input/InputManager.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -39334,15 +39411,8 @@ private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
 
-	// インプットハンドラ
-	std::unique_ptr <Character::InputHander> inputHander_;
-	Character::ICommand* iCommand_;
-
-	// インプットマネージャ
-	std::unique_ptr<InputManager> inputManager_;
-
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// 物理入力、アクション入力、コマンドをまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
@@ -39406,9 +39476,9 @@ void CustomScene::Initialize() {
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	input = GetInput();
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
@@ -39421,11 +39491,11 @@ void CustomScene::Initialize() {
 
 	// カスタムシステム初期化
 	customSystem_ = std::make_unique<CustomSystem>();
-	customSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	customSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	
 	// カスタムUI初期化
 	customUI_ = std::make_unique<CustomUI>();
-	customUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	customUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
@@ -39438,15 +39508,8 @@ void CustomScene::Initialize() {
 void CustomScene::Finalize() {}
 
 void CustomScene::Update() {
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
-
-
-
-
-
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	// シーン内の入力を一度だけ更新する
+	inputCoordinator_->Update(GetTime());
 
 	// リザルトシステム更新
 	customSystem_->Update(GetTime());
@@ -39500,7 +39563,7 @@ File Path: project/DirectXGame/application/scene/CustomScene.h
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 
 #include <DirectXGame/application/base/UI/CustomUI.h>
 #include <DirectXGame/application/base/Game/Custom/CustomSystem.h>
@@ -39535,8 +39598,8 @@ private:
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 	// エフェクト
 	std::unique_ptr<EffectSystem> effect_ = nullptr;
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 private:
 	// カスタムUI
 	std::unique_ptr<CustomUI> customUI_ = nullptr;
@@ -39576,39 +39639,9 @@ void GamePlayScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input);
-	
-
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input);
-
-
-	inputManager_->Triggered(InputManager::Action::Jump);
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input);
 
 	// エフェクト
 	effect_ = std::make_unique<EffectSystem>();
@@ -39616,20 +39649,20 @@ void GamePlayScene::Initialize() {
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// ステージカメラ
 	stageCamera_ = std::make_unique<StageCamera>();
-	stageCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	stageCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -39655,7 +39688,7 @@ void GamePlayScene::Initialize() {
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -39664,7 +39697,7 @@ void GamePlayScene::Initialize() {
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
-	gameFlowController_->Initialize(GetSceneManager(),inputSystem_.get(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
+	gameFlowController_->Initialize(GetSceneManager(),inputCoordinator_->GetInputSystem(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
@@ -39693,13 +39726,13 @@ void GamePlayScene::Initialize() {
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	gameUI->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
 	// カメラ設定
@@ -39707,7 +39740,7 @@ void GamePlayScene::Initialize() {
 
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
-	inputManager_->SetOwner(characterManager_->GetPlayer());
+	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
 }
 
 // 終了
@@ -39753,9 +39786,8 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
-	inputManager_->SetOwner(characterManager_->GetPlayer());
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	// 入力更新とプレイヤーコマンド実行を一括で行う
+	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -39765,16 +39797,6 @@ void GamePlayScene::Update()
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	
-	// インプットマネージャー更新
-	inputManager_->Update(GetTime());
-
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_ && characterManager_->GetPlayer()) {
-		iCommand_->Exec(*characterManager_->GetPlayer());
-	}
-
-
 	// 調整項目
 	ApplyGlobalVariables();
 
@@ -39872,9 +39894,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
-#include "DirectXGame/application/base/Input/InputHander.h"
-#include <DirectXGame/application/base/Input/InputManager.h>
-#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -39917,15 +39937,8 @@ private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
 	DebugTimer debugTimer_;
-	// インプットハンドラ
-	std::unique_ptr < Character::InputHander> inputHander_;
-	Character::ICommand* iCommand_;
-
-	// インプットマネージャ
-	std::unique_ptr<InputManager> inputManager_;
-
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// 物理入力、アクション入力、コマンドをまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
@@ -39986,16 +39999,16 @@ File Path: project/DirectXGame/application/scene/ResultScene.cpp
 // 初期化
 void ResultScene::Initialize() {
 
-	// inputSystem初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// リザルト用カメラ初期化
 	resultCamera_ = std::make_unique<ResultCamera>();
-	resultCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-20.0f });
+	resultCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-20.0f });
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	cameraManager_->AddCamera({ resultCamera_.get(), true}, "resultCamera");
 
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
@@ -40015,11 +40028,11 @@ void ResultScene::Initialize() {
 
 	// リザルトUI初期化
 	resultUI_ = std::make_unique<ResultUI>();
-	resultUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	resultUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	// リザルトスコアUI初期化
 	resultScoreUI_ = std::make_unique<ResultScoreUI>();
-	resultScoreUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	resultScoreUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	overUI_ = std::make_unique<Engine::Sprite>();
 	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
@@ -40030,7 +40043,7 @@ void ResultScene::Initialize() {
 
 	// リザルトシステム初期化
 	resultSystem_ = std::make_unique<ResultSystem>();
-	resultSystem_->Initialize(GetSceneManager(),inputSystem_.get(),
+	resultSystem_->Initialize(GetSceneManager(),inputCoordinator_->GetInputSystem(),
 		GetEntityManager(), GetGlobalVariables());
 
 };
@@ -40043,7 +40056,7 @@ void ResultScene::Finalize() {
 void ResultScene::Update() {
 
 	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	inputCoordinator_->Update(GetTime());
 
 	// リザルトシステム更新
 	resultSystem_->Update(GetTime());
@@ -40082,6 +40095,7 @@ void ResultScene::Draw2D() {
 	}
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/scene/ResultScene.h
 ============================================================
@@ -40110,7 +40124,7 @@ File Path: project/DirectXGame/application/scene/ResultScene.h
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 class ResultScene : public Engine::BaseScene {
 public:
 
@@ -40131,8 +40145,8 @@ public:
 private:
 
 private:
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 	// エフェクト
 	std::unique_ptr<EffectSystem> effect_;
 	// カメラ管理
@@ -40181,17 +40195,17 @@ void SampleScene::Initialize() {
 
 // カメラ
 void SampleScene::InitCamera() {
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	fixedCamera_->Update();
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManeger_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
@@ -40346,6 +40360,8 @@ void SampleScene::Finalize() {
 
 // 毎フレーム更新
 void SampleScene::Update() {
+	// シーン内の入力を一括更新する
+	inputCoordinator_->Update(GetTime());
 
 	// カメラ管理の更新
 	cameraManeger_->Update();
@@ -40367,6 +40383,7 @@ void SampleScene::Draw2D() {
 	sprite_->Draw();
 
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/scene/SampleScene.h
@@ -40391,7 +40408,7 @@ File Path: project/DirectXGame/application/scene/SampleScene.h
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 #include "DirectXGame/engine/Audio/Audio.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -40445,8 +40462,8 @@ private:
 
 private:
 	Engine::Input* input_ = nullptr;									// 入力
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	std::unique_ptr<Engine::Audio> audioTest_;							// オーディオ
 	uint32_t soundHandle_ = 0;									// サウンドハンドル
@@ -40612,9 +40629,9 @@ File Path: project/DirectXGame/application/scene/SelectScene.cpp
 
 void SelectScene::Initialize() {
 	input = GetInput();
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// セレクトカメラ生成
 	selectCamera_ = std::make_unique<SelectCamera>();
@@ -40642,11 +40659,11 @@ void SelectScene::Initialize() {
 	selectStage_->GetPlayerCar()->GetStateMachine()->ChangeState(CarMainState::SelectMove);
 	// UI生成
 	selectUI_ = std::make_unique<SelectUI>();
-	selectUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	selectUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	// セレクトシーンの管理クラス生成
 	selectSystem_ = std::make_unique<SelectSystem>();
-	selectSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	selectSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 }
 
@@ -40657,7 +40674,7 @@ void SelectScene::Finalize() {}
 // 毎フレーム更新
 void SelectScene::Update() {
 	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	inputCoordinator_->Update(GetTime());
 	// セレクトシーンの管理クラス更新
 	selectSystem_->Update(GetTime());
 
@@ -40686,6 +40703,7 @@ void SelectScene::Draw2D() {
 	selectUI_->Draw();
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/scene/SelectScene.h
 ============================================================
@@ -40708,13 +40726,12 @@ File Path: project/DirectXGame/application/scene/SelectScene.h
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
-#include "DirectXGame/application/base/Input/InputHander.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/application/base/Stage/SelectStage.h"
 #include "DirectXGame/application/base/UI/SelectUI.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Game/Select/SelectSystem.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
 
 /// <summary>
 /// セレクトシーン
@@ -40751,8 +40768,8 @@ private:
 	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// セレクトシーンの管理クラス
 	std::unique_ptr<SelectSystem> selectSystem_ = nullptr;
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 };
 
 
@@ -40804,6 +40821,9 @@ void TestScene::Finalize()
 
 void TestScene::Update()
 {
+	// シーン内の入力を一括更新する
+	inputCoordinator_->Update(GetTime());
+
 	SwitchRoom(); // 部屋切り替え
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
@@ -41094,18 +41114,18 @@ void TestScene::InitializeLight()
 /// </summary>
 void TestScene::InitializeCamera()
 {
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(),  GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),  GetGlobalVariables(), {});
 	
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputSystem_.get(), GetEntityManager(),GetGlobalVariables());
+	cameraManeger_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 	cameraManeger_->SetUseCamera("fixedCamera", 0.0f);
@@ -41304,7 +41324,7 @@ File Path: project/DirectXGame/application/scene/TestScene.h
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
 
 /// <summary>
@@ -41399,8 +41419,8 @@ private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
 	Engine::ImGuiManager* imGuiManager = nullptr;
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 
 	/// <summary>
@@ -41708,39 +41728,9 @@ void TutorialScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input);
-
-
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input);
-
-
-	inputManager_->Triggered(InputManager::Action::Jump);
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input);
 
 	// エフェクト
 	effect_ = std::make_unique<EffectSystem>();
@@ -41748,11 +41738,11 @@ void TutorialScene::Initialize() {
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 
@@ -41775,7 +41765,7 @@ void TutorialScene::Initialize() {
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -41794,16 +41784,16 @@ void TutorialScene::Initialize() {
 	tutorialStage_->Initialize(GetEntityManager(), cameraManager_.get());
 
 	tutorialSystem_ = std::make_unique<TutorialSystem>();
-	tutorialSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
+	tutorialSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
 
 	tutorialUI_ = std::make_unique<TutorialUI>();
-	tutorialUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	tutorialUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
 
@@ -41821,7 +41811,7 @@ void TutorialScene::Initialize() {
 
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
-	inputManager_->SetOwner(characterManager_->GetPlayer());
+	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
 }
 
 void TutorialScene::Finalize() {
@@ -41830,9 +41820,8 @@ void TutorialScene::Finalize() {
 }
 
 void TutorialScene::Update() {
-	inputManager_->SetOwner(characterManager_->GetPlayer());
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	// 入力更新とプレイヤーコマンド実行を一括で行う
+	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -41841,16 +41830,6 @@ void TutorialScene::Update() {
 	if (input->IsTriggerKey(DIK_T)) {
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
-
-	// インプットマネージャー更新
-	inputManager_->Update(GetTime());
-
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_ && characterManager_->GetPlayer()) {
-		iCommand_->Exec(*characterManager_->GetPlayer());
-	}
-
 
 	// 調整項目
 	ApplyGlobalVariables();
@@ -41929,9 +41908,7 @@ File Path: project/DirectXGame/application/scene/TutorialScene.h
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
-#include "DirectXGame/application/base/Input/InputHander.h"
-#include <DirectXGame/application/base/Input/InputManager.h>
-#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
@@ -41971,15 +41948,8 @@ private:
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
-	// インプットハンドラ
-	std::unique_ptr < Character::InputHander> inputHander_;
-	Character::ICommand* iCommand_;
-
-	// インプットマネージャ
-	std::unique_ptr<InputManager> inputManager_;
-
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// 物理入力、アクション入力、コマンドをまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
