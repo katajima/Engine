@@ -1,4 +1,4 @@
-#include "BaseStage.h"
+﻿#include "BaseStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -64,6 +64,24 @@ void BaseStage::InitializeStageColliderSystem(Engine::EntityManager* entityManag
 		}
 		stageColliderSystem_->CreateCollider();
 	}
+}
+
+void BaseStage::InitializeGround(Engine::EntityManager* entityManager, const Vector3& scale) {
+	// 通常描画の地面オブジェクトを生成する。
+	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail_->SetModel("Ground.obj");
+	// オブジェクトとUV変換の拡大率を揃える。
+	tail_->GetWorldTransform().scale_ = scale;
+	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = scale;
+}
+
+void BaseStage::InitializePlayerCar(Engine::EntityManager* entityManager, std::unique_ptr<PlayerCar>& playerCar,
+	const Vector3& position, const Vector3& rotation) {
+	// 派生ステージが所有するプレイヤー車を生成する。
+	playerCar = std::make_unique<PlayerCar>();
+	playerCar->Initialize(entityManager, {}, position, rotation);
+	// ステージ共通の地面高さを車へ設定する。
+	playerCar->SetGroungHeight(0.1f);
 }
 
 void BaseStage::BaseUpdate(float dt) {

@@ -6,100 +6,51 @@ void TutorialScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// シーンで使用する入力管理を一括初期化する
-	inputCoordinator_ = std::make_unique<InputCoordinator>();
-	inputCoordinator_->Initialize(input);
-
-	// エフェクト
-	effect_ = std::make_unique<EffectSystem>();
-	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-	// フォローカメラ
-	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
-
-	// カメラ管理
-	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
-	// カメラ追加
-	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
-
-
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
-
-	// ヒットボックスシステム初期化
-	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(GetEntityManager());
-
-	// 弾管理クラス
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntityManager(), GetGlobalVariables(), nullptr);
-	bulletManager_->SetEffect(effect_.get());
-
-	// スペシャルポイント管理クラス
-	specalPointManager_ = std::make_unique<SpecalPointManager>();
-	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-
-	// キャラクター管理 
-	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
-	characterManager_->SetEffect(effect_.get());
-	characterManager_->SetFollowCamera(followCamera_.get());
-	characterManager_->SetBulletManager(bulletManager_.get());
-	characterManager_->SetCameraManager(cameraManager_.get());
-	characterManager_->SetSpecialPointManager(specalPointManager_.get());
-
-
-	// プレイヤー生成
-	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
-
-	// 追従カメラtarget設定
-	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+	// チュートリアルでもゲームプレイ共通基盤を一括初期化する。
+	gameplaySession_ = std::make_unique<GameplaySession>();
+	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(),
+		Character::PlayerType::kNormal, { 0, 2, -40 });
+	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
+	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
+	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
 
 
 	tutorialStage_ = std::make_unique<TutorialStage>();
-	tutorialStage_->Initialize(GetEntityManager(), cameraManager_.get());
+	tutorialStage_->Initialize(GetEntityManager(), cameraManager);
 
 	tutorialSystem_ = std::make_unique<TutorialSystem>();
-	tutorialSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
+	tutorialSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables(), characterManager->GetPlayer());
 
 	tutorialUI_ = std::make_unique<TutorialUI>();
-	tutorialUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	tutorialUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 
 
 
 	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	//sp->SetStage(stage_.get());
 
-	// 衝突登録システム
-	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
-	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
-		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
-
-
 	// カメラ設定
-	SetCamera(cameraManager_->GetCamera());
-
-	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-
-	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
+	SetCamera(cameraManager->GetCamera());
 }
 
 void TutorialScene::Finalize() {
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionRegistrationSystem_->GetCollisionManager()->Clear();
+	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
 }
 
 void TutorialScene::Update() {
+	// 共通基盤から、このフレームで使用する各管理クラスを取得する。
+	InputCoordinator* inputCoordinator = gameplaySession_->GetInputCoordinator();
+	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
+	SpecalPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
 	// 入力更新とプレイヤーコマンド実行を一括で行う
-	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
+	inputCoordinator->Update(GetTime(), characterManager->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -115,20 +66,20 @@ void TutorialScene::Update() {
 	// ImGuiの更新
 	UpdateImGui();
 	// キャラクターマネージャー更新
-	characterManager_->Update(GetTime(),true);
+	characterManager->Update(GetTime(),true);
 	// 必殺技ポイント管理クラス
-	specalPointManager_->SetTarget(characterManager_->GetPlayer());
-	specalPointManager_->Update(GetTime());
+	specialPointManager->SetTarget(characterManager->GetPlayer());
+	specialPointManager->Update(GetTime());
 	// 弾マネージャ
-	bulletManager_->Update();
+	gameplaySession_->GetBulletManager()->Update();
 	// ステージ
 	tutorialStage_->Update(GetTime());
 	// ヒットボックスシステム更新
-	hitBoxSystem_->Update(GetTime());
+	gameplaySession_->GetHitBoxSystem()->Update(GetTime());
 	// 当たり判定
-	collisionRegistrationSystem_->RegisterAllCollisions();
+	gameplaySession_->GetCollisionRegistrationSystem()->RegisterAllCollisions();
 	// Effect更新
-	effect_->Update(GetTime());
+	gameplaySession_->GetEffectSystem()->Update(GetTime());
 	// チュートリアルシステム更新
 	tutorialSystem_->Update(GetTime());
 	// チュートリアルUI更新
@@ -140,12 +91,12 @@ void TutorialScene::Update() {
 	
 	
 	// カメラ管理の更新
-	cameraManager_->Update();
+	gameplaySession_->GetCameraManager()->Update();
 }
 
 void TutorialScene::Draw3D() {
 	////3Dオブジェクトの描画
-	bulletManager_->DrawEffect();
+	gameplaySession_->GetBulletManager()->DrawEffect();
 }
 
 void TutorialScene::Draw2D() {
@@ -154,8 +105,8 @@ void TutorialScene::Draw2D() {
 	// ポーズUI描画
 	poseUI_->Draw();
 	// キャラクター
-	characterManager_->Draw2D();
+	gameplaySession_->GetCharacterManager()->Draw2D();
 	// 弾マネージャ
-	bulletManager_->Draw2D();
+	gameplaySession_->GetBulletManager()->Draw2D();
 	
 }

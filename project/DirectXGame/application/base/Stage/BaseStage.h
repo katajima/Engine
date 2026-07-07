@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // engine
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
@@ -37,17 +37,17 @@ public:
 	///< summary>
 	/// 描画
 	///</summary>
-	virtual void Draw() = 0;
+	virtual void Draw() {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	virtual void DrawEffect() = 0;
+	virtual void DrawEffect() {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	virtual void Draw2D() = 0;
+	virtual void Draw2D() {};
 
 
 public:
@@ -82,6 +82,23 @@ protected:
 	/// </summary>
 	/// <param name="entityManager"></param>
 	void InitializeStageColliderSystem(Engine::EntityManager* entityManager);
+
+	/// <summary>
+	/// 共通の地面オブジェクトを初期化する。
+	/// </summary>
+	/// <param name="entityManager">エンティティ管理。</param>
+	/// <param name="scale">地面とマテリアルへ設定する拡大率。</param>
+	void InitializeGround(Engine::EntityManager* entityManager, const Vector3& scale = { 100.0f, 100.0f, 100.0f });
+
+	/// <summary>
+	/// プレイヤー車を生成し、共通の接地設定まで初期化する。
+	/// </summary>
+	/// <param name="entityManager">エンティティ管理。</param>
+	/// <param name="playerCar">生成した車を保持する所有ポインタ。</param>
+	/// <param name="position">車の初期座標。</param>
+	/// <param name="rotation">車の初期回転。</param>
+	void InitializePlayerCar(Engine::EntityManager* entityManager, std::unique_ptr<PlayerCar>& playerCar,
+		const Vector3& position, const Vector3& rotation);
 
 protected:
 	/// <summary>

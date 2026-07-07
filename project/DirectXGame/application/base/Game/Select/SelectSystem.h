@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // C++
 #include <imgui.h>
 #include <list>
@@ -12,6 +12,7 @@
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
+#include "DirectXGame/application/base/Game/Menu/MenuSelectionController.h"
 
 
 // 前方宣言
@@ -49,15 +50,9 @@ public:
 	/// 選択されているインデックスの取得
 	/// </summary>
 	/// <returns></returns>
-	int GetSelectedIndex() const { return selectedIndex; }
+	int GetSelectedIndex() const { return menuSelectionController_.GetSelectedIndex(); }
 
 private:
-	// 選択されているインデックス
-	int selectedIndex = 0; 
-	float timer_ = 0.0f;
-private:
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::SceneManager* sceneManager = nullptr;
-	InputSystem* input = nullptr;
+	// セレクト画面の項目移動とシーン遷移を処理する。
+	MenuSelectionController menuSelectionController_;
 };

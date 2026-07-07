@@ -33,6 +33,7 @@
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+#include "DirectXGame/application/base/Game/GameplaySession.h"
 
 class TutorialScene : public Engine::BaseScene {
 public:
@@ -60,29 +61,8 @@ private:
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
-	// 物理入力、アクション入力、コマンドをまとめて管理する
-	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
-
-	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
-
-	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
-	// エフェクト
-	std::unique_ptr<EffectSystem> effect_ = nullptr;
-	// スペシャルポイント管理クラス
-	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
-	
-	// キャラクター管理
-	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
-	// 弾
-	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
-	// ヒットボックスシステム
-	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
-
-private:
-	// 衝突登録システム
-	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
+	// ゲームプレイシーンで共通利用する基盤システム
+	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
 private:
 	// チュートリアルステージ
 	std::unique_ptr<TutorialStage> tutorialStage_;

@@ -30,6 +30,7 @@
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+#include "DirectXGame/application/base/Game/GameplaySession.h"
 
 /// <summary>
 /// ゲームプレイシーン
@@ -63,8 +64,8 @@ private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
 	DebugTimer debugTimer_;
-	// 物理入力、アクション入力、コマンドをまとめて管理する
-	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
+	// ゲームプレイシーンで共通利用する基盤システム
+	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
@@ -74,8 +75,6 @@ private:
 	// ポーズUI
 	std::unique_ptr<PoseUI> poseUI_;
 private:
-	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_ = nullptr;
 	// 固定カメラ
@@ -83,26 +82,8 @@ private:
 	// ステージカメラ
 	std::unique_ptr<StageCamera> stageCamera_ = nullptr;
 
-	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
-	// エフェクト
-	std::unique_ptr<EffectSystem> effect_ = nullptr;
-	// スペシャルポイント管理クラス
-	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
-
-private:
-	// キャラクター管理
-	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
 	// ステージ
 	std::unique_ptr<MainStage> stage_ = nullptr;
-	// 弾
-	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
-	// ヒットボックスシステム
-	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
-
-private:
-	// 衝突登録システム
-	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;	
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = nullptr;

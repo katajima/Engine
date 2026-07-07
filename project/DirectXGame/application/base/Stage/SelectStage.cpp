@@ -1,4 +1,4 @@
-#include "SelectStage.h"
+﻿#include "SelectStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -12,16 +12,11 @@ void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager
 	// ライト初期化
 	InitializeLight(entityManager);
 	
-	// タイル
-	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail_->SetModel("Ground.obj");
-	tail_->GetWorldTransform().scale_ = { 100,100,100 };
-	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+	// 基底クラスの共通処理で地面を生成する。
+	InitializeGround(entityManager);
 
-	// 車
-	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,0,0});
-	playerCar_->SetGroungHeight(0.1f);
+	// セレクト用の向きでプレイヤー車を生成する。
+	InitializePlayerCar(entityManager, playerCar_, playerCarPos_, { 0, 0, 0 });
 
 	for (int i = 0; i < 300; i++) {
 		std::unique_ptr<ObjectComponent> stone = std::make_unique<ObjectComponent>();

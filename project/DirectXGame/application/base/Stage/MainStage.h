@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "BaseStage.h"
 
 
@@ -12,21 +12,6 @@ public:
 
 	// 更新
 	void Update(float dt) override;
-
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化

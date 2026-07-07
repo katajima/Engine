@@ -4,47 +4,20 @@
 
 void SelectSystem::Initialize(Engine::SceneManager* sceneManager ,InputSystem* input, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
-	this->entityManager = entityManager;
-	this->globalVariables = globalVariables;
-	this->sceneManager = sceneManager;
-	this->input = input;
+	// 現在はメニュー操作で使用しない依存を明示的に未使用とする。
+	(void)entityManager;
+	(void)globalVariables;
+	// 縦軸で4項目を選択し、各項目に対応する遷移先を設定する。
+	MenuSelectionConfig config{};
+	config.itemCount = 4;
+	config.axis = MenuSelectionAxis::kVertical;
+	config.positiveDirectionStep = -1;
+	config.transitionScenes = { "GAMEPLAY", "", "", "TITLE" };
+	menuSelectionController_.Initialize(sceneManager, input, config);
 }
 
 void SelectSystem::Update(float dt) {
 
-	timer_ += dt;
-
-	if (timer_ >= 0.25f) {
-		if (input->GetGameInputData().moveShick.y > 0.5f) {
-			selectedIndex += -1;
-			timer_ = 0.0f;
-		}
-		else if (input->GetGameInputData().moveShick.y < -0.5f) {
-			selectedIndex += 1;
-			timer_ = 0.0f;
-		}
-	}
-
-	if (selectedIndex < 0) {
-		selectedIndex = 0;
-	}
-	else if (selectedIndex > 3) {
-		selectedIndex = 3;
-	}
-
-
-	if (input->GetGameInputData().decisionTrigger) {
-		if (selectedIndex == 0) {
-			sceneManager->ChangeScene("GAMEPLAY");
-		}
-		else if (selectedIndex == 1) {
-			//sceneManager->ChangeScene("TUTORIAL");
-		}
-		else if (selectedIndex == 2) {
-			//sceneManager->ChangeScene("CUSTOM");
-		}
-		else if (selectedIndex == 3) {
-			sceneManager->ChangeScene("TITLE");
-		}
-	}
+	// 共通メニュー操作へ更新を委譲する。
+	menuSelectionController_.Update(dt);
 }

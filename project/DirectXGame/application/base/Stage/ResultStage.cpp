@@ -1,4 +1,4 @@
-#include "ResultStage.h"
+﻿#include "ResultStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -13,21 +13,16 @@ void ResultStage::Initialize(Engine::EntityManager* entityManager, CameraManager
 	InitializeLight(entityManager);
 
 
-	// タイル
-	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail_->SetModel("Ground.obj");
-	tail_->GetWorldTransform().scale_ = { 100,100,100 };
-	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+	// 基底クラスの共通処理で地面を生成する。
+	InitializeGround(entityManager);
 
 	// 換金所
 	moneyExchangePlace = entityManager->CreateObject3D("MoneyExchangePlace", Engine::ObjectModelType::kNormal, { 0,0.06f,0 }, camera);
 	moneyExchangePlace->SetModel("MoneyExchangePlace.obj");
 	moneyExchangePlace->GetWorldTransform().rotate_ = { 0,Math::DegreesToRadians(-90),0 };
 
-	// 車
-	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,Math::DegreesToRadians(-90),0});
-	playerCar_->SetGroungHeight(0.1f);
+	// リザルト用の向きでプレイヤー車を生成する。
+	InitializePlayerCar(entityManager, playerCar_, playerCarPos_, { 0, Math::DegreesToRadians(-90), 0 });
 
 	// ステート変更
 	playerCar_->GetStateMachine()->ChangeState(CarMainState::ResultCashExchange);
