@@ -34,6 +34,8 @@
 #include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
+#include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+
 class TutorialScene : public Engine::BaseScene {
 public:
 
@@ -57,11 +59,6 @@ private:
 
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
-
-	/// <summary>
-	/// 衝突判定と応答
-	/// </summary>
-	void CheckAllCollisions();
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
@@ -93,8 +90,8 @@ private:
 	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
 
 private:
-	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
+	// 衝突登録システム
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
 private:
 	// チュートリアルステージ
 	std::unique_ptr<TutorialStage> tutorialStage_;

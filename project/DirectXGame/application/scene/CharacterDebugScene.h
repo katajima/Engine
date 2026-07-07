@@ -28,6 +28,8 @@
 #include <DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h>
 #include <DirectXGame/application/base/Bullet/Base/Debug/ProjectileDebug.h>
 
+#include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+
 class CharacterDebugScene : public Engine::BaseScene {
 public:
 
@@ -70,9 +72,6 @@ private:
 	void UpdateImGui();
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
-	// 衝突判定と応答
-	void CheckAllCollisions();
-
 	// デバッグ対象設定
 	void SetDebugTarget(uint32_t tag);
 
@@ -121,8 +120,8 @@ private:
 	// ズーム
 	CameraZoomData zoomData{};
 private:
-	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_;
+	// 衝突登録システム
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;

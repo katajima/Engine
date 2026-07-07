@@ -28,6 +28,12 @@ void CharacterDebugScene::Initialize() {
 	// デバッグ対象設定
 	SetDebugTarget(tagNumber);
 
+	// 衝突登録システム
+	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
+		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
+
+
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
@@ -36,7 +42,7 @@ void CharacterDebugScene::Initialize() {
 
 void CharacterDebugScene::Finalize(){
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionManager_->Clear();
+	collisionRegistrationSystem_->GetCollisionManager()->Clear();
 }
 
 void CharacterDebugScene::Update(){
@@ -167,11 +173,6 @@ void CharacterDebugScene::InitializeBase(){
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
 	stage_->Initialize(GetEntityManager(), cameraManager_.get());
-
-	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 1000,1000,1000 };
-	collisionManager_ = std::make_unique<Engine::CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 }
 // デバック関係初期化
 void CharacterDebugScene::InitializeDebug(){
@@ -222,8 +223,8 @@ void CharacterDebugScene::UpdateBase(float dt){
 	stage_->Update(dt);
 	// ヒットボックスシステム更新
 	hitBoxSystem_->Update(dt);
-	// 当たり判定
-	CheckAllCollisions();
+	// 衝突判定と応答
+	collisionRegistrationSystem_->RegisterAllCollisions();
 	// Effect更新
 	effect_->Update(dt);
 }
@@ -262,50 +263,6 @@ void CharacterDebugScene::UpdateImGui() {
 }
 // グローバルバリアブル適応
 void CharacterDebugScene::ApplyGlobalVariables() {
-}
-// 衝突判定と応答
-void CharacterDebugScene::CheckAllCollisions() {
-	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
-		if (objects->GetColliderComponent()) {
-			collisionManager_->Register(objects->GetColliderComponent());
-		}
-	}
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
-			collisionManager_->Register(caracter->GetColliderComponent());
-
-		}
-	}
-	// ヒットボックス
-	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-	for (const auto& bullet : bulletManager_->GetProjectiles()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	collisionManager_->CheckAll();
-	collisionManager_->ClearDynamic();
 }
 
 void CharacterDebugScene::SetDebugTarget(uint32_t tag) {

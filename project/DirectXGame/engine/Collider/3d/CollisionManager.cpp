@@ -1,4 +1,4 @@
-#include "CollisionManager.h"
+﻿#include "CollisionManager.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 
@@ -15,7 +15,8 @@ void Engine::CollisionManager::Initialize(GlobalVariables* globalVariables, cons
 	// オクツリー初期化（シーン全体のAABBと深さなど指定）
 	octreeCollider_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 3, 3, 3);
 	octreeColliderStatic_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
-	}
+}
+
 
 void Engine::CollisionManager::DrawLine(LineCommon* lineCommon) {
 	//octreeCollider_->Draw(*lineCommon);
@@ -65,7 +66,7 @@ void Engine::CollisionManager::RegisterStatic(ColliderComponent* comp)
 
 }
 
-void Engine::CollisionManager::Clear(){
+void Engine::CollisionManager::Clear() {
 	ClearDynamic();
 	ClearStatic();
 }

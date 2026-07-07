@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "ColliderComponent.h"
 #include"list"

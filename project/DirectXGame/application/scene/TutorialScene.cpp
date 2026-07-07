@@ -108,13 +108,11 @@ void TutorialScene::Initialize() {
 	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	//sp->SetStage(stage_.get());
 
-	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 300,25,300 };
-	collisionManager_ = std::make_unique<Engine::CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
+	// 衝突登録システム
+	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
+		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
 
-
-	
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -126,7 +124,7 @@ void TutorialScene::Initialize() {
 
 void TutorialScene::Finalize() {
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionManager_->Clear();
+	collisionRegistrationSystem_->GetCollisionManager()->Clear();
 }
 
 void TutorialScene::Update() {
@@ -169,7 +167,7 @@ void TutorialScene::Update() {
 	// ヒットボックスシステム更新
 	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
-	CheckAllCollisions();
+	collisionRegistrationSystem_->RegisterAllCollisions();
 	// Effect更新
 	effect_->Update(GetTime());
 	// チュートリアルシステム更新
@@ -213,48 +211,4 @@ void TutorialScene::UpdateImGui() {
 void TutorialScene::ApplyGlobalVariables() {
 	// グローバルバリアブルの適応ロジック
 
-}
-
-/// <summary>
-/// 衝突判定と応答
-/// </summary>
-void TutorialScene::CheckAllCollisions() {
-	// 衝突判定と応答のロジック
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
-				collisionManager_->Register(caracter->GetColliderComponent());
-
-		}
-	}
-
-	// ヒットボックス
-	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	// 描画
-	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
-	// 判定チェック
-	collisionManager_->CheckAll();
-	// 動的コライダー削除
-	collisionManager_->ClearDynamic();
 }

@@ -218,6 +218,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MoveComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
@@ -661,6 +662,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Game\Pose\PoseSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\PoseUI.h" />
