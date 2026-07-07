@@ -3424,6 +3424,42 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cp
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
 #include <DirectXGame/application/base/Character/State/CharacterStateMachine.h>
 
+namespace {
+	// コンボ設定の登録と保存で異なるGlobalVariables操作を吸収する
+	class ComboDataWriter {
+	public:
+		ComboDataWriter(Engine::GlobalVariables* globalVariables, bool overwrite)
+			: globalVariables_(globalVariables), overwrite_(overwrite) {
+		}
+
+		// 通常値を新規登録、または既存値へ保存する
+		template<typename T>
+		void Value(const std::string& groupName, const std::string& key, const T& value) {
+			if (overwrite_) {
+				globalVariables_->SetValue(groupName, key, value);
+			}
+			else {
+				globalVariables_->AddItem(groupName, key, value);
+			}
+		}
+
+		// enum値を型情報付きで新規登録、または既存値へ保存する
+		template<typename E>
+		void EnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType) {
+			if (overwrite_) {
+				globalVariables_->SetEnumValue(groupName, key, value, enumType);
+			}
+			else {
+				globalVariables_->AddEnumItem(groupName, key, value, enumType);
+			}
+		}
+
+	private:
+		Engine::GlobalVariables* globalVariables_ = nullptr; // 書き込み先のグローバル変数
+		bool overwrite_ = false; // trueなら保存、falseなら未登録項目だけ追加
+	};
+}
+
 namespace Combo {
 
 #pragma region main
@@ -3862,299 +3898,303 @@ namespace Combo {
 			globalVariables->AddItem(this->name, name.c_str(), name);
 		}
 
+		// 未登録の項目だけを追加し、既存の保存値は維持する
+		WriteGlobalComboData(name, data, false);
+		// 登録後に保存済みの値を実行時データへ読み戻す
+		GetGlobalComboData(name, data);
+	}
+
+	void System::WriteGlobalComboData(const std::string& groupName, GlobalData& data, bool overwrite) {
+		// 項目一覧は一か所に集約し、writerが登録と保存の違いを吸収する
+		ComboDataWriter writer(globalVariables, overwrite);
 		// 攻撃タイプと遠距離攻撃
 		{
-			globalVariables->AddItem(name, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
-			globalVariables->AddItem(name, "スタミナコスト", data.action.staminaCost);
-			globalVariables->AddItem(name, "クールダウン", data.action.cooldown);
-			globalVariables->AddItem(name, "空中残り回数要求", data.action.requiredAirRemainCount);
-			globalVariables->AddItem(name, "スーパーアーマー", data.action.superArmor);
-			globalVariables->AddItem(name, "無敵", data.action.invincible);
-			globalVariables->AddItem(name, "ガードポイント", data.action.guardPoint);
-			globalVariables->AddItem(name, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
-			globalVariables->AddItem(name, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
-			globalVariables->AddItem(name, "着地時のみキャンセル", data.action.landingCancel);
-			globalVariables->AddItem(name, "ヒットポーズ倍率", data.action.hitPauseScale);
-			globalVariables->AddItem(name, "カメラシェイク量", data.action.cameraShakePower);
-			globalVariables->AddItem(name, "攻撃音", data.audio.attackSoundName);
-			globalVariables->AddItem(name, "攻撃音再生時間", data.audio.attackStartTime);
-			globalVariables->AddItem(name, "攻撃音音量", data.audio.attackVolume);
-			globalVariables->AddItem(name, "ヒット音", data.audio.hitSoundName);
-			globalVariables->AddItem(name, "ヒット音音量", data.audio.hitVolume);
-			globalVariables->AddItem(name, "攻撃終了音", data.audio.finishSoundName);
-			globalVariables->AddItem(name, "攻撃終了音音量", data.audio.finishVolume);
+			writer.Value(groupName, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			writer.Value(groupName, "スタミナコスト", data.action.staminaCost);
+			writer.Value(groupName, "クールダウン", data.action.cooldown);
+			writer.Value(groupName, "空中残り回数要求", data.action.requiredAirRemainCount);
+			writer.Value(groupName, "スーパーアーマー", data.action.superArmor);
+			writer.Value(groupName, "無敵", data.action.invincible);
+			writer.Value(groupName, "ガードポイント", data.action.guardPoint);
+			writer.Value(groupName, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
+			writer.Value(groupName, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
+			writer.Value(groupName, "着地時のみキャンセル", data.action.landingCancel);
+			writer.Value(groupName, "ヒットポーズ倍率", data.action.hitPauseScale);
+			writer.Value(groupName, "カメラシェイク量", data.action.cameraShakePower);
+			writer.Value(groupName, "攻撃音", data.audio.attackSoundName);
+			writer.Value(groupName, "攻撃音再生時間", data.audio.attackStartTime);
+			writer.Value(groupName, "攻撃音音量", data.audio.attackVolume);
+			writer.Value(groupName, "ヒット音", data.audio.hitSoundName);
+			writer.Value(groupName, "ヒット音音量", data.audio.hitVolume);
+			writer.Value(groupName, "攻撃終了音", data.audio.finishSoundName);
+			writer.Value(groupName, "攻撃終了音音量", data.audio.finishVolume);
 
-			globalVariables->AddEnumItem(name, "コンボ攻撃タイプ", data.type, "ComboType");
-			globalVariables->AddEnumItem(name, "遠距離タイプ", data.range.rangeType, "RangeType");
-			globalVariables->AddEnumItem(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
-			globalVariables->AddEnumItem(name, "遠距離オフセットタイプ", data.range.offsetTargetType, "RangeOffsetTargetType");
-			globalVariables->AddEnumItem(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
-			globalVariables->AddEnumItem(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
-			globalVariables->AddEnumItem(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
-			globalVariables->AddItem(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
-			globalVariables->AddItem(name, "遠距離オフセットターゲット", data.range.offsetTarget);
-			globalVariables->AddItem(name, "投擲補間時間", data.range.throwLerpTime);
-			globalVariables->AddItem(name, "投擲効果発動時間", data.range.effectTriggerTime);
-			globalVariables->AddItem(name, "投擲回収時間", data.range.recallTriggerTime);
-			globalVariables->AddItem(name, "投擲回収近接半径", data.range.recallNearRadius);
-			globalVariables->AddItem(name, "投擲停滞時間", data.range.throwStayTime);
-			globalVariables->AddItem(name, "遠距離発射開始時間", data.range.rangeWindowStart);
-			globalVariables->AddItem(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
-			globalVariables->AddItem(name, "遠距離弾速", data.range.speed);
-			globalVariables->AddItem(name, "遠距離発射間隔", data.range.interval);
-			globalVariables->AddItem(name, "遠距離発射数", data.range.count);
-			globalVariables->AddItem(name, "遠距離ダメージ", data.range.damage);
-			globalVariables->AddItem(name, "サブ武器待機位置", data.range.subWeaponIdleOffset);
-			globalVariables->AddItem(name, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
-			globalVariables->AddItem(name, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
-			globalVariables->AddItem(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
-			globalVariables->AddItem(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
-			globalVariables->AddItem(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
-			globalVariables->AddItem(name, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
-			globalVariables->AddItem(name, "サブ武器スピン", data.range.subWeaponUseSpin);
-			globalVariables->AddItem(name, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
+			writer.EnumValue(groupName, "コンボ攻撃タイプ", data.type, "ComboType");
+			writer.EnumValue(groupName, "遠距離タイプ", data.range.rangeType, "RangeType");
+			writer.EnumValue(groupName, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
+			writer.EnumValue(groupName, "遠距離オフセットタイプ", data.range.offsetTargetType, "RangeOffsetTargetType");
+			writer.EnumValue(groupName, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
+			writer.EnumValue(groupName, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
+			writer.EnumValue(groupName, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
+			writer.Value(groupName, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
+			writer.Value(groupName, "遠距離オフセットターゲット", data.range.offsetTarget);
+			writer.Value(groupName, "投擲補間時間", data.range.throwLerpTime);
+			writer.Value(groupName, "投擲効果発動時間", data.range.effectTriggerTime);
+			writer.Value(groupName, "投擲回収時間", data.range.recallTriggerTime);
+			writer.Value(groupName, "投擲回収近接半径", data.range.recallNearRadius);
+			writer.Value(groupName, "投擲停滞時間", data.range.throwStayTime);
+			writer.Value(groupName, "遠距離発射開始時間", data.range.rangeWindowStart);
+			writer.Value(groupName, "遠距離発射終了時間", data.range.rangeWindowEnd);
+			writer.Value(groupName, "遠距離弾速", data.range.speed);
+			writer.Value(groupName, "遠距離発射間隔", data.range.interval);
+			writer.Value(groupName, "遠距離発射数", data.range.count);
+			writer.Value(groupName, "遠距離ダメージ", data.range.damage);
+			writer.Value(groupName, "サブ武器待機位置", data.range.subWeaponIdleOffset);
+			writer.Value(groupName, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
+			writer.Value(groupName, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
+			writer.Value(groupName, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
+			writer.Value(groupName, "サブ武器戻り時間", data.range.subWeaponReturnTime);
+			writer.Value(groupName, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
+			writer.Value(groupName, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
+			writer.Value(groupName, "サブ武器スピン", data.range.subWeaponUseSpin);
+			writer.Value(groupName, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
 		}
 
 		// エフェクト
 		{
-			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
-			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
-			globalVariables->AddItem(name, "エフェクト(武器表示)", data.effect.weaponDraw);
-			globalVariables->AddItem(name, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+			writer.Value(groupName, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
+			writer.Value(groupName, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+			writer.Value(groupName, "エフェクト(武器表示)", data.effect.weaponDraw);
+			writer.Value(groupName, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
 
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
-				globalVariables->AddItem(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
-				globalVariables->AddItem(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
-				globalVariables->AddEnumItem(name, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
-				globalVariables->AddItem(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
-				globalVariables->AddItem(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
-				globalVariables->AddItem(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
-				globalVariables->AddItem(name, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+				writer.Value(groupName, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
+				writer.Value(groupName, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
+				writer.EnumValue(groupName, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
+				writer.Value(groupName, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
+				writer.Value(groupName, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
+				writer.Value(groupName, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
+				writer.Value(groupName, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
 			}
 		}
 		// 接続
 		{
-			globalVariables->AddItem(name, "接続先(弱攻撃)", data.connection.lightAttack);
-			globalVariables->AddItem(name, "接続先(強攻撃)", data.connection.heavyAttack);
-			globalVariables->AddItem(name, "接続先(スキル)", data.connection.skill);
-			globalVariables->AddItem(name, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
-			globalVariables->AddItem(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
-			globalVariables->AddItem(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
-			globalVariables->AddItem(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
-			globalVariables->AddItem(name, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
-			globalVariables->AddItem(name, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
-			globalVariables->AddItem(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
-			globalVariables->AddItem(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
-			globalVariables->AddItem(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
-			globalVariables->AddItem(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
-			globalVariables->AddItem(name, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
-			globalVariables->AddItem(name, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
-			globalVariables->AddItem(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
-			globalVariables->AddItem(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
-			globalVariables->AddItem(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
-			globalVariables->AddItem(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
-			globalVariables->AddItem(name, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
-			globalVariables->AddItem(name, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
+			writer.Value(groupName, "接続先(弱攻撃)", data.connection.lightAttack);
+			writer.Value(groupName, "接続先(強攻撃)", data.connection.heavyAttack);
+			writer.Value(groupName, "接続先(スキル)", data.connection.skill);
+			writer.Value(groupName, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
+			writer.Value(groupName, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
+			writer.Value(groupName, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
+			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
+			writer.Value(groupName, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
+			writer.Value(groupName, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
+			writer.Value(groupName, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
+			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
+			writer.Value(groupName, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
+			writer.Value(groupName, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
+			writer.Value(groupName, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
+			writer.Value(groupName, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
+			writer.Value(groupName, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
+			writer.Value(groupName, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
+			writer.Value(groupName, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
+			writer.Value(groupName, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
 		}
 		// 条件
 		{
-			globalVariables->AddItem(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
-			globalVariables->AddItem(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
-			globalVariables->AddItem(name, "コンボ入力バッファ時間", data.condition.inputBufferTime);
-			globalVariables->AddItem(name, "コンボ終了時間", data.condition.stateEndTime);
-			globalVariables->AddItem(name, "コンボ移行時間", data.condition.stateNextTime);
-			globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
-			globalVariables->AddItem(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
-			globalVariables->AddItem(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
-			globalVariables->AddItem(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);
-			globalVariables->AddEnumItem(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
-			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
-			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
-			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
-			globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
+			writer.Value(groupName, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
+			writer.Value(groupName, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			writer.Value(groupName, "コンボ入力バッファ時間", data.condition.inputBufferTime);
+			writer.Value(groupName, "コンボ終了時間", data.condition.stateEndTime);
+			writer.Value(groupName, "コンボ移行時間", data.condition.stateNextTime);
+			writer.Value(groupName, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
+			writer.Value(groupName, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
+			writer.Value(groupName, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
+			writer.Value(groupName, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);
+			writer.EnumValue(groupName, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
+			writer.Value(groupName, "コンボ強制移行", data.condition.isCompulsionNext);
+			writer.Value(groupName, "コンボキャンセル可能", data.condition.isCancel);
+			writer.Value(groupName, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+			writer.Value(groupName, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{
-			globalVariables->AddItem(name, "アニメーション名前", data.animation.animationName);
-			globalVariables->AddItem(name, "アニメーション速度", data.animation.animationSpeed);
-			globalVariables->AddItem(name, "アニメーション遷移時間", data.animation.animationBlendTime);
-			globalVariables->AddItem(name, "アニメーションループ", data.animation.animationLoop);
-			globalVariables->AddItem(name, "アニメーションを一定時間で止めるか", data.animation.animationStop);
-			globalVariables->AddItem(name, "アニメーション停止時間", data.animation.animationStopTime);
+			writer.Value(groupName, "アニメーション名前", data.animation.animationName);
+			writer.Value(groupName, "アニメーション速度", data.animation.animationSpeed);
+			writer.Value(groupName, "アニメーション遷移時間", data.animation.animationBlendTime);
+			writer.Value(groupName, "アニメーションループ", data.animation.animationLoop);
+			writer.Value(groupName, "アニメーションを一定時間で止めるか", data.animation.animationStop);
+			writer.Value(groupName, "アニメーション停止時間", data.animation.animationStopTime);
 			// Transformアニメーション設定をコンボ単位で保存対象へ登録する
-			globalVariables->AddItem(name, "Transformアニメーション使用", data.animation.isTransformAnimation);
-			globalVariables->AddItem(name, "Transformアニメーション開始時間", data.animation.transformStartTime);
-			globalVariables->AddItem(name, "Transformアニメーション終了時間", data.animation.transformEndTime);
-			globalVariables->AddItem(name, "Transform開始スケール加算値", data.animation.transformStart.scale);
-			globalVariables->AddItem(name, "Transform開始回転加算値", data.animation.transformStart.rotate);
-			globalVariables->AddItem(name, "Transform開始位置加算値", data.animation.transformStart.translate);
-			globalVariables->AddItem(name, "Transform終了スケール加算値", data.animation.transformEnd.scale);
-			globalVariables->AddItem(name, "Transform終了回転加算値", data.animation.transformEnd.rotate);
-			globalVariables->AddItem(name, "Transform終了位置加算値", data.animation.transformEnd.translate);
-			globalVariables->AddItem(name, "Transform終了時復元", data.animation.restoreTransformOnExit);
+			writer.Value(groupName, "Transformアニメーション使用", data.animation.isTransformAnimation);
+			writer.Value(groupName, "Transformアニメーション開始時間", data.animation.transformStartTime);
+			writer.Value(groupName, "Transformアニメーション終了時間", data.animation.transformEndTime);
+			writer.Value(groupName, "Transform開始スケール加算値", data.animation.transformStart.scale);
+			writer.Value(groupName, "Transform開始回転加算値", data.animation.transformStart.rotate);
+			writer.Value(groupName, "Transform開始位置加算値", data.animation.transformStart.translate);
+			writer.Value(groupName, "Transform終了スケール加算値", data.animation.transformEnd.scale);
+			writer.Value(groupName, "Transform終了回転加算値", data.animation.transformEnd.rotate);
+			writer.Value(groupName, "Transform終了位置加算値", data.animation.transformEnd.translate);
+			writer.Value(groupName, "Transform終了時復元", data.animation.restoreTransformOnExit);
 		}
 		// 移動
 		{
-			globalVariables->AddItem(name, "コンボ中の移動慣性", data.move.inheritMoveInertia);
-			globalVariables->AddItem(name, "コンボ中の重力", data.move.isGravity);
-			globalVariables->AddItem(name, "コンボ中の重力強度", data.move.gravityScale);
-			globalVariables->AddItem(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
-			globalVariables->AddItem(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
+			writer.Value(groupName, "コンボ中の移動慣性", data.move.inheritMoveInertia);
+			writer.Value(groupName, "コンボ中の重力", data.move.isGravity);
+			writer.Value(groupName, "コンボ中の重力強度", data.move.gravityScale);
+			writer.Value(groupName, "コンボ中の最大落下速度", data.move.maxFallSpeed);
+			writer.Value(groupName, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
-			globalVariables->AddItem(name, "移動スピード", data.move.moveSpeed);
-			globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
-			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
-			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
-			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
-			globalVariables->AddItem(name, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
-			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.lockOnRadius);
-			globalVariables->AddItem(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
+			writer.Value(groupName, "移動スピード", data.move.moveSpeed);
+			writer.Value(groupName, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
+			writer.Value(groupName, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
+			writer.Value(groupName, "コンボ中の移動強制", data.move.isCompulsionMove);
+			writer.EnumValue(groupName, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
+			writer.Value(groupName, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
+			writer.Value(groupName, "ロックオン半径", data.move.lockOnData.lockOnRadius);
+			writer.Value(groupName, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
 
-			globalVariables->AddEnumItem(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
-			globalVariables->AddEnumItem(name, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
+			writer.EnumValue(groupName, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
+			writer.EnumValue(groupName, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
 
 
-			globalVariables->AddItem(name, "コンボ中の移動方向", data.move.localMoveVector);
-			globalVariables->AddItem(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
-			globalVariables->AddItem(name, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
-			globalVariables->AddItem(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
-			globalVariables->AddEnumItem(name, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
-			globalVariables->AddItem(name, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
-			globalVariables->AddItem(name, "コンボ中の縦方向移動", data.move.isVerticalMove);
-			globalVariables->AddItem(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
-			globalVariables->AddItem(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
+			writer.Value(groupName, "コンボ中の移動方向", data.move.localMoveVector);
+			writer.Value(groupName, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
+			writer.Value(groupName, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
+			writer.Value(groupName, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
+			writer.EnumValue(groupName, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
+			writer.Value(groupName, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
+			writer.Value(groupName, "コンボ中の縦方向移動", data.move.isVerticalMove);
+			writer.Value(groupName, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
+			writer.Value(groupName, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
 
 			// ターゲット有無で移動の味付けを変えるための上書き設定
-			globalVariables->AddItem(name, "ターゲットあり移動上書き", data.move.targetMove.enabled);
-			globalVariables->AddItem(name, "ターゲットあり移動スピード", data.move.targetMove.moveSpeed);
-			globalVariables->AddItem(name, "ターゲットあり移動方向", data.move.targetMove.localMoveVector);
-			globalVariables->AddItem(name, "ターゲットあり移動方向を正規化してから使うか", data.move.targetMove.isNormalizeLocalMove);
-			globalVariables->AddEnumItem(name, "ターゲットありターゲット移動タイプ", data.move.targetMove.targetMoveType, "TargetMoveType");
-			globalVariables->AddItem(name, "ターゲットあり接近距離半径", data.move.targetMove.moveTargetRadius);
-			globalVariables->AddItem(name, "ターゲットなし移動上書き", data.move.noTargetMove.enabled);
-			globalVariables->AddItem(name, "ターゲットなし移動スピード", data.move.noTargetMove.moveSpeed);
-			globalVariables->AddItem(name, "ターゲットなし移動方向", data.move.noTargetMove.localMoveVector);
-			globalVariables->AddItem(name, "ターゲットなし移動方向を正規化してから使うか", data.move.noTargetMove.isNormalizeLocalMove);
+			writer.Value(groupName, "ターゲットあり移動上書き", data.move.targetMove.enabled);
+			writer.Value(groupName, "ターゲットあり移動スピード", data.move.targetMove.moveSpeed);
+			writer.Value(groupName, "ターゲットあり移動方向", data.move.targetMove.localMoveVector);
+			writer.Value(groupName, "ターゲットあり移動方向を正規化してから使うか", data.move.targetMove.isNormalizeLocalMove);
+			writer.EnumValue(groupName, "ターゲットありターゲット移動タイプ", data.move.targetMove.targetMoveType, "TargetMoveType");
+			writer.Value(groupName, "ターゲットあり接近距離半径", data.move.targetMove.moveTargetRadius);
+			writer.Value(groupName, "ターゲットなし移動上書き", data.move.noTargetMove.enabled);
+			writer.Value(groupName, "ターゲットなし移動スピード", data.move.noTargetMove.moveSpeed);
+			writer.Value(groupName, "ターゲットなし移動方向", data.move.noTargetMove.localMoveVector);
+			writer.Value(groupName, "ターゲットなし移動方向を正規化してから使うか", data.move.noTargetMove.isNormalizeLocalMove);
 
 		}
 		// ヒットボックス
 		{
-			globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName);
-			globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.windowStart);
-			globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
-			globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
-			globalVariables->AddItem(name, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
-			globalVariables->AddItem(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
-			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
-			globalVariables->AddItem(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
+			writer.Value(groupName, "親オブジェクト名前", data.hitBox.parentName);
+			writer.Value(groupName, "ヒットボックス発生時間", data.hitBox.windowStart);
+			writer.Value(groupName, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			writer.Value(groupName, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			writer.Value(groupName, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
+			writer.Value(groupName, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
+			writer.Value(groupName, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
+			writer.Value(groupName, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
-			globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
-			globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
-			globalVariables->AddEnumItem(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
-			globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
-			globalVariables->AddEnumItem(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
-			globalVariables->AddEnumItem(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
-			globalVariables->AddEnumItem(name, "コライダー(タグ)", data.hitBox.tag, "CollisionTag");
-			globalVariables->AddEnumItem(name, "コライダー(レイヤー)", data.hitBox.layer, "CollisionLayer");
-			globalVariables->AddEnumItem(name, "コライダー(マスク)", data.hitBox.mask, "CollisionMask");
+			writer.EnumValue(groupName, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+			writer.EnumValue(groupName, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+			writer.EnumValue(groupName, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
+			writer.EnumValue(groupName, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+			writer.EnumValue(groupName, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
+			writer.EnumValue(groupName, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+			writer.EnumValue(groupName, "コライダー(タグ)", data.hitBox.tag, "CollisionTag");
+			writer.EnumValue(groupName, "コライダー(レイヤー)", data.hitBox.layer, "CollisionLayer");
+			writer.EnumValue(groupName, "コライダー(マスク)", data.hitBox.mask, "CollisionMask");
 		}
 		// リアクション
 		{
-			globalVariables->AddItem(name, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
-			globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-			globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
-			globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
-			globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
-			globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
-			globalVariables->AddEnumItem(name, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
-			globalVariables->AddEnumItem(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
-			globalVariables->AddItem(name, "ヒット優先度", data.hitReaction.hitPriority);
-			globalVariables->AddItem(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
-			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
-			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
-			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
-			globalVariables->AddItem(name, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
-			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
-			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+			writer.Value(groupName, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
+			writer.Value(groupName, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+			writer.Value(groupName, "ノックバック力", data.hitReaction.power);
+			writer.Value(groupName, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+			writer.Value(groupName, "ノックバック持続時間", data.hitReaction.duration);
+			writer.EnumValue(groupName, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			writer.EnumValue(groupName, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
+			writer.EnumValue(groupName, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
+			writer.Value(groupName, "ヒット優先度", data.hitReaction.hitPriority);
+			writer.Value(groupName, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
+			writer.Value(groupName, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+			writer.Value(groupName, "ダウン持続時間", data.hitReaction.downTime);
+			writer.Value(groupName, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			writer.Value(groupName, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
+			writer.Value(groupName, "ヒット重力", data.hitReaction.gravityEnabled);
+			writer.Value(groupName, "ヒット重力倍率", data.hitReaction.gravityScale);
 
-			globalVariables->AddItem(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
-			globalVariables->AddItem(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
-			globalVariables->AddItem(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
+			writer.Value(groupName, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
+			writer.Value(groupName, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
+			writer.Value(groupName, "ヒットストップ(一回のみ)", overwrite ?
+				data.hitReaction.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly : data.hitReaction.isSingleHitStop);
 
 
-			globalVariables->AddItem(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
+			writer.Value(groupName, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
 
 			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
-				globalVariables->AddItem(name, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
-				globalVariables->AddItem(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
+				writer.Value(groupName, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
+				writer.Value(groupName, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
 			}
 		}
 		// カメラ
 		{
-			globalVariables->AddItem(name, "カメラロックオン", data.camera.isLockOn);
-			globalVariables->AddItem(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
-			globalVariables->AddItem(name, "カメラロックオン回転引き継ぎ", data.camera.isLockOnRotate);
-			globalVariables->AddItem(name, "カメラロックオン解除時間", data.camera.lockOnEndTime);
+			writer.Value(groupName, "カメラロックオン", data.camera.isLockOn);
+			writer.Value(groupName, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
+			writer.Value(groupName, "カメラロックオン回転引き継ぎ", data.camera.isLockOnRotate);
+			writer.Value(groupName, "カメラロックオン解除時間", data.camera.lockOnEndTime);
 
-			globalVariables->AddItem(name, "カメラ切り替え", data.camera.isChangeCamera);
-			globalVariables->AddItem(name, "カメラ切り替え名", data.camera.cameraName);
-			globalVariables->AddItem(name, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
-			globalVariables->AddItem(name, "カメラ切り替え補間時間", data.camera.interpolation);
+			writer.Value(groupName, "カメラ切り替え", data.camera.isChangeCamera);
+			writer.Value(groupName, "カメラ切り替え名", data.camera.cameraName);
+			writer.Value(groupName, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
+			writer.Value(groupName, "カメラ切り替え補間時間", data.camera.interpolation);
 			
-			globalVariables->AddItem(name, "カメラズーム", data.camera.isZoom);
-			globalVariables->AddItem(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
-			globalVariables->AddItem(name, "カメラズーム速度", data.camera.zoomSpeed);
-			globalVariables->AddItem(name, "カメラズーム時間", data.camera.zoomDuration);
-			globalVariables->AddItem(name, "カメラズーム開始時間", data.camera.zoomStartTime);
-			globalVariables->AddItem(name, "カメラズーム量", data.camera.zoomTargetDistance);
+			writer.Value(groupName, "カメラズーム", data.camera.isZoom);
+			writer.Value(groupName, "カメラロックオンズーム", data.camera.isLockOnZoom);
+			writer.Value(groupName, "カメラズーム速度", data.camera.zoomSpeed);
+			writer.Value(groupName, "カメラズーム時間", data.camera.zoomDuration);
+			writer.Value(groupName, "カメラズーム開始時間", data.camera.zoomStartTime);
+			writer.Value(groupName, "カメラズーム量", data.camera.zoomTargetDistance);
 
-			globalVariables->AddItem(name, "カメラシェイク", data.camera.isShake);
-			globalVariables->AddItem(name, "カメラシェイク量", data.camera.shakeCameraPower);
-			globalVariables->AddItem(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
-			globalVariables->AddItem(name, "カメラシェイク時間", data.camera.shakeDuration);
-			globalVariables->AddItem(name, "カメラシェイク幅", data.camera.shakeOffset);
+			writer.Value(groupName, "カメラシェイク", data.camera.isShake);
+			writer.Value(groupName, "カメラシェイク量", data.camera.shakeCameraPower);
+			writer.Value(groupName, "カメラシェイク開始時間", data.camera.shakeStartTime);
+			writer.Value(groupName, "カメラシェイク時間", data.camera.shakeDuration);
+			writer.Value(groupName, "カメラシェイク幅", data.camera.shakeOffset);
 
-			globalVariables->AddItem(name, "カメラ注視点オフセット", data.camera.isActionTargetOffset);
-			globalVariables->AddItem(name, "カメラ注視点オフセット開始時間", data.camera.actionTargetOffsetStartTime);
-			globalVariables->AddItem(name, "カメラ注視点オフセット時間", data.camera.actionTargetOffsetDuration);
-			globalVariables->AddItem(name, "カメラ注視点オフセット補間速度", data.camera.actionTargetOffsetBlendSpeed);
-			globalVariables->AddItem(name, "カメラ注視点オフセット量", data.camera.actionTargetOffset);
+			writer.Value(groupName, "カメラ注視点オフセット", data.camera.isActionTargetOffset);
+			writer.Value(groupName, "カメラ注視点オフセット開始時間", data.camera.actionTargetOffsetStartTime);
+			writer.Value(groupName, "カメラ注視点オフセット時間", data.camera.actionTargetOffsetDuration);
+			writer.Value(groupName, "カメラ注視点オフセット補間速度", data.camera.actionTargetOffsetBlendSpeed);
+			writer.Value(groupName, "カメラ注視点オフセット量", data.camera.actionTargetOffset);
 
-			globalVariables->AddItem(name, "カメラ先読み", data.camera.isLookAhead);
-			globalVariables->AddItem(name, "カメラ先読み開始時間", data.camera.lookAheadStartTime);
-			globalVariables->AddItem(name, "カメラ先読み時間", data.camera.lookAheadDuration);
-			globalVariables->AddItem(name, "カメラ先読み距離", data.camera.lookAheadDistance);
-			globalVariables->AddItem(name, "カメラ先読み最小速度", data.camera.lookAheadMinSpeed);
-			globalVariables->AddItem(name, "カメラ先読み最大速度", data.camera.lookAheadMaxSpeed);
-			globalVariables->AddItem(name, "カメラ先読み補間速度", data.camera.lookAheadSmoothSpeed);
+			writer.Value(groupName, "カメラ先読み", data.camera.isLookAhead);
+			writer.Value(groupName, "カメラ先読み開始時間", data.camera.lookAheadStartTime);
+			writer.Value(groupName, "カメラ先読み時間", data.camera.lookAheadDuration);
+			writer.Value(groupName, "カメラ先読み距離", data.camera.lookAheadDistance);
+			writer.Value(groupName, "カメラ先読み最小速度", data.camera.lookAheadMinSpeed);
+			writer.Value(groupName, "カメラ先読み最大速度", data.camera.lookAheadMaxSpeed);
+			writer.Value(groupName, "カメラ先読み補間速度", data.camera.lookAheadSmoothSpeed);
 
-			globalVariables->AddItem(name, "カメラ速度ズーム", data.camera.isSpeedZoom);
-			globalVariables->AddItem(name, "カメラ速度ズーム開始時間", data.camera.speedZoomStartTime);
-			globalVariables->AddItem(name, "カメラ速度ズーム時間", data.camera.speedZoomDuration);
-			globalVariables->AddItem(name, "カメラ速度ズーム最小速度", data.camera.speedZoomMinSpeed);
-			globalVariables->AddItem(name, "カメラ速度ズーム最大速度", data.camera.speedZoomMaxSpeed);
-			globalVariables->AddItem(name, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
-			globalVariables->AddItem(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
-			globalVariables->AddItem(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
+			writer.Value(groupName, "カメラ速度ズーム", data.camera.isSpeedZoom);
+			writer.Value(groupName, "カメラ速度ズーム開始時間", data.camera.speedZoomStartTime);
+			writer.Value(groupName, "カメラ速度ズーム時間", data.camera.speedZoomDuration);
+			writer.Value(groupName, "カメラ速度ズーム最小速度", data.camera.speedZoomMinSpeed);
+			writer.Value(groupName, "カメラ速度ズーム最大速度", data.camera.speedZoomMaxSpeed);
+			writer.Value(groupName, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
+			writer.Value(groupName, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
+			writer.Value(groupName, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
 
 			// 命中を契機に再生するカメラ演出をコンボデータへ登録する
-			globalVariables->AddItem(name, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
-			globalVariables->AddItem(name, "ヒット時カメラシェイク", data.camera.isHitShake);
-			globalVariables->AddItem(name, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
-			globalVariables->AddItem(name, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
-			globalVariables->AddItem(name, "ヒット時カメラズーム", data.camera.isHitZoom);
-			globalVariables->AddItem(name, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
-			globalVariables->AddItem(name, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
-			globalVariables->AddItem(name, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
+			writer.Value(groupName, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
+			writer.Value(groupName, "ヒット時カメラシェイク", data.camera.isHitShake);
+			writer.Value(groupName, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
+			writer.Value(groupName, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
+			writer.Value(groupName, "ヒット時カメラズーム", data.camera.isHitZoom);
+			writer.Value(groupName, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
+			writer.Value(groupName, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
+			writer.Value(groupName, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
 
 		}
-
-
-
-		// 保存項目の適応
-		GetGlobalComboData(name, data);
-	};
-
+	}
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
 		// 攻撃タイプと遠距離攻撃
 		{
@@ -4469,301 +4509,9 @@ namespace Combo {
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
-		// 攻撃タイプと遠距離攻撃
-		{
-			globalVariables->SetValue(name, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
-			globalVariables->SetValue(name, "スタミナコスト", data.action.staminaCost);
-			globalVariables->SetValue(name, "クールダウン", data.action.cooldown);
-			globalVariables->SetValue(name, "空中残り回数要求", data.action.requiredAirRemainCount);
-			globalVariables->SetValue(name, "スーパーアーマー", data.action.superArmor);
-			globalVariables->SetValue(name, "無敵", data.action.invincible);
-			globalVariables->SetValue(name, "ガードポイント", data.action.guardPoint);
-			globalVariables->SetValue(name, "ヒット時のみキャンセル", data.action.cancelOnHitOnly);
-			globalVariables->SetValue(name, "ミス時のみキャンセル", data.action.cancelOnMissOnly);
-			globalVariables->SetValue(name, "着地時のみキャンセル", data.action.landingCancel);
-			globalVariables->SetValue(name, "ヒットポーズ倍率", data.action.hitPauseScale);
-			globalVariables->SetValue(name, "カメラシェイク量", data.action.cameraShakePower);
-			globalVariables->SetValue(name, "攻撃音", data.audio.attackSoundName);
-			globalVariables->SetValue(name, "攻撃音再生時間", data.audio.attackStartTime);
-			globalVariables->SetValue(name, "攻撃音音量", data.audio.attackVolume);
-			globalVariables->SetValue(name, "ヒット音", data.audio.hitSoundName);
-			globalVariables->SetValue(name, "ヒット音音量", data.audio.hitVolume);
-			globalVariables->SetValue(name, "攻撃終了音", data.audio.finishSoundName);
-			globalVariables->SetValue(name, "攻撃終了音音量", data.audio.finishVolume);
-
-			globalVariables->SetEnumValue(name, "コンボ攻撃タイプ", data.type, "ComboType");
-			globalVariables->SetEnumValue(name, "遠距離タイプ", data.range.rangeType, "RangeType");
-			globalVariables->SetEnumValue(name, "遠距離狙いタイプ", data.range.lockOnType, "RangeLockOnType");
-			globalVariables->SetEnumValue(name, "遠距離オフセットタイプ", data.range.offsetTargetType, "RangeOffsetTargetType");
-			globalVariables->SetEnumValue(name, "投擲移動タイプ", data.range.throwMoveType, "RangeThrowMoveType");
-			globalVariables->SetEnumValue(name, "投擲効果発動条件", data.range.effectTriggerType, "RangeEffectTriggerType");
-			globalVariables->SetEnumValue(name, "投擲回収条件", data.range.recallTriggerType, "RangeRecallTriggerType");
-			globalVariables->SetValue(name, "遠距離ロックオン開始半径", data.range.lockOnStartRadius);
-			globalVariables->SetValue(name, "遠距離オフセットターゲット", data.range.offsetTarget);
-			globalVariables->SetValue(name, "投擲補間時間", data.range.throwLerpTime);
-			globalVariables->SetValue(name, "投擲効果発動時間", data.range.effectTriggerTime);
-			globalVariables->SetValue(name, "投擲回収時間", data.range.recallTriggerTime);
-			globalVariables->SetValue(name, "投擲回収近接半径", data.range.recallNearRadius);
-			globalVariables->SetValue(name, "投擲停滞時間", data.range.throwStayTime);
-			globalVariables->SetValue(name, "遠距離発射開始時間", data.range.rangeWindowStart);
-			globalVariables->SetValue(name, "遠距離発射終了時間", data.range.rangeWindowEnd);
-			globalVariables->SetValue(name, "遠距離弾速", data.range.speed);
-			globalVariables->SetValue(name, "遠距離発射間隔", data.range.interval);
-			globalVariables->SetValue(name, "遠距離発射数", data.range.count);
-			globalVariables->SetValue(name, "遠距離ダメージ", data.range.damage);
-			globalVariables->SetValue(name, "サブ武器待機位置", data.range.subWeaponIdleOffset);
-			globalVariables->SetValue(name, "サブ武器投擲開始オフセット", data.range.subWeaponStartOffset);
-			globalVariables->SetValue(name, "サブ武器投擲速度", data.range.subWeaponThrowSpeed);
-			globalVariables->SetValue(name, "サブ武器投擲時間", data.range.subWeaponThrowLifeTime);
-			globalVariables->SetValue(name, "サブ武器戻り時間", data.range.subWeaponReturnTime);
-			globalVariables->SetValue(name, "サブ武器回転速度", data.range.subWeaponSpinSpeed);
-			globalVariables->SetValue(name, "サブ武器投擲方向に向ける", data.range.subWeaponAlignToDirection);
-			globalVariables->SetValue(name, "サブ武器スピン", data.range.subWeaponUseSpin);
-			globalVariables->SetValue(name, "サブ武器回転オフセット", data.range.subWeaponRotateOffset);
-		}
-
-		// エフェクト
-		{
-			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
-			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
-			globalVariables->SetValue(name, "エフェクト(武器表示)", data.effect.weaponDraw);
-			globalVariables->SetValue(name, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
-
-			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
-				globalVariables->SetValue(name, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
-				globalVariables->SetValue(name, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
-				globalVariables->SetEnumValue(name, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
-				globalVariables->SetValue(name, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
-				globalVariables->SetValue(name, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
-				globalVariables->SetValue(name, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
-				globalVariables->SetValue(name, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
-			}
-		}
-		// 接続
-		{
-			globalVariables->SetValue(name, "接続先(弱攻撃)", data.connection.lightAttack);
-			globalVariables->SetValue(name, "接続先(強攻撃)", data.connection.heavyAttack);
-			globalVariables->SetValue(name, "接続先(スキル)", data.connection.skill);
-			globalVariables->SetValue(name, "接続先(弱攻撃-地上-未ヒット)", data.connection.lightCondition.groundMiss);
-			globalVariables->SetValue(name, "接続先(弱攻撃-地上-ヒット)", data.connection.lightCondition.groundHit);
-			globalVariables->SetValue(name, "接続先(弱攻撃-空中-未ヒット)", data.connection.lightCondition.airMiss);
-			globalVariables->SetValue(name, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
-			globalVariables->SetValue(name, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
-			globalVariables->SetValue(name, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
-			globalVariables->SetValue(name, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
-			globalVariables->SetValue(name, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
-			globalVariables->SetValue(name, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
-			globalVariables->SetValue(name, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
-			globalVariables->SetValue(name, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
-			globalVariables->SetValue(name, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
-			globalVariables->SetValue(name, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
-			globalVariables->SetValue(name, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
-			globalVariables->SetValue(name, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
-			globalVariables->SetValue(name, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
-			globalVariables->SetValue(name, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
-			globalVariables->SetValue(name, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
-		}
-		// 条件
-		{
-			globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
-			globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
-			globalVariables->SetValue(name, "コンボ入力バッファ時間", data.condition.inputBufferTime);
-			globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
-			globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
-			globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
-			globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
-			globalVariables->SetValue(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
-			globalVariables->SetValue(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);	
-			globalVariables->SetEnumValue(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
-			globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
-			globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
-			globalVariables->SetValue(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
-			globalVariables->SetValue(name, "コンボ入力遅延", data.condition.inputDelay);
-		}
-		// アニメーション
-		{
-			globalVariables->SetValue(name, "アニメーション名前", data.animation.animationName);
-			globalVariables->SetValue(name, "アニメーション速度", data.animation.animationSpeed);
-			globalVariables->SetValue(name, "アニメーション遷移時間", data.animation.animationBlendTime);
-			globalVariables->SetValue(name, "アニメーションループ", data.animation.animationLoop);
-			globalVariables->SetValue(name, "アニメーションを一定時間で止めるか", data.animation.animationStop);
-			globalVariables->SetValue(name, "アニメーション停止時間", data.animation.animationStopTime);
-			// エディター上のTransformアニメーション設定を保存値へ反映する
-			globalVariables->SetValue(name, "Transformアニメーション使用", data.animation.isTransformAnimation);
-			globalVariables->SetValue(name, "Transformアニメーション開始時間", data.animation.transformStartTime);
-			globalVariables->SetValue(name, "Transformアニメーション終了時間", data.animation.transformEndTime);
-			globalVariables->SetValue(name, "Transform開始スケール加算値", data.animation.transformStart.scale);
-			globalVariables->SetValue(name, "Transform開始回転加算値", data.animation.transformStart.rotate);
-			globalVariables->SetValue(name, "Transform開始位置加算値", data.animation.transformStart.translate);
-			globalVariables->SetValue(name, "Transform終了スケール加算値", data.animation.transformEnd.scale);
-			globalVariables->SetValue(name, "Transform終了回転加算値", data.animation.transformEnd.rotate);
-			globalVariables->SetValue(name, "Transform終了位置加算値", data.animation.transformEnd.translate);
-			globalVariables->SetValue(name, "Transform終了時復元", data.animation.restoreTransformOnExit);
-
-
-		}
-		// 移動
-		{
-			globalVariables->SetValue(name, "コンボ中の移動慣性", data.move.inheritMoveInertia);
-			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
-			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
-			globalVariables->SetValue(name, "移動スピード", data.move.moveSpeed);
-			globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove);
-			globalVariables->SetValue(name, "コンボ中の重力", data.move.isGravity);
-			globalVariables->SetValue(name, "コンボ中の重力強度", data.move.gravityScale);
-			globalVariables->SetValue(name, "コンボ中の最大落下速度", data.move.maxFallSpeed);
-			globalVariables->SetValue(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
-
-			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
-			globalVariables->SetValue(name, "ソフトロックオン半径", data.move.lockOnData.softLockRadius);
-			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.lockOnRadius);
-			globalVariables->SetValue(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
-
-			globalVariables->SetEnumValue(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
-			globalVariables->SetEnumValue(name, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
-
-
-			globalVariables->SetValue(name, "コンボ中の移動方向", data.move.localMoveVector);
-			globalVariables->SetValue(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
-			globalVariables->SetValue(name, "コンボ中の移動毎フレームターゲット位置を更新", data.move.isUpdateTargetPositionEachFrame);
-			globalVariables->SetValue(name, "コンボ中の移動方向を正規化してから使うか", data.move.isNormalizeLocalMove);
-			globalVariables->SetEnumValue(name, "コンボ中の移動速度カーブ", data.move.speedCurveType, "MoveSpeedCurveType");
-			globalVariables->SetValue(name, "コンボ中の移動速度カーブ強度", data.move.speedCurvePower);
-			globalVariables->SetValue(name, "コンボ中の縦方向移動", data.move.isVerticalMove);
-			globalVariables->SetValue(name, "コンボ中の移動基準前方を水平化", data.move.isFlattenTargetDirection);
-			globalVariables->SetValue(name, "移動方向とキャラクターの向く方向を一致させるか", data.move.alignCharacterToMovement);
-
-			// ターゲット有無で移動の味付けを変えるための上書き設定
-			globalVariables->SetValue(name, "ターゲットあり移動上書き", data.move.targetMove.enabled);
-			globalVariables->SetValue(name, "ターゲットあり移動スピード", data.move.targetMove.moveSpeed);
-			globalVariables->SetValue(name, "ターゲットあり移動方向", data.move.targetMove.localMoveVector);
-			globalVariables->SetValue(name, "ターゲットあり移動方向を正規化してから使うか", data.move.targetMove.isNormalizeLocalMove);
-			globalVariables->SetEnumValue(name, "ターゲットありターゲット移動タイプ", data.move.targetMove.targetMoveType, "TargetMoveType");
-			globalVariables->SetValue(name, "ターゲットあり接近距離半径", data.move.targetMove.moveTargetRadius);
-			globalVariables->SetValue(name, "ターゲットなし移動上書き", data.move.noTargetMove.enabled);
-			globalVariables->SetValue(name, "ターゲットなし移動スピード", data.move.noTargetMove.moveSpeed);
-			globalVariables->SetValue(name, "ターゲットなし移動方向", data.move.noTargetMove.localMoveVector);
-			globalVariables->SetValue(name, "ターゲットなし移動方向を正規化してから使うか", data.move.noTargetMove.isNormalizeLocalMove);
-
-		}
-		// リアクション
-		{
-			globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
-			globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
-			globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
-			globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
-			globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
-			globalVariables->SetEnumValue(name, "ヒットストップ方針(自分)", data.hitReaction.selfHitStopPolicy, "SelfHitStopPolicy");
-			globalVariables->SetEnumValue(name, "攻撃属性", data.hitReaction.attribute, "AttackAttribute");
-			globalVariables->SetValue(name, "ヒット優先度", data.hitReaction.hitPriority);
-			globalVariables->SetValue(name, "ヒットカメラシェイク量", data.hitReaction.cameraShakePower);
-			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
-			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
-			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
-			globalVariables->SetValue(name, "打ち上げ最大高度", data.hitReaction.launchMaxHeight);
-			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
-			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
-
-
-			globalVariables->SetValue(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
-			globalVariables->SetValue(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
-			globalVariables->SetValue(name, "ヒットストップ(一回のみ)",
-				data.hitReaction.selfHitStopPolicy == SelfHitStopPolicy::FirstHitOnly);
-
-
-			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
-
-			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
-				globalVariables->SetValue(name, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
-				globalVariables->SetValue(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
-			}
-		}
-		// ヒットボックス
-		{
-			globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.windowStart);
-			globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
-			globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
-			globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
-			globalVariables->SetValue(name, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
-			globalVariables->SetValue(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
-			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
-			globalVariables->SetValue(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
-
-			globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
-			globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
-			globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
-			globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
-			globalVariables->SetEnumValue(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
-			globalVariables->SetEnumValue(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
-
-			globalVariables->SetEnumValue(name, "コライダー(タグ)", data.hitBox.tag, "CollisionTag");
-			globalVariables->SetEnumValue(name, "コライダー(レイヤー)", data.hitBox.layer, "CollisionLayer");
-			globalVariables->SetEnumValue(name, "コライダー(マスク)", data.hitBox.mask, "CollisionMask");
-
-
-		}
-		// カメラ
-		{
-			globalVariables->SetValue(name, "カメラロックオン", data.camera.isLockOn);
-			globalVariables->SetValue(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
-			globalVariables->SetValue(name, "カメラロックオン回転引き継ぎ",data.camera.isLockOnRotate);
-			globalVariables->SetValue(name, "カメラロックオン解除時間", data.camera.lockOnEndTime);
-
-			globalVariables->SetValue(name, "カメラ切り替え", data.camera.isChangeCamera);
-			globalVariables->SetValue(name, "カメラ切り替え名", data.camera.cameraName);
-			globalVariables->SetValue(name, "カメラ切り替え開始時間", data.camera.changeCameraStartTime);
-			globalVariables->SetValue(name, "カメラ切り替え補間時間", data.camera.interpolation);
-
-			globalVariables->SetValue(name, "カメラズーム", data.camera.isZoom);
-			globalVariables->SetValue(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
-			globalVariables->SetValue(name, "カメラズーム速度", data.camera.zoomSpeed);
-			globalVariables->SetValue(name, "カメラズーム時間", data.camera.zoomDuration);
-			globalVariables->SetValue(name, "カメラズーム開始時間", data.camera.zoomStartTime);
-			globalVariables->SetValue(name, "カメラズーム量", data.camera.zoomTargetDistance);
-
-			globalVariables->SetValue(name, "カメラシェイク", data.camera.isShake);
-			globalVariables->SetValue(name, "カメラシェイク量", data.camera.shakeCameraPower);
-			globalVariables->SetValue(name, "カメラシェイク開始時間", data.camera.shakeStartTime);
-			globalVariables->SetValue(name, "カメラシェイク時間", data.camera.shakeDuration);
-			globalVariables->SetValue(name, "カメラシェイク幅", data.camera.shakeOffset);
-
-			globalVariables->SetValue(name, "カメラ注視点オフセット", data.camera.isActionTargetOffset);
-			globalVariables->SetValue(name, "カメラ注視点オフセット開始時間", data.camera.actionTargetOffsetStartTime);
-			globalVariables->SetValue(name, "カメラ注視点オフセット時間", data.camera.actionTargetOffsetDuration);
-			globalVariables->SetValue(name, "カメラ注視点オフセット補間速度", data.camera.actionTargetOffsetBlendSpeed);
-			globalVariables->SetValue(name, "カメラ注視点オフセット量", data.camera.actionTargetOffset);
-
-			globalVariables->SetValue(name, "カメラ先読み", data.camera.isLookAhead);
-			globalVariables->SetValue(name, "カメラ先読み開始時間", data.camera.lookAheadStartTime);
-			globalVariables->SetValue(name, "カメラ先読み時間", data.camera.lookAheadDuration);
-			globalVariables->SetValue(name, "カメラ先読み距離", data.camera.lookAheadDistance);
-			globalVariables->SetValue(name, "カメラ先読み最小速度", data.camera.lookAheadMinSpeed);
-			globalVariables->SetValue(name, "カメラ先読み最大速度", data.camera.lookAheadMaxSpeed);
-			globalVariables->SetValue(name, "カメラ先読み補間速度", data.camera.lookAheadSmoothSpeed);
-
-			globalVariables->SetValue(name, "カメラ速度ズーム", data.camera.isSpeedZoom);
-			globalVariables->SetValue(name, "カメラ速度ズーム開始時間", data.camera.speedZoomStartTime);
-			globalVariables->SetValue(name, "カメラ速度ズーム時間", data.camera.speedZoomDuration);
-			globalVariables->SetValue(name, "カメラ速度ズーム最小速度", data.camera.speedZoomMinSpeed);
-			globalVariables->SetValue(name, "カメラ速度ズーム最大速度", data.camera.speedZoomMaxSpeed);
-			globalVariables->SetValue(name, "カメラ速度ズーム近距離補正", data.camera.speedZoomNearOffsetZ);
-			globalVariables->SetValue(name, "カメラ速度ズーム遠距離補正", data.camera.speedZoomFarOffsetZ);
-			globalVariables->SetValue(name, "カメラ速度ズーム補間速度", data.camera.speedZoomSmoothSpeed);
-
-			// エディターで変更した命中時カメラ演出を永続化する
-			globalVariables->SetValue(name, "ヒット時カメラ演出", data.camera.isHitCameraEffect);
-			globalVariables->SetValue(name, "ヒット時カメラシェイク", data.camera.isHitShake);
-			globalVariables->SetValue(name, "ヒット時カメラシェイク時間", data.camera.hitShakeDuration);
-			globalVariables->SetValue(name, "ヒット時カメラシェイク幅", data.camera.hitShakeOffset);
-			globalVariables->SetValue(name, "ヒット時カメラズーム", data.camera.isHitZoom);
-			globalVariables->SetValue(name, "ヒット時カメラズーム距離", data.camera.hitZoomTargetDistance);
-			globalVariables->SetValue(name, "ヒット時カメラズーム速度", data.camera.hitZoomSpeed);
-			globalVariables->SetValue(name, "ヒット時カメラズーム時間", data.camera.hitZoomDuration);
-
-		}
+		// 共通の項目一覧を上書きモードで保存する
+		WriteGlobalComboData(name, data, true);
 	}
-
 	void System::SetGlobalComboDatas() {
 		for (auto& pair : comboGlobalDatas_) {
 			SetGlobalComboData(pair.first, pair.second);
@@ -5136,6 +4884,8 @@ namespace Combo {
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
+		// 登録と保存で共通のコンボ項目一覧を書き込む
+		void WriteGlobalComboData(const std::string& groupName, GlobalData& data, bool overwrite);
 		void ConnectSavedCombos();
 		std::string ResolveStartCombo(ActionInput input, bool isLanding, bool isDodging, bool isDodgeSuccess) const;
 		bool IsStartComboKey(const std::string& key) const;
@@ -39472,9 +39222,6 @@ void CharacterDebugScene::UpdateImGui() {
 	ImGui::End();
 #endif // _DEBUG
 }
-// グローバルバリアブル適応
-void CharacterDebugScene::ApplyGlobalVariables() {
-}
 
 void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 	// デバック対象設定
@@ -39571,7 +39318,7 @@ private:
 	// ImGui更新
 	void UpdateImGui();
 	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+	void ApplyGlobalVariables() {};
 	// デバッグ対象設定
 	void SetDebugTarget(uint32_t tag);
 
@@ -40090,8 +39837,6 @@ void GamePlayScene::Draw2D(){
 	poseUI_->Draw();
 }
 
-// 調整項目
-void GamePlayScene::ApplyGlobalVariables() {}
 
 
 ============================================================
@@ -40159,7 +39904,7 @@ private:
 	void UpdateImGui();
 
 	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
@@ -42150,18 +41895,6 @@ void TutorialScene::Draw2D() {
 	
 }
 
-// ImGui更新
-void TutorialScene::UpdateImGui() {
-	// ImGuiの更新ロジック
-
-}
-
-// グローバルバリアブル適応
-void TutorialScene::ApplyGlobalVariables() {
-	// グローバルバリアブルの適応ロジック
-
-}
-
 
 ============================================================
 File Path: project/DirectXGame/application/scene/TutorialScene.h
@@ -42223,10 +41956,10 @@ public:
 
 private:
 	// ImGui更新
-	void UpdateImGui();
+	void UpdateImGui() {};
 
 	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
