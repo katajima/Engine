@@ -200,15 +200,3 @@ void TutorialScene::Draw2D() {
 	bulletManager_->Draw2D();
 	
 }
-
-// ImGui更新
-void TutorialScene::UpdateImGui() {
-	// ImGuiの更新ロジック
-
-}
-
-// グローバルバリアブル適応
-void TutorialScene::ApplyGlobalVariables() {
-	// グローバルバリアブルの適応ロジック
-
-}

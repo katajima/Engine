@@ -55,10 +55,10 @@ public:
 
 private:
 	// ImGui更新
-	void UpdateImGui();
+	void UpdateImGui() {};
 
 	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;

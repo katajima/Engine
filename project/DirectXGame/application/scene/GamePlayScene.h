@@ -60,7 +60,7 @@ private:
 	void UpdateImGui();
 
 	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;

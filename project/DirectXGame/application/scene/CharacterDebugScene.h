@@ -71,7 +71,7 @@ private:
 	// ImGui更新
 	void UpdateImGui();
 	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+	void ApplyGlobalVariables() {};
 	// デバッグ対象設定
 	void SetDebugTarget(uint32_t tag);
 

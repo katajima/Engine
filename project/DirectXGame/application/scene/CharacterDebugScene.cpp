@@ -261,9 +261,6 @@ void CharacterDebugScene::UpdateImGui() {
 	ImGui::End();
 #endif // _DEBUG
 }
-// グローバルバリアブル適応
-void CharacterDebugScene::ApplyGlobalVariables() {
-}
 
 void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 	// デバック対象設定

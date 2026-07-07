@@ -287,5 +287,3 @@ void GamePlayScene::Draw2D(){
 	poseUI_->Draw();
 }
 
-// 調整項目
-void GamePlayScene::ApplyGlobalVariables() {}

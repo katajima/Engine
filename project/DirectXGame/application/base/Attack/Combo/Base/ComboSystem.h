@@ -208,6 +208,8 @@ namespace Combo {
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
+		// 登録と保存で共通のコンボ項目一覧を書き込む
+		void WriteGlobalComboData(const std::string& groupName, GlobalData& data, bool overwrite);
 		void ConnectSavedCombos();
 		std::string ResolveStartCombo(ActionInput input, bool isLanding, bool isDodging, bool isDodgeSuccess) const;
 		bool IsStartComboKey(const std::string& key) const;
