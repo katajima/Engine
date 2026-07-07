@@ -1,6 +1,6 @@
-#include "ObjectComponent.h"  
+﻿#include "ObjectComponent.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include <DirectXGame/engine/3d/Object/Object3dInstansManager.h>
+#include <DirectXGame/engine/3d/Object/Object3dInstanceManager.h>
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/collider/3d/ColliderComponent.h"
@@ -132,7 +132,7 @@ Engine::ContactRecord& ObjectComponent::GetContactRecord() {
 Vector2 ObjectComponent::GetScreenPosition() {
     // インスタンシング描画なら
     if (useInstancing) {
-        return ScreenPosition(objectInstance_->transform, entityManager->GetObject3dCommon()->GetDefaltCamera());
+        return ScreenPosition(objectInstance_->transform, entityManager->GetObject3dCommon()->GetDefaultCamera());
     }
     else {
         return objectBase_->GetScreenPosition();
@@ -184,7 +184,7 @@ void ObjectComponent::Initialize(Engine::EntityManager* entityManager, Engine::G
 
 void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
     const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
-    IHitReceiver* iHitReceiver, Engine::ObjectInstans::TransparencyType transparencyType, bool rigidUpdate)
+    IHitReceiver* iHitReceiver, Engine::ObjectInstance::TransparencyType transparencyType, bool rigidUpdate)
 {
     this->entityManager = entityManager;   // エンティティ3d
     this->globalVariables = globalVariables;   // 保存項目
@@ -196,14 +196,14 @@ void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager,
     modelName_ = modelName;                     // モデル名
     useInstancing = true;                       // インスタンシング描画にする
     // インスタンス初期化
-    Engine::ObjectInstans object;
+    Engine::ObjectInstance object;
     object.Initialize(entityManager, useCollider_, rigidUpdate_);
     // オブジェクト追加
-    entityManager->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
-        Engine::Object3dInstansManager::MeshType::kModel,transparencyType);
+    entityManager->GetObject3dInstanceManager()->AddObject(modelName, texName, std::move(object), instanceId_,
+        Engine::Object3dInstanceManager::MeshType::kModel,transparencyType);
 
     // インスタンス
-    objectInstance_ = entityManager->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_, transparencyType);
+    objectInstance_ = entityManager->GetObject3dInstanceManager()->GetObjectById(modelName_, instanceId_, transparencyType);
 }
 
 /// <summary>

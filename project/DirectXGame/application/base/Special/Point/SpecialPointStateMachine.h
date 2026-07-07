@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "SpecialPointState.h"
 
 // 前方宣言
-class SpecalPoint;
+class SpecialPoint;
 
-using SpecialPointStateFactory = std::function<std::unique_ptr<BaseSpecialPointState>(SpecalPoint*)>;
+using SpecialPointStateFactory = std::function<std::unique_ptr<BaseSpecialPointState>(SpecialPoint*)>;
 
 /// <summary>
 /// スペシャルポイントステートマシーン
@@ -12,7 +12,7 @@ using SpecialPointStateFactory = std::function<std::unique_ptr<BaseSpecialPointS
 class SpecialPointStateMachine {
 public:
 	// 初期化
-	void Initialize(SpecalPoint* object, SpecialPointState initialState = SpecialPointState::kPop);
+	void Initialize(SpecialPoint* object, SpecialPointState initialState = SpecialPointState::kPop);
 	// 更新
 	void Update(float dt);
 
@@ -60,6 +60,6 @@ private:
 	//
 	SpecialPointState nowState_;
 private:
-	SpecalPoint* object_ = nullptr;
+	SpecialPoint* object_ = nullptr;
 
 };

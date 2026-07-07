@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DirectXGame/engine/Mesh/Base/BaseMesh.h"
 #include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
@@ -12,7 +12,7 @@ namespace Engine {
 	class TrailMesh : public BaseMesh {
 	public:
 		// メッシュ生成
-		void CreateMesh(size_t instanse);
+		void CreateMesh(size_t instance);
 		// 初期化
 		void Initialize(DirectXCommon* dxcommon) override;
 		// コマンドリスト設定

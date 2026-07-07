@@ -1,16 +1,16 @@
 ﻿#include "CollisionRegistrationSystem.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 void CollisionRegistrationSystem::Initialize(Engine::GlobalVariables* globalVariables,Engine::LineCommon* lineCommon, HitBox::System* hitBoxSystem,
-	Character::CharacterManager* characterManager,SpecalPointManager* specalPointManager, BulletManager* bulletManager){
+	Character::CharacterManager* characterManager,SpecialPointManager* specialPointManager, BulletManager* bulletManager){
 
 	this->lineCommon = lineCommon;
 	this->hitBoxSystem = hitBoxSystem;	
 	this->characterManager = characterManager;	
-	this->specalPointManager = specalPointManager;	
+	this->specialPointManager = specialPointManager;
 	this->bulletManager = bulletManager;	
 
 
@@ -52,7 +52,7 @@ void CollisionRegistrationSystem::RegisterAllCollisions(){
 	}
 
 	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager->GetSpecalPoints()) {
+	for (const auto& point : specialPointManager->GetSpecialPoints()) {
 		if (point->GetColliderComponent()) {
 			collisionManager_->Register(point->GetColliderComponent());
 		}

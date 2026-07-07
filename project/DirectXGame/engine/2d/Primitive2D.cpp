@@ -1,4 +1,4 @@
-#include "Primitive2D.h"
+﻿#include "Primitive2D.h"
 #include "SpriteCommon.h"
 
 void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
@@ -41,8 +41,8 @@ void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type,
 	material->GetMaterialInstance().color = color;
 
 	// トランスフォーム
-	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(spriteCommon->GetDxCommon());
+	transformation = std::make_unique<Transformation>();
+	transformation->Initialize(spriteCommon->GetDxCommon());
 
 
 
@@ -70,7 +70,7 @@ void Engine::Primitive2D::Update()
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
 	// トランスフォーム
-	transfomation->UpdateSprite(worldViewProjectionMatrix);
+	transformation->UpdateSprite(worldViewProjectionMatrix);
 
 	// マテリアル
 	material->GPUData();
@@ -85,7 +85,7 @@ void Engine::Primitive2D::Draw()
 	material->GetCommandListTexture(2, 2, 2);
 
 	//トランスフォームMatrixResource
-	transfomation->GetCommandList(1);
+	transformation->GetCommandList(1);
 
 	mesh->GetCommandList();
 

@@ -1,4 +1,4 @@
-#include "LineCommon.h"
+﻿#include "LineCommon.h"
 #include "combaseapi.h"
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -112,16 +112,16 @@ void Engine::LineCommon::CreateRootSignature()
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};  // 2つのパラメーターを使う
 
 	// カメラデータ
-	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters),nullptr,0);
 
 	// カメラデータ
-	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	psoManager_->SetRootSignature(rootSignature2, rootParameters, _countof(rootParameters),nullptr,0);
 
@@ -137,7 +137,7 @@ void Engine::LineCommon::CreateGraphicsPipeline()
 
 	// BlendState(ブレンドステート)の設定
 	// 標準のアルファブレンド設定を生成する
-	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	D3D12_BLEND_DESC blendDesc = PSOFunction::CreateAlphaBlendDesc();
 
 #pragma endregion //BlendState(ブレンドステート)
 
@@ -152,7 +152,7 @@ void Engine::LineCommon::CreateGraphicsPipeline()
 
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 
 
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);

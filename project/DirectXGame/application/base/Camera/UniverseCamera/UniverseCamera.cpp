@@ -1,6 +1,6 @@
-#include "UniverseCamera.h"
+﻿#include "UniverseCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 
 
 void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
@@ -37,7 +37,7 @@ void UniverseCamera::Update() {
 		if (timer_.IsMaxOverT()) {
 			timer_.t = 0.0f;			// 初期化
 			scaleLerp_.currentT = 0.0f;	// 初期化
-			cameraManeger->SetUseCamera("followCamera", 0.0f);	// フォローカメラに移行
+			cameraManager->SetUseCamera("followCamera", 0.0f);	// フォローカメラに移行
 		}
 	}
 	

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include <DirectXGame/engine/2d/Sprite.h>
 #include "DirectXGame/engine/Effect/Particle/Emit/EmitData.h"
@@ -93,7 +93,7 @@ namespace Engine {
 
 
 	class DirectXCommon;
-	namespace ParticleFanction {
+	namespace ParticleFunction {
 
 		// ビルボード
 		Matrix4x4 Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera);

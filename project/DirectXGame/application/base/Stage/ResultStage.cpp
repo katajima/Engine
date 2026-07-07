@@ -1,6 +1,6 @@
 ﻿#include "ResultStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 
@@ -9,14 +9,14 @@ enum class SpecialPointState {
 	kMove,		// 移動
 	kEnd,		// 終了
 };
-class SpecalPoint;
+class SpecialPoint;
 
 // 基底ステート
 class BaseSpecialPointState {
 public:
 
 	virtual ~BaseSpecialPointState() = default;
-	BaseSpecialPointState(const SpecialPointState& state, SpecalPoint* object) :specialPointState(state),object_(object){};
+	BaseSpecialPointState(const SpecialPointState& state, SpecialPoint* object) :specialPointState(state),object_(object){};
 	// 開始
 	virtual void Enter() {}
 	// 更新
@@ -30,13 +30,13 @@ protected:
 	SpecialPointState specialPointState;
 	float timer = 0.0f;
 protected:
-	SpecalPoint* object_ = nullptr;
+	SpecialPoint* object_ = nullptr;
 };
 
 // 出現時のステート
 class SpecialPointPopState : public BaseSpecialPointState {
 public:
-	SpecialPointPopState(SpecalPoint* object)
+	SpecialPointPopState(SpecialPoint* object)
 	: BaseSpecialPointState(SpecialPointState::kPop,object){}
 	// 開始
 	void Enter() override;
@@ -59,7 +59,7 @@ private:
 // 通常時のステート
 class SpecialPointIdleState : public BaseSpecialPointState {
 public:
-	SpecialPointIdleState(SpecalPoint* object)
+	SpecialPointIdleState(SpecialPoint* object)
 		:BaseSpecialPointState(SpecialPointState::kIdle, object){}
 	// 開始
 	void Enter() override;
@@ -83,7 +83,7 @@ private:
 // 移動時のステート
 class SpecialPointMoveState : public BaseSpecialPointState {
 public:
-	SpecialPointMoveState(SpecalPoint* object)
+	SpecialPointMoveState(SpecialPoint* object)
 		: BaseSpecialPointState(SpecialPointState::kMove, object){}
 	// 開始
 	void Enter() override;
@@ -101,7 +101,7 @@ private:
 // 終了時のステート
 class SpecialPointEndState : public BaseSpecialPointState {
 public:
-	SpecialPointEndState(SpecalPoint* object)
+	SpecialPointEndState(SpecialPoint* object)
 		: BaseSpecialPointState(SpecialPointState::kEnd, object){}
 	// 開始
 	void Enter() override;

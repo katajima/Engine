@@ -112,10 +112,10 @@ namespace Character {
 		special_->SetOwner(this);
 		special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 		special_->SetInputSystem(inputSystem);
-		RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-		rengeSp->SetRadius(50);
-		rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
-		rengeSp->Set(followCamera, bulletSpawn_.get());
+		RangeBombingSpecial* rangeSp = static_cast<RangeBombingSpecial*>(special_.get());
+		rangeSp->SetRadius(50);
+		rangeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
+		rangeSp->Set(followCamera, bulletSpawn_.get());
 
 		deathSystem_ = std::make_unique<DeathSystem>();
 		deathSystem_->SetOwner(this);

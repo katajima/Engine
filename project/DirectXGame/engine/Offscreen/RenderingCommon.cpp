@@ -1,4 +1,4 @@
-#include "DirectXGame/engine/Camera/Camera.h"
+﻿#include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "RenderingCommon.h"
 
@@ -15,10 +15,10 @@ void Engine::RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	gaussian_.Initialize(dxCommon, "Gaussian");
 	outline_.Initialize(dxCommon, "Outline");
 	radialBlur_.Initialize(dxCommon, "RadialBlur");
-	dissovle_.Initialize(dxCommon, "Dissovle");
+	dissolve_.Initialize(dxCommon, "Dissolve");
 	random_.Initialize(dxCommon, "Random");
 	bloom_.Initialize(dxCommon, "BloomExtract");
-	cimbin_.Initialize(dxCommon, "BloomCombine");
+	combine_.Initialize(dxCommon, "BloomCombine");
 	
 }
 
@@ -51,8 +51,8 @@ void Engine::RenderingCommon::DrawRender(PostEffectType type, int index, int ind
 	case PostEffectType::kRadialBlur: // ラジアルブラ
 		radialBlur_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kDissovle: // ディゾルブ
-		dissovle_.DrawRender(index, indexB);
+	case PostEffectType::kDissolve: // ディゾルブ
+		dissolve_.DrawRender(index, indexB);
 		break;
 	case PostEffectType::kRandom: // ランダム
 		random_.DrawRender(index, indexB);
@@ -60,8 +60,8 @@ void Engine::RenderingCommon::DrawRender(PostEffectType type, int index, int ind
 	case PostEffectType::kBloom: // ブルーム
 		bloom_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kBloomCombin: // 合成
-		cimbin_.DrawRender(indexB,index);
+	case PostEffectType::kBloomCombine: // 合成
+		combine_.DrawRender(indexB,index);
 		break;
 	default:
 		break;

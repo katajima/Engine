@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="ソース ファイル">
@@ -285,7 +285,7 @@
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp">
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp">
@@ -318,7 +318,7 @@
     <ClCompile Include="DirectXGame\engine\Manager\Entity\EntityManager.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFunction.cpp">
       <Filter>ソース ファイル\engine\effect</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\scene\Fade.cpp">
@@ -339,7 +339,7 @@
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManager.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp">
@@ -372,7 +372,7 @@
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp">
       <Filter>ソース ファイル\application\globalVariables</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.cpp">
+    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.cpp">
       <Filter>ソース ファイル\application\globalVariables</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp">
@@ -546,7 +546,7 @@
     <ClCompile Include="DirectXGame\engine\UI\UIBoard.cpp">
       <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Transform\Transfomation\Transfomation.cpp">
+    <ClCompile Include="DirectXGame\engine\Transform\Transformation\Transformation.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
@@ -597,7 +597,7 @@
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3dCommon.cpp">
       <Filter>ソース ファイル\engine\3d\object</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp">
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstanceManager.cpp">
       <Filter>ソース ファイル\engine\3d\object</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp">
@@ -636,7 +636,7 @@
     <ClCompile Include="DirectXGame\engine\PSO\psoData.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp">
+    <ClCompile Include="DirectXGame\engine\PSO\PSOFunction.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\PSO\PSOManager.cpp">
@@ -660,7 +660,7 @@
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManeger.cpp">
+    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManager.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.cpp">
@@ -675,7 +675,7 @@
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
       <Filter>ソース ファイル\engine\base\load</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFunction.cpp">
       <Filter>ソース ファイル\engine\base\load</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.cpp">
@@ -1029,7 +1029,7 @@
     <ClCompile Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstans.cpp">
+    <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstance.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp">
@@ -1138,7 +1138,7 @@
     <None Include="resources\shaders\Object2D\Object2D.hlsli">
       <Filter>シェーダーファイル</Filter>
     </None>
-    <None Include="resources\shaders\Object3D\Object3dInstans.hlsli">
+    <None Include="resources\shaders\Object3D\Object3dInstance.hlsli">
       <Filter>シェーダーファイル</Filter>
     </None>
     <None Include="resources\shaders\Ocean\Ocean.hlsli">
@@ -1171,18 +1171,15 @@
     <None Include="resources\shaders\Trail\Trail.hlsli">
       <Filter>シェーダーファイル</Filter>
     </None>
-    <None Include="resources\shaders\Object3D\LightInstans.hlsli" />
     <None Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
     <None Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
     <None Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
-    <None Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Dissolve.PS.hlsl" />
     <None Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
     <None Include="resources\shaders\Line\Line.PS.hlsl" />
     <None Include="resources\shaders\Line\Line.VS.hlsl" />
     <None Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
     <None Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
-    <None Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
-    <None Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
     <None Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
     <None Include="resources\shaders\Ocean\Ocean.DS.hlsl" />
     <None Include="resources\shaders\Ocean\Ocean.HS.hlsl" />
@@ -1388,7 +1385,7 @@
     <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManeger.h">
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManager.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\CollisionTypeIdDef.h">
@@ -1469,7 +1466,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h">
       <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFunction.h">
       <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h">
@@ -1493,7 +1490,7 @@
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.h">
+    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.h">
       <Filter>ヘッダー ファイル\application\globalVariables</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
@@ -1562,7 +1559,7 @@
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h">
       <Filter>ヘッダー ファイル\engine\base\load</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h">
+    <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFunction.h">
       <Filter>ヘッダー ファイル\engine\base\load</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Math\MapChip.h">
@@ -1604,7 +1601,7 @@
     <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h">
       <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h">
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstanceManager.h">
       <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h">
@@ -1658,7 +1655,7 @@
     <ClInclude Include="DirectXGame\engine\PSO\PSOManager.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h">
+    <ClInclude Include="DirectXGame\engine\PSO\PSOFunction.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h">
@@ -1721,7 +1718,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.h">
       <Filter>ヘッダー ファイル\engine\effect\primitive</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManeger.h">
+    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManager.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h">
@@ -1757,7 +1754,7 @@
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Transform\Transfomation\Transfomation.h">
+    <ClInclude Include="DirectXGame\engine\Transform\Transformation\Transformation.h">
       <Filter>ヘッダー ファイル\engine\transform</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Transform\TransformComponent.h">
@@ -1829,7 +1826,7 @@
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h">
       <Filter>ヘッダー ファイル\application\base\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterManeger.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterManager.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h">
@@ -2336,7 +2333,7 @@
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h">
+    <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstance.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.h">

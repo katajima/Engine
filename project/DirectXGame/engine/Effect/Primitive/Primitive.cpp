@@ -1,4 +1,4 @@
-#include "Primitive.h"
+﻿#include "Primitive.h"
 
 #include"PrimitiveCommon.h"
 
@@ -111,8 +111,8 @@ void Engine::BasePrimitive::DrawSetting(PsoType type)
 {
 	switch (type)
 	{
-	case BasePrimitive::PsoType::kDefalt:
-		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
+	case BasePrimitive::PsoType::kDefault:
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kDefault);
 		break;
 	case BasePrimitive::PsoType::kRingClamp:
 		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kRingClamp);
@@ -127,7 +127,7 @@ void Engine::BasePrimitive::DrawSetting(PsoType type)
 		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullWireFrame);
 		break;
 	default:
-		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kDefault);
 		break;
 	}
 }

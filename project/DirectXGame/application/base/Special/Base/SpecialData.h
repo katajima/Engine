@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 
 namespace Special {
 	enum class Type {
 		Melee,	// 近距離
-		Renged,	// 遠距離
+		Ranged,	// 遠距離
 		Mix,	// 両方
 	};
 

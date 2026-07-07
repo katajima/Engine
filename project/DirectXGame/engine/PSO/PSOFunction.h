@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
@@ -40,7 +40,7 @@ namespace Engine {
 	class DXGIDevice;
 
 	// PSO設定関数
-	namespace PSOFanction {
+	namespace PSOFunction {
 		// 標準的なアルファブレンド設定を生成する
 		D3D12_BLEND_DESC CreateAlphaBlendDesc();
 		// 深度テストを有効にした標準的な深度ステンシル設定を生成する
@@ -50,7 +50,7 @@ namespace Engine {
 		// ルートパラメータ設定
 		void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange, D3D12_SHADER_VISIBILITY shaderType);
 		// ディスクリプタレンジ設定
-		void SetDescriptorRenge(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rengeType);
+		void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rangeType);
 		// 　サンプラー設定
 		void SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shaderRegister, D3D12_FILTER filter, D3D12_SHADER_VISIBILITY shaderType, TextureAddressMode mode = TextureAddressMode::kWRAP);
 		// バルブ設定

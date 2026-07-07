@@ -1,4 +1,4 @@
-#include "ParticleField.h"
+﻿#include "ParticleField.h"
 
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Collider/3d/ColliderFunction3D.h"
@@ -52,8 +52,8 @@ void Engine::Field::FieldEffect::Initialize(const std::string& name, ShapeType s
 	case Field::ShapeType::kAABB:
 		name_ = name_ + "AABB";
 
-		renge_.min = -Vector3{ 1.0f,1.0f,1.0f };
-		renge_.max = Vector3{ 1.0f,1.0f,1.0f };
+		range_.min = -Vector3{ 1.0f,1.0f,1.0f };
+		range_.max = Vector3{ 1.0f,1.0f,1.0f };
 
 
 		break;
@@ -100,8 +100,8 @@ void Engine::Field::FieldEffect::DebugImgui()
 		switch (shapeType_)
 		{
 		case Field::ShapeType::kAABB:
-			ImGui::DragFloat3("renge.max", &renge_.max.x, 0.1f);
-			ImGui::DragFloat3("renge.min", &renge_.min.x, 0.1f);
+			ImGui::DragFloat3("range.max", &range_.max.x, 0.1f);
+			ImGui::DragFloat3("range.min", &range_.min.x, 0.1f);
 			break;
 		case Field::ShapeType::kSphere:
 			ImGui::DragFloat("rad", &rad, 0.1f);
@@ -140,8 +140,8 @@ void Engine::Field::FieldEffect::DebugImgui()
 			break;
 		case Field::EffectType::kNoise:
 			ImGui::DragFloat("noiseScale", &noiseScale_, 0.01f);
-			ImGui::DragFloat3("rondomRenge.max", &rondomRenge.max.x, 0.1f);
-			ImGui::DragFloat3("rondomRenge.min", &rondomRenge.min.x, 0.1f);
+			ImGui::DragFloat3("randomRange.max", &randomRange.max.x, 0.1f);
+			ImGui::DragFloat3("randomRange.min", &randomRange.min.x, 0.1f);
 			break;
 		case Field::EffectType::kTornado:
 			ImGui::DragFloat("force", &force_, 0.1f);
@@ -162,7 +162,7 @@ void Engine::Field::FieldEffect::DebugImgui()
 	{
 	case Field::ShapeType::kAABB:
 		// ライン
-		lineCommon_->GetDebugLineMeshData().AddLineAABB(renge_, transform_.worldMat_.GetWorldPosition(), color_);
+		lineCommon_->GetDebugLineMeshData().AddLineAABB(range_, transform_.worldMat_.GetWorldPosition(), color_);
 		break;
 	case Field::ShapeType::kSphere:
 		// ライン
@@ -184,16 +184,16 @@ bool Engine::Field::FieldEffect::IsCollisionAABB(const Vector3& point)
 	switch (shapeType_)
 	{
 	case Field::ShapeType::kAABB:
-		return Collision::Detection::Check(AABB{ renge_.min + worldPos,renge_.max + worldPos }, point);
+		return Collision::Detection::Check(AABB{ range_.min + worldPos,range_.max + worldPos }, point);
 		break;
 	case Field::ShapeType::kSphere:
 		return Collision::Detection::Check(Sphere{ worldPos,rad }, point);
 		break;
 	case Field::ShapeType::kCapsule:
-		return Collision::Detection::Check(AABB{ renge_.min + worldPos,renge_.max + worldPos }, point);
+		return Collision::Detection::Check(AABB{ range_.min + worldPos,range_.max + worldPos }, point);
 		break;
 	case Field::ShapeType::kCapsuleSpline:
-		return Collision::Detection::Check(AABB{ renge_.min + worldPos,renge_.max + worldPos }, point);
+		return Collision::Detection::Check(AABB{ range_.min + worldPos,range_.max + worldPos }, point);
 		break;
 	default:
 		break;
@@ -252,11 +252,11 @@ void Engine::Field::Effect(ParticleGroup& grop, std::list<Particle>::iterator& p
 					break;
 				case Field::EffectType::kNoise:
 
-					ConversionRange(acc->rondomRenge);
+					ConversionRange(acc->randomRange);
 
-					particleIterator->velocity.x += Random::RandomFloat(acc->rondomRenge.min.x, acc->rondomRenge.max.x) * acc->noiseScale_;
-					particleIterator->velocity.y += Random::RandomFloat(acc->rondomRenge.min.y, acc->rondomRenge.max.y) * acc->noiseScale_;
-					particleIterator->velocity.z += Random::RandomFloat(acc->rondomRenge.min.z, acc->rondomRenge.max.z) * acc->noiseScale_;
+					particleIterator->velocity.x += Random::RandomFloat(acc->randomRange.min.x, acc->randomRange.max.x) * acc->noiseScale_;
+					particleIterator->velocity.y += Random::RandomFloat(acc->randomRange.min.y, acc->randomRange.max.y) * acc->noiseScale_;
+					particleIterator->velocity.z += Random::RandomFloat(acc->randomRange.min.z, acc->randomRange.max.z) * acc->noiseScale_;
 					break;
 				case Field::EffectType::kEvent:
 					particleIterator->isEvent = true;

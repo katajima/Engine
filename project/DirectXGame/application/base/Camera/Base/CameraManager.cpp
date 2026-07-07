@@ -1,4 +1,4 @@
-#include "CameraManeger.h"
+﻿#include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
@@ -16,10 +16,10 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	camera->SetFarClip(10000.0f);						// farZを10000に
 	isGameCamera = true;								// ゲームに使用する
 
-	entityManager->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
-	entityManager->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
-	entityManager->Get3DLineCommon()->SetDefaltCamera(camera.get());						// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());						// デフォルトカメラ設定
 }
 
 void CameraManager::Update()
@@ -63,16 +63,16 @@ void CameraManager::Update()
 	
 
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
-	entityManager->GetObject3dCommon()->SetDefaltCamera(camera.get());				// デフォルトカメラ設定
-	entityManager->Get3DLineCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
-	entityManager->GetObject3dInstansManager()->SetCamera(camera.get());				// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());				// デフォルトカメラ設定
+	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->GetObject3dInstanceManager()->SetCamera(camera.get());				// デフォルトカメラ設定
 	// カメラ更新
 	camera->UpdateMatrix();
 }
 
 void CameraManager::AddCamera(CameraInfo camera, std::string name) {
 	// カメラ管理クラスを渡す
-	camera.camera->SetCameraManeger(this);
+	camera.camera->SetCameraManager(this);
 	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
 }
@@ -118,7 +118,7 @@ void CameraManager::UpadateImGui() {
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("CameraManeger")) {
+	if (ImGui::CollapsingHeader("CameraManager")) {
 		Vector3 translate = camera->GetTranslate();
 		ImGui::DragFloat3("Translate", &translate.x, 0.1f);	// 位置
 		camera->SetTranslate(translate);

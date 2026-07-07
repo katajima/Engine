@@ -1,6 +1,6 @@
 ﻿#include "BaseStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 
 
 
@@ -81,7 +81,7 @@ void BaseStage::InitializePlayerCar(Engine::EntityManager* entityManager, std::u
 	playerCar = std::make_unique<PlayerCar>();
 	playerCar->Initialize(entityManager, {}, position, rotation);
 	// ステージ共通の地面高さを車へ設定する。
-	playerCar->SetGroungHeight(0.1f);
+	playerCar->SetGroundHeight(0.1f);
 }
 
 void BaseStage::BaseUpdate(float dt) {

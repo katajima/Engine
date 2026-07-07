@@ -40,7 +40,7 @@ void TutorialScene::Initialize() {
 }
 
 void TutorialScene::Finalize() {
-	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
 	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
 }
 
@@ -48,7 +48,7 @@ void TutorialScene::Update() {
 	// 共通基盤から、このフレームで使用する各管理クラスを取得する。
 	InputCoordinator* inputCoordinator = gameplaySession_->GetInputCoordinator();
 	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
-	SpecalPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
+	SpecialPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
 	// 入力更新とプレイヤーコマンド実行を一括で行う
 	inputCoordinator->Update(GetTime(), characterManager->GetPlayer());
 

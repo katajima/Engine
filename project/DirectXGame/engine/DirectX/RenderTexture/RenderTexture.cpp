@@ -1,8 +1,8 @@
-#include "RenderTexture.h"
+﻿#include "RenderTexture.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/Manager/RTV/RtvManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 

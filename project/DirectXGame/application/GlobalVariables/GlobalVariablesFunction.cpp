@@ -1,6 +1,6 @@
-#include "GlobalVariablesFanction.h"
+﻿#include "GlobalVariablesFunction.h"
 
-void GvFanction::Save(const std::string& groupName, GvData::json& root, GvData::Item& item, const std::string& itemName)
+void GvFunction::Save(const std::string& groupName, GvData::json& root, GvData::Item& item, const std::string& itemName)
 {
 	if (std::holds_alternative<int32_t>(item)) { // int32_t
 		root[groupName][itemName] = {
@@ -74,7 +74,7 @@ void GvFanction::Save(const std::string& groupName, GvData::json& root, GvData::
 	}
 }
 
-void GvFanction::SetValue(const std::string& groupName, const std::string& itemName, const std::string& typeStr)
+void GvFunction::SetValue(const std::string& groupName, const std::string& itemName, const std::string& typeStr)
 {
 
 }

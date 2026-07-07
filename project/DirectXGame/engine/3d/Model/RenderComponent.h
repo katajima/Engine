@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -27,7 +27,7 @@ namespace Engine {
 	class BasePrimitive;
 	class SkyBox;
 	class Ocean;
-	class Transfomation;
+	class Transformation;
 	class EntityManager;
 	class ShadowMap;
 
@@ -59,7 +59,7 @@ namespace Engine {
 		// カメラ設定
 		void SetCamera(Camera* camera) { this->camera = camera; }
 		// トランスフォーム設定
-		void SetTransfomation(Transfomation* transfomation) { this->transfomation = transfomation; }
+		void SetTransformation(Transformation* transformation) { this->transformation = transformation; }
 
 		// モデル設定
 		void SetModel(Model* model);
@@ -148,7 +148,7 @@ namespace Engine {
 		// 波
 		Ocean* ocean = nullptr;
 		// トランスフォーム
-		Transfomation* transfomation = nullptr;
+		Transformation* transformation = nullptr;
 		// カメラ
 		Camera* camera = nullptr;
 	};

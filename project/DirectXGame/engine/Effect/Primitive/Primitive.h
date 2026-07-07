@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -17,7 +17,7 @@
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Transform/Transformation/Transformation.h"
 #include "DirectXGame/engine/Animation/UV/UVAnimationComponent.h"
 
 
@@ -38,7 +38,7 @@ namespace Engine {
 		~BasePrimitive() = default;
 
 		enum class PsoType {
-			kDefalt,
+			kDefault,
 			kRingClamp,
 			kNoCull,
 			kNoCullRingClamp,
@@ -66,7 +66,7 @@ namespace Engine {
 		// 名前設定
 		void SetName(const std::string str) { name_ = str; };
 		// 描画準備
-		void DrawSetting(PsoType type = PsoType::kDefalt);
+		void DrawSetting(PsoType type = PsoType::kDefault);
 
 	private:
 
@@ -85,7 +85,7 @@ namespace Engine {
 
 		// 名前
 		std::string name_ = "primitive";
-		PsoType psoType_ = PsoType::kDefalt;
+		PsoType psoType_ = PsoType::kDefault;
 
 		UVAnimetionData aimetion_{};
 	private:

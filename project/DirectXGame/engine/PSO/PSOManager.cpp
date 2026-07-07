@@ -1,4 +1,4 @@
-#include "PSOManager.h"
+﻿#include "PSOManager.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -78,7 +78,7 @@ void Engine::PSOManager::SetRootSignature(
 	descriptionSignature.pStaticSamplers = samplerDesc;
 	descriptionSignature.NumStaticSamplers = numSamplers;
 
-	PSOFanction::Blob(dxgiDevice,descriptionSignature, rootSignature);
+	PSOFunction::Blob(dxgiDevice,descriptionSignature, rootSignature);
 }
 
 void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& graphicsPipelineState, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)

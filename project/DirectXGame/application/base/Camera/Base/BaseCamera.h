@@ -51,8 +51,8 @@ public:
 	/// <summary>
 	/// カメラ管理を設定
 	/// </summary>
-	/// <param name="cameraManeger"></param>
-	void SetCameraManeger(CameraManager* cameraManeger) { this->cameraManeger = cameraManeger; };
+	/// <param name="cameraManager"></param>
+	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 
 
 	/// <summary>
@@ -82,7 +82,7 @@ protected:
 	std::string name_;
 protected:
 	const Engine::WorldTransform* target = nullptr;		// ロックオン対象
-	CameraManager* cameraManeger = nullptr;			// カメラ管理
+	CameraManager* cameraManager = nullptr;			// カメラ管理
 protected:
 	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数

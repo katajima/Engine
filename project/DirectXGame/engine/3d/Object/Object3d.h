@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/Entity/Entity.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -95,13 +95,13 @@ namespace Engine {
 
 	private:
 		// カメラ
-		Camera* defaltCamera = nullptr;
+		Camera* defaultCamera = nullptr;
 		Camera* individualCamera = nullptr;
 		// 個人的にカメラを使用するか
 		bool isIndividualCamera_ = false;
 
 		// トランスフォームデータ
-		std::unique_ptr<Transfomation> transformation = nullptr;
+		std::unique_ptr<Transformation> transformation = nullptr;
 
 
 

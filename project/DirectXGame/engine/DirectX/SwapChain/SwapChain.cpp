@@ -1,7 +1,7 @@
-#include "SwapChain.h"
+﻿#include "SwapChain.h"
 
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/Manager/RTV/RtvManager.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"

@@ -1,4 +1,4 @@
-#include "GlobalVariables.h"
+﻿#include "GlobalVariables.h"
 #include "Windows.h"
 #include "imgui.h"
 #include <algorithm>
@@ -311,7 +311,7 @@ void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
 		GvData::Item& item = itItem->second;
 
 		// 各型の値を保存
-		GvFanction::Save(groupName, root, item, itemName);
+		GvFunction::Save(groupName, root, item, itemName);
 
 	}
 	// ディレクトリがなければ作成する

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
 
@@ -19,9 +19,9 @@ namespace Engine {
 		// シャドウマップ描画設定
 		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
 		// デフォルトカメラ設定
-		void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
+		void SetDefaultCamera(Camera* camera) { this->defaultCamera = camera; }
 		// デフォルトカメラ取得
-		Camera* GetDefaltCamera() const { return defaultCamera; }
+		Camera* GetDefaultCamera() const { return defaultCamera; }
 		// オブジェクトカウント取得
 		int32_t GetObjectCount() const { return objectCount; }
 		// オブジェクトカウント加算

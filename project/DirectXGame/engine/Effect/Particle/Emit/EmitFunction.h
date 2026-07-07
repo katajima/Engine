@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "EmitData.h"
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleData.h"
@@ -6,7 +6,7 @@
 
 
 namespace Engine {
-	namespace EmitFanction {
+	namespace EmitFunction {
 		// パーティクル生成3d位置
 		void CreateParticle(ParticleGroup& group, EffectEmitData emitData, std::mt19937& randomEngine, Vector3 emitPos);
 		// パーティクル生成3d位置+方向

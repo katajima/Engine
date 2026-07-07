@@ -1,5 +1,5 @@
-#include "ComboEditor.h"
-#include <DirectXGame/application/base/Character/Base/CharacterManeger.h>
+﻿#include "ComboEditor.h"
+#include <DirectXGame/application/base/Character/Base/CharacterManager.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"

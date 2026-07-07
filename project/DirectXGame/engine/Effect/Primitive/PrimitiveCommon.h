@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -24,7 +24,7 @@ namespace Engine {
 	public:
 
 		enum class PsoType {
-			kDefalt,
+			kDefault,
 			kRingClamp,
 			kNoCull,
 			kNoCullRingClamp,
@@ -33,7 +33,7 @@ namespace Engine {
 		// 初期化
 		void Initialize(DirectXCommon* dxcommon);
 		// 描画準備
-		void DrawCommonSetting(PsoType type = PsoType::kDefalt);
+		void DrawCommonSetting(PsoType type = PsoType::kDefault);
 		// DirectX共通クラス取得
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
 	private:
@@ -47,8 +47,8 @@ namespace Engine {
 
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-		PSRS defalt_;           // 標準プリミティブ用PSO
-		PSRS defaltRing_;       // リング用PSO
+		PSRS default_;           // 標準プリミティブ用PSO
+		PSRS defaultRing_;       // リング用PSO
 		PSRS noCull_;           // カリングなし用PSO
 		PSRS noCullRing_;       // カリングなしリング用PSO
 		PSRS noCullWireFrame_;  // カリングなしワイヤーフレーム用PSO

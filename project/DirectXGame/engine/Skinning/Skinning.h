@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
@@ -24,9 +24,9 @@ namespace Engine {
 		// 計算前準備
 		void DrawComputeSetting() { csPsoManager_->PreComputePSRS(); }
 		// デフォルトカメラ設定
-		void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
+		void SetDefaultCamera(Camera* camera) { this->defaultCamera = camera; }
 		// デフォルトカメラ取得
-		Camera* GetDefaltCamera() const {
+		Camera* GetDefaultCamera() const {
 			defaultCamera;
 			return defaultCamera;
 		}

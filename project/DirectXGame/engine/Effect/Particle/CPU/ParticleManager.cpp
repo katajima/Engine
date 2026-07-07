@@ -1,4 +1,4 @@
-#include "ParticleManager.h"
+﻿#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -324,10 +324,10 @@ void Engine::ParticleManager::Update() {
 					Field::Effect(group, particleIterator, fieldEffect_, deltaTime);
 
 					// パーティクル影響
-					ParticleFanction::Effect(group, particleIterator, deltaTime);
+					ParticleFunction::Effect(group, particleIterator, deltaTime);
 
 					// パーティクルデータをGPUに送る
-					ParticleFanction::WorldDataForGPU(group, particleIterator, camera);
+					ParticleFunction::WorldDataForGPU(group, particleIterator, camera);
 
 					// 加算 
 					++group.instanceCount;
@@ -337,7 +337,7 @@ void Engine::ParticleManager::Update() {
 			}
 			// マテリアルデータ
 			if(group.material)
-			ParticleFanction::MaterialEffect(group);
+			ParticleFunction::MaterialEffect(group);
 		});
 }
 
@@ -381,7 +381,7 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, model->GetModelData().mesh[0].get(), rasteType, blendType);
+	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, model->GetModelData().mesh[0].get(), rasteType, blendType);
 	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
 		.texturePath = textureFilePath,
 		.shapeType = ShapeParameter::ShapeType::Plane,
@@ -406,7 +406,7 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, primitive->GetModelMesh(), rasteType, blendType);
+	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, primitive->GetModelMesh(), rasteType, blendType);
 	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
 		.texturePath = textureFilePath,
 		.shapeType = ShapeParameter::ShapeType::Plane,
@@ -432,7 +432,7 @@ bool Engine::ParticleManager::CreateEditorParticleGroup(const std::string& name,
 
 	BasePrimitive* primitivePtr = primitive.get();
 	editorParticlePrimitives_[name] = std::move(primitive);
-	ParticleFanction::Create(particleGroups[name], name, data.texturePath, kNumMaxInstance,
+	ParticleFunction::Create(particleGroups[name], name, data.texturePath, kNumMaxInstance,
 		dxCommon, primitivePtr->GetModelMesh(), data.rasterizerType, data.blendType);
 	editorParticleGroupDatas_[name] = data;
 	editorParticleGroupDatas_[name].isEditorPrimitive = true;
@@ -570,25 +570,25 @@ void Engine::ParticleManager::ClearParticle(std::string name)
 void Engine::ParticleManager::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFunction::SetDescriptorRange(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
 
 
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	// マテリアル (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向ライト (b1) をバーテックスシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 
 	// ルートシグネチャ作成
@@ -605,7 +605,7 @@ void Engine::ParticleManager::CreateGraphicsPipeline()
 	CreateRootSignature();
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 	// 透明オブジェクトの場合はデプス書き込みを無効化
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 

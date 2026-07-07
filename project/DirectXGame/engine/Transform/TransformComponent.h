@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
-#include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Transform/Transformation/Transformation.h"
 
 
 namespace Engine {

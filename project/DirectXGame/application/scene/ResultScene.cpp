@@ -1,4 +1,4 @@
-#include "ResultScene.h"
+﻿#include "ResultScene.h"
 
 
 // 初期化
@@ -16,10 +16,10 @@ void ResultScene::Initialize() {
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	cameraManager_->AddCamera({ resultCamera_.get(), true}, "resultCamera");
 
-	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaultCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 	SetCamera(cameraManager_->GetCamera());
 
 	// エフェクト初期化

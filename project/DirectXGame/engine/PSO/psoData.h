@@ -1,5 +1,5 @@
-#pragma once
-#include "PSOFanction.h"
+﻿#pragma once
+#include "PSOFunction.h"
 
 
 #include"DirectXGame/engine/struct/Structs3D.h"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "WeaponData.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/engine/struct/Vector3.h>
@@ -117,5 +117,5 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 protected:
-	RangedWeaponData rengedData_; // 遠距離武器データ
+	RangedWeaponData rangedData_; // 遠距離武器データ
 };

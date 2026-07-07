@@ -1,4 +1,4 @@
-#include "BaseProjectile.h"
+﻿#include "BaseProjectile.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
@@ -29,7 +29,7 @@ void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManag
 	// 基礎初期化
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, param.name, param.modelName, param.textureName,
-		true, true, this, Engine::ObjectInstans::TransparencyType::kNo, false);
+		true, true, this, Engine::ObjectInstance::TransparencyType::kNo, false);
 	objectComponent_->SetInstancingSRT(spawnInfo_.scale, Math::DirectionToRotate(direction, Dire::Z), spawnInfo_.position);
 	objectComponent_->GetWorldTransform().Update();
 	objectComponent_->GetRigidBodyComponent()->Velocity() = velocity; // 重力加算

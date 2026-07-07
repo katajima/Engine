@@ -1,4 +1,4 @@
-#include "PostEffect.h"
+﻿#include "PostEffect.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -58,14 +58,14 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 		cbRadialBlur_->Data()->numSamples = 10;
 		cbRadialBlur_->Data()->blurWidth = 0.01f;
 		break;
-	case PostEffectType::kDissovle:
-		cbDissovle_ = std::make_unique<Engine::ConstantBuffer<DissovleGPU>>();
-		cbDissovle_->CreateBuffer(dxCommon);
-		cbDissovle_->Data()->threshold = 0.5f;
-		cbDissovle_->Data()->edge = 0.03f;
-		cbDissovle_->Data()->color.x = 1.0f;
-		cbDissovle_->Data()->color.y = 0.4f;
-		cbDissovle_->Data()->color.z = 0.3f;
+	case PostEffectType::kDissolve:
+		cbDissolve_ = std::make_unique<Engine::ConstantBuffer<DissolveGPU>>();
+		cbDissolve_->CreateBuffer(dxCommon);
+		cbDissolve_->Data()->threshold = 0.5f;
+		cbDissolve_->Data()->edge = 0.03f;
+		cbDissolve_->Data()->color.x = 1.0f;
+		cbDissolve_->Data()->color.y = 0.4f;
+		cbDissolve_->Data()->color.z = 0.3f;
 		break;
 	case PostEffectType::kRandom:
 		cbRandom_ = std::make_unique<Engine::ConstantBuffer<RandomGPU>>();
@@ -78,7 +78,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 		cbBloom_->Data()->threshold = 0.9f;
 		cbBloom_->Data()->intensity = 1.0f;
 		break;
-	case PostEffectType::kBloomCombin:
+	case PostEffectType::kBloomCombine:
 		break;
 	default:
 		break;
@@ -117,8 +117,8 @@ void Engine::PostEffectData::DrawRender()
 	case PostEffectType::kRadialBlur:
 		cbRadialBlur_->SetGraphicsRootConstantBufferView(0);
 		break;
-	case PostEffectType::kDissovle:
-		cbDissovle_->SetGraphicsRootConstantBufferView(0);
+	case PostEffectType::kDissolve:
+		cbDissolve_->SetGraphicsRootConstantBufferView(0);
 		break;
 	case PostEffectType::kRandom:
 		cbRandom_->Data()->time += 0.01f;
@@ -127,7 +127,7 @@ void Engine::PostEffectData::DrawRender()
 	case PostEffectType::kBloom:
 		cbBloom_->SetGraphicsRootConstantBufferView(0);
 		break;
-	case PostEffectType::kBloomCombin:
+	case PostEffectType::kBloomCombine:
 		break;
 	default:
 		break;
@@ -194,10 +194,10 @@ void Engine::PostEffectData::UpdateImgui()
 		ImGui::DragFloat("blurWidth", &cbRadialBlur_->Data()->blurWidth, 0.01f);
 		ImGui::SliderInt("numSamples", &cbRadialBlur_->Data()->numSamples, 1, 20);
 		break;
-	case PostEffectType::kDissovle:
-		ImGui::DragFloat("threshold", &cbDissovle_->Data()->threshold, 0.01f);
-		ImGui::DragFloat("edge", &cbDissovle_->Data()->edge, 0.001f);
-		ImGui::ColorEdit3("color", &cbDissovle_->Data()->color.x);
+	case PostEffectType::kDissolve:
+		ImGui::DragFloat("threshold", &cbDissolve_->Data()->threshold, 0.01f);
+		ImGui::DragFloat("edge", &cbDissolve_->Data()->edge, 0.001f);
+		ImGui::ColorEdit3("color", &cbDissolve_->Data()->color.x);
 		break;
 	case PostEffectType::kRandom:
 		break;
@@ -205,7 +205,7 @@ void Engine::PostEffectData::UpdateImgui()
 		ImGui::SliderFloat("threshold", &cbBloom_->Data()->threshold, 0.0f, 1.0f);
 		ImGui::DragFloat("intensity", &cbBloom_->Data()->intensity, 0.01f);
 		break;
-	case PostEffectType::kBloomCombin:
+	case PostEffectType::kBloomCombine:
 		break;
 	default:
 		break;
@@ -242,7 +242,7 @@ void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 
 #pragma region BlendState
 	// 標準のアルファブレンド設定を生成する
-	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	D3D12_BLEND_DESC blendDesc = PSOFunction::CreateAlphaBlendDesc();
 #pragma endregion //BlendState(ブレンドステート)
 
 	// RasterizerState(ラスタライザステート)の設定
@@ -254,7 +254,7 @@ void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = false;
 
@@ -290,18 +290,18 @@ void Engine::PostEffectCopy::DrawRender(int index, int indexB)
 
 void Engine::PostEffectCopy::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -319,17 +319,17 @@ void Engine::PostEffectGrayScale::DrawRender(int index, int indexB)
 
 void Engine::PostEffectGrayScale::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -347,17 +347,17 @@ void Engine::PostEffectSepia::DrawRender(int index, int indexB)
 
 void Engine::PostEffectSepia::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -375,17 +375,17 @@ void Engine::PostEffectVignette::DrawRender(int index, int indexB)
 
 void Engine::PostEffectVignette::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -403,17 +403,17 @@ void Engine::PostEffectSmoothing::DrawRender(int index, int indexB)
 
 void Engine::PostEffectSmoothing::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -431,17 +431,17 @@ void Engine::PostEffectGaussian::DrawRender(int index, int indexB)
 
 void Engine::PostEffectGaussian::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -461,21 +461,21 @@ void Engine::PostEffectOutline::DrawRender(int index, int indexB)
 void Engine::PostEffectOutline::CreateRootSignature() {
 	// アウトライン	
 	D3D12_DESCRIPTOR_RANGE descriptorRangeOutline[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRangeOutline[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
-	PSOFanction::SetDescriptorRenge(descriptorRangeOutline[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
+	PSOFunction::SetDescriptorRange(descriptorRangeOutline[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
+	PSOFunction::SetDescriptorRange(descriptorRangeOutline[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplersOutline[2] = {};
-	PSOFanction::SetSampler(staticSamplersOutline[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
-	PSOFanction::SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplersOutline[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER outlineRootParameters[3] = {};
 
-	PSOFanction::SetRootParameter(outlineRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(outlineRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(outlineRootParameters[1], descriptorRangeOutline[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(outlineRootParameters[1], descriptorRangeOutline[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(outlineRootParameters[2], descriptorRangeOutline[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(outlineRootParameters[2], descriptorRangeOutline[1], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	psoManager_->SetRootSignature(posteffect_.rootSignature, outlineRootParameters, _countof(outlineRootParameters), staticSamplersOutline, _countof(staticSamplersOutline));
 
@@ -493,56 +493,56 @@ void Engine::PostEffectRadialBlur::DrawRender(int index, int indexB)
 
 void Engine::PostEffectRadialBlur::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
-	PSOFanction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);
+	PSOFunction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);
 
 	D3D12_ROOT_PARAMETER RootParameters[2] = {};
 	//ラジアルブラー (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(RootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(RootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	psoManager_->SetRootSignature(posteffect_.rootSignature, RootParameters, _countof(RootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
 }
 
 #pragma endregion
 
-#pragma region Dissovle
+#pragma region Dissolve
 
-void Engine::PostEffectDissovle::DrawRender(int index, int indexB)
+void Engine::PostEffectDissolve::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
-	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, dissovleIndex);
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, dissolveIndex);
 }
 
-void Engine::PostEffectDissovle::CreateRootSignature() {
+void Engine::PostEffectDissolve::CreateRootSignature() {
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 
 	// ディゾルブ
-	D3D12_DESCRIPTOR_RANGE descriptorRangeDissovle[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRangeDissovle[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
-	PSOFanction::SetDescriptorRenge(descriptorRangeDissovle[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
+	D3D12_DESCRIPTOR_RANGE descriptorRangeDissolve[2] = {};
+	PSOFunction::SetDescriptorRange(descriptorRangeDissolve[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
+	PSOFunction::SetDescriptorRange(descriptorRangeDissolve[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
 
-	D3D12_ROOT_PARAMETER dissovleRootParameters[3] = {};
+	D3D12_ROOT_PARAMETER dissolveRootParameters[3] = {};
 	//　ディゾルブ(b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(dissovleRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(dissolveRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(dissovleRootParameters[1], descriptorRangeDissovle[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(dissolveRootParameters[1], descriptorRangeDissolve[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(dissovleRootParameters[2], descriptorRangeDissovle[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(dissolveRootParameters[2], descriptorRangeDissolve[1], D3D12_SHADER_VISIBILITY_PIXEL);
 
-	psoManager_->SetRootSignature(posteffect_.rootSignature, dissovleRootParameters, _countof(dissovleRootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(posteffect_.rootSignature, dissolveRootParameters, _countof(dissolveRootParameters), staticSamplers, _countof(staticSamplers));
 
 	// ノイズテクスチャ
 	dxCommon_->GetTextureManager()->LoadTexture("resources/Texture/noise.dds");
-	dissovleIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath("resources/Texture/noise.dds");
+	dissolveIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath("resources/Texture/noise.dds");
 }
 
 #pragma endregion
@@ -557,24 +557,24 @@ void Engine::PostEffectRandom::DrawRender(int index, int indexB)
 
 void Engine::PostEffectRandom::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 
 
 	// ランダム(b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	psoManager_->SetRootSignature(posteffect_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 }
@@ -591,51 +591,51 @@ void Engine::PostEffectBloom::DrawRender(int index, int indexB)
 
 void Engine::PostEffectBloom::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
-	PSOFanction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);
+	PSOFunction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);
 
 	D3D12_ROOT_PARAMETER RootParameters[2] = {};
 	// ブルーム (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(RootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(RootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	psoManager_->SetRootSignature(posteffect_.rootSignature, RootParameters, _countof(RootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
 }
 
 #pragma endregion
 
-#pragma region Combin
+#pragma region Combine
 
-void Engine::PostEffectCombin::DrawRender(int index, int indexB)
+void Engine::PostEffectCombine::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, indexB);
 }
 
-void Engine::PostEffectCombin::CreateRootSignature() {
+void Engine::PostEffectCombine::CreateRootSignature() {
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
-	PSOFanction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);
+	PSOFunction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);
 
 
-	D3D12_DESCRIPTOR_RANGE descriptorRangeCombin[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRangeCombin[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-	PSOFanction::SetDescriptorRenge(descriptorRangeCombin[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	D3D12_DESCRIPTOR_RANGE descriptorRangeCombine[2] = {};
+	PSOFunction::SetDescriptorRange(descriptorRangeCombine[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRangeCombine[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
-	D3D12_ROOT_PARAMETER RootParametersCombin[3] = {};
+	D3D12_ROOT_PARAMETER RootParametersCombine[3] = {};
 	// ブルーム (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParametersCombin[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(RootParametersCombine[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParametersCombin[1], descriptorRangeCombin[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(RootParametersCombine[1], descriptorRangeCombine[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(RootParametersCombin[2], descriptorRangeCombin[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(RootParametersCombine[2], descriptorRangeCombine[1], D3D12_SHADER_VISIBILITY_PIXEL);
 
-	psoManager_->SetRootSignature(posteffect_.rootSignature, RootParametersCombin, _countof(RootParametersCombin), staticSamplersBlur, _countof(staticSamplersBlur));
+	psoManager_->SetRootSignature(posteffect_.rootSignature, RootParametersCombine, _countof(RootParametersCombine), staticSamplersBlur, _countof(staticSamplersBlur));
 }
 
 #pragma endregion

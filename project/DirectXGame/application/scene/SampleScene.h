@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -14,8 +14,8 @@
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
-#include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/3d/Object/Object3dInstanceManager.h"
 
 #include "DirectXGame/engine/Audio/Audio.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
@@ -83,12 +83,12 @@ private:
 	std::unique_ptr<Engine::SkyBox> skyBox;								// スカイボックス
 	Engine::Object3d* sky_;												// スカイボックス用オブジェクト
 
-	Engine::Object3dInstansManager* object3dInstansManager_ = nullptr;	// 3Dオブジェクトインスタンスマネージャ
+	Engine::Object3dInstanceManager* object3dInstanceManager_ = nullptr;	// 3Dオブジェクトインスタンスマネージャ
 private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManeger_;
+	std::unique_ptr<CameraManager> cameraManager_;
 private:
 
 

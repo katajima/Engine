@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -15,7 +15,7 @@ namespace Engine {
 	/// <summary>
 	/// トランスフォームクラス
 	/// </summary>
-	class Transfomation
+	class Transformation
 	{
 	public:
 		// 初期化
@@ -32,7 +32,7 @@ namespace Engine {
 		void GetCommandList(int index);
 
 		// トランスフォーム行列
-		struct TransfomationMatrix
+		struct TransformationMatrix
 		{
 			Matrix4x4 WVP;
 			Matrix4x4 World;
@@ -42,7 +42,7 @@ namespace Engine {
 	private:
 		DirectXCommon* dxCommon = nullptr;
 
-		ConstantBuffer<TransfomationMatrix> cbResource_;
+		ConstantBuffer<TransformationMatrix> cbResource_;
 
 	};
 }

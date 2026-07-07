@@ -1,4 +1,4 @@
-#include "SampleScene.h"
+﻿#include "SampleScene.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
@@ -33,14 +33,14 @@ void SampleScene::InitCamera() {
 	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	fixedCamera_->Update();
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
-	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
-	cameraManeger_->SetUseCamera("fixedCamera", 0.0f);
-	cameraManeger_->Update();
-	SetCamera(cameraManeger_->GetCamera());
+	cameraManager_->SetUseCamera("fixedCamera", 0.0f);
+	cameraManager_->Update();
+	SetCamera(cameraManager_->GetCamera());
 };
 // ライト
 void SampleScene::InitLight() {
@@ -120,11 +120,11 @@ void SampleScene::InitParticle() {
 };
 // オブジェクト
 void SampleScene::InitObject() {
-	object3dInstansManager_ = GetEntityManager()->GetObject3dInstansManager();
+	object3dInstanceManager_ = GetEntityManager()->GetObject3dInstanceManager();
 
 
 	// カメラセット
-	object3dInstansManager_->SetCamera(GetCamara());
+	object3dInstanceManager_->SetCamera(GetCamara());
 
 
 	// 3Dオブジェクトの生成(オブジェクト名、モデルタイプ、位置、カメラ)
@@ -159,7 +159,7 @@ void SampleScene::InitObject() {
 	skyBox->Initialize(GetEntityManager(), "resources/Texture/hdr/sky.dds");
 
 	// 空
-	sky_ = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	sky_ = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManager_->GetCamera());
 	sky_->GetWorldTransform().scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
 };
@@ -180,8 +180,8 @@ void SampleScene::InitSprite() {
 
 // 終了
 void SampleScene::Finalize() {
-	cameraManeger_->GetCamera()->Clear();
-	cameraManeger_->Clear();
+	cameraManager_->GetCamera()->Clear();
+	cameraManager_->Clear();
 
 	fixedCamera_->GetUniqueCamera()->Clear();
 
@@ -193,8 +193,8 @@ void SampleScene::Update() {
 	inputCoordinator_->Update(GetTime());
 
 	// カメラ管理の更新
-	cameraManeger_->Update();
-	SetCamera(cameraManeger_->GetCamera());
+	cameraManager_->Update();
+	SetCamera(cameraManager_->GetCamera());
 	
 	aabbParticleEmitter_->Update();
 	

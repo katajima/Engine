@@ -1,4 +1,4 @@
-#include"Sprite.h"
+﻿#include"Sprite.h"
 #include"SpriteCommon.h"
 #include <iostream>
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
@@ -41,8 +41,8 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	//
 
 	// トランスフォーム
-	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(spriteCommon->GetDxCommon());
+	transformation = std::make_unique<Transformation>();
+	transformation->Initialize(spriteCommon->GetDxCommon());
 
 	// ワールドトランスフォーム初期化
 	worldTransform2d.Initialize();
@@ -136,7 +136,7 @@ void Engine::Sprite::Update()
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldTransform2d.GetConvert2DMatrixTo4x4(), Multiply(viewMatrix, projectionMatrix));
 
 	// シェーダーに送信
-	transfomation->UpdateSprite(worldViewProjectionMatrix);
+	transformation->UpdateSprite(worldViewProjectionMatrix);
 	material->GPUData();
 }
 
@@ -179,7 +179,7 @@ void Engine::Sprite::Draw(PSOType type)
 		indexResorce_.IASetIndexBuffer();
 
 		//トランスフォームMatrixResource
-		transfomation->GetCommandList(1);
+		transformation->GetCommandList(1);
 
 
 		spriteCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);

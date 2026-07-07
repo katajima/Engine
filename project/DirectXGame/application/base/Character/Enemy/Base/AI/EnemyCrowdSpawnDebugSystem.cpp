@@ -1,6 +1,6 @@
-#include "EnemyCrowdSpawnDebugSystem.h"
+﻿#include "EnemyCrowdSpawnDebugSystem.h"
 
-#include "DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/EnemyData.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 

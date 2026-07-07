@@ -67,7 +67,7 @@ namespace Character {
 		objectComponent_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
 		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
-			, Engine::ObjectInstans::TransparencyType::kNo, false);
+			, Engine::ObjectInstance::TransparencyType::kNo, false);
 		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 		objectComponent_->SetInstancingSRT({1,1,1}, {}, position);	// SRT設定

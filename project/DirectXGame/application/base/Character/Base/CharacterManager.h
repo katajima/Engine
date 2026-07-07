@@ -22,7 +22,7 @@ class EffectSystem;
 class FollowCamera;
 class BulletManager;
 class CameraManager;
-class SpecalPointManager;
+class SpecialPointManager;
 
 namespace Engine {
 	class EntityManager;
@@ -52,7 +52,7 @@ namespace Character {
 		// エフェクト設定
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// スペシャルポイント管理クラスの設定
-		void SetSpecialPointManager(SpecalPointManager* specalPointManager) { this->specalPointManager = specalPointManager; };
+		void SetSpecialPointManager(SpecialPointManager* specialPointManager) { this->specialPointManager = specialPointManager; };
 	public: // 取得系
 
 		// キャラクターのタイプによっての数を取得
@@ -151,7 +151,7 @@ namespace Character {
 		BulletManager* bulletManager = nullptr;	// 弾をマネジャー
 		CameraManager* cameraManager = nullptr;	// カメラ管理
 		EffectSystem* effect = nullptr;
-		SpecalPointManager* specalPointManager = nullptr;
+		SpecialPointManager* specialPointManager = nullptr;
 		HitBox::System* hitBoxSystem = nullptr;		// ヒットボックスシステム
 	};
 }

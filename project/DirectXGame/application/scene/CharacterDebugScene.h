@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
@@ -16,7 +16,7 @@
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
@@ -97,7 +97,7 @@ private:
 	// エフェクト
 	std::unique_ptr<EffectSystem> effect_;
 	// スペシャルポイント管理クラス
-	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
+	std::unique_ptr<SpecialPointManager> specialPointManager_ = nullptr;
 private:
 	// キャラクター管理
 	std::unique_ptr<Character::CharacterManager> characterManager_;

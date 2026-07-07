@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/struct/Vector4.h"
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/Vector2.h"
@@ -22,16 +22,16 @@ inline int ConversionMax(int a, int b) {
     return (std::max)(a, b);
 }
 // 範囲の最小値と最大値を入れ替える(float)
-static void ConversionRangeFloat(Range <float>& renge)
+static void ConversionRangeFloat(Range <float>& range)
 {
-	renge.min = ConversionMin(renge.min, renge.max);
-	renge.max = ConversionMax(renge.min, renge.max);
+	range.min = ConversionMin(range.min, range.max);
+	range.max = ConversionMax(range.min, range.max);
 }
 // 範囲の最小値と最大値を入れ替える(int)
-static void ConversionRangeInt(Range <int>& renge)
+static void ConversionRangeInt(Range <int>& range)
 {
-    renge.min = ConversionMin(renge.min, renge.max);
-    renge.max = ConversionMax(renge.min, renge.max);
+    range.min = ConversionMin(range.min, range.max);
+    range.max = ConversionMax(range.min, range.max);
 }
 
 // 範囲の最小値と最大値を入れ替える(Vector2,3,4)
@@ -44,16 +44,16 @@ void ConversionRange(Range<Vec>& range) {
     }
 }
 // 範囲の最小値と最大値を入れ替える(float)
-static void ConversionRangeFloat(ValueRange <float>& renge)
+static void ConversionRangeFloat(ValueRange <float>& range)
 {
-    renge.min = ConversionMin(renge.min, renge.max);
-    renge.max = ConversionMax(renge.min, renge.max);
+    range.min = ConversionMin(range.min, range.max);
+    range.max = ConversionMax(range.min, range.max);
 }
 // 範囲の最小値と最大値を入れ替える(int)
-static void ConversionRangeInt(ValueRange <int>& renge)
+static void ConversionRangeInt(ValueRange <int>& range)
 {
-    renge.min = ConversionMin(renge.min, renge.max);
-    renge.max = ConversionMax(renge.min, renge.max);
+    range.min = ConversionMin(range.min, range.max);
+    range.max = ConversionMax(range.min, range.max);
 }
 
 // 範囲の最小値と最大値を入れ替える(Vector2,3,4)

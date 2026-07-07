@@ -29,10 +29,10 @@ void CustomScene::Initialize() {
 	customUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
-	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaultCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 	SetCamera(cameraManager_->GetCamera());
 }
 

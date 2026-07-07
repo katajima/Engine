@@ -31,17 +31,17 @@ void CharacterDebugScene::Initialize() {
 	// 衝突登録システム
 	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
 	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
-		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
+		characterManager_.get(), specialPointManager_.get(), bulletManager_.get());
 
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 }
 
 void CharacterDebugScene::Finalize(){
-	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
 	collisionRegistrationSystem_->GetCollisionManager()->Clear();
 }
 
@@ -91,7 +91,7 @@ void CharacterDebugScene::InitializeCharacter(){
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
 	characterManager_->SetCameraManager(cameraManager_.get());
-	characterManager_->SetSpecialPointManager(specalPointManager_.get());
+	characterManager_->SetSpecialPointManager(specialPointManager_.get());
 
 	tagNumber = characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	// ダミー敵生成
@@ -144,8 +144,8 @@ void CharacterDebugScene::InitializeBase(){
 	hitBoxSystem_->Initialize(GetEntityManager());
 
 	// スペシャルポイント管理クラス
-	specalPointManager_ = std::make_unique<SpecalPointManager>();
-	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
+	specialPointManager_ = std::make_unique<SpecialPointManager>();
+	specialPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
@@ -184,7 +184,7 @@ void CharacterDebugScene::UpdateCharacter(float dt){
 void CharacterDebugScene::UpdateBase(float dt){
 
 	// 必殺技ポイント管理クラス
-	specalPointManager_->Update(dt);
+	specialPointManager_->Update(dt);
 	// カメラ管理の更新
 	cameraManager_->Update();
 	// 弾マネージャ

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // C++
 #include <optional>
 #include <memory>
@@ -12,7 +12,7 @@ class BaseSpecial;
 class BaseWeapon;
 class BulletManager;
 class CameraManager;
-class SpecalPointManager;
+class SpecialPointManager;
 namespace Engine {
 	class EntityManager;
 }

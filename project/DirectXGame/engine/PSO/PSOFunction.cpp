@@ -1,11 +1,11 @@
-#include "PSOFanction.h"
+﻿#include "PSOFunction.h"
 
 #include "assert.h"
 
 #include "DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
-D3D12_BLEND_DESC Engine::PSOFanction::CreateAlphaBlendDesc() {
+D3D12_BLEND_DESC Engine::PSOFunction::CreateAlphaBlendDesc() {
 	// 描画先の全色成分へ、通常のアルファブレンドで書き込む設定を作成する
 	D3D12_BLEND_DESC blendDesc{};
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
@@ -19,7 +19,7 @@ D3D12_BLEND_DESC Engine::PSOFanction::CreateAlphaBlendDesc() {
 	return blendDesc;
 }
 
-D3D12_DEPTH_STENCIL_DESC Engine::PSOFanction::CreateDepthStencilDesc() {
+D3D12_DEPTH_STENCIL_DESC Engine::PSOFunction::CreateDepthStencilDesc() {
 	// 手前または同じ深度のピクセルを描画し、深度値も更新する設定を作成する
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	depthStencilDesc.DepthEnable = TRUE;
@@ -28,7 +28,7 @@ D3D12_DEPTH_STENCIL_DESC Engine::PSOFanction::CreateDepthStencilDesc() {
 	return depthStencilDesc;
 }
 
-void Engine::PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister, D3D12_SHADER_VISIBILITY shaderType, D3D12_ROOT_PARAMETER_TYPE rootType){
+void Engine::PSOFunction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister, D3D12_SHADER_VISIBILITY shaderType, D3D12_ROOT_PARAMETER_TYPE rootType){
 	// どのシェーダを使うのか
 	parameter.ShaderVisibility = shaderType;
 
@@ -39,22 +39,22 @@ void Engine::PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int 
 	parameter.Descriptor.ShaderRegister = ShaderRegister;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
 }
 
-void Engine::PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange, D3D12_SHADER_VISIBILITY shaderType) {
+void Engine::PSOFunction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange, D3D12_SHADER_VISIBILITY shaderType) {
 	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
 	parameter.ShaderVisibility = shaderType;
 	parameter.DescriptorTable.pDescriptorRanges = &descriptorRange; // Tableの中身の配列を指定
 	parameter.DescriptorTable.NumDescriptorRanges = 1; // Tableで利用する数 	
 };
 
-void Engine::PSOFanction::SetDescriptorRenge(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rengeType) {
+void Engine::PSOFunction::SetDescriptorRange(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rangeType) {
 	descriptorRange.BaseShaderRegister = ShaderRegister; //
 	descriptorRange.RegisterSpace = 0; // レジスタスペース (通常は0) 
 	descriptorRange.NumDescriptors = numDescriptors; // 数は1つ
-	descriptorRange.RangeType = rengeType;
+	descriptorRange.RangeType = rangeType;
 	descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 };
 
-void Engine::PSOFanction::SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shaderRegister, D3D12_FILTER filter, D3D12_SHADER_VISIBILITY shaderType, TextureAddressMode mode) {
+void Engine::PSOFunction::SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shaderRegister, D3D12_FILTER filter, D3D12_SHADER_VISIBILITY shaderType, TextureAddressMode mode) {
 	switch (mode)
 	{
 	case TextureAddressMode::kWRAP:
@@ -95,7 +95,7 @@ void Engine::PSOFanction::SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, 
 
 };
 
-void Engine::PSOFanction::Blob(DXGIDevice* DXGIDevice,D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature) {
+void Engine::PSOFunction::Blob(DXGIDevice* DXGIDevice,D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature) {
 	HRESULT hr;
 	// descriptionSignature が正しく設定されているか確認
 	if (descriptionSignature.pParameters == nullptr || descriptionSignature.NumParameters == 0)

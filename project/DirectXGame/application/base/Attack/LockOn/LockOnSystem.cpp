@@ -1,6 +1,6 @@
-#include "LockOnSystem.h"
+﻿#include "LockOnSystem.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include <algorithm>
 #include <limits>
 

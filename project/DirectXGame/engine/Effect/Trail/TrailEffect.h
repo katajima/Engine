@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -17,7 +17,7 @@
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Transform/Transformation/Transformation.h"
 
 #include"TrailEffectManager.h"
 
@@ -154,7 +154,7 @@ namespace Engine {
 		Camera* camera_ = nullptr;
 
 		std::unique_ptr<Material> material;
-		std::unique_ptr<Transfomation> transfomation = nullptr;
+		std::unique_ptr<Transformation> transformation = nullptr;
 
 		Matrix4x4 mat_;
 		Matrix4x4 parentTransform_;

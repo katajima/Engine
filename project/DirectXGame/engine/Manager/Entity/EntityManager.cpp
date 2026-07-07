@@ -1,4 +1,4 @@
-#include "EntityManager.h"
+﻿#include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
@@ -53,9 +53,9 @@ void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 	oceanManager_->Initialize(dxCommon);
 
 	// オブジェクトのインスタンシング初期化
-	object3dInstansManager_ = std::make_unique<Object3dInstansManager>();
-	object3dInstansManager_->Initialize(dxCommon);
-	object3dInstansManager_->SetEntity3D(this);
+	object3dInstanceManager_ = std::make_unique<Object3dInstanceManager>();
+	object3dInstanceManager_->Initialize(dxCommon);
+	object3dInstanceManager_->SetEntity3D(this);
 
 	// オブジェクト共通クラス初期化
 	object3dCommon_ = std::make_unique<Object3dCommon>();
@@ -272,7 +272,7 @@ TrailEffect* Engine::EntityManager::CreateTrailEffect(const std::string& name,
 void Engine::EntityManager::Update()
 {
 	// オブジェクトインスタンシング更新
-	object3dInstansManager_->Update();
+	object3dInstanceManager_->Update();
 
 	// オブジェクトが消えたときの処理
 	entities_.erase(
@@ -325,7 +325,7 @@ void Engine::EntityManager::ObjectClean()
 void Engine::EntityManager::ObjectDraw()
 {
 	// インスタンシング描画
-	object3dInstansManager_->Draw();
+	object3dInstanceManager_->Draw();
 
 	// 不透明
 	for (auto& object : opaqueObjects) {
@@ -333,7 +333,7 @@ void Engine::EntityManager::ObjectDraw()
 	}
 
 
-	object3dInstansManager_->DrawTransparency();
+	object3dInstanceManager_->DrawTransparency();
 
 	// 半透明
 	for (auto& object : transparentObjects) {
@@ -350,7 +350,7 @@ void Engine::EntityManager::ObjectDraw()
 
 void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
 {
-	object3dInstansManager_->DrawShadowMap(shadowMap);
+	object3dInstanceManager_->DrawShadowMap(shadowMap);
 
 	for (auto& entity : entities_) {
 		if (entity) {

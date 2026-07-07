@@ -1,5 +1,5 @@
-#include "CharacterSpawn.h"
-#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+﻿#include "CharacterSpawn.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 

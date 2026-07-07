@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -20,7 +20,7 @@
 
 #include "DirectXGame/application/base/Stage/ResultStage.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"

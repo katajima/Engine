@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<string>
@@ -20,7 +20,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
-#include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include"DirectXGame/engine/Transform/Transformation/Transformation.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
@@ -55,7 +55,7 @@ namespace Engine {
 
 
 		// 初期化
-		void Initialize(EntityManager* entityManager, Vector2 renge);
+		void Initialize(EntityManager* entityManager, Vector2 range);
 		// 更新
 		void Update();
 		// ImGui更新
@@ -97,10 +97,10 @@ namespace Engine {
 
 
 		// 幅	
-		struct Renge {
-			Vector2 renge;
+		struct Range {
+			Vector2 range;
 		};
-		Renge renge_;
+		Range range_;
 
 		// 波の合成数
 		uint32_t index_ = 0;

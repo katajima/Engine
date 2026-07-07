@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
 #include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include"DirectXGame/engine/Transform/Transformation/Transformation.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
 
@@ -150,7 +150,7 @@ namespace Engine {
 
 
 		// トランスフォーム
-		std::unique_ptr<Transfomation>transfomation = nullptr;
+		std::unique_ptr<Transformation>transformation = nullptr;
 		// マテリアル
 		std::unique_ptr<Material> material = nullptr;
 		// テクスチャパス

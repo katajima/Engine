@@ -6,7 +6,7 @@
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
-#include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
+#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
 
 namespace Character {
 #pragma region Idle
@@ -277,15 +277,15 @@ namespace Character {
 
 		// UIを表示しない
 		player->GetPlayerUI()->SetIsTextRB(false);
-		RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
+		RangeBombingSpecial* rangeSp = static_cast<RangeBombingSpecial*>(special);
 
-		rengeSp->InAction();	// アクション中
-		rengeSp->SetIsDraw(false);	// 描画
+		rangeSp->InAction();	// アクション中
+		rangeSp->SetIsDraw(false);	// 描画
 		if (special->GetPhese() == 0) {	// 最初フェーズなら
 			// UI描画
 			player->GetPlayerUI()->SetIsTextRB(true);
 			// スペシャル描画
-			rengeSp->SetIsDraw(true);
+			rangeSp->SetIsDraw(true);
 		}
 		if (special->GetPhese() == 2) {	// 最終フェーズなら
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);

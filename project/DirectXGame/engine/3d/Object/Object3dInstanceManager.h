@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include<wrl.h>
 using namespace Microsoft::WRL;
@@ -9,7 +9,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
-#include "ObjectInstans.h"
+#include "ObjectInstance.h"
 
 #include<fstream>
 #include<sstream>
@@ -39,7 +39,7 @@ namespace Engine {
 	class ShadowMap;
 
 	// オブジェクトインスタンシングクラス(大量描画用)
-	class Object3dInstansManager
+	class Object3dInstanceManager
 	{
 	public:
 		// GPU転送用
@@ -70,7 +70,7 @@ namespace Engine {
 		struct ObjectGroup
 		{
 			std::string name; // 名前
-			std::deque<ObjectInstans> object; // ✅ ここをdequeに
+			std::deque<ObjectInstance> object; // ✅ ここをdequeに
 			std::unordered_map<int, size_t> idMap;
 			Model* model;
 			bool flag;
@@ -86,10 +86,10 @@ namespace Engine {
 		};
 
 	public:
-		Object3dInstansManager();
-		~Object3dInstansManager();
-		Object3dInstansManager(Object3dInstansManager&) = delete;
-		Object3dInstansManager& operator=(Object3dInstansManager&) = delete;
+		Object3dInstanceManager();
+		~Object3dInstanceManager();
+		Object3dInstanceManager(Object3dInstanceManager&) = delete;
+		Object3dInstanceManager& operator=(Object3dInstanceManager&) = delete;
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
@@ -112,15 +112,15 @@ namespace Engine {
 
 		// オブジェクトグループ作り(モデル)
 		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, Model* model,
-			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstans::TransparencyType transparencyType = ObjectInstans::TransparencyType::kNo);
+			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstance::TransparencyType transparencyType = ObjectInstance::TransparencyType::kNo);
 		// オブジェクトグループ作り(モデル)
 		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
-			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstans::TransparencyType transparencyType = ObjectInstans::TransparencyType::kNo);
+			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstance::TransparencyType transparencyType = ObjectInstance::TransparencyType::kNo);
 
 		// カメラセット
 		void SetCamera(Camera* camera) { this->camera_ = camera; }
 		// オブジェクトの追加
-		void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object, int& id, MeshType type = MeshType::kModel, ObjectInstans::TransparencyType transparencyType = ObjectInstans::TransparencyType::kNo);
+		void AddObject(const std::string& name, const std::string& texName, ObjectInstance&& object, int& id, MeshType type = MeshType::kModel, ObjectInstance::TransparencyType transparencyType = ObjectInstance::TransparencyType::kNo);
 		// オブジェクトのグループ数取得
 		int GetSize() { return static_cast<int>(objectGroups.size()); };
 		// オブジェクトグループ名前でオブジェクトクリーン
@@ -145,15 +145,15 @@ namespace Engine {
 
 	public: //取得
 		// オブジェクトインスタンスをIDで取得
-		ObjectInstans* GetObjectById(const std::string& groupName, int id, ObjectInstans::TransparencyType transparencyType);
+		ObjectInstance* GetObjectById(const std::string& groupName, int id, ObjectInstance::TransparencyType transparencyType);
 		// 全てのオブジェクトインスタンス取得
-		std::deque<ObjectInstans>& GetObjects(const std::string& groupName, ObjectInstans::TransparencyType transparencyType);
+		std::deque<ObjectInstance>& GetObjects(const std::string& groupName, ObjectInstance::TransparencyType transparencyType);
 		// オブジェクトグループ取得
-		ObjectGroup& GetObjectGroup(const std::string& groupName, ObjectInstans::TransparencyType transparencyType);
+		ObjectGroup& GetObjectGroup(const std::string& groupName, ObjectInstance::TransparencyType transparencyType);
 
 	private:
 
-		ObjectGroup& GroupContains(const std::string& groupName, ObjectInstans::TransparencyType transparencyType, bool& isReturn);
+		ObjectGroup& GroupContains(const std::string& groupName, ObjectInstance::TransparencyType transparencyType, bool& isReturn);
 
 	private:
 		// ルートシグネチャの作成

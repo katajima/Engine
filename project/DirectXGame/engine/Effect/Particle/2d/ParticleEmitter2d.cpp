@@ -1,4 +1,4 @@
-#include "ParticleEmitter2d.h"
+﻿#include "ParticleEmitter2d.h"
 // engine
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
@@ -135,5 +135,5 @@ void Engine::ParticleEmitter2d::EmitUniqe() {
 	pos.y = pa.y + ran.y;
 	pos.z = 0.0f;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 };

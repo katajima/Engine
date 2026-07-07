@@ -1,4 +1,4 @@
-#include "PrimitiveCommon.h"
+﻿#include "PrimitiveCommon.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void Engine::PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
@@ -18,17 +18,17 @@ void Engine::PrimitiveCommon::DrawCommonSetting(PsoType type)
 	// タイプに合わせてパイプライン選択
 	switch (type)
 	{
-	case PrimitiveCommon::PsoType::kDefalt:
+	case PrimitiveCommon::PsoType::kDefault:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(default_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defalt_.pipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(default_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kRingClamp:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon->GetCommandList()->SetGraphicsRootSignature(defaltRing_.rootSignature.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(defaultRing_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defaltRing_.pipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(defaultRing_.pipelineState.Get()); //PSOを設定
 		break;
 	case PrimitiveCommon::PsoType::kNoCull:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
@@ -50,9 +50,9 @@ void Engine::PrimitiveCommon::DrawCommonSetting(PsoType type)
 		break;
 	default:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(default_.rootSignature.Get());
 
-		dxCommon->GetCommandList()->SetPipelineState(defalt_.pipelineState.Get()); //PSOを設定
+		dxCommon->GetCommandList()->SetPipelineState(default_.pipelineState.Get()); //PSOを設定
 		break;
 	}
 
@@ -63,31 +63,31 @@ void Engine::PrimitiveCommon::DrawCommonSetting(PsoType type)
 void Engine::PrimitiveCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 
 
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 
 	// マテリアル
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	// トランスフォーム
-	PSOFanction::SetRootParameter(rootParameters[1], 1, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[1], 1, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	// テクスチャ用
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
-	psoManager_->SetRootSignature(defalt_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	psoManager_->SetRootSignature(default_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 	psoManager_->SetRootSignature(noCull_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 	psoManager_->SetRootSignature(noCullWireFrame_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 
-	psoManager_->SetRootSignature(defaltRing_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(defaultRing_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 	psoManager_->SetRootSignature(noCullRing_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 }
@@ -104,12 +104,12 @@ void Engine::PrimitiveCommon::CreateGraphicsPipeline()
 
 	// BlendState(ブレンドステート)の設定
 	// 標準のアルファブレンド設定を生成する
-	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	D3D12_BLEND_DESC blendDesc = PSOFunction::CreateAlphaBlendDesc();
 
 #pragma endregion //BlendState(ブレンドステート)
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 
 
 	// インプットレイアウト
@@ -124,8 +124,8 @@ void Engine::PrimitiveCommon::CreateGraphicsPipeline()
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(defalt_.rootSignature, defalt_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(defaltRing_.rootSignature, defaltRing_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(default_.rootSignature, default_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(defaultRing_.rootSignature, defaultRing_.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 

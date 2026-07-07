@@ -1,10 +1,10 @@
-#include "LoadLevelData.h"
+﻿#include "LoadLevelData.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/manager/entity/EntityManager.h"
 
-#include "LoadDataFanction.h"
+#include "LoadDataFunction.h"
 
-#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
 void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::ModelManager* modelManager, Engine::Camera* camera,

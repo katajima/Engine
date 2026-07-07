@@ -1,6 +1,6 @@
-#include "SkyBoxCommon.h"
+﻿#include "SkyBoxCommon.h"
 
-#include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Transform/Transformation/Transformation.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
@@ -35,26 +35,26 @@ void Engine::SkyBoxCommon::DrawCommonSetting()
 void Engine::SkyBoxCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	// トランスフォームデータ (b0) を頂点シェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1],0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[1],0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 
-	PSOFanction::SetSampler(staticSamplers[0],0 ,D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0],0 ,D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	
 	// ルートシグネチャ作成
@@ -71,7 +71,7 @@ void Engine::SkyBoxCommon::CreateGraphicsPipeline()
 
 	// BlendState(ブレンドステート)の設定
 	// 標準のアルファブレンド設定を生成する
-	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	D3D12_BLEND_DESC blendDesc = PSOFunction::CreateAlphaBlendDesc();
 
 #pragma endregion //BlendState(ブレンドステート)
 
@@ -88,7 +88,7 @@ void Engine::SkyBoxCommon::CreateGraphicsPipeline()
 
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 	// 書き込みします
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 

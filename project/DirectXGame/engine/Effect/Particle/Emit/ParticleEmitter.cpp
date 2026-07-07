@@ -1,4 +1,4 @@
-
+﻿
 // engine
 #include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -72,12 +72,12 @@ namespace {
 		if (directionType == EmitData::DirectionType::kRandom ||
 			directionType == EmitData::DirectionType::kVelocity ||
 			directionType == EmitData::DirectionType::kVelocityBase) {
-			Engine::EmitFanction::CreateParticle(particleGroup, emitData, randomEngine, emitPos);
+			Engine::EmitFunction::CreateParticle(particleGroup, emitData, randomEngine, emitPos);
 			return;
 		}
 
 		const Vector3 velocity = BuildShapeVelocity(emitData, directionType, randomEngine, emitPos, centerPos, normal);
-		Engine::EmitFanction::CreateParticle(particleGroup, emitData, randomEngine, emitPos, velocity);
+		Engine::EmitFunction::CreateParticle(particleGroup, emitData, randomEngine, emitPos, velocity);
 	}
 
 	Vector3 SampleTriangleSurface(const Triangle& triangle, std::mt19937& randomEngine)
@@ -117,7 +117,7 @@ void Engine::PointParticleEmitter::EmitUniqe() {
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), transform_.worldMat_.GetWorldPosition());
+	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), transform_.worldMat_.GetWorldPosition());
 }
 #pragma endregion
 
@@ -255,8 +255,8 @@ void Engine::AABBParticleEmitter::DebugImGui()
 	ImGui::Text("AABB");
 	ImGui::Separator();
 
-	ImGui::DragFloat3("renge.max", &range_.max.x, 0.1f);
-	ImGui::DragFloat3("renge.min", &range_.min.x, 0.1f);
+	ImGui::DragFloat3("range.max", &range_.max.x, 0.1f);
+	ImGui::DragFloat3("range.min", &range_.min.x, 0.1f);
 }
 // 範囲設定
 void Engine::AABBParticleEmitter::SetRange(Vector3 min, Vector3 max)
@@ -468,7 +468,7 @@ void Engine::LineParticleEmitter::EmitUniqe() {
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + diff;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::LineParticleEmitter::DebugImGui()
@@ -523,7 +523,7 @@ void Engine::SplineParticleEmitter::EmitUniqe() {
 
 	pos = CatmullRom(controlPoints, t) + transform_.worldMat_.GetWorldPosition();
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
+	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::SplineParticleEmitter::DebugImGui()

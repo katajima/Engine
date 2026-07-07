@@ -1,6 +1,6 @@
-#include "MainStage.h"
+﻿#include "MainStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
 void MainStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
@@ -36,7 +36,7 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, CameraManager* 
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
 	playerCar_->Initialize(entityManager, {},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
-	playerCar_->SetGroungHeight(-2.9f);	
+	playerCar_->SetGroundHeight(-2.9f);
 }
 
 void MainStage::Update(float dt) {

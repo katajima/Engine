@@ -1,5 +1,5 @@
-#pragma once
-#include"GlobalVariablesFanction.h"
+﻿#pragma once
+#include"GlobalVariablesFunction.h"
 #include <filesystem>
 
 

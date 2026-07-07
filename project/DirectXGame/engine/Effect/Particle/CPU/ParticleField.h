@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 #include "ParticleData.h"
-#include "DirectXGame/engine/Effect/Particle/Emit/EmitFanction.h"
+#include "DirectXGame/engine/Effect/Particle/Emit/EmitFunction.h"
 
 #include "DirectXGame/engine/Math/Noise.h"
 
@@ -69,7 +69,7 @@ namespace Engine {
 		public:	// 各パラメータ
 			EffectType effectType_ = EffectType::kAcceleration;					// エフェクト種類選択
 			Vector3 acceleration_{};											// 加速
-			AABB renge_{ -Vector3{1.0f,1.0f,1.0f},Vector3{1.0f,1.0f,1.0f} };	// 範囲
+			AABB range_{ -Vector3{1.0f,1.0f,1.0f},Vector3{1.0f,1.0f,1.0f} };	// 範囲
 			WorldTransform transform_;											// ワールドトランスフォーム
 			float rad;															// 半径
 			int segmentPerCurve = 3;											// カーブのセグメント数
@@ -81,7 +81,7 @@ namespace Engine {
 			Noise noise_;														// ノイズ
 			float noiseScale_ = 1.0f;											// ノイズスケール
 
-			Range <Vector3> rondomRenge{};										// 乱数範囲 (Vector3の範囲)
+			Range <Vector3> randomRange{};										// 乱数範囲 (Vector3の範囲)
 
 		private:
 			bool isEffect = true;												// 効果を出すか

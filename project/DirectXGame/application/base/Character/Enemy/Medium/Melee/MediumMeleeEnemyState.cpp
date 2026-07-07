@@ -1,4 +1,4 @@
-#include "MediumMeleeEnemyState.h"
+﻿#include "MediumMeleeEnemyState.h"
 #include "MediumMeleeEnemy.h"
 
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -90,7 +90,7 @@ namespace Character {
 
 	void MediumMeleeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
-		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	
 		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());

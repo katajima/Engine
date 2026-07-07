@@ -1,4 +1,4 @@
-#include "Ocean.h"
+﻿#include "Ocean.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "OceanManager.h"
@@ -6,7 +6,7 @@
 
 
 
-void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 renge)
+void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 range)
 {
 	this->entityManager = entityManager;	// エンティティ3d
 
@@ -14,14 +14,14 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 reng
 	this->dxCommon = entityManager->GetOceanManager()->GetDxCommon();
 
 	// 範囲
-	renge_.renge = renge;
+	range_.range = range;
 
 	mesh_ = std::make_unique<ModelMesh>();
 	// 頂点データ
-	mesh_->vertices.push_back({ .position = {renge_.renge.x, 0.0f, renge_.renge.y, 1.0f} ,.texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左上
-	mesh_->vertices.push_back({ .position = {-renge_.renge.x, 0.0f, renge_.renge.y, 1.0f} ,.texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右上
-	mesh_->vertices.push_back({ .position = {renge_.renge.x, 0.0f, -renge_.renge.y, 1.0f} ,.texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
-	mesh_->vertices.push_back({ .position = {-renge_.renge.x, 0.0f, -renge_.renge.y, 1.0f} ,.texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右下
+	mesh_->vertices.push_back({ .position = {range_.range.x, 0.0f, range_.range.y, 1.0f} ,.texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左上
+	mesh_->vertices.push_back({ .position = {-range_.range.x, 0.0f, range_.range.y, 1.0f} ,.texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右上
+	mesh_->vertices.push_back({ .position = {range_.range.x, 0.0f, -range_.range.y, 1.0f} ,.texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
+	mesh_->vertices.push_back({ .position = {-range_.range.x, 0.0f, -range_.range.y, 1.0f} ,.texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右下
 	
 	mesh_->SetIndice(0);
 	mesh_->SetIndice(1);

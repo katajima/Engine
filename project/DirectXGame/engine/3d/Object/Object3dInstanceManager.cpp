@@ -1,4 +1,4 @@
-#include "Object3dInstansManager.h"
+﻿#include "Object3dInstanceManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
@@ -10,13 +10,13 @@
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 
 
-#pragma region Object3dInstansManager
+#pragma region Object3dInstanceManager
 
-Engine::Object3dInstansManager::Object3dInstansManager() = default;
-Engine::Object3dInstansManager::~Object3dInstansManager() = default;
+Engine::Object3dInstanceManager::Object3dInstanceManager() = default;
+Engine::Object3dInstanceManager::~Object3dInstanceManager() = default;
 
 
-void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
+void Engine::Object3dInstanceManager::Initialize(DirectXCommon* dxCommon) {
 	this->dxCommon = dxCommon;						// DX共通クラス
 	this->srvManager = dxCommon->GetSrvManager();	// SRV管理クラス
 	modelManager = dxCommon->GetModelManager();		// モデル管理クラス
@@ -33,7 +33,7 @@ void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 }
 
 
-void Engine::Object3dInstansManager::Update() {
+void Engine::Object3dInstanceManager::Update() {
 
 	// カメラあるなら
 	if (camera_) {
@@ -131,7 +131,7 @@ void Engine::Object3dInstansManager::Update() {
 	}
 }
 
-void Engine::Object3dInstansManager::Draw() {
+void Engine::Object3dInstanceManager::Draw() {
 	auto commandList = dxCommon->GetCommandList();
 
 	for (auto& pair : objectGroups) {
@@ -172,7 +172,7 @@ void Engine::Object3dInstansManager::Draw() {
 	}
 }
 
-void Engine::Object3dInstansManager::DrawTransparency(){
+void Engine::Object3dInstanceManager::DrawTransparency(){
 	auto commandList = dxCommon->GetCommandList();
 
 	for (auto& pair : objectTranslucentGroups) {
@@ -213,7 +213,7 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 	}
 }
 
-void Engine::Object3dInstansManager::DrawShadowMap(ShadowMap* shadowMap)
+void Engine::Object3dInstanceManager::DrawShadowMap(ShadowMap* shadowMap)
 {
 	auto commandList = dxCommon->GetCommandList();
 
@@ -240,7 +240,7 @@ void Engine::Object3dInstansManager::DrawShadowMap(ShadowMap* shadowMap)
 }
 
 
-void Engine::Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
+void Engine::Object3dInstanceManager::DrawCommonSetting(RasterizerType rasteType,
 	BlendType      blendType) {
 	switch (blendType) {
 	case BlendType::MODE_ADD:
@@ -287,7 +287,7 @@ void Engine::Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Engine::Object3dInstansManager::Clear(const std::string& name) {
+void Engine::Object3dInstanceManager::Clear(const std::string& name) {
 	auto it = objectGroups.find(name);
 	if (it == objectGroups.end()) return;
 	it->second.object.clear();
@@ -304,9 +304,9 @@ void Engine::Object3dInstansManager::Clear(const std::string& name) {
 
 #pragma region Create
 
-void Engine::Object3dInstansManager::CreateObject3dGroup(
+void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, Model* model,
-	RasterizerType    rasteType, BlendType    blendType, ObjectInstans::TransparencyType transparencyType) {
+	RasterizerType    rasteType, BlendType    blendType, ObjectInstance::TransparencyType transparencyType) {
 
 	bool isReturn = false;
 
@@ -357,9 +357,9 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 	objectGroup.rasteType = rasteType;
 }
 
-void Engine::Object3dInstansManager::CreateObject3dGroup(
+void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
-	RasterizerType    rasteType, BlendType    blendType, ObjectInstans::TransparencyType transparencyType) {
+	RasterizerType    rasteType, BlendType    blendType, ObjectInstance::TransparencyType transparencyType) {
 	
 
 	bool isReturn = false;
@@ -411,9 +411,9 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 }
 
 
-void Engine::Object3dInstansManager::AddObject(const std::string& name,
+void Engine::Object3dInstanceManager::AddObject(const std::string& name,
 	const std::string& texName,
-	ObjectInstans&& object, int& id, MeshType type, ObjectInstans::TransparencyType transparencyType) {
+	ObjectInstance&& object, int& id, MeshType type, ObjectInstance::TransparencyType transparencyType) {
 
 	if (MeshType::kModel == type) {
 		CreateObject3dGroup(name, texName, modelManager->FindModel(name),RasterizerType::MODE_SOLID_BACK,BlendType::MODE_ADD, transparencyType);
@@ -424,7 +424,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	object.isDraw_ = true;
 
 	if (texName.empty()) {
-		if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+		if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 			object.texIndex = objectGroups[name].model->GetModelData().mesh[0]->material->tex_.diffuseIndex;
 		}
 		else {
@@ -439,7 +439,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	int objectId = object.id;
 
 	// ✅ 完全に右辺値としてムーブされる
-	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+	if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 		objectGroups[name].object.emplace_back(std::move(object));
 	}
 	else {
@@ -447,7 +447,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	}
 
 
-	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+	if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 		// 追加した要素のインデックスを取得
 		size_t index = objectGroups[name].object.size() - 1;
 		// ID → インデックスで登録
@@ -475,9 +475,9 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 
 
 
-Engine::ObjectInstans* Engine::Object3dInstansManager::GetObjectById(
-	const std::string& groupName, int id, ObjectInstans::TransparencyType transparencyType) {
-	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+Engine::ObjectInstance* Engine::Object3dInstanceManager::GetObjectById(
+	const std::string& groupName, int id, ObjectInstance::TransparencyType transparencyType) {
+	if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 		auto itGroup = objectGroups.find(groupName);
 		if (itGroup == objectGroups.end()) {
 			std::terminate(); // 即座にプログラム停止
@@ -523,12 +523,12 @@ Engine::ObjectInstans* Engine::Object3dInstansManager::GetObjectById(
 	}
 }
 
-std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(const std::string& groupName, ObjectInstans::TransparencyType transparencyType)
+std::deque<Engine::ObjectInstance>& Engine::Object3dInstanceManager::GetObjects(const std::string& groupName, ObjectInstance::TransparencyType transparencyType)
 {
-	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+	if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 		auto itGroup = objectGroups.find(groupName);
 		if (itGroup == objectGroups.end()) {
-			static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
+			static std::deque<ObjectInstance> empty; // 空のベクタを static で用意
 			return empty; // 空参照を返す
 		}
 		return itGroup->second.object; // コピーして返す
@@ -536,16 +536,16 @@ std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(co
 	else {
 		auto itGroup = objectTranslucentGroups.find(groupName);
 		if (itGroup == objectTranslucentGroups.end()) {
-			static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
+			static std::deque<ObjectInstance> empty; // 空のベクタを static で用意
 			return empty; // 空参照を返す
 		}
 		return itGroup->second.object; // コピーして返す
 	}
 }
 
-Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GetObjectGroup(const std::string& groupName, ObjectInstans::TransparencyType transparencyType)
+Engine::Object3dInstanceManager::ObjectGroup& Engine::Object3dInstanceManager::GetObjectGroup(const std::string& groupName, ObjectInstance::TransparencyType transparencyType)
 {
-	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+	if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 		auto itGroup = objectGroups.find(groupName);
 		if (itGroup == objectGroups.end()){
 			throw std::runtime_error("Object group not found: " + groupName);
@@ -562,9 +562,9 @@ Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::Get
 }
 
 
-Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GroupContains(const std::string& groupName, ObjectInstans::TransparencyType transparencyType, bool& isReturn)
+Engine::Object3dInstanceManager::ObjectGroup& Engine::Object3dInstanceManager::GroupContains(const std::string& groupName, ObjectInstance::TransparencyType transparencyType, bool& isReturn)
 {
-	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
+	if (transparencyType == ObjectInstance::TransparencyType::kNo) {
 		if (objectGroups.contains(groupName)) {
 			isReturn = true;
 			return objectGroups[groupName];
@@ -591,14 +591,14 @@ Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::Gro
 #pragma region PSO
 
 
-void Engine::Object3dInstansManager::CreateRootSignature() {
+void Engine::Object3dInstanceManager::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[6] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[4],	0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 4, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[5], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
+	PSOFunction::SetDescriptorRange(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
+	PSOFunction::SetDescriptorRange(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
+	PSOFunction::SetDescriptorRange(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFunction::SetDescriptorRange(descriptorRange[4],	0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 4, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFunction::SetDescriptorRange(descriptorRange[5], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // シャドウマップ用
 
 
 	// RootParameter作成。複数指定できるのではい
@@ -607,36 +607,36 @@ void Engine::Object3dInstansManager::CreateRootSignature() {
 	//CD3DX12_ROOT_PARAMETER 
 
 	// マテリアル (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[4],D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[4],D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// カメラデータ (b2) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t2) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t3) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// シャドウマップ (t0) をピクセルシェーダで使用する。頂点用t0とはShaderVisibilityで分離する。
-	PSOFanction::SetRootParameter(rootParameters[11], descriptorRange[5], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[11], descriptorRange[5], D3D12_SHADER_VISIBILITY_PIXEL);
 	// シャドウ行列などのデータ (b6) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[12], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[12], 6, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0,D3D12_FILTER_MIN_MAG_MIP_LINEAR,D3D12_SHADER_VISIBILITY_PIXEL); // バイリニアフィルタ
+	PSOFunction::SetSampler(staticSamplers[0], 0,D3D12_FILTER_MIN_MAG_MIP_LINEAR,D3D12_SHADER_VISIBILITY_PIXEL); // バイリニアフィルタ
 	staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
@@ -659,12 +659,12 @@ void Engine::Object3dInstansManager::CreateRootSignature() {
 		_countof(staticSamplers));
 }
 
-void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
+void Engine::Object3dInstanceManager::CreateGraphicsPipeline() {
 	CreateRootSignature();
 
 	// DepthStencilStateの設定
 	// 標準の深度テストと書き込み設定を生成する
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 
 	// インプットレイアウト
 	psoManager_->AddInputElementDesc("POSITION", 0,
@@ -674,9 +674,9 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS,
-		L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
+		L"resources/shaders/Object3D/Object3dInstance.VS.hlsl");
 	psoManager_->SetShaderFileName(ShaderFileName::PS,
-		L"resources/shaders/Object3D/Object3dInstans.PS.hlsl");
+		L"resources/shaders/Object3D/Object3dInstance.PS.hlsl");
 
 
 	BlendAdd();
@@ -709,14 +709,14 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 }
 
-void Engine::Object3dInstansManager::CreateShadowMapPipeline()
+void Engine::Object3dInstanceManager::CreateShadowMapPipeline()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
-	PSOFanction::SetRootParameter(rootParameters[0], descriptorRange[0], D3D12_SHADER_VISIBILITY_VERTEX);
-	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], descriptorRange[0], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFunction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	psoManager_->SetRootSignature(shadowRootSignature, rootParameters, _countof(rootParameters), nullptr, 0);
 
@@ -724,23 +724,23 @@ void Engine::Object3dInstansManager::CreateShadowMapPipeline()
 	shadowBlendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
 
 	// シャドウマップでも標準の深度比較と書き込み設定を利用する
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 
-	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMapInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMapInstance.VS.hlsl");
 	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");
 	psoManager_->SetRenderTargetFormats(0, DXGI_FORMAT_UNKNOWN, DXGI_FORMAT_D32_FLOAT);
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(shadowRootSignature, shadowGraphicsPipelineState, shadowBlendDesc,
 		depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
-	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3dInstans.PS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3dInstance.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3dInstance.PS.hlsl");
 	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
 }
 
 #pragma region Blend
 
-void Engine::Object3dInstansManager::BlendAdd() {
+void Engine::Object3dInstanceManager::BlendAdd() {
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
 		D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -752,7 +752,7 @@ void Engine::Object3dInstansManager::BlendAdd() {
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 }
 
-void Engine::Object3dInstansManager::BlendSubtract() {
+void Engine::Object3dInstanceManager::BlendSubtract() {
 	// 減算ブレンドの設定
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
@@ -769,7 +769,7 @@ void Engine::Object3dInstansManager::BlendSubtract() {
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 }
 
-void Engine::Object3dInstansManager::BlendMuliply() {
+void Engine::Object3dInstanceManager::BlendMuliply() {
 	// 加算ブレンドの設定
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =

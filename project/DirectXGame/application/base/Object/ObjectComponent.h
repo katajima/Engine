@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/3d/Object/ObjectInstans.h"
+#include"DirectXGame/engine/3d/Object/ObjectInstance.h"
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include"DirectXGame/engine/Animation/AnimationData.h"
 
@@ -37,7 +37,7 @@ struct ObjectStateFlags
 // 前方宣言
 namespace Engine {
 	class EntityManager;
-	class Object3dInstansManager;
+	class Object3dInstanceManager;
 	class Camera;
 	class ColliderComponent;
 	class RigidBodyComponent;
@@ -61,7 +61,7 @@ public:
 	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
 		bool useRigidBody, IHitReceiver* iHitReceiver,
-		Engine::ObjectInstans::TransparencyType transparencyType, bool rigidUpdate = true);
+		Engine::ObjectInstance::TransparencyType transparencyType, bool rigidUpdate = true);
 
 	/// <summary>
 	/// 更新
@@ -137,7 +137,7 @@ private:
 	bool useInstancing = false;	// インスタンシング描画にするか
 	bool rigidUpdate_ = true;
 
-	Engine::ObjectInstans* objectInstance_ = nullptr;
+	Engine::ObjectInstance* objectInstance_ = nullptr;
 	int instanceId_ = 0;
 
 protected: // 貰ってくるもの

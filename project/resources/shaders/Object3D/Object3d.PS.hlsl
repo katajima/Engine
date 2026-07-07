@@ -1,4 +1,4 @@
-#include"Light.hlsli"
+﻿#include"Light.hlsli"
 
 
 Texture2D<float4> gTexture : register(t0);

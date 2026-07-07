@@ -1,10 +1,10 @@
-#include "ParticleData.h"
+﻿#include "ParticleData.h"
 
 #include <DirectXGame/engine/Base/WinApp/WinApp.h>
 #include <DirectXGame/engine/Math/Random.h>
 #include <DirectXGame/engine/MyGame/MyGame.h>
 
-Matrix4x4 Engine::ParticleFanction::Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
+Matrix4x4 Engine::ParticleFunction::Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
 {
 	Matrix4x4 worldMatrix;
 
@@ -55,7 +55,7 @@ Matrix4x4 Engine::ParticleFanction::Billboard(ParticleGroup& group, std::list<Pa
 	return worldMatrix;
 }
 
-void Engine::ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, float deltaTime)
+void Engine::ParticleFunction::Effect(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, float deltaTime)
 {
 	// 重力の影響を受けるか
 	if (group.isFlag.isGravity) {
@@ -129,7 +129,7 @@ void Engine::ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>:
 	particleIterator->transform.translate += particleIterator->velocity * deltaTime;
 }
 
-void Engine::ParticleFanction::Effect(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, float deltaTime)
+void Engine::ParticleFunction::Effect(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, float deltaTime)
 {
 	// 重力の影響を受けるか
 	if (group.isGravity_) {
@@ -162,13 +162,13 @@ void Engine::ParticleFanction::Effect(ParticleGroup2d& group, std::list<Particle
 	particleIterator->transform.translate += particleIterator->velocity * deltaTime;
 }
 
-void Engine::ParticleFanction::WorldDataForGPU(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
+void Engine::ParticleFunction::WorldDataForGPU(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
 {
 	Matrix4x4 projectionMatrix = camera->GetProjectionMatrix();
 	Matrix4x4 viewMatrix = camera->GetViewMatrix();
 
 	// ビルボード関係の関数
-	Matrix4x4 worldMatrix = ParticleFanction::Billboard(group, particleIterator, camera);
+	Matrix4x4 worldMatrix = ParticleFunction::Billboard(group, particleIterator, camera);
 
 	// ビュープロジェクション
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
@@ -178,7 +178,7 @@ void Engine::ParticleFanction::WorldDataForGPU(ParticleGroup& group, std::list<P
 
 }
 
-void Engine::ParticleFanction::WorldDataForGPU(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
+void Engine::ParticleFunction::WorldDataForGPU(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
 {
 	float winWidth = static_cast<float>(WinApp::GetClientWidth(false));
 	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
@@ -204,7 +204,7 @@ void Engine::ParticleFanction::WorldDataForGPU(ParticleGroup2d& group, std::list
 	dst.color = particleIterator->color;
 }
 
-void Engine::ParticleFanction::MaterialEffect(ParticleGroup& group)
+void Engine::ParticleFunction::MaterialEffect(ParticleGroup& group)
 {
 	group.material->GetMaterialInstance().transform.translate += group.uvTransformVeloctiy_.translate;
 	group.material->GetMaterialInstance().transform.rotate += group.uvTransformVeloctiy_.rotate;
@@ -212,7 +212,7 @@ void Engine::ParticleFanction::MaterialEffect(ParticleGroup& group)
 	group.material->GPUData();
 }
 
-void Engine::ParticleFanction::Create(ParticleGroup& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
+void Engine::ParticleFunction::Create(ParticleGroup& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
 	DirectXCommon* dxCommon, ModelMesh* mesh, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	// 名前
@@ -248,7 +248,7 @@ void Engine::ParticleFanction::Create(ParticleGroup& particleGroup, const std::s
 	particleGroup.rasteType = rasteType;
 }
 
-void Engine::ParticleFanction::Create(ParticleGroup2d& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance, DirectXCommon* dxCommon, Sprite* sprite)
+void Engine::ParticleFunction::Create(ParticleGroup2d& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance, DirectXCommon* dxCommon, Sprite* sprite)
 {
 	// 名前
 	particleGroup.name = name;
@@ -275,7 +275,7 @@ void Engine::ParticleFanction::Create(ParticleGroup2d& particleGroup, const std:
 	}
 }
 
-void Engine::ParticleFanction::Create(ParticleGroup2d& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance, DirectXCommon* dxCommon, ModelMesh* sprite)
+void Engine::ParticleFunction::Create(ParticleGroup2d& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance, DirectXCommon* dxCommon, ModelMesh* sprite)
 {
 	// 名前
 	particleGroup.name = name;

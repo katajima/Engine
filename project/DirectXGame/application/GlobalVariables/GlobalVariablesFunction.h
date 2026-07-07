@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include <iostream>
 #include <fstream>
@@ -52,7 +52,7 @@ namespace GvData {
 	using json = nlohmann::json;
 }
 
-namespace GvFanction {
+namespace GvFunction {
 	// 型を判別して値を保存
 	void Save(const std::string& groupName, GvData::json& root,GvData::Item& item, const std::string& itemName);
 

@@ -1,4 +1,4 @@
-#include "SpecialPoint.h"
+﻿#include "SpecialPoint.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
@@ -7,20 +7,20 @@
 
 #pragma region Manager
 
-void SpecalPointManager::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
+void SpecialPointManager::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
 
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 
 }
 
-void SpecalPointManager::Update(float dt) {
+void SpecialPointManager::Update(float dt) {
 
 
 	// 削除
 	points.erase(
 		std::remove_if(points.begin(), points.end(),
-			[](const std::unique_ptr<SpecalPoint>& spPoint) {
+			[](const std::unique_ptr<SpecialPoint>& spPoint) {
 				return !spPoint->GetAlive();
 			}),
 		points.end());
@@ -34,8 +34,8 @@ void SpecalPointManager::Update(float dt) {
 
 }
 
-void SpecalPointManager::AddPoint(const Vector3& pos, int point){
-	std::unique_ptr<SpecalPoint> spPoint = std::make_unique<SpecalPoint>();
+void SpecialPointManager::AddPoint(const Vector3& pos, int point){
+	std::unique_ptr<SpecialPoint> spPoint = std::make_unique<SpecialPoint>();
 	spPoint->Initialize(entityManager,globalVariables,pos, point,count_);
 	points.push_back(std::move(spPoint));
 	count_++;
@@ -47,7 +47,7 @@ void SpecalPointManager::AddPoint(const Vector3& pos, int point){
 
 #pragma region Point
 
-void SpecalPoint::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point, int id) {
+void SpecialPoint::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point, int id) {
 	id_ = id;			// ID
 	point_ = point;		// ポイント量
 
@@ -55,7 +55,7 @@ void SpecalPoint::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
 	objectComponent_->InitializeInstancing(entityManager, globalVariables, "" + std::to_string(id), "point.obj", "", 
-		true, true, this, Engine::ObjectInstans::TransparencyType::kNo);
+		true, true, this, Engine::ObjectInstance::TransparencyType::kNo);
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 	objectComponent_->SetInstancingSRT({0.5f,0.5f,0.5f },{}, pos);
 
@@ -89,29 +89,29 @@ void SpecalPoint::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 
 
 	specialPointStateMachine_ = std::make_unique<SpecialPointStateMachine>();
-	specialPointStateMachine_->RegisterState(SpecialPointState::kPop, [](SpecalPoint* p) {
+	specialPointStateMachine_->RegisterState(SpecialPointState::kPop, [](SpecialPoint* p) {
 		return std::make_unique<SpecialPointPopState>(p);
 		});
-	specialPointStateMachine_->RegisterState(SpecialPointState::kIdle, [](SpecalPoint* p) {
+	specialPointStateMachine_->RegisterState(SpecialPointState::kIdle, [](SpecialPoint* p) {
 		return std::make_unique<SpecialPointIdleState>(p);
 		});
-	specialPointStateMachine_->RegisterState(SpecialPointState::kMove, [](SpecalPoint* p) {
+	specialPointStateMachine_->RegisterState(SpecialPointState::kMove, [](SpecialPoint* p) {
 		return std::make_unique<SpecialPointMoveState>(p);
 		});
-	specialPointStateMachine_->RegisterState(SpecialPointState::kEnd, [](SpecalPoint* p) {
+	specialPointStateMachine_->RegisterState(SpecialPointState::kEnd, [](SpecialPoint* p) {
 		return std::make_unique<SpecialPointEndState>(p);
 		});
 	specialPointStateMachine_->Initialize(this);
 }
 
 
-void SpecalPoint::Update(float dt) {
+void SpecialPoint::Update(float dt) {
 
 	// ステートマシーン更新
 	specialPointStateMachine_->Update(dt);
 }
 
-bool SpecalPoint::IsMove()
+bool SpecialPoint::IsMove()
 {
 	return radius_ > Length(GetTargetPos() - GetObjectComponent()->GetWorldPosition());
 }

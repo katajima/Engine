@@ -1,4 +1,4 @@
-#include "TrailEffect.h"
+﻿#include "TrailEffect.h"
 
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -82,8 +82,8 @@ void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::st
 	material->GetMaterialInstance().color = color;
 
 	// トランスフォーム初期化
-	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(effectManager->GetDxCommon());
+	transformation = std::make_unique<Transformation>();
+	transformation->Initialize(effectManager->GetDxCommon());
 
 	parentTransform_.Identity();
 	mat_.Identity();
@@ -128,7 +128,7 @@ void Engine::TrailEffect::Update()
 
 	// トレイルは頂点側がワールド座標なので、行列は単位行列として扱う。
 	parentTransform_ = MakeAffineMatrix({ 1,1,1 }, Vector3{ 0,0,0 }, { 0,0,0 });
-	transfomation->Update(camera_, parentTransform_);
+	transformation->Update(camera_, parentTransform_);
 
 	material->GetMaterialInstance().color = baseColor_;
 	UpdateComposableModules(deltaTime);
@@ -147,7 +147,7 @@ void Engine::TrailEffect::Draw()
 		effectManager->GetTrailEffectCommon()->DrawCommonSetting();
 
 		// 位置
-		transfomation->GetCommandList(1);
+		transformation->GetCommandList(1);
 
 		// マテリアル
 		material->GetCommandListMaterial(0);

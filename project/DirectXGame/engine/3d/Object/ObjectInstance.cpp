@@ -1,19 +1,19 @@
-#include "ObjectInstans.h"
+﻿#include "ObjectInstance.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-#pragma region ObjectInstans
+#pragma region ObjectInstance
 
-Engine::ObjectInstans::ObjectInstans() = default;
+Engine::ObjectInstance::ObjectInstance() = default;
 
-Engine::ObjectInstans::~ObjectInstans() = default;
+Engine::ObjectInstance::~ObjectInstance() = default;
 
-Engine::ObjectInstans::ObjectInstans(ObjectInstans&&) noexcept = default;
-Engine::ObjectInstans& Engine::ObjectInstans::operator=(ObjectInstans&&) noexcept = default;
+Engine::ObjectInstance::ObjectInstance(ObjectInstance&&) noexcept = default;
+Engine::ObjectInstance& Engine::ObjectInstance::operator=(ObjectInstance&&) noexcept = default;
 
-void Engine::ObjectInstans::Initialize(EntityManager* entity3DManager, bool useCollider, bool rigidUpdate, Transform transfor) {
+void Engine::ObjectInstance::Initialize(EntityManager* entity3DManager, bool useCollider, bool rigidUpdate, Transform transfor) {
 	transform.Initialize();
 	transform.translate_ = transfor.translate;
 	transform.rotate_ = transfor.rotate;
@@ -38,7 +38,7 @@ void Engine::ObjectInstans::Initialize(EntityManager* entity3DManager, bool useC
 
 }
 
-void Engine::ObjectInstans::Update() {
+void Engine::ObjectInstance::Update() {
 	if (isDelete_) return;
 	transform.Update();
 	// コライダー
@@ -55,12 +55,12 @@ void Engine::ObjectInstans::Update() {
 }
 
 
-Engine::ContactRecord& Engine::ObjectInstans::GetContactRecord() { return colliderComponent_->contactRecord_; };
+Engine::ContactRecord& Engine::ObjectInstance::GetContactRecord() { return colliderComponent_->contactRecord_; };
 // Object3d内でコライダーコンポーネントを更新するか
-void Engine::ObjectInstans::SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
+void Engine::ObjectInstance::SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
 // コライダーコンポーネントを取得
-Engine::ColliderComponent* Engine::ObjectInstans::GetColliderComponent() { return colliderComponent_.get(); };
+Engine::ColliderComponent* Engine::ObjectInstance::GetColliderComponent() { return colliderComponent_.get(); };
 // リジットボディー取得
-Engine::RigidBodyComponent* Engine::ObjectInstans::GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
+Engine::RigidBodyComponent* Engine::ObjectInstance::GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
 
 #pragma endregion

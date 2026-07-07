@@ -1,4 +1,4 @@
-#include "LoadDataFanction.h"
+﻿#include "LoadDataFunction.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 
 nlohmann::json LoadDataFanc::FileData(const std::string fullpath)

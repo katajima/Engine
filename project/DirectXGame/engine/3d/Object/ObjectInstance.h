@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<fstream>
 #include<sstream>
 #include<vector>
@@ -24,13 +24,13 @@ namespace Engine {
 	
 
 	// オブジェクトのインスタスクラス
-	class ObjectInstans {
+	class ObjectInstance {
 	public:
-		ObjectInstans();
-		~ObjectInstans();
+		ObjectInstance();
+		~ObjectInstance();
 		// ムーブ許可
-		ObjectInstans(ObjectInstans&&) noexcept;
-		ObjectInstans& operator=(ObjectInstans&&) noexcept;
+		ObjectInstance(ObjectInstance&&) noexcept;
+		ObjectInstance& operator=(ObjectInstance&&) noexcept;
 		
 		// 透明度タイプ
 		enum class TransparencyType {

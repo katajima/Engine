@@ -1,4 +1,4 @@
-#include"TitleScene.h"
+﻿#include"TitleScene.h"
 
 
 
@@ -38,7 +38,7 @@ void TitleScene::Initialize()
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
 	objectComponentShadow_->InitializeInstancing(GetEntityManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
-		false, false, nullptr, Engine::ObjectInstans::TransparencyType::kYes);
+		false, false, nullptr, Engine::ObjectInstance::TransparencyType::kYes);
 
 	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
 	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
@@ -115,10 +115,10 @@ void TitleScene::Draw2D(){
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
-	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaultCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 
 }
 

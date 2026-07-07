@@ -1,5 +1,5 @@
-#include "ComboCondition.h"
-#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+﻿#include "ComboCondition.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 
 #pragma region ComboCondition
 

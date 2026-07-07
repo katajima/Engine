@@ -1,10 +1,10 @@
-#include "TrailMesh.h"
+﻿#include "TrailMesh.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void Engine::TrailMesh::CreateMesh(size_t instanse)
+void Engine::TrailMesh::CreateMesh(size_t instance)
 {
-	size_t sise = instanse;
+	size_t sise = instance;
 
 	// リサイズ
 	verticesTrail.resize(sise);

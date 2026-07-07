@@ -1,7 +1,7 @@
-#include "SpecialPointStateMachine.h"
+﻿#include "SpecialPointStateMachine.h"
 
 
-void SpecialPointStateMachine::Initialize(SpecalPoint* object, SpecialPointState initialState){
+void SpecialPointStateMachine::Initialize(SpecialPoint* object, SpecialPointState initialState){
 	object_ = object;
 	ChangeState(initialState);
 }

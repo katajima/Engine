@@ -1,4 +1,4 @@
-#include "RangeBombingSpecial.h"
+﻿#include "RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -7,7 +7,7 @@
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
+#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
 #include "DirectXgame/application/base/Stage/MainStage.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"

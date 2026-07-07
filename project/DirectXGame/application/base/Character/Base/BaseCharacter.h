@@ -135,7 +135,7 @@ namespace Character {
 		// ヒットボックス管理取得
 		HitBox::System* GetHitBoxSystem() { return this->hitBoxSystem; }
 		// スペシャルポイント管理クラス取得
-		SpecalPointManager* GetSpecalPointManager() { return this->specalPointManager; }
+		SpecialPointManager* GetSpecialPointManager() { return this->specialPointManager; }
 		// 入力システム取得
 		InputSystem* GetInputSystem() { return inputSystem; };
 		// 入力システム設定
@@ -155,7 +155,7 @@ namespace Character {
 		// カメラ管理クラスの設定
 		void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 		// スペシャルポイント管理クラス設定
-		void SetSpecalPointManager(SpecalPointManager* specalPointManager) { this->specalPointManager = specalPointManager; }
+		void SetSpecialPointManager(SpecialPointManager* specialPointManager) { this->specialPointManager = specialPointManager; }
 	public:
 		// 移動コンポーネント取得
 		MovementComponent* GetMoveComponent() { return moveComponent_.get(); }
@@ -229,7 +229,7 @@ namespace Character {
 		// カメラ管理クラス
 		CameraManager* cameraManager = nullptr;
 		// 必殺技ポイント管理クラス
-		SpecalPointManager* specalPointManager = nullptr;
+		SpecialPointManager* specialPointManager = nullptr;
 	protected: // 貰ってくるもの(エンジン層)
 		// 3Dエンティティマネージャー
 		Engine::EntityManager* entityManager = nullptr;

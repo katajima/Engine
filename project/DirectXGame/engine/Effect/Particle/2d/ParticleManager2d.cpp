@@ -1,4 +1,4 @@
-#include "ParticleManager2d.h"
+﻿#include "ParticleManager2d.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -55,10 +55,10 @@ void Engine::ParticleManager2d::Update() {
 
 
 					// パーティクル影響
-					ParticleFanction::Effect(group, particleIterator, deltaTime);
+					ParticleFunction::Effect(group, particleIterator, deltaTime);
 
 					// パーティクルデータをGPUに送る
-					ParticleFanction::WorldDataForGPU(group, particleIterator, camera);
+					ParticleFunction::WorldDataForGPU(group, particleIterator, camera);
 
 					// 加算 
 					++group.instanceCount;
@@ -107,7 +107,7 @@ void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, cons
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, sprite);
+	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, sprite);
 }
 
 void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive2D* primitive2d)
@@ -127,7 +127,7 @@ void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, cons
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, modelMesh);
+	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, modelMesh);
 }
 
 void Engine::ParticleManager2d::DrawCommonSetting() {
@@ -142,22 +142,22 @@ void Engine::ParticleManager2d::DrawCommonSetting() {
 // ルートシグネチャの作成
 void Engine::ParticleManager2d::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFunction::SetDescriptorRange(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
 
 
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 	// マテリアル (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 
 	// ルートシグネチャ作成
@@ -169,7 +169,7 @@ void Engine::ParticleManager2d::CreateGraphicsPipeline() {
 	CreateRootSignature();
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 
 	// インプットレイアウト
@@ -183,7 +183,7 @@ void Engine::ParticleManager2d::CreateGraphicsPipeline() {
 
 
 	// メンバーに標準のアルファブレンド設定を保持する
-	blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	blendDesc = PSOFunction::CreateAlphaBlendDesc();
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);

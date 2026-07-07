@@ -1,4 +1,4 @@
-#include "TrailEffectManager.h"
+﻿#include "TrailEffectManager.h"
 
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
@@ -28,23 +28,23 @@ void Engine::TrailEffectCommon::DrawCommonSetting()
 void Engine::TrailEffectCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	PSOFunction::SetDescriptorRange(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 
 	
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 	
 	// マテリアル
-	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	
 	// トランスフォーム
-	PSOFanction::SetRootParameter(rootParameters[1],1, D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[1],1, D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	
 	// テクスチャ用
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0],0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetSampler(staticSamplers[0],0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
@@ -62,12 +62,12 @@ void Engine::TrailEffectCommon::CreateGraphicsPipeline()
 
 	// BlendState(ブレンドステート)の設定
 	// 標準のアルファブレンド設定を生成する
-	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	D3D12_BLEND_DESC blendDesc = PSOFunction::CreateAlphaBlendDesc();
 
 #pragma endregion //BlendState(ブレンドステート)
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 	// 半透明の帯同士が深度を書いて欠けないよう、テストだけ行って書き込みはしない。
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 

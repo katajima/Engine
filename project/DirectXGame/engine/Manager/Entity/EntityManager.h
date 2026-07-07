@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // C++
 #include"memory"
@@ -7,7 +7,7 @@
 // engine
 #include"DirectXGame/engine/2d/SpriteCommon.h"
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
-#include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
+#include"DirectXGame/engine/3d/Object/Object3dInstanceManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -140,7 +140,7 @@ namespace Engine {
 		// 海マネージャー取得
 		OceanManager* GetOceanManager() { return oceanManager_.get(); };
 		// オブジェクトインスタンスマネージャー取得
-		Object3dInstansManager* GetObject3dInstansManager() { return object3dInstansManager_.get(); }
+		Object3dInstanceManager* GetObject3dInstanceManager() { return object3dInstanceManager_.get(); }
 		// オブジェクト共通クラス取得
 		Object3dCommon* GetObject3dCommon() { return object3dCommon_.get(); }
 		// スカイボックス共通クラス取得
@@ -181,7 +181,7 @@ namespace Engine {
 		std::unique_ptr<OceanManager> oceanManager_ = nullptr;
 
 		// インスタンシング描画
-		std::unique_ptr<Object3dInstansManager> object3dInstansManager_ = nullptr;
+		std::unique_ptr<Object3dInstanceManager> object3dInstanceManager_ = nullptr;
 
 		// オブジェクト
 		std::unique_ptr<Object3dCommon> object3dCommon_ = nullptr;

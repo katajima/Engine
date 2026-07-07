@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "PostEffect.h"
 
 
@@ -38,10 +38,10 @@ namespace Engine {
 		PostEffectGaussian		gaussian_;
 		PostEffectOutline		outline_;
 		PostEffectRadialBlur	radialBlur_;
-		PostEffectDissovle		dissovle_;
+		PostEffectDissolve		dissolve_;
 		PostEffectRandom		random_;
 		PostEffectBloom			bloom_;
-		PostEffectCombin		cimbin_;
+		PostEffectCombine		combine_;
 	};
 }
 

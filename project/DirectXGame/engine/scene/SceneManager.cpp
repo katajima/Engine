@@ -1,4 +1,4 @@
-#include"SceneManager.h"
+﻿#include"SceneManager.h"
 #include"cassert"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -54,8 +54,8 @@ void Engine::SceneManager::Update()
 			scene_->SetAudioManager(audioManager);
 
 			dxCommon->GetPostEffectManager()->ClearPostEffectBlock();
-			entityManager->GetObject3dInstansManager()->ClearObject();
-			entityManager->GetObject3dInstansManager()->AllClear();
+			entityManager->GetObject3dInstanceManager()->ClearObject();
+			entityManager->GetObject3dInstanceManager()->AllClear();
 			entityManager->GetEffectManager()->GetParticleManager()->ClearParticle();
 			entityManager->ObjectClean();
 			entityManager->GetLightManager()->ClearLights();

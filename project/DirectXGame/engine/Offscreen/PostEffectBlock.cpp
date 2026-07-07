@@ -1,4 +1,4 @@
-#include "PostEffectBlock.h"
+﻿#include "PostEffectBlock.h"
 
 #include <algorithm>
 
@@ -9,7 +9,7 @@
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/ScissorRect/ScissorRect.h"
 #include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/Manager/RTV/RtvManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 
 void Engine::PostEffectPass::Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,
@@ -125,8 +125,8 @@ Engine::PostEffectPass* Engine::PostEffectPipeline::AddEffect(const std::string&
 		return AddPass("Outline_" + name, PostEffectType::kOitline, use);
 	case PostEffectBlockType::kRadialBlur:
 		return AddPass("RadialBlur_" + name, PostEffectType::kRadialBlur, use);
-	case PostEffectBlockType::kDissovle:
-		return AddPass("Dissovle_" + name, PostEffectType::kDissovle, use);
+	case PostEffectBlockType::kDissolve:
+		return AddPass("Dissolve_" + name, PostEffectType::kDissolve, use);
 	case PostEffectBlockType::kRandom:
 		return AddPass("Random_" + name, PostEffectType::kRandom, use);
 	case PostEffectBlockType::kBloom:
@@ -142,7 +142,7 @@ void Engine::PostEffectPipeline::AddBloom(const std::string& name, bool use)
 	// BloomCombineは直前のGaussian結果に加えて、最初のBrightPass結果も参照する。
 	PostEffectPass* brightPass = AddPass("BrightPass_" + name, PostEffectType::kBloom, use);
 	AddPass("Gaussian_" + name, PostEffectType::kGaussian, use);
-	PostEffectPass* combine = AddPass("BloomCombine_" + name, PostEffectType::kBloomCombin, use);
+	PostEffectPass* combine = AddPass("BloomCombine_" + name, PostEffectType::kBloomCombine, use);
 	if (combine) {
 		combine->SetOtherInputPass(brightPass);
 	}

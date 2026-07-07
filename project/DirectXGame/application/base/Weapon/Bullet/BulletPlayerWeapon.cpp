@@ -1,4 +1,4 @@
-#include "BulletPlayerWeapon.h"
+﻿#include "BulletPlayerWeapon.h"
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include<DirectXGame/application/base/Bullet/Base/BulletManager.h>
@@ -39,7 +39,7 @@ void BulletPlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityMana
 	bulletCartridgeTransform_.parent_ = &objectComponent_->GetWorldTransform();
 	bulletCartridgeTransform_.translate_ = provisionalData_.translateCartridge;
 
-	rengedData_.bulletSpeed = provisionalData_.bulletSpeed;
+	rangedData_.bulletSpeed = provisionalData_.bulletSpeed;
 };
 
 ///< summary>
@@ -158,7 +158,7 @@ void BulletPlayerWeapon::Shoot()
 	// 弾の情報
 	BulletInfo info{};
 	info.damage = provisionalData_.damage;						// ダメージ
-	info.speed = rengedData_.bulletSpeed;	// スピード
+	info.speed = rangedData_.bulletSpeed;	// スピード
 	info.targetPos = targetPos_;			// ターゲット位置
 	info.position = objectComponent_->GetWorldTransform().GetWorldPosition(); // 開始位置
 
@@ -168,7 +168,7 @@ void BulletPlayerWeapon::Shoot()
 	}
 	else {
 		info.type = ProjectileType::PENETRATION;
-		info.speed = rengedData_.bulletSpeed * provisionalData_.bulletSpeedScale;
+		info.speed = rangedData_.bulletSpeed * provisionalData_.bulletSpeedScale;
 	}
 	
 

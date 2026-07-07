@@ -1,8 +1,8 @@
-#include "Transfomation.h"
+﻿#include "Transformation.h"
 
 #include"DirectXGame/engine/Effect/Primitive/Primitive.h"
 
-void Engine::Transfomation::Initialize(DirectXCommon* dxCommon)
+void Engine::Transformation::Initialize(DirectXCommon* dxCommon)
 {
 	// ダイレクトX共通クラス
 	this->dxCommon = dxCommon;
@@ -15,7 +15,7 @@ void Engine::Transfomation::Initialize(DirectXCommon* dxCommon)
 	cbResource_.Data()->World = MakeIdentity4x4();
 	cbResource_.Data()->worldInverseTranspose = MakeIdentity4x4();
 }
-void Engine::Transfomation::Update(void* entity, Camera* camera, Matrix4x4& local, Matrix4x4& mat){
+void Engine::Transformation::Update(void* entity, Camera* camera, Matrix4x4& local, Matrix4x4& mat){
 	Matrix4x4 worldViewProjectionMatrix{};
 
 	// カメラがあるなら
@@ -52,7 +52,7 @@ void Engine::Transfomation::Update(void* entity, Camera* camera, Matrix4x4& loca
 
 }
 
-void Engine::Transfomation::Update(Camera* camera, Matrix4x4& mat)
+void Engine::Transformation::Update(Camera* camera, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -76,13 +76,13 @@ void Engine::Transfomation::Update(Camera* camera, Matrix4x4& mat)
 	cbResource_.Data()->worldInverseTranspose = Transpose(Inverse(mat));
 }
 
-void Engine::Transfomation::UpdateSprite(Matrix4x4& mat)
+void Engine::Transformation::UpdateSprite(Matrix4x4& mat)
 {
 	cbResource_.Data()->World = mat;
 	cbResource_.Data()->WVP = mat;
 }
 
-void Engine::Transfomation::GetCommandList(int index)
+void Engine::Transformation::GetCommandList(int index)
 {
 	cbResource_.SetGraphicsRootConstantBufferView(index);
 }

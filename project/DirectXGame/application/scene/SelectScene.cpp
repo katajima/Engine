@@ -1,4 +1,4 @@
-#include "SelectScene.h"
+﻿#include "SelectScene.h"
 
 
 void SelectScene::Initialize() {
@@ -15,10 +15,10 @@ void SelectScene::Initialize() {
 	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
 	cameraManager_->AddCamera({ selectCamera_.get() ,true }, "selectCamera");
 
-	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaultCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 	SetCamera(cameraManager_->GetCamera());
 
 

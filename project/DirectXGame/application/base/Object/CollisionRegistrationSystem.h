@@ -16,7 +16,7 @@ namespace Character {
 	class CharacterManager;
 }
 
-class SpecalPointManager;
+class SpecialPointManager;
 class BulletManager;
 
 /// <summary>
@@ -26,7 +26,7 @@ class CollisionRegistrationSystem {
 public:
 	// 初期化
 	void Initialize(Engine::GlobalVariables* globalVariables,Engine::LineCommon* lineCommon, HitBox::System* hitBoxSystem,
-		Character::CharacterManager* characterManager,	SpecalPointManager* specalPointManager,	BulletManager* bulletManager);
+		Character::CharacterManager* characterManager,	SpecialPointManager* specialPointManager,	BulletManager* bulletManager);
 
 	// 衝突登録と判定
 	void RegisterAllCollisions();
@@ -44,7 +44,7 @@ private:
 	// キャラクター管理
 	Character::CharacterManager* characterManager = nullptr;
 	// ポイント管理
-	SpecalPointManager* specalPointManager = nullptr;
+	SpecialPointManager* specialPointManager = nullptr;
 	// 弾管理
 	BulletManager* bulletManager = nullptr;
 

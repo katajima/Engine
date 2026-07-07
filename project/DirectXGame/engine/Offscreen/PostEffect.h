@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DirectXGame/engine/struct/VertexDeta.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
@@ -48,7 +48,7 @@ namespace Engine {
 		// ラジアルブラー取得
 		ConstantBuffer<RadialBlurGPU>* GetRadialBlur() { return cbRadialBlur_.get(); }
 		// ディゾルブ取得
-		ConstantBuffer<DissovleGPU>* GetDissovle() { return cbDissovle_.get(); }
+		ConstantBuffer<DissolveGPU>* GetDissolve() { return cbDissolve_.get(); }
 		// ランダム取得
 		ConstantBuffer<RandomGPU>* GetRandom() { return cbRandom_.get(); }
 		// ブルーム取得
@@ -65,7 +65,7 @@ namespace Engine {
 		std::unique_ptr <ConstantBuffer<GaussianGPU>>	cbGaussian_;
 		std::unique_ptr <ConstantBuffer<OutlineGPU>>	cbOutline_;
 		std::unique_ptr <ConstantBuffer<RadialBlurGPU>> cbRadialBlur_;
-		std::unique_ptr <ConstantBuffer<DissovleGPU>>	cbDissovle_;
+		std::unique_ptr <ConstantBuffer<DissolveGPU>>	cbDissolve_;
 		std::unique_ptr <ConstantBuffer<RandomGPU>>		cbRandom_;
 		std::unique_ptr <ConstantBuffer<BloomGPU>>		cbBloom_;
 	private:
@@ -182,7 +182,7 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ディゾルブ
-	class PostEffectDissovle : public IPostEffect {
+	class PostEffectDissolve : public IPostEffect {
 	public:
 		// 描画
 		void DrawRender(int index, int indexB) override;
@@ -190,7 +190,7 @@ namespace Engine {
 		// ルートシグネチャ生成
 		void CreateRootSignature() override;
 		// ノイズテクスチャ
-		uint32_t dissovleIndex = 0;
+		uint32_t dissolveIndex = 0;
 	};
 
 	// ランダム
@@ -213,7 +213,7 @@ namespace Engine {
 	};
 
 	// 合成
-	class PostEffectCombin : public IPostEffect {
+	class PostEffectCombine : public IPostEffect {
 	public:
 		// 描画
 		void DrawRender(int index, int indexB) override;

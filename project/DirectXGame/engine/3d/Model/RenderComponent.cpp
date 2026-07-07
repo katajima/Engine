@@ -1,4 +1,4 @@
-#include "RenderComponent.h"
+﻿#include "RenderComponent.h"
 
 
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
@@ -176,7 +176,7 @@ void Engine::RenderComponent::Draw()
 
 			primitive->DrawSetting(primitive->GetPsoType());
 
-			transfomation->GetCommandList(1);
+			transformation->GetCommandList(1);
 
 			primitive->Draw();
 		}
@@ -185,7 +185,7 @@ void Engine::RenderComponent::Draw()
 		if (skyBox) {
 			skyBoxCommon->DrawCommonSetting();
 
-			transfomation->GetCommandList(1);
+			transformation->GetCommandList(1);
 
 			skyBox->Draw();
 		}
@@ -214,7 +214,7 @@ void Engine::RenderComponent::DrawShadowMap(ShadowMap* shadowMap)
 	case ObjectModelType::kAnimation:
 		// シャドウパスでは色やテクスチャは使わず、ライト視点の深度だけを書き込む。
 		entityManager->GetObject3dCommon()->DrawShadowMapSetting();
-		transfomation->GetCommandList(0);
+		transformation->GetCommandList(0);
 		shadowMap->SetGraphicsRootConstantBufferView(1);
 
 		for (auto& mesh : model->GetModelData().mesh) {
@@ -230,7 +230,7 @@ void Engine::RenderComponent::DrawShadowMap(ShadowMap* shadowMap)
 	case ObjectModelType::kSkinning:
 		// スキニングはCSで変形済み頂点を作ってから、その頂点をシャドウマップへ描画する。
 		ObjectSkinningTypeDiscrimination(PSOType::ShadowMap);
-		transfomation->GetCommandList(0);
+		transformation->GetCommandList(0);
 		shadowMap->SetGraphicsRootConstantBufferView(1);
 
 		for (auto& mesh : model->GetModelData().mesh) {
@@ -337,8 +337,8 @@ void Engine::RenderComponent::DrawSetting()
 	entityManager->GetLightManager()->DrawLight();
 
 	// 位置
-	transfomation->GetCommandList(1);
-	transfomation->GetCommandList(10);
+	transformation->GetCommandList(1);
+	transformation->GetCommandList(10);
 
 	// カメラ
 	camera->GetCommandList(4);
@@ -355,7 +355,7 @@ void Engine::RenderComponent::DrawSettingSkin()
 	// ライト
 	entityManager->GetLightManager()->DrawLight();
 	// 位置
-	transfomation->GetCommandList(1);
+	transformation->GetCommandList(1);
 	// カメラ
 	camera->GetCommandList(4);
 	// スキニングモデルも通常モデルと同じシャドウマップを参照する。
@@ -371,8 +371,8 @@ void Engine::RenderComponent::DrawSettingOcean()
 	// ライト
 	entityManager->GetLightManager()->DrawLight();
 	// 位置
-	transfomation->GetCommandList(1);
-	transfomation->GetCommandList(9);
+	transformation->GetCommandList(1);
+	transformation->GetCommandList(9);
 	// カメラ
 	camera->GetCommandList(4);
 }

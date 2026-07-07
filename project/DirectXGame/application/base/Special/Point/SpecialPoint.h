@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "SpecialPointStateMachine.h"
 
@@ -14,7 +14,7 @@ namespace Character {
 /// <summary>
 /// スペシャルポイント
 /// </summary>
-class SpecalPoint : public IHitReceiver {
+class SpecialPoint : public IHitReceiver {
 public:
 
 	// 初期化
@@ -66,7 +66,7 @@ private:
 /// <summary>
 /// スペシャルポイント管理クラス
 /// </summary>
-class SpecalPointManager {
+class SpecialPointManager {
 public:
 	// 初期化
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
@@ -78,15 +78,15 @@ public:
 	void SetTarget(Character::BaseCharacter* target) { this->target = target; };
 
 	// SPポイントたち取得
-	std::vector<SpecalPoint*> GetSpecalPoints() {
-		std::vector<SpecalPoint*> result;
+	std::vector<SpecialPoint*> GetSpecialPoints() {
+		std::vector<SpecialPoint*> result;
 		for (auto& point : points) {
 			result.push_back(point.get());
 		}
 		return result;
 	}
 private:
-	std::vector<std::unique_ptr<SpecalPoint>> points;	// SPポイントたち
+	std::vector<std::unique_ptr<SpecialPoint>> points;	// SPポイントたち
 	int count_ = 0;			// 出現回数カウント用
 private:
 	Character::BaseCharacter* target = nullptr;		// ターゲット

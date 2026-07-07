@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // DirectX
 #include<d3d12.h>
@@ -18,7 +18,7 @@
 #include"DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #include "ParticleData.h"
-#include "DirectXGame/engine/Effect/Particle/Emit/EmitFanction.h"
+#include "DirectXGame/engine/Effect/Particle/Emit/EmitFunction.h"
 #include "ParticleField.h"
 
 

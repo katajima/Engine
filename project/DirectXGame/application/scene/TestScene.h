@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -36,7 +36,7 @@
 #include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
 
@@ -143,7 +143,7 @@ private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManeger_;
+	std::unique_ptr<CameraManager> cameraManager_;
 
 	/// <summary>
 	/// 3Dオブジェクト

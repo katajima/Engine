@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/struct/Vector4.h"
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/Vector2.h"
@@ -45,7 +45,7 @@ namespace Engine {
 	};
 
 	// ディゾルブ
-	struct DissovleGPU
+	struct DissolveGPU
 	{
 		float threshold;
 		Vector3 color;
@@ -78,10 +78,10 @@ namespace Engine {
 		kGaussian,      // ガウス
 		kOitline,		// アウトライン
 		kRadialBlur,	// ラジアルブラー
-		kDissovle,      // ディゾルブ
+		kDissolve,      // ディゾルブ
 		kRandom,		// ランダム
 		kBloom,			// ブルーム
-		kBloomCombin,	// 合成ブルーム
+		kBloomCombine,	// 合成ブルーム
 	};
 
 	enum class PostEffectBlockType {
@@ -93,7 +93,7 @@ namespace Engine {
 		kGaussian,      // ガウス
 		kOitline,		// アウトライン
 		kRadialBlur,	// ラジアルブラー
-		kDissovle,      // ディゾルブ
+		kDissolve,      // ディゾルブ
 		kRandom,		// ランダム
 		kBloom,			// ブルーム
 		kDoF,			// 被写界深度

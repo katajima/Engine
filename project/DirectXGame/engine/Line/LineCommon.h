@@ -1,4 +1,4 @@
-#pragma once  
+﻿#pragma once
 #include <array>  
 #include <cstdint>  
 #include <d3d12.h>  
@@ -29,7 +29,7 @@ namespace Engine {
         // DitectXCommonの取得  
         DirectXCommon* GetDxCommon() const { return dxCommon; }
         // カメラ設定  
-        void SetDefaltCamera(Camera* camera) { this->camera = camera; }
+        void SetDefaultCamera(Camera* camera) { this->camera = camera; }
 
         // デバッグラインメッシュデータの取得  
         LineMeshData& GetDebugLineMeshData() { return lineDebugMeshData_; }

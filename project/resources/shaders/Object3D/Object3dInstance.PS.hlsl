@@ -1,4 +1,4 @@
-#include"LightInstans.hlsli"
+﻿#include"LightInstans.hlsli"
 
 
 SamplerState sSampler           : register(s0);

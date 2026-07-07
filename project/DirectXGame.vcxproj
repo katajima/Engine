@@ -155,7 +155,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp" />
@@ -168,7 +168,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCarStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\BaseCharacter.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterContext.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Death\DeathSystem.cpp" />
@@ -259,7 +259,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstans.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstance.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp" />
@@ -294,16 +294,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp" />
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.cpp" />
+    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelData.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\RenderComponent.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstanceManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\AnimationComponent.cpp" />
-    <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFunction.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.cpp" />
@@ -320,7 +320,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFunction.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp" />
@@ -345,13 +345,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectData.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp" />
+    <ClCompile Include="DirectXGame\engine\PSO\PSOFunction.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\Animation.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\RenderingCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManeger.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManager.cpp" />
     <ClCompile Include="DirectXGame\application\scene\GamePlayScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TitleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp" />
@@ -381,7 +381,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Skinning\Skinning.cpp" />
     <ClCompile Include="DirectXGame\engine\struct\Matrix4x4.cpp" />
     <ClCompile Include="DirectXGame\engine\struct\Quaternion.cpp" />
-    <ClCompile Include="DirectXGame\engine\Transform\Transfomation\Transfomation.cpp" />
+    <ClCompile Include="DirectXGame\engine\Transform\Transformation\Transformation.cpp" />
     <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.cpp" />
     <ClCompile Include="DirectXGame\engine\Utility\StringUtility.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -411,7 +411,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="cpp.hint" />
-    <None Include="resources\shaders\Object3D\LightInstans.hlsli" />
     <None Include="resources\shaders\Offscreen\Fullscreen.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -428,7 +427,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="resources\shaders\Object3D\Object3dInstans.hlsli">
+    <None Include="resources\shaders\Object3D\Object3dInstance.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
@@ -493,14 +492,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
     <None Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
     <None Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
-    <None Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Dissolve.PS.hlsl" />
     <None Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
     <None Include="resources\shaders\Line\Line.PS.hlsl" />
     <None Include="resources\shaders\Line\Line.VS.hlsl" />
     <None Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
     <None Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
-    <None Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
-    <None Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
     <None Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
     <None Include="resources\shaders\Ocean\Ocean.DS.hlsl" />
     <None Include="resources\shaders\Ocean\Ocean.HS.hlsl" />
@@ -668,7 +665,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\PoseUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\TutorialUI.h" />
-    <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstance.h" />
     <ClInclude Include="DirectXGame\engine\Audio\AudioData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
@@ -765,11 +762,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\UI\UIElement.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterManeger.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\WeaponData.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManeger.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManager.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h" />
@@ -793,7 +790,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h" />
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h" />
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.h" />
+    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\SelectScene.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
@@ -801,12 +798,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\2d\SpriteData.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\RenderComponent.h" />
-    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstanceManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
     <ClInclude Include="DirectXGame\engine\Animation\AnimationComponent.h" />
     <ClInclude Include="DirectXGame\engine\Animation\AnimationData.h" />
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
-    <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFunction.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
     <ClInclude Include="DirectXGame\engine\Base\pch.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
@@ -830,7 +827,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\ShadowMap\ShadowMap.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFunction.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h" />
@@ -859,12 +856,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectData.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h" />
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h" />
-    <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h" />
+    <ClInclude Include="DirectXGame\engine\PSO\PSOFunction.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\RenderingCommon.h" />
-    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManeger.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManager.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\Collider.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h" />
@@ -911,7 +908,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\struct\Vector3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector4.h" />
     <ClInclude Include="DirectXGame\engine\struct\VertexDeta.h" />
-    <ClInclude Include="DirectXGame\engine\Transform\Transfomation\Transfomation.h" />
+    <ClInclude Include="DirectXGame\engine\Transform\Transformation\Transformation.h" />
     <ClInclude Include="DirectXGame\engine\Transform\TransformComponent.h" />
     <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.h" />
     <ClInclude Include="DirectXGame\engine\Utility\ConvertUtility.h" />

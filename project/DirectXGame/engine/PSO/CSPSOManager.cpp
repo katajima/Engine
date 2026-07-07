@@ -1,4 +1,4 @@
-#include "CSPSOManager.h"
+﻿#include "CSPSOManager.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -19,7 +19,7 @@ void Engine::CSPSOManager::SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter,
 	descriptionSignature.pParameters = rootParameter;
 	descriptionSignature.NumParameters = numRootParameters;
 
-	PSOFanction::Blob(dxgiDevice,descriptionSignature, computePSRS_.rootSignature);
+	PSOFunction::Blob(dxgiDevice,descriptionSignature, computePSRS_.rootSignature);
 }
 
 void Engine::CSPSOManager::ComputePipelineState()

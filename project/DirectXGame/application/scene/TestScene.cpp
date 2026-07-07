@@ -1,4 +1,4 @@
-#include"TestScene.h"
+﻿#include"TestScene.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 #include "DirectXGame/engine/math/Random.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -46,7 +46,7 @@ void TestScene::Update()
 	inputCoordinator_->Update(GetTime());
 
 	SwitchRoom(); // 部屋切り替え
-	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 
 	
 #ifdef _DEBUG
@@ -140,7 +140,7 @@ void TestScene::Update()
 		break;
 	}
 	
-	cameraManeger_->Update();
+	cameraManager_->Update();
 
 }
 
@@ -199,7 +199,7 @@ void TestScene::AppGlobalVariables(){}
 /// </summary>
 void TestScene::InitializeObject3D()
 {
-	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaultCamera(cameraManager_->GetCamera());
 
 
 	ocean_ = std::make_unique<Engine::Ocean>();
@@ -207,7 +207,7 @@ void TestScene::InitializeObject3D()
 	ocean_->GetMaterial()->GetMaterialInstance().enableLighting_ = false;
 
 
-	oceanObject = GetEntityManager()->CreateObject3D("ocean", Engine::ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
+	oceanObject = GetEntityManager()->CreateObject3D("ocean", Engine::ObjectModelType::kOcean, {}, cameraManager_->GetCamera());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
 	oceanObject->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
@@ -222,13 +222,13 @@ void TestScene::InitializeObject3D()
 	skyBox2->Initialize(GetEntityManager(), "resources/Texture/hdr/sky.dds");
 
 
-	skyBoxObject = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	skyBoxObject = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManager_->GetCamera());
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->GetWorldTransform().scale_ = {10,10,10};
 	skyBoxObject->SetIsDraw(true);
 	
 	
-	skyBoxObject2 = GetEntityManager()->CreateObject3D("skyBox2", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	skyBoxObject2 = GetEntityManager()->CreateObject3D("skyBox2", Engine::ObjectModelType::kSkyBox, {}, cameraManager_->GetCamera());
 	skyBoxObject2->SetSkyBox(skyBox2.get());
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
 	skyBoxObject2->SetIsDraw(false);
@@ -237,7 +237,7 @@ void TestScene::InitializeObject3D()
 
 	for(int i = 0; i < 1; i++)
 	{
-		auto obj = GetEntityManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManeger_->GetCamera());
+		auto obj = GetEntityManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManager_->GetCamera());
 		obj->SetModel("testCharacter.gltf");
 		obj->InitAnimationComponent();
 		obj->GetAnimationComponent()->SetAnimation("Idle01", static_cast<float>(i) / 10.0f );
@@ -274,8 +274,8 @@ void TestScene::InitializeObject2D()
 /// </summary>
 void TestScene::InitializeParticle()
 {
-	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
-	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 }
 
 /// <summary>
@@ -311,9 +311,9 @@ void TestScene::InitializeLight()
 	spot->spot = spotLightData;
 	//GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
-	GetEntityManager()->Get3DLineCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->Get3DLineCommon()->SetDefaultCamera(cameraManager_->GetCamera());
 
-	SetCamera(cameraManeger_->GetCamera());
+	SetCamera(cameraManager_->GetCamera());
 	
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
@@ -345,11 +345,11 @@ void TestScene::InitializeCamera()
 	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),  GetGlobalVariables(), {});
 	
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),GetGlobalVariables());
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),GetGlobalVariables());
 	// カメラ追加
-	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
-	cameraManeger_->SetUseCamera("fixedCamera", 0.0f);
+	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->SetUseCamera("fixedCamera", 0.0f);
 }
 
 /// <summary>

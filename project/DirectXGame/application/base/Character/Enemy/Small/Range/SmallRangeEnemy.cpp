@@ -1,4 +1,4 @@
-#include "SmallRangeEnemy.h"
+﻿#include "SmallRangeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -21,7 +21,7 @@ namespace Character {
 
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
 		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
-			false, false, this, Engine::ObjectInstans::TransparencyType::kNo);
+			false, false, this, Engine::ObjectInstance::TransparencyType::kNo);
 		objectComponentPropeller_->SetInstancingSRT({ 1,1,1 }, {}, {});
 		objectComponentPropeller_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 		objectComponentPropeller_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();

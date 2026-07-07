@@ -1,4 +1,4 @@
-﻿#include "CharacterManeger.h"
+﻿#include "CharacterManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -57,7 +57,7 @@ namespace Character {
 
 		// プレイヤー座標をセット
 		if (player) {
-			specalPointManager->SetTarget(player);
+			specialPointManager->SetTarget(player);
 		}
 
 		// キャラクター更新(敵)
@@ -169,7 +169,7 @@ namespace Character {
 		enemy->SetTagNumber(characterCount_);
 		enemy->SetID(characterCount_);					// ID設定
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
-		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
+		enemy->SetSpecialPointManager(specialPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetEffect(effect);						// エフェクト設定
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
 		enemy->SetType(enemyType);						// 一覧表示や種類別処理に使用する敵種類を保持
@@ -196,7 +196,7 @@ namespace Character {
 		player->SetFollowCamera(followCamera);		// フォローカメラ設定
 		player->SetCameraManager(cameraManager);	// カメラ管理クラス設定
 		player->SetBulletManager(bulletManager);	// 弾管理クラス設定
-		player->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
+		player->SetSpecialPointManager(specialPointManager);	// スペシャルポイント管理クラス設定
 		player->SetEffect(effect);					// エフェクト設定
 		player->Initialize(inputSystem, entityManager, globalVariables, transform.translate, camera); // 初期化
 		player->SetCharacterType(Type::Player);// キャラクターのタイプをプレイヤーに

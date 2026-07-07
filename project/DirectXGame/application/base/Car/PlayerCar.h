@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "PlayerCarStateMachine.h"
 #include <DirectXGame/engine/Move/RigidBodyComponent.h>
@@ -20,7 +20,7 @@ public:
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,const Vector3& pos, const Vector3& rotate);
 
 
-	void SetGroungHeight(float height) { height_ = height; }
+	void SetGroundHeight(float height) { height_ = height; }
 
 	/// <summary>
 	/// 更新

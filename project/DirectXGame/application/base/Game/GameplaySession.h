@@ -3,9 +3,9 @@
 #include <memory>
 
 #include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include "DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/application/base/Object/CollisionRegistrationSystem.h"
@@ -44,7 +44,7 @@ public:
 		cameraManager_ = std::make_unique<CameraManager>();
 		cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables);
 		cameraManager_->AddCamera({ followCamera_.get(), true }, "followCamera");
-		entityManager->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+		entityManager->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 
 		// キャラクターと弾が登録するヒットボックスを管理する。
 		hitBoxSystem_ = std::make_unique<HitBox::System>();
@@ -56,7 +56,7 @@ public:
 		bulletManager_->SetEffect(effectSystem_.get());
 
 		// 必殺技ポイントを一括管理する。
-		specialPointManager_ = std::make_unique<SpecalPointManager>();
+		specialPointManager_ = std::make_unique<SpecialPointManager>();
 		specialPointManager_->Initialize(entityManager, globalVariables);
 
 		// 共通システムを接続してキャラクター管理を初期化する。
@@ -94,7 +94,7 @@ public:
 	// エフェクト管理を取得する。
 	EffectSystem* GetEffectSystem() const { return effectSystem_.get(); }
 	// 必殺技ポイント管理を取得する。
-	SpecalPointManager* GetSpecialPointManager() const { return specialPointManager_.get(); }
+	SpecialPointManager* GetSpecialPointManager() const { return specialPointManager_.get(); }
 	// キャラクター管理を取得する。
 	Character::CharacterManager* GetCharacterManager() const { return characterManager_.get(); }
 	// 弾管理を取得する。
@@ -114,7 +114,7 @@ private:
 	// ゲームプレイ中のエフェクトを管理する。
 	std::unique_ptr<EffectSystem> effectSystem_;
 	// 必殺技ポイントを管理する。
-	std::unique_ptr<SpecalPointManager> specialPointManager_;
+	std::unique_ptr<SpecialPointManager> specialPointManager_;
 	// プレイヤーと敵キャラクターを管理する。
 	std::unique_ptr<Character::CharacterManager> characterManager_;
 	// シーン内の弾を管理する。

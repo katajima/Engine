@@ -68,7 +68,7 @@ void GamePlayScene::Initialize() {
 
 // 終了
 void GamePlayScene::Finalize() {
-	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
 	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
 }
 
@@ -112,7 +112,7 @@ void GamePlayScene::Update()
 	// 共通基盤から、このフレームで使用する各管理クラスを取得する。
 	InputCoordinator* inputCoordinator = gameplaySession_->GetInputCoordinator();
 	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
-	SpecalPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
+	SpecialPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
 	BulletManager* bulletManager = gameplaySession_->GetBulletManager();
 	HitBox::System* hitBoxSystem = gameplaySession_->GetHitBoxSystem();
 	CollisionRegistrationSystem* collisionRegistrationSystem = gameplaySession_->GetCollisionRegistrationSystem();

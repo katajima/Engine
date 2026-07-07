@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<d3d12.h>
@@ -35,7 +35,7 @@
 
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/Manager/RTV/RtvManager.h"
 
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"

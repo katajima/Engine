@@ -1,7 +1,7 @@
-#include "PostEffectManager.h"
+﻿#include "PostEffectManager.h"
 
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/Manager/RTV/RtvManager.h"
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"

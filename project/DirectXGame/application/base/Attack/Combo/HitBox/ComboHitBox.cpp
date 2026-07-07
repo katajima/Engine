@@ -1,5 +1,5 @@
-#include "ComboHitBox.h"
-#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+﻿#include "ComboHitBox.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 
 namespace Combo {

@@ -43,11 +43,11 @@ void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType 
 	name_ = "object" + std::to_string(object3dCommon->GetObjectCount());
 
 	// 位置初期化
-	transformation = std::make_unique<Transfomation>();
+	transformation = std::make_unique<Transformation>();
 	transformation->Initialize(object3dCommon->GetDxCommon());
 
 
-	defaltCamera = entityManager->GetObject3dCommon()->GetDefaltCamera();
+	defaultCamera = entityManager->GetObject3dCommon()->GetDefaultCamera();
 
 
 
@@ -55,7 +55,7 @@ void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType 
 	// レンダーコンポーネント初期化
 	renderComponent_ = std::make_unique<RenderComponent>();
 	renderComponent_->Init(entityManager, objectType, rasterizerType);
-	renderComponent_->SetTransfomation(transformation.get());
+	renderComponent_->SetTransformation(transformation.get());
 
 
 	isColliderComponenyUpdate_ = true;
@@ -104,7 +104,7 @@ void Engine::Object3d::Update()
 		cameraPtr = individualCamera;
 	}
 	else {
-		cameraPtr = defaltCamera;
+		cameraPtr = defaultCamera;
 	}
 	renderComponent_->Update();
 	renderComponent_->SetCamera(cameraPtr);
@@ -260,7 +260,7 @@ float Engine::Object3d::GetAlpha() { return renderComponent_->GetAlpha(); };
 
 float Engine::Object3d::GetCameraSortDepth() const
 {
-	Camera* camera = isIndividualCamera_ ? individualCamera : defaltCamera;
+	Camera* camera = isIndividualCamera_ ? individualCamera : defaultCamera;
 	if (!camera) {
 		return 0.0f;
 	}
@@ -307,7 +307,7 @@ Vector2 Engine::Object3d::GetScreenPosition()
 			return ScreenPosition(transformComponent_->GetWorldTransform(), individualCamera);
 		}
 		else {
-			return ScreenPosition(transformComponent_->GetWorldTransform(), defaltCamera);
+			return ScreenPosition(transformComponent_->GetWorldTransform(), defaultCamera);
 		}
 	}
 	else {

@@ -1,4 +1,4 @@
-#include "GpuParticleManager.h"
+﻿#include "GpuParticleManager.h"
 
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
@@ -263,24 +263,24 @@ void Engine::GpuParticleManager::ClearField(std::string name)
 void Engine::GpuParticleManager::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
+	PSOFunction::SetDescriptorRange(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFunction::SetDescriptorRange(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
 
 
 	// RootParameter作成。
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 	// PerView (b0) を頂点シェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// パーティクルインスタンシング(t1) を頂点シェーダ使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFunction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFunction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFunction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(particleDraw.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -298,16 +298,16 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[4] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
-		PSOFanction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウントインデックス
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウント
-		PSOFanction::SetRootParameter(computeRootParameters[3], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大個数
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
+		PSOFunction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウントインデックス
+		PSOFunction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウント
+		PSOFunction::SetRootParameter(computeRootParameters[3], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大個数
 
 		// Compute用のSamplerを設定
 		csPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -317,24 +317,24 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[6] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[3], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //エミッター
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[4], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //エミッター(トレイル)
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[5], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // エミッターディスパッチ情報
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[3], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //エミッター
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[4], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //エミッター(トレイル)
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[5], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // エミッターディスパッチ情報
 
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[9] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
-		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウンターインデックス
-		PSOFanction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウンター
-		PSOFanction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大個数
-		PSOFanction::SetRootParameter(computeRootParameters[5],	computeDescriptorRange[3], D3D12_SHADER_VISIBILITY_ALL);		// エミッター共通
-		PSOFanction::SetRootParameter(computeRootParameters[6],	computeDescriptorRange[4], D3D12_SHADER_VISIBILITY_ALL);		// エミッタートレイル関係
-		PSOFanction::SetRootParameter(computeRootParameters[7],	computeDescriptorRange[5], D3D12_SHADER_VISIBILITY_ALL);		// エミッターディスパッチ情報
-		PSOFanction::SetRootParameter(computeRootParameters[8],	2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッターディスパッチ数
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
+		PSOFunction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
+		PSOFunction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウンターインデックス
+		PSOFunction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウンター
+		PSOFunction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大個数
+		PSOFunction::SetRootParameter(computeRootParameters[5],	computeDescriptorRange[3], D3D12_SHADER_VISIBILITY_ALL);		// エミッター共通
+		PSOFunction::SetRootParameter(computeRootParameters[6],	computeDescriptorRange[4], D3D12_SHADER_VISIBILITY_ALL);		// エミッタートレイル関係
+		PSOFunction::SetRootParameter(computeRootParameters[7],	computeDescriptorRange[5], D3D12_SHADER_VISIBILITY_ALL);		// エミッターディスパッチ情報
+		PSOFunction::SetRootParameter(computeRootParameters[8],	2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッターディスパッチ数
 
 		// Compute用のSamplerを設定
 		csEmitPsoManagers_[EmitterType::AABB]->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -345,18 +345,18 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[6] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
-		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 乱数生成用時間
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウントインデックス
-		PSOFanction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);			// カウント
-		PSOFanction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 最大個数
-		PSOFanction::SetRootParameter(computeRootParameters[5], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// パーティクル削除
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
+		PSOFunction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 乱数生成用時間
+		PSOFunction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウントインデックス
+		PSOFunction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);			// カウント
+		PSOFunction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 最大個数
+		PSOFunction::SetRootParameter(computeRootParameters[5], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// パーティクル削除
 
 		// Compute用のSamplerを設定
 		csUpdatePsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -366,18 +366,18 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[6] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
-		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 乱数生成用時間
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウントインデックス
-		PSOFanction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);			// カウント
-		PSOFanction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 最大個数
-		PSOFanction::SetRootParameter(computeRootParameters[5], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 影響Field
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
+		PSOFunction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 乱数生成用時間
+		PSOFunction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウントインデックス
+		PSOFunction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);			// カウント
+		PSOFunction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 最大個数
+		PSOFunction::SetRootParameter(computeRootParameters[5], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 影響Field
 
 		// Compute用のSamplerを設定
 		csFieldPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -387,12 +387,12 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
 		
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[2] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
-		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
+		PSOFunction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点
 
 
 		csTrailInitPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -402,16 +402,16 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[2] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //パーティクル用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //パーティクル用
 		
 
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[4] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
-		PSOFanction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
-		PSOFanction::SetRootParameter(computeRootParameters[2], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(パーティクル)
-		PSOFanction::SetRootParameter(computeRootParameters[3], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// カメラ位置
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
+		PSOFunction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
+		PSOFunction::SetRootParameter(computeRootParameters[2], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(パーティクル)
+		PSOFunction::SetRootParameter(computeRootParameters[3], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// カメラ位置
 
 		csTrailEmitPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 	}
@@ -420,13 +420,13 @@ void Engine::GpuParticleManager::CreateRootSignature()
 	{
 		// Compute用のルートシグネチャを作成
 		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
+		PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
 		
 		// Compute用のRootParameterを作成
 		D3D12_ROOT_PARAMETER computeRootParameters[3] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
-		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
-		PSOFanction::SetRootParameter(computeRootParameters[2], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(トレイル)
+		PSOFunction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
+		PSOFunction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
+		PSOFunction::SetRootParameter(computeRootParameters[2], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(トレイル)
 		
 		csTrailUpdatePsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 	}
@@ -440,7 +440,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFunction::CreateDepthStencilDesc();
 	// 透明オブジェクトの場合はデプス書き込みを無効化
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 
@@ -454,7 +454,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 
 
 	// BlendState(ブレンドステート)の設定
-	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
+	D3D12_BLEND_DESC blendDesc = PSOFunction::CreateAlphaBlendDesc();
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
