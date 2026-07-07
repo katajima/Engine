@@ -7,9 +7,9 @@ void CustomScene::Initialize() {
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	input = GetInput();
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
@@ -22,11 +22,11 @@ void CustomScene::Initialize() {
 
 	// カスタムシステム初期化
 	customSystem_ = std::make_unique<CustomSystem>();
-	customSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	customSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	
 	// カスタムUI初期化
 	customUI_ = std::make_unique<CustomUI>();
-	customUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	customUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
@@ -39,15 +39,8 @@ void CustomScene::Initialize() {
 void CustomScene::Finalize() {}
 
 void CustomScene::Update() {
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
-
-
-
-
-
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	// シーン内の入力を一度だけ更新する
+	inputCoordinator_->Update(GetTime());
 
 	// リザルトシステム更新
 	customSystem_->Update(GetTime());

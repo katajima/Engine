@@ -78,38 +78,15 @@ void CharacterDebugScene::Draw2D(){
 void CharacterDebugScene::InitializeInput(){
 	// Input
 	input_ = GetInput();
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input_);
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input_);
-	inputManager_->Triggered(InputManager::Action::Jump);
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// デバッグシーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input_);
 }
 // キャラクター関係初期化
 void CharacterDebugScene::InitializeCharacter(){
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -130,17 +107,17 @@ void CharacterDebugScene::InitializeCharacter(){
 void CharacterDebugScene::InitializeCamera(){
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -190,15 +167,8 @@ void CharacterDebugScene::InitializeDebug(){
 
 // 入力関係更新
 void CharacterDebugScene::UpdateInput(float dt){
-	// 入力管理
-	inputSystem_->Update(dt);
-	// インプットマネージャー更新
-	inputManager_->Update(dt);
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_) {
-		iCommand_->Exec(*debugTarget);
-	}
+	// 入力更新とデバッグ対象へのコマンド実行を一括で行う
+	inputCoordinator_->Update(dt, debugTarget);
 
 }
 // キャラクター関係更新
@@ -268,13 +238,13 @@ void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&debugTarget->GetObjectComponent()->GetWorldTransform());
 	// 入力管理所有者設定
-	inputManager_->SetOwner(debugTarget);
+	inputCoordinator_->SetOwner(debugTarget);
 	// コンボエディタのターゲット設定
 	comboEditor_->SetOwner(debugTarget);
 	// ターゲット設定
 	projectileDebug_->SetTarget(debugTarget);
 	// 入力システム設定
-	debugTarget->SetInputSystem(inputSystem_.get());
+	debugTarget->SetInputSystem(inputCoordinator_->GetInputSystem());
 	// カメラ管理取得
 	debugTarget->SetCamera(cameraManager_->GetCamera());
 }

@@ -23,7 +23,7 @@
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 class ResultScene : public Engine::BaseScene {
 public:
 
@@ -44,8 +44,8 @@ public:
 private:
 
 private:
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 	// エフェクト
 	std::unique_ptr<EffectSystem> effect_;
 	// カメラ管理

@@ -17,13 +17,12 @@
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
-#include "DirectXGame/application/base/Input/InputHander.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/application/base/Stage/SelectStage.h"
 #include "DirectXGame/application/base/UI/SelectUI.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Game/Select/SelectSystem.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
 
 /// <summary>
 /// セレクトシーン
@@ -60,7 +59,7 @@ private:
 	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// セレクトシーンの管理クラス
 	std::unique_ptr<SelectSystem> selectSystem_ = nullptr;
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 };
 

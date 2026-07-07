@@ -17,7 +17,7 @@
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 
 #include <DirectXGame/application/base/UI/CustomUI.h>
 #include <DirectXGame/application/base/Game/Custom/CustomSystem.h>
@@ -52,8 +52,8 @@ private:
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 	// エフェクト
 	std::unique_ptr<EffectSystem> effect_ = nullptr;
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 private:
 	// カスタムUI
 	std::unique_ptr<CustomUI> customUI_ = nullptr;

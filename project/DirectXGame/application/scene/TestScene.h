@@ -37,7 +37,7 @@
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
 
 /// <summary>
@@ -132,8 +132,8 @@ private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
 	Engine::ImGuiManager* imGuiManager = nullptr;
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 
 	/// <summary>

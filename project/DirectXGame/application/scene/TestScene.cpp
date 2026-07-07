@@ -42,6 +42,9 @@ void TestScene::Finalize()
 
 void TestScene::Update()
 {
+	// シーン内の入力を一括更新する
+	inputCoordinator_->Update(GetTime());
+
 	SwitchRoom(); // 部屋切り替え
 	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
@@ -332,18 +335,18 @@ void TestScene::InitializeLight()
 /// </summary>
 void TestScene::InitializeCamera()
 {
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(),  GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),  GetGlobalVariables(), {});
 	
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputSystem_.get(), GetEntityManager(),GetGlobalVariables());
+	cameraManeger_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(),GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 	cameraManeger_->SetUseCamera("fixedCamera", 0.0f);

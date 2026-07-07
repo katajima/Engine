@@ -20,9 +20,7 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
-#include "DirectXGame/application/base/Input/InputHander.h"
-#include <DirectXGame/application/base/Input/InputManager.h>
-#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
@@ -62,15 +60,8 @@ private:
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
-	// インプットハンドラ
-	std::unique_ptr < Character::InputHander> inputHander_;
-	Character::ICommand* iCommand_;
-
-	// インプットマネージャ
-	std::unique_ptr<InputManager> inputManager_;
-
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// 物理入力、アクション入力、コマンドをまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_ = nullptr;

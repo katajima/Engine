@@ -3,9 +3,9 @@
 
 void SelectScene::Initialize() {
 	input = GetInput();
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// セレクトカメラ生成
 	selectCamera_ = std::make_unique<SelectCamera>();
@@ -33,11 +33,11 @@ void SelectScene::Initialize() {
 	selectStage_->GetPlayerCar()->GetStateMachine()->ChangeState(CarMainState::SelectMove);
 	// UI生成
 	selectUI_ = std::make_unique<SelectUI>();
-	selectUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	selectUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	// セレクトシーンの管理クラス生成
 	selectSystem_ = std::make_unique<SelectSystem>();
-	selectSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	selectSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 }
 
@@ -48,7 +48,7 @@ void SelectScene::Finalize() {}
 // 毎フレーム更新
 void SelectScene::Update() {
 	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	inputCoordinator_->Update(GetTime());
 	// セレクトシーンの管理クラス更新
 	selectSystem_->Update(GetTime());
 

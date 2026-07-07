@@ -18,39 +18,9 @@ void GamePlayScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input);
-	
-
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input);
-
-
-	inputManager_->Triggered(InputManager::Action::Jump);
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input);
 
 	// エフェクト
 	effect_ = std::make_unique<EffectSystem>();
@@ -58,20 +28,20 @@ void GamePlayScene::Initialize() {
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	// ステージカメラ
 	stageCamera_ = std::make_unique<StageCamera>();
-	stageCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	stageCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -97,7 +67,7 @@ void GamePlayScene::Initialize() {
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -106,7 +76,7 @@ void GamePlayScene::Initialize() {
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
-	gameFlowController_->Initialize(GetSceneManager(),inputSystem_.get(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
+	gameFlowController_->Initialize(GetSceneManager(),inputCoordinator_->GetInputSystem(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
@@ -135,13 +105,13 @@ void GamePlayScene::Initialize() {
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	gameUI->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
 	// カメラ設定
@@ -149,7 +119,7 @@ void GamePlayScene::Initialize() {
 
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
-	inputManager_->SetOwner(characterManager_->GetPlayer());
+	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
 }
 
 // 終了
@@ -195,9 +165,8 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
-	inputManager_->SetOwner(characterManager_->GetPlayer());
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	// 入力更新とプレイヤーコマンド実行を一括で行う
+	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -207,16 +176,6 @@ void GamePlayScene::Update()
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	
-	// インプットマネージャー更新
-	inputManager_->Update(GetTime());
-
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_ && characterManager_->GetPlayer()) {
-		iCommand_->Exec(*characterManager_->GetPlayer());
-	}
-
-
 	// 調整項目
 	ApplyGlobalVariables();
 

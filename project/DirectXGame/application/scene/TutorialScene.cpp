@@ -6,39 +6,9 @@ void TutorialScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// インプットマネージャー初期化
-	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input);
-
-
-	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input);
-
-
-	inputManager_->Triggered(InputManager::Action::Jump);
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<Character::JampCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<Character::AttackCommand>());
-
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<Character::SkillAttackCommand>());
-	inputHander_->Bind(
-		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<Character::MoveCommand>());
-
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input);
 
 	// エフェクト
 	effect_ = std::make_unique<EffectSystem>();
@@ -46,11 +16,11 @@ void TutorialScene::Initialize() {
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 
@@ -73,7 +43,7 @@ void TutorialScene::Initialize() {
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -92,16 +62,16 @@ void TutorialScene::Initialize() {
 	tutorialStage_->Initialize(GetEntityManager(), cameraManager_.get());
 
 	tutorialSystem_ = std::make_unique<TutorialSystem>();
-	tutorialSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
+	tutorialSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
 
 	tutorialUI_ = std::make_unique<TutorialUI>();
-	tutorialUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	tutorialUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 
 
@@ -119,7 +89,7 @@ void TutorialScene::Initialize() {
 
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
-	inputManager_->SetOwner(characterManager_->GetPlayer());
+	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
 }
 
 void TutorialScene::Finalize() {
@@ -128,9 +98,8 @@ void TutorialScene::Finalize() {
 }
 
 void TutorialScene::Update() {
-	inputManager_->SetOwner(characterManager_->GetPlayer());
-	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	// 入力更新とプレイヤーコマンド実行を一括で行う
+	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -139,16 +108,6 @@ void TutorialScene::Update() {
 	if (input->IsTriggerKey(DIK_T)) {
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
-
-	// インプットマネージャー更新
-	inputManager_->Update(GetTime());
-
-	// コマンド
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_ && characterManager_->GetPlayer()) {
-		iCommand_->Exec(*characterManager_->GetPlayer());
-	}
-
 
 	// 調整項目
 	ApplyGlobalVariables();

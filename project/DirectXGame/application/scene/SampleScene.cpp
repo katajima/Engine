@@ -24,17 +24,17 @@ void SampleScene::Initialize() {
 
 // カメラ
 void SampleScene::InitCamera() {
-	// 入力システム初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 	fixedCamera_->Update();
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManeger_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
@@ -189,6 +189,8 @@ void SampleScene::Finalize() {
 
 // 毎フレーム更新
 void SampleScene::Update() {
+	// シーン内の入力を一括更新する
+	inputCoordinator_->Update(GetTime());
 
 	// カメラ管理の更新
 	cameraManeger_->Update();

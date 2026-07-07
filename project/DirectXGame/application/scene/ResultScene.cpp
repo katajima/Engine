@@ -4,16 +4,16 @@
 // 初期化
 void ResultScene::Initialize() {
 
-	// inputSystem初期化
-	inputSystem_ = std::make_unique<InputSystem>();
-	inputSystem_->Initialize(GetInput());
+	// シーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
 
 	// リザルト用カメラ初期化
 	resultCamera_ = std::make_unique<ResultCamera>();
-	resultCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-20.0f });
+	resultCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-20.0f });
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	cameraManager_->AddCamera({ resultCamera_.get(), true}, "resultCamera");
 
 	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
@@ -33,11 +33,11 @@ void ResultScene::Initialize() {
 
 	// リザルトUI初期化
 	resultUI_ = std::make_unique<ResultUI>();
-	resultUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	resultUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	// リザルトスコアUI初期化
 	resultScoreUI_ = std::make_unique<ResultScoreUI>();
-	resultScoreUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+	resultScoreUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	overUI_ = std::make_unique<Engine::Sprite>();
 	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
@@ -48,7 +48,7 @@ void ResultScene::Initialize() {
 
 	// リザルトシステム初期化
 	resultSystem_ = std::make_unique<ResultSystem>();
-	resultSystem_->Initialize(GetSceneManager(),inputSystem_.get(),
+	resultSystem_->Initialize(GetSceneManager(),inputCoordinator_->GetInputSystem(),
 		GetEntityManager(), GetGlobalVariables());
 
 };
@@ -61,7 +61,7 @@ void ResultScene::Finalize() {
 void ResultScene::Update() {
 
 	// 入力システム更新
-	inputSystem_->Update(GetTime());
+	inputCoordinator_->Update(GetTime());
 
 	// リザルトシステム更新
 	resultSystem_->Update(GetTime());

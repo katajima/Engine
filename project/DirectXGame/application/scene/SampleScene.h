@@ -18,7 +18,7 @@
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 #include "DirectXGame/engine/Audio/Audio.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -72,8 +72,8 @@ private:
 
 private:
 	Engine::Input* input_ = nullptr;									// 入力
-	// インプットシステム
-	std::unique_ptr<InputSystem> inputSystem_;
+	// シーン内の入力をまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	std::unique_ptr<Engine::Audio> audioTest_;							// オーディオ
 	uint32_t soundHandle_ = 0;									// サウンドハンドル
