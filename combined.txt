@@ -361,6 +361,8 @@
     └── └── └── └── ├── BasePointLight.h
     └── └── └── └── └── BaseSpotLight.h
     └── └── └── ├── Object/
+    └── └── └── └── ├── CollisionRegistrationSystem.cpp
+    └── └── └── └── ├── CollisionRegistrationSystem.h
     └── └── └── └── ├── ObjectComponent.cpp
     └── └── └── └── └── ObjectComponent.h
     └── └── └── ├── Special/
@@ -33431,6 +33433,130 @@ protected:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Object/CollisionRegistrationSystem.cpp
+============================================================
+﻿#include "CollisionRegistrationSystem.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+
+void CollisionRegistrationSystem::Initialize(Engine::GlobalVariables* globalVariables,Engine::LineCommon* lineCommon, HitBox::System* hitBoxSystem,
+	Character::CharacterManager* characterManager,SpecalPointManager* specalPointManager, BulletManager* bulletManager){
+
+	this->lineCommon = lineCommon;
+	this->hitBoxSystem = hitBoxSystem;	
+	this->characterManager = characterManager;	
+	this->specalPointManager = specalPointManager;	
+	this->bulletManager = bulletManager;	
+
+
+	// 衝突マネージャの生成
+	Vector3 sizeAABB = { 300,25,300 };
+	collisionManager_ = std::make_unique<Engine::CollisionManager>();
+	collisionManager_->Initialize(globalVariables, AABB(-sizeAABB, sizeAABB));
+}
+
+void CollisionRegistrationSystem::RegisterAllCollisions(){
+	// キャラクターセット
+	for (auto caracter : characterManager->GetCharacters()) {
+		if (caracter->GetColliderComponent()) {
+			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
+				collisionManager_->Register(caracter->GetColliderComponent());
+
+		}
+	}
+
+	// ヒットボックス
+	for (auto& hitBoxData : hitBoxSystem->GetHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+	for (auto& hitBoxData : hitBoxSystem->GetLifeTimeHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+
+	// 弾のコライダー追加
+	for (const auto& bullet : bulletManager->GetBullets()) {
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
+	}
+
+	// SPポイントのコライダー追加
+	for (const auto& point : specalPointManager->GetSpecalPoints()) {
+		if (point->GetColliderComponent()) {
+			collisionManager_->Register(point->GetColliderComponent());
+		}
+	}
+
+	// 描画
+	collisionManager_->DrawLine(lineCommon);
+	// 判定チェック
+	collisionManager_->CheckAll();
+	// 動的コライダー削除
+	collisionManager_->ClearDynamic();
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Object/CollisionRegistrationSystem.h
+============================================================
+﻿#pragma once
+#include <memory>
+
+namespace Engine {
+	class GlobalVariables;
+	class CollisionManager;
+	class LineCommon;
+}
+
+
+namespace HitBox {
+	class System;
+}
+
+namespace Character {
+	class CharacterManager;
+}
+
+class SpecalPointManager;
+class BulletManager;
+
+/// <summary>
+/// コリジョンの衝突登録システム
+/// </summary>
+class CollisionRegistrationSystem {
+public:
+	// 初期化
+	void Initialize(Engine::GlobalVariables* globalVariables,Engine::LineCommon* lineCommon, HitBox::System* hitBoxSystem,
+		Character::CharacterManager* characterManager,	SpecalPointManager* specalPointManager,	BulletManager* bulletManager);
+
+	// 衝突登録と判定
+	void RegisterAllCollisions();
+
+	// 衝突マネージャ取得
+	Engine::CollisionManager* GetCollisionManager() { return collisionManager_.get(); }
+
+private:
+	// 衝突マネージャ
+	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
+	// ライン管理
+	Engine::LineCommon* lineCommon = nullptr;
+	// ヒットボックスシステム
+	HitBox::System* hitBoxSystem = nullptr;
+	// キャラクター管理
+	Character::CharacterManager* characterManager = nullptr;
+	// ポイント管理
+	SpecalPointManager* specalPointManager = nullptr;
+	// 弾管理
+	BulletManager* bulletManager = nullptr;
+
+
+};
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Object/ObjectComponent.cpp
 ============================================================
 #include "ObjectComponent.h"  
@@ -39113,6 +39239,12 @@ void CharacterDebugScene::Initialize() {
 	// デバッグ対象設定
 	SetDebugTarget(tagNumber);
 
+	// 衝突登録システム
+	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
+		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
+
+
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
@@ -39121,7 +39253,7 @@ void CharacterDebugScene::Initialize() {
 
 void CharacterDebugScene::Finalize(){
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionManager_->Clear();
+	collisionRegistrationSystem_->GetCollisionManager()->Clear();
 }
 
 void CharacterDebugScene::Update(){
@@ -39252,11 +39384,6 @@ void CharacterDebugScene::InitializeBase(){
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
 	stage_->Initialize(GetEntityManager(), cameraManager_.get());
-
-	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 1000,1000,1000 };
-	collisionManager_ = std::make_unique<Engine::CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 }
 // デバック関係初期化
 void CharacterDebugScene::InitializeDebug(){
@@ -39307,8 +39434,8 @@ void CharacterDebugScene::UpdateBase(float dt){
 	stage_->Update(dt);
 	// ヒットボックスシステム更新
 	hitBoxSystem_->Update(dt);
-	// 当たり判定
-	CheckAllCollisions();
+	// 衝突判定と応答
+	collisionRegistrationSystem_->RegisterAllCollisions();
 	// Effect更新
 	effect_->Update(dt);
 }
@@ -39347,50 +39474,6 @@ void CharacterDebugScene::UpdateImGui() {
 }
 // グローバルバリアブル適応
 void CharacterDebugScene::ApplyGlobalVariables() {
-}
-// 衝突判定と応答
-void CharacterDebugScene::CheckAllCollisions() {
-	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
-		if (objects->GetColliderComponent()) {
-			collisionManager_->Register(objects->GetColliderComponent());
-		}
-	}
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
-			collisionManager_->Register(caracter->GetColliderComponent());
-
-		}
-	}
-	// ヒットボックス
-	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-	for (const auto& bullet : bulletManager_->GetProjectiles()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	collisionManager_->CheckAll();
-	collisionManager_->ClearDynamic();
 }
 
 void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
@@ -39445,6 +39528,8 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 #include <DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h>
 #include <DirectXGame/application/base/Bullet/Base/Debug/ProjectileDebug.h>
 
+#include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+
 class CharacterDebugScene : public Engine::BaseScene {
 public:
 
@@ -39487,9 +39572,6 @@ private:
 	void UpdateImGui();
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
-	// 衝突判定と応答
-	void CheckAllCollisions();
-
 	// デバッグ対象設定
 	void SetDebugTarget(uint32_t tag);
 
@@ -39538,8 +39620,8 @@ private:
 	// ズーム
 	CameraZoomData zoomData{};
 private:
-	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_;
+	// 衝突登録システム
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;
@@ -39848,14 +39930,11 @@ void GamePlayScene::Initialize() {
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
 
-	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 300,25,300 };
-	collisionManager_ = std::make_unique<Engine::CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
-	// 静的Octreeコライダー
-	//collisionManager_->BuildStaticSceneOctree();
 
+	// 衝突登録システム
+	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
+		characterManager_.get(),specalPointManager_.get(),bulletManager_.get());
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
@@ -39879,7 +39958,7 @@ void GamePlayScene::Initialize() {
 // 終了
 void GamePlayScene::Finalize() {
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionManager_->Clear();
+	collisionRegistrationSystem_->GetCollisionManager()->Clear();
 }
 
 #pragma endregion 初期化関係
@@ -39958,7 +40037,7 @@ void GamePlayScene::Update()
 	// ヒットボックスシステム更新
 	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
-	CheckAllCollisions();
+	collisionRegistrationSystem_->RegisterAllCollisions();
 	// Effect更新
 	effect_->Update(GetTime());
 	// ゲーム進行マネージャー更新
@@ -40014,47 +40093,6 @@ void GamePlayScene::Draw2D(){
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables() {}
 
-void GamePlayScene::CheckAllCollisions() {
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
-			collisionManager_->Register(caracter->GetColliderComponent());
-
-		}
-	}
-
-	// ヒットボックス
-	for(auto & hitBoxData : hitBoxSystem_->GetHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	// 描画
-	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
-	// 判定チェック
-	collisionManager_->CheckAll();
-	// 動的コライダー削除
-	collisionManager_->ClearDynamic();
-
-}
-
 
 ============================================================
 File Path: project/DirectXGame/application/scene/GamePlayScene.h
@@ -40092,6 +40130,8 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 #include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
+#include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
@@ -40120,12 +40160,6 @@ private:
 
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
-
-	/// <summary>
-	/// 衝突判定と応答
-	/// </summary>
-	void CheckAllCollisions();
-
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
@@ -40175,13 +40209,11 @@ private:
 	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
 
 private:
-	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
+	// 衝突登録システム
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;	
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = nullptr;
-	//
-
 };
 
 
@@ -42025,13 +42057,11 @@ void TutorialScene::Initialize() {
 	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	//sp->SetStage(stage_.get());
 
-	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 300,25,300 };
-	collisionManager_ = std::make_unique<Engine::CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
+	// 衝突登録システム
+	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
+		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
 
-
-	
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -42043,7 +42073,7 @@ void TutorialScene::Initialize() {
 
 void TutorialScene::Finalize() {
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionManager_->Clear();
+	collisionRegistrationSystem_->GetCollisionManager()->Clear();
 }
 
 void TutorialScene::Update() {
@@ -42086,7 +42116,7 @@ void TutorialScene::Update() {
 	// ヒットボックスシステム更新
 	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
-	CheckAllCollisions();
+	collisionRegistrationSystem_->RegisterAllCollisions();
 	// Effect更新
 	effect_->Update(GetTime());
 	// チュートリアルシステム更新
@@ -42132,50 +42162,6 @@ void TutorialScene::ApplyGlobalVariables() {
 
 }
 
-/// <summary>
-/// 衝突判定と応答
-/// </summary>
-void TutorialScene::CheckAllCollisions() {
-	// 衝突判定と応答のロジック
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
-				collisionManager_->Register(caracter->GetColliderComponent());
-
-		}
-	}
-
-	// ヒットボックス
-	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
-		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
-	}
-
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	// 描画
-	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
-	// 判定チェック
-	collisionManager_->CheckAll();
-	// 動的コライダー削除
-	collisionManager_->ClearDynamic();
-}
-
 
 ============================================================
 File Path: project/DirectXGame/application/scene/TutorialScene.h
@@ -42216,6 +42202,8 @@ File Path: project/DirectXGame/application/scene/TutorialScene.h
 #include <DirectXGame/application/base/Game/Pose/PoseSystem.h>
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
+#include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+
 class TutorialScene : public Engine::BaseScene {
 public:
 
@@ -42239,11 +42227,6 @@ private:
 
 	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
-
-	/// <summary>
-	/// 衝突判定と応答
-	/// </summary>
-	void CheckAllCollisions();
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
@@ -42275,8 +42258,8 @@ private:
 	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
 
 private:
-	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
+	// 衝突登録システム
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
 private:
 	// チュートリアルステージ
 	std::unique_ptr<TutorialStage> tutorialStage_;
@@ -55150,7 +55133,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Collider/3d/CollisionManager.cpp
 ============================================================
-#include "CollisionManager.h"
+﻿#include "CollisionManager.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 
@@ -55167,7 +55150,8 @@ void Engine::CollisionManager::Initialize(GlobalVariables* globalVariables, cons
 	// オクツリー初期化（シーン全体のAABBと深さなど指定）
 	octreeCollider_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 3, 3, 3);
 	octreeColliderStatic_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
-	}
+}
+
 
 void Engine::CollisionManager::DrawLine(LineCommon* lineCommon) {
 	//octreeCollider_->Draw(*lineCommon);
@@ -55217,7 +55201,7 @@ void Engine::CollisionManager::RegisterStatic(ColliderComponent* comp)
 
 }
 
-void Engine::CollisionManager::Clear(){
+void Engine::CollisionManager::Clear() {
 	ClearDynamic();
 	ClearStatic();
 }
@@ -55516,7 +55500,7 @@ void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider*
 ============================================================
 File Path: project/DirectXGame/engine/Collider/3d/CollisionManager.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "ColliderComponent.h"
 #include"list"
@@ -55616,6 +55600,7 @@ namespace Engine {
 		CollisionManager() = default;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Collider/ColliderData.h
@@ -85652,6 +85637,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MoveComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
@@ -86095,6 +86081,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Game\Pose\PoseSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\CustomStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\CustomUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\PoseUI.h" />
@@ -87506,6 +87493,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Stage\TutorialStage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -88811,6 +88801,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Audio\AudioData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
