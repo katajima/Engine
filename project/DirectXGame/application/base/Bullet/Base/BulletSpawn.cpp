@@ -35,32 +35,32 @@ void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3
 }
 
 void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target) {
-	std::unique_ptr<BaseBullet> bullet;
+	// 旧BulletInfoを共通のProjectile生成情報へ変換する
+	Projectile::ProjectileSpawnInfo spawnInfo{};
+	spawnInfo.position = info.position;
+	spawnInfo.direction = (info.targetPos - info.position).Normalize();
+	spawnInfo.owner = owner;
+	spawnInfo.target = target;
+
 	if (type == BulletType::kEnemyBullet) {
-		bullet = std::make_unique<EnemyBullet>();
-		bullet->SetInfo(info); // 設定
-		bullet->SetEffect(effect);	// エフェクトセット
-		bullet->SetTarget(target);	// 敵セット
-		bullet->SetOwner(owner);	// 持ち主設定
-		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
+		auto projectile = std::make_unique<EnemyBullet>();
+		projectile->Initialize(entityManager, globalVariables, effect, spawnInfo, info);
+		bulletManager->AddProjectile(std::move(projectile));
 	}
 	else if (type == BulletType::kPlayerBullet) {
-		bullet = std::make_unique<PlayerBullet>();
-		bullet->SetInfo(info); // 設定
-		bullet->SetEffect(effect);	// エフェクトセット
-		bullet->SetTarget(target);	// 敵セット
-		bullet->SetOwner(owner);	// 持ち主設定
-		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
+		auto projectile = std::make_unique<PlayerBullet>();
+		projectile->Initialize(entityManager, globalVariables, effect, spawnInfo, info);
+		bulletManager->AddProjectile(std::move(projectile));
 	}
 	else {
-		bullet = std::make_unique<PlayerRangeBombingBullet>();
+		std::unique_ptr<BaseBullet> bullet = std::make_unique<PlayerRangeBombingBullet>();
 		bullet->SetInfo(info); // 設定
 		bullet->SetEffect(effect);	// エフェクトセット
 		bullet->SetTarget(target);	// 敵セット
 		bullet->SetOwner(owner);	// 持ち主設定
 		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
+		bulletManager->AddBullet(std::move(bullet));
 	}
-	bulletManager->AddBullet(std::move(bullet));
 }
 
 void BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,

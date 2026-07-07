@@ -44,6 +44,12 @@ void CollisionRegistrationSystem::RegisterAllCollisions(){
 			collisionManager_->Register(bullet->GetColliderComponent());
 		}
 	}
+	// BaseProjectileへ統合された標準弾のコライダーを登録する
+	for (const auto& projectile : bulletManager->GetProjectiles()) {
+		if (projectile->GetColliderComponent()) {
+			collisionManager_->Register(projectile->GetColliderComponent());
+		}
+	}
 
 	// SPポイントのコライダー追加
 	for (const auto& point : specalPointManager->GetSpecalPoints()) {

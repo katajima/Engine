@@ -1,6 +1,7 @@
 #include "EffectEditor.h"
 #include "DirectXGame/engine/Base/Imgui/ImGuiUtility.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 #include <algorithm>
 #include <cctype>
@@ -109,6 +110,7 @@ void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 
 	this->effectComponent = effectComponent;
 	this->globalVariables = globalVariables;
+	serializer_.Initialize(globalVariables);
 	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
 
 }
@@ -152,9 +154,9 @@ void EffectEditor::Update(float dt) {
 			if (!nowChoice) continue;
 
 			// エディターでの調整
-			AAAA(name,combo.second);
+			DrawEffectDetail(name, combo.second);
 			// データの保存
-			SetValue(name, combo.second);
+			serializer_.SaveEffectData(name, combo.second);
 		}
 
 		// セーブ
@@ -166,8 +168,8 @@ void EffectEditor::Update(float dt) {
 				// 手動セーブ時は現在のパーティクル群実体を外部保存データへ反映してから書き出す。
 				Engine::ParticleGroupEditorData particleData =
 					effectComponent->GetParticleManager()->GetEditorParticleGroupData(particle.first);
-				AddParticleGroupItem(particle.first, particleData);
-				SetParticleGroupValue(particle.first, particleData);
+				serializer_.RegisterParticleGroupData(particle.first, particleData);
+				serializer_.SaveParticleGroupData(particle.first, particleData);
 				globalVariables->SaveFile(kParticleDataPrefix + particle.first);
 			}
 			globalVariables->SaveFile(kEffectRegistryGroup);
@@ -182,7 +184,7 @@ void EffectEditor::Update(float dt) {
 
 #ifdef _DEBUG
 	for (auto& [name, data] : effectGlobalDatas_) {
-		GetValue(name, data);
+		serializer_.LoadEffectData(name, data);
 		SetEffectGlobalData(name, data.shapeType, data);
 	}
 #endif // _DEBUG
@@ -267,9 +269,9 @@ void EffectEditor::AddEffectGlobalData(const std::string& name, const std::strin
 	data.particleName = particleName;
 	globalVariables->SetGroupCategory(name, "Effect");
 	// 保存項目に追加
-	AddItem(name, data);
+	serializer_.RegisterEffectData(name, data);
 	// データを取得
-	GetValue(name, data);
+	serializer_.LoadEffectData(name, data);
 	// データを保存
 	effectGlobalDatas_[name] = data;
 	// エフェクト一覧として保存し、次回起動時にUI追加分も復元できるようにする。
@@ -293,7 +295,7 @@ void EffectEditor::LoadRegisteredEffectGlobalDatas() {
 		// 保存済みエフェクト本体のグループからデータを読み戻す。
 		EffectGlobalData data;
 		globalVariables->SetGroupCategory(effectName, "Effect");
-		GetValue(effectName, data);
+		serializer_.LoadEffectData(effectName, data);
 		effectGlobalDatas_[effectName] = data;
 	}
 }
@@ -339,7 +341,7 @@ void EffectEditor::LoadRegisteredParticleGroups() {
 		// 保存済みメタデータから、エディタ所有プリミティブのパーティクル群を復元する。
 		Engine::ParticleGroupEditorData data;
 		globalVariables->SetGroupCategory(dataGroupName, "Effect/Particle");
-		GetParticleGroupValue(particleName, data);
+		serializer_.LoadParticleGroupData(particleName, data);
 		if (!particleManager->GetParticleGroups().Contains(particleName)) {
 			particleManager->CreateEditorParticleGroup(particleName, data);
 		}
@@ -688,8 +690,8 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	if (saveData) {
 		particleManager->ApplyEditorParticleGroupData(particleName, data);
 		data = particleManager->GetEditorParticleGroupData(particleName);
-		AddParticleGroupItem(particleName, data);
-		SetParticleGroupValue(particleName, data);
+		serializer_.RegisterParticleGroupData(particleName, data);
+		serializer_.SaveParticleGroupData(particleName, data);
 		globalVariables->SaveFile(kParticleDataPrefix + particleName);
 		globalVariables->SaveFile(kParticleRegistryGroup);
 	}
@@ -729,8 +731,8 @@ void EffectEditor::AddEffectFromEditor() {
 	EffectGlobalData data;
 	data.particleName = newEffectParticleName_;
 	globalVariables->SetGroupCategory(effectName, "Effect");
-	AddItem(effectName, data);
-	GetValue(effectName, data);
+	serializer_.RegisterEffectData(effectName, data);
+	serializer_.LoadEffectData(effectName, data);
 	effectGlobalDatas_[effectName] = data;
 	RegisterEffectName(effectName);
 	effectComponent->AddEmitter(effectName, data.particleName, data.shapeType);
@@ -753,7 +755,7 @@ void EffectEditor::RenameEffect(const std::string& oldName, const std::string& n
 		return;
 	}
 
-	SetValue(oldName, effectGlobalDatas_[oldName]);
+	serializer_.SaveEffectData(oldName, effectGlobalDatas_[oldName]);
 	if (!globalVariables->RenameGroup(oldName, newName)) {
 		managementMessage_ = "Could not rename the saved effect data.";
 		return;
@@ -879,8 +881,8 @@ void EffectEditor::AddParticleGroupFromEditor() {
 	RegisterParticleGroupName(particleName);
 	Engine::ParticleGroupEditorData savedData =
 		effectComponent->GetParticleManager()->GetEditorParticleGroupData(particleName);
-	AddParticleGroupItem(particleName, savedData);
-	SetParticleGroupValue(particleName, savedData);
+	serializer_.RegisterParticleGroupData(particleName, savedData);
+	serializer_.SaveParticleGroupData(particleName, savedData);
 	globalVariables->SaveFile(kParticleRegistryGroup);
 	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
 	globalVariables->SaveFile(kParticleDataPrefix + particleName);
@@ -914,14 +916,14 @@ void EffectEditor::RenameParticleGroup(const std::string& oldName, const std::st
 
 	globalVariables->RemoveGroup(kParticleDataPrefix + oldName);
 	globalVariables->RemoveSavedFile(kParticleDataPrefix + oldName);
-	AddParticleGroupItem(newName, data);
-	SetParticleGroupValue(newName, data);
+	serializer_.RegisterParticleGroupData(newName, data);
+	serializer_.SaveParticleGroupData(newName, data);
 	globalVariables->SaveFile(kParticleDataPrefix + newName);
 	globalVariables->SaveFile(kParticleRegistryGroup);
 	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
 	for (auto& [effectName, effectData] : effectGlobalDatas_) {
 		if (effectData.particleName == newName) {
-			SetValue(effectName, effectData);
+			serializer_.SaveEffectData(effectName, effectData);
 			globalVariables->SaveFile(effectName);
 		}
 	}
@@ -940,7 +942,7 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 	for (auto& [effectName, effectData] : effectGlobalDatas_) {
 		if (effectData.particleName == particleName) {
 			effectData.particleName.clear();
-			SetValue(effectName, effectData);
+			serializer_.SaveEffectData(effectName, effectData);
 			globalVariables->SaveFile(effectName);
 		}
 	}
@@ -963,260 +965,187 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 	particleManagementMessage_ = "Deleted particle group: " + particleName;
 }
 
-void EffectEditor::AddParticleGroupItem(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
-	const std::string groupName = kParticleDataPrefix + particleName;
-	globalVariables->SetGroupCategory(groupName, "Effect/Particle");
-	globalVariables->CreateGroup(groupName);
-	// パーティクル群を外部ファイルから復元するため、生成情報と実行時の編集値をまとめて登録する。
-	globalVariables->AddItem(groupName, "texturePath", data.texturePath);
-	globalVariables->AddEnumItem<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
-	globalVariables->AddItem(groupName, "shape.plane.width", data.plane.width);
-	globalVariables->AddItem(groupName, "shape.plane.height", data.plane.height);
-	globalVariables->AddItem(groupName, "shape.triangle.upPos", data.triangle.upPos);
-	globalVariables->AddItem(groupName, "shape.triangle.leftPos", data.triangle.leftPos);
-	globalVariables->AddItem(groupName, "shape.triangle.rightPos", data.triangle.rightPos);
-	globalVariables->AddItem(groupName, "shape.cross.armLength", data.cross.armLength);
-	globalVariables->AddItem(groupName, "shape.cross.armWidth", data.cross.armWidth);
-	globalVariables->AddItem(groupName, "shape.cube.size", data.cube.size);
-	globalVariables->AddItem(groupName, "shape.circle.radius", data.circle.radius);
-	globalVariables->AddItem(groupName, "shape.circle.segments", data.circle.segments);
-	globalVariables->AddItem(groupName, "shape.star.innerRadius", data.star.innerRadius);
-	globalVariables->AddItem(groupName, "shape.star.outerRadius", data.star.outerRadius);
-	globalVariables->AddItem(groupName, "shape.star.segments", data.star.segments);
-	globalVariables->AddItem(groupName, "shape.crescent.innerRadius", data.crescent.innerRadius);
-	globalVariables->AddItem(groupName, "shape.crescent.outerRadius", data.crescent.outerRadius);
-	globalVariables->AddItem(groupName, "shape.crescent.distance", data.crescent.distance);
-	globalVariables->AddItem(groupName, "shape.crescent.segments", data.crescent.segments);
-	globalVariables->AddItem(groupName, "shape.ring.innerRadius", data.ring.innerRadius);
-	globalVariables->AddItem(groupName, "shape.ring.outerRadius", data.ring.outerRadius);
-	globalVariables->AddItem(groupName, "shape.ring.segments", data.ring.segments);
-	globalVariables->AddItem(groupName, "shape.sphere.radius", data.sphere.radius);
-	globalVariables->AddItem(groupName, "shape.sphere.latitudeSegments", data.sphere.latitudeSegments);
-	globalVariables->AddItem(groupName, "shape.sphere.longitudeSegments", data.sphere.longitudeSegments);
-	globalVariables->AddItem(groupName, "shape.sphere.isTopBased", data.sphere.isTopBased);
-	globalVariables->AddItem(groupName, "shape.arrow.shaftLength", data.arrow.shaftLength);
-	globalVariables->AddItem(groupName, "shape.arrow.shaftRadius", data.arrow.shaftRadius);
-	globalVariables->AddItem(groupName, "shape.arrow.headLength", data.arrow.headLength);
-	globalVariables->AddItem(groupName, "shape.arrow.headRadius", data.arrow.headRadius);
-	globalVariables->AddItem(groupName, "shape.arrow.segments", data.arrow.segments);
-	globalVariables->AddItem(groupName, "shape.cylinder.innerRadius", data.cylinder.innerRadius);
-	globalVariables->AddItem(groupName, "shape.cylinder.outerRadius", data.cylinder.outerRadius);
-	globalVariables->AddItem(groupName, "shape.cylinder.height", data.cylinder.height);
-	globalVariables->AddItem(groupName, "shape.cylinder.segments", data.cylinder.segments);
-	globalVariables->AddItem(groupName, "shape.cylinder.isCover", data.cylinder.isCover);
-	globalVariables->AddItem(groupName, "shape.tube.radius", data.tube.radius);
-	globalVariables->AddItem(groupName, "shape.tube.innerRadius", data.tube.innerRadius);
-	globalVariables->AddItem(groupName, "shape.tube.height", data.tube.height);
-	globalVariables->AddItem(groupName, "shape.tube.segments", data.tube.segments);
-	globalVariables->AddItem(groupName, "shape.pyramid.radius", data.pyramid.radius);
-	globalVariables->AddItem(groupName, "shape.pyramid.height", data.pyramid.height);
-	globalVariables->AddItem(groupName, "shape.pyramid.segments", data.pyramid.segments);
-	globalVariables->AddItem(groupName, "shape.torus.innerRadius", data.torus.innerRadius);
-	globalVariables->AddItem(groupName, "shape.torus.outerRadius", data.torus.outerRadius);
-	globalVariables->AddItem(groupName, "shape.torus.segments", data.torus.segments);
-	globalVariables->AddItem(groupName, "shape.torus.tubeSegments", data.torus.tubeSegments);
-	globalVariables->AddEnumItem<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
-	globalVariables->AddEnumItem<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
-	globalVariables->AddItem(groupName, "isEditorPrimitive", data.isEditorPrimitive);
-	globalVariables->AddItem(groupName, "isUVClamp", data.isUVClamp);
-	globalVariables->AddItem(groupName, "uvTransformVelocity", data.uvTransformVelocity);
-	globalVariables->AddItem(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
-	globalVariables->AddItem(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
-	globalVariables->AddItem(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
-	globalVariables->AddItem(groupName, "isFlag.isAlpha", data.isFlag.isAlpha);
-	globalVariables->AddItem(groupName, "isFlag.isLine", data.isFlag.isLine);
-	globalVariables->AddItem(groupName, "isFlag.isGravity", data.isFlag.isGravity);
-	globalVariables->AddItem(groupName, "isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
-	globalVariables->AddItem(groupName, "isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
-	globalVariables->AddItem(groupName, "isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
-	globalVariables->AddItem(groupName, "isFlag.isBounce", data.isFlag.isBounce);
-	globalVariables->AddItem(groupName, "isFlag.isAcceleration", data.isFlag.isAcceleration);
-	globalVariables->AddItem(groupName, "isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
-	globalVariables->AddItem(groupName, "isFlag.isScaling", data.isFlag.isScaling_);
-	globalVariables->AddEnumItem<EmitData::EmitType>(groupName, "emitType", data.emitType, "EmitType");
-	globalVariables->AddEnumItem<EmitData::TopBottom>(groupName, "topBottom", data.topBottom, "TopBottom");
-	globalVariables->AddItem(groupName, "gravitationalAcceleration", data.gravitationalAcceleration);
-	globalVariables->AddItem(groupName, "material.transform", data.materialTransform);
-	globalVariables->AddItem(groupName, "material.color", data.materialColor);
-	globalVariables->AddItem(groupName, "material.enableLighting", data.materialEnableLighting);
-	globalVariables->AddItem(groupName, "material.environmentCoefficient", data.materialEnvironmentCoefficient);
-	globalVariables->AddItem(groupName, "material.shininess", data.materialShininess);
-	globalVariables->AddItem(groupName, "material.useLig", data.materialUseLig);
-	globalVariables->AddItem(groupName, "material.useNormalMap", data.materialUseNormalMap);
-	globalVariables->AddItem(groupName, "material.useSpeculerMap", data.materialUseSpeculerMap);
-	globalVariables->AddItem(groupName, "material.useEnvironment", data.materialUseEnvironment);
-	globalVariables->AddItem(groupName, "material.alphaClipping", data.materialAlphaClipping);
-	globalVariables->AddItem(groupName, "material.alpha", data.materialAlpha);
+void EffectEditorSerializer::RegisterParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
+	const std::string groupName = std::string(kParticleDataPrefix) + particleName;
+	globalVariables_->SetGroupCategory(groupName, "Particle");
+	globalVariables_->CreateGroup(groupName);
+	WriteParticleGroupData(particleName, data, false);
 }
 
-void EffectEditor::GetParticleGroupValue(const std::string& particleName, Engine::ParticleGroupEditorData& data) {
+void EffectEditorSerializer::SaveParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
+	WriteParticleGroupData(particleName, data, true);
+}
+
+void EffectEditorSerializer::WriteParticleGroupData(const std::string& particleName,
+	const Engine::ParticleGroupEditorData& data, bool overwrite) {
+	const std::string groupName = std::string(kParticleDataPrefix) + particleName;
+	Engine::GlobalVariableWriter writer(globalVariables_, overwrite ?
+		Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
+	// パーティクル群の全保存項目を登録・保存で共有する
+	writer.Value(groupName, "texturePath", data.texturePath);
+	writer.EnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
+	writer.Value(groupName, "shape.plane.width", data.plane.width);
+	writer.Value(groupName, "shape.plane.height", data.plane.height);
+	writer.Value(groupName, "shape.triangle.upPos", data.triangle.upPos);
+	writer.Value(groupName, "shape.triangle.leftPos", data.triangle.leftPos);
+	writer.Value(groupName, "shape.triangle.rightPos", data.triangle.rightPos);
+	writer.Value(groupName, "shape.cross.armLength", data.cross.armLength);
+	writer.Value(groupName, "shape.cross.armWidth", data.cross.armWidth);
+	writer.Value(groupName, "shape.cube.size", data.cube.size);
+	writer.Value(groupName, "shape.circle.radius", data.circle.radius);
+	writer.Value(groupName, "shape.circle.segments", data.circle.segments);
+	writer.Value(groupName, "shape.star.innerRadius", data.star.innerRadius);
+	writer.Value(groupName, "shape.star.outerRadius", data.star.outerRadius);
+	writer.Value(groupName, "shape.star.segments", data.star.segments);
+	writer.Value(groupName, "shape.crescent.innerRadius", data.crescent.innerRadius);
+	writer.Value(groupName, "shape.crescent.outerRadius", data.crescent.outerRadius);
+	writer.Value(groupName, "shape.crescent.distance", data.crescent.distance);
+	writer.Value(groupName, "shape.crescent.segments", data.crescent.segments);
+	writer.Value(groupName, "shape.ring.innerRadius", data.ring.innerRadius);
+	writer.Value(groupName, "shape.ring.outerRadius", data.ring.outerRadius);
+	writer.Value(groupName, "shape.ring.segments", data.ring.segments);
+	writer.Value(groupName, "shape.sphere.radius", data.sphere.radius);
+	writer.Value(groupName, "shape.sphere.latitudeSegments", data.sphere.latitudeSegments);
+	writer.Value(groupName, "shape.sphere.longitudeSegments", data.sphere.longitudeSegments);
+	writer.Value(groupName, "shape.sphere.isTopBased", data.sphere.isTopBased);
+	writer.Value(groupName, "shape.arrow.shaftLength", data.arrow.shaftLength);
+	writer.Value(groupName, "shape.arrow.shaftRadius", data.arrow.shaftRadius);
+	writer.Value(groupName, "shape.arrow.headLength", data.arrow.headLength);
+	writer.Value(groupName, "shape.arrow.headRadius", data.arrow.headRadius);
+	writer.Value(groupName, "shape.arrow.segments", data.arrow.segments);
+	writer.Value(groupName, "shape.cylinder.innerRadius", data.cylinder.innerRadius);
+	writer.Value(groupName, "shape.cylinder.outerRadius", data.cylinder.outerRadius);
+	writer.Value(groupName, "shape.cylinder.height", data.cylinder.height);
+	writer.Value(groupName, "shape.cylinder.segments", data.cylinder.segments);
+	writer.Value(groupName, "shape.cylinder.isCover", data.cylinder.isCover);
+	writer.Value(groupName, "shape.tube.radius", data.tube.radius);
+	writer.Value(groupName, "shape.tube.innerRadius", data.tube.innerRadius);
+	writer.Value(groupName, "shape.tube.height", data.tube.height);
+	writer.Value(groupName, "shape.tube.segments", data.tube.segments);
+	writer.Value(groupName, "shape.pyramid.radius", data.pyramid.radius);
+	writer.Value(groupName, "shape.pyramid.height", data.pyramid.height);
+	writer.Value(groupName, "shape.pyramid.segments", data.pyramid.segments);
+	writer.Value(groupName, "shape.torus.innerRadius", data.torus.innerRadius);
+	writer.Value(groupName, "shape.torus.outerRadius", data.torus.outerRadius);
+	writer.Value(groupName, "shape.torus.segments", data.torus.segments);
+	writer.Value(groupName, "shape.torus.tubeSegments", data.torus.tubeSegments);
+	writer.EnumValue<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
+	writer.EnumValue<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
+	writer.Value(groupName, "isEditorPrimitive", data.isEditorPrimitive);
+	writer.Value(groupName, "isUVClamp", data.isUVClamp);
+	writer.Value(groupName, "uvTransformVelocity", data.uvTransformVelocity);
+	writer.Value(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
+	writer.Value(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
+	writer.Value(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
+	writer.Value(groupName, "isFlag.isAlpha", data.isFlag.isAlpha);
+	writer.Value(groupName, "isFlag.isLine", data.isFlag.isLine);
+	writer.Value(groupName, "isFlag.isGravity", data.isFlag.isGravity);
+	writer.Value(groupName, "isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
+	writer.Value(groupName, "isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
+	writer.Value(groupName, "isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
+	writer.Value(groupName, "isFlag.isBounce", data.isFlag.isBounce);
+	writer.Value(groupName, "isFlag.isAcceleration", data.isFlag.isAcceleration);
+	writer.Value(groupName, "isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
+	writer.Value(groupName, "isFlag.isScaling", data.isFlag.isScaling_);
+	writer.EnumValue<EmitData::EmitType>(groupName, "emitType", data.emitType, "EmitType");
+	writer.EnumValue<EmitData::TopBottom>(groupName, "topBottom", data.topBottom, "TopBottom");
+	writer.Value(groupName, "gravitationalAcceleration", data.gravitationalAcceleration);
+	writer.Value(groupName, "material.transform", data.materialTransform);
+	writer.Value(groupName, "material.color", data.materialColor);
+	writer.Value(groupName, "material.enableLighting", data.materialEnableLighting);
+	writer.Value(groupName, "material.environmentCoefficient", data.materialEnvironmentCoefficient);
+	writer.Value(groupName, "material.shininess", data.materialShininess);
+	writer.Value(groupName, "material.useLig", data.materialUseLig);
+	writer.Value(groupName, "material.useNormalMap", data.materialUseNormalMap);
+	writer.Value(groupName, "material.useSpeculerMap", data.materialUseSpeculerMap);
+	writer.Value(groupName, "material.useEnvironment", data.materialUseEnvironment);
+	writer.Value(groupName, "material.alphaClipping", data.materialAlphaClipping);
+	writer.Value(groupName, "material.alpha", data.materialAlpha);
+}
+
+void EffectEditorSerializer::LoadParticleGroupData(const std::string& particleName, Engine::ParticleGroupEditorData& data) const {
 	const std::string groupName = kParticleDataPrefix + particleName;
 	// 旧形式の保存ファイルでも読み込めるよう、追加項目はキーがある場合だけ上書きする。
-	data.texturePath = globalVariables->GetValue<std::string>(groupName, "texturePath");
-	data.shapeType = globalVariables->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
-	if (globalVariables->HasKey(groupName, "shape.plane.width")) data.plane.width = globalVariables->GetValue<float>(groupName, "shape.plane.width");
-	if (globalVariables->HasKey(groupName, "shape.plane.height")) data.plane.height = globalVariables->GetValue<float>(groupName, "shape.plane.height");
-	if (globalVariables->HasKey(groupName, "shape.triangle.upPos")) data.triangle.upPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.upPos");
-	if (globalVariables->HasKey(groupName, "shape.triangle.leftPos")) data.triangle.leftPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.leftPos");
-	if (globalVariables->HasKey(groupName, "shape.triangle.rightPos")) data.triangle.rightPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.rightPos");
-	if (globalVariables->HasKey(groupName, "shape.cross.armLength")) data.cross.armLength = globalVariables->GetValue<float>(groupName, "shape.cross.armLength");
-	if (globalVariables->HasKey(groupName, "shape.cross.armWidth")) data.cross.armWidth = globalVariables->GetValue<float>(groupName, "shape.cross.armWidth");
-	if (globalVariables->HasKey(groupName, "shape.cube.size")) data.cube.size = globalVariables->GetValue<Vector3>(groupName, "shape.cube.size");
-	if (globalVariables->HasKey(groupName, "shape.circle.radius")) data.circle.radius = globalVariables->GetValue<float>(groupName, "shape.circle.radius");
-	if (globalVariables->HasKey(groupName, "shape.circle.segments")) data.circle.segments = globalVariables->GetValue<int32_t>(groupName, "shape.circle.segments");
-	if (globalVariables->HasKey(groupName, "shape.star.innerRadius")) data.star.innerRadius = globalVariables->GetValue<float>(groupName, "shape.star.innerRadius");
-	if (globalVariables->HasKey(groupName, "shape.star.outerRadius")) data.star.outerRadius = globalVariables->GetValue<float>(groupName, "shape.star.outerRadius");
-	if (globalVariables->HasKey(groupName, "shape.star.segments")) data.star.segments = globalVariables->GetValue<int32_t>(groupName, "shape.star.segments");
-	if (globalVariables->HasKey(groupName, "shape.crescent.innerRadius")) data.crescent.innerRadius = globalVariables->GetValue<float>(groupName, "shape.crescent.innerRadius");
-	if (globalVariables->HasKey(groupName, "shape.crescent.outerRadius")) data.crescent.outerRadius = globalVariables->GetValue<float>(groupName, "shape.crescent.outerRadius");
-	if (globalVariables->HasKey(groupName, "shape.crescent.distance")) data.crescent.distance = globalVariables->GetValue<float>(groupName, "shape.crescent.distance");
-	if (globalVariables->HasKey(groupName, "shape.crescent.segments")) data.crescent.segments = globalVariables->GetValue<int32_t>(groupName, "shape.crescent.segments");
-	if (globalVariables->HasKey(groupName, "shape.ring.innerRadius")) data.ring.innerRadius = globalVariables->GetValue<float>(groupName, "shape.ring.innerRadius");
-	if (globalVariables->HasKey(groupName, "shape.ring.outerRadius")) data.ring.outerRadius = globalVariables->GetValue<float>(groupName, "shape.ring.outerRadius");
-	if (globalVariables->HasKey(groupName, "shape.ring.segments")) data.ring.segments = globalVariables->GetValue<int32_t>(groupName, "shape.ring.segments");
-	if (globalVariables->HasKey(groupName, "shape.sphere.radius")) data.sphere.radius = globalVariables->GetValue<float>(groupName, "shape.sphere.radius");
-	if (globalVariables->HasKey(groupName, "shape.sphere.latitudeSegments")) data.sphere.latitudeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.sphere.latitudeSegments");
-	if (globalVariables->HasKey(groupName, "shape.sphere.longitudeSegments")) data.sphere.longitudeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.sphere.longitudeSegments");
-	if (globalVariables->HasKey(groupName, "shape.sphere.isTopBased")) data.sphere.isTopBased = globalVariables->GetValue<bool>(groupName, "shape.sphere.isTopBased");
-	if (globalVariables->HasKey(groupName, "shape.arrow.shaftLength")) data.arrow.shaftLength = globalVariables->GetValue<float>(groupName, "shape.arrow.shaftLength");
-	if (globalVariables->HasKey(groupName, "shape.arrow.shaftRadius")) data.arrow.shaftRadius = globalVariables->GetValue<float>(groupName, "shape.arrow.shaftRadius");
-	if (globalVariables->HasKey(groupName, "shape.arrow.headLength")) data.arrow.headLength = globalVariables->GetValue<float>(groupName, "shape.arrow.headLength");
-	if (globalVariables->HasKey(groupName, "shape.arrow.headRadius")) data.arrow.headRadius = globalVariables->GetValue<float>(groupName, "shape.arrow.headRadius");
-	if (globalVariables->HasKey(groupName, "shape.arrow.segments")) data.arrow.segments = globalVariables->GetValue<int32_t>(groupName, "shape.arrow.segments");
-	if (globalVariables->HasKey(groupName, "shape.cylinder.innerRadius")) data.cylinder.innerRadius = globalVariables->GetValue<float>(groupName, "shape.cylinder.innerRadius");
-	if (globalVariables->HasKey(groupName, "shape.cylinder.outerRadius")) data.cylinder.outerRadius = globalVariables->GetValue<float>(groupName, "shape.cylinder.outerRadius");
-	if (globalVariables->HasKey(groupName, "shape.cylinder.height")) data.cylinder.height = globalVariables->GetValue<float>(groupName, "shape.cylinder.height");
-	if (globalVariables->HasKey(groupName, "shape.cylinder.segments")) data.cylinder.segments = globalVariables->GetValue<int32_t>(groupName, "shape.cylinder.segments");
-	if (globalVariables->HasKey(groupName, "shape.cylinder.isCover")) data.cylinder.isCover = globalVariables->GetValue<bool>(groupName, "shape.cylinder.isCover");
-	if (globalVariables->HasKey(groupName, "shape.tube.radius")) data.tube.radius = globalVariables->GetValue<float>(groupName, "shape.tube.radius");
-	if (globalVariables->HasKey(groupName, "shape.tube.innerRadius")) data.tube.innerRadius = globalVariables->GetValue<float>(groupName, "shape.tube.innerRadius");
-	if (globalVariables->HasKey(groupName, "shape.tube.height")) data.tube.height = globalVariables->GetValue<float>(groupName, "shape.tube.height");
-	if (globalVariables->HasKey(groupName, "shape.tube.segments")) data.tube.segments = globalVariables->GetValue<int32_t>(groupName, "shape.tube.segments");
-	if (globalVariables->HasKey(groupName, "shape.pyramid.radius")) data.pyramid.radius = globalVariables->GetValue<float>(groupName, "shape.pyramid.radius");
-	if (globalVariables->HasKey(groupName, "shape.pyramid.height")) data.pyramid.height = globalVariables->GetValue<float>(groupName, "shape.pyramid.height");
-	if (globalVariables->HasKey(groupName, "shape.pyramid.segments")) data.pyramid.segments = globalVariables->GetValue<int32_t>(groupName, "shape.pyramid.segments");
-	if (globalVariables->HasKey(groupName, "shape.torus.innerRadius")) data.torus.innerRadius = globalVariables->GetValue<float>(groupName, "shape.torus.innerRadius");
-	if (globalVariables->HasKey(groupName, "shape.torus.outerRadius")) data.torus.outerRadius = globalVariables->GetValue<float>(groupName, "shape.torus.outerRadius");
-	if (globalVariables->HasKey(groupName, "shape.torus.segments")) data.torus.segments = globalVariables->GetValue<int32_t>(groupName, "shape.torus.segments");
-	if (globalVariables->HasKey(groupName, "shape.torus.tubeSegments")) data.torus.tubeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.torus.tubeSegments");
-	data.rasterizerType = globalVariables->GetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType");
-	data.blendType = globalVariables->GetEnumValue<EmitData::BlendType>(groupName, "blendType");
-	data.isEditorPrimitive = globalVariables->GetValue<bool>(groupName, "isEditorPrimitive");
-	if (globalVariables->HasKey(groupName, "isUVClamp")) data.isUVClamp = globalVariables->GetValue<bool>(groupName, "isUVClamp");
-	if (globalVariables->HasKey(groupName, "uvTransformVelocity")) data.uvTransformVelocity = globalVariables->GetValue<Transform>(groupName, "uvTransformVelocity");
-	if (globalVariables->HasKey(groupName, "isFlag.usebillboard")) data.isFlag.usebillboard = globalVariables->GetValue<bool>(groupName, "isFlag.usebillboard");
-	if (globalVariables->HasKey(groupName, "isFlag.usebillboardY")) data.isFlag.usebillboardY = globalVariables->GetValue<bool>(groupName, "isFlag.usebillboardY");
-	if (globalVariables->HasKey(groupName, "isFlag.billboardRotZ")) data.isFlag.billboardRotZ = globalVariables->GetValue<bool>(groupName, "isFlag.billboardRotZ");
-	if (globalVariables->HasKey(groupName, "isFlag.isAlpha")) data.isFlag.isAlpha = globalVariables->GetValue<bool>(groupName, "isFlag.isAlpha");
-	if (globalVariables->HasKey(groupName, "isFlag.isLine")) data.isFlag.isLine = globalVariables->GetValue<bool>(groupName, "isFlag.isLine");
-	if (globalVariables->HasKey(groupName, "isFlag.isGravity")) data.isFlag.isGravity = globalVariables->GetValue<bool>(groupName, "isFlag.isGravity");
-	if (globalVariables->HasKey(groupName, "isFlag.isLifeTimeScale")) data.isFlag.isLifeTimeScale_ = globalVariables->GetValue<bool>(groupName, "isFlag.isLifeTimeScale");
-	if (globalVariables->HasKey(groupName, "isFlag.isRotateVelocity")) data.isFlag.isRotateVelocity = globalVariables->GetValue<bool>(groupName, "isFlag.isRotateVelocity");
-	if (globalVariables->HasKey(groupName, "isFlag.isLifeTimeVelocity")) data.isFlag.isLifeTimeVelocity = globalVariables->GetValue<bool>(groupName, "isFlag.isLifeTimeVelocity");
-	if (globalVariables->HasKey(groupName, "isFlag.isBounce")) data.isFlag.isBounce = globalVariables->GetValue<bool>(groupName, "isFlag.isBounce");
-	if (globalVariables->HasKey(groupName, "isFlag.isAcceleration")) data.isFlag.isAcceleration = globalVariables->GetValue<bool>(groupName, "isFlag.isAcceleration");
-	if (globalVariables->HasKey(groupName, "isFlag.isLineInterpolation")) data.isFlag.isLineInterpolation = globalVariables->GetValue<bool>(groupName, "isFlag.isLineInterpolation");
-	if (globalVariables->HasKey(groupName, "isFlag.isScaling")) data.isFlag.isScaling_ = globalVariables->GetValue<bool>(groupName, "isFlag.isScaling");
-	if (globalVariables->HasKey(groupName, "emitType")) data.emitType = globalVariables->GetEnumValue<EmitData::EmitType>(groupName, "emitType");
-	if (globalVariables->HasKey(groupName, "topBottom")) data.topBottom = globalVariables->GetEnumValue<EmitData::TopBottom>(groupName, "topBottom");
-	if (globalVariables->HasKey(groupName, "gravitationalAcceleration")) data.gravitationalAcceleration = globalVariables->GetValue<float>(groupName, "gravitationalAcceleration");
-	if (globalVariables->HasKey(groupName, "material.transform")) data.materialTransform = globalVariables->GetValue<Transform>(groupName, "material.transform");
-	if (globalVariables->HasKey(groupName, "material.color")) data.materialColor = globalVariables->GetValue<Vector4>(groupName, "material.color");
-	if (globalVariables->HasKey(groupName, "material.enableLighting")) data.materialEnableLighting = globalVariables->GetValue<bool>(groupName, "material.enableLighting");
-	if (globalVariables->HasKey(groupName, "material.environmentCoefficient")) data.materialEnvironmentCoefficient = globalVariables->GetValue<float>(groupName, "material.environmentCoefficient");
-	if (globalVariables->HasKey(groupName, "material.shininess")) data.materialShininess = globalVariables->GetValue<float>(groupName, "material.shininess");
-	if (globalVariables->HasKey(groupName, "material.useLig")) data.materialUseLig = globalVariables->GetValue<bool>(groupName, "material.useLig");
-	if (globalVariables->HasKey(groupName, "material.useNormalMap")) data.materialUseNormalMap = globalVariables->GetValue<bool>(groupName, "material.useNormalMap");
-	if (globalVariables->HasKey(groupName, "material.useSpeculerMap")) data.materialUseSpeculerMap = globalVariables->GetValue<bool>(groupName, "material.useSpeculerMap");
-	if (globalVariables->HasKey(groupName, "material.useEnvironment")) data.materialUseEnvironment = globalVariables->GetValue<bool>(groupName, "material.useEnvironment");
-	if (globalVariables->HasKey(groupName, "material.alphaClipping")) data.materialAlphaClipping = globalVariables->GetValue<float>(groupName, "material.alphaClipping");
-	if (globalVariables->HasKey(groupName, "material.alpha")) data.materialAlpha = globalVariables->GetValue<float>(groupName, "material.alpha");
+	data.texturePath = globalVariables_->GetValue<std::string>(groupName, "texturePath");
+	data.shapeType = globalVariables_->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
+	if (globalVariables_->HasKey(groupName, "shape.plane.width")) data.plane.width = globalVariables_->GetValue<float>(groupName, "shape.plane.width");
+	if (globalVariables_->HasKey(groupName, "shape.plane.height")) data.plane.height = globalVariables_->GetValue<float>(groupName, "shape.plane.height");
+	if (globalVariables_->HasKey(groupName, "shape.triangle.upPos")) data.triangle.upPos = globalVariables_->GetValue<Vector2>(groupName, "shape.triangle.upPos");
+	if (globalVariables_->HasKey(groupName, "shape.triangle.leftPos")) data.triangle.leftPos = globalVariables_->GetValue<Vector2>(groupName, "shape.triangle.leftPos");
+	if (globalVariables_->HasKey(groupName, "shape.triangle.rightPos")) data.triangle.rightPos = globalVariables_->GetValue<Vector2>(groupName, "shape.triangle.rightPos");
+	if (globalVariables_->HasKey(groupName, "shape.cross.armLength")) data.cross.armLength = globalVariables_->GetValue<float>(groupName, "shape.cross.armLength");
+	if (globalVariables_->HasKey(groupName, "shape.cross.armWidth")) data.cross.armWidth = globalVariables_->GetValue<float>(groupName, "shape.cross.armWidth");
+	if (globalVariables_->HasKey(groupName, "shape.cube.size")) data.cube.size = globalVariables_->GetValue<Vector3>(groupName, "shape.cube.size");
+	if (globalVariables_->HasKey(groupName, "shape.circle.radius")) data.circle.radius = globalVariables_->GetValue<float>(groupName, "shape.circle.radius");
+	if (globalVariables_->HasKey(groupName, "shape.circle.segments")) data.circle.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.circle.segments");
+	if (globalVariables_->HasKey(groupName, "shape.star.innerRadius")) data.star.innerRadius = globalVariables_->GetValue<float>(groupName, "shape.star.innerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.star.outerRadius")) data.star.outerRadius = globalVariables_->GetValue<float>(groupName, "shape.star.outerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.star.segments")) data.star.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.star.segments");
+	if (globalVariables_->HasKey(groupName, "shape.crescent.innerRadius")) data.crescent.innerRadius = globalVariables_->GetValue<float>(groupName, "shape.crescent.innerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.crescent.outerRadius")) data.crescent.outerRadius = globalVariables_->GetValue<float>(groupName, "shape.crescent.outerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.crescent.distance")) data.crescent.distance = globalVariables_->GetValue<float>(groupName, "shape.crescent.distance");
+	if (globalVariables_->HasKey(groupName, "shape.crescent.segments")) data.crescent.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.crescent.segments");
+	if (globalVariables_->HasKey(groupName, "shape.ring.innerRadius")) data.ring.innerRadius = globalVariables_->GetValue<float>(groupName, "shape.ring.innerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.ring.outerRadius")) data.ring.outerRadius = globalVariables_->GetValue<float>(groupName, "shape.ring.outerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.ring.segments")) data.ring.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.ring.segments");
+	if (globalVariables_->HasKey(groupName, "shape.sphere.radius")) data.sphere.radius = globalVariables_->GetValue<float>(groupName, "shape.sphere.radius");
+	if (globalVariables_->HasKey(groupName, "shape.sphere.latitudeSegments")) data.sphere.latitudeSegments = globalVariables_->GetValue<int32_t>(groupName, "shape.sphere.latitudeSegments");
+	if (globalVariables_->HasKey(groupName, "shape.sphere.longitudeSegments")) data.sphere.longitudeSegments = globalVariables_->GetValue<int32_t>(groupName, "shape.sphere.longitudeSegments");
+	if (globalVariables_->HasKey(groupName, "shape.sphere.isTopBased")) data.sphere.isTopBased = globalVariables_->GetValue<bool>(groupName, "shape.sphere.isTopBased");
+	if (globalVariables_->HasKey(groupName, "shape.arrow.shaftLength")) data.arrow.shaftLength = globalVariables_->GetValue<float>(groupName, "shape.arrow.shaftLength");
+	if (globalVariables_->HasKey(groupName, "shape.arrow.shaftRadius")) data.arrow.shaftRadius = globalVariables_->GetValue<float>(groupName, "shape.arrow.shaftRadius");
+	if (globalVariables_->HasKey(groupName, "shape.arrow.headLength")) data.arrow.headLength = globalVariables_->GetValue<float>(groupName, "shape.arrow.headLength");
+	if (globalVariables_->HasKey(groupName, "shape.arrow.headRadius")) data.arrow.headRadius = globalVariables_->GetValue<float>(groupName, "shape.arrow.headRadius");
+	if (globalVariables_->HasKey(groupName, "shape.arrow.segments")) data.arrow.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.arrow.segments");
+	if (globalVariables_->HasKey(groupName, "shape.cylinder.innerRadius")) data.cylinder.innerRadius = globalVariables_->GetValue<float>(groupName, "shape.cylinder.innerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.cylinder.outerRadius")) data.cylinder.outerRadius = globalVariables_->GetValue<float>(groupName, "shape.cylinder.outerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.cylinder.height")) data.cylinder.height = globalVariables_->GetValue<float>(groupName, "shape.cylinder.height");
+	if (globalVariables_->HasKey(groupName, "shape.cylinder.segments")) data.cylinder.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.cylinder.segments");
+	if (globalVariables_->HasKey(groupName, "shape.cylinder.isCover")) data.cylinder.isCover = globalVariables_->GetValue<bool>(groupName, "shape.cylinder.isCover");
+	if (globalVariables_->HasKey(groupName, "shape.tube.radius")) data.tube.radius = globalVariables_->GetValue<float>(groupName, "shape.tube.radius");
+	if (globalVariables_->HasKey(groupName, "shape.tube.innerRadius")) data.tube.innerRadius = globalVariables_->GetValue<float>(groupName, "shape.tube.innerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.tube.height")) data.tube.height = globalVariables_->GetValue<float>(groupName, "shape.tube.height");
+	if (globalVariables_->HasKey(groupName, "shape.tube.segments")) data.tube.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.tube.segments");
+	if (globalVariables_->HasKey(groupName, "shape.pyramid.radius")) data.pyramid.radius = globalVariables_->GetValue<float>(groupName, "shape.pyramid.radius");
+	if (globalVariables_->HasKey(groupName, "shape.pyramid.height")) data.pyramid.height = globalVariables_->GetValue<float>(groupName, "shape.pyramid.height");
+	if (globalVariables_->HasKey(groupName, "shape.pyramid.segments")) data.pyramid.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.pyramid.segments");
+	if (globalVariables_->HasKey(groupName, "shape.torus.innerRadius")) data.torus.innerRadius = globalVariables_->GetValue<float>(groupName, "shape.torus.innerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.torus.outerRadius")) data.torus.outerRadius = globalVariables_->GetValue<float>(groupName, "shape.torus.outerRadius");
+	if (globalVariables_->HasKey(groupName, "shape.torus.segments")) data.torus.segments = globalVariables_->GetValue<int32_t>(groupName, "shape.torus.segments");
+	if (globalVariables_->HasKey(groupName, "shape.torus.tubeSegments")) data.torus.tubeSegments = globalVariables_->GetValue<int32_t>(groupName, "shape.torus.tubeSegments");
+	data.rasterizerType = globalVariables_->GetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType");
+	data.blendType = globalVariables_->GetEnumValue<EmitData::BlendType>(groupName, "blendType");
+	data.isEditorPrimitive = globalVariables_->GetValue<bool>(groupName, "isEditorPrimitive");
+	if (globalVariables_->HasKey(groupName, "isUVClamp")) data.isUVClamp = globalVariables_->GetValue<bool>(groupName, "isUVClamp");
+	if (globalVariables_->HasKey(groupName, "uvTransformVelocity")) data.uvTransformVelocity = globalVariables_->GetValue<Transform>(groupName, "uvTransformVelocity");
+	if (globalVariables_->HasKey(groupName, "isFlag.usebillboard")) data.isFlag.usebillboard = globalVariables_->GetValue<bool>(groupName, "isFlag.usebillboard");
+	if (globalVariables_->HasKey(groupName, "isFlag.usebillboardY")) data.isFlag.usebillboardY = globalVariables_->GetValue<bool>(groupName, "isFlag.usebillboardY");
+	if (globalVariables_->HasKey(groupName, "isFlag.billboardRotZ")) data.isFlag.billboardRotZ = globalVariables_->GetValue<bool>(groupName, "isFlag.billboardRotZ");
+	if (globalVariables_->HasKey(groupName, "isFlag.isAlpha")) data.isFlag.isAlpha = globalVariables_->GetValue<bool>(groupName, "isFlag.isAlpha");
+	if (globalVariables_->HasKey(groupName, "isFlag.isLine")) data.isFlag.isLine = globalVariables_->GetValue<bool>(groupName, "isFlag.isLine");
+	if (globalVariables_->HasKey(groupName, "isFlag.isGravity")) data.isFlag.isGravity = globalVariables_->GetValue<bool>(groupName, "isFlag.isGravity");
+	if (globalVariables_->HasKey(groupName, "isFlag.isLifeTimeScale")) data.isFlag.isLifeTimeScale_ = globalVariables_->GetValue<bool>(groupName, "isFlag.isLifeTimeScale");
+	if (globalVariables_->HasKey(groupName, "isFlag.isRotateVelocity")) data.isFlag.isRotateVelocity = globalVariables_->GetValue<bool>(groupName, "isFlag.isRotateVelocity");
+	if (globalVariables_->HasKey(groupName, "isFlag.isLifeTimeVelocity")) data.isFlag.isLifeTimeVelocity = globalVariables_->GetValue<bool>(groupName, "isFlag.isLifeTimeVelocity");
+	if (globalVariables_->HasKey(groupName, "isFlag.isBounce")) data.isFlag.isBounce = globalVariables_->GetValue<bool>(groupName, "isFlag.isBounce");
+	if (globalVariables_->HasKey(groupName, "isFlag.isAcceleration")) data.isFlag.isAcceleration = globalVariables_->GetValue<bool>(groupName, "isFlag.isAcceleration");
+	if (globalVariables_->HasKey(groupName, "isFlag.isLineInterpolation")) data.isFlag.isLineInterpolation = globalVariables_->GetValue<bool>(groupName, "isFlag.isLineInterpolation");
+	if (globalVariables_->HasKey(groupName, "isFlag.isScaling")) data.isFlag.isScaling_ = globalVariables_->GetValue<bool>(groupName, "isFlag.isScaling");
+	if (globalVariables_->HasKey(groupName, "emitType")) data.emitType = globalVariables_->GetEnumValue<EmitData::EmitType>(groupName, "emitType");
+	if (globalVariables_->HasKey(groupName, "topBottom")) data.topBottom = globalVariables_->GetEnumValue<EmitData::TopBottom>(groupName, "topBottom");
+	if (globalVariables_->HasKey(groupName, "gravitationalAcceleration")) data.gravitationalAcceleration = globalVariables_->GetValue<float>(groupName, "gravitationalAcceleration");
+	if (globalVariables_->HasKey(groupName, "material.transform")) data.materialTransform = globalVariables_->GetValue<Transform>(groupName, "material.transform");
+	if (globalVariables_->HasKey(groupName, "material.color")) data.materialColor = globalVariables_->GetValue<Vector4>(groupName, "material.color");
+	if (globalVariables_->HasKey(groupName, "material.enableLighting")) data.materialEnableLighting = globalVariables_->GetValue<bool>(groupName, "material.enableLighting");
+	if (globalVariables_->HasKey(groupName, "material.environmentCoefficient")) data.materialEnvironmentCoefficient = globalVariables_->GetValue<float>(groupName, "material.environmentCoefficient");
+	if (globalVariables_->HasKey(groupName, "material.shininess")) data.materialShininess = globalVariables_->GetValue<float>(groupName, "material.shininess");
+	if (globalVariables_->HasKey(groupName, "material.useLig")) data.materialUseLig = globalVariables_->GetValue<bool>(groupName, "material.useLig");
+	if (globalVariables_->HasKey(groupName, "material.useNormalMap")) data.materialUseNormalMap = globalVariables_->GetValue<bool>(groupName, "material.useNormalMap");
+	if (globalVariables_->HasKey(groupName, "material.useSpeculerMap")) data.materialUseSpeculerMap = globalVariables_->GetValue<bool>(groupName, "material.useSpeculerMap");
+	if (globalVariables_->HasKey(groupName, "material.useEnvironment")) data.materialUseEnvironment = globalVariables_->GetValue<bool>(groupName, "material.useEnvironment");
+	if (globalVariables_->HasKey(groupName, "material.alphaClipping")) data.materialAlphaClipping = globalVariables_->GetValue<float>(groupName, "material.alphaClipping");
+	if (globalVariables_->HasKey(groupName, "material.alpha")) data.materialAlpha = globalVariables_->GetValue<float>(groupName, "material.alpha");
 }
-
-void EffectEditor::SetParticleGroupValue(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
-	const std::string groupName = kParticleDataPrefix + particleName;
-	// AddItemでキーを揃えたあと、現在の編集内容で外部保存用データを上書きする。
-	globalVariables->SetValue(groupName, "texturePath", data.texturePath);
-	globalVariables->SetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
-	globalVariables->SetValue(groupName, "shape.plane.width", data.plane.width);
-	globalVariables->SetValue(groupName, "shape.plane.height", data.plane.height);
-	globalVariables->SetValue(groupName, "shape.triangle.upPos", data.triangle.upPos);
-	globalVariables->SetValue(groupName, "shape.triangle.leftPos", data.triangle.leftPos);
-	globalVariables->SetValue(groupName, "shape.triangle.rightPos", data.triangle.rightPos);
-	globalVariables->SetValue(groupName, "shape.cross.armLength", data.cross.armLength);
-	globalVariables->SetValue(groupName, "shape.cross.armWidth", data.cross.armWidth);
-	globalVariables->SetValue(groupName, "shape.cube.size", data.cube.size);
-	globalVariables->SetValue(groupName, "shape.circle.radius", data.circle.radius);
-	globalVariables->SetValue(groupName, "shape.circle.segments", data.circle.segments);
-	globalVariables->SetValue(groupName, "shape.star.innerRadius", data.star.innerRadius);
-	globalVariables->SetValue(groupName, "shape.star.outerRadius", data.star.outerRadius);
-	globalVariables->SetValue(groupName, "shape.star.segments", data.star.segments);
-	globalVariables->SetValue(groupName, "shape.crescent.innerRadius", data.crescent.innerRadius);
-	globalVariables->SetValue(groupName, "shape.crescent.outerRadius", data.crescent.outerRadius);
-	globalVariables->SetValue(groupName, "shape.crescent.distance", data.crescent.distance);
-	globalVariables->SetValue(groupName, "shape.crescent.segments", data.crescent.segments);
-	globalVariables->SetValue(groupName, "shape.ring.innerRadius", data.ring.innerRadius);
-	globalVariables->SetValue(groupName, "shape.ring.outerRadius", data.ring.outerRadius);
-	globalVariables->SetValue(groupName, "shape.ring.segments", data.ring.segments);
-	globalVariables->SetValue(groupName, "shape.sphere.radius", data.sphere.radius);
-	globalVariables->SetValue(groupName, "shape.sphere.latitudeSegments", data.sphere.latitudeSegments);
-	globalVariables->SetValue(groupName, "shape.sphere.longitudeSegments", data.sphere.longitudeSegments);
-	globalVariables->SetValue(groupName, "shape.sphere.isTopBased", data.sphere.isTopBased);
-	globalVariables->SetValue(groupName, "shape.arrow.shaftLength", data.arrow.shaftLength);
-	globalVariables->SetValue(groupName, "shape.arrow.shaftRadius", data.arrow.shaftRadius);
-	globalVariables->SetValue(groupName, "shape.arrow.headLength", data.arrow.headLength);
-	globalVariables->SetValue(groupName, "shape.arrow.headRadius", data.arrow.headRadius);
-	globalVariables->SetValue(groupName, "shape.arrow.segments", data.arrow.segments);
-	globalVariables->SetValue(groupName, "shape.cylinder.innerRadius", data.cylinder.innerRadius);
-	globalVariables->SetValue(groupName, "shape.cylinder.outerRadius", data.cylinder.outerRadius);
-	globalVariables->SetValue(groupName, "shape.cylinder.height", data.cylinder.height);
-	globalVariables->SetValue(groupName, "shape.cylinder.segments", data.cylinder.segments);
-	globalVariables->SetValue(groupName, "shape.cylinder.isCover", data.cylinder.isCover);
-	globalVariables->SetValue(groupName, "shape.tube.radius", data.tube.radius);
-	globalVariables->SetValue(groupName, "shape.tube.innerRadius", data.tube.innerRadius);
-	globalVariables->SetValue(groupName, "shape.tube.height", data.tube.height);
-	globalVariables->SetValue(groupName, "shape.tube.segments", data.tube.segments);
-	globalVariables->SetValue(groupName, "shape.pyramid.radius", data.pyramid.radius);
-	globalVariables->SetValue(groupName, "shape.pyramid.height", data.pyramid.height);
-	globalVariables->SetValue(groupName, "shape.pyramid.segments", data.pyramid.segments);
-	globalVariables->SetValue(groupName, "shape.torus.innerRadius", data.torus.innerRadius);
-	globalVariables->SetValue(groupName, "shape.torus.outerRadius", data.torus.outerRadius);
-	globalVariables->SetValue(groupName, "shape.torus.segments", data.torus.segments);
-	globalVariables->SetValue(groupName, "shape.torus.tubeSegments", data.torus.tubeSegments);
-	globalVariables->SetEnumValue<EmitData::RasterizerType>(groupName, "rasterizerType", data.rasterizerType, "RasterizerType");
-	globalVariables->SetEnumValue<EmitData::BlendType>(groupName, "blendType", data.blendType, "BlendType");
-	globalVariables->SetValue(groupName, "isEditorPrimitive", data.isEditorPrimitive);
-	globalVariables->SetValue(groupName, "isUVClamp", data.isUVClamp);
-	globalVariables->SetValue(groupName, "uvTransformVelocity", data.uvTransformVelocity);
-	globalVariables->SetValue(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
-	globalVariables->SetValue(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
-	globalVariables->SetValue(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
-	globalVariables->SetValue(groupName, "isFlag.isAlpha", data.isFlag.isAlpha);
-	globalVariables->SetValue(groupName, "isFlag.isLine", data.isFlag.isLine);
-	globalVariables->SetValue(groupName, "isFlag.isGravity", data.isFlag.isGravity);
-	globalVariables->SetValue(groupName, "isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
-	globalVariables->SetValue(groupName, "isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
-	globalVariables->SetValue(groupName, "isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
-	globalVariables->SetValue(groupName, "isFlag.isBounce", data.isFlag.isBounce);
-	globalVariables->SetValue(groupName, "isFlag.isAcceleration", data.isFlag.isAcceleration);
-	globalVariables->SetValue(groupName, "isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
-	globalVariables->SetValue(groupName, "isFlag.isScaling", data.isFlag.isScaling_);
-	globalVariables->SetEnumValue<EmitData::EmitType>(groupName, "emitType", data.emitType, "EmitType");
-	globalVariables->SetEnumValue<EmitData::TopBottom>(groupName, "topBottom", data.topBottom, "TopBottom");
-	globalVariables->SetValue(groupName, "gravitationalAcceleration", data.gravitationalAcceleration);
-	globalVariables->SetValue(groupName, "material.transform", data.materialTransform);
-	globalVariables->SetValue(groupName, "material.color", data.materialColor);
-	globalVariables->SetValue(groupName, "material.enableLighting", data.materialEnableLighting);
-	globalVariables->SetValue(groupName, "material.environmentCoefficient", data.materialEnvironmentCoefficient);
-	globalVariables->SetValue(groupName, "material.shininess", data.materialShininess);
-	globalVariables->SetValue(groupName, "material.useLig", data.materialUseLig);
-	globalVariables->SetValue(groupName, "material.useNormalMap", data.materialUseNormalMap);
-	globalVariables->SetValue(groupName, "material.useSpeculerMap", data.materialUseSpeculerMap);
-	globalVariables->SetValue(groupName, "material.useEnvironment", data.materialUseEnvironment);
-	globalVariables->SetValue(groupName, "material.alphaClipping", data.materialAlphaClipping);
-	globalVariables->SetValue(groupName, "material.alpha", data.materialAlpha);
-}
-
 void EffectEditor::RegisterParticleGroupName(const std::string& name) {
 	globalVariables->SetGroupCategory(kParticleRegistryGroup, "Effect/Particle");
 	globalVariables->CreateGroup(kParticleRegistryGroup);
@@ -1252,182 +1181,136 @@ void EffectEditor::RenameParticleReferences(const std::string& oldName, const st
 	}
 }
 
-void EffectEditor::AddItem(const std::string& name, const EffectGlobalData& data) {
-	globalVariables->SetGroupCategory(name, "Effect");
-	globalVariables->CreateGroup(name);
-	globalVariables->AddItem(name, "particleName", data.particleName);
-	globalVariables->AddItem(name, "frequency", data.frequency);
-	globalVariables->AddItem(name, "emitData.acceleration.median", data.emitData.acceleration.median);
-	globalVariables->AddItem(name, "emitData.acceleration.range", data.emitData.acceleration.range);
-	globalVariables->AddItem(name, "emitData.colorRange.min", data.emitData.colorRange.min);
-	globalVariables->AddItem(name, "emitData.colorRange.max", data.emitData.colorRange.max);
-	globalVariables->AddItem(name, "emitData.count.median", data.emitData.count.median);
-	globalVariables->AddItem(name, "emitData.count.range", data.emitData.count.range);
-	globalVariables->AddItem(name, "emitData.lifeTime.median", data.emitData.lifeTime.median);
-	globalVariables->AddItem(name, "emitData.lifeTime.range", data.emitData.lifeTime.range);
-	globalVariables->AddItem(name, "emitData.rotate.median", data.emitData.rotate.median);
-	globalVariables->AddItem(name, "emitData.rotate.range", data.emitData.rotate.range);
-	globalVariables->AddItem(name, "emitData.rotateVelocity.median", data.emitData.rotateVelocity.median);
-	globalVariables->AddItem(name, "emitData.rotateVelocity.range", data.emitData.rotateVelocity.range);
-	globalVariables->AddItem(name, "emitData.size.median", data.emitData.size.median);
-	globalVariables->AddItem(name, "emitData.size.range", data.emitData.size.range);
-	globalVariables->AddItem(name, "emitData.sizeAmount.median", data.emitData.sizeAmount.median);
-	globalVariables->AddItem(name, "emitData.sizeAmount.range", data.emitData.sizeAmount.range);
-	globalVariables->AddItem(name, "emitData.velocity.median", data.emitData.velocity.median);
-	globalVariables->AddItem(name, "emitData.velocity.range", data.emitData.velocity.range);
-
-	globalVariables->AddItem(name, "emitData.alphaClipping", data.alphaClipping);
-	globalVariables->AddItem(name, "emitData.enableLighting", data.enableLighting);
-
-	globalVariables->AddItem(name, "emitData.isFlag.billboardRotZ", data.isFlag.billboardRotZ);
-	globalVariables->AddItem(name, "emitData.isFlag.isAcceleration", data.isFlag.isAcceleration);
-	globalVariables->AddItem(name, "emitData.isFlag.isAlpha", data.isFlag.isAlpha);
-	globalVariables->AddItem(name, "emitData.isFlag.isBounce", data.isFlag.isBounce);
-	globalVariables->AddItem(name, "emitData.isFlag.isGravity", data.isFlag.isGravity);
-	globalVariables->AddItem(name, "emitData.isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
-	globalVariables->AddItem(name, "emitData.isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
-	globalVariables->AddItem(name, "emitData.isFlag.isLine", data.isFlag.isLine);
-	globalVariables->AddItem(name, "emitData.isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
-	globalVariables->AddItem(name, "emitData.isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
-	globalVariables->AddItem(name, "emitData.isFlag.isScaling", data.isFlag.isScaling_);
-	globalVariables->AddItem(name, "emitData.isFlag.usebillboard", data.isFlag.usebillboard);
-	globalVariables->AddItem(name, "emitData.isFlag.usebillboardY", data.isFlag.usebillboardY);
-
-
-	globalVariables->AddItem(name, "emitData.lineEnd", data.lineEnd);
-	globalVariables->AddItem(name, "emitData.lineStart", data.lineStart);
-
-	globalVariables->AddItem(name, "emitData.radius", data.radius);
-
-	globalVariables->AddItem(name, "emitData.rangeMax", data.rangeMax);
-	globalVariables->AddItem(name, "emitData.rangeMin", data.rangeMin);
-
-	globalVariables->AddItem(name, "emitData.segment", data.segment);
-
-	globalVariables->AddEnumItem<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
-	globalVariables->AddEnumItem<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
-	globalVariables->AddEnumItem<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
-	globalVariables->AddEnumItem<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
+void EffectEditorSerializer::RegisterEffectData(const std::string& name, const EffectGlobalData& data) {
+	globalVariables_->SetGroupCategory(name, "Effect");
+	globalVariables_->CreateGroup(name);
+	WriteEffectData(name, data, false);
 }
 
-void EffectEditor::GetValue(const std::string& name, EffectGlobalData& data) {
-	data.particleName = globalVariables->GetValue<std::string>(name, "particleName");
+void EffectEditorSerializer::SaveEffectData(const std::string& name, const EffectGlobalData& data) {
+	WriteEffectData(name, data, true);
+}
 
-	data.frequency = globalVariables->GetValue<float>(name, "frequency");
-	data.emitData.acceleration.median = globalVariables->GetValue<Vector3>(name, "emitData.acceleration.median");
-	data.emitData.acceleration.range = globalVariables->GetValue<Vector3>(name, "emitData.acceleration.range");
-	data.emitData.colorRange.min = globalVariables->GetValue<Vector4>(name, "emitData.colorRange.min");
-	data.emitData.colorRange.max = globalVariables->GetValue<Vector4>(name, "emitData.colorRange.max");
-	data.emitData.count.median = globalVariables->GetValue<int>(name, "emitData.count.median");
-	data.emitData.count.range = globalVariables->GetValue<int>(name, "emitData.count.range");
-	data.emitData.lifeTime.median = globalVariables->GetValue<float>(name, "emitData.lifeTime.median");
-	data.emitData.lifeTime.range = globalVariables->GetValue<float>(name, "emitData.lifeTime.range");
-	data.emitData.rotate.median = globalVariables->GetValue<Vector3>(name, "emitData.rotate.median");
-	data.emitData.rotate.range = globalVariables->GetValue<Vector3>(name, "emitData.rotate.range");
-	data.emitData.rotateVelocity.median = globalVariables->GetValue<Vector3>(name, "emitData.rotateVelocity.median");
-	data.emitData.rotateVelocity.range = globalVariables->GetValue<Vector3>(name, "emitData.rotateVelocity.range");
-	data.emitData.size.median = globalVariables->GetValue<Vector3>(name, "emitData.size.median");
-	data.emitData.size.range = globalVariables->GetValue<Vector3>(name, "emitData.size.range");
-	data.emitData.sizeAmount.median = globalVariables->GetValue<Vector3>(name, "emitData.sizeAmount.median");
-	data.emitData.sizeAmount.range = globalVariables->GetValue<Vector3>(name, "emitData.sizeAmount.range");
-	data.emitData.velocity.median = globalVariables->GetValue<Vector3>(name, "emitData.velocity.median");
-	data.emitData.velocity.range = globalVariables->GetValue<Vector3>(name, "emitData.velocity.range");
+void EffectEditorSerializer::WriteEffectData(const std::string& name, const EffectGlobalData& data, bool overwrite) {
+	Engine::GlobalVariableWriter writer(globalVariables_, overwrite ?
+		Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
+	// エフェクトの全保存項目を登録・保存で共有する
+	writer.Value(name, "particleName", data.particleName);
+	writer.Value(name, "frequency", data.frequency);
+	writer.Value(name, "emitData.acceleration.median", data.emitData.acceleration.median);
+	writer.Value(name, "emitData.acceleration.range", data.emitData.acceleration.range);
+	writer.Value(name, "emitData.colorRange.min", data.emitData.colorRange.min);
+	writer.Value(name, "emitData.colorRange.max", data.emitData.colorRange.max);
+	writer.Value(name, "emitData.count.median", data.emitData.count.median);
+	writer.Value(name, "emitData.count.range", data.emitData.count.range);
+	writer.Value(name, "emitData.lifeTime.median", data.emitData.lifeTime.median);
+	writer.Value(name, "emitData.lifeTime.range", data.emitData.lifeTime.range);
+	writer.Value(name, "emitData.rotate.median", data.emitData.rotate.median);
+	writer.Value(name, "emitData.rotate.range", data.emitData.rotate.range);
+	writer.Value(name, "emitData.rotateVelocity.median", data.emitData.rotateVelocity.median);
+	writer.Value(name, "emitData.rotateVelocity.range", data.emitData.rotateVelocity.range);
+	writer.Value(name, "emitData.size.median", data.emitData.size.median);
+	writer.Value(name, "emitData.size.range", data.emitData.size.range);
+	writer.Value(name, "emitData.sizeAmount.median", data.emitData.sizeAmount.median);
+	writer.Value(name, "emitData.sizeAmount.range", data.emitData.sizeAmount.range);
+	writer.Value(name, "emitData.velocity.median", data.emitData.velocity.median);
+	writer.Value(name, "emitData.velocity.range", data.emitData.velocity.range);
 
-	data.alphaClipping = globalVariables->GetValue<float>(name, "emitData.alphaClipping");
-	data.enableLighting = globalVariables->GetValue<int>(name, "emitData.enableLighting");
+	writer.Value(name, "emitData.alphaClipping", data.alphaClipping);
+	writer.Value(name, "emitData.enableLighting", data.enableLighting);
 
-	data.isFlag.billboardRotZ = globalVariables->GetValue<bool>(name, "emitData.isFlag.billboardRotZ");
-	data.isFlag.isAcceleration = globalVariables->GetValue<bool>(name, "emitData.isFlag.isAcceleration");
-	data.isFlag.isAlpha = globalVariables->GetValue<bool>(name, "emitData.isFlag.isAlpha");
-	data.isFlag.isBounce = globalVariables->GetValue<bool>(name, "emitData.isFlag.isBounce");
-	data.isFlag.isGravity = globalVariables->GetValue<bool>(name, "emitData.isFlag.isGravity");
-	data.isFlag.isLifeTimeScale_ = globalVariables->GetValue<bool>(name, "emitData.isFlag.isLifeTimeScale");
-	data.isFlag.isLifeTimeVelocity = globalVariables->GetValue<bool>(name, "emitData.isFlag.isLifeTimeVelocity");
-	data.isFlag.isLine = globalVariables->GetValue<bool>(name, "emitData.isFlag.isLine");
-	data.isFlag.isLineInterpolation = globalVariables->GetValue<bool>(name, "emitData.isFlag.isLineInterpolation");
-	data.isFlag.isRotateVelocity = globalVariables->GetValue<bool>(name, "emitData.isFlag.isRotateVelocity");
-	data.isFlag.isScaling_ = globalVariables->GetValue<bool>(name, "emitData.isFlag.isScaling");
-	data.isFlag.usebillboard = globalVariables->GetValue<bool>(name, "emitData.isFlag.usebillboard");
-	data.isFlag.usebillboardY = globalVariables->GetValue<bool>(name, "emitData.isFlag.usebillboardY");
+	writer.Value(name, "emitData.isFlag.billboardRotZ", data.isFlag.billboardRotZ);
+	writer.Value(name, "emitData.isFlag.isAcceleration", data.isFlag.isAcceleration);
+	writer.Value(name, "emitData.isFlag.isAlpha", data.isFlag.isAlpha);
+	writer.Value(name, "emitData.isFlag.isBounce", data.isFlag.isBounce);
+	writer.Value(name, "emitData.isFlag.isGravity", data.isFlag.isGravity);
+	writer.Value(name, "emitData.isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
+	writer.Value(name, "emitData.isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
+	writer.Value(name, "emitData.isFlag.isLine", data.isFlag.isLine);
+	writer.Value(name, "emitData.isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
+	writer.Value(name, "emitData.isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
+	writer.Value(name, "emitData.isFlag.isScaling", data.isFlag.isScaling_);
+	writer.Value(name, "emitData.isFlag.usebillboard", data.isFlag.usebillboard);
+	writer.Value(name, "emitData.isFlag.usebillboardY", data.isFlag.usebillboardY);
 
 
-	data.lineEnd = globalVariables->GetValue<Vector3>(name, "emitData.lineEnd");
-	data.lineStart = globalVariables->GetValue<Vector3>(name, "emitData.lineStart");
+	writer.Value(name, "emitData.lineEnd", data.lineEnd);
+	writer.Value(name, "emitData.lineStart", data.lineStart);
 
-	data.radius = globalVariables->GetValue<float>(name, "emitData.radius");
+	writer.Value(name, "emitData.radius", data.radius);
 
-	data.rangeMax = globalVariables->GetValue<Vector3>(name, "emitData.rangeMax");
-	data.rangeMin = globalVariables->GetValue<Vector3>(name, "emitData.rangeMin");
+	writer.Value(name, "emitData.rangeMax", data.rangeMax);
+	writer.Value(name, "emitData.rangeMin", data.rangeMin);
 
-	data.segment = globalVariables->GetValue<int>(name, "emitData.segment");
+	writer.Value(name, "emitData.segment", data.segment);
 
-	data.shapeType = globalVariables->GetEnumValue<EmitterShapeType>(name, "emitData.shapeType");
-	if (globalVariables->HasKey(name, "emitData.emitType")) {
-		data.emitType = globalVariables->GetEnumValue<EmitData::EmitType>(name, "emitData.emitType");
+	writer.EnumValue<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
+	writer.EnumValue<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
+	writer.EnumValue<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
+	writer.EnumValue<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
+}
+
+void EffectEditorSerializer::LoadEffectData(const std::string& name, EffectGlobalData& data) const {
+	data.particleName = globalVariables_->GetValue<std::string>(name, "particleName");
+
+	data.frequency = globalVariables_->GetValue<float>(name, "frequency");
+	data.emitData.acceleration.median = globalVariables_->GetValue<Vector3>(name, "emitData.acceleration.median");
+	data.emitData.acceleration.range = globalVariables_->GetValue<Vector3>(name, "emitData.acceleration.range");
+	data.emitData.colorRange.min = globalVariables_->GetValue<Vector4>(name, "emitData.colorRange.min");
+	data.emitData.colorRange.max = globalVariables_->GetValue<Vector4>(name, "emitData.colorRange.max");
+	data.emitData.count.median = globalVariables_->GetValue<int>(name, "emitData.count.median");
+	data.emitData.count.range = globalVariables_->GetValue<int>(name, "emitData.count.range");
+	data.emitData.lifeTime.median = globalVariables_->GetValue<float>(name, "emitData.lifeTime.median");
+	data.emitData.lifeTime.range = globalVariables_->GetValue<float>(name, "emitData.lifeTime.range");
+	data.emitData.rotate.median = globalVariables_->GetValue<Vector3>(name, "emitData.rotate.median");
+	data.emitData.rotate.range = globalVariables_->GetValue<Vector3>(name, "emitData.rotate.range");
+	data.emitData.rotateVelocity.median = globalVariables_->GetValue<Vector3>(name, "emitData.rotateVelocity.median");
+	data.emitData.rotateVelocity.range = globalVariables_->GetValue<Vector3>(name, "emitData.rotateVelocity.range");
+	data.emitData.size.median = globalVariables_->GetValue<Vector3>(name, "emitData.size.median");
+	data.emitData.size.range = globalVariables_->GetValue<Vector3>(name, "emitData.size.range");
+	data.emitData.sizeAmount.median = globalVariables_->GetValue<Vector3>(name, "emitData.sizeAmount.median");
+	data.emitData.sizeAmount.range = globalVariables_->GetValue<Vector3>(name, "emitData.sizeAmount.range");
+	data.emitData.velocity.median = globalVariables_->GetValue<Vector3>(name, "emitData.velocity.median");
+	data.emitData.velocity.range = globalVariables_->GetValue<Vector3>(name, "emitData.velocity.range");
+
+	data.alphaClipping = globalVariables_->GetValue<float>(name, "emitData.alphaClipping");
+	data.enableLighting = globalVariables_->GetValue<int>(name, "emitData.enableLighting");
+
+	data.isFlag.billboardRotZ = globalVariables_->GetValue<bool>(name, "emitData.isFlag.billboardRotZ");
+	data.isFlag.isAcceleration = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isAcceleration");
+	data.isFlag.isAlpha = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isAlpha");
+	data.isFlag.isBounce = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isBounce");
+	data.isFlag.isGravity = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isGravity");
+	data.isFlag.isLifeTimeScale_ = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isLifeTimeScale");
+	data.isFlag.isLifeTimeVelocity = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isLifeTimeVelocity");
+	data.isFlag.isLine = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isLine");
+	data.isFlag.isLineInterpolation = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isLineInterpolation");
+	data.isFlag.isRotateVelocity = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isRotateVelocity");
+	data.isFlag.isScaling_ = globalVariables_->GetValue<bool>(name, "emitData.isFlag.isScaling");
+	data.isFlag.usebillboard = globalVariables_->GetValue<bool>(name, "emitData.isFlag.usebillboard");
+	data.isFlag.usebillboardY = globalVariables_->GetValue<bool>(name, "emitData.isFlag.usebillboardY");
+
+
+	data.lineEnd = globalVariables_->GetValue<Vector3>(name, "emitData.lineEnd");
+	data.lineStart = globalVariables_->GetValue<Vector3>(name, "emitData.lineStart");
+
+	data.radius = globalVariables_->GetValue<float>(name, "emitData.radius");
+
+	data.rangeMax = globalVariables_->GetValue<Vector3>(name, "emitData.rangeMax");
+	data.rangeMin = globalVariables_->GetValue<Vector3>(name, "emitData.rangeMin");
+
+	data.segment = globalVariables_->GetValue<int>(name, "emitData.segment");
+
+	data.shapeType = globalVariables_->GetEnumValue<EmitterShapeType>(name, "emitData.shapeType");
+	if (globalVariables_->HasKey(name, "emitData.emitType")) {
+		data.emitType = globalVariables_->GetEnumValue<EmitData::EmitType>(name, "emitData.emitType");
 	}
-	if (globalVariables->HasKey(name, "emitData.directionType")) {
-		data.directionType = globalVariables->GetEnumValue<EmitData::DirectionType>(name, "emitData.directionType");
+	if (globalVariables_->HasKey(name, "emitData.directionType")) {
+		data.directionType = globalVariables_->GetEnumValue<EmitData::DirectionType>(name, "emitData.directionType");
 	}
-	data.topBottom = globalVariables->GetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom");
+	data.topBottom = globalVariables_->GetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom");
 }
-
-void EffectEditor::SetValue(const std::string& name, const EffectGlobalData& data) {
-	globalVariables->SetValue(name, "particleName", data.particleName);
-	globalVariables->SetValue(name, "frequency", data.frequency);
-	globalVariables->SetValue(name, "emitData.acceleration.median", data.emitData.acceleration.median);
-	globalVariables->SetValue(name, "emitData.acceleration.range", data.emitData.acceleration.range);
-	globalVariables->SetValue(name, "emitData.colorRange.min", data.emitData.colorRange.min);
-	globalVariables->SetValue(name, "emitData.colorRange.max", data.emitData.colorRange.max);
-	globalVariables->SetValue(name, "emitData.count.median", data.emitData.count.median);
-	globalVariables->SetValue(name, "emitData.count.range", data.emitData.count.range);
-	globalVariables->SetValue(name, "emitData.lifeTime.median", data.emitData.lifeTime.median);
-	globalVariables->SetValue(name, "emitData.lifeTime.range", data.emitData.lifeTime.range);
-	globalVariables->SetValue(name, "emitData.rotate.median", data.emitData.rotate.median);
-	globalVariables->SetValue(name, "emitData.rotate.range", data.emitData.rotate.range);
-	globalVariables->SetValue(name, "emitData.rotateVelocity.median", data.emitData.rotateVelocity.median);
-	globalVariables->SetValue(name, "emitData.rotateVelocity.range", data.emitData.rotateVelocity.range);
-	globalVariables->SetValue(name, "emitData.size.median", data.emitData.size.median);
-	globalVariables->SetValue(name, "emitData.size.range", data.emitData.size.range);
-	globalVariables->SetValue(name, "emitData.sizeAmount.median", data.emitData.sizeAmount.median);
-	globalVariables->SetValue(name, "emitData.sizeAmount.range", data.emitData.sizeAmount.range);
-	globalVariables->SetValue(name, "emitData.velocity.median", data.emitData.velocity.median);
-	globalVariables->SetValue(name, "emitData.velocity.range", data.emitData.velocity.range);
-
-	globalVariables->SetValue(name, "emitData.alphaClipping", data.alphaClipping);
-	globalVariables->SetValue(name, "emitData.enableLighting", data.enableLighting);
-
-	globalVariables->SetValue(name, "emitData.isFlag.billboardRotZ", data.isFlag.billboardRotZ);
-	globalVariables->SetValue(name, "emitData.isFlag.isAcceleration", data.isFlag.isAcceleration);
-	globalVariables->SetValue(name, "emitData.isFlag.isAlpha", data.isFlag.isAlpha);
-	globalVariables->SetValue(name, "emitData.isFlag.isBounce", data.isFlag.isBounce);
-	globalVariables->SetValue(name, "emitData.isFlag.isGravity", data.isFlag.isGravity);
-	globalVariables->SetValue(name, "emitData.isFlag.isLifeTimeScale", data.isFlag.isLifeTimeScale_);
-	globalVariables->SetValue(name, "emitData.isFlag.isLifeTimeVelocity", data.isFlag.isLifeTimeVelocity);
-	globalVariables->SetValue(name, "emitData.isFlag.isLine", data.isFlag.isLine);
-	globalVariables->SetValue(name, "emitData.isFlag.isLineInterpolation", data.isFlag.isLineInterpolation);
-	globalVariables->SetValue(name, "emitData.isFlag.isRotateVelocity", data.isFlag.isRotateVelocity);
-	globalVariables->SetValue(name, "emitData.isFlag.isScaling", data.isFlag.isScaling_);
-	globalVariables->SetValue(name, "emitData.isFlag.usebillboard", data.isFlag.usebillboard);
-	globalVariables->SetValue(name, "emitData.isFlag.usebillboardY", data.isFlag.usebillboardY);
-
-
-	globalVariables->SetValue(name, "emitData.lineEnd", data.lineEnd);
-	globalVariables->SetValue(name, "emitData.lineStart", data.lineStart);
-
-	globalVariables->SetValue(name, "emitData.radius", data.radius);
-
-	globalVariables->SetValue(name, "emitData.rangeMax", data.rangeMax);
-	globalVariables->SetValue(name, "emitData.rangeMin", data.rangeMin);
-
-	globalVariables->SetValue(name, "emitData.segment", data.segment);
-
-	globalVariables->SetEnumValue<EmitterShapeType>(name, "emitData.shapeType", data.shapeType, "EmitterShapeType");
-	globalVariables->SetEnumValue<EmitData::EmitType>(name, "emitData.emitType", data.emitType, "EmitType");
-	globalVariables->SetEnumValue<EmitData::DirectionType>(name, "emitData.directionType", data.directionType, "DirectionType");
-	globalVariables->SetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom", data.topBottom, "TopBottom");
-}
-
-void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
+void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& data) {
 	ImGui::Begin("EffectEditor");
 
 	// パーティクル選択

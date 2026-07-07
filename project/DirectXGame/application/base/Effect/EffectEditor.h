@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <DirectXGame/engine/Effect/EffectGlovalData.h>
+#include "DirectXGame/application/base/Effect/EffectEditorSerializer.h"
 
 #include <array>
 
@@ -59,12 +60,6 @@ private:
 	void RenameParticleGroup(const std::string& oldName, const std::string& newName);
 	// 選択中のパーティクル群を削除
 	void DeleteParticleGroup(const std::string& particleName);
-	// パーティクル群メタデータを保存項目へ追加
-	void AddParticleGroupItem(const std::string& particleName, const Engine::ParticleGroupEditorData& data);
-	// パーティクル群メタデータを保存項目から取得
-	void GetParticleGroupValue(const std::string& particleName, Engine::ParticleGroupEditorData& data);
-	// パーティクル群メタデータを保存項目へ反映
-	void SetParticleGroupValue(const std::string& particleName, const Engine::ParticleGroupEditorData& data);
 	// パーティクル群一覧の保存グループへ登録
 	void RegisterParticleGroupName(const std::string& name);
 	// パーティクル群一覧の保存グループから登録解除
@@ -77,16 +72,9 @@ private:
 	bool IsDeletedParticleGroupName(const std::string& name) const;
 	// パーティクル名変更を参照中のエフェクトへ反映
 	void RenameParticleReferences(const std::string& oldName, const std::string& newName);
-	// 保存項目に追加
-	void AddItem(const std::string& name, const EffectGlobalData& data);
-	// 保存項目のデータを取得
-	void GetValue(const std::string& name, EffectGlobalData& data);
-	// 保存項目設定
-	void SetValue(const std::string& name, const EffectGlobalData& data);
-
 private:
-
-	void AAAA(const std::string& name,EffectGlobalData& data);
+	// 選択中エフェクトの詳細編集UIを描画する
+	void DrawEffectDetail(const std::string& name, EffectGlobalData& data);
 
 	void Emit(const std::string& name, const Vector3& pos);
 private:// エフェクトのグローバルデータ
@@ -137,4 +125,6 @@ private:
 	Engine::EffectComponent* effectComponent = nullptr;
 	// グローバル変数保存
 	Engine::GlobalVariables* globalVariables = nullptr;
+	// エフェクトとパーティクル設定の永続化を担当する
+	EffectEditorSerializer serializer_;
 };

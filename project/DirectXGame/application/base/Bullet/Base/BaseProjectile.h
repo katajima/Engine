@@ -14,6 +14,8 @@ namespace Projectile {
 	// 発射物の基底クラス
 	class BaseProjectile : public IHitReceiver{
 	public:
+		// 派生発射物を基底ポインターから安全に破棄する
+		virtual ~BaseProjectile() = default;
 
 		// 初期化
 		void Initialize(Engine::EntityManager* entity3DManager,
@@ -33,6 +35,15 @@ namespace Projectile {
 		bool GetIsAlive() const { return isAlive_; }
 		// コライダーコンポーネント取得
 		Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); }
+	protected:
+		// プレイヤー命中時の差分処理を派生発射物から上書きする
+		virtual void OnHitPlayer(Character::BasePlayer* player);
+		// 敵命中時の差分処理を派生発射物から上書きする
+		virtual void OnHitEnemy(Character::BaseEnemy* enemy);
+		// 派生命中処理から発射者を参照する
+		Character::BaseCharacter* GetOwner() const { return owner; }
+		// 派生命中処理から発射物パラメーターを参照する
+		const ProjectileParam& GetParam() const { return param_; }
 	private:
 		// コライダの作成
 		void CreateCollision();

@@ -153,20 +153,14 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 	{
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());
-		if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
-			player->OnDodgeSuccess();	// 回避成功後コンボの受付を開く
-			return;						// 回避成功時はダメージと被弾ステートを入れない
-		}
-		player->AddDamage(param_.damage);	// ダメージを与える
-		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // ダメージ状態に遷移
+		OnHitPlayer(player);
 	}
 	break;
 	case CollisionTag::Enemy:
 	{
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
-		enemy->AddDamage(param_.damage);	// ダメージを与える
-		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // ダメージ状態に遷移
+		OnHitEnemy(enemy);
 	}
 	break;
 	case CollisionTag::PlayerAttack:
@@ -189,6 +183,26 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 	}
 }
 
+void Projectile::BaseProjectile::OnHitPlayer(Character::BasePlayer* player) {
+	if (!player) {
+		return;
+	}
+	if (player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
+		player->OnDodgeSuccess(); // 回避成功後コンボの受付を開く
+		return; // 回避成功時はダメージと被弾ステートを入れない
+	}
+	player->AddDamage(param_.damage); // ダメージを与える
+	player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+}
+
+void Projectile::BaseProjectile::OnHitEnemy(Character::BaseEnemy* enemy) {
+	if (!enemy) {
+		return;
+	}
+	enemy->AddDamage(param_.damage); // ダメージを与える
+	enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+}
+
 // 衝突処理
 void Projectile::BaseProjectile::ProjectileHit() {
 	Vector3 worldPos = objectComponent_->GetWorldPosition(); // 衝突位置取得
@@ -200,7 +214,7 @@ void Projectile::BaseProjectile::ProjectileHit() {
 		break;
 	case ProjectileHitType::Penetrate:	// 貫通
 		// 貫通数が上限を超えたら消える
-		if (param_.maxPierceCount >= pierceCount) {
+		if (pierceCount >= param_.maxPierceCount) {
 			DeleteProcess();
 		}
 		pierceCount++;	// 貫通カウント増加
