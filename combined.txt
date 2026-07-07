@@ -32851,7 +32851,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputSystem.cpp
 ============================================================
-#include "InputSystem.h"
+﻿#include "InputSystem.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 void InputSystem::Initialize(Engine::Input* input) {
@@ -32945,10 +32945,15 @@ void InputSystem::PlayerInputUpdate(float dt) {
 void InputSystem::GameInputUpdate(float dt) {
 	// ゲームUI用の移動入力を作成
 	Vector2 gameMove = input->GetGamePadLeftStick();
+	// メニューではWASDと矢印キーのどちらでも項目を移動できるようにする。
 	if (input->IsPushKey(DIK_A)) gameMove.x -= 1.0f;
 	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
 	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
 	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
+	if (input->IsPushKey(DIK_LEFT)) gameMove.x -= 1.0f;
+	if (input->IsPushKey(DIK_RIGHT)) gameMove.x += 1.0f;
+	if (input->IsPushKey(DIK_UP)) gameMove.y += 1.0f;
+	if (input->IsPushKey(DIK_DOWN)) gameMove.y -= 1.0f;
 	gameInputData_.moveShick = Math::ClampLength(gameMove);
 	// 決定入力押した瞬間
 	gameInputData_.decisionTrigger =
@@ -41291,6 +41296,9 @@ void TitleScene::Initialize()
 {
 	// 入力初期化
 	input_ = GetInput();
+	// タイトル画面でも共通入力を利用し、キーボードとコントローラーを同じ操作へ変換する。
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input_);
 	// カメラ
 	InitializeCamera();
 	// リソース
@@ -41309,7 +41317,7 @@ void TitleScene::Initialize()
 
 	// UI
 	titleUI_ = std::make_unique<TitleUI>();
-	titleUI_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
+	titleUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	// プレイヤー
 	objectComponent_ = std::make_unique<ObjectComponent>();
@@ -41337,12 +41345,12 @@ void TitleScene::Finalize(){
 
 void TitleScene::Update()
 {
-	if (input_->IsControllerConnected()) {
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			titleUI_->Action();
-			isStart_ = true;
-			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
-		}
+	// 共通入力を更新し、ゲームパッドB・Enter・Spaceを決定操作として受け付ける。
+	inputCoordinator_->Update(GetTime());
+	if (!isStart_ && inputCoordinator_->GetInputSystem()->GetGameInputData().decisionTrigger) {
+		titleUI_->Action();
+		isStart_ = true;
+		objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
 	}
 	if (isStart_) {
 		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetBodyWorldPosition().z) {
@@ -41444,6 +41452,7 @@ File Path: project/DirectXGame/application/scene/TitleScene.h
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 
 /// <summary>
 /// タイトルシーン
@@ -41475,6 +41484,8 @@ private:
 private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
+	// タイトル画面のコントローラー入力とキーボード入力を統合して管理する。
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 private:
 	// ステージ
 	std::unique_ptr<TitleStage> titleStage_ = nullptr;
