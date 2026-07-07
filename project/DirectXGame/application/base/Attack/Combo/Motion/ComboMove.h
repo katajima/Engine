@@ -63,6 +63,8 @@ namespace Combo {
 		float CalculateMoveCurveScale(float timer) const;
 		// 攻撃開始前から引き継いだ移動慣性を今フレームの移動要求へ追加する
 		void RequestMoveInertia(float dt);
+		// 接地状態に応じた摩擦または空気抵抗で移動慣性を減衰する
+		void ApplyMoveInertiaResistance(float dt);
 		// ターゲット有無に応じた移動速度取得
 		Vector3 GetActiveMoveSpeed() const;
 		// ターゲット有無に応じたローカル移動方向取得

@@ -1,4 +1,4 @@
-﻿#include "ComboMove.h"
+#include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 
@@ -99,10 +99,35 @@ namespace Combo {
 			return;
 		}
 
+		// 接地中は摩擦、空中では空気抵抗を使って引き継いだ速度を減衰する
+		ApplyMoveInertiaResistance(dt);
+		if (moveInertiaVelocity_.LengthSq() <= 0.000001f) {
+			moveInertiaVelocity_ = {};
+			return;
+		}
+
 		MoveRequest request{};
 		request.velocity = moveInertiaVelocity_ * dt;
 		request.priority = 1;
 		moveRequestSystem->SetRequest(request);
+	}
+
+	void ComboMove::ApplyMoveInertiaResistance(float dt) {
+		// 移動コンポーネントが無い場合は接地状態を判定できないため減衰しない
+		if (!moveComponent || dt <= 0.0f) {
+			return;
+		}
+
+		// 接地状態に対応する係数を選び、1/60秒あたりに失う慣性の割合へ制限する
+		const bool isGrounded = moveComponent->GetIsLanding();
+		const float resistance = isGrounded ?
+			data_.moveInertiaGroundFriction : data_.moveInertiaAirResistance;
+		const float clampedResistance = std::clamp(resistance, 0.0f, 1.0f);
+
+		// 60FPS基準の減衰率を経過時間に合わせて累乗し、フレームレート差を吸収する
+		const float referenceFrameCount = dt * 60.0f;
+		const float damping = std::pow(1.0f - clampedResistance, referenceFrameCount);
+		moveInertiaVelocity_ *= damping;
 	}
 
 	// 移動処理

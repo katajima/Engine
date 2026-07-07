@@ -1,5 +1,69 @@
 {
     "LightHitAttack": {
+        "Transformアニメーション使用": {
+            "type": "bool",
+            "value": false
+        },
+        "Transformアニメーション終了時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "Transformアニメーション開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "Transform終了スケール加算値": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "Transform終了位置加算値": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "Transform終了回転加算値": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "Transform終了時復元": {
+            "type": "bool",
+            "value": true
+        },
+        "Transform開始スケール加算値": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "Transform開始位置加算値": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "Transform開始回転加算値": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
         "Y方向ノックバック": {
             "type": "bool",
             "value": true
@@ -266,7 +330,7 @@
         },
         "コンボ中の移動慣性": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "コンボ中の移動方向": {
             "type": "Vector3",
@@ -700,6 +764,10 @@
             "type": "string",
             "value": ""
         },
+        "ヒット音音量": {
+            "type": "float",
+            "value": 1.0
+        },
         "ミス時のみキャンセル": {
             "type": "bool",
             "value": false
@@ -849,9 +917,25 @@
             "type": "enum",
             "value": 1
         },
+        "攻撃終了音": {
+            "type": "string",
+            "value": ""
+        },
+        "攻撃終了音音量": {
+            "type": "float",
+            "value": 1.0
+        },
         "攻撃音": {
             "type": "string",
             "value": ""
+        },
+        "攻撃音再生時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "攻撃音音量": {
+            "type": "float",
+            "value": 1.0
         },
         "無敵": {
             "type": "bool",
@@ -868,6 +952,14 @@
                 0.0,
                 167.11000061035156
             ]
+        },
+        "移動慣性の地上摩擦係数": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "移動慣性の空気抵抗係数": {
+            "type": "float",
+            "value": 0.10000000149011612
         },
         "移動方向とキャラクターの向く方向を一致させるか": {
             "type": "bool",

@@ -83,6 +83,11 @@ namespace Combo {
 		ImGuiAudio();
 		// 移動関係設定
 		ImGuiMove();
+		// 慣性係数は保存を待たず、次のプレビューフレームから実行データへ反映する
+		GlobalMove& previewMove = state->Data().GetComboMotion().GetComboMove().GetData();
+		previewMove.inheritMoveInertia = data_.move.inheritMoveInertia;
+		previewMove.moveInertiaGroundFriction = data_.move.moveInertiaGroundFriction;
+		previewMove.moveInertiaAirResistance = data_.move.moveInertiaAirResistance;
 		// リアクション設定
 		ImGuiReaction();
 		// ヒットボックス設定
@@ -508,6 +513,12 @@ namespace Combo {
 
 			// 攻撃開始前の走行速度を維持するか、コンボ単位で切り替える
 			ImGui::Checkbox("攻撃開始前の移動慣性を引き継ぐ", &data_.move.inheritMoveInertia);
+			if (data_.move.inheritMoveInertia) {
+				// 60FPSの1フレームごとに失う割合として、直感的に0～1で調整する。
+				ImGui::SliderFloat("移動慣性の地上摩擦係数", &data_.move.moveInertiaGroundFriction, 0.0f, 1.0f, "%.2f");
+				ImGui::SliderFloat("移動慣性の空気抵抗係数", &data_.move.moveInertiaAirResistance, 0.0f, 1.0f, "%.2f");
+				ImGui::TextDisabled("0: 減衰なし / 0.1: 毎フレーム10%%減衰 / 1: 即時停止");
+			}
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
 			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
 

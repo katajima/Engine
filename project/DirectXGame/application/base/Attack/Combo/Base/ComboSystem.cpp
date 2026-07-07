@@ -587,6 +587,9 @@ namespace Combo {
 		// 移動
 		{
 			writer.Value(groupName, "コンボ中の移動慣性", data.move.inheritMoveInertia);
+			// 移動慣性に使用する地上摩擦と空気抵抗をコンボ単位で保存する
+			writer.Value(groupName, "移動慣性の地上摩擦係数", data.move.moveInertiaGroundFriction);
+			writer.Value(groupName, "移動慣性の空気抵抗係数", data.move.moveInertiaAirResistance);
 			writer.Value(groupName, "コンボ中の重力", data.move.isGravity);
 			writer.Value(groupName, "コンボ中の重力強度", data.move.gravityScale);
 			writer.Value(groupName, "コンボ中の最大落下速度", data.move.maxFallSpeed);
@@ -889,6 +892,9 @@ namespace Combo {
 		// 移動
 		{
 			data.move.inheritMoveInertia = globalVariables->GetValue<bool>(name, "コンボ中の移動慣性");
+			// 保存された係数を読み込み、実行中の慣性減衰へ反映する
+			data.move.moveInertiaGroundFriction = globalVariables->GetValue<float>(name, "移動慣性の地上摩擦係数");
+			data.move.moveInertiaAirResistance = globalVariables->GetValue<float>(name, "移動慣性の空気抵抗係数");
 			data.move.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
 			data.move.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
 			data.move.maxFallSpeed = globalVariables->GetValue<float>(name, "コンボ中の最大落下速度");

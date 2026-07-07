@@ -186,6 +186,10 @@ namespace Combo {
 	struct GlobalMove {
 		// 攻撃開始直前の通常移動速度をコンボ中も維持するか
 		bool inheritMoveInertia = false;
+		// 接地中に1/60秒あたり失う移動慣性の割合。0なら減衰せず、1なら即時停止する。
+		float moveInertiaGroundFriction = 0.5f;
+		// 空中で1/60秒あたり失う移動慣性の割合。0なら減衰せず、1なら即時停止する。
+		float moveInertiaAirResistance = 0.5f;
 		// 受付時間
 		StateTime moveWindow{};
 		// 移動速度（軸ごと）
