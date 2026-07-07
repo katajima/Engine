@@ -16,6 +16,7 @@
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
 
 /// <summary>
 /// タイトルシーン
@@ -47,6 +48,8 @@ private:
 private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
+	// タイトル画面のコントローラー入力とキーボード入力を統合して管理する。
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 private:
 	// ステージ
 	std::unique_ptr<TitleStage> titleStage_ = nullptr;

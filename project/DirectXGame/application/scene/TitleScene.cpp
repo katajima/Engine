@@ -6,6 +6,9 @@ void TitleScene::Initialize()
 {
 	// 入力初期化
 	input_ = GetInput();
+	// タイトル画面でも共通入力を利用し、キーボードとコントローラーを同じ操作へ変換する。
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input_);
 	// カメラ
 	InitializeCamera();
 	// リソース
@@ -24,7 +27,7 @@ void TitleScene::Initialize()
 
 	// UI
 	titleUI_ = std::make_unique<TitleUI>();
-	titleUI_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
+	titleUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 
 	// プレイヤー
 	objectComponent_ = std::make_unique<ObjectComponent>();
@@ -52,12 +55,12 @@ void TitleScene::Finalize(){
 
 void TitleScene::Update()
 {
-	if (input_->IsControllerConnected()) {
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			titleUI_->Action();
-			isStart_ = true;
-			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
-		}
+	// 共通入力を更新し、ゲームパッドB・Enter・Spaceを決定操作として受け付ける。
+	inputCoordinator_->Update(GetTime());
+	if (!isStart_ && inputCoordinator_->GetInputSystem()->GetGameInputData().decisionTrigger) {
+		titleUI_->Action();
+		isStart_ = true;
+		objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
 	}
 	if (isStart_) {
 		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetBodyWorldPosition().z) {

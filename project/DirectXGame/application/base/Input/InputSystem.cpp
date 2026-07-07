@@ -1,4 +1,4 @@
-#include "InputSystem.h"
+﻿#include "InputSystem.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 void InputSystem::Initialize(Engine::Input* input) {
@@ -92,10 +92,15 @@ void InputSystem::PlayerInputUpdate(float dt) {
 void InputSystem::GameInputUpdate(float dt) {
 	// ゲームUI用の移動入力を作成
 	Vector2 gameMove = input->GetGamePadLeftStick();
+	// メニューではWASDと矢印キーのどちらでも項目を移動できるようにする。
 	if (input->IsPushKey(DIK_A)) gameMove.x -= 1.0f;
 	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
 	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
 	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
+	if (input->IsPushKey(DIK_LEFT)) gameMove.x -= 1.0f;
+	if (input->IsPushKey(DIK_RIGHT)) gameMove.x += 1.0f;
+	if (input->IsPushKey(DIK_UP)) gameMove.y += 1.0f;
+	if (input->IsPushKey(DIK_DOWN)) gameMove.y -= 1.0f;
 	gameInputData_.moveShick = Math::ClampLength(gameMove);
 	// 決定入力押した瞬間
 	gameInputData_.decisionTrigger =
