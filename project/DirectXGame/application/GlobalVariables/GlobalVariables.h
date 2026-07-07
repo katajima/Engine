@@ -4,6 +4,12 @@
 
 
 namespace Engine {
+	// 設定値を未登録時だけ追加するか、現在値で上書きするかを表す
+	enum class GlobalVariableWriteMode {
+		Register,
+		Save,
+	};
+
 	/// <summary>
 	/// グローバル変数
 	/// </summary>
@@ -128,6 +134,43 @@ namespace Engine {
 		std::filesystem::path GetSaveFilePath(const std::string& groupName) const;
 		// 旧形式を含めた既存保存ファイルパスを探す
 		std::filesystem::path FindExistingFilePath(const std::string& groupName) const;
+	};
+
+	/// <summary>
+	/// 設定項目の列挙処理から、登録と保存のAPI差を隠蔽するライター
+	/// </summary>
+	class GlobalVariableWriter {
+	public:
+		// 書き込み先と登録・保存モードを設定する
+		GlobalVariableWriter(GlobalVariables* globalVariables, GlobalVariableWriteMode mode)
+			: globalVariables_(globalVariables), mode_(mode) {
+		}
+
+		// 通常値を新規登録、または現在値で上書きする
+		template<typename T>
+		void Value(const std::string& groupName, const std::string& key, const T& value) {
+			if (mode_ == GlobalVariableWriteMode::Save) {
+				globalVariables_->SetValue(groupName, key, value);
+			}
+			else {
+				globalVariables_->AddItem(groupName, key, value);
+			}
+		}
+
+		// enum値を型情報付きで新規登録、または現在値で上書きする
+		template<typename E>
+		void EnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType) {
+			if (mode_ == GlobalVariableWriteMode::Save) {
+				globalVariables_->SetEnumValue(groupName, key, value, enumType);
+			}
+			else {
+				globalVariables_->AddEnumItem(groupName, key, value, enumType);
+			}
+		}
+
+	private:
+		GlobalVariables* globalVariables_ = nullptr; // 設定値の書き込み先
+		GlobalVariableWriteMode mode_ = GlobalVariableWriteMode::Register; // 登録または保存モード
 	};
 
 

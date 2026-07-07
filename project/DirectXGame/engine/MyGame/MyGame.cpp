@@ -102,33 +102,32 @@ void Engine::MyGame::Update()
 	if(input_->IsTriggerKey(DIK_N)){
 		entityManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
 	}
-	// FPS表示用ウィジェット
-	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
-		ImGui::End();
-		return;
-	}
-	if (!ImGui::BeginMenuBar())
-		return;
-
-	if (ImGui::BeginMenu("Time")) {
-
-		ImGui::Text("FPS: %.2f", fps);
-		ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
-
-		ImGui::EndMenu();
-	}
-
-	if (ImGui::BeginMenu("Scene")) {
-		for(auto & name : scenenames_){
-			if (ImGui::Button(name.c_str())) {
-				sceneManager_->ChangeScene(name);
+	// 最小化時もImGuiフレームを必ず完了できるよう、ウィンドウの表示状態ではUpdateを中断しない。
+	const bool isFileWindowVisible = ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar);
+	if (isFileWindowVisible) {
+		// メニューバーを開始できた場合だけ、対応するUIを構築する。
+		if (ImGui::BeginMenuBar()) {
+			// 時間関連のデバッグ項目を表示する。
+			if (ImGui::BeginMenu("Time")) {
+				ImGui::Text("FPS: %.2f", fps);
+				ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
+				ImGui::EndMenu();
 			}
-		}
-		ImGui::EndMenu();
-	}
 
-	
-	ImGui::EndMenuBar();
+			// デバッグ中に遷移するシーンを選択する。
+			if (ImGui::BeginMenu("Scene")) {
+				for (auto& name : scenenames_) {
+					if (ImGui::Button(name.c_str())) {
+						sceneManager_->ChangeScene(name);
+					}
+				}
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
+		}
+	}
+	// Beginの戻り値に関係なく、対応するEndを必ず呼び出す。
 	ImGui::End();
 
 #endif // _DEBUG

@@ -5,42 +5,6 @@
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
 #include <DirectXGame/application/base/Character/State/CharacterStateMachine.h>
 
-namespace {
-	// コンボ設定の登録と保存で異なるGlobalVariables操作を吸収する
-	class ComboDataWriter {
-	public:
-		ComboDataWriter(Engine::GlobalVariables* globalVariables, bool overwrite)
-			: globalVariables_(globalVariables), overwrite_(overwrite) {
-		}
-
-		// 通常値を新規登録、または既存値へ保存する
-		template<typename T>
-		void Value(const std::string& groupName, const std::string& key, const T& value) {
-			if (overwrite_) {
-				globalVariables_->SetValue(groupName, key, value);
-			}
-			else {
-				globalVariables_->AddItem(groupName, key, value);
-			}
-		}
-
-		// enum値を型情報付きで新規登録、または既存値へ保存する
-		template<typename E>
-		void EnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType) {
-			if (overwrite_) {
-				globalVariables_->SetEnumValue(groupName, key, value, enumType);
-			}
-			else {
-				globalVariables_->AddEnumItem(groupName, key, value, enumType);
-			}
-		}
-
-	private:
-		Engine::GlobalVariables* globalVariables_ = nullptr; // 書き込み先のグローバル変数
-		bool overwrite_ = false; // trueなら保存、falseなら未登録項目だけ追加
-	};
-}
-
 namespace Combo {
 
 #pragma region main
@@ -487,7 +451,8 @@ namespace Combo {
 
 	void System::WriteGlobalComboData(const std::string& groupName, GlobalData& data, bool overwrite) {
 		// 項目一覧は一か所に集約し、writerが登録と保存の違いを吸収する
-		ComboDataWriter writer(globalVariables, overwrite);
+		Engine::GlobalVariableWriter writer(globalVariables, overwrite ?
+			Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
 		// 攻撃タイプと遠距離攻撃
 		{
 			writer.Value(groupName, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
