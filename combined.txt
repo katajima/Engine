@@ -329,6 +329,9 @@
     └── └── └── └── ├── GameEventController.h
     └── └── └── └── ├── GameFlowController.cpp
     └── └── └── └── ├── GameFlowController.h
+    └── └── └── └── ├── GameplaySession.h
+    └── └── └── └── ├── Menu/
+    └── └── └── └── └── └── MenuSelectionController.h
     └── └── └── └── ├── Pose/
     └── └── └── └── └── ├── PoseSystem.cpp
     └── └── └── └── └── └── PoseSystem.h
@@ -31216,6 +31219,249 @@ private: // 貰いもの
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Game/GameplaySession.h
+============================================================
+﻿#pragma once
+
+#include <memory>
+
+#include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include "DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
+#include "DirectXGame/application/base/Object/CollisionRegistrationSystem.h"
+#include "DirectXGame/application/base/Special/Point/SpecialPoint.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+
+/// <summary>
+/// ゲームプレイ系シーンで共通利用する基盤システムを所有し、一括初期化するクラス。
+/// </summary>
+class GameplaySession {
+public:
+	/// <summary>
+	/// 入力、カメラ、キャラクター、弾、衝突判定などの共通基盤を初期化する。
+	/// </summary>
+	/// <param name="input">物理入力。</param>
+	/// <param name="entityManager">エンティティ管理。</param>
+	/// <param name="globalVariables">調整値管理。</param>
+	/// <param name="playerType">生成するプレイヤー種別。</param>
+	/// <param name="playerPosition">プレイヤーの初期座標。</param>
+	void Initialize(Engine::Input* input, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables, Character::PlayerType playerType,
+		const Vector3& playerPosition) {
+		// シーン入力をアクション入力へ変換する管理クラスを生成する。
+		inputCoordinator_ = std::make_unique<InputCoordinator>();
+		inputCoordinator_->Initialize(input);
+
+		// キャラクターや弾が共有するエフェクトシステムを生成する。
+		effectSystem_ = std::make_unique<EffectSystem>();
+		effectSystem_->Initialize(entityManager, globalVariables);
+
+		// 全ゲームプレイシーンで使用する追従カメラを生成する。
+		followCamera_ = std::make_unique<FollowCamera>();
+		followCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
+
+		// 追従カメラを既定カメラとしてカメラ管理へ登録する。
+		cameraManager_ = std::make_unique<CameraManager>();
+		cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables);
+		cameraManager_->AddCamera({ followCamera_.get(), true }, "followCamera");
+		entityManager->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+
+		// キャラクターと弾が登録するヒットボックスを管理する。
+		hitBoxSystem_ = std::make_unique<HitBox::System>();
+		hitBoxSystem_->Initialize(entityManager);
+
+		// シーン内に存在する弾を一括管理する。
+		bulletManager_ = std::make_unique<BulletManager>();
+		bulletManager_->Initialize(entityManager, globalVariables, nullptr);
+		bulletManager_->SetEffect(effectSystem_.get());
+
+		// 必殺技ポイントを一括管理する。
+		specialPointManager_ = std::make_unique<SpecalPointManager>();
+		specialPointManager_->Initialize(entityManager, globalVariables);
+
+		// 共通システムを接続してキャラクター管理を初期化する。
+		characterManager_ = std::make_unique<Character::CharacterManager>();
+		characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), entityManager,
+			globalVariables, cameraManager_->GetCamera());
+		characterManager_->SetEffect(effectSystem_.get());
+		characterManager_->SetFollowCamera(followCamera_.get());
+		characterManager_->SetBulletManager(bulletManager_.get());
+		characterManager_->SetCameraManager(cameraManager_.get());
+		characterManager_->SetSpecialPointManager(specialPointManager_.get());
+
+		// 指定された座標をTransformの移動値へ設定してプレイヤーを生成する。
+		Transform playerTransform{};
+		playerTransform.translate = playerPosition;
+		characterManager_->CreateCharacter(playerType, "", playerTransform);
+		followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+		inputCoordinator_->SetOwner(characterManager_->GetPlayer());
+
+		// 各管理クラスから毎フレームの衝突対象を収集するシステムを生成する。
+		collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+		collisionRegistrationSystem_->Initialize(globalVariables, entityManager->Get3DLineCommon(), hitBoxSystem_.get(),
+			characterManager_.get(), specialPointManager_.get(), bulletManager_.get());
+
+		// GPUパーティクルでも共通カメラを使用する。
+		entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	}
+
+	// 物理入力とゲーム入力をまとめる入力管理を取得する。
+	InputCoordinator* GetInputCoordinator() const { return inputCoordinator_.get(); }
+	// 追従カメラを取得する。
+	FollowCamera* GetFollowCamera() const { return followCamera_.get(); }
+	// カメラ管理を取得する。
+	CameraManager* GetCameraManager() const { return cameraManager_.get(); }
+	// エフェクト管理を取得する。
+	EffectSystem* GetEffectSystem() const { return effectSystem_.get(); }
+	// 必殺技ポイント管理を取得する。
+	SpecalPointManager* GetSpecialPointManager() const { return specialPointManager_.get(); }
+	// キャラクター管理を取得する。
+	Character::CharacterManager* GetCharacterManager() const { return characterManager_.get(); }
+	// 弾管理を取得する。
+	BulletManager* GetBulletManager() const { return bulletManager_.get(); }
+	// ヒットボックス管理を取得する。
+	HitBox::System* GetHitBoxSystem() const { return hitBoxSystem_.get(); }
+	// 衝突対象登録システムを取得する。
+	CollisionRegistrationSystem* GetCollisionRegistrationSystem() const { return collisionRegistrationSystem_.get(); }
+
+private:
+	// 物理入力、アクション入力、コマンドをまとめて管理する。
+	std::unique_ptr<InputCoordinator> inputCoordinator_;
+	// ゲームプレイ共通の追従カメラ。
+	std::unique_ptr<FollowCamera> followCamera_;
+	// シーンで利用するカメラを管理する。
+	std::unique_ptr<CameraManager> cameraManager_;
+	// ゲームプレイ中のエフェクトを管理する。
+	std::unique_ptr<EffectSystem> effectSystem_;
+	// 必殺技ポイントを管理する。
+	std::unique_ptr<SpecalPointManager> specialPointManager_;
+	// プレイヤーと敵キャラクターを管理する。
+	std::unique_ptr<Character::CharacterManager> characterManager_;
+	// シーン内の弾を管理する。
+	std::unique_ptr<BulletManager> bulletManager_;
+	// ヒットボックスを管理する。
+	std::unique_ptr<HitBox::System> hitBoxSystem_;
+	// 各管理クラスの衝突対象を登録する。
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_;
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/Menu/MenuSelectionController.h
+============================================================
+﻿#pragma once
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/engine/scene/SceneManager.h"
+
+/// <summary>
+/// メニュー項目の移動に使用するスティック軸。
+/// </summary>
+enum class MenuSelectionAxis {
+	kHorizontal,
+	kVertical,
+};
+
+/// <summary>
+/// メニュー選択操作を構成する設定値。
+/// </summary>
+struct MenuSelectionConfig {
+	// 選択可能な項目数。
+	int itemCount = 1;
+	// 項目移動に使用するスティック軸。
+	MenuSelectionAxis axis = MenuSelectionAxis::kVertical;
+	// 軸の正方向へ入力した際に加算するインデックス値。
+	int positiveDirectionStep = 1;
+	// 入力として扱うスティック値のしきい値。
+	float inputThreshold = 0.5f;
+	// 項目移動を繰り返せる間隔。
+	float moveInterval = 0.25f;
+	// 初期化直後に決定入力を受け付けない時間。
+	float decisionDelay = 0.0f;
+	// 項目インデックスに対応する遷移先。空文字の項目は遷移しない。
+	std::vector<std::string> transitionScenes;
+};
+
+/// <summary>
+/// 設定に従ってメニュー選択とシーン遷移を処理する共通クラス。
+/// </summary>
+class MenuSelectionController {
+public:
+	/// <summary>
+	/// 入力元、遷移先管理、メニュー構成を設定する。
+	/// </summary>
+	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, const MenuSelectionConfig& config) {
+		// 更新時に利用する外部システムを保持する。
+		sceneManager_ = sceneManager;
+		input_ = input;
+		config_ = config;
+		// 不正な項目数でも選択範囲が成立するよう最低値を保証する。
+		config_.itemCount = (std::max)(config_.itemCount, 1);
+		selectedIndex_ = 0;
+		moveTimer_ = 0.0f;
+		decisionTimer_ = 0.0f;
+	}
+
+	/// <summary>
+	/// 軸入力による項目移動と、決定入力によるシーン遷移を更新する。
+	/// </summary>
+	void Update(float dt) {
+		// 移動入力と決定入力の経過時間を進める。
+		moveTimer_ += dt;
+		decisionTimer_ += dt;
+
+		// 設定された軸の値だけを選択操作へ利用する。
+		const Vector2 moveStick = input_->GetGameInputData().moveShick;
+		const float axisValue = config_.axis == MenuSelectionAxis::kHorizontal ? moveStick.x : moveStick.y;
+		if (moveTimer_ >= config_.moveInterval) {
+			if (axisValue > config_.inputThreshold) {
+				selectedIndex_ += config_.positiveDirectionStep;
+				moveTimer_ = 0.0f;
+			} else if (axisValue < -config_.inputThreshold) {
+				selectedIndex_ -= config_.positiveDirectionStep;
+				moveTimer_ = 0.0f;
+			}
+		}
+		// 選択位置が項目範囲を超えないよう補正する。
+		selectedIndex_ = std::clamp(selectedIndex_, 0, config_.itemCount - 1);
+
+		// 誤決定防止時間の経過後だけ、設定された遷移先へ移動する。
+		if (decisionTimer_ >= config_.decisionDelay && input_->GetGameInputData().decisionTrigger &&
+			selectedIndex_ < static_cast<int>(config_.transitionScenes.size())) {
+			const std::string& transitionScene = config_.transitionScenes[selectedIndex_];
+			if (!transitionScene.empty()) {
+				sceneManager_->ChangeScene(transitionScene);
+			}
+		}
+	}
+
+	// 現在選択されている項目インデックスを取得する。
+	int GetSelectedIndex() const { return selectedIndex_; }
+
+private:
+	// シーン遷移を実行する管理クラス。
+	Engine::SceneManager* sceneManager_ = nullptr;
+	// メニュー操作に使用するゲーム入力。
+	InputSystem* input_ = nullptr;
+	// 項目数、軸、遷移先をまとめた設定。
+	MenuSelectionConfig config_;
+	// 現在選択されている項目インデックス。
+	int selectedIndex_ = 0;
+	// 項目移動の連続入力を制限するタイマー。
+	float moveTimer_ = 0.0f;
+	// 初期決定入力を抑制するタイマー。
+	float decisionTimer_ = 0.0f;
+};
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Game/Pose/PoseSystem.cpp
 ============================================================
 ﻿#include "PoseSystem.h"
@@ -31277,57 +31523,36 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.cpp
 ============================================================
-#include "ResultSystem.h"
+﻿#include "ResultSystem.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
 void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
-	this->entityManager = entityManager;
-	this->globalVariables = globalVariables;
-	this->sceneManager = sceneManager;
-	this->input = input;
+	// 現在はメニュー操作で使用しない依存を明示的に未使用とする。
+	(void)entityManager;
+	(void)globalVariables;
+	// 横軸で2項目を選択し、誤決定防止時間と遷移先を設定する。
+	MenuSelectionConfig config{};
+	config.itemCount = 2;
+	config.axis = MenuSelectionAxis::kHorizontal;
+	config.positiveDirectionStep = 1;
+	config.decisionDelay = 0.5f;
+	config.transitionScenes = { "GAMEPLAY", "TITLE" };
+	menuSelectionController_.Initialize(sceneManager, input, config);
 }
 
 void ResultSystem::Update(float dt) {
 
-	timer_ += dt;
-	changeTimer_ += dt;
-
-	if (timer_ >= 0.25f) {
-		if (input->GetGameInputData().moveShick.x > 0.5f) {
-			selectedIndex += 1;
-			timer_ = 0.0f;
-		}
-		else if (input->GetGameInputData().moveShick.x < -0.5f) {
-			selectedIndex += -1;
-			timer_ = 0.0f;
-		}
-	}
-
-	if (selectedIndex < 0) {
-		selectedIndex = 0;
-	}
-	else if (selectedIndex > 1) {
-		selectedIndex = 1;
-	}
-	if (changeTimer_ >= changeCooldown_) {
-		changeTimer_ = changeCooldown_;
-		if (input->GetGameInputData().decisionTrigger) {
-			if (selectedIndex == 0) {
-				sceneManager->ChangeScene("GAMEPLAY");
-			}
-			else if (selectedIndex == 1) {
-				sceneManager->ChangeScene("TITLE");
-			}
-		}
-	}
+	// 共通メニュー操作へ更新を委譲する。
+	menuSelectionController_.Update(dt);
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 // C++
 #include <imgui.h>
 #include <list>
@@ -31341,6 +31566,7 @@ File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.h
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
+#include "DirectXGame/application/base/Game/Menu/MenuSelectionController.h"
 
 // 前方宣言
 namespace Engine {
@@ -31373,21 +31599,14 @@ public:
 	/// 選択されているインデックスの取得
 	/// </summary>
 	/// <returns></returns>
-	int GetSelectedIndex() const { return selectedIndex; }
+	int GetSelectedIndex() const { return menuSelectionController_.GetSelectedIndex(); }
 
 
 private:
-	// 選択されているインデックス
-	int selectedIndex = 0;
-	float timer_ = 0.0f;
-	float changeTimer_ = 0.0f;
-	float changeCooldown_ = 0.5f;
-private:
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::SceneManager* sceneManager = nullptr;
-	InputSystem* input = nullptr;
+	// リザルト画面の項目移動とシーン遷移を処理する。
+	MenuSelectionController menuSelectionController_;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.cpp
@@ -31398,56 +31617,29 @@ File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.cpp
 
 void SelectSystem::Initialize(Engine::SceneManager* sceneManager ,InputSystem* input, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
-	this->entityManager = entityManager;
-	this->globalVariables = globalVariables;
-	this->sceneManager = sceneManager;
-	this->input = input;
+	// 現在はメニュー操作で使用しない依存を明示的に未使用とする。
+	(void)entityManager;
+	(void)globalVariables;
+	// 縦軸で4項目を選択し、各項目に対応する遷移先を設定する。
+	MenuSelectionConfig config{};
+	config.itemCount = 4;
+	config.axis = MenuSelectionAxis::kVertical;
+	config.positiveDirectionStep = -1;
+	config.transitionScenes = { "GAMEPLAY", "", "", "TITLE" };
+	menuSelectionController_.Initialize(sceneManager, input, config);
 }
 
 void SelectSystem::Update(float dt) {
 
-	timer_ += dt;
-
-	if (timer_ >= 0.25f) {
-		if (input->GetGameInputData().moveShick.y > 0.5f) {
-			selectedIndex += -1;
-			timer_ = 0.0f;
-		}
-		else if (input->GetGameInputData().moveShick.y < -0.5f) {
-			selectedIndex += 1;
-			timer_ = 0.0f;
-		}
-	}
-
-	if (selectedIndex < 0) {
-		selectedIndex = 0;
-	}
-	else if (selectedIndex > 3) {
-		selectedIndex = 3;
-	}
-
-
-	if (input->GetGameInputData().decisionTrigger) {
-		if (selectedIndex == 0) {
-			sceneManager->ChangeScene("GAMEPLAY");
-		}
-		else if (selectedIndex == 1) {
-			//sceneManager->ChangeScene("TUTORIAL");
-		}
-		else if (selectedIndex == 2) {
-			//sceneManager->ChangeScene("CUSTOM");
-		}
-		else if (selectedIndex == 3) {
-			sceneManager->ChangeScene("TITLE");
-		}
-	}
+	// 共通メニュー操作へ更新を委譲する。
+	menuSelectionController_.Update(dt);
 }
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 // C++
 #include <imgui.h>
 #include <list>
@@ -31461,6 +31653,7 @@ File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.h
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
+#include "DirectXGame/application/base/Game/Menu/MenuSelectionController.h"
 
 
 // 前方宣言
@@ -31498,18 +31691,13 @@ public:
 	/// 選択されているインデックスの取得
 	/// </summary>
 	/// <returns></returns>
-	int GetSelectedIndex() const { return selectedIndex; }
+	int GetSelectedIndex() const { return menuSelectionController_.GetSelectedIndex(); }
 
 private:
-	// 選択されているインデックス
-	int selectedIndex = 0; 
-	float timer_ = 0.0f;
-private:
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::SceneManager* sceneManager = nullptr;
-	InputSystem* input = nullptr;
+	// セレクト画面の項目移動とシーン遷移を処理する。
+	MenuSelectionController menuSelectionController_;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialStep.cpp
@@ -34639,7 +34827,7 @@ private: // 一旦
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/BaseStage.cpp
 ============================================================
-#include "BaseStage.h"
+﻿#include "BaseStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
@@ -34707,6 +34895,24 @@ void BaseStage::InitializeStageColliderSystem(Engine::EntityManager* entityManag
 	}
 }
 
+void BaseStage::InitializeGround(Engine::EntityManager* entityManager, const Vector3& scale) {
+	// 通常描画の地面オブジェクトを生成する。
+	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail_->SetModel("Ground.obj");
+	// オブジェクトとUV変換の拡大率を揃える。
+	tail_->GetWorldTransform().scale_ = scale;
+	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = scale;
+}
+
+void BaseStage::InitializePlayerCar(Engine::EntityManager* entityManager, std::unique_ptr<PlayerCar>& playerCar,
+	const Vector3& position, const Vector3& rotation) {
+	// 派生ステージが所有するプレイヤー車を生成する。
+	playerCar = std::make_unique<PlayerCar>();
+	playerCar->Initialize(entityManager, {}, position, rotation);
+	// ステージ共通の地面高さを車へ設定する。
+	playerCar->SetGroungHeight(0.1f);
+}
+
 void BaseStage::BaseUpdate(float dt) {
 	
 	// ステージコライダーシステムがあるなら
@@ -34723,7 +34929,7 @@ void BaseStage::BaseUpdate(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/BaseStage.h
 ============================================================
-#pragma once
+﻿#pragma once
 // engine
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
@@ -34762,17 +34968,17 @@ public:
 	///< summary>
 	/// 描画
 	///</summary>
-	virtual void Draw() = 0;
+	virtual void Draw() {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	virtual void DrawEffect() = 0;
+	virtual void DrawEffect() {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	virtual void Draw2D() = 0;
+	virtual void Draw2D() {};
 
 
 public:
@@ -34807,6 +35013,23 @@ protected:
 	/// </summary>
 	/// <param name="entityManager"></param>
 	void InitializeStageColliderSystem(Engine::EntityManager* entityManager);
+
+	/// <summary>
+	/// 共通の地面オブジェクトを初期化する。
+	/// </summary>
+	/// <param name="entityManager">エンティティ管理。</param>
+	/// <param name="scale">地面とマテリアルへ設定する拡大率。</param>
+	void InitializeGround(Engine::EntityManager* entityManager, const Vector3& scale = { 100.0f, 100.0f, 100.0f });
+
+	/// <summary>
+	/// プレイヤー車を生成し、共通の接地設定まで初期化する。
+	/// </summary>
+	/// <param name="entityManager">エンティティ管理。</param>
+	/// <param name="playerCar">生成した車を保持する所有ポインタ。</param>
+	/// <param name="position">車の初期座標。</param>
+	/// <param name="rotation">車の初期回転。</param>
+	void InitializePlayerCar(Engine::EntityManager* entityManager, std::unique_ptr<PlayerCar>& playerCar,
+		const Vector3& position, const Vector3& rotation);
 
 protected:
 	/// <summary>
@@ -34888,19 +35111,6 @@ public:
 	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 	// 更新
 	void Update(float dt) override;
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
-
 private:
 
 };
@@ -34962,7 +35172,7 @@ void MainStage::Update(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/MainStage.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "BaseStage.h"
 
 
@@ -34976,21 +35186,6 @@ public:
 
 	// 更新
 	void Update(float dt) override;
-
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -35026,7 +35221,7 @@ private: // 一旦
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/ResultStage.cpp
 ============================================================
-#include "ResultStage.h"
+﻿#include "ResultStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -35041,21 +35236,16 @@ void ResultStage::Initialize(Engine::EntityManager* entityManager, CameraManager
 	InitializeLight(entityManager);
 
 
-	// タイル
-	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail_->SetModel("Ground.obj");
-	tail_->GetWorldTransform().scale_ = { 100,100,100 };
-	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+	// 基底クラスの共通処理で地面を生成する。
+	InitializeGround(entityManager);
 
 	// 換金所
 	moneyExchangePlace = entityManager->CreateObject3D("MoneyExchangePlace", Engine::ObjectModelType::kNormal, { 0,0.06f,0 }, camera);
 	moneyExchangePlace->SetModel("MoneyExchangePlace.obj");
 	moneyExchangePlace->GetWorldTransform().rotate_ = { 0,Math::DegreesToRadians(-90),0 };
 
-	// 車
-	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,Math::DegreesToRadians(-90),0});
-	playerCar_->SetGroungHeight(0.1f);
+	// リザルト用の向きでプレイヤー車を生成する。
+	InitializePlayerCar(entityManager, playerCar_, playerCarPos_, { 0, Math::DegreesToRadians(-90), 0 });
 
 	// ステート変更
 	playerCar_->GetStateMachine()->ChangeState(CarMainState::ResultCashExchange);
@@ -35071,7 +35261,7 @@ void ResultStage::Update(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/ResultStage.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "BaseStage.h"
 
 /// <summary>
@@ -35084,21 +35274,6 @@ public:
 
 	// 更新
 	void Update(float dt) override;
-
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -35135,10 +35310,11 @@ private:
 	Vector3 playerCarPos_ = { -1.25f,0.05f,-4.0f };
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/SelectStage.cpp
 ============================================================
-#include "SelectStage.h"
+﻿#include "SelectStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -35152,16 +35328,11 @@ void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager
 	// ライト初期化
 	InitializeLight(entityManager);
 	
-	// タイル
-	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail_->SetModel("Ground.obj");
-	tail_->GetWorldTransform().scale_ = { 100,100,100 };
-	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+	// 基底クラスの共通処理で地面を生成する。
+	InitializeGround(entityManager);
 
-	// 車
-	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,0,0});
-	playerCar_->SetGroungHeight(0.1f);
+	// セレクト用の向きでプレイヤー車を生成する。
+	InitializePlayerCar(entityManager, playerCar_, playerCarPos_, { 0, 0, 0 });
 
 	for (int i = 0; i < 300; i++) {
 		std::unique_ptr<ObjectComponent> stone = std::make_unique<ObjectComponent>();
@@ -35207,7 +35378,7 @@ void SelectStage::Update(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/SelectStage.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "BaseStage.h"
 
 /// <summary>
@@ -35220,21 +35391,6 @@ public:
 
 	// 更新
 	void Update(float dt) override;
-
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -35273,6 +35429,7 @@ private:
 	//
 	float ratio_ = 1.0f;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/StageColliderSystem.cpp
@@ -35461,7 +35618,7 @@ void TitleStage::Update(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/TitleStage.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "BaseStage.h"
 
 /// <summary>
@@ -35474,21 +35631,6 @@ public:
 
 	// 更新
 	void Update(float dt) override;
-
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -35556,6 +35698,7 @@ private:
 	ProvisionalData provisionalData_;
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/TutorialStage.cpp
 ============================================================
@@ -35601,21 +35744,6 @@ public:
 
 	// 更新
 	void Update(float dt) override;
-
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw() override {};
-
-	/// <summary>
-	/// 描画エフェクト
-	/// </summary>
-	void DrawEffect() override {};
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -39364,114 +39492,58 @@ void GamePlayScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// シーンで使用する入力管理を一括初期化する
-	inputCoordinator_ = std::make_unique<InputCoordinator>();
-	inputCoordinator_->Initialize(input);
-
-	// エフェクト
-	effect_ = std::make_unique<EffectSystem>();
-	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-	// フォローカメラ
-	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	// 選択されたプレイヤー種別を共通基盤へ渡す。
+	const Character::PlayerType playerType = GetSceneData().playerID == 1
+		? Character::PlayerType::kNormal : Character::PlayerType::kBullet;
+	// ゲームプレイで共通利用する入力、カメラ、キャラクター、衝突基盤を一括初期化する。
+	gameplaySession_ = std::make_unique<GameplaySession>();
+	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(), playerType, { 0, 2, -40 });
+	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
+	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables(), {});
 	// ステージカメラ
 	stageCamera_ = std::make_unique<StageCamera>();
-	stageCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
-
-	// カメラ管理
-	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
-	// カメラ追加
-	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
-	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
-	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
-	cameraManager_->AddCamera({ stageCamera_.get(),false }, "stageCamera");
-
-
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
-
-	// ヒットボックスシステム初期化
-	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(GetEntityManager());
-
-	// 弾管理クラス
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntityManager(), GetGlobalVariables(), nullptr);
-	bulletManager_->SetEffect(effect_.get());
-
-	// スペシャルポイント管理クラス
-	specalPointManager_ = std::make_unique<SpecalPointManager>();
-	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-
-	// キャラクター管理 
-	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
-	characterManager_->SetEffect(effect_.get());
-	characterManager_->SetFollowCamera(followCamera_.get());
-	characterManager_->SetBulletManager(bulletManager_.get());
-	characterManager_->SetCameraManager(cameraManager_.get());
-	characterManager_->SetSpecialPointManager(specalPointManager_.get());
+	stageCamera_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables(), {});
+	// ゲームプレイ専用カメラを共通カメラ管理へ追加する。
+	cameraManager->AddCamera({ universeCamera_.get(),false }, "universeCamera");
+	cameraManager->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager->AddCamera({ stageCamera_.get(),false }, "stageCamera");
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
-	gameFlowController_->Initialize(GetSceneManager(),inputCoordinator_->GetInputSystem(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
-
-	// プレイヤー生成
-	if (GetSceneData().playerID == 1) {
-		characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
-	}
-	else {
-		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
-	}
-
-
-	// 追従カメラtarget設定
-	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+	gameFlowController_->Initialize(GetSceneManager(), inputSystem, cameraManager, GetGlobalVariables(), gameplaySession_->GetCharacterManager());
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetEntityManager(), cameraManager_.get());
+	stage_->Initialize(GetEntityManager(), cameraManager);
 	
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(gameplaySession_->GetCharacterManager()->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
-
-
-	// 衝突登録システム
-	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
-	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
-		characterManager_.get(),specalPointManager_.get(),bulletManager_.get());
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	gameUI->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 
 
 	// カメラ設定
-	SetCamera(cameraManager_->GetCamera());
-
-	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-
-	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
+	SetCamera(cameraManager->GetCamera());
 }
 
 // 終了
 void GamePlayScene::Finalize() {
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionRegistrationSystem_->GetCollisionManager()->Clear();
+	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
 }
 
 #pragma endregion 初期化関係
@@ -39494,10 +39566,10 @@ void GamePlayScene::UpdateImGui()
 	Vector2 inputPos = input->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	if (ImGui::Button("lockOn")) {
-		cameraManager_->SetUseCamera("fixedCamera", 0.3f);
+		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", 0.3f);
 	}
 	if (ImGui::Button("noLockOn")) {
-		cameraManager_->SetUseCamera("followCamera", 0.3f);
+		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", 0.3f);
 	}
 
 
@@ -39511,8 +39583,15 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
+	// 共通基盤から、このフレームで使用する各管理クラスを取得する。
+	InputCoordinator* inputCoordinator = gameplaySession_->GetInputCoordinator();
+	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
+	SpecalPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
+	BulletManager* bulletManager = gameplaySession_->GetBulletManager();
+	HitBox::System* hitBoxSystem = gameplaySession_->GetHitBoxSystem();
+	CollisionRegistrationSystem* collisionRegistrationSystem = gameplaySession_->GetCollisionRegistrationSystem();
 	// 入力更新とプレイヤーコマンド実行を一括で行う
-	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
+	inputCoordinator->Update(GetTime(), characterManager->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -39528,33 +39607,33 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 	// キャラクターマネージャー更新
-	characterManager_->Update(GetTime(),gameFlowController_->IsMove());
+	characterManager->Update(GetTime(),gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
-	specalPointManager_->SetTarget(characterManager_->GetPlayer());
-	specalPointManager_->Update(GetTime());
+	specialPointManager->SetTarget(characterManager->GetPlayer());
+	specialPointManager->Update(GetTime());
 	// 弾マネージャ
-	bulletManager_->Update();
+	bulletManager->Update();
 	// ステージ
 	stage_->Update(GetTime());
 	// ヒットボックスシステム更新
-	hitBoxSystem_->Update(GetTime());
+	hitBoxSystem->Update(GetTime());
 	// 当たり判定
-	collisionRegistrationSystem_->RegisterAllCollisions();
+	collisionRegistrationSystem->RegisterAllCollisions();
 	// Effect更新
-	effect_->Update(GetTime());
+	gameplaySession_->GetEffectSystem()->Update(GetTime());
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(GetTime());
 
-	if (characterManager_->GetPlayer()) {
-		if (characterManager_->GetPlayer()->GetAlive()) {
+	if (characterManager->GetPlayer()) {
+		if (characterManager->GetPlayer()->GetAlive()) {
 			GetSceneData().playerDie = false;
 		}
 	}
 	else {
 		GetSceneData().playerDie = true;
 	}
-	GetSceneData().score = characterManager_->GetScore();
-	gameUI->SetPlayer(characterManager_->GetPlayer());
+	GetSceneData().score = characterManager->GetScore();
+	gameUI->SetPlayer(characterManager->GetPlayer());
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
 	// ポーズシステム更新
@@ -39563,7 +39642,7 @@ void GamePlayScene::Update()
 	poseUI_->Update(GetTime());
 
 	// カメラ管理の更新
-	cameraManager_->Update();
+	gameplaySession_->GetCameraManager()->Update();
 }
 
 #pragma endregion //更新関係
@@ -39573,7 +39652,7 @@ void GamePlayScene::Update()
 // 3D描画
 void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
-	bulletManager_->DrawEffect();
+	gameplaySession_->GetBulletManager()->DrawEffect();
 	// ゲーム進行
 	gameFlowController_->Draw();
 }
@@ -39583,9 +39662,9 @@ void GamePlayScene::Draw2D(){
 	// ゲームUI
 	gameUI->Draw();
 	// キャラクター
-	characterManager_->Draw2D();
+	gameplaySession_->GetCharacterManager()->Draw2D();
 	// 弾マネージャ
-	bulletManager_->Draw2D();
+	gameplaySession_->GetBulletManager()->Draw2D();
 	// ゲーム進行UI
 	gameFlowController_->Draw2D();
 	// ポーズUI
@@ -39629,6 +39708,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+#include "DirectXGame/application/base/Game/GameplaySession.h"
 
 /// <summary>
 /// ゲームプレイシーン
@@ -39662,8 +39742,8 @@ private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
 	DebugTimer debugTimer_;
-	// 物理入力、アクション入力、コマンドをまとめて管理する
-	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
+	// ゲームプレイシーンで共通利用する基盤システム
+	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
@@ -39673,8 +39753,6 @@ private:
 	// ポーズUI
 	std::unique_ptr<PoseUI> poseUI_;
 private:
-	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_ = nullptr;
 	// 固定カメラ
@@ -39682,26 +39760,8 @@ private:
 	// ステージカメラ
 	std::unique_ptr<StageCamera> stageCamera_ = nullptr;
 
-	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
-	// エフェクト
-	std::unique_ptr<EffectSystem> effect_ = nullptr;
-	// スペシャルポイント管理クラス
-	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
-
-private:
-	// キャラクター管理
-	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
 	// ステージ
 	std::unique_ptr<MainStage> stage_ = nullptr;
-	// 弾
-	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
-	// ヒットボックスシステム
-	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
-
-private:
-	// 衝突登録システム
-	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;	
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = nullptr;
@@ -41453,100 +41513,51 @@ void TutorialScene::Initialize() {
 	// Input
 	input = GetInput();
 
-	// シーンで使用する入力管理を一括初期化する
-	inputCoordinator_ = std::make_unique<InputCoordinator>();
-	inputCoordinator_->Initialize(input);
-
-	// エフェクト
-	effect_ = std::make_unique<EffectSystem>();
-	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-	// フォローカメラ
-	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
-
-	// カメラ管理
-	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
-	// カメラ追加
-	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
-
-
-	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
-
-	// ヒットボックスシステム初期化
-	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(GetEntityManager());
-
-	// 弾管理クラス
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntityManager(), GetGlobalVariables(), nullptr);
-	bulletManager_->SetEffect(effect_.get());
-
-	// スペシャルポイント管理クラス
-	specalPointManager_ = std::make_unique<SpecalPointManager>();
-	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
-
-
-	// キャラクター管理 
-	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
-	characterManager_->SetEffect(effect_.get());
-	characterManager_->SetFollowCamera(followCamera_.get());
-	characterManager_->SetBulletManager(bulletManager_.get());
-	characterManager_->SetCameraManager(cameraManager_.get());
-	characterManager_->SetSpecialPointManager(specalPointManager_.get());
-
-
-	// プレイヤー生成
-	characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
-
-	// 追従カメラtarget設定
-	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+	// チュートリアルでもゲームプレイ共通基盤を一括初期化する。
+	gameplaySession_ = std::make_unique<GameplaySession>();
+	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(),
+		Character::PlayerType::kNormal, { 0, 2, -40 });
+	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
+	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
+	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
 
 
 	tutorialStage_ = std::make_unique<TutorialStage>();
-	tutorialStage_->Initialize(GetEntityManager(), cameraManager_.get());
+	tutorialStage_->Initialize(GetEntityManager(), cameraManager);
 
 	tutorialSystem_ = std::make_unique<TutorialSystem>();
-	tutorialSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), characterManager_->GetPlayer());
+	tutorialSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables(), characterManager->GetPlayer());
 
 	tutorialUI_ = std::make_unique<TutorialUI>();
-	tutorialUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	tutorialUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
-	poseSystem_->Initialize(GetSceneManager(), inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	poseSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables());
 
 	poseUI_ = std::make_unique<PoseUI>();
-	poseUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	poseUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 
 
 
 	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	//sp->SetStage(stage_.get());
 
-	// 衝突登録システム
-	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
-	collisionRegistrationSystem_->Initialize(GetGlobalVariables(), GetEntityManager()->Get3DLineCommon(), hitBoxSystem_.get(),
-		characterManager_.get(), specalPointManager_.get(), bulletManager_.get());
-
-
 	// カメラ設定
-	SetCamera(cameraManager_->GetCamera());
-
-	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-
-	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
+	SetCamera(cameraManager->GetCamera());
 }
 
 void TutorialScene::Finalize() {
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionRegistrationSystem_->GetCollisionManager()->Clear();
+	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
 }
 
 void TutorialScene::Update() {
+	// 共通基盤から、このフレームで使用する各管理クラスを取得する。
+	InputCoordinator* inputCoordinator = gameplaySession_->GetInputCoordinator();
+	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
+	SpecalPointManager* specialPointManager = gameplaySession_->GetSpecialPointManager();
 	// 入力更新とプレイヤーコマンド実行を一括で行う
-	inputCoordinator_->Update(GetTime(), characterManager_->GetPlayer());
+	inputCoordinator->Update(GetTime(), characterManager->GetPlayer());
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -41562,20 +41573,20 @@ void TutorialScene::Update() {
 	// ImGuiの更新
 	UpdateImGui();
 	// キャラクターマネージャー更新
-	characterManager_->Update(GetTime(),true);
+	characterManager->Update(GetTime(),true);
 	// 必殺技ポイント管理クラス
-	specalPointManager_->SetTarget(characterManager_->GetPlayer());
-	specalPointManager_->Update(GetTime());
+	specialPointManager->SetTarget(characterManager->GetPlayer());
+	specialPointManager->Update(GetTime());
 	// 弾マネージャ
-	bulletManager_->Update();
+	gameplaySession_->GetBulletManager()->Update();
 	// ステージ
 	tutorialStage_->Update(GetTime());
 	// ヒットボックスシステム更新
-	hitBoxSystem_->Update(GetTime());
+	gameplaySession_->GetHitBoxSystem()->Update(GetTime());
 	// 当たり判定
-	collisionRegistrationSystem_->RegisterAllCollisions();
+	gameplaySession_->GetCollisionRegistrationSystem()->RegisterAllCollisions();
 	// Effect更新
-	effect_->Update(GetTime());
+	gameplaySession_->GetEffectSystem()->Update(GetTime());
 	// チュートリアルシステム更新
 	tutorialSystem_->Update(GetTime());
 	// チュートリアルUI更新
@@ -41587,12 +41598,12 @@ void TutorialScene::Update() {
 	
 	
 	// カメラ管理の更新
-	cameraManager_->Update();
+	gameplaySession_->GetCameraManager()->Update();
 }
 
 void TutorialScene::Draw3D() {
 	////3Dオブジェクトの描画
-	bulletManager_->DrawEffect();
+	gameplaySession_->GetBulletManager()->DrawEffect();
 }
 
 void TutorialScene::Draw2D() {
@@ -41601,9 +41612,9 @@ void TutorialScene::Draw2D() {
 	// ポーズUI描画
 	poseUI_->Draw();
 	// キャラクター
-	characterManager_->Draw2D();
+	gameplaySession_->GetCharacterManager()->Draw2D();
 	// 弾マネージャ
-	bulletManager_->Draw2D();
+	gameplaySession_->GetBulletManager()->Draw2D();
 	
 }
 
@@ -41646,6 +41657,7 @@ File Path: project/DirectXGame/application/scene/TutorialScene.h
 #include <DirectXGame/application/base/UI/PoseUI.h>
 
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
+#include "DirectXGame/application/base/Game/GameplaySession.h"
 
 class TutorialScene : public Engine::BaseScene {
 public:
@@ -41673,29 +41685,8 @@ private:
 private:
 	Engine::Input* input = nullptr;
 	Engine::Audio* audio = nullptr;
-	// 物理入力、アクション入力、コマンドをまとめて管理する
-	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
-
-	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
-
-	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
-	// エフェクト
-	std::unique_ptr<EffectSystem> effect_ = nullptr;
-	// スペシャルポイント管理クラス
-	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
-	
-	// キャラクター管理
-	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
-	// 弾
-	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
-	// ヒットボックスシステム
-	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
-
-private:
-	// 衝突登録システム
-	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
+	// ゲームプレイシーンで共通利用する基盤システム
+	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
 private:
 	// チュートリアルステージ
 	std::unique_ptr<TutorialStage> tutorialStage_;
