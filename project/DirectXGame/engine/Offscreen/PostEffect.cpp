@@ -241,16 +241,8 @@ void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 	CreateRootSignature();
 
 #pragma region BlendState
-	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	// 標準のアルファブレンド設定を生成する
+	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
 #pragma endregion //BlendState(ブレンドステート)
 
 	// RasterizerState(ラスタライザステート)の設定
@@ -262,7 +254,7 @@ void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = false;
 

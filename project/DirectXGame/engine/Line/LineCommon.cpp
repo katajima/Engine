@@ -136,16 +136,8 @@ void Engine::LineCommon::CreateGraphicsPipeline()
 #pragma region BlendState
 
 	// BlendState(ブレンドステート)の設定
-	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	// 標準のアルファブレンド設定を生成する
+	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
 
 #pragma endregion //BlendState(ブレンドステート)
 
@@ -160,22 +152,12 @@ void Engine::LineCommon::CreateGraphicsPipeline()
 
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 
 
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = false;
-	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState2, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 

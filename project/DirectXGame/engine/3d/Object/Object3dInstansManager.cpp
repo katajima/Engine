@@ -663,13 +663,8 @@ void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	CreateRootSignature();
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 透明オブジェクトの場合はデプス書き込みを無効化
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	// 標準の深度テストと書き込み設定を生成する
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 
 	// インプットレイアウト
 	psoManager_->AddInputElementDesc("POSITION", 0,
@@ -728,10 +723,8 @@ void Engine::Object3dInstansManager::CreateShadowMapPipeline()
 	D3D12_BLEND_DESC shadowBlendDesc{};
 	shadowBlendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
 
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	// シャドウマップでも標準の深度比較と書き込み設定を利用する
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMapInstans.VS.hlsl");
 	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");

@@ -41,6 +41,10 @@ namespace Engine {
 
 	// PSO設定関数
 	namespace PSOFanction {
+		// 標準的なアルファブレンド設定を生成する
+		D3D12_BLEND_DESC CreateAlphaBlendDesc();
+		// 深度テストを有効にした標準的な深度ステンシル設定を生成する
+		D3D12_DEPTH_STENCIL_DESC CreateDepthStencilDesc();
 		// ルートパラメータ設定
 		void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister, D3D12_SHADER_VISIBILITY shaderType, D3D12_ROOT_PARAMETER_TYPE rootType);
 		// ルートパラメータ設定

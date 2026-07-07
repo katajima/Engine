@@ -74,27 +74,13 @@ void Engine::Object3dCommon::CreateGraphicsPipeline()
 #pragma region BlendState
 
 	// BlendState(ブレンドステート)の設定
-	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	// 標準のアルファブレンド設定を生成する
+	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
 
 #pragma endregion //BlendState(ブレンドステート)
 
 	//DepthStencilStateの設定を行う
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
-	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 
 
 	// インプットレイアウト
@@ -180,13 +166,12 @@ void Engine::Object3dCommon::CreateShadowMapPipeline()
 	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	PSOFanction::SetRootParameter(rootParameters[1], 6, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
+	// シャドウマップはカラーバッファへ書き込まない
 	D3D12_BLEND_DESC blendDesc{};
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0;
 
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	// シャドウマップでも標準の深度比較と書き込み設定を利用する
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/ShadowMap.VS.hlsl");
 	psoManager_->SetShaderFileName(ShaderFileName::PS, L"");

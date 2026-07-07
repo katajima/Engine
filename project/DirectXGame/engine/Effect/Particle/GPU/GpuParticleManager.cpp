@@ -440,13 +440,9 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = PSOFanction::CreateDepthStencilDesc();
 	// 透明オブジェクトの場合はデプス書き込みを無効化
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	// インプットレイアウト
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
@@ -458,16 +454,7 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 
 
 	// BlendState(ブレンドステート)の設定
-	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	D3D12_BLEND_DESC blendDesc = PSOFanction::CreateAlphaBlendDesc();
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.pipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
@@ -493,9 +480,8 @@ void Engine::GpuParticleManager::CreateGraphicsPipeline()
 	/// トレイルエフェクト用のパイプライン作成
 
 	// トレイルPSO
-	depthStencilDesc.DepthEnable = TRUE;
+	// トレイルは深度テストのみ行い、深度値を書き込まない
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 
 	psoTrailManager_->NoInputLayout();
