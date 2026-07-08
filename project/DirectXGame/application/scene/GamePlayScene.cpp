@@ -11,6 +11,17 @@
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
+namespace {
+	// デバッグ操作でカメラを切り替える際の補間時間。
+	constexpr float kDebugCameraBlendSeconds = 0.3f;
+	// リトライ時のシーン遷移時間。
+	constexpr float kRetryTransitionSeconds = 0.5f;
+	// タイトルへ戻る際のシーン遷移時間。
+	constexpr float kTitleTransitionSeconds = 0.25f;
+	// ゲーム開始時のプレイヤー座標。
+	const Vector3 kPlayerInitialPosition = { 0.0f, 2.0f, -40.0f };
+}
+
 #pragma region Initialize
 // 初期化
 void GamePlayScene::Initialize() {
@@ -23,7 +34,7 @@ void GamePlayScene::Initialize() {
 		? Character::PlayerType::kNormal : Character::PlayerType::kBullet;
 	// ゲームプレイで共通利用する入力、カメラ、キャラクター、衝突基盤を一括初期化する。
 	gameplaySession_ = std::make_unique<GameplaySession>();
-	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(), playerType, { 0, 2, -40 });
+	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(), playerType, kPlayerInitialPosition);
 	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
 	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
 	// 宇宙カメラ
@@ -92,10 +103,10 @@ void GamePlayScene::UpdateImGui()
 	Vector2 inputPos = input->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	if (ImGui::Button("lockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", 0.3f);
+		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", kDebugCameraBlendSeconds);
 	}
 	if (ImGui::Button("noLockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", 0.3f);
+		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", kDebugCameraBlendSeconds);
 	}
 
 
@@ -121,10 +132,10 @@ void GamePlayScene::Update()
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+		GetSceneManager()->ChangeScene("GAMEPLAY", kRetryTransitionSeconds);
 	}
 	if (input->IsTriggerKey(DIK_T)) {
-		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+		GetSceneManager()->ChangeScene("TITLE", kTitleTransitionSeconds);
 	}
 	
 	// 調整項目

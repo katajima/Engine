@@ -2,6 +2,11 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 
+namespace {
+	// ステージ上でプレイヤー車が接地する共通の高さ。
+	constexpr float kDefaultPlayerCarGroundHeight = 0.1f;
+}
+
 
 
 void BaseStage::InitializeOcean(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
@@ -81,7 +86,7 @@ void BaseStage::InitializePlayerCar(Engine::EntityManager* entityManager, std::u
 	playerCar = std::make_unique<PlayerCar>();
 	playerCar->Initialize(entityManager, {}, position, rotation);
 	// ステージ共通の地面高さを車へ設定する。
-	playerCar->SetGroundHeight(0.1f);
+	playerCar->SetGroundHeight(kDefaultPlayerCarGroundHeight);
 }
 
 void BaseStage::BaseUpdate(float dt) {

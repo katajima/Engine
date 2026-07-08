@@ -656,6 +656,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\GameplaySession.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Pose\PoseSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.h" />

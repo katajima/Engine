@@ -1,6 +1,11 @@
 ﻿#include "SelectScene.h"
 
 
+namespace {
+	// セレクト画面用カメラの初期座標。
+	const Vector3 kSelectCameraPosition = { 1.8f, 0.7f, 3.3f };
+}
+
 void SelectScene::Initialize() {
 	input = GetInput();
 	// シーンで使用する入力管理を一括初期化する
@@ -9,7 +14,7 @@ void SelectScene::Initialize() {
 
 	// セレクトカメラ生成
 	selectCamera_ = std::make_unique<SelectCamera>();
-	selectCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), { 1.8f,0.7f,3.3f });
+	selectCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), kSelectCameraPosition);
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());

@@ -3,8 +3,9 @@
 
 #include "vector"
 #include "string"
+#include <memory>
 
-/// ダメージデータ
+/// ダメージ処理の共通インターフェース
 class DamageData {
 public:
 	// ダメージタイプ
@@ -20,116 +21,151 @@ public:
 		kCustom,	// 1つ1つで変える
 	};
 
-	// 一回データ
-	class One {
-	public:
-		// 更新
-		void Update(float dt);
-		// ダメージが入るか
-		bool IsAttack() const { return isDamage; }
-		// 終わったか
-		bool IsFinish() const { return isFinish; }
-		// ダメージ取得 
-		float GetDamage() const;
-		// ダメージ設定
-		void SetDamage(float damage) { this->damage = damage; };
+	// 基底クラス経由で安全に破棄するための仮想デストラクタ
+	virtual ~DamageData() = default;
+	// ダメージ状態を更新する
+	virtual void Update(float dt) = 0;
+	// 現在発生させるダメージを取得する
+	virtual float GetDamage() const = 0;
+	// ダメージ処理が終了したか取得する
+	virtual bool IsFinish() const = 0;
+	// 現在ダメージを発生させるか取得する
+	virtual bool IsAttack() const = 0;
+	// 派生クラスの種別を取得する
+	virtual Type GetType() const = 0;
+	// 値コピー時に派生型を維持した複製を作る
+	virtual std::unique_ptr<DamageData> Clone() const = 0;
+};
 
-	private:
-		float damage = 0;			// ダメージ(変化がない場合)
-		float timer = 0.0f;		// 時間
-		bool isDamage = true;	// ダメージを入れるか
-		bool isFinish = false;	// 攻撃として終了したか
-	};
+/// 一回だけダメージを発生させるデータ
+class One final : public DamageData {
+public:
+	// 一回ダメージの状態を更新する
+	void Update(float dt) override;
+	// 設定されたダメージを取得する
+	float GetDamage() const override;
+	// 一回ダメージが終了したか取得する
+	bool IsFinish() const override { return isFinish; }
+	// ダメージを発生させるか取得する
+	bool IsAttack() const override { return isDamage; }
+	// 一回ダメージ種別を返す
+	Type GetType() const override { return Type::kOne; }
+	// 現在の状態を含めて複製する
+	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<One>(*this); }
+	// ダメージ値を設定する
+	void SetDamage(float value) { damage = value; }
 
-	// 連撃データ
-	class Continuous {
-	public:
-		// 更新
-		void Update(float dt);
-		// カウントリセット
-		void Reset();
-		// ダメージが入るか
-		bool IsAttack() const { return isDamage; }
-		// 終わったか
-		bool IsFinish() const { return isFinish; }
-		// ダメージ取得 
-		float GetDamage() const;
-		// 一つ一つのダメージの変化タイプ取得
-		OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
-	private:
-		OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 一つ一つのダメージの変化タイプ
-		float interval = 0.1f;		// 連撃のダメージ入りる間隔
-		int num = 2;				// 連撃のダメージの回数
-		std::vector<float> damages;	// ダメージ一つ一つ
-		float damage = 0;			// ダメージ(変化がない場合)
-	private:
-		float timer = 0.0f;		// 時間
-		bool isDamage = true;	// ダメージを入れるか
-		bool isFinish = false;	// 攻撃として終了したか
-		int count = 0;			// カウント用
-	};
-
-	// 持続データ
-	class Duration {
-	public:
-
-		// 更新
-		void Update(float dt);
-		// カウントリセット
-		void Reset();
-		// ダメージが入るか
-		bool IsAttack() const { return isDamage; }
-		// 終わったか
-		bool IsFinish() const { return isFinish; }
-		// ダメージ取得 
-		float GetDamage() const;
-		// ダメージ設定
-		void SetDamage(float damage) { this->damage = damage; };
-	private:
-		float interval = 0.1f;	// 持続ダメージの入る間隔	
-		int num = 2;			// 持続ダメージの回数
-		float damage = 0;		// ダメージ
-		bool isDed = false;		// 持続ダメージでの死亡はするか
-	private:
-		float timer = 0.0f;		// 時間
-		bool isDamage = true;	// ダメージを入れるか
-		bool isFinish = false;	// 攻撃として終了したか
-		int count = 0;			// カウント用
-	};
-
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-	// ダメージの与え方取得
-	Type GetType() const { return type; };
-	// ダメージ取得
-	float GetDamage();
-	// 終了しているか
-	bool IsFinish();
-	// ダメージが発生しているか
-	bool IsAttack();
-
-
-	// 一撃
-	One& GetOne() { return one; }
-
-	// 連撃
-	Continuous& GetContinuous() { return continuous; }
-
-	// 持続
-	Duration& GetDuration() { return duration; }
-
-	
 private:
-	Type type = Type::kOne;		// ダメージの与え方;
-	Continuous continuous{};	// 連撃ダメージデータ
-	Duration duration{};		// 持続ダメージデータ
-	One one{};					// 一回ダメージデータ
-	float damage = 0;			// ダメージ
+	float damage = 0.0f;		// 一回で与えるダメージ
+	bool isDamage = true;	// ダメージを発生させるか
+	bool isFinish = false;	// 一回ダメージが終了したか
+};
+
+/// 一回の攻撃中に複数回ダメージを発生させるデータ
+class Continuous final : public DamageData {
+public:
+	// 連撃ダメージの状態を更新する
+	void Update(float dt) override;
+	// 現在のヒットに対応するダメージを取得する
+	float GetDamage() const override;
+	// 連撃ダメージが終了したか取得する
+	bool IsFinish() const override { return isFinish; }
+	// 現在ダメージを発生させるか取得する
+	bool IsAttack() const override { return isDamage; }
+	// 連撃ダメージ種別を返す
+	Type GetType() const override { return Type::kContinuous; }
+	// 現在の状態を含めて複製する
+	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<Continuous>(*this); }
+	// 連撃の実行状態を初期化する
+	void Reset();
+	// 連撃内のダメージ変更方式を取得する
+	OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
+
+private:
+	OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 各ヒットのダメージ方式
+	float interval = 0.1f;		// ダメージを発生させる間隔
+	int num = 2;				// ダメージを発生させる回数
+	std::vector<float> damages;	// ヒットごとのダメージ
+	float damage = 0.0f;		// 一定方式で使用するダメージ
+	float timer = 0.0f;		// 次のダメージまでの時間
+	bool isDamage = true;	// 現在ダメージを発生させるか
+	bool isFinish = false;	// 連撃ダメージが終了したか
+	int count = 0;			// 発生済みダメージ回数
+};
+
+/// 時間経過で継続的にダメージを発生させるデータ
+class Duration final : public DamageData {
+public:
+	// 持続ダメージの状態を更新する
+	void Update(float dt) override;
+	// 設定された持続ダメージを取得する
+	float GetDamage() const override;
+	// 持続ダメージが終了したか取得する
+	bool IsFinish() const override { return isFinish; }
+	// 現在ダメージを発生させるか取得する
+	bool IsAttack() const override { return isDamage; }
+	// 持続ダメージ種別を返す
+	Type GetType() const override { return Type::kDuration; }
+	// 現在の状態を含めて複製する
+	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<Duration>(*this); }
+	// 持続ダメージの実行状態を初期化する
+	void Reset();
+	// ダメージ値を設定する
+	void SetDamage(float value) { damage = value; }
+
+private:
+	float interval = 0.1f;	// ダメージを発生させる間隔
+	int num = 2;			// ダメージを発生させる回数
+	float damage = 0.0f;	// 一回ごとの持続ダメージ
+	bool isDed = false;		// 持続ダメージで死亡可能か
+	float timer = 0.0f;		// 次のダメージまでの時間
+	bool isDamage = true;	// 現在ダメージを発生させるか
+	bool isFinish = false;	// 持続ダメージが終了したか
+	int count = 0;			// 発生済みダメージ回数
+};
+
+/// 派生DamageDataの所有と値コピーを担当するハンドル
+class DamageDataHandle {
+public:
+	// 既定では一回ダメージを保持する
+	DamageDataHandle();
+	// 派生型を維持してコピーする
+	DamageDataHandle(const DamageDataHandle& other);
+	// 派生型を維持して代入する
+	DamageDataHandle& operator=(const DamageDataHandle& other);
+	// 所有権のムーブを許可する
+	DamageDataHandle(DamageDataHandle&&) noexcept = default;
+	DamageDataHandle& operator=(DamageDataHandle&&) noexcept = default;
+	// 任意の派生ダメージデータから複製する
+	explicit DamageDataHandle(const DamageData& data);
+
+	// 保持中の派生ダメージデータを更新する
+	void Update(float dt) { data_->Update(dt); }
+	// 保持中の派生ダメージ値を取得する
+	float GetDamage() const { return data_->GetDamage(); }
+	// 保持中の処理が終了したか取得する
+	bool IsFinish() const { return data_->IsFinish(); }
+	// 現在ダメージを発生させるか取得する
+	bool IsAttack() const { return data_->IsAttack(); }
+	// 保持中のダメージ種別を取得する
+	DamageData::Type GetType() const { return data_->GetType(); }
+	// 指定種別の派生データへ切り替える
+	void SetType(DamageData::Type type);
+	// 基底クラス参照を取得する
+	DamageData& Get() { return *data_; }
+	const DamageData& Get() const { return *data_; }
+	// 既存の編集処理向けに一回ダメージを取得する
+	One& GetOne();
+	const One& GetOne() const;
+	// 連撃ダメージを取得する
+	Continuous& GetContinuous();
+	const Continuous& GetContinuous() const;
+	// 持続ダメージを取得する
+	Duration& GetDuration();
+	const Duration& GetDuration() const;
+
+private:
+	std::unique_ptr<DamageData> data_;	// 実際に動作する派生ダメージデータ
 };
 
 // リアクション
@@ -204,7 +240,7 @@ struct HitReactionData {
 	// 重力倍率
 	float gravityScale = 1.0f;
 	// ダメージデータ
-	DamageData damageData{};
+	DamageDataHandle damageData{};
 	// エフェクト
 	std::vector<HitEffectEntry> hitEffectNames;
 };

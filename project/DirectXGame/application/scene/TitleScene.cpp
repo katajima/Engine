@@ -2,6 +2,25 @@
 
 
 
+namespace {
+	// タイトル画面で選択する既定プレイヤーID。
+	constexpr int kDefaultPlayerId = 1;
+	// タイトルキャラクターの初期座標。
+	const Vector3 kTitlePlayerPosition = { 0.0f, 0.0f, 6.0f };
+	// タイトルカメラの初期座標。
+	const Vector3 kTitleCameraPosition = { 0.0f, 3.7f, -4.5f };
+	// アニメーションを切り替える際の補間時間。
+	constexpr float kAnimationBlendSeconds = 0.1f;
+	// 車へ乗り込んだ後にセレクト画面へ遷移するまでの時間。
+	constexpr float kSceneTransitionDelaySeconds = 1.0f;
+	// キャラクターが車へ近づく1フレーム当たりの移動量。
+	constexpr float kPlayerApproachSpeedPerFrame = 0.1f;
+	// 影オブジェクトを配置する地面からの高さ。
+	constexpr float kShadowGroundOffset = 0.1f;
+	// 影モデルを地面へ寝かせるX軸回転角度。
+	constexpr float kShadowRotationDegrees = -90.0f;
+}
+
 void TitleScene::Initialize()
 {
 	// 入力初期化
@@ -14,7 +33,7 @@ void TitleScene::Initialize()
 	// リソース
 	InitializeResources();
 	// 
-	GetSceneData().playerID = 1;
+	GetSceneData().playerID = kDefaultPlayerId;
 
 	// エフェクト
 	effect_ = std::make_unique<EffectSystem>();
@@ -35,7 +54,7 @@ void TitleScene::Initialize()
 		false, false, nullptr,Engine::ObjectModelType::kSkinning);
 	objectComponent_->GetObject3D()->InitAnimationComponent();
 	objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop",0.0f);
-	objectComponent_->GetWorldTransform().translate_ = { 0,0,6 };
+	objectComponent_->GetWorldTransform().translate_ = kTitlePlayerPosition;
 
 	// オブジェクトコンポーネント追加
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -43,7 +62,8 @@ void TitleScene::Initialize()
 	objectComponentShadow_->InitializeInstancing(GetEntityManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
 		false, false, nullptr, Engine::ObjectInstance::TransparencyType::kYes);
 
-	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f },
+		{ Math::DegreesToRadians(kShadowRotationDegrees),0.0f,0.0f }, { 0.0f,kShadowGroundOffset,0.0f });
 	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 }
 
@@ -60,18 +80,18 @@ void TitleScene::Update()
 	if (!isStart_ && inputCoordinator_->GetInputSystem()->GetGameInputData().decisionTrigger) {
 		titleUI_->Action();
 		isStart_ = true;
-		objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
+		objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", kAnimationBlendSeconds);
 	}
 	if (isStart_) {
 		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetBodyWorldPosition().z) {
 			objectComponent_->GetWorldTransform().translate_.z = titleStage_->GetPlayerCar()->GetBodyWorldPosition().z;
-			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", 0.1f);
+			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", kAnimationBlendSeconds);
 			objectComponent_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
 			objectComponentShadow_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
 			//
 			startTimer_ += GetTime();
 
-			if (startTimer_ >= 1.0f) {
+			if (startTimer_ >= kSceneTransitionDelaySeconds) {
 				GetSceneManager()->ChangeScene("SELECT");
 			}
 
@@ -79,7 +99,7 @@ void TitleScene::Update()
 			titleStage_->GetPlayerCar()->Action();
 		}
 		else {
-			objectComponent_->GetWorldTransform().translate_.z += 0.1f;
+			objectComponent_->GetWorldTransform().translate_.z += kPlayerApproachSpeedPerFrame;
 		}
 	}
 
@@ -88,7 +108,7 @@ void TitleScene::Update()
 
 	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x;
 	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z;
-	objectComponentShadow_->GetWorldTransform().translate_.y = 0.1f;
+	objectComponentShadow_->GetWorldTransform().translate_.y = kShadowGroundOffset;
 
 	objectComponentShadow_->Update();
 
@@ -129,7 +149,7 @@ void TitleScene::InitializeCamera()
 {
 	// タイトルシーン用カメラ
 	titleCamera_ = std::make_unique<TitleCamera>();
-	titleCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-4.5f });
+	titleCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), kTitleCameraPosition);
 
 
 	// カメラ管理クラス初期化

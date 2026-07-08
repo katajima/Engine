@@ -2,93 +2,77 @@
 #include <DirectXGame/engine/Math/Random.h>
 
 #pragma region DamageData
-// 更新
-void DamageData::Update(float dt) {
-	switch (type)
-	{
-	case DamageData::kOne:
-		one.Update(dt);
-		break;
-	case DamageData::kContinuous:
-		continuous.Update(dt);
-		break;
-	case DamageData::kDuration:
-		duration.Update(dt);
-		break;
-	default:
-		break;
-	}
-};
-// ダメージ取得
-float DamageData::GetDamage() {
-	float damage = 0;
 
-	switch (type)
-	{
-	case DamageData::kOne:
-		damage = one.GetDamage();
-		break;
-	case DamageData::kContinuous:
-		damage = continuous.GetDamage();
-		break;
-	case DamageData::kDuration:
-		damage = duration.GetDamage();
-		break;
-	default:
-		break;
-	}
+DamageDataHandle::DamageDataHandle()
+	: data_(std::make_unique<One>()) {}
 
-	return damage;
-};
-// 終了しているか
-bool DamageData::IsFinish() {
-	bool is = true;
-	switch (type)
-	{
-	case DamageData::kOne:
-		is = one.IsFinish();
-		break;
-	case DamageData::kContinuous:
-		is = continuous.IsFinish();
-		break;
-	case DamageData::kDuration:
-		is = duration.IsFinish();
-		break;
-	default:
-		break;
+DamageDataHandle::DamageDataHandle(const DamageDataHandle& other)
+	: data_(other.data_ ? other.data_->Clone() : std::make_unique<One>()) {}
+
+DamageDataHandle& DamageDataHandle::operator=(const DamageDataHandle& other) {
+	// 自己代入で現在の派生データを不要に作り直さない
+	if (this != &other) {
+		data_ = other.data_ ? other.data_->Clone() : std::make_unique<One>();
 	}
-	return is;
+	return *this;
 }
-// ダメージが発生しているか
-bool DamageData::IsAttack()
-{
-	bool is = true;
-	switch (type)
-	{
+
+DamageDataHandle::DamageDataHandle(const DamageData& data)
+	: data_(data.Clone()) {}
+
+void DamageDataHandle::SetType(DamageData::Type type) {
+	// 指定されたダメージ方式に対応する派生インスタンスへ切り替える
+	switch (type) {
 	case DamageData::kOne:
-		is = one.IsAttack();
+		data_ = std::make_unique<One>();
 		break;
 	case DamageData::kContinuous:
-		is = continuous.IsAttack();
+		data_ = std::make_unique<Continuous>();
 		break;
 	case DamageData::kDuration:
-		is = duration.IsAttack();
+		data_ = std::make_unique<Duration>();
 		break;
 	default:
+		data_ = std::make_unique<One>();
 		break;
 	}
-	return is;
+}
+
+One& DamageDataHandle::GetOne() {
+	return dynamic_cast<One&>(*data_);
+}
+
+const One& DamageDataHandle::GetOne() const {
+	return dynamic_cast<const One&>(*data_);
+}
+
+Continuous& DamageDataHandle::GetContinuous() {
+	return dynamic_cast<Continuous&>(*data_);
+}
+
+const Continuous& DamageDataHandle::GetContinuous() const {
+	return dynamic_cast<const Continuous&>(*data_);
+}
+
+Duration& DamageDataHandle::GetDuration() {
+	return dynamic_cast<Duration&>(*data_);
+}
+
+const Duration& DamageDataHandle::GetDuration() const {
+	return dynamic_cast<const Duration&>(*data_);
 }
 
 #pragma endregion ダメージデータ
 
 #pragma region One
 // 更新
-void DamageData::One::Update(float dt) {
+void One::Update(float dt) {
+	// 一回ダメージは最初の更新で処理完了とする
+	(void)dt;
 	isFinish = true;
 }
 // ダメージ取得
-float DamageData::One::GetDamage() const {
+float One::GetDamage() const {
 	return damage;
 }
 
@@ -96,7 +80,7 @@ float DamageData::One::GetDamage() const {
 
 #pragma region Duration
 // 更新
-void DamageData::Duration::Update(float dt) {
+void Duration::Update(float dt) {
 
 	// カウント内なら時間を加算
 	if (count < num && !isDamage) {
@@ -116,13 +100,13 @@ void DamageData::Duration::Update(float dt) {
 }
 
 // カウントリセット
-void DamageData::Duration::Reset() {
+void Duration::Reset() {
 	count = 0;
 	isFinish = false;
 }
 
 // ダメージ取得 
-float DamageData::Duration::GetDamage() const {
+float Duration::GetDamage() const {
 	return damage;
 };
 
@@ -130,7 +114,7 @@ float DamageData::Duration::GetDamage() const {
 
 #pragma region Continuous
 // 更新
-void DamageData::Continuous::Update(float dt) {
+void Continuous::Update(float dt) {
 	// カウント内なら時間を加算
 	if (count < num) {
 		timer += dt;
@@ -148,13 +132,13 @@ void DamageData::Continuous::Update(float dt) {
 };
 
 // カウントリセット
-void DamageData::Continuous::Reset() {
+void Continuous::Reset() {
 	count = 0;
 	isFinish = false;
 }
 
 // ダメージ取得
-float DamageData::Continuous::GetDamage() const
+float Continuous::GetDamage() const
 {
 	float damage = 0;
 	switch (oneHitDamegeType)

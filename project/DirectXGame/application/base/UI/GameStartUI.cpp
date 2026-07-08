@@ -1,6 +1,18 @@
-#include "GameStartUI.h"
+﻿#include "GameStartUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+namespace {
+	// フェードUIの1秒当たりの透明度変化量。
+	constexpr float kFadeAlphaSpeed = 2.0f;
+	// UI透明度の有効範囲。
+	constexpr float kMinAlpha = 0.0f;
+	constexpr float kMaxAlpha = 1.0f;
+	// カウント数字テクスチャの1文字分のサイズ。
+	const Vector2 kCountTextureSize = { 64.0f, 96.0f };
+	// カウントUIが表示できる最大数字。
+	constexpr int kMaximumCountDigit = 9;
+}
 
 void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
@@ -30,22 +42,22 @@ void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	InitUICount("numCount", numPosition_, 1, false);
 	Engine::UICount* hitCount = GetUICount("numCount");
 	hitCount->SetMaxSize(numUiSize_, {});	// 最大サイズ
-	hitCount->SetTextuerSize({64,96});				// テクスチャサイズ
-	hitCount->SetCountMax(9);							// カウント最大数
+	hitCount->SetTextuerSize(kCountTextureSize);		// テクスチャサイズ
+	hitCount->SetCountMax(kMaximumCountDigit);		// カウント最大数
 	hitCount->SetCountColor(numUiColor_);	// 色指定
 }
 
 void GameStartUI::Update(float dt) {
 	if (isfade_) {
-		uiColor_.a += 2.0f * dt;
-		if (uiColor_.a >= 1.0f) {
-			uiColor_.a = 1.0f;
+		uiColor_.a += kFadeAlphaSpeed * dt;
+		if (uiColor_.a >= kMaxAlpha) {
+			uiColor_.a = kMaxAlpha;
 		}
 	}
 	else {
-		uiColor_.a -= 2.0f * dt;
-		if (uiColor_.a <= 0.0f) {
-			uiColor_.a = 0.0f;
+		uiColor_.a -= kFadeAlphaSpeed * dt;
+		if (uiColor_.a <= kMinAlpha) {
+			uiColor_.a = kMinAlpha;
 		}
 	}
 

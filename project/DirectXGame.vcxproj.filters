@@ -2417,6 +2417,9 @@
     <ClInclude Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\GameplaySession.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

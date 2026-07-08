@@ -1,6 +1,17 @@
 ﻿#include "ResultScene.h"
 
 
+namespace {
+	// リザルト画面用カメラの初期座標。
+	const Vector3 kResultCameraPosition = { 0.0f, 3.7f, -20.0f };
+	// ゲームオーバー表示の画面座標。
+	const Vector2 kGameOverUiPosition = { 640.0f, 200.0f };
+	// ゲームオーバー表示の中央アンカー。
+	const Vector2 kGameOverUiAnchor = { 0.5f, 0.5f };
+	// ゲームオーバー表示の描画サイズ。
+	const Vector2 kGameOverUiSize = { 256.0f, 64.0f };
+}
+
 // 初期化
 void ResultScene::Initialize() {
 
@@ -10,7 +21,7 @@ void ResultScene::Initialize() {
 
 	// リザルト用カメラ初期化
 	resultCamera_ = std::make_unique<ResultCamera>();
-	resultCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-20.0f });
+	resultCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), kResultCameraPosition);
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
@@ -41,10 +52,10 @@ void ResultScene::Initialize() {
 
 	overUI_ = std::make_unique<Engine::Sprite>();
 	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
-	overUI_->SetPosition({640,200});
-	overUI_->SetAnchorPoint({0.5f,0.5f });
+	overUI_->SetPosition(kGameOverUiPosition);
+	overUI_->SetAnchorPoint(kGameOverUiAnchor);
 	//overUI_->SetTextureSize({256,64});
-	overUI_->SetSize({ 256,64 });
+	overUI_->SetSize(kGameOverUiSize);
 
 	// リザルトシステム初期化
 	resultSystem_ = std::make_unique<ResultSystem>();

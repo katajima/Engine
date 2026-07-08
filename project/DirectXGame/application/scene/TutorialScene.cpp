@@ -2,6 +2,15 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
+namespace {
+	// チュートリアル開始時のプレイヤー座標。
+	const Vector3 kTutorialPlayerInitialPosition = { 0.0f, 2.0f, -40.0f };
+	// リトライ時のシーン遷移時間。
+	constexpr float kRetryTransitionSeconds = 0.5f;
+	// タイトルへ戻る際のシーン遷移時間。
+	constexpr float kTitleTransitionSeconds = 0.25f;
+}
+
 void TutorialScene::Initialize() {
 	// Input
 	input = GetInput();
@@ -9,7 +18,7 @@ void TutorialScene::Initialize() {
 	// チュートリアルでもゲームプレイ共通基盤を一括初期化する。
 	gameplaySession_ = std::make_unique<GameplaySession>();
 	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(),
-		Character::PlayerType::kNormal, { 0, 2, -40 });
+		Character::PlayerType::kNormal, kTutorialPlayerInitialPosition);
 	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
 	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
 	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
@@ -54,10 +63,10 @@ void TutorialScene::Update() {
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+		GetSceneManager()->ChangeScene("GAMEPLAY", kRetryTransitionSeconds);
 	}
 	if (input->IsTriggerKey(DIK_T)) {
-		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+		GetSceneManager()->ChangeScene("TITLE", kTitleTransitionSeconds);
 	}
 
 	// 調整項目

@@ -57,8 +57,8 @@ namespace Game {
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
 		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 20, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 120, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 50, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);

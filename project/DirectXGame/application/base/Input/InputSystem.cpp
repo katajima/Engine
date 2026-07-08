@@ -1,6 +1,17 @@
 ﻿#include "InputSystem.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
+namespace {
+	// デジタルキーをスティック入力へ変換するときの最大入力値。
+	constexpr float kDigitalInputMagnitude = 1.0f;
+	// マウス移動量を視点入力へ変換する感度。
+	constexpr float kMouseLookSensitivity = 0.05f;
+	// ゲームパッドトリガーを押下として扱うしきい値。
+	constexpr float kTriggerDeadZone = 0.2f;
+	// 右クリックとして使用するマウスボタン番号。
+	constexpr int kRightMouseButton = 1;
+}
+
 void InputSystem::Initialize(Engine::Input* input) {
 	this->input = input;
 }
@@ -18,10 +29,10 @@ void InputSystem::PlayerInputUpdate(float dt) {
 
 	// キーボード移動入力を作成
 	Vector2 keyboardMove{};
-	if (input->IsPushKey(DIK_A)) keyboardMove.x -= 1.0f;
-	if (input->IsPushKey(DIK_D)) keyboardMove.x += 1.0f;
-	if (input->IsPushKey(DIK_W)) keyboardMove.y += 1.0f;
-	if (input->IsPushKey(DIK_S)) keyboardMove.y -= 1.0f;
+	if (input->IsPushKey(DIK_A)) keyboardMove.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_D)) keyboardMove.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_W)) keyboardMove.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_S)) keyboardMove.y -= kDigitalInputMagnitude;
 
 	// 左スティックとキーボード移動入力を合成
 	Vector2 moveStick = input->GetGamePadLeftStick();
@@ -31,17 +42,17 @@ void InputSystem::PlayerInputUpdate(float dt) {
 
 	// キーボード視点入力を作成
 	Vector2 keyboardLook{};
-	if (input->IsPushKey(DIK_LEFT)) keyboardLook.x -= 1.0f;
-	if (input->IsPushKey(DIK_RIGHT)) keyboardLook.x += 1.0f;
-	if (input->IsPushKey(DIK_UP)) keyboardLook.y += 1.0f;
-	if (input->IsPushKey(DIK_DOWN)) keyboardLook.y -= 1.0f;
+	if (input->IsPushKey(DIK_LEFT)) keyboardLook.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_RIGHT)) keyboardLook.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_UP)) keyboardLook.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_DOWN)) keyboardLook.y -= kDigitalInputMagnitude;
 
 	// 右クリック中だけマウス移動を視点入力として扱う
 	Vector2 mouseLook{};
-	if (input->IsMousePressed(1)) {
+	if (input->IsMousePressed(kRightMouseButton)) {
 		const Vector2 mouseDelta = input->GetMouseMoveDelta();
-		mouseLook.x = mouseDelta.x * 0.05f;
-		mouseLook.y = -mouseDelta.y * 0.05f;
+		mouseLook.x = mouseDelta.x * kMouseLookSensitivity;
+		mouseLook.y = -mouseDelta.y * kMouseLookSensitivity;
 	}
 
 	// 右スティック、矢印キー、マウス視点入力を合成
@@ -66,15 +77,14 @@ void InputSystem::PlayerInputUpdate(float dt) {
 
 	// ダッシュ入力している間
 	float lt = input->GetGamePadLeftTrigger();
-	const float triggerDeadZone = 0.2f;
 	playerInputData_.dashHeld =
-		lt > triggerDeadZone ||
+		lt > kTriggerDeadZone ||
 		input->IsPushKey(DIK_LSHIFT);
 
 	// ロックオン入力している間
 	float rt = input->GetGamePadRightTrigger();
 	playerInputData_.lockOnHeld =
-		rt > triggerDeadZone ||
+		rt > kTriggerDeadZone ||
 		input->IsPushKey(DIK_Q);
 
 	// スキル入力押した瞬間
@@ -93,14 +103,14 @@ void InputSystem::GameInputUpdate(float dt) {
 	// ゲームUI用の移動入力を作成
 	Vector2 gameMove = input->GetGamePadLeftStick();
 	// メニューではWASDと矢印キーのどちらでも項目を移動できるようにする。
-	if (input->IsPushKey(DIK_A)) gameMove.x -= 1.0f;
-	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
-	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
-	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
-	if (input->IsPushKey(DIK_LEFT)) gameMove.x -= 1.0f;
-	if (input->IsPushKey(DIK_RIGHT)) gameMove.x += 1.0f;
-	if (input->IsPushKey(DIK_UP)) gameMove.y += 1.0f;
-	if (input->IsPushKey(DIK_DOWN)) gameMove.y -= 1.0f;
+	if (input->IsPushKey(DIK_A)) gameMove.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_D)) gameMove.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_W)) gameMove.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_S)) gameMove.y -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_LEFT)) gameMove.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_RIGHT)) gameMove.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_UP)) gameMove.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_DOWN)) gameMove.y -= kDigitalInputMagnitude;
 	gameInputData_.moveShick = Math::ClampLength(gameMove);
 	// 決定入力押した瞬間
 	gameInputData_.decisionTrigger =

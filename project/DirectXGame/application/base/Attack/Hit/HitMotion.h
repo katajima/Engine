@@ -12,17 +12,17 @@ public:
 	// 更新
 	void Update(float dt);
 	// ダメージデータ設定
-	void SetData(const DamageData& data) {
+	void SetData(const DamageDataHandle& data) {
 		damageData_ = data;
 		isPlaying_ = true;
 	}
 	// ダメージデータ取得
-	DamageData GetDamageData() const { return damageData_; }
+	const DamageDataHandle& GetDamageData() const { return damageData_; }
 	// 再生中か取得
 	bool IsPlaying() const { return isPlaying_; }
 
 private:
 	bool isPlaying_ = false;
-	DamageData damageData_;
+	DamageDataHandle damageData_;	// 派生ダメージデータを所有するコピー可能なハンドル
 };
 
