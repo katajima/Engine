@@ -4717,7 +4717,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -4810,13 +4810,20 @@ namespace Combo {
 			comboStateMachine_.reset();
 		}
 
-		// 初期化
+		/// <summary>キャラクターのコンボ状態、保存データ、デバッグ編集機能を初期化する。</summary>
+		/// <param name="character">コンボを実行する所有者。非所有ポインターで利用中は有効であること。</param>
+		/// <param name="lineCommon">当たり判定などのデバッグ描画に使用するライン基盤。</param>
+		/// <param name="globalVariables">コンボ定義の登録・保存・読込先。</param>
+		/// <param name="audioManager">攻撃音の再生とプレビューに使用する音声管理。非所有ポインター。</param>
 		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon,
 			Engine::GlobalVariables* globalVariables, Engine::AudioManager* audioManager);
 
-		// コンボ更新
+		/// <summary>現在のコンボノード、入力受付、スタミナ、クールダウンを更新する。</summary>
+		/// <param name="ctx">所有者の入力、移動、状態をまとめたフレームコンテキスト。</param>
 		void Update(const Character::CharacterContext& ctx);
-		// プレイヤーからの攻撃入力要求
+		/// <summary>攻撃入力から開始または派生可能なコンボを要求する。</summary>
+		/// <param name="input">弱攻撃、強攻撃、スキルなどのアクション入力。</param>
+		/// <returns>コンボ開始または遷移要求を受理した場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
 		// 現在のコンボ攻撃が命中したことを通知
 		void NotifyAttackHit();
@@ -4826,23 +4833,34 @@ namespace Combo {
 		void Create(const std::string name);
 	public: // 保存や適応に関しての関数
 
-		// 保存項目の追加
+		/// <summary>コンボデータの全項目をGlobalVariablesへ登録または上書きする。</summary>
+		/// <param name="name">保存グループ名。</param>
+		/// <param name="data">登録するコンボデータ。</param>
 		void ApplyGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
-		// 保存項目の適応
+		/// <summary>保存済み項目を指定コンボデータへ読み込む。</summary>
+		/// <param name="name">読込元の保存グループ名。</param>
+		/// <param name="data">読込結果を格納するデータ。</param>
 		void GetGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
-		// 保存項目に設定
+		/// <summary>指定コンボデータを保存対象へ設定する。</summary>
+		/// <param name="name">保存グループ名。</param>
+		/// <param name="data">保存するコンボデータ。</param>
 		void SetGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
 		// 全保存項目の設定
 		void SetGlobalComboDatas();
 	public:
-		// 親ワールド変換取得してコンテナに追加
+		/// <summary>エフェクトなどが追従できる親ワールド変換を名前付きで登録する。</summary>
+		/// <param name="name">参照に使用する一意な名前。</param>
+		/// <param name="transform">呼び出し側が所有するワールド変換。登録中は有効であること。</param>
 		void SetParentTransform(const std::string& name, Engine::WorldTransform* transform) {
 			parentTransforms_[name] = transform;
 		}
 
+		/// <summary>登録名から親ワールド変換を検索する。</summary>
+		/// <param name="name">SetParentTransformで登録した名前。</param>
+		/// <returns>非所有ポインター。未登録の場合はnullptr。</returns>
 		Engine::WorldTransform* GetParentTransform(const std::string& name) {
 			auto it = parentTransforms_.find(name);
 			if (it != parentTransforms_.end()) {
@@ -4851,6 +4869,9 @@ namespace Combo {
 			return nullptr;
 		}
 
+		/// <summary>指定コンボノードに対応する登録名を取得する。</summary>
+		/// <param name="comboNodeName">検索するコンボノード名。</param>
+		/// <returns>存在する場合はノード名、存在しない場合は空文字。</returns>
 		std::string GetParentName(const std::string& comboNodeName) {
 			auto it = comboNodes_.find(comboNodeName);
 			if (it != comboNodes_.end()) {
@@ -4864,7 +4885,8 @@ namespace Combo {
 
 
 	public:
-		// コンボステートマシーン取得
+		/// <summary>コンボ状態機械を取得する。</summary>
+		/// <returns>Systemが所有する状態機械への非所有ポインター。</returns>
 		StateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 
 		// コンボノードステートマップ取得
@@ -4877,7 +4899,9 @@ namespace Combo {
 		StartComboRoutes GetStartComboRoutes() const;
 		// 開始コンボ設定
 		void SetStartComboRoutes(const StartComboRoutes& routes);
-		// コンボノードステート取得
+		/// <summary>名前に対応するコンボノードを取得する。</summary>
+		/// <param name="name">検索するノード名。</param>
+		/// <returns>共有所有権を持つノード。存在しない場合はnullptr。</returns>
 		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) {
 			auto it = comboNodes_.find(name);
 			if (it != comboNodes_.end()) {
@@ -4886,16 +4910,27 @@ namespace Combo {
 			return nullptr;
 		}
 	public:
-		// ノード追加
+		/// <summary>生成済みコンボノードを名前付きで登録する。</summary>
+		/// <param name="name">一意なノード名。</param>
+		/// <param name="node">登録する共有ノード。nullptrは登録しないこと。</param>
 		void AddComboNode(const std::string& name, std::shared_ptr<NodeState> node);
-		// ノード追加(データから生成)
+		/// <summary>アニメーション名とデータからコンボノードを生成して登録する。</summary>
+		/// <param name="nodeName">一意なノード名。</param>
+		/// <param name="animationName">再生するアニメーション名。</param>
+		/// <param name="data">入力、移動、当たり判定、演出を含むノード設定。</param>
 		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
-		// コンボ接続
+		/// <summary>入力条件に応じたコンボノード間の遷移を登録する。</summary>
+		/// <param name="from">遷移元ノード名。</param>
+		/// <param name="input">遷移に必要なアクション入力。</param>
+		/// <param name="to">遷移先ノード名。</param>
+		/// <param name="condition">地上・空中などの追加遷移条件。</param>
 		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to,
 			TransitionCondition condition = TransitionCondition::Default);
 		// コンボ名を参照している接続と開始ルートを更新
 		void RenameComboReferences(const std::string& oldName, const std::string& newName);
-		// 最初のコンボ
+		/// <summary>指定ノードを先頭としてコンボを開始する。</summary>
+		/// <param name="name">開始するノード名。</param>
+		/// <returns>ノードが存在し、開始できた場合はtrue。</returns>
 		bool StartCombo(const std::string& name);
 		// コンボが終了したか
 		bool IsComboFinished() const {
@@ -10846,7 +10881,7 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -10877,33 +10912,46 @@ public:
 
 public:
 
-	// 初期化
+	/// <summary>キャラクターの被弾リアクション管理を初期化する。</summary>
+	/// <param name="owner">リアクションを適用するキャラクター。非所有ポインターで、利用中は有効であること。</param>
+	/// <param name="effectSystem">命中エフェクトの出力先。演出不要の場合はnullptrを許容する。</param>
 	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem);
-	// 更新
+	/// <summary>ヒットストップ、ノックバック、スタン、ダウンなどの残り時間と移動を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
 
 	// ヒットエフェクト
 	void EmitHitEffect();
 	
-	// リアクションデータ設定
+	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
+	/// <param name="data">リアクション種別、時間、移動量、演出を含む設定。</param>
 	void SetReactionData(const HitReactionData& data);
-	// ヒットストップ時間設定(自分)
+	/// <summary>所有者自身へ適用するヒットストップ時間を設定する。</summary>
+	/// <param name="time">停止時間（秒）。0以下で停止を解除する。</param>
 	void SetSelfHitStopTime(float time) { selfHitStopTime_ = time; }
-	// ヒットモーション中か
+	/// <summary>いずれかの被弾リアクションが進行中か取得する。</summary>
+	/// <returns>リアクション中ならtrue。</returns>
 	bool IsHitMotion() const;
-	// スタン中か
+	/// <summary>操作不能のヒットスタン中か取得する。</summary>
+	/// <returns>残りスタン時間がある場合はtrue。</returns>
 	bool IsHitStun() const;
-	// ダウン中か
+	/// <summary>ダウン状態が継続中か取得する。</summary>
+	/// <returns>残りダウン時間がある場合はtrue。</returns>
 	bool IsDown() const;
-	// 打ち上げ中か
+	/// <summary>打ち上げ滞空状態か取得する。</summary>
+	/// <returns>残り滞空時間がある場合はtrue。</returns>
 	bool IsLaunch() const;
-	// ヒットストップ中か
+	/// <summary>相手由来のヒットストップ中か取得する。</summary>
+	/// <returns>残り停止時間がある場合はtrue。</returns>
 	bool IsHitStop() const;
-	// セルフヒットストップ中か
+	/// <summary>自分由来のヒットストップ中か取得する。</summary>
+	/// <returns>残り停止時間がある場合はtrue。</returns>
 	bool IsSelfHitStop() const;
-	// 重力は有効か
+	/// <summary>現在のリアクション中に通常重力を適用できるか取得する。</summary>
+	/// <returns>重力を適用する場合はtrue。</returns>
 	bool IsGravityEnabled() const;
-	// 重力倍率取得
+	/// <summary>現在のリアクションで使用する重力倍率を取得する。</summary>
+	/// <returns>重力加速度へ乗算する倍率。</returns>
 	float GetGravityScale() const;
 	// スタン時間
 	float GetHitStunTimer() const { return hitStunTimer_; }
@@ -10921,16 +10969,22 @@ public:
 	void ForceFinishReaction();
 
 private:
-	// ダメージ処理
+	/// <summary>パラメータへダメージを反映し、時間依存処理を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
+	/// <param name="parameter">ダメージを反映するパラメータ。nullptrの場合は反映しない。</param>
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
-	// 移動システムにリクエストする
+	/// <summary>算出したリアクション速度を移動システムへ要求する。</summary>
+	/// <param name="velocity">ワールド空間の速度。</param>
 	void SendReactionMoveRequest(const Vector3& velocity);
 	// リアクション終了
 	void FinishReaction();
 
-	// 時間内か
+	/// <summary>残り時間を減算して継続中か判定する。</summary>
+	/// <param name="dt">減算する秒単位の時間。</param>
+	/// <param name="time">更新対象の残り時間。</param>
+	/// <returns>減算後も時間が残っている場合はtrue。</returns>
 	bool GetIsTime(float dt, float& time);
 
 private:
@@ -12107,6 +12161,13 @@ File Path: project/DirectXGame/application/base/Attack/Response/Response.cpp
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 
+namespace {
+	// 壁面の法線を接地可能な上向き面として扱うY成分のしきい値。
+	constexpr float kLandingNormalThreshold = 0.7f;
+	// プレイヤーエフェクトから受ける押し出し速度。
+	constexpr float kPlayerEffectPushSpeed = 20.0f;
+}
+
 #pragma region HitResponse
 
 void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)
@@ -12153,7 +12214,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 					request.velocity = pushVec * halfSize;
 				}
 				if (other->GetTag() == CollisionTag::Wall) {
-					if (pushVec.Normalize().y >= 0.7f) {
+					if (pushVec.Normalize().y >= kLandingNormalThreshold) {
 						request.isLanding = true;
 					}
 					else if (pushVec.Length() == 0.0f) {
@@ -12179,7 +12240,7 @@ void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
 		// リアクション移動システムがあるなら
 		if (moveRequestSystem) {
 			MoveRequest request;
-			request.velocity = dire * 20.0f;
+			request.velocity = dire * kPlayerEffectPushSpeed;
 			moveRequestSystem->SetRequest(request);
 			return;
 		}
@@ -12246,7 +12307,7 @@ File Path: project/DirectXGame/application/base/Attack/Response/ResponseData.h
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BaseBullet.cpp
 ============================================================
-#include "BaseBullet.h"
+﻿#include "BaseBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -12254,6 +12315,9 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BaseBullet.cpp
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 BaseBullet::~BaseBullet() {
 	// オブジェクトを削除
+}
+BaseBullet::BaseBullet() {
+	// デフォルトコンストラクタ
 }
 
 void BaseBullet::BaseInitialize(Engine::EntityManager* entityManager, 
@@ -12278,7 +12342,7 @@ Engine::ColliderComponent* BaseBullet::GetColliderComponent() { return object_->
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BaseBullet.h
 ============================================================
-#pragma once
+﻿#pragma once
 
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "BulletData.h"
@@ -12304,8 +12368,8 @@ class EffectSystem;
 /// </summary>
 class BaseBullet : public IHitReceiver{
 public:
-	// デフォルトコンストラクタ
-	BaseBullet() = default;
+	/// <summary>弾の共通状態を既定値で構築する。</summary>
+	BaseBullet();
 	virtual ~BaseBullet() = 0;
 	
 	struct Parameters {
@@ -12706,7 +12770,7 @@ void Projectile::BaseProjectile::DeleteProcess() {
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BaseProjectile.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "ProjectileData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -12725,7 +12789,12 @@ namespace Projectile {
 		// 派生発射物を基底ポインターから安全に破棄する
 		virtual ~BaseProjectile() = default;
 
-		// 初期化
+		/// <summary>発射物の見た目、移動、衝突、演出を生成情報と定義値から初期化する。</summary>
+		/// <param name="entity3DManager">発射物オブジェクトを生成するエンティティ管理。</param>
+		/// <param name="globalVariables">調整値の登録・参照先。</param>
+		/// <param name="effectSystem">移動・命中演出の出力先。演出不要の場合はnullptrを許容する。</param>
+		/// <param name="spawnInfo">生成位置、方向、所有者、ターゲットを含む生成情報。</param>
+		/// <param name="param">寿命、速度、当たり判定などを含む発射物定義。</param>
 		void Initialize(Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, EffectSystem* effectSystem, const ProjectileSpawnInfo& spawnInfo,
 			const ProjectileParam& param);
@@ -12739,29 +12808,40 @@ namespace Projectile {
 		// 描画2D
 		void Draw2D();
 	public:
-		// 生きているか
+		/// <summary>発射物が管理対象として生存しているか取得する。</summary>
+		/// <returns>更新・描画対象ならtrue、寿命切れまたは命中で削除待ちならfalse。</returns>
 		bool GetIsAlive() const { return isAlive_; }
-		// コライダーコンポーネント取得
+		/// <summary>衝突登録に使用するコライダーコンポーネントを取得する。</summary>
+		/// <returns>内部ObjectComponentが所有する非所有ポインター。</returns>
 		Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); }
 	protected:
-		// プレイヤー命中時の差分処理を派生発射物から上書きする
+		/// <summary>プレイヤー命中時に派生発射物固有の処理を実行する。</summary>
+		/// <param name="player">命中したプレイヤー。命中通知中のみ有効。</param>
 		virtual void OnHitPlayer(Character::BasePlayer* player);
-		// 敵命中時の差分処理を派生発射物から上書きする
+		/// <summary>敵命中時に派生発射物固有の処理を実行する。</summary>
+		/// <param name="enemy">命中した敵。命中通知中のみ有効。</param>
 		virtual void OnHitEnemy(Character::BaseEnemy* enemy);
-		// 派生命中処理から発射者を参照する
+		/// <summary>この発射物を生成したキャラクターを取得する。</summary>
+		/// <returns>生成者への非所有ポインター。生成者を指定していない場合はnullptr。</returns>
 		Character::BaseCharacter* GetOwner() const { return owner; }
-		// 派生命中処理から発射物パラメーターを参照する
+		/// <summary>初期化時に保持した発射物定義を取得する。</summary>
+		/// <returns>発射物の生存期間中有効な定義への読み取り専用参照。</returns>
 		const ProjectileParam& GetParam() const { return param_; }
 	private:
 		// コライダの作成
 		void CreateCollision();
-		// コライダー処理
+		/// <summary>コライダー通知を解釈し、命中対象に応じた処理へ振り分ける。</summary>
+		/// <param name="otherComponent">衝突相手のコンポーネント。存在しない場合はnullptr。</param>
+		/// <param name="self">自身のコライダー。</param>
+		/// <param name="other">衝突相手のコライダー。</param>
 		void CollisionProcess(Engine::ColliderComponent* otherComponent,Engine::Collider* self, Engine::Collider* other);
 		// 衝突処理
 		void ProjectileHit();
-		// 移動処理更新
+		/// <summary>設定された移動方式に従って座標と速度を更新する。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
 		void UpdateMovement(float dt);
-		// エフェクト処理更新
+		/// <summary>移動中エフェクトとトレイルを更新する。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
 		void UpdateEffect(float dt);
 		// 削除(終了)処理
 		void DeleteProcess();
@@ -13000,7 +13080,7 @@ const Projectile::ProjectileParam* BulletManager::FindProjectileParam(const std:
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletManager.h
 ============================================================
-#pragma once
+﻿#pragma once
 // 
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
@@ -13025,7 +13105,10 @@ namespace Engine {
 class BulletManager {
 public:
 	~BulletManager();
-	// 初期化
+	/// <summary>弾と発射物の管理、および発射物定義エディターを初期化する。</summary>
+	/// <param name="entityManager">弾オブジェクトを生成するエンティティ管理。呼び出し側が所有し、利用中は有効であること。</param>
+	/// <param name="globalVariables">発射物定義の登録・保存先。呼び出し側が所有する。</param>
+	/// <param name="camera">弾描画に利用するカメラ。カメラ不要の場合はnullptrを許容する。</param>
 	void Initialize(Engine::EntityManager* entityManager,Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 	
 
@@ -13041,26 +13124,35 @@ public:
 	// 描画2D
 	void Draw2D();
 
-	// 弾の追加
+	/// <summary>従来形式の弾を管理対象へ追加する。</summary>
+	/// <param name="bullet">所有権を移譲する弾。nullptrは追加しないこと。</param>
 	void AddBullet(std::unique_ptr<BaseBullet> bullet);
 
-	// 発射物の追加
+	/// <summary>共通発射物を管理対象へ追加する。</summary>
+	/// <param name="projectile">所有権を移譲する発射物。nullptrは追加しないこと。</param>
 	void AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile);
 
-	// エディターで管理している発射物パラメータを取得
+	/// <summary>保存名に対応する発射物パラメータを検索する。</summary>
+	/// <param name="definitionName">発射物定義の保存名。</param>
+	/// <returns>定義が存在する場合は内部データへの非所有ポインター、存在しない場合はnullptr。</returns>
 	const Projectile::ProjectileParam* FindProjectileParam(const std::string& definitionName) const;
+	/// <summary>登録済みの発射物定義をすべて取得する。</summary>
+	/// <returns>エディターが所有する定義マップへの読み取り専用参照。</returns>
 	const std::map<std::string, Projectile::ProjectileParam>& GetProjectileDefinitions() const {
 		return projectileEditor_.GetDefinitions();
 	}
 
 public: // 取得or設定
-	// 弾リストを取得
+	/// <summary>管理中の従来形式の弾を取得する。</summary>
+	/// <returns>BulletManagerが所有する弾リストへの読み取り専用参照。</returns>
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
 		
-	// 発射物リストを取得
+	/// <summary>管理中の共通発射物を取得する。</summary>
+	/// <returns>BulletManagerが所有する発射物リストへの読み取り専用参照。</returns>
 	const std::list<std::unique_ptr<Projectile::BaseProjectile>>& GetProjectiles() const { return projectiles_; }
 
-	// エフェクトの設定
+	/// <summary>弾の演出に利用するエフェクトシステムを設定する。</summary>
+	/// <param name="effect">非所有ポインター。弾管理中は有効であること。</param>
 	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 private:
 
@@ -14602,9 +14694,11 @@ class BaseCamera
 {
 public:
 	virtual ~BaseCamera() = default; 
-	///< summary>
-	/// 初期化
-	///</summary>
+	/// <summary>カメラ固有の制御器と描画カメラを初期化する。</summary>
+	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラではnullptrを許容する。</param>
+	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>
+	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
+	/// <param name="position">カメラの初期ワールド座標。</param>
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
@@ -14617,32 +14711,32 @@ public:
 	/// <summary>
 	/// カメラ取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>このBaseCameraが所有する描画カメラへの非所有ポインター。</returns>
 	Engine::Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
 
 	/// <summary>
 	///	カメラ統括クラス取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>このBaseCameraが所有する制御器への非所有ポインター。</returns>
 	CameraController* GetCameraController() { return controller.get(); }
 
 	/// <summary>
 	/// ロックオン対象を設定
 	/// </summary>
-	/// <param name="object"></param>
+	/// <param name="object">注視対象のワールド変換。解除する場合はnullptr。</param>
 	void LockOn(const Engine::WorldTransform* object) { target = object; };
 
 	/// <summary>
 	/// カメラ管理を設定
 	/// </summary>
-	/// <param name="cameraManager"></param>
+	/// <param name="cameraManager">カメラ切り替えを管理する非所有ポインター。</param>
 	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 
 
 	/// <summary>
 	/// 時間取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>シーンのタイムスケールを反映したフレーム時間。</returns>
 	float GetTime() const;
 
 	//名前設定
@@ -14812,7 +14906,7 @@ void CameraCollision::Update(Transform& transform, float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraCollision.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // 
@@ -14825,7 +14919,9 @@ public:
 	// 更新
 	void Update(Transform& transform, float dt);
 	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+	/// <summary>衝突補正の基準となる追従対象を設定する。</summary>
+	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
 
 private:
 	CameraCollisionData data_;
@@ -14840,10 +14936,11 @@ private:
 	const Engine::WorldTransform* target = nullptr;
 };
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraController.cpp
 ============================================================
-#include "CameraController.h"
+﻿#include "CameraController.h"
 #include <algorithm>
 #include <cmath>
 
@@ -14907,10 +15004,10 @@ void CameraController::Update(float dt) {
 	camera->SetTransform(transform);
 };
 
-void CameraController::SetTraget(const Engine::WorldTransform* target) { 
+void CameraController::SetTarget(const Engine::WorldTransform* target) {
 	this->target = target;
-	follow->SetTraget(target);
-	collision->SetTraget(target);
+	follow->SetTarget(target);
+	collision->SetTarget(target);
 	hasPreviousTargetPosition_ = false;
 };
 
@@ -15068,7 +15165,7 @@ Vector3 CameraController::CalculateLookAheadOffset(const CameraLookAheadData& da
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
@@ -15085,32 +15182,46 @@ class InputSystem;
 class CameraController {
 public:
 
-	// 初期化
+	/// <summary>追従、回転、ロックオン、衝突補正、演出用の各カメラ機能を初期化する。</summary>
+	/// <param name="camera">制御対象のカメラ。CameraControllerは所有せず、利用中は有効であること。</param>
+	/// <param name="input">カメラ操作に使用する入力。自動制御のみの場合はnullptrを許容する。</param>
 	void Initialize(Engine::Camera* camera,const InputSystem* input);
 
-	// 更新
+	/// <summary>設定済みの追従対象と入力に基づいて全カメラ機能を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。0以下の場合、時間依存の補間は進行しない。</param>
 	void Update(float dt);
 
-	// ロックオンターゲット設定
+	/// <summary>カメラが注視するロックオン対象を設定する。</summary>
+	/// <param name="target">対象への非所有ポインター。ロックオン解除時はnullptr。</param>
 	void SetLockOnTarget(const Engine::WorldTransform* target);
-	void SetLockOnTraget(const Engine::WorldTransform* target) { SetLockOnTarget(target); };
-	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target);
-	// カメラシェイク取得
+	/// <summary>カメラの通常追従対象を設定する。</summary>
+	/// <param name="target">対象への非所有ポインター。追従解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target);
+	/// <summary>カメラシェイク機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
 	CameraShake* GetShake(){ return shake.get(); }
-	// カメラズーム取得
+	/// <summary>カメラズーム機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
 	CameraZoom* GetZoom(){ return zoom.get(); }
-	// ロックオン取得
+	/// <summary>ロックオン機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
 	CameraLockOn* GetCameraLockOn() { return lockOn.get(); }
-	// 先読みデータ設定
+	/// <summary>通常追従時の先読み設定を置き換える。</summary>
+	/// <param name="data">速度方向の先読み量と補間設定。</param>
 	void SetLookAheadData(const CameraLookAheadData& data);
-	// 速度ズームデータ設定
+	/// <summary>通常追従時の速度ズーム設定を置き換える。</summary>
+	/// <param name="data">速度範囲、ズーム距離、補間設定。</param>
 	void SetSpeedZoomData(const CameraSpeedZoomData& data);
-	// 攻撃などの一時先読みリクエスト
+	/// <summary>攻撃演出などで一時的な先読みを要求する。</summary>
+	/// <param name="data">一時適用する先読み設定。</param>
+	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
 	void RequestLookAhead(const CameraLookAheadData& data, float duration);
-	// 攻撃などの一時速度ズームリクエスト
+	/// <summary>攻撃演出などで一時的な速度ズームを要求する。</summary>
+	/// <param name="data">一時適用する速度ズーム設定。</param>
+	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
 	void RequestSpeedZoom(const CameraSpeedZoomData& data, float duration);
-	// 攻撃などの一時注視点オフセットリクエスト
+	/// <summary>攻撃演出などで一時的な注視点オフセットを要求する。</summary>
+	/// <param name="data">オフセット量、開始時間、継続時間を含む設定。</param>
 	void RequestActionTargetOffset(const CameraActionOffsetData& data);
 	// 一時カメラ演出の解除
 	void ClearActionAssist();
@@ -15123,9 +15234,14 @@ private:
 	void UpdateSpeedZoom(float dt);
 	// 一時リクエストの残り時間を更新する
 	void UpdateActionTimers(float dt);
-	// 速度に応じた0.0fから1.0fの割合を計算する
+	/// <summary>現在速度を指定範囲の0.0～1.0へ正規化する。</summary>
+	/// <param name="minSpeed">割合0.0に対応する速度。</param>
+	/// <param name="maxSpeed">割合1.0に対応する速度。</param>
+	/// <returns>範囲内へ制限した速度割合。範囲が無効な場合は0.0。</returns>
 	float CalculateSpeedRate(float minSpeed, float maxSpeed) const;
-	// 速度方向へどれだけ先読みするか計算する
+	/// <summary>現在の推定速度から追従先読みオフセットを計算する。</summary>
+	/// <param name="data">計算に使用する先読み設定。</param>
+	/// <returns>ワールド空間の先読みオフセット。</returns>
 	Vector3 CalculateLookAheadOffset(const CameraLookAheadData& data) const;
 private:
 	// 追従
@@ -15362,7 +15478,7 @@ void CameraFollow::Update(Transform& transform,float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // カメラ追従
@@ -15375,7 +15491,9 @@ public:
 	void Update(Transform& transform,float dt);
 
 	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+	/// <summary>追従対象を設定する。</summary>
+	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
 
 	// カメラオフセット位置取得
 	Vector3 GetOffsetPos() const { return data_.offset; }  
@@ -15512,7 +15630,7 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 void CameraManager::Update()
 {
 	// ImGui更新
-	UpadateImGui();
+	UpdateImGui();
 
 	// ゲームカメラOn
 	if (isGameCamera) {
@@ -15557,14 +15675,19 @@ void CameraManager::Update()
 	camera->UpdateMatrix();
 }
 
-void CameraManager::AddCamera(CameraInfo camera, std::string name) {
+
+void CameraManager::AddCamera(const CameraInfo& cameraInfo, const std::string& name) {
+	// CameraManagerは所有権を受け取らず、登録元が所有するカメラを参照する。
+	if (!cameraInfo.camera) {
+		return;
+	}
 	// カメラ管理クラスを渡す
-	camera.camera->SetCameraManager(this);
-	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
-	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
+	cameraInfo.camera->SetCameraManager(this);
+	cameraInfo.camera->SetUseCamera(cameraInfo.useCamera);	// 使っているか
+	cameras.insert(std::make_pair(name, cameraInfo.camera));	// カメラ追加
 }
 
-void CameraManager::SetUseCamera(std::string name, float time) {
+void CameraManager::SetUseCamera(const std::string& name, float time) {
 
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
@@ -15601,7 +15724,7 @@ void CameraManager::SetUseCamera(std::string name, float time) {
 	}
 }
 
-void CameraManager::UpadateImGui() {
+void CameraManager::UpdateImGui() {
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
@@ -15660,12 +15783,12 @@ BaseCamera* CameraManager::GetBaseCamera() {
 	return nullptr;
 }
 
-void CameraManager::DeleteCamera(std::string name)
+void CameraManager::DeleteCamera(const std::string& name)
 {
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
-		delete it->second;         // メモリの解放
-		cameras.erase(it);         // マップから削除
+		// カメラ本体は登録元のunique_ptrが所有するため、非所有参照だけを削除する。
+		cameras.erase(it);
 	}
 }
 
@@ -15673,13 +15796,13 @@ void CameraManager::DeleteCamera(std::string name)
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraManager.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "BaseCamera.h"
 
-// カメラインフォメーション
+/// <summary>CameraManagerへ登録する非所有カメラ情報。</summary>
 struct CameraInfo {
-	BaseCamera* camera;
-	bool useCamera = false;
+	BaseCamera* camera = nullptr; // 呼び出し側が所有し、登録中は有効であること
+	bool useCamera = false;       // 登録直後から使用カメラにする場合はtrue
 };
 
 /// <summary>
@@ -15689,32 +15812,43 @@ class CameraManager
 {
 public:
 
-	// 初期化
+	/// <summary>シーン共通の出力カメラを生成し、描画システムへ設定する。</summary>
+	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラのみの場合はnullptrを許容する。</param>
+	/// <param name="entityManager">カメラを設定する描画・エフェクト管理元。利用中は有効であること。</param>
+	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
 
-	// 更新
+	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
 	void Update();
 
-	// カメラセット
-	void AddCamera(CameraInfo camera, std::string name);
+	/// <summary>呼び出し側が所有するカメラを名前付きで登録する。</summary>
+	/// <param name="cameraInfo">登録する非所有カメラと初期使用状態。cameraはnullptr不可。</param>
+	/// <param name="name">検索と切り替えに使用する一意な名前。同名登録時は追加されない。</param>
+	void AddCamera(const CameraInfo& cameraInfo, const std::string& name);
 
-	// 使っているカメラ設定(string カメラの名前、float 切り替わり時間(補間時間))
-	void SetUseCamera(std::string name, float time);
-	// ImGui更新
-	void UpadateImGui();
-	// カメラ取得
+	/// <summary>指定名のカメラへ切り替える。</summary>
+	/// <param name="name">AddCameraで登録したカメラ名。未登録名の場合は何もしない。</param>
+	/// <param name="time">切り替え補間時間（秒）。0以下の場合は即時切り替え。</param>
+	void SetUseCamera(const std::string& name, float time);
+	/// <summary>デバッグ用カメラ編集UIを更新する。</summary>
+	void UpdateImGui();
+	/// <summary>各描画システムへ渡す共通出力カメラを取得する。</summary>
+	/// <returns>CameraManagerが所有するカメラへの非所有ポインター。</returns>
 	Engine::Camera* GetCamera() { return camera.get(); }
-	// カメラ取得
+	/// <summary>現在使用中の登録カメラを取得する。</summary>
+	/// <returns>登録元が所有するBaseCameraへの非所有ポインター。使用中カメラがなければnullptr。</returns>
 	BaseCamera* GetBaseCamera();
-	// カメラを管理対象から削除
-	void DeleteCamera(std::string name);
-	// カメラクリア
+	/// <summary>指定したカメラを登録対象から外す。</summary>
+	/// <param name="name">削除する登録名。未登録名の場合は何もしない。</param>
+	/// <remarks>カメラの所有権は呼び出し側にあるため、オブジェクト自体は破棄しない。</remarks>
+	void DeleteCamera(const std::string& name);
+	/// <summary>全カメラを登録対象から外す。登録元が所有するカメラは破棄しない。</summary>
 	void Clear() {
 		cameras.clear();
 	};
 
 private:
-	// 全てのカメラ
+	// 呼び出し側が所有する全カメラへの非所有ポインター
 	std::map<std::string, BaseCamera*> cameras;
 	// カメラ
 	std::unique_ptr < Engine::Camera> camera;
@@ -16266,7 +16400,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/FollowCamera/FollowCamera.cpp
 ============================================================
-#include "FollowCamera.h"
+﻿#include "FollowCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
@@ -16299,7 +16433,7 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 }
 
 void FollowCamera::Update() {
-	controller->SetTraget(target_);
+	controller->SetTarget(target_);
 	controller->SetLockOnTarget(target);
 	// カメラを使っているなら
 	if (useCamera) {
@@ -17365,7 +17499,12 @@ namespace Character {
 	public:
 		BaseCharacter();
 		virtual ~BaseCharacter(); // = default をヘッダーに書かない
-		/// 初期化
+		/// <summary>派生キャラクターのオブジェクト、能力、状態、依存システムを初期化する。</summary>
+		/// <param name="inputSystem">操作入力。AI専用キャラクターではnullptrを許容する。</param>
+		/// <param name="entity3DManager">キャラクターオブジェクトとコンポーネントの生成元。</param>
+		/// <param name="globalVariables">キャラクター調整値の登録・保存先。</param>
+		/// <param name="position">初期ワールド座標。</param>
+		/// <param name="camera">描画に使用する非所有カメラ。</param>
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 		/// 更新
@@ -17395,29 +17534,38 @@ namespace Character {
 		// リロード
 		virtual void Reload() {};
 	public:
-		// キャラクタータイプ設定
+		/// <summary>プレイヤーまたは敵のキャラクター種別を設定する。</summary>
+		/// <param name="type">設定するキャラクター種別。</param>
 		void SetCharacterType(Type type);
-		// キャラクター取得
+		/// <summary>キャラクター種別を取得する。</summary>
+		/// <returns>現在設定されている種別。</returns>
 		Type GetCharacterType() const;
-		// キャラクターの生存状態を取得
+		/// <summary>キャラクターが生存しているか取得する。</summary>
+		/// <returns>通常更新対象として生存している場合はtrue。</returns>
 		bool GetAlive() const;
-		// キャラクターの生存状態を取得
+		/// <summary>キャラクターの生存状態を設定する。</summary>
+		/// <param name="is">生存状態にする場合はtrue。</param>
 		void SetAlive(bool is);
-		// HP取得
+		/// <summary>現在HPを取得する。</summary>
+		/// <returns>現在のHP。下限処理はパラメータコンポーネントに従う。</returns>
 		float GetHP() const;
-		// ダメージ
+		/// <summary>現在HPへダメージを適用する。</summary>
+		/// <param name="damage">減算するダメージ量。負数の扱いはパラメータ実装に従う。</param>
 		void AddDamage(float damage);
 		// 削除フラグ
 		bool  GetDelete() const;
 		// 削除する
 		void Delete();
-		// 時間
+		/// <summary>キャラクター固有の時間倍率を反映したフレーム時間を取得する。</summary>
+		/// <returns>秒単位のフレーム時間。</returns>
 		float GetTime();
-		// 移動出来るか設定
+		/// <summary>通常移動処理の許可状態を設定する。</summary>
+		/// <param name="is">移動を許可する場合はtrue。</param>
 		void IsMove(bool is);
 		// 移動可能か
 		bool GetIsMove() const;
-		// パラメータ取得
+		/// <summary>基本能力パラメータを取得する。</summary>
+		/// <returns>ParameterComponentが所有する変更可能ポインター。未初期化時はnullptr。</returns>
 		BasicParameters* GetBasicParameters() const;
 		// 基本パラメータ
 		BasicParameters* Parameters();
@@ -17447,11 +17595,14 @@ namespace Character {
 		Engine::ColliderComponent* GetColliderComponent();
 		// オブジェクト3d取得
 		ObjectComponent* GetObjectComponent();
-		// ワールド変換取得
+		/// <summary>キャラクター本体のワールド変換を取得する。</summary>
+		/// <returns>キャラクターの生存期間中有効な変更可能参照。</returns>
 		Engine::WorldTransform& GetWorldTransform();
-		// ワールド変換取得
+		/// <summary>キャラクター本体のワールド変換を読み取り専用で取得する。</summary>
+		/// <returns>内部ObjectComponentが所有する非所有ポインター。</returns>
 		const Engine::WorldTransform* GetConstWorldTransform() const;
-		// ワールド座標取得
+		/// <summary>キャラクター本体の現在ワールド座標を取得する。</summary>
+		/// <returns>ワールド空間の座標。</returns>
 		Vector3 GetWorldPosition() const;
 	public: // 貰いもの
 		// 弾マネージャ取得
@@ -17464,11 +17615,13 @@ namespace Character {
 		SpecialPointManager* GetSpecialPointManager() { return this->specialPointManager; }
 		// 入力システム取得
 		InputSystem* GetInputSystem() { return inputSystem; };
-		// 入力システム設定
+		/// <summary>キャラクター操作に使用する入力を設定する。</summary>
+		/// <param name="inputSystem">非所有ポインター。AI操作へ切り替える場合はnullptrを許容する。</param>
 		void SetInputSystem(InputSystem* inputSystem);
 		// カメラ取得
 		Engine::Camera* GetCamera() const { return camera; }
-		// カメラ設定
+		/// <summary>キャラクター描画と方向計算に使用するカメラを設定する。</summary>
+		/// <param name="camera">非所有ポインター。キャラクター利用中は有効であること。</param>
 		void SetCamera(Engine::Camera* camera);
 		//エフェクト設定
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
@@ -17511,7 +17664,9 @@ namespace Character {
 		void UpdateBaseGetValue();
 
 
-		// 攻撃要求
+		/// <summary>入力種別に対応するコンボ攻撃の開始または遷移を要求する。</summary>
+		/// <param name="input">弱攻撃、強攻撃、スキルの入力種別。</param>
+		/// <returns>攻撃要求が受理された場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
 	protected:
 		// オブジェクトコンポーネント
@@ -18511,28 +18666,42 @@ namespace Character {
 	/// </summary>
 	class CharacterManager {
 	public:
-		// 初期化
+		/// <summary>キャラクター生成・AI・衝突連携に必要な依存を設定して初期化する。</summary>
+		/// <param name="inputSystem">プレイヤー操作に使用する入力。非所有ポインター。</param>
+		/// <param name="hitBoxSystem">キャラクターの攻撃判定を登録するシステム。非所有ポインター。</param>
+		/// <param name="entity3DManager">キャラクターオブジェクトを生成するエンティティ管理。</param>
+		/// <param name="globalVariables">キャラクター調整値の登録・保存先。</param>
+		/// <param name="camera">キャラクター描画に使用するカメラ。後からCameraManagerで切り替え可能。</param>
 		void Initialize(InputSystem* inputSystem,HitBox::System* hitBoxSystem,Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
-		// 更新
+		/// <summary>全キャラクターと敵AIを更新し、死亡済みキャラクターを整理する。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
+		/// <param name="isMove">ゲーム進行上キャラクター移動を許可する場合はtrue。</param>
 		void Update(float dt,bool isMove);
 		// 描画2d
 		void Draw2D();
 	public:
-		// カメラマネジャー設定
+		/// <summary>キャラクター演出が操作するカメラ管理を設定する。</summary>
+		/// <param name="cameraManager">非所有ポインター。CharacterManagerより長く生存すること。</param>
 		void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
-		// フォローカメラ設定
+		/// <summary>プレイヤー追従に使用するカメラを設定する。</summary>
+		/// <param name="followCamera">非所有ポインター。未使用の場合はnullptrを許容する。</param>
 		void SetFollowCamera(FollowCamera* followCamera) { this->followCamera = followCamera; }
-		// 弾マネージャー設定
+		/// <summary>キャラクターが生成する弾の登録先を設定する。</summary>
+		/// <param name="bulletManager">非所有ポインター。弾を生成するキャラクターがいる間は有効であること。</param>
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
-		// エフェクト設定
+		/// <summary>キャラクター演出の出力先を設定する。</summary>
+		/// <param name="effect">非所有ポインター。演出不要の場合はnullptrを許容する。</param>
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
-		// スペシャルポイント管理クラスの設定
+		/// <summary>敵撃破時などに使用するスペシャルポイント管理を設定する。</summary>
+		/// <param name="specialPointManager">非所有ポインター。</param>
 		void SetSpecialPointManager(SpecialPointManager* specialPointManager) { this->specialPointManager = specialPointManager; };
 	public: // 取得系
 
-		// キャラクターのタイプによっての数を取得
+		/// <summary>指定種別の生存管理中キャラクター数を取得する。</summary>
+		/// <param name="type">集計するプレイヤーまたは敵の種別。</param>
+		/// <returns>現在管理している該当キャラクター数。</returns>
 		int GetCharacterCount(Type type) const
 		{
 			int result = 0;
@@ -18547,7 +18716,8 @@ namespace Character {
 			return result;
 		}
 
-		// キャラクター
+		/// <summary>管理中の全キャラクターを取得する。</summary>
+		/// <returns>所有権を持たないポインターの配列。次回の削除処理後は無効になる可能性がある。</returns>
 		std::vector<BaseCharacter*> GetCharacters() {
 			std::vector<BaseCharacter*> result;
 			for (auto& enemy : character_) {
@@ -18556,7 +18726,8 @@ namespace Character {
 			return result;
 		}
 
-		// プレイヤー取得
+		/// <summary>現在管理中のプレイヤーを取得する。</summary>
+		/// <returns>プレイヤーへの非所有ポインター。存在しない場合はnullptr。</returns>
 		BasePlayer* GetPlayer() {
 			for (auto& character : character_) {
 				if (character->GetCharacterType() == Type::Player) {
@@ -18565,7 +18736,9 @@ namespace Character {
 			}
 			return nullptr;
 		}
-		// 敵取得
+		/// <summary>タグ番号が一致する敵を検索する。</summary>
+		/// <param name="tagNumber">生成時に割り当てられたタグ番号。</param>
+		/// <returns>一致する敵への非所有ポインター。存在しない場合はnullptr。</returns>
 		BaseEnemy* GetEnemy(uint32_t tagNumber) {
 			for (auto& character : character_) {
 				if (character->GetCharacterType() == Type::Enemy && character->GetTagNumber() == tagNumber) {
@@ -18574,7 +18747,9 @@ namespace Character {
 			}
 			return nullptr;
 		}
-		// キャラクター取得
+		/// <summary>種別を問わずタグ番号が一致するキャラクターを検索する。</summary>
+		/// <param name="tagNumber">生成時に割り当てられたタグ番号。</param>
+		/// <returns>一致するキャラクターへの非所有ポインター。存在しない場合はnullptr。</returns>
 		BaseCharacter* GetCharacter(uint32_t tagNumber) {
 			for (auto& character : character_) {
 				if (character->GetTagNumber() == tagNumber) {
@@ -18584,21 +18759,45 @@ namespace Character {
 			return nullptr;
 		}
 	public: // 生成系
-		// キャラクター生成(敵)
+		/// <summary>指定設定で敵キャラクターを1体生成する。</summary>
+		/// <param name="enemyType">生成する敵種別。</param>
+		/// <param name="characterName">調整値とオブジェクト識別に使用する名前。空文字の場合は種別の既定名を使用する。</param>
+		/// <param name="groupId">AI群衆グループの識別番号。</param>
+		/// <param name="transform">初期スケール・回転・座標。</param>
+		/// <param name="crowdBehavior">群衆AIの振る舞い設定。</param>
+		/// <returns>生成した敵へ割り当てたタグ番号。</returns>
 		uint32_t CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
 			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
-		// キャラクター生成(プレイヤー)
+		/// <summary>指定設定でプレイヤーキャラクターを生成する。</summary>
+		/// <param name="playerType">生成するプレイヤー種別。</param>
+		/// <param name="characterName">調整値とオブジェクト識別に使用する名前。</param>
+		/// <param name="transform">初期スケール・回転・座標。</param>
+		/// <returns>生成したプレイヤーへ割り当てたタグ番号。</returns>
 		uint32_t CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
+		/// <summary>指定範囲へ複数の敵グループをまとめて生成する。</summary>
+		/// <param name="enemyType">生成する敵種別。</param>
+		/// <param name="groupCount">生成するAIグループ数。</param>
+		/// <param name="perGroup">1グループ当たりの敵数。</param>
+		/// <param name="origin">生成範囲の基準座標。</param>
+		/// <param name="aabb">基準座標からの生成範囲。</param>
+		/// <param name="crowdBehavior">各グループへ設定する群衆AIの振る舞い。</param>
 		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb,
 			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 	public:
+		/// <summary>指定種別のキャラクターを管理対象から削除する。</summary>
+		/// <param name="type">削除するプレイヤーまたは敵の種別。</param>
 		void Clear(Type type);
 		// ウェーブ切り替え用に、敵を即削除せず退場演出へ移行させる
+		/// <param name="duration">退場演出に使用する秒数。0以下なら即時終了相当。</param>
 		void BeginEnemyWaveExit(float duration = 1.2f);
 		// 指定した群衆グループだけを、退場演出を伴って削除する
+		/// <param name="crowdGroupId">退場させる群衆グループID。</param>
+		/// <param name="duration">退場演出に使用する秒数。</param>
 		void BeginEnemyCrowdExit(int crowdGroupId, float duration = 1.2f);
 
+		/// <summary>敵撃破などで蓄積した現在のスコアを取得する。</summary>
+		/// <returns>現在のスコア。</returns>
 		float GetScore() { return score; }
 	private:
 		// キャラクター
@@ -22243,7 +22442,16 @@ namespace Character {
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
-		// 基盤となる初期化
+		/// <summary>敵共通のオブジェクト、パラメータ、AI、攻撃、死亡処理を初期化する。</summary>
+		/// <param name="inputSystem">入力参照。AI操作のみの場合はnullptrを許容する。</param>
+		/// <param name="entity3DManager">敵オブジェクトとコンポーネントの生成元。</param>
+		/// <param name="globalVariables">敵調整値の登録・保存先。</param>
+		/// <param name="position">敵の初期ワールド座標。</param>
+		/// <param name="camera">敵描画に使用する非所有カメラ。</param>
+		/// <param name="modelName">使用するモデル名。</param>
+		/// <param name="charaName">オブジェクトと調整値に使用する敵名。</param>
+		/// <param name="colliderRadius">球コライダー半径。0より大きい値を指定する。</param>
+		/// <param name="shadowSize">影の表示倍率。</param>
 		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f,float shadowSize = 1.0f);
@@ -22261,16 +22469,26 @@ namespace Character {
 		virtual void Jump(){};
 		// リロード
 		virtual void Reload() {};
-		// ターゲット取得
+		/// <summary>現在の攻撃・移動対象を取得する。</summary>
+		/// <returns>非所有ポインター。対象が設定されていない場合はnullptr。</returns>
 		const BaseCharacter* GetTarget();
 
+		/// <summary>攻撃・移動対象となるキャラクターを設定する。</summary>
+		/// <param name="target">対象への非所有ポインター。解除時はnullptr。</param>
 		void SetTargetCharacters(BaseCharacter* target);
 
+		/// <summary>敵固有の攻撃判断システムを取得する。</summary>
+		/// <returns>BaseEnemyが所有する非所有ポインター。未初期化時はnullptr。</returns>
 		EnemyAttackSystem* GetEnemyAttackSystem() const;
+		/// <summary>共有敵AIシステムを取得する。</summary>
+		/// <returns>CharacterManagerなどが所有する非所有ポインター。</returns>
 		EnemyAiSystem* GetEnemyAiSystem() const { return enemAi; }
 
+		/// <summary>共有敵AIシステムを設定する。</summary>
+		/// <param name="aiSystem">非所有ポインター。敵の生存中は有効であること。</param>
 		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
 		// ウェーブ終了による自然退場を開始する
+		/// <param name="duration">自然退場に使用する秒数。</param>
 		void BeginWaveExit(float duration = 1.2f);
 		// 退場中の敵は攻撃・ロックオン・撃破得点の対象から外す
 		bool IsWaveExiting() const;
@@ -22296,15 +22514,19 @@ namespace Character {
 		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
 		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
-		// 対象の位置(プレイヤー)
+		/// <summary>現在のターゲット座標を取得する。</summary>
+		/// <returns>ターゲットのワールド座標。未設定時は既定のゼロベクトル。</returns>
 		Vector3 GetTargetPos();
-		// 対象との距離(プレイヤー)
+		/// <summary>自身から現在ターゲットまでの距離を取得する。</summary>
+		/// <returns>ワールド単位の直線距離。</returns>
 		float GetTargetDistance();
-		// ターゲット方向取得
+		/// <summary>自身からターゲットへ向かう方向を取得する。</summary>
+		/// <returns>正規化済みワールド方向。方向を算出できない場合はゼロベクトル。</returns>
 		Vector3 TargetDirection();
 
 	protected:
-		// エフェクト初期化
+		/// <summary>敵に追従するエフェクト用ワールド変換を初期化する。</summary>
+		/// <param name="pos">初期ワールド座標。</param>
 		void InitializeEffect(const Vector3& pos);
 		// 武器初期化
 		template<typename T>
@@ -28426,7 +28648,7 @@ void EffectSystem::CreateEffect(const std::string& name, EmitterShapeType shapeT
 ============================================================
 File Path: project/DirectXGame/application/base/Effect/Effect.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "EffectEditor.h"
 // 前方宣言
 namespace Engine {
@@ -28437,19 +28659,33 @@ namespace Engine {
 /// </summary>
 class EffectSystem {
 public:
-	// 初期化
+	/// <summary>エフェクト定義と実行用コンポーネントを初期化する。</summary>
+	/// <param name="entityManager">エフェクトを生成するエンティティ管理。利用中は有効であること。</param>
+	/// <param name="globalVariables">エフェクト定義の登録・保存先。</param>
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
-	// 更新
+	/// <summary>生成済みエフェクトとエディター状態を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
-	// 出現
+	/// <summary>指定位置へエフェクトを生成する。</summary>
+	/// <param name="name">登録済みエフェクト名。</param>
+	/// <param name="pos">ワールド座標。</param>
 	void Emit(const std::string& name, const Vector3& pos);
-	// 出現(方向付き)
+	/// <summary>方向と放出範囲を指定してエフェクトを生成する。</summary>
+	/// <param name="name">登録済みエフェクト名。</param>
+	/// <param name="pos">ワールド座標。</param>
+	/// <param name="dir">放出方向。</param>
+	/// <param name="range">各軸の放出範囲。</param>
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
 
 public:
+	/// <summary>エディターが管理している全エフェクト定義を取得する。</summary>
+	/// <returns>呼び出し側で安全に参照できる定義マップのコピー。</returns>
 	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectEditor_->GetEffectGlobalDatas(); };
 private:
-	// エフェクトの作成
+	/// <summary>1件のエフェクト定義から実行用エフェクトを生成する。</summary>
+	/// <param name="name">生成するエフェクト名。</param>
+	/// <param name="shapeType">エミッター形状。</param>
+	/// <param name="data">生成に利用する保存済みパラメータ。</param>
 	void CreateEffect(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
 
 	// パーティクル初期化
@@ -33498,7 +33734,7 @@ float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * tim
 /// オブジェクトの時間設定
 /// </summary>
 /// <param name="spped"></param>
-void ObjectComponent::SetTimeSpeed(const float& spped) { timeSpeed_ = spped; }
+void ObjectComponent::SetTimeSpeed(float speed) { timeSpeed_ = speed; }
 
 
 /// <summary>
@@ -33752,9 +33988,16 @@ namespace Engine {
 class ObjectComponent {
 public:
 
-	///< summary>
-	/// 初期化
-	///</summary>
+	/// <summary>通常描画オブジェクトと任意の物理コンポーネントを初期化する。</summary>
+	/// <param name="entityManager">オブジェクトと各コンポーネントの生成元。</param>
+	/// <param name="globalVariables">オブジェクト調整値の登録・保存先。不要な場合はnullptr。</param>
+	/// <param name="objectName">EntityManager上の一意なオブジェクト名。</param>
+	/// <param name="modelName">使用するモデルの登録名またはファイル名。</param>
+	/// <param name="useCollider">コライダーを生成する場合はtrue。</param>
+	/// <param name="useRigidBody">剛体を生成する場合はtrue。</param>
+	/// <param name="iHitReceiver">衝突通知先。コライダー未使用時または通知不要時はnullptr。</param>
+	/// <param name="modelType">通常、スキニングなどの描画モデル種別。</param>
+	/// <param name="rigidUpdate">Update内で剛体を自動更新する場合はtrue。</param>
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
 		const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, 
 		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal,bool rigidUpdate = true);
@@ -33762,6 +34005,16 @@ public:
 	/// <summary>
 	/// インスタンシング用初期化
 	/// </summary>
+	/// <param name="entityManager">インスタンスと各コンポーネントの生成元。</param>
+	/// <param name="globalVariables">調整値の登録・保存先。不要な場合はnullptr。</param>
+	/// <param name="objectName">インスタンス識別名。</param>
+	/// <param name="modelName">使用するモデル名。</param>
+	/// <param name="texName">上書きテクスチャ名。モデル既定を使う場合は空文字。</param>
+	/// <param name="useCollider">コライダーを生成する場合はtrue。</param>
+	/// <param name="useRigidBody">剛体を生成する場合はtrue。</param>
+	/// <param name="iHitReceiver">衝突通知先。通知不要時はnullptr。</param>
+	/// <param name="transparencyType">不透明または半透明の描画区分。</param>
+	/// <param name="rigidUpdate">Update内で剛体を自動更新する場合はtrue。</param>
 	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
 		bool useRigidBody, IHitReceiver* iHitReceiver,
@@ -33774,31 +34027,39 @@ public:
 
 
 public: // コライダー
-	// コライダーコンポーネント取得
+	/// <summary>このオブジェクトへ接続したコライダーを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
 	Engine::ColliderComponent* GetColliderComponent();
 	// コライダー衝突履歴削除
 	void ColliderHistoryClear();
-	// 衝突履歴取得
+	/// <summary>コライダーが保持する接触履歴を取得する。</summary>
+	/// <returns>次回履歴クリアまで有効な接触履歴への参照。</returns>
 	Engine::ContactRecord& GetContactRecord();
 
-	// 描画するか
+	/// <summary>オブジェクトの描画可否を設定する。</summary>
+	/// <param name="is">描画する場合はtrue。</param>
 	void SetIsDraw(bool is);
 
 	// 削除
 	void IsDelete();
 
 public: // 取得
-	// オブジェクト3d取得
+	/// <summary>通常描画オブジェクトを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。インスタンシング利用時はnullptrの場合がある。</returns>
 	Engine::Object3d* GetObject3D() { return objectBase_; }
-	// ワールド変換取得
+	/// <summary>通常・インスタンシングを問わず、このオブジェクトのワールド変換を取得する。</summary>
+	/// <returns>オブジェクトの生存期間中有効な変更可能参照。</returns>
 	Engine::WorldTransform& GetWorldTransform();
 	// ワールド座標取得
 	Vector3 GetWorldPosition() { return GetWorldTransform().GetWorldPosition(); };
-	// スクリーン座標取得
+	/// <summary>現在のワールド座標を描画カメラのスクリーン座標へ変換する。</summary>
+	/// <returns>ピクセル単位のスクリーン座標。</returns>
 	Vector2 GetScreenPosition();
-	// リジッドボディー取得
+	/// <summary>接続した剛体コンポーネントを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
 	Engine::RigidBodyComponent* GetRigidBodyComponent();
-	// リジットボディーを別の場所で更新するか
+	/// <summary>Update内でコライダー・剛体を自動更新するか設定する。</summary>
+	/// <param name="is">ObjectComponent側で更新する場合はtrue。</param>
 	void SetIsUpdateColliderComponent(bool is);
 	// オブジェクト時間取得
 	float GetTime() const;
@@ -33818,16 +34079,24 @@ public: // 設定
 	// 名前設定
 	void SetName(std::string name) { this->name_ = name; };
 
-	// 時間設定
-	void SetTimeSpeed(const float& spped);
+	/// <summary>このオブジェクト固有の時間倍率を設定する。</summary>
+	/// <param name="speed">時間倍率。1.0で通常、0.0で停止。</param>
+	void SetTimeSpeed(float speed);
 
 	// オブジェクト状態取得(設定可能)
 	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
-	// SRT設定
+	/// <summary>通常オブジェクトのスケール・回転・移動をまとめて設定する。</summary>
+	/// <param name="s">各軸のスケール。</param>
+	/// <param name="r">ラジアン単位のXYZ回転。</param>
+	/// <param name="t">ワールドまたは親基準の移動量。</param>
 	void SetSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
-	// インスタンシング用SRT設定
+	/// <summary>インスタンシングオブジェクトのスケール・回転・移動をまとめて設定する。</summary>
+	/// <param name="s">各軸のスケール。</param>
+	/// <param name="r">ラジアン単位のXYZ回転。</param>
+	/// <param name="t">ワールドまたは親基準の移動量。</param>
 	void SetInstancingSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
-	// 色の設定
+	/// <summary>描画マテリアルまたはインスタンスの色を設定する。</summary>
+	/// <param name="color">RGBA色。各成分は通常0.0～1.0。</param>
 	void SetColor(const Color& color);
 private:
 	Engine::Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
@@ -34348,16 +34617,25 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Special/Point/SpecialPointState.cpp
 ============================================================
-#include "SpecialPointState.h"
+﻿#include "SpecialPointState.h"
 #include "SpecialPoint.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
+
+namespace {
+	// 出現時にスペシャルポイントを配置する高さ。
+	constexpr float kPopInitialHeight = 2.0f;
+	// ターゲット到達と判定する距離。
+	constexpr float kTargetArrivalDistance = 2.0f;
+	// 到達後にターゲット位置へ加える高さ。
+	const Vector3 kCollectedPointOffset = { 0.0f, 3.0f, 0.0f };
+}
 
 #pragma region Pop
 
 // 開始
 void SpecialPointPopState::Enter() {
 	timer = 0.0f;
-	object_->GetObjectComponent()->GetWorldTransform().translate_.y = 2.0f;
+	object_->GetObjectComponent()->GetWorldTransform().translate_.y = kPopInitialHeight;
 	object_->GetObjectComponent()->GetRigidBodyComponent()->AddForce(upVelocity_);
 	object_->GetObjectComponent()->GetRigidBodyComponent()->SetGravityScale(glavityScale_);
 	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(true);
@@ -34447,8 +34725,8 @@ void SpecialPointMoveState::Update(float dt) {
 	object_->GetObjectComponent()->GetWorldTransform().translate_ += dire * speed_ * dt;
 
 	// 目標位置に到達したら位置を固定
-	if (2.0f  > object_->GetObjectComponent()->GetWorldPosition().Distance(object_->GetTargetPos())) {
-		object_->GetObjectComponent()->GetWorldPosition() = object_->GetTargetPos() + Vector3{0,3,0};
+	if (kTargetArrivalDistance > object_->GetObjectComponent()->GetWorldPosition().Distance(object_->GetTargetPos())) {
+		object_->GetObjectComponent()->GetWorldPosition() = object_->GetTargetPos() + kCollectedPointOffset;
 	}
 
 
@@ -35946,11 +36224,11 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/UI/Base/BaseUI.cpp
 ============================================================
-#include "BaseUI.h"
+﻿#include "BaseUI.h"
 
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-void BaseUI::InitSprite(Engine::Sprite* sprite, std::string texFile, Vector2 pos, Vector2 size)
+void BaseUI::InitSprite(Engine::Sprite* sprite, const std::string& texFile, Vector2 pos, Vector2 size)
 {
 	sprite->Initialize(entityManager->GetSpriteCommon(), texFile);	// 初期化
 	sprite->SetPosition(pos);											// 位置設定
@@ -36091,7 +36369,7 @@ void BaseUI::DrawUIElement()
 
 }
 
-Engine::UICheckBox* BaseUI::GetUICheckBox(std::string name)
+Engine::UICheckBox* BaseUI::GetUICheckBox(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiCheckBox_.contains(name)) {
@@ -36100,7 +36378,7 @@ Engine::UICheckBox* BaseUI::GetUICheckBox(std::string name)
 	return nullptr;
 }
 
-Engine::UISlider* BaseUI::GetUISlider(std::string name)
+Engine::UISlider* BaseUI::GetUISlider(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiSlider_.contains(name)) {
@@ -36109,7 +36387,7 @@ Engine::UISlider* BaseUI::GetUISlider(std::string name)
 	return nullptr;
 }
 
-Engine::UIMeter* BaseUI::GetUIMeter(std::string name)
+Engine::UIMeter* BaseUI::GetUIMeter(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiMeter_.contains(name)) {
@@ -36118,7 +36396,7 @@ Engine::UIMeter* BaseUI::GetUIMeter(std::string name)
 	return nullptr;
 }
 
-Engine::UIPair* BaseUI::GetUIPair(std::string name)
+Engine::UIPair* BaseUI::GetUIPair(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiPair_.contains(name)) {
@@ -36127,7 +36405,7 @@ Engine::UIPair* BaseUI::GetUIPair(std::string name)
 	return nullptr;
 }
 
-Engine::UICount* BaseUI::GetUICount(std::string name)
+Engine::UICount* BaseUI::GetUICount(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiCount_.contains(name)) {
@@ -36141,7 +36419,7 @@ Engine::UICount* BaseUI::GetUICount(std::string name)
 ============================================================
 File Path: project/DirectXGame/application/base/UI/Base/BaseUI.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/UI/UIBoard.h"
 
 
@@ -36159,16 +36437,22 @@ namespace Engine {
 class BaseUI
 {
 public:
-	//初期化
+	/// <summary>UIが使用する入力、描画リソース、調整値を初期化する。</summary>
+	/// <param name="inputSystem">UI操作に使用する入力。表示専用UIではnullptrを許容する。</param>
+	/// <param name="entityManager">スプライトとUI要素の生成元。</param>
+	/// <param name="globalVariables">UI調整値の登録・保存先。調整値不要ならnullptrを許容する。</param>
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) = 0;
 
-	// 毎フレーム更新
+	/// <summary>UIの状態、アニメーション、入力を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
 	virtual void Update(float dt) = 0;
 
 	// 描画
 	virtual void Draw() = 0;
 
-	// 画面比率設定
+	/// <summary>オフスクリーン画像の表示領域に合わせてUI座標変換を設定する。</summary>
+	/// <param name="leftTopPos">表示画像の左上スクリーン座標。</param>
+	/// <param name="ratio">実画面サイズに対する表示画像のXY倍率。</param>
 	void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) {
 		leftTopPos_ = leftTopPos;	// 画面左上座標
 		ratio_ = ratio;				// 画面比率
@@ -36176,8 +36460,12 @@ public:
 
 
 protected:
-	// スプライト初期化
-	void InitSprite(Engine::Sprite* sprite,std::string texFile,Vector2 pos,Vector2 size);
+	/// <summary>呼び出し側が所有するスプライトへ共通表示設定を適用する。</summary>
+	/// <param name="sprite">初期化対象。nullptr不可。</param>
+	/// <param name="texFile">使用するテクスチャファイルパス。</param>
+	/// <param name="pos">ピクセル単位の初期座標。</param>
+	/// <param name="size">ピクセル単位の表示サイズ。</param>
+	void InitSprite(Engine::Sprite* sprite,const std::string& texFile,Vector2 pos,Vector2 size);
 	// チェックボックス初期化
 	void InitUICheckBox(std::string name,Vector2 pos);
 	// スライダー初期化
@@ -36190,21 +36478,24 @@ protected:
 	void InitUICount(std::string name, Vector2 pos,int instance = 1,bool useSprite = false);
 
 
-	// 更新
+	/// <summary>登録済みの全UI要素を更新する。</summary>
+	/// <param name="deltaTime">秒単位のフレーム時間。</param>
 	void UpdateUIElement(float deltaTime);
 	// 描画
 	void DrawUIElement();
 	
-	// チェックボックス取得
-	Engine::UICheckBox* GetUICheckBox(std::string name);
+	/// <summary>名前からチェックボックスを検索する。</summary>
+	/// <param name="name">初期化時に登録した名前。</param>
+	/// <returns>BaseUIが所有する非所有ポインター。未登録の場合はnullptr。</returns>
+	Engine::UICheckBox* GetUICheckBox(const std::string& name);
 	// スライダー取得
-	Engine::UISlider* GetUISlider(std::string name);
+	Engine::UISlider* GetUISlider(const std::string& name);
 	// メータ取得
-	Engine::UIMeter* GetUIMeter(std::string name);
+	Engine::UIMeter* GetUIMeter(const std::string& name);
 	// ペア取得
-	Engine::UIPair* GetUIPair(std::string name);
+	Engine::UIPair* GetUIPair(const std::string& name);
 	// カウンター取得
-	Engine::UICount* GetUICount(std::string name);
+	Engine::UICount* GetUICount(const std::string& name);
 
 protected:
 	Engine::EntityManager* entityManager = nullptr;
@@ -37825,7 +38116,12 @@ public:
 	BaseWeapon();
 	virtual ~BaseWeapon();
 
-	// 初期化
+	/// <summary>武器オブジェクト、当たり判定、描画依存を初期化する。</summary>
+	/// <param name="inputSystem">武器操作に使用する入力。敵武器ではnullptrを許容する。</param>
+	/// <param name="entityManager">武器オブジェクトとコンポーネントの生成元。</param>
+	/// <param name="globalVariables">武器調整値の登録・保存先。</param>
+	/// <param name="position">武器の初期ワールド座標。</param>
+	/// <param name="camera">武器描画に使用する非所有カメラ。</param>
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	// 更新
@@ -37835,23 +38131,33 @@ public:
 	// 描画2d
 	virtual void Draw2D() = 0;
 public:
-	// 使っているキャラクター設定
+	/// <summary>この武器を使用するキャラクターを設定する。</summary>
+	/// <param name="character">所有者への非所有ポインター。武器利用中は有効であること。</param>
 	void SetCharacter(Character::BaseCharacter* character);
-	// タグによるコライダーの有効・無効を設定
+	/// <summary>指定衝突タグに対する武器コライダーの有効状態を設定する。</summary>
+	/// <param name="tag">有効状態を変更する衝突対象タグ。</param>
+	/// <param name="is">衝突を有効にする場合はtrue。</param>
 	void SetIsCollider(CollisionTag tag, bool is);
-	// コライダーコンポーネント
+	/// <summary>武器のコライダーコンポーネントを取得する。</summary>
+	/// <returns>内部ObjectComponentが所有する非所有ポインター。未生成の場合はnullptr。</returns>
 	Engine::ColliderComponent* GetColliderComponent();
-	// オブジェクト3d取得
+	/// <summary>武器の描画オブジェクトを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。</returns>
 	Engine::Object3d* GetObject3D();
-	// ワールド変換取得
+	/// <summary>武器のワールド変換を取得する。</summary>
+	/// <returns>武器の生存期間中有効な変更可能参照。</returns>
 	Engine::WorldTransform& GetWorldTransform();
-	// 弾管理クラス設定
+	/// <summary>遠距離武器が生成する弾の登録先を設定する。</summary>
+	/// <param name="bulletManager">非所有ポインター。弾を生成する間は有効であること。</param>
 	void SetBulletManager(BulletManager* bulletManager);
-	// 武器に紐づくトレイルを設定
+	/// <summary>武器軌跡として使用するトレイルを設定する。</summary>
+	/// <param name="trailEffect">EntityManagerなどが所有する非所有ポインター。解除時はnullptr。</param>
 	void SetTrailEffect(Engine::TrailEffect* trailEffect);
-	// 武器に紐づくトレイルを取得
+	/// <summary>設定済みの武器トレイルを取得する。</summary>
+	/// <returns>非所有ポインター。未設定の場合はnullptr。</returns>
 	Engine::TrailEffect* GetTrailEffect();
-	// トレイル発生のON/OFF
+	/// <summary>武器トレイルの頂点生成を開始または停止する。</summary>
+	/// <param name="isEmit">生成する場合はtrue。</param>
 	void SetTrailEmit(bool isEmit);
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
