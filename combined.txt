@@ -2024,93 +2024,77 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.cpp
 #include <DirectXGame/engine/Math/Random.h>
 
 #pragma region DamageData
-// 更新
-void DamageData::Update(float dt) {
-	switch (type)
-	{
-	case DamageData::kOne:
-		one.Update(dt);
-		break;
-	case DamageData::kContinuous:
-		continuous.Update(dt);
-		break;
-	case DamageData::kDuration:
-		duration.Update(dt);
-		break;
-	default:
-		break;
-	}
-};
-// ダメージ取得
-float DamageData::GetDamage() {
-	float damage = 0;
 
-	switch (type)
-	{
-	case DamageData::kOne:
-		damage = one.GetDamage();
-		break;
-	case DamageData::kContinuous:
-		damage = continuous.GetDamage();
-		break;
-	case DamageData::kDuration:
-		damage = duration.GetDamage();
-		break;
-	default:
-		break;
-	}
+DamageDataHandle::DamageDataHandle()
+	: data_(std::make_unique<One>()) {}
 
-	return damage;
-};
-// 終了しているか
-bool DamageData::IsFinish() {
-	bool is = true;
-	switch (type)
-	{
-	case DamageData::kOne:
-		is = one.IsFinish();
-		break;
-	case DamageData::kContinuous:
-		is = continuous.IsFinish();
-		break;
-	case DamageData::kDuration:
-		is = duration.IsFinish();
-		break;
-	default:
-		break;
+DamageDataHandle::DamageDataHandle(const DamageDataHandle& other)
+	: data_(other.data_ ? other.data_->Clone() : std::make_unique<One>()) {}
+
+DamageDataHandle& DamageDataHandle::operator=(const DamageDataHandle& other) {
+	// 自己代入で現在の派生データを不要に作り直さない
+	if (this != &other) {
+		data_ = other.data_ ? other.data_->Clone() : std::make_unique<One>();
 	}
-	return is;
+	return *this;
 }
-// ダメージが発生しているか
-bool DamageData::IsAttack()
-{
-	bool is = true;
-	switch (type)
-	{
+
+DamageDataHandle::DamageDataHandle(const DamageData& data)
+	: data_(data.Clone()) {}
+
+void DamageDataHandle::SetType(DamageData::Type type) {
+	// 指定されたダメージ方式に対応する派生インスタンスへ切り替える
+	switch (type) {
 	case DamageData::kOne:
-		is = one.IsAttack();
+		data_ = std::make_unique<One>();
 		break;
 	case DamageData::kContinuous:
-		is = continuous.IsAttack();
+		data_ = std::make_unique<Continuous>();
 		break;
 	case DamageData::kDuration:
-		is = duration.IsAttack();
+		data_ = std::make_unique<Duration>();
 		break;
 	default:
+		data_ = std::make_unique<One>();
 		break;
 	}
-	return is;
+}
+
+One& DamageDataHandle::GetOne() {
+	return dynamic_cast<One&>(*data_);
+}
+
+const One& DamageDataHandle::GetOne() const {
+	return dynamic_cast<const One&>(*data_);
+}
+
+Continuous& DamageDataHandle::GetContinuous() {
+	return dynamic_cast<Continuous&>(*data_);
+}
+
+const Continuous& DamageDataHandle::GetContinuous() const {
+	return dynamic_cast<const Continuous&>(*data_);
+}
+
+Duration& DamageDataHandle::GetDuration() {
+	return dynamic_cast<Duration&>(*data_);
+}
+
+const Duration& DamageDataHandle::GetDuration() const {
+	return dynamic_cast<const Duration&>(*data_);
 }
 
 #pragma endregion ダメージデータ
 
 #pragma region One
 // 更新
-void DamageData::One::Update(float dt) {
+void One::Update(float dt) {
+	// 一回ダメージは最初の更新で処理完了とする
+	(void)dt;
 	isFinish = true;
 }
 // ダメージ取得
-float DamageData::One::GetDamage() const {
+float One::GetDamage() const {
 	return damage;
 }
 
@@ -2118,7 +2102,7 @@ float DamageData::One::GetDamage() const {
 
 #pragma region Duration
 // 更新
-void DamageData::Duration::Update(float dt) {
+void Duration::Update(float dt) {
 
 	// カウント内なら時間を加算
 	if (count < num && !isDamage) {
@@ -2138,13 +2122,13 @@ void DamageData::Duration::Update(float dt) {
 }
 
 // カウントリセット
-void DamageData::Duration::Reset() {
+void Duration::Reset() {
 	count = 0;
 	isFinish = false;
 }
 
 // ダメージ取得 
-float DamageData::Duration::GetDamage() const {
+float Duration::GetDamage() const {
 	return damage;
 };
 
@@ -2152,7 +2136,7 @@ float DamageData::Duration::GetDamage() const {
 
 #pragma region Continuous
 // 更新
-void DamageData::Continuous::Update(float dt) {
+void Continuous::Update(float dt) {
 	// カウント内なら時間を加算
 	if (count < num) {
 		timer += dt;
@@ -2170,13 +2154,13 @@ void DamageData::Continuous::Update(float dt) {
 };
 
 // カウントリセット
-void DamageData::Continuous::Reset() {
+void Continuous::Reset() {
 	count = 0;
 	isFinish = false;
 }
 
 // ダメージ取得
-float DamageData::Continuous::GetDamage() const
+float Continuous::GetDamage() const
 {
 	float damage = 0;
 	switch (oneHitDamegeType)
@@ -2205,8 +2189,9 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.h
 
 #include "vector"
 #include "string"
+#include <memory>
 
-/// ダメージデータ
+/// ダメージ処理の共通インターフェース
 class DamageData {
 public:
 	// ダメージタイプ
@@ -2222,116 +2207,151 @@ public:
 		kCustom,	// 1つ1つで変える
 	};
 
-	// 一回データ
-	class One {
-	public:
-		// 更新
-		void Update(float dt);
-		// ダメージが入るか
-		bool IsAttack() const { return isDamage; }
-		// 終わったか
-		bool IsFinish() const { return isFinish; }
-		// ダメージ取得 
-		float GetDamage() const;
-		// ダメージ設定
-		void SetDamage(float damage) { this->damage = damage; };
+	// 基底クラス経由で安全に破棄するための仮想デストラクタ
+	virtual ~DamageData() = default;
+	// ダメージ状態を更新する
+	virtual void Update(float dt) = 0;
+	// 現在発生させるダメージを取得する
+	virtual float GetDamage() const = 0;
+	// ダメージ処理が終了したか取得する
+	virtual bool IsFinish() const = 0;
+	// 現在ダメージを発生させるか取得する
+	virtual bool IsAttack() const = 0;
+	// 派生クラスの種別を取得する
+	virtual Type GetType() const = 0;
+	// 値コピー時に派生型を維持した複製を作る
+	virtual std::unique_ptr<DamageData> Clone() const = 0;
+};
 
-	private:
-		float damage = 0;			// ダメージ(変化がない場合)
-		float timer = 0.0f;		// 時間
-		bool isDamage = true;	// ダメージを入れるか
-		bool isFinish = false;	// 攻撃として終了したか
-	};
+/// 一回だけダメージを発生させるデータ
+class One final : public DamageData {
+public:
+	// 一回ダメージの状態を更新する
+	void Update(float dt) override;
+	// 設定されたダメージを取得する
+	float GetDamage() const override;
+	// 一回ダメージが終了したか取得する
+	bool IsFinish() const override { return isFinish; }
+	// ダメージを発生させるか取得する
+	bool IsAttack() const override { return isDamage; }
+	// 一回ダメージ種別を返す
+	Type GetType() const override { return Type::kOne; }
+	// 現在の状態を含めて複製する
+	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<One>(*this); }
+	// ダメージ値を設定する
+	void SetDamage(float value) { damage = value; }
 
-	// 連撃データ
-	class Continuous {
-	public:
-		// 更新
-		void Update(float dt);
-		// カウントリセット
-		void Reset();
-		// ダメージが入るか
-		bool IsAttack() const { return isDamage; }
-		// 終わったか
-		bool IsFinish() const { return isFinish; }
-		// ダメージ取得 
-		float GetDamage() const;
-		// 一つ一つのダメージの変化タイプ取得
-		OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
-	private:
-		OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 一つ一つのダメージの変化タイプ
-		float interval = 0.1f;		// 連撃のダメージ入りる間隔
-		int num = 2;				// 連撃のダメージの回数
-		std::vector<float> damages;	// ダメージ一つ一つ
-		float damage = 0;			// ダメージ(変化がない場合)
-	private:
-		float timer = 0.0f;		// 時間
-		bool isDamage = true;	// ダメージを入れるか
-		bool isFinish = false;	// 攻撃として終了したか
-		int count = 0;			// カウント用
-	};
-
-	// 持続データ
-	class Duration {
-	public:
-
-		// 更新
-		void Update(float dt);
-		// カウントリセット
-		void Reset();
-		// ダメージが入るか
-		bool IsAttack() const { return isDamage; }
-		// 終わったか
-		bool IsFinish() const { return isFinish; }
-		// ダメージ取得 
-		float GetDamage() const;
-		// ダメージ設定
-		void SetDamage(float damage) { this->damage = damage; };
-	private:
-		float interval = 0.1f;	// 持続ダメージの入る間隔	
-		int num = 2;			// 持続ダメージの回数
-		float damage = 0;		// ダメージ
-		bool isDed = false;		// 持続ダメージでの死亡はするか
-	private:
-		float timer = 0.0f;		// 時間
-		bool isDamage = true;	// ダメージを入れるか
-		bool isFinish = false;	// 攻撃として終了したか
-		int count = 0;			// カウント用
-	};
-
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-	// ダメージの与え方取得
-	Type GetType() const { return type; };
-	// ダメージ取得
-	float GetDamage();
-	// 終了しているか
-	bool IsFinish();
-	// ダメージが発生しているか
-	bool IsAttack();
-
-
-	// 一撃
-	One& GetOne() { return one; }
-
-	// 連撃
-	Continuous& GetContinuous() { return continuous; }
-
-	// 持続
-	Duration& GetDuration() { return duration; }
-
-	
 private:
-	Type type = Type::kOne;		// ダメージの与え方;
-	Continuous continuous{};	// 連撃ダメージデータ
-	Duration duration{};		// 持続ダメージデータ
-	One one{};					// 一回ダメージデータ
-	float damage = 0;			// ダメージ
+	float damage = 0.0f;		// 一回で与えるダメージ
+	bool isDamage = true;	// ダメージを発生させるか
+	bool isFinish = false;	// 一回ダメージが終了したか
+};
+
+/// 一回の攻撃中に複数回ダメージを発生させるデータ
+class Continuous final : public DamageData {
+public:
+	// 連撃ダメージの状態を更新する
+	void Update(float dt) override;
+	// 現在のヒットに対応するダメージを取得する
+	float GetDamage() const override;
+	// 連撃ダメージが終了したか取得する
+	bool IsFinish() const override { return isFinish; }
+	// 現在ダメージを発生させるか取得する
+	bool IsAttack() const override { return isDamage; }
+	// 連撃ダメージ種別を返す
+	Type GetType() const override { return Type::kContinuous; }
+	// 現在の状態を含めて複製する
+	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<Continuous>(*this); }
+	// 連撃の実行状態を初期化する
+	void Reset();
+	// 連撃内のダメージ変更方式を取得する
+	OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
+
+private:
+	OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 各ヒットのダメージ方式
+	float interval = 0.1f;		// ダメージを発生させる間隔
+	int num = 2;				// ダメージを発生させる回数
+	std::vector<float> damages;	// ヒットごとのダメージ
+	float damage = 0.0f;		// 一定方式で使用するダメージ
+	float timer = 0.0f;		// 次のダメージまでの時間
+	bool isDamage = true;	// 現在ダメージを発生させるか
+	bool isFinish = false;	// 連撃ダメージが終了したか
+	int count = 0;			// 発生済みダメージ回数
+};
+
+/// 時間経過で継続的にダメージを発生させるデータ
+class Duration final : public DamageData {
+public:
+	// 持続ダメージの状態を更新する
+	void Update(float dt) override;
+	// 設定された持続ダメージを取得する
+	float GetDamage() const override;
+	// 持続ダメージが終了したか取得する
+	bool IsFinish() const override { return isFinish; }
+	// 現在ダメージを発生させるか取得する
+	bool IsAttack() const override { return isDamage; }
+	// 持続ダメージ種別を返す
+	Type GetType() const override { return Type::kDuration; }
+	// 現在の状態を含めて複製する
+	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<Duration>(*this); }
+	// 持続ダメージの実行状態を初期化する
+	void Reset();
+	// ダメージ値を設定する
+	void SetDamage(float value) { damage = value; }
+
+private:
+	float interval = 0.1f;	// ダメージを発生させる間隔
+	int num = 2;			// ダメージを発生させる回数
+	float damage = 0.0f;	// 一回ごとの持続ダメージ
+	bool isDed = false;		// 持続ダメージで死亡可能か
+	float timer = 0.0f;		// 次のダメージまでの時間
+	bool isDamage = true;	// 現在ダメージを発生させるか
+	bool isFinish = false;	// 持続ダメージが終了したか
+	int count = 0;			// 発生済みダメージ回数
+};
+
+/// 派生DamageDataの所有と値コピーを担当するハンドル
+class DamageDataHandle {
+public:
+	// 既定では一回ダメージを保持する
+	DamageDataHandle();
+	// 派生型を維持してコピーする
+	DamageDataHandle(const DamageDataHandle& other);
+	// 派生型を維持して代入する
+	DamageDataHandle& operator=(const DamageDataHandle& other);
+	// 所有権のムーブを許可する
+	DamageDataHandle(DamageDataHandle&&) noexcept = default;
+	DamageDataHandle& operator=(DamageDataHandle&&) noexcept = default;
+	// 任意の派生ダメージデータから複製する
+	explicit DamageDataHandle(const DamageData& data);
+
+	// 保持中の派生ダメージデータを更新する
+	void Update(float dt) { data_->Update(dt); }
+	// 保持中の派生ダメージ値を取得する
+	float GetDamage() const { return data_->GetDamage(); }
+	// 保持中の処理が終了したか取得する
+	bool IsFinish() const { return data_->IsFinish(); }
+	// 現在ダメージを発生させるか取得する
+	bool IsAttack() const { return data_->IsAttack(); }
+	// 保持中のダメージ種別を取得する
+	DamageData::Type GetType() const { return data_->GetType(); }
+	// 指定種別の派生データへ切り替える
+	void SetType(DamageData::Type type);
+	// 基底クラス参照を取得する
+	DamageData& Get() { return *data_; }
+	const DamageData& Get() const { return *data_; }
+	// 既存の編集処理向けに一回ダメージを取得する
+	One& GetOne();
+	const One& GetOne() const;
+	// 連撃ダメージを取得する
+	Continuous& GetContinuous();
+	const Continuous& GetContinuous() const;
+	// 持続ダメージを取得する
+	Duration& GetDuration();
+	const Duration& GetDuration() const;
+
+private:
+	std::unique_ptr<DamageData> data_;	// 実際に動作する派生ダメージデータ
 };
 
 // リアクション
@@ -2406,7 +2426,7 @@ struct HitReactionData {
 	// 重力倍率
 	float gravityScale = 1.0f;
 	// ダメージデータ
-	DamageData damageData{};
+	DamageDataHandle damageData{};
 	// エフェクト
 	std::vector<HitEffectEntry> hitEffectNames;
 };
@@ -10475,18 +10495,18 @@ public:
 	// 更新
 	void Update(float dt);
 	// ダメージデータ設定
-	void SetData(const DamageData& data) {
+	void SetData(const DamageDataHandle& data) {
 		damageData_ = data;
 		isPlaying_ = true;
 	}
 	// ダメージデータ取得
-	DamageData GetDamageData() const { return damageData_; }
+	const DamageDataHandle& GetDamageData() const { return damageData_; }
 	// 再生中か取得
 	bool IsPlaying() const { return isPlaying_; }
 
 private:
 	bool isPlaying_ = false;
-	DamageData damageData_;
+	DamageDataHandle damageData_;	// 派生ダメージデータを所有するコピー可能なハンドル
 };
 
 
@@ -16436,6 +16456,29 @@ File Path: project/DirectXGame/application/base/Car/PlayerCar.cpp
 #include "DirectXGame/engine/Math/Random.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 
+namespace {
+	// 車体を基準とした各パーツのローカル座標。
+	const Vector3 kLeftFrontTireOffset = { 1.0f, 0.3f, -1.3f };
+	const Vector3 kLeftBackTireOffset = { 1.0f, 0.3f, 2.0f };
+	const Vector3 kRightFrontTireOffset = { -1.0f, 0.3f, -1.3f };
+	const Vector3 kRightBackTireOffset = { -1.0f, 0.3f, 2.0f };
+	const Vector3 kScrapBoxOffset = { 0.0f, 0.4f, 1.25f };
+	const Vector3 kRightHeadlightOffset = { -1.0f, 0.8f, -1.5f };
+	const Vector3 kLeftHeadlightOffset = { 1.0f, 0.8f, -1.5f };
+	// 車体影の表示設定。
+	const Vector3 kShadowScale = { 5.0f, 5.0f, 5.0f };
+	const Vector3 kShadowPositionOffset = { -0.5f, 0.1f, 0.0f };
+	constexpr float kShadowRotationDegrees = -90.0f;
+	// 発進操作から走行状態へ切り替えるまでの時間。
+	constexpr float kPreparationDurationSeconds = 0.5f;
+	// 車のヘッドライトへ設定する照明パラメータ。
+	constexpr float kHeadlightDistance = 5.0f;
+	constexpr float kHeadlightIntensity = 2.0f;
+	constexpr float kHeadlightCosAngle = 0.72f;
+	constexpr float kHeadlightDecay = 0.8f;
+	constexpr float kHeadlightCosFalloffStart = 0.9f;
+	constexpr float kHeadlightPositionY = 1.0f;
+}
 
 void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, const Vector3& rotate) {
 	this->entityManager = entityManager;
@@ -16451,31 +16494,31 @@ void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalV
 	objectLFTier_ = std::make_unique<ObjectComponent>();
 	objectLFTier_->Initialize(entityManager, globalVariables, "TrackCarTireLF", "TrackCarTire.obj", false, false, nullptr);
 	objectLFTier_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
-	objectLFTier_->GetWorldTransform().translate_ = { 1.0f ,0.3f,-1.3f };
+	objectLFTier_->GetWorldTransform().translate_ = kLeftFrontTireOffset;
 
 	//// タイヤ
 	objectLBTire_ = std::make_unique<ObjectComponent>();
 	objectLBTire_->Initialize(entityManager, globalVariables, "TrackCarTireLB", "TrackCarTire.obj", false, false, nullptr);
 	objectLBTire_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
-	objectLBTire_->GetWorldTransform().translate_ = { 1.0f ,0.3f, 2.0f };
+	objectLBTire_->GetWorldTransform().translate_ = kLeftBackTireOffset;
 
 	//// タイヤ
 	objectRFTire_ = std::make_unique<ObjectComponent>();
 	objectRFTire_->Initialize(entityManager, globalVariables, "TrackCarTireRF", "TrackCarTire.obj", false, false, nullptr);
 	objectRFTire_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
-	objectRFTire_->GetWorldTransform().translate_ = { -1.0f ,0.3f,-1.3f };
+	objectRFTire_->GetWorldTransform().translate_ = kRightFrontTireOffset;
 
 	//// タイヤ
 	objectRBTire_ = std::make_unique<ObjectComponent>();
 	objectRBTire_->Initialize(entityManager, globalVariables, "TrackCarTireRB", "TrackCarTire.obj", false, false, nullptr);
 	objectRBTire_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
-	objectRBTire_->GetWorldTransform().translate_ = { -1.0f ,0.3f,2.0f };
+	objectRBTire_->GetWorldTransform().translate_ = kRightBackTireOffset;
 
 	// スクラップボックス
 	objectScrapBox_ = std::make_unique<ObjectComponent>();
 	objectScrapBox_->Initialize(entityManager, globalVariables, "TrackCarScrapBox", "scrapBox.obj", false, false, nullptr);
 	objectScrapBox_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
-	objectScrapBox_->GetWorldTransform().translate_ = { 0.0f ,0.4f,1.25f };
+	objectScrapBox_->GetWorldTransform().translate_ = kScrapBoxOffset;
 
 	// オブジェクトコンポーネント追加
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -16483,17 +16526,18 @@ void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalV
 	objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase2", "plane.obj", "resources/Texture/smoke/no4.dds",
 		false, false, nullptr, Engine::ObjectInstance::TransparencyType::kYes);
 
-	objectComponentShadow_->SetInstancingSRT({ 5.0f,5.0f,5.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->SetInstancingSRT(kShadowScale,
+		{ Math::DegreesToRadians(kShadowRotationDegrees),0.0f,0.0f }, kShadowPositionOffset);
 	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 
 	// スポットライト
 
 	spotLightTransformRF_.Initialize();
 	spotLightTransformRF_.parent_ = &objectComponent_->GetWorldTransform();
-	spotLightTransformRF_.translate_ = { -1.0f ,0.8f,-1.5f };
+	spotLightTransformRF_.translate_ = kRightHeadlightOffset;
 	spotLightTransformLF_.Initialize();
 	spotLightTransformLF_.parent_ = &objectComponent_->GetWorldTransform();
-	spotLightTransformLF_.translate_ = { 1.0f ,0.8f,-1.5f };
+	spotLightTransformLF_.translate_ = kLeftHeadlightOffset;
 
 
 
@@ -16502,12 +16546,12 @@ void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalV
 	spotData.color = { 1,1,1,1 };
 	spotData.direction = { 1,0,0 };
 	spotData.isLight = false;
-	spotData.distance = 5.0f;
-	spotData.intensity = 2.0f;
-	spotData.position = pos_ + Vector3{ 0.0f,1.0f,0.0f };
-	spotData.cosAngle = 0.72f;
-	spotData.decay = 0.8f;
-	spotData.cosFalloffStart = 0.9f;
+	spotData.distance = kHeadlightDistance;
+	spotData.intensity = kHeadlightIntensity;
+	spotData.position = pos_ + Vector3{ 0.0f,kHeadlightPositionY,0.0f };
+	spotData.cosAngle = kHeadlightCosAngle;
+	spotData.decay = kHeadlightDecay;
+	spotData.cosFalloffStart = kHeadlightCosFalloffStart;
 
 	spotLightRF_ = std::make_shared<Engine::SpotLight>();
 	spotLightRF_->spot = spotData;
@@ -16544,7 +16588,7 @@ void PlayerCar::Update(float dt) {
 
 	if (isMoving_) {
 		moveTimer_ += dt;
-		if (moveTimer_ >= 0.5f) {
+		if (moveTimer_ >= kPreparationDurationSeconds) {
 			stateMachine_->ChangeState(CarMainState::TitleMove);
 		}
 		else {
@@ -16564,8 +16608,8 @@ void PlayerCar::Update(float dt) {
 
 void PlayerCar::ShadowUpdate(float dt) {
 	// 影の位置を車体の位置に合わせる
-	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x + -0.5f;
-	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z + 0.0f;
+	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x + kShadowPositionOffset.x;
+	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z + kShadowPositionOffset.z;
 	objectComponentShadow_->GetWorldTransform().translate_.y = height_;
 
 	objectComponentShadow_->Update();
@@ -16752,9 +16796,27 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Car/PlayerCarState.cpp
 ============================================================
-#include "PlayerCarState.h"
+﻿#include "PlayerCarState.h"
 #include "PlayerCar.h"
 #include "DirectXGame/engine/Math/Random.h"
+
+namespace {
+	// タイトル画面で車が走り出す初速度。
+	const Vector3 kTitleMoveInitialVelocity = { 4.0f, 0.0f, 0.0f };
+	// タイトル画面で車へ毎フレーム加える加速度。
+	constexpr float kTitleMoveAccelerationPerFrame = 0.5f;
+	// 発進準備中にライトを点灯するまでの時間。
+	constexpr float kHeadlightTurnOnDelaySeconds = 0.2f;
+	// 発進準備中に車体へ加える上下振動の範囲。
+	constexpr float kPreparationShakeMinOffset = -0.03f;
+	constexpr float kPreparationShakeMaxOffset = 0.03f;
+	// セレクト画面でタイヤから放出する埃の方向と範囲。
+	const Vector3 kSelectDustDirection = { 0.0f, 0.0f, 15.0f };
+	const Vector3 kSelectDustRange = { 0.0f, 0.0f, 5.0f };
+	// リザルト画面でスクラップを放出する方向と範囲。
+	const Vector3 kScrapEmitDirection = { 0.0f, 15.0f, 0.0f };
+	const Vector3 kScrapEmitRange = { 0.0f, 5.0f, 0.0f };
+}
 
 #pragma region Idle
 
@@ -16777,12 +16839,12 @@ void CarIdleState::Exit()
 void CarTitleMoveState::Enter()
 {
 	// 速度
-	velocity_ = { 4.0f,0.0f,0.0f };
+	velocity_ = kTitleMoveInitialVelocity;
 }
 
 void CarTitleMoveState::Update(float dt)
 {
-	velocity_.x += 0.5f;
+	velocity_.x += kTitleMoveAccelerationPerFrame;
 	// 移動
 	GetPlayerCar()->GetBodyWorldTransform().translate_ += velocity_ * dt;
 	GetPlayerCar()->GetBodyWorldTransform().translate_.y = pos_.y;
@@ -16816,12 +16878,13 @@ void CarPreparationMoveState::Enter()
 void CarPreparationMoveState::Update(float dt) {
 	timer_ += dt;
 
-	if (timer_ >= 0.2f) {
+	if (timer_ >= kHeadlightTurnOnDelaySeconds) {
 		GetPlayerCar()->GetLFSpotLight()->spot.isLight = true;
 		GetPlayerCar()->GetRFSpotLight()->spot.isLight = true;
 	}
 
-	GetPlayerCar()->GetBodyWorldTransform().translate_.y = pos_.y + Random::RandomFloat(-0.03f, 0.03f);
+	GetPlayerCar()->GetBodyWorldTransform().translate_.y = pos_.y +
+		Random::RandomFloat(kPreparationShakeMinOffset, kPreparationShakeMaxOffset);
 }
 
 void CarPreparationMoveState::Exit()
@@ -16845,10 +16908,10 @@ void CarSelectMove::Update(float dt){
 	GetPlayerCar()->GetRBTierWorldTransform().rotate_.x += velocity_.x * dt;
 
 	// 埃出現
-	GetPlayerCar()->Emit(GetPlayerCar()->GetLFTierWorldPosition() + dustOffset_, {0,0,15},{0,0,5});
-	GetPlayerCar()->Emit(GetPlayerCar()->GetLBTierWorldPosition() + dustOffset_, {0,0,15},{0,0,5});
-	GetPlayerCar()->Emit(GetPlayerCar()->GetRFTierWorldPosition() + dustOffset_, {0,0,15},{0,0,5});
-	GetPlayerCar()->Emit(GetPlayerCar()->GetRBTierWorldPosition() + dustOffset_, {0,0,15},{0,0,5});
+	GetPlayerCar()->Emit(GetPlayerCar()->GetLFTierWorldPosition() + dustOffset_, kSelectDustDirection, kSelectDustRange);
+	GetPlayerCar()->Emit(GetPlayerCar()->GetLBTierWorldPosition() + dustOffset_, kSelectDustDirection, kSelectDustRange);
+	GetPlayerCar()->Emit(GetPlayerCar()->GetRFTierWorldPosition() + dustOffset_, kSelectDustDirection, kSelectDustRange);
+	GetPlayerCar()->Emit(GetPlayerCar()->GetRBTierWorldPosition() + dustOffset_, kSelectDustDirection, kSelectDustRange);
 }
 
 void CarSelectMove::Exit(){
@@ -16866,7 +16929,8 @@ void ResultCashExchangeState::Update(float dt)
 	scrapTimer_ += dt;
 	if(scrapTimer_ >= scrapInterval_) {
 		scrapTimer_ = 0.0f;
-		GetPlayerCar()->EmitScrapBox(GetPlayerCar()->GetScrapBoxWorldPosition() + scrapOffset_, { 0,15, 0}, { 0,5,0 });
+		GetPlayerCar()->EmitScrapBox(GetPlayerCar()->GetScrapBoxWorldPosition() + scrapOffset_,
+			kScrapEmitDirection, kScrapEmitRange);
 	}
 }
 
@@ -30816,8 +30880,8 @@ namespace Game {
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
 		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 20, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 120, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 50, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);
@@ -31575,6 +31639,15 @@ File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.cpp
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
+namespace {
+	// リザルト画面に表示するメニュー項目数。
+	constexpr int kResultMenuItemCount = 2;
+	// 右入力で次の項目へ移動するためのインデックス変化量。
+	constexpr int kResultPositiveDirectionStep = 1;
+	// シーン表示直後の誤決定を防止する待機時間。
+	constexpr float kResultDecisionDelaySeconds = 0.5f;
+}
+
 void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
 	// 現在はメニュー操作で使用しない依存を明示的に未使用とする。
@@ -31582,10 +31655,10 @@ void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* i
 	(void)globalVariables;
 	// 横軸で2項目を選択し、誤決定防止時間と遷移先を設定する。
 	MenuSelectionConfig config{};
-	config.itemCount = 2;
+	config.itemCount = kResultMenuItemCount;
 	config.axis = MenuSelectionAxis::kHorizontal;
-	config.positiveDirectionStep = 1;
-	config.decisionDelay = 0.5f;
+	config.positiveDirectionStep = kResultPositiveDirectionStep;
+	config.decisionDelay = kResultDecisionDelaySeconds;
 	config.transitionScenes = { "GAMEPLAY", "TITLE" };
 	menuSelectionController_.Initialize(sceneManager, input, config);
 }
@@ -31663,6 +31736,13 @@ File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.cpp
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
+namespace {
+	// セレクト画面に表示するメニュー項目数。
+	constexpr int kSelectMenuItemCount = 4;
+	// 上入力で前の項目へ移動するためのインデックス変化量。
+	constexpr int kSelectPositiveDirectionStep = -1;
+}
+
 void SelectSystem::Initialize(Engine::SceneManager* sceneManager ,InputSystem* input, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
 	// 現在はメニュー操作で使用しない依存を明示的に未使用とする。
@@ -31670,9 +31750,9 @@ void SelectSystem::Initialize(Engine::SceneManager* sceneManager ,InputSystem* i
 	(void)globalVariables;
 	// 縦軸で4項目を選択し、各項目に対応する遷移先を設定する。
 	MenuSelectionConfig config{};
-	config.itemCount = 4;
+	config.itemCount = kSelectMenuItemCount;
 	config.axis = MenuSelectionAxis::kVertical;
-	config.positiveDirectionStep = -1;
+	config.positiveDirectionStep = kSelectPositiveDirectionStep;
 	config.transitionScenes = { "GAMEPLAY", "", "", "TITLE" };
 	menuSelectionController_.Initialize(sceneManager, input, config);
 }
@@ -32902,6 +32982,17 @@ File Path: project/DirectXGame/application/base/Input/InputSystem.cpp
 ﻿#include "InputSystem.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
+namespace {
+	// デジタルキーをスティック入力へ変換するときの最大入力値。
+	constexpr float kDigitalInputMagnitude = 1.0f;
+	// マウス移動量を視点入力へ変換する感度。
+	constexpr float kMouseLookSensitivity = 0.05f;
+	// ゲームパッドトリガーを押下として扱うしきい値。
+	constexpr float kTriggerDeadZone = 0.2f;
+	// 右クリックとして使用するマウスボタン番号。
+	constexpr int kRightMouseButton = 1;
+}
+
 void InputSystem::Initialize(Engine::Input* input) {
 	this->input = input;
 }
@@ -32919,10 +33010,10 @@ void InputSystem::PlayerInputUpdate(float dt) {
 
 	// キーボード移動入力を作成
 	Vector2 keyboardMove{};
-	if (input->IsPushKey(DIK_A)) keyboardMove.x -= 1.0f;
-	if (input->IsPushKey(DIK_D)) keyboardMove.x += 1.0f;
-	if (input->IsPushKey(DIK_W)) keyboardMove.y += 1.0f;
-	if (input->IsPushKey(DIK_S)) keyboardMove.y -= 1.0f;
+	if (input->IsPushKey(DIK_A)) keyboardMove.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_D)) keyboardMove.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_W)) keyboardMove.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_S)) keyboardMove.y -= kDigitalInputMagnitude;
 
 	// 左スティックとキーボード移動入力を合成
 	Vector2 moveStick = input->GetGamePadLeftStick();
@@ -32932,17 +33023,17 @@ void InputSystem::PlayerInputUpdate(float dt) {
 
 	// キーボード視点入力を作成
 	Vector2 keyboardLook{};
-	if (input->IsPushKey(DIK_LEFT)) keyboardLook.x -= 1.0f;
-	if (input->IsPushKey(DIK_RIGHT)) keyboardLook.x += 1.0f;
-	if (input->IsPushKey(DIK_UP)) keyboardLook.y += 1.0f;
-	if (input->IsPushKey(DIK_DOWN)) keyboardLook.y -= 1.0f;
+	if (input->IsPushKey(DIK_LEFT)) keyboardLook.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_RIGHT)) keyboardLook.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_UP)) keyboardLook.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_DOWN)) keyboardLook.y -= kDigitalInputMagnitude;
 
 	// 右クリック中だけマウス移動を視点入力として扱う
 	Vector2 mouseLook{};
-	if (input->IsMousePressed(1)) {
+	if (input->IsMousePressed(kRightMouseButton)) {
 		const Vector2 mouseDelta = input->GetMouseMoveDelta();
-		mouseLook.x = mouseDelta.x * 0.05f;
-		mouseLook.y = -mouseDelta.y * 0.05f;
+		mouseLook.x = mouseDelta.x * kMouseLookSensitivity;
+		mouseLook.y = -mouseDelta.y * kMouseLookSensitivity;
 	}
 
 	// 右スティック、矢印キー、マウス視点入力を合成
@@ -32967,15 +33058,14 @@ void InputSystem::PlayerInputUpdate(float dt) {
 
 	// ダッシュ入力している間
 	float lt = input->GetGamePadLeftTrigger();
-	const float triggerDeadZone = 0.2f;
 	playerInputData_.dashHeld =
-		lt > triggerDeadZone ||
+		lt > kTriggerDeadZone ||
 		input->IsPushKey(DIK_LSHIFT);
 
 	// ロックオン入力している間
 	float rt = input->GetGamePadRightTrigger();
 	playerInputData_.lockOnHeld =
-		rt > triggerDeadZone ||
+		rt > kTriggerDeadZone ||
 		input->IsPushKey(DIK_Q);
 
 	// スキル入力押した瞬間
@@ -32994,14 +33084,14 @@ void InputSystem::GameInputUpdate(float dt) {
 	// ゲームUI用の移動入力を作成
 	Vector2 gameMove = input->GetGamePadLeftStick();
 	// メニューではWASDと矢印キーのどちらでも項目を移動できるようにする。
-	if (input->IsPushKey(DIK_A)) gameMove.x -= 1.0f;
-	if (input->IsPushKey(DIK_D)) gameMove.x += 1.0f;
-	if (input->IsPushKey(DIK_W)) gameMove.y += 1.0f;
-	if (input->IsPushKey(DIK_S)) gameMove.y -= 1.0f;
-	if (input->IsPushKey(DIK_LEFT)) gameMove.x -= 1.0f;
-	if (input->IsPushKey(DIK_RIGHT)) gameMove.x += 1.0f;
-	if (input->IsPushKey(DIK_UP)) gameMove.y += 1.0f;
-	if (input->IsPushKey(DIK_DOWN)) gameMove.y -= 1.0f;
+	if (input->IsPushKey(DIK_A)) gameMove.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_D)) gameMove.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_W)) gameMove.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_S)) gameMove.y -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_LEFT)) gameMove.x -= kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_RIGHT)) gameMove.x += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_UP)) gameMove.y += kDigitalInputMagnitude;
+	if (input->IsPushKey(DIK_DOWN)) gameMove.y -= kDigitalInputMagnitude;
 	gameInputData_.moveShick = Math::ClampLength(gameMove);
 	// 決定入力押した瞬間
 	gameInputData_.decisionTrigger =
@@ -34885,6 +34975,11 @@ File Path: project/DirectXGame/application/base/Stage/BaseStage.cpp
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 
+namespace {
+	// ステージ上でプレイヤー車が接地する共通の高さ。
+	constexpr float kDefaultPlayerCarGroundHeight = 0.1f;
+}
+
 
 
 void BaseStage::InitializeOcean(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
@@ -34964,7 +35059,7 @@ void BaseStage::InitializePlayerCar(Engine::EntityManager* entityManager, std::u
 	playerCar = std::make_unique<PlayerCar>();
 	playerCar->Initialize(entityManager, {}, position, rotation);
 	// ステージ共通の地面高さを車へ設定する。
-	playerCar->SetGroundHeight(0.1f);
+	playerCar->SetGroundHeight(kDefaultPlayerCarGroundHeight);
 }
 
 void BaseStage::BaseUpdate(float dt) {
@@ -35374,6 +35469,31 @@ File Path: project/DirectXGame/application/base/Stage/SelectStage.cpp
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
+namespace {
+	// 背景へ配置する岩の個数。
+	constexpr int kStoneCount = 300;
+	// 岩を配置するX座標の範囲。
+	constexpr float kStoneMinPositionX = -6000.0f;
+	constexpr float kStoneMaxPositionX = -400.0f;
+	// 岩を配置するZ座標の範囲と再配置位置。
+	constexpr float kStoneMinPositionZ = -100.0f;
+	constexpr float kStoneMaxPositionZ = 7000.0f;
+	constexpr float kStoneResetPositionZ = 0.0f;
+	// 岩を地面の下へ配置する高さ。
+	constexpr float kStonePositionY = -20.0f;
+	// 岩のランダム回転角度の範囲。
+	constexpr float kStoneMinRotationDegrees = 0.0f;
+	constexpr float kStoneMaxRotationDegrees = 360.0f;
+	// 岩のランダム拡大率の範囲。
+	constexpr float kStoneMinScale = 0.5f;
+	constexpr float kStoneMaxScale = 2.25f;
+	// 岩を奥方向へ流す1フレーム当たりの移動量。
+	constexpr float kStoneMoveSpeedPerFrame = 20.0f;
+	// 地面テクスチャをスクロールする速度と折り返し位置。
+	constexpr float kGroundTextureScrollSpeed = 0.05f;
+	constexpr float kGroundTextureScrollLimit = 1.0f;
+}
+
 void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d
 	this->camera = cameraManager->GetCamera();	// カメラ取得
@@ -35388,14 +35508,15 @@ void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager
 	// セレクト用の向きでプレイヤー車を生成する。
 	InitializePlayerCar(entityManager, playerCar_, playerCarPos_, { 0, 0, 0 });
 
-	for (int i = 0; i < 300; i++) {
+	for (int i = 0; i < kStoneCount; i++) {
 		std::unique_ptr<ObjectComponent> stone = std::make_unique<ObjectComponent>();
 		stone->InitializeInstancing(entityManager,
 			{}, "Stone" + std::to_string(i), "Stone.obj", "", false, false, nullptr,
 			Engine::ObjectInstance::TransparencyType::kNo,false);
-		stone->GetWorldTransform().translate_ = { Random::RandomFloat(-6000, -400.0f) , -20.0f, Random::RandomFloat(-100, 7000.0f) };
-		stone->GetWorldTransform().rotate_.y = Random::RandomFloat(0, 360.0f);
-		stone->GetWorldTransform().scale_ = Random::RandomFloat(0.5f, 2.25f);
+		stone->GetWorldTransform().translate_ = { Random::RandomFloat(kStoneMinPositionX, kStoneMaxPositionX),
+			kStonePositionY, Random::RandomFloat(kStoneMinPositionZ, kStoneMaxPositionZ) };
+		stone->GetWorldTransform().rotate_.y = Random::RandomFloat(kStoneMinRotationDegrees, kStoneMaxRotationDegrees);
+		stone->GetWorldTransform().scale_ = Random::RandomFloat(kStoneMinScale, kStoneMaxScale);
 		stoneComponents_.push_back(std::move(stone));
 	}
 }
@@ -35404,8 +35525,8 @@ void SelectStage::Update(float dt) {
 	BaseUpdate(dt);
 
 
-	tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y += 0.05f * dt;
-	if (tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y >= 1.0f) {
+	tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y += kGroundTextureScrollSpeed * dt;
+	if (tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y >= kGroundTextureScrollLimit) {
 		tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y = 0.0f;
 	}
 
@@ -35414,14 +35535,14 @@ void SelectStage::Update(float dt) {
 
 
 	for(auto& stone : stoneComponents_){
-		stone->GetWorldTransform().translate_.z += 20.0f;
-		if (stone->GetWorldTransform().translate_.z >= 7000.0f) {
+		stone->GetWorldTransform().translate_.z += kStoneMoveSpeedPerFrame;
+		if (stone->GetWorldTransform().translate_.z >= kStoneMaxPositionZ) {
 			
-			stone->GetWorldTransform().translate_.x = Random::RandomFloat(-6000, -400.0f);
+			stone->GetWorldTransform().translate_.x = Random::RandomFloat(kStoneMinPositionX, kStoneMaxPositionX);
 
-			stone->GetWorldTransform().translate_.z = 0;
-			stone->GetWorldTransform().rotate_.y = Random::RandomFloat(0, 360.0f);
-			stone->GetWorldTransform().scale_ = Random::RandomFloat(0.5f, 2.25f);
+			stone->GetWorldTransform().translate_.z = kStoneResetPositionZ;
+			stone->GetWorldTransform().rotate_.y = Random::RandomFloat(kStoneMinRotationDegrees, kStoneMaxRotationDegrees);
+			stone->GetWorldTransform().scale_ = Random::RandomFloat(kStoneMinScale, kStoneMaxScale);
 
 		}
 		stone->Update();
@@ -36240,9 +36361,21 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/UI/GameStartUI.cpp
 ============================================================
-#include "GameStartUI.h"
+﻿#include "GameStartUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+namespace {
+	// フェードUIの1秒当たりの透明度変化量。
+	constexpr float kFadeAlphaSpeed = 2.0f;
+	// UI透明度の有効範囲。
+	constexpr float kMinAlpha = 0.0f;
+	constexpr float kMaxAlpha = 1.0f;
+	// カウント数字テクスチャの1文字分のサイズ。
+	const Vector2 kCountTextureSize = { 64.0f, 96.0f };
+	// カウントUIが表示できる最大数字。
+	constexpr int kMaximumCountDigit = 9;
+}
 
 void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables) {
@@ -36272,22 +36405,22 @@ void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	InitUICount("numCount", numPosition_, 1, false);
 	Engine::UICount* hitCount = GetUICount("numCount");
 	hitCount->SetMaxSize(numUiSize_, {});	// 最大サイズ
-	hitCount->SetTextuerSize({64,96});				// テクスチャサイズ
-	hitCount->SetCountMax(9);							// カウント最大数
+	hitCount->SetTextuerSize(kCountTextureSize);		// テクスチャサイズ
+	hitCount->SetCountMax(kMaximumCountDigit);		// カウント最大数
 	hitCount->SetCountColor(numUiColor_);	// 色指定
 }
 
 void GameStartUI::Update(float dt) {
 	if (isfade_) {
-		uiColor_.a += 2.0f * dt;
-		if (uiColor_.a >= 1.0f) {
-			uiColor_.a = 1.0f;
+		uiColor_.a += kFadeAlphaSpeed * dt;
+		if (uiColor_.a >= kMaxAlpha) {
+			uiColor_.a = kMaxAlpha;
 		}
 	}
 	else {
-		uiColor_.a -= 2.0f * dt;
-		if (uiColor_.a <= 0.0f) {
-			uiColor_.a = 0.0f;
+		uiColor_.a -= kFadeAlphaSpeed * dt;
+		if (uiColor_.a <= kMinAlpha) {
+			uiColor_.a = kMinAlpha;
 		}
 	}
 
@@ -37408,23 +37541,40 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/UI/TitleUI.cpp
 ============================================================
-#include "TitleUI.h"
+﻿#include "TitleUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+namespace {
+	// タイトル決定ボタンの表示位置とサイズ。
+	const Vector2 kDecisionIconPosition = { 640.0f, 600.0f };
+	const Vector2 kDecisionIconSize = { 200.0f, 200.0f };
+	// UI画像を中央基準で配置するアンカー。
+	const Vector2 kCenterAnchor = { 0.5f, 0.5f };
+	// タイトル画像へ設定する明度。
+	constexpr float kTitleColorIntensity = 0.75f;
+	// 決定後にタイトル画像を上へ移動する速度。
+	constexpr float kTitleExitMoveSpeed = 300.0f;
+	// 決定アイコンを点滅させる1フレーム当たりの透明度変化量。
+	constexpr float kButtonAlphaStepPerFrame = 0.015f;
+	// UI透明度の有効範囲。
+	constexpr float kMinAlpha = 0.0f;
+	constexpr float kMaxAlpha = 1.0f;
+}
 
 void TitleUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
 	iconB_ = std::make_unique<Engine::Sprite>();
 	iconB_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/B.dds");
-	iconB_->SetPosition({ 640,600 });
-	iconB_->SetAnchorPoint({ 0.5f,0.5f });
-	iconB_->SetSize({ 200,200 });
+	iconB_->SetPosition(kDecisionIconPosition);
+	iconB_->SetAnchorPoint(kCenterAnchor);
+	iconB_->SetSize(kDecisionIconSize);
 
 	title_ = std::make_unique<Engine::Sprite>();
 	title_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/title.dds");
 	title_->SetPosition(titlePos_);
-	title_->SetAnchorPoint({ 0.5f,0.5f });
+	title_->SetAnchorPoint(kCenterAnchor);
 	title_->SetSize(2);
-	title_->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
+	title_->SetColor({ kTitleColorIntensity, kTitleColorIntensity, kTitleColorIntensity, kMaxAlpha });
 }
 
 void TitleUI::Update(float dt) {
@@ -37442,29 +37592,29 @@ void TitleUI::Draw() {
 void TitleUI::ButtonUiProcess(float dt) {
 
 	if (isAction_) {
-		titlePos_.y -= 300.0f * dt;
+		titlePos_.y -= kTitleExitMoveSpeed * dt;
 
 		title_->SetPosition(titlePos_);
 
-		if (buttonColor_.a <= 0.0f) {
+		if (buttonColor_.a <= kMinAlpha) {
 			return;
 		}
 	}
 
-	if (buttonColor_.a >= 1.0f) {
-		buttonColor_.a = 1.0f;
+	if (buttonColor_.a >= kMaxAlpha) {
+		buttonColor_.a = kMaxAlpha;
 		buttonClock_ *= -1;
 	}
-	else if (buttonColor_.a <= 0.0f) {
-		buttonColor_.a = 0.0f;
+	else if (buttonColor_.a <= kMinAlpha) {
+		buttonColor_.a = kMinAlpha;
 		buttonClock_ *= -1;
 	}
 
 	if (buttonClock_ == 1) {
-		buttonColor_.a += 0.015f;
+		buttonColor_.a += kButtonAlphaStepPerFrame;
 	}
 	else {
-		buttonColor_.a -= 0.015f;
+		buttonColor_.a -= kButtonAlphaStepPerFrame;
 	}
 
 	// 色設定
@@ -39539,6 +39689,17 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.cpp
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
+namespace {
+	// デバッグ操作でカメラを切り替える際の補間時間。
+	constexpr float kDebugCameraBlendSeconds = 0.3f;
+	// リトライ時のシーン遷移時間。
+	constexpr float kRetryTransitionSeconds = 0.5f;
+	// タイトルへ戻る際のシーン遷移時間。
+	constexpr float kTitleTransitionSeconds = 0.25f;
+	// ゲーム開始時のプレイヤー座標。
+	const Vector3 kPlayerInitialPosition = { 0.0f, 2.0f, -40.0f };
+}
+
 #pragma region Initialize
 // 初期化
 void GamePlayScene::Initialize() {
@@ -39551,7 +39712,7 @@ void GamePlayScene::Initialize() {
 		? Character::PlayerType::kNormal : Character::PlayerType::kBullet;
 	// ゲームプレイで共通利用する入力、カメラ、キャラクター、衝突基盤を一括初期化する。
 	gameplaySession_ = std::make_unique<GameplaySession>();
-	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(), playerType, { 0, 2, -40 });
+	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(), playerType, kPlayerInitialPosition);
 	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
 	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
 	// 宇宙カメラ
@@ -39620,10 +39781,10 @@ void GamePlayScene::UpdateImGui()
 	Vector2 inputPos = input->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	if (ImGui::Button("lockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", 0.3f);
+		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", kDebugCameraBlendSeconds);
 	}
 	if (ImGui::Button("noLockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", 0.3f);
+		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", kDebugCameraBlendSeconds);
 	}
 
 
@@ -39649,10 +39810,10 @@ void GamePlayScene::Update()
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+		GetSceneManager()->ChangeScene("GAMEPLAY", kRetryTransitionSeconds);
 	}
 	if (input->IsTriggerKey(DIK_T)) {
-		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+		GetSceneManager()->ChangeScene("TITLE", kTitleTransitionSeconds);
 	}
 	
 	// 調整項目
@@ -39835,6 +39996,17 @@ File Path: project/DirectXGame/application/scene/ResultScene.cpp
 ﻿#include "ResultScene.h"
 
 
+namespace {
+	// リザルト画面用カメラの初期座標。
+	const Vector3 kResultCameraPosition = { 0.0f, 3.7f, -20.0f };
+	// ゲームオーバー表示の画面座標。
+	const Vector2 kGameOverUiPosition = { 640.0f, 200.0f };
+	// ゲームオーバー表示の中央アンカー。
+	const Vector2 kGameOverUiAnchor = { 0.5f, 0.5f };
+	// ゲームオーバー表示の描画サイズ。
+	const Vector2 kGameOverUiSize = { 256.0f, 64.0f };
+}
+
 // 初期化
 void ResultScene::Initialize() {
 
@@ -39844,7 +40016,7 @@ void ResultScene::Initialize() {
 
 	// リザルト用カメラ初期化
 	resultCamera_ = std::make_unique<ResultCamera>();
-	resultCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-20.0f });
+	resultCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), kResultCameraPosition);
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
@@ -39875,10 +40047,10 @@ void ResultScene::Initialize() {
 
 	overUI_ = std::make_unique<Engine::Sprite>();
 	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
-	overUI_->SetPosition({640,200});
-	overUI_->SetAnchorPoint({0.5f,0.5f });
+	overUI_->SetPosition(kGameOverUiPosition);
+	overUI_->SetAnchorPoint(kGameOverUiAnchor);
 	//overUI_->SetTextureSize({256,64});
-	overUI_->SetSize({ 256,64 });
+	overUI_->SetSize(kGameOverUiSize);
 
 	// リザルトシステム初期化
 	resultSystem_ = std::make_unique<ResultSystem>();
@@ -40466,6 +40638,11 @@ File Path: project/DirectXGame/application/scene/SelectScene.cpp
 ﻿#include "SelectScene.h"
 
 
+namespace {
+	// セレクト画面用カメラの初期座標。
+	const Vector3 kSelectCameraPosition = { 1.8f, 0.7f, 3.3f };
+}
+
 void SelectScene::Initialize() {
 	input = GetInput();
 	// シーンで使用する入力管理を一括初期化する
@@ -40474,7 +40651,7 @@ void SelectScene::Initialize() {
 
 	// セレクトカメラ生成
 	selectCamera_ = std::make_unique<SelectCamera>();
-	selectCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), { 1.8f,0.7f,3.3f });
+	selectCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), kSelectCameraPosition);
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
@@ -41340,6 +41517,25 @@ File Path: project/DirectXGame/application/scene/TitleScene.cpp
 
 
 
+namespace {
+	// タイトル画面で選択する既定プレイヤーID。
+	constexpr int kDefaultPlayerId = 1;
+	// タイトルキャラクターの初期座標。
+	const Vector3 kTitlePlayerPosition = { 0.0f, 0.0f, 6.0f };
+	// タイトルカメラの初期座標。
+	const Vector3 kTitleCameraPosition = { 0.0f, 3.7f, -4.5f };
+	// アニメーションを切り替える際の補間時間。
+	constexpr float kAnimationBlendSeconds = 0.1f;
+	// 車へ乗り込んだ後にセレクト画面へ遷移するまでの時間。
+	constexpr float kSceneTransitionDelaySeconds = 1.0f;
+	// キャラクターが車へ近づく1フレーム当たりの移動量。
+	constexpr float kPlayerApproachSpeedPerFrame = 0.1f;
+	// 影オブジェクトを配置する地面からの高さ。
+	constexpr float kShadowGroundOffset = 0.1f;
+	// 影モデルを地面へ寝かせるX軸回転角度。
+	constexpr float kShadowRotationDegrees = -90.0f;
+}
+
 void TitleScene::Initialize()
 {
 	// 入力初期化
@@ -41352,7 +41548,7 @@ void TitleScene::Initialize()
 	// リソース
 	InitializeResources();
 	// 
-	GetSceneData().playerID = 1;
+	GetSceneData().playerID = kDefaultPlayerId;
 
 	// エフェクト
 	effect_ = std::make_unique<EffectSystem>();
@@ -41373,7 +41569,7 @@ void TitleScene::Initialize()
 		false, false, nullptr,Engine::ObjectModelType::kSkinning);
 	objectComponent_->GetObject3D()->InitAnimationComponent();
 	objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop",0.0f);
-	objectComponent_->GetWorldTransform().translate_ = { 0,0,6 };
+	objectComponent_->GetWorldTransform().translate_ = kTitlePlayerPosition;
 
 	// オブジェクトコンポーネント追加
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -41381,7 +41577,8 @@ void TitleScene::Initialize()
 	objectComponentShadow_->InitializeInstancing(GetEntityManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
 		false, false, nullptr, Engine::ObjectInstance::TransparencyType::kYes);
 
-	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f },
+		{ Math::DegreesToRadians(kShadowRotationDegrees),0.0f,0.0f }, { 0.0f,kShadowGroundOffset,0.0f });
 	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 }
 
@@ -41398,18 +41595,18 @@ void TitleScene::Update()
 	if (!isStart_ && inputCoordinator_->GetInputSystem()->GetGameInputData().decisionTrigger) {
 		titleUI_->Action();
 		isStart_ = true;
-		objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
+		objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", kAnimationBlendSeconds);
 	}
 	if (isStart_) {
 		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetBodyWorldPosition().z) {
 			objectComponent_->GetWorldTransform().translate_.z = titleStage_->GetPlayerCar()->GetBodyWorldPosition().z;
-			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", 0.1f);
+			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", kAnimationBlendSeconds);
 			objectComponent_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
 			objectComponentShadow_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
 			//
 			startTimer_ += GetTime();
 
-			if (startTimer_ >= 1.0f) {
+			if (startTimer_ >= kSceneTransitionDelaySeconds) {
 				GetSceneManager()->ChangeScene("SELECT");
 			}
 
@@ -41417,7 +41614,7 @@ void TitleScene::Update()
 			titleStage_->GetPlayerCar()->Action();
 		}
 		else {
-			objectComponent_->GetWorldTransform().translate_.z += 0.1f;
+			objectComponent_->GetWorldTransform().translate_.z += kPlayerApproachSpeedPerFrame;
 		}
 	}
 
@@ -41426,7 +41623,7 @@ void TitleScene::Update()
 
 	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x;
 	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z;
-	objectComponentShadow_->GetWorldTransform().translate_.y = 0.1f;
+	objectComponentShadow_->GetWorldTransform().translate_.y = kShadowGroundOffset;
 
 	objectComponentShadow_->Update();
 
@@ -41467,7 +41664,7 @@ void TitleScene::InitializeCamera()
 {
 	// タイトルシーン用カメラ
 	titleCamera_ = std::make_unique<TitleCamera>();
-	titleCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-4.5f });
+	titleCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), kTitleCameraPosition);
 
 
 	// カメラ管理クラス初期化
@@ -41569,6 +41766,15 @@ File Path: project/DirectXGame/application/scene/TutorialScene.cpp
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
+namespace {
+	// チュートリアル開始時のプレイヤー座標。
+	const Vector3 kTutorialPlayerInitialPosition = { 0.0f, 2.0f, -40.0f };
+	// リトライ時のシーン遷移時間。
+	constexpr float kRetryTransitionSeconds = 0.5f;
+	// タイトルへ戻る際のシーン遷移時間。
+	constexpr float kTitleTransitionSeconds = 0.25f;
+}
+
 void TutorialScene::Initialize() {
 	// Input
 	input = GetInput();
@@ -41576,7 +41782,7 @@ void TutorialScene::Initialize() {
 	// チュートリアルでもゲームプレイ共通基盤を一括初期化する。
 	gameplaySession_ = std::make_unique<GameplaySession>();
 	gameplaySession_->Initialize(input, GetEntityManager(), GetGlobalVariables(),
-		Character::PlayerType::kNormal, { 0, 2, -40 });
+		Character::PlayerType::kNormal, kTutorialPlayerInitialPosition);
 	InputSystem* inputSystem = gameplaySession_->GetInputCoordinator()->GetInputSystem();
 	CameraManager* cameraManager = gameplaySession_->GetCameraManager();
 	Character::CharacterManager* characterManager = gameplaySession_->GetCharacterManager();
@@ -41621,10 +41827,10 @@ void TutorialScene::Update() {
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+		GetSceneManager()->ChangeScene("GAMEPLAY", kRetryTransitionSeconds);
 	}
 	if (input->IsTriggerKey(DIK_T)) {
-		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+		GetSceneManager()->ChangeScene("TITLE", kTitleTransitionSeconds);
 	}
 
 	// 調整項目
@@ -85563,6 +85769,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Custom\CustomSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\GameplaySession.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Pose\PoseSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.h" />
@@ -88286,6 +88493,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\GameplaySession.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
