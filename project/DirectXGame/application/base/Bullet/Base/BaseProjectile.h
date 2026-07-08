@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ProjectileData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -17,7 +17,12 @@ namespace Projectile {
 		// 派生発射物を基底ポインターから安全に破棄する
 		virtual ~BaseProjectile() = default;
 
-		// 初期化
+		/// <summary>発射物の見た目、移動、衝突、演出を生成情報と定義値から初期化する。</summary>
+		/// <param name="entity3DManager">発射物オブジェクトを生成するエンティティ管理。</param>
+		/// <param name="globalVariables">調整値の登録・参照先。</param>
+		/// <param name="effectSystem">移動・命中演出の出力先。演出不要の場合はnullptrを許容する。</param>
+		/// <param name="spawnInfo">生成位置、方向、所有者、ターゲットを含む生成情報。</param>
+		/// <param name="param">寿命、速度、当たり判定などを含む発射物定義。</param>
 		void Initialize(Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, EffectSystem* effectSystem, const ProjectileSpawnInfo& spawnInfo,
 			const ProjectileParam& param);
@@ -31,29 +36,40 @@ namespace Projectile {
 		// 描画2D
 		void Draw2D();
 	public:
-		// 生きているか
+		/// <summary>発射物が管理対象として生存しているか取得する。</summary>
+		/// <returns>更新・描画対象ならtrue、寿命切れまたは命中で削除待ちならfalse。</returns>
 		bool GetIsAlive() const { return isAlive_; }
-		// コライダーコンポーネント取得
+		/// <summary>衝突登録に使用するコライダーコンポーネントを取得する。</summary>
+		/// <returns>内部ObjectComponentが所有する非所有ポインター。</returns>
 		Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); }
 	protected:
-		// プレイヤー命中時の差分処理を派生発射物から上書きする
+		/// <summary>プレイヤー命中時に派生発射物固有の処理を実行する。</summary>
+		/// <param name="player">命中したプレイヤー。命中通知中のみ有効。</param>
 		virtual void OnHitPlayer(Character::BasePlayer* player);
-		// 敵命中時の差分処理を派生発射物から上書きする
+		/// <summary>敵命中時に派生発射物固有の処理を実行する。</summary>
+		/// <param name="enemy">命中した敵。命中通知中のみ有効。</param>
 		virtual void OnHitEnemy(Character::BaseEnemy* enemy);
-		// 派生命中処理から発射者を参照する
+		/// <summary>この発射物を生成したキャラクターを取得する。</summary>
+		/// <returns>生成者への非所有ポインター。生成者を指定していない場合はnullptr。</returns>
 		Character::BaseCharacter* GetOwner() const { return owner; }
-		// 派生命中処理から発射物パラメーターを参照する
+		/// <summary>初期化時に保持した発射物定義を取得する。</summary>
+		/// <returns>発射物の生存期間中有効な定義への読み取り専用参照。</returns>
 		const ProjectileParam& GetParam() const { return param_; }
 	private:
 		// コライダの作成
 		void CreateCollision();
-		// コライダー処理
+		/// <summary>コライダー通知を解釈し、命中対象に応じた処理へ振り分ける。</summary>
+		/// <param name="otherComponent">衝突相手のコンポーネント。存在しない場合はnullptr。</param>
+		/// <param name="self">自身のコライダー。</param>
+		/// <param name="other">衝突相手のコライダー。</param>
 		void CollisionProcess(Engine::ColliderComponent* otherComponent,Engine::Collider* self, Engine::Collider* other);
 		// 衝突処理
 		void ProjectileHit();
-		// 移動処理更新
+		/// <summary>設定された移動方式に従って座標と速度を更新する。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
 		void UpdateMovement(float dt);
-		// エフェクト処理更新
+		/// <summary>移動中エフェクトとトレイルを更新する。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
 		void UpdateEffect(float dt);
 		// 削除(終了)処理
 		void DeleteProcess();

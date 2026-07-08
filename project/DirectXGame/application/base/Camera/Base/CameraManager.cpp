@@ -25,7 +25,7 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 void CameraManager::Update()
 {
 	// ImGui更新
-	UpadateImGui();
+	UpdateImGui();
 
 	// ゲームカメラOn
 	if (isGameCamera) {
@@ -70,14 +70,19 @@ void CameraManager::Update()
 	camera->UpdateMatrix();
 }
 
-void CameraManager::AddCamera(CameraInfo camera, std::string name) {
+
+void CameraManager::AddCamera(const CameraInfo& cameraInfo, const std::string& name) {
+	// CameraManagerは所有権を受け取らず、登録元が所有するカメラを参照する。
+	if (!cameraInfo.camera) {
+		return;
+	}
 	// カメラ管理クラスを渡す
-	camera.camera->SetCameraManager(this);
-	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
-	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
+	cameraInfo.camera->SetCameraManager(this);
+	cameraInfo.camera->SetUseCamera(cameraInfo.useCamera);	// 使っているか
+	cameras.insert(std::make_pair(name, cameraInfo.camera));	// カメラ追加
 }
 
-void CameraManager::SetUseCamera(std::string name, float time) {
+void CameraManager::SetUseCamera(const std::string& name, float time) {
 
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
@@ -114,7 +119,7 @@ void CameraManager::SetUseCamera(std::string name, float time) {
 	}
 }
 
-void CameraManager::UpadateImGui() {
+void CameraManager::UpdateImGui() {
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
@@ -173,11 +178,11 @@ BaseCamera* CameraManager::GetBaseCamera() {
 	return nullptr;
 }
 
-void CameraManager::DeleteCamera(std::string name)
+void CameraManager::DeleteCamera(const std::string& name)
 {
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
-		delete it->second;         // メモリの解放
-		cameras.erase(it);         // マップから削除
+		// カメラ本体は登録元のunique_ptrが所有するため、非所有参照だけを削除する。
+		cameras.erase(it);
 	}
 }

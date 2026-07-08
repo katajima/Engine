@@ -1,4 +1,4 @@
-#include "FollowCamera.h"
+﻿#include "FollowCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
@@ -31,7 +31,7 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 }
 
 void FollowCamera::Update() {
-	controller->SetTraget(target_);
+	controller->SetTarget(target_);
 	controller->SetLockOnTarget(target);
 	// カメラを使っているなら
 	if (useCamera) {

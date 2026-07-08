@@ -1,4 +1,4 @@
-#include "CameraController.h"
+﻿#include "CameraController.h"
 #include <algorithm>
 #include <cmath>
 
@@ -62,10 +62,10 @@ void CameraController::Update(float dt) {
 	camera->SetTransform(transform);
 };
 
-void CameraController::SetTraget(const Engine::WorldTransform* target) { 
+void CameraController::SetTarget(const Engine::WorldTransform* target) {
 	this->target = target;
-	follow->SetTraget(target);
-	collision->SetTraget(target);
+	follow->SetTarget(target);
+	collision->SetTarget(target);
 	hasPreviousTargetPosition_ = false;
 };
 

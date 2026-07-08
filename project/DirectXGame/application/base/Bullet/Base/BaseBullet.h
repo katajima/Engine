@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "BulletData.h"
@@ -24,8 +24,8 @@ class EffectSystem;
 /// </summary>
 class BaseBullet : public IHitReceiver{
 public:
-	// デフォルトコンストラクタ
-	BaseBullet() = default;
+	/// <summary>弾の共通状態を既定値で構築する。</summary>
+	BaseBullet();
 	virtual ~BaseBullet() = 0;
 	
 	struct Parameters {

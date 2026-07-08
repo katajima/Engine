@@ -1,13 +1,22 @@
-#include "SpecialPointState.h"
+﻿#include "SpecialPointState.h"
 #include "SpecialPoint.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
+
+namespace {
+	// 出現時にスペシャルポイントを配置する高さ。
+	constexpr float kPopInitialHeight = 2.0f;
+	// ターゲット到達と判定する距離。
+	constexpr float kTargetArrivalDistance = 2.0f;
+	// 到達後にターゲット位置へ加える高さ。
+	const Vector3 kCollectedPointOffset = { 0.0f, 3.0f, 0.0f };
+}
 
 #pragma region Pop
 
 // 開始
 void SpecialPointPopState::Enter() {
 	timer = 0.0f;
-	object_->GetObjectComponent()->GetWorldTransform().translate_.y = 2.0f;
+	object_->GetObjectComponent()->GetWorldTransform().translate_.y = kPopInitialHeight;
 	object_->GetObjectComponent()->GetRigidBodyComponent()->AddForce(upVelocity_);
 	object_->GetObjectComponent()->GetRigidBodyComponent()->SetGravityScale(glavityScale_);
 	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(true);
@@ -97,8 +106,8 @@ void SpecialPointMoveState::Update(float dt) {
 	object_->GetObjectComponent()->GetWorldTransform().translate_ += dire * speed_ * dt;
 
 	// 目標位置に到達したら位置を固定
-	if (2.0f  > object_->GetObjectComponent()->GetWorldPosition().Distance(object_->GetTargetPos())) {
-		object_->GetObjectComponent()->GetWorldPosition() = object_->GetTargetPos() + Vector3{0,3,0};
+	if (kTargetArrivalDistance > object_->GetObjectComponent()->GetWorldPosition().Distance(object_->GetTargetPos())) {
+		object_->GetObjectComponent()->GetWorldPosition() = object_->GetTargetPos() + kCollectedPointOffset;
 	}
 
 

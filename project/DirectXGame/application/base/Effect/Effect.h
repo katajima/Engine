@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "EffectEditor.h"
 // 前方宣言
 namespace Engine {
@@ -9,19 +9,33 @@ namespace Engine {
 /// </summary>
 class EffectSystem {
 public:
-	// 初期化
+	/// <summary>エフェクト定義と実行用コンポーネントを初期化する。</summary>
+	/// <param name="entityManager">エフェクトを生成するエンティティ管理。利用中は有効であること。</param>
+	/// <param name="globalVariables">エフェクト定義の登録・保存先。</param>
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
-	// 更新
+	/// <summary>生成済みエフェクトとエディター状態を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
-	// 出現
+	/// <summary>指定位置へエフェクトを生成する。</summary>
+	/// <param name="name">登録済みエフェクト名。</param>
+	/// <param name="pos">ワールド座標。</param>
 	void Emit(const std::string& name, const Vector3& pos);
-	// 出現(方向付き)
+	/// <summary>方向と放出範囲を指定してエフェクトを生成する。</summary>
+	/// <param name="name">登録済みエフェクト名。</param>
+	/// <param name="pos">ワールド座標。</param>
+	/// <param name="dir">放出方向。</param>
+	/// <param name="range">各軸の放出範囲。</param>
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
 
 public:
+	/// <summary>エディターが管理している全エフェクト定義を取得する。</summary>
+	/// <returns>呼び出し側で安全に参照できる定義マップのコピー。</returns>
 	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectEditor_->GetEffectGlobalDatas(); };
 private:
-	// エフェクトの作成
+	/// <summary>1件のエフェクト定義から実行用エフェクトを生成する。</summary>
+	/// <param name="name">生成するエフェクト名。</param>
+	/// <param name="shapeType">エミッター形状。</param>
+	/// <param name="data">生成に利用する保存済みパラメータ。</param>
 	void CreateEffect(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
 
 	// パーティクル初期化

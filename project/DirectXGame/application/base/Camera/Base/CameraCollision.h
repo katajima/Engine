@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // 
@@ -11,7 +11,9 @@ public:
 	// 更新
 	void Update(Transform& transform, float dt);
 	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+	/// <summary>衝突補正の基準となる追従対象を設定する。</summary>
+	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
 
 private:
 	CameraCollisionData data_;

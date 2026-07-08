@@ -39,7 +39,12 @@ namespace Character {
 	public:
 		BaseCharacter();
 		virtual ~BaseCharacter(); // = default をヘッダーに書かない
-		/// 初期化
+		/// <summary>派生キャラクターのオブジェクト、能力、状態、依存システムを初期化する。</summary>
+		/// <param name="inputSystem">操作入力。AI専用キャラクターではnullptrを許容する。</param>
+		/// <param name="entity3DManager">キャラクターオブジェクトとコンポーネントの生成元。</param>
+		/// <param name="globalVariables">キャラクター調整値の登録・保存先。</param>
+		/// <param name="position">初期ワールド座標。</param>
+		/// <param name="camera">描画に使用する非所有カメラ。</param>
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 		/// 更新
@@ -69,29 +74,38 @@ namespace Character {
 		// リロード
 		virtual void Reload() {};
 	public:
-		// キャラクタータイプ設定
+		/// <summary>プレイヤーまたは敵のキャラクター種別を設定する。</summary>
+		/// <param name="type">設定するキャラクター種別。</param>
 		void SetCharacterType(Type type);
-		// キャラクター取得
+		/// <summary>キャラクター種別を取得する。</summary>
+		/// <returns>現在設定されている種別。</returns>
 		Type GetCharacterType() const;
-		// キャラクターの生存状態を取得
+		/// <summary>キャラクターが生存しているか取得する。</summary>
+		/// <returns>通常更新対象として生存している場合はtrue。</returns>
 		bool GetAlive() const;
-		// キャラクターの生存状態を取得
+		/// <summary>キャラクターの生存状態を設定する。</summary>
+		/// <param name="is">生存状態にする場合はtrue。</param>
 		void SetAlive(bool is);
-		// HP取得
+		/// <summary>現在HPを取得する。</summary>
+		/// <returns>現在のHP。下限処理はパラメータコンポーネントに従う。</returns>
 		float GetHP() const;
-		// ダメージ
+		/// <summary>現在HPへダメージを適用する。</summary>
+		/// <param name="damage">減算するダメージ量。負数の扱いはパラメータ実装に従う。</param>
 		void AddDamage(float damage);
 		// 削除フラグ
 		bool  GetDelete() const;
 		// 削除する
 		void Delete();
-		// 時間
+		/// <summary>キャラクター固有の時間倍率を反映したフレーム時間を取得する。</summary>
+		/// <returns>秒単位のフレーム時間。</returns>
 		float GetTime();
-		// 移動出来るか設定
+		/// <summary>通常移動処理の許可状態を設定する。</summary>
+		/// <param name="is">移動を許可する場合はtrue。</param>
 		void IsMove(bool is);
 		// 移動可能か
 		bool GetIsMove() const;
-		// パラメータ取得
+		/// <summary>基本能力パラメータを取得する。</summary>
+		/// <returns>ParameterComponentが所有する変更可能ポインター。未初期化時はnullptr。</returns>
 		BasicParameters* GetBasicParameters() const;
 		// 基本パラメータ
 		BasicParameters* Parameters();
@@ -121,11 +135,14 @@ namespace Character {
 		Engine::ColliderComponent* GetColliderComponent();
 		// オブジェクト3d取得
 		ObjectComponent* GetObjectComponent();
-		// ワールド変換取得
+		/// <summary>キャラクター本体のワールド変換を取得する。</summary>
+		/// <returns>キャラクターの生存期間中有効な変更可能参照。</returns>
 		Engine::WorldTransform& GetWorldTransform();
-		// ワールド変換取得
+		/// <summary>キャラクター本体のワールド変換を読み取り専用で取得する。</summary>
+		/// <returns>内部ObjectComponentが所有する非所有ポインター。</returns>
 		const Engine::WorldTransform* GetConstWorldTransform() const;
-		// ワールド座標取得
+		/// <summary>キャラクター本体の現在ワールド座標を取得する。</summary>
+		/// <returns>ワールド空間の座標。</returns>
 		Vector3 GetWorldPosition() const;
 	public: // 貰いもの
 		// 弾マネージャ取得
@@ -138,11 +155,13 @@ namespace Character {
 		SpecialPointManager* GetSpecialPointManager() { return this->specialPointManager; }
 		// 入力システム取得
 		InputSystem* GetInputSystem() { return inputSystem; };
-		// 入力システム設定
+		/// <summary>キャラクター操作に使用する入力を設定する。</summary>
+		/// <param name="inputSystem">非所有ポインター。AI操作へ切り替える場合はnullptrを許容する。</param>
 		void SetInputSystem(InputSystem* inputSystem);
 		// カメラ取得
 		Engine::Camera* GetCamera() const { return camera; }
-		// カメラ設定
+		/// <summary>キャラクター描画と方向計算に使用するカメラを設定する。</summary>
+		/// <param name="camera">非所有ポインター。キャラクター利用中は有効であること。</param>
 		void SetCamera(Engine::Camera* camera);
 		//エフェクト設定
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
@@ -185,7 +204,9 @@ namespace Character {
 		void UpdateBaseGetValue();
 
 
-		// 攻撃要求
+		/// <summary>入力種別に対応するコンボ攻撃の開始または遷移を要求する。</summary>
+		/// <param name="input">弱攻撃、強攻撃、スキルの入力種別。</param>
+		/// <returns>攻撃要求が受理された場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
 	protected:
 		// オブジェクトコンポーネント

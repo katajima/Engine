@@ -21,7 +21,16 @@ namespace Character {
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
-		// 基盤となる初期化
+		/// <summary>敵共通のオブジェクト、パラメータ、AI、攻撃、死亡処理を初期化する。</summary>
+		/// <param name="inputSystem">入力参照。AI操作のみの場合はnullptrを許容する。</param>
+		/// <param name="entity3DManager">敵オブジェクトとコンポーネントの生成元。</param>
+		/// <param name="globalVariables">敵調整値の登録・保存先。</param>
+		/// <param name="position">敵の初期ワールド座標。</param>
+		/// <param name="camera">敵描画に使用する非所有カメラ。</param>
+		/// <param name="modelName">使用するモデル名。</param>
+		/// <param name="charaName">オブジェクトと調整値に使用する敵名。</param>
+		/// <param name="colliderRadius">球コライダー半径。0より大きい値を指定する。</param>
+		/// <param name="shadowSize">影の表示倍率。</param>
 		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f,float shadowSize = 1.0f);
@@ -39,16 +48,26 @@ namespace Character {
 		virtual void Jump(){};
 		// リロード
 		virtual void Reload() {};
-		// ターゲット取得
+		/// <summary>現在の攻撃・移動対象を取得する。</summary>
+		/// <returns>非所有ポインター。対象が設定されていない場合はnullptr。</returns>
 		const BaseCharacter* GetTarget();
 
+		/// <summary>攻撃・移動対象となるキャラクターを設定する。</summary>
+		/// <param name="target">対象への非所有ポインター。解除時はnullptr。</param>
 		void SetTargetCharacters(BaseCharacter* target);
 
+		/// <summary>敵固有の攻撃判断システムを取得する。</summary>
+		/// <returns>BaseEnemyが所有する非所有ポインター。未初期化時はnullptr。</returns>
 		EnemyAttackSystem* GetEnemyAttackSystem() const;
+		/// <summary>共有敵AIシステムを取得する。</summary>
+		/// <returns>CharacterManagerなどが所有する非所有ポインター。</returns>
 		EnemyAiSystem* GetEnemyAiSystem() const { return enemAi; }
 
+		/// <summary>共有敵AIシステムを設定する。</summary>
+		/// <param name="aiSystem">非所有ポインター。敵の生存中は有効であること。</param>
 		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
 		// ウェーブ終了による自然退場を開始する
+		/// <param name="duration">自然退場に使用する秒数。</param>
 		void BeginWaveExit(float duration = 1.2f);
 		// 退場中の敵は攻撃・ロックオン・撃破得点の対象から外す
 		bool IsWaveExiting() const;
@@ -74,15 +93,19 @@ namespace Character {
 		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
 		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
-		// 対象の位置(プレイヤー)
+		/// <summary>現在のターゲット座標を取得する。</summary>
+		/// <returns>ターゲットのワールド座標。未設定時は既定のゼロベクトル。</returns>
 		Vector3 GetTargetPos();
-		// 対象との距離(プレイヤー)
+		/// <summary>自身から現在ターゲットまでの距離を取得する。</summary>
+		/// <returns>ワールド単位の直線距離。</returns>
 		float GetTargetDistance();
-		// ターゲット方向取得
+		/// <summary>自身からターゲットへ向かう方向を取得する。</summary>
+		/// <returns>正規化済みワールド方向。方向を算出できない場合はゼロベクトル。</returns>
 		Vector3 TargetDirection();
 
 	protected:
-		// エフェクト初期化
+		/// <summary>敵に追従するエフェクト用ワールド変換を初期化する。</summary>
+		/// <param name="pos">初期ワールド座標。</param>
 		void InitializeEffect(const Vector3& pos);
 		// 武器初期化
 		template<typename T>

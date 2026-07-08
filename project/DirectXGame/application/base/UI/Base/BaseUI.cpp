@@ -1,8 +1,8 @@
-#include "BaseUI.h"
+﻿#include "BaseUI.h"
 
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-void BaseUI::InitSprite(Engine::Sprite* sprite, std::string texFile, Vector2 pos, Vector2 size)
+void BaseUI::InitSprite(Engine::Sprite* sprite, const std::string& texFile, Vector2 pos, Vector2 size)
 {
 	sprite->Initialize(entityManager->GetSpriteCommon(), texFile);	// 初期化
 	sprite->SetPosition(pos);											// 位置設定
@@ -143,7 +143,7 @@ void BaseUI::DrawUIElement()
 
 }
 
-Engine::UICheckBox* BaseUI::GetUICheckBox(std::string name)
+Engine::UICheckBox* BaseUI::GetUICheckBox(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiCheckBox_.contains(name)) {
@@ -152,7 +152,7 @@ Engine::UICheckBox* BaseUI::GetUICheckBox(std::string name)
 	return nullptr;
 }
 
-Engine::UISlider* BaseUI::GetUISlider(std::string name)
+Engine::UISlider* BaseUI::GetUISlider(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiSlider_.contains(name)) {
@@ -161,7 +161,7 @@ Engine::UISlider* BaseUI::GetUISlider(std::string name)
 	return nullptr;
 }
 
-Engine::UIMeter* BaseUI::GetUIMeter(std::string name)
+Engine::UIMeter* BaseUI::GetUIMeter(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiMeter_.contains(name)) {
@@ -170,7 +170,7 @@ Engine::UIMeter* BaseUI::GetUIMeter(std::string name)
 	return nullptr;
 }
 
-Engine::UIPair* BaseUI::GetUIPair(std::string name)
+Engine::UIPair* BaseUI::GetUIPair(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiPair_.contains(name)) {
@@ -179,7 +179,7 @@ Engine::UIPair* BaseUI::GetUIPair(std::string name)
 	return nullptr;
 }
 
-Engine::UICount* BaseUI::GetUICount(std::string name)
+Engine::UICount* BaseUI::GetUICount(const std::string& name)
 {
 	// 読み込み済みモデルを検索
 	if (uiCount_.contains(name)) {

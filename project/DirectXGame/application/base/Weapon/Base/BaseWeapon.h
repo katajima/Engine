@@ -35,7 +35,12 @@ public:
 	BaseWeapon();
 	virtual ~BaseWeapon();
 
-	// 初期化
+	/// <summary>武器オブジェクト、当たり判定、描画依存を初期化する。</summary>
+	/// <param name="inputSystem">武器操作に使用する入力。敵武器ではnullptrを許容する。</param>
+	/// <param name="entityManager">武器オブジェクトとコンポーネントの生成元。</param>
+	/// <param name="globalVariables">武器調整値の登録・保存先。</param>
+	/// <param name="position">武器の初期ワールド座標。</param>
+	/// <param name="camera">武器描画に使用する非所有カメラ。</param>
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	// 更新
@@ -45,23 +50,33 @@ public:
 	// 描画2d
 	virtual void Draw2D() = 0;
 public:
-	// 使っているキャラクター設定
+	/// <summary>この武器を使用するキャラクターを設定する。</summary>
+	/// <param name="character">所有者への非所有ポインター。武器利用中は有効であること。</param>
 	void SetCharacter(Character::BaseCharacter* character);
-	// タグによるコライダーの有効・無効を設定
+	/// <summary>指定衝突タグに対する武器コライダーの有効状態を設定する。</summary>
+	/// <param name="tag">有効状態を変更する衝突対象タグ。</param>
+	/// <param name="is">衝突を有効にする場合はtrue。</param>
 	void SetIsCollider(CollisionTag tag, bool is);
-	// コライダーコンポーネント
+	/// <summary>武器のコライダーコンポーネントを取得する。</summary>
+	/// <returns>内部ObjectComponentが所有する非所有ポインター。未生成の場合はnullptr。</returns>
 	Engine::ColliderComponent* GetColliderComponent();
-	// オブジェクト3d取得
+	/// <summary>武器の描画オブジェクトを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。</returns>
 	Engine::Object3d* GetObject3D();
-	// ワールド変換取得
+	/// <summary>武器のワールド変換を取得する。</summary>
+	/// <returns>武器の生存期間中有効な変更可能参照。</returns>
 	Engine::WorldTransform& GetWorldTransform();
-	// 弾管理クラス設定
+	/// <summary>遠距離武器が生成する弾の登録先を設定する。</summary>
+	/// <param name="bulletManager">非所有ポインター。弾を生成する間は有効であること。</param>
 	void SetBulletManager(BulletManager* bulletManager);
-	// 武器に紐づくトレイルを設定
+	/// <summary>武器軌跡として使用するトレイルを設定する。</summary>
+	/// <param name="trailEffect">EntityManagerなどが所有する非所有ポインター。解除時はnullptr。</param>
 	void SetTrailEffect(Engine::TrailEffect* trailEffect);
-	// 武器に紐づくトレイルを取得
+	/// <summary>設定済みの武器トレイルを取得する。</summary>
+	/// <returns>非所有ポインター。未設定の場合はnullptr。</returns>
 	Engine::TrailEffect* GetTrailEffect();
-	// トレイル発生のON/OFF
+	/// <summary>武器トレイルの頂点生成を開始または停止する。</summary>
+	/// <param name="isEmit">生成する場合はtrue。</param>
 	void SetTrailEmit(bool isEmit);
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター

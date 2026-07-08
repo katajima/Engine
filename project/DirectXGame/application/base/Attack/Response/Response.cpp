@@ -4,6 +4,13 @@
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 
+namespace {
+	// 壁面の法線を接地可能な上向き面として扱うY成分のしきい値。
+	constexpr float kLandingNormalThreshold = 0.7f;
+	// プレイヤーエフェクトから受ける押し出し速度。
+	constexpr float kPlayerEffectPushSpeed = 20.0f;
+}
+
 #pragma region HitResponse
 
 void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)
@@ -50,7 +57,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 					request.velocity = pushVec * halfSize;
 				}
 				if (other->GetTag() == CollisionTag::Wall) {
-					if (pushVec.Normalize().y >= 0.7f) {
+					if (pushVec.Normalize().y >= kLandingNormalThreshold) {
 						request.isLanding = true;
 					}
 					else if (pushVec.Length() == 0.0f) {
@@ -76,7 +83,7 @@ void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
 		// リアクション移動システムがあるなら
 		if (moveRequestSystem) {
 			MoveRequest request;
-			request.velocity = dire * 20.0f;
+			request.velocity = dire * kPlayerEffectPushSpeed;
 			moveRequestSystem->SetRequest(request);
 			return;
 		}

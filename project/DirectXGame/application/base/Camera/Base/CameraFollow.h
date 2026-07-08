@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // カメラ追従
@@ -11,7 +11,9 @@ public:
 	void Update(Transform& transform,float dt);
 
 	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+	/// <summary>追従対象を設定する。</summary>
+	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
 
 	// カメラオフセット位置取得
 	Vector3 GetOffsetPos() const { return data_.offset; }  

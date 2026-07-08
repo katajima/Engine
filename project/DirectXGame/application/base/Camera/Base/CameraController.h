@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
@@ -15,32 +15,46 @@ class InputSystem;
 class CameraController {
 public:
 
-	// 初期化
+	/// <summary>追従、回転、ロックオン、衝突補正、演出用の各カメラ機能を初期化する。</summary>
+	/// <param name="camera">制御対象のカメラ。CameraControllerは所有せず、利用中は有効であること。</param>
+	/// <param name="input">カメラ操作に使用する入力。自動制御のみの場合はnullptrを許容する。</param>
 	void Initialize(Engine::Camera* camera,const InputSystem* input);
 
-	// 更新
+	/// <summary>設定済みの追従対象と入力に基づいて全カメラ機能を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。0以下の場合、時間依存の補間は進行しない。</param>
 	void Update(float dt);
 
-	// ロックオンターゲット設定
+	/// <summary>カメラが注視するロックオン対象を設定する。</summary>
+	/// <param name="target">対象への非所有ポインター。ロックオン解除時はnullptr。</param>
 	void SetLockOnTarget(const Engine::WorldTransform* target);
-	void SetLockOnTraget(const Engine::WorldTransform* target) { SetLockOnTarget(target); };
-	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target);
-	// カメラシェイク取得
+	/// <summary>カメラの通常追従対象を設定する。</summary>
+	/// <param name="target">対象への非所有ポインター。追従解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target);
+	/// <summary>カメラシェイク機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
 	CameraShake* GetShake(){ return shake.get(); }
-	// カメラズーム取得
+	/// <summary>カメラズーム機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
 	CameraZoom* GetZoom(){ return zoom.get(); }
-	// ロックオン取得
+	/// <summary>ロックオン機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
 	CameraLockOn* GetCameraLockOn() { return lockOn.get(); }
-	// 先読みデータ設定
+	/// <summary>通常追従時の先読み設定を置き換える。</summary>
+	/// <param name="data">速度方向の先読み量と補間設定。</param>
 	void SetLookAheadData(const CameraLookAheadData& data);
-	// 速度ズームデータ設定
+	/// <summary>通常追従時の速度ズーム設定を置き換える。</summary>
+	/// <param name="data">速度範囲、ズーム距離、補間設定。</param>
 	void SetSpeedZoomData(const CameraSpeedZoomData& data);
-	// 攻撃などの一時先読みリクエスト
+	/// <summary>攻撃演出などで一時的な先読みを要求する。</summary>
+	/// <param name="data">一時適用する先読み設定。</param>
+	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
 	void RequestLookAhead(const CameraLookAheadData& data, float duration);
-	// 攻撃などの一時速度ズームリクエスト
+	/// <summary>攻撃演出などで一時的な速度ズームを要求する。</summary>
+	/// <param name="data">一時適用する速度ズーム設定。</param>
+	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
 	void RequestSpeedZoom(const CameraSpeedZoomData& data, float duration);
-	// 攻撃などの一時注視点オフセットリクエスト
+	/// <summary>攻撃演出などで一時的な注視点オフセットを要求する。</summary>
+	/// <param name="data">オフセット量、開始時間、継続時間を含む設定。</param>
 	void RequestActionTargetOffset(const CameraActionOffsetData& data);
 	// 一時カメラ演出の解除
 	void ClearActionAssist();
@@ -53,9 +67,14 @@ private:
 	void UpdateSpeedZoom(float dt);
 	// 一時リクエストの残り時間を更新する
 	void UpdateActionTimers(float dt);
-	// 速度に応じた0.0fから1.0fの割合を計算する
+	/// <summary>現在速度を指定範囲の0.0～1.0へ正規化する。</summary>
+	/// <param name="minSpeed">割合0.0に対応する速度。</param>
+	/// <param name="maxSpeed">割合1.0に対応する速度。</param>
+	/// <returns>範囲内へ制限した速度割合。範囲が無効な場合は0.0。</returns>
 	float CalculateSpeedRate(float minSpeed, float maxSpeed) const;
-	// 速度方向へどれだけ先読みするか計算する
+	/// <summary>現在の推定速度から追従先読みオフセットを計算する。</summary>
+	/// <param name="data">計算に使用する先読み設定。</param>
+	/// <returns>ワールド空間の先読みオフセット。</returns>
 	Vector3 CalculateLookAheadOffset(const CameraLookAheadData& data) const;
 private:
 	// 追従

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -29,33 +29,46 @@ public:
 
 public:
 
-	// 初期化
+	/// <summary>キャラクターの被弾リアクション管理を初期化する。</summary>
+	/// <param name="owner">リアクションを適用するキャラクター。非所有ポインターで、利用中は有効であること。</param>
+	/// <param name="effectSystem">命中エフェクトの出力先。演出不要の場合はnullptrを許容する。</param>
 	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem);
-	// 更新
+	/// <summary>ヒットストップ、ノックバック、スタン、ダウンなどの残り時間と移動を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
 
 	// ヒットエフェクト
 	void EmitHitEffect();
 	
-	// リアクションデータ設定
+	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
+	/// <param name="data">リアクション種別、時間、移動量、演出を含む設定。</param>
 	void SetReactionData(const HitReactionData& data);
-	// ヒットストップ時間設定(自分)
+	/// <summary>所有者自身へ適用するヒットストップ時間を設定する。</summary>
+	/// <param name="time">停止時間（秒）。0以下で停止を解除する。</param>
 	void SetSelfHitStopTime(float time) { selfHitStopTime_ = time; }
-	// ヒットモーション中か
+	/// <summary>いずれかの被弾リアクションが進行中か取得する。</summary>
+	/// <returns>リアクション中ならtrue。</returns>
 	bool IsHitMotion() const;
-	// スタン中か
+	/// <summary>操作不能のヒットスタン中か取得する。</summary>
+	/// <returns>残りスタン時間がある場合はtrue。</returns>
 	bool IsHitStun() const;
-	// ダウン中か
+	/// <summary>ダウン状態が継続中か取得する。</summary>
+	/// <returns>残りダウン時間がある場合はtrue。</returns>
 	bool IsDown() const;
-	// 打ち上げ中か
+	/// <summary>打ち上げ滞空状態か取得する。</summary>
+	/// <returns>残り滞空時間がある場合はtrue。</returns>
 	bool IsLaunch() const;
-	// ヒットストップ中か
+	/// <summary>相手由来のヒットストップ中か取得する。</summary>
+	/// <returns>残り停止時間がある場合はtrue。</returns>
 	bool IsHitStop() const;
-	// セルフヒットストップ中か
+	/// <summary>自分由来のヒットストップ中か取得する。</summary>
+	/// <returns>残り停止時間がある場合はtrue。</returns>
 	bool IsSelfHitStop() const;
-	// 重力は有効か
+	/// <summary>現在のリアクション中に通常重力を適用できるか取得する。</summary>
+	/// <returns>重力を適用する場合はtrue。</returns>
 	bool IsGravityEnabled() const;
-	// 重力倍率取得
+	/// <summary>現在のリアクションで使用する重力倍率を取得する。</summary>
+	/// <returns>重力加速度へ乗算する倍率。</returns>
 	float GetGravityScale() const;
 	// スタン時間
 	float GetHitStunTimer() const { return hitStunTimer_; }
@@ -73,16 +86,22 @@ public:
 	void ForceFinishReaction();
 
 private:
-	// ダメージ処理
+	/// <summary>パラメータへダメージを反映し、時間依存処理を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
+	/// <param name="parameter">ダメージを反映するパラメータ。nullptrの場合は反映しない。</param>
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
-	// 移動システムにリクエストする
+	/// <summary>算出したリアクション速度を移動システムへ要求する。</summary>
+	/// <param name="velocity">ワールド空間の速度。</param>
 	void SendReactionMoveRequest(const Vector3& velocity);
 	// リアクション終了
 	void FinishReaction();
 
-	// 時間内か
+	/// <summary>残り時間を減算して継続中か判定する。</summary>
+	/// <param name="dt">減算する秒単位の時間。</param>
+	/// <param name="time">更新対象の残り時間。</param>
+	/// <returns>減算後も時間が残っている場合はtrue。</returns>
 	bool GetIsTime(float dt, float& time);
 
 private:

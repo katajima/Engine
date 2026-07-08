@@ -15,7 +15,7 @@ float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * tim
 /// オブジェクトの時間設定
 /// </summary>
 /// <param name="spped"></param>
-void ObjectComponent::SetTimeSpeed(const float& spped) { timeSpeed_ = spped; }
+void ObjectComponent::SetTimeSpeed(float speed) { timeSpeed_ = speed; }
 
 
 /// <summary>

@@ -18,9 +18,11 @@ class BaseCamera
 {
 public:
 	virtual ~BaseCamera() = default; 
-	///< summary>
-	/// 初期化
-	///</summary>
+	/// <summary>カメラ固有の制御器と描画カメラを初期化する。</summary>
+	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラではnullptrを許容する。</param>
+	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>
+	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
+	/// <param name="position">カメラの初期ワールド座標。</param>
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
@@ -33,32 +35,32 @@ public:
 	/// <summary>
 	/// カメラ取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>このBaseCameraが所有する描画カメラへの非所有ポインター。</returns>
 	Engine::Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
 
 	/// <summary>
 	///	カメラ統括クラス取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>このBaseCameraが所有する制御器への非所有ポインター。</returns>
 	CameraController* GetCameraController() { return controller.get(); }
 
 	/// <summary>
 	/// ロックオン対象を設定
 	/// </summary>
-	/// <param name="object"></param>
+	/// <param name="object">注視対象のワールド変換。解除する場合はnullptr。</param>
 	void LockOn(const Engine::WorldTransform* object) { target = object; };
 
 	/// <summary>
 	/// カメラ管理を設定
 	/// </summary>
-	/// <param name="cameraManager"></param>
+	/// <param name="cameraManager">カメラ切り替えを管理する非所有ポインター。</param>
 	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 
 
 	/// <summary>
 	/// 時間取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>シーンのタイムスケールを反映したフレーム時間。</returns>
 	float GetTime() const;
 
 	//名前設定
