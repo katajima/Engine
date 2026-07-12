@@ -75722,8 +75722,8 @@ void Engine::Framework::Initialize()
 	input_->Intialize(winApp_.get());
 
 	// 音
-	//audioManager_ = std::make_unique<AudioManager>();
-	//audioManager_->Initialize();
+	audioManager_ = std::make_unique<AudioManager>();
+	audioManager_->Initialize();
 
 
 	// グローバル
@@ -75744,14 +75744,14 @@ void Engine::Framework::Initialize()
 
 void Engine::Framework::Finalize()
 {
-	// WindowsAPIの終了処理
-	winApp_->Finalize();
-	
 	// DirectX
 	dxCommon_->Finalize();
 
 	// 音
 	audioManager_->Finalize();
+
+	// WindowsAPIの終了処理
+	winApp_->Finalize();
 
 }
 
@@ -82466,7 +82466,7 @@ void Engine::SceneManager::Update()
 			scene_->SetEntityManager(entityManager);
 			scene_->SetWinApp(winApp);
 			// シーンやエディタから音源一覧と再生機能を利用できるよう共有する。
-			//audioManager->StopAll();
+			audioManager->StopAll();
 			scene_->SetAudioManager(audioManager);
 
 			dxCommon->GetPostEffectManager()->ClearPostEffectBlock();
