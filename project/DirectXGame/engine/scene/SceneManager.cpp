@@ -53,7 +53,7 @@ void Engine::SceneManager::Update()
 			scene_->SetEntityManager(entityManager);
 			scene_->SetWinApp(winApp);
 			// シーンやエディタから音源一覧と再生機能を利用できるよう共有する。
-			//audioManager->StopAll();
+			audioManager->StopAll();
 			scene_->SetAudioManager(audioManager);
 
 			dxCommon->GetPostEffectManager()->ClearPostEffectBlock();

@@ -11,8 +11,8 @@ void Engine::Framework::Initialize()
 	input_->Intialize(winApp_.get());
 
 	// 音
-	//audioManager_ = std::make_unique<AudioManager>();
-	//audioManager_->Initialize();
+	audioManager_ = std::make_unique<AudioManager>();
+	audioManager_->Initialize();
 
 
 	// グローバル
@@ -33,14 +33,14 @@ void Engine::Framework::Initialize()
 
 void Engine::Framework::Finalize()
 {
-	// WindowsAPIの終了処理
-	winApp_->Finalize();
-	
 	// DirectX
 	dxCommon_->Finalize();
 
 	// 音
 	audioManager_->Finalize();
+
+	// WindowsAPIの終了処理
+	winApp_->Finalize();
 
 }
 
