@@ -25,7 +25,7 @@ void TutorialScene::Initialize() {
 
 
 	tutorialStage_ = std::make_unique<TutorialStage>();
-	tutorialStage_->Initialize(GetEntityManager(), cameraManager);
+	tutorialStage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager);
 
 	tutorialSystem_ = std::make_unique<TutorialSystem>();
 	tutorialSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables(), characterManager->GetPlayer());

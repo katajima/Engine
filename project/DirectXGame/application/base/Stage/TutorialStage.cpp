@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 
 // 初期化
-void TutorialStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+void TutorialStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;
 	this->cameraManager = cameraManager;
 }

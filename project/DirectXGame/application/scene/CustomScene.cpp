@@ -18,7 +18,7 @@ void CustomScene::Initialize() {
 
 	// カスタムステージ初期化
 	customStage_ = std::make_unique<CustomStage>();
-	customStage_->Initialize(GetEntityManager(), cameraManager_.get());
+	customStage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager_.get());
 
 	// カスタムシステム初期化
 	customSystem_ = std::make_unique<CustomSystem>();

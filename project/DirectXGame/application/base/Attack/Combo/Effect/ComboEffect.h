@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
@@ -24,20 +24,39 @@ namespace Combo {
 	/// </summary>
 	class ComboCamera {
 	public:
-		// 開始
+		/// <summary>
+		/// コンボカメラ演出を開始し、所有者から必要なカメラ参照を取得します。
+		/// </summary>
+		/// <param name="owner">コンボを実行するキャラクターです。所有権は受け取りません。</param>
 		void Enter(Character::BaseCharacter* owner);
 
-		// 更新
+		/// <summary>
+		/// コンボ中のカメラ切り替え、ズーム、シェイクなどを時間に応じて更新します。
+		/// </summary>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(float timer, float dt);
-		// 攻撃が命中した瞬間のカメラ演出を再生する
+
+		/// <summary>
+		/// 攻撃が命中した瞬間に設定されているカメラ演出を再生します。
+		/// </summary>
 		void OnHit();
 
-		// 終了
+		/// <summary>
+		/// コンボカメラ演出を終了し、必要に応じて元のカメラ状態へ戻します。
+		/// </summary>
 		void Exit();
 
+		/// <summary>
+		/// カメラ演出で注視するターゲットTransformを設定します。
+		/// </summary>
+		/// <param name="target">注視対象Transformです。所有権は受け取りません。nullptrの場合はターゲットなしとして扱います。</param>
 		void SetTarget(const Engine::WorldTransform* target) { this->target = target; }
 
-		// データ構造体取得
+		/// <summary>
+		/// コンボカメラ演出の調整データを取得します。
+		/// </summary>
+		/// <returns>編集可能なカメラ演出データ参照を返します。</returns>
 		GlobalCameraData& GetData() { return data_; }
 	private:
 		const Engine::WorldTransform* target;	
@@ -60,31 +79,74 @@ namespace Combo {
 	/// </summary>
 	class ComboEffect {
 	public:
-		// 開始
+		/// <summary>
+		/// コンボエフェクトを開始し、所有者や武器、エフェクトシステムへの参照を取得します。
+		/// </summary>
+		/// <param name="owner">コンボを実行するキャラクターです。所有権は受け取りません。</param>
 		void Enter(Character::BaseCharacter* owner);
 
-		// 更新
+		/// <summary>
+		/// コンボ時間、接地状態、発生条件に応じてエフェクトを更新・発生させます。
+		/// </summary>
+		/// <param name="ctx">接地状態や外部システム参照をまとめたコンテキストです。</param>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer, float dt);
 
-		// 終了
+		/// <summary>
+		/// コンボエフェクトを終了し、発生済みフラグなどの一時状態を整理します。
+		/// </summary>
+		/// <param name="owner">コンボを終了するキャラクターです。</param>
 		void Exit(Character::BaseCharacter* owner);
-		// コンボシステムが持つ追従先Transform一覧を設定する
+
+		/// <summary>
+		/// コンボシステムが持つ追従先Transform一覧を設定します。
+		/// </summary>
+		/// <param name="parentTransforms">追従先名をキーにしたTransform一覧です。ポインタの所有権は受け取りません。</param>
 		void SetParentTransforms(const std::map<std::string, Engine::WorldTransform*>& parentTransforms) { parentTransforms_ = parentTransforms; }
 
-		// トレイルするか
+		/// <summary>
+		/// 指定時刻がトレイルエフェクトの発生時間内か確認します。
+		/// </summary>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <returns>トレイル発生時間内ならtrue、それ以外はfalseです。</returns>
 		bool IsEffectTrail(float timer) const {
 			return data_.trailEffectStartTime <= timer && 
 				timer <= (data_.trailEffectLifeTime + data_.trailEffectStartTime);
 		}
+
+		/// <summary>
+		/// コンボエフェクトの調整データを取得します。
+		/// </summary>
+		/// <returns>編集可能なエフェクトデータ参照を返します。</returns>
 		GloblEffectData& GetData() { return data_; }
 	private:
-		// 指定時間内のコンボエフェクトを頻度に応じて発生させる
+		/// <summary>
+		/// 指定時間内のコンボエフェクトを頻度に応じて発生させます。
+		/// </summary>
+		/// <param name="ctx">発生条件の判定に使うキャラクターコンテキストです。</param>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		void EmitComboEffects(const Character::CharacterContext& ctx, float timer);
-		// 演出条件の時間範囲を満たしているか確認する
+
+		/// <summary>
+		/// 演出条件の時間範囲を満たしているか確認します。
+		/// </summary>
+		/// <param name="entry">判定するエフェクト発生設定です。</param>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <returns>発生可能な時間範囲内ならtrue、それ以外はfalseです。</returns>
 		bool IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const;
-		// 指定演出を現在位置へ発生させる
+
+		/// <summary>
+		/// 指定演出を現在の基準位置へ発生させます。
+		/// </summary>
+		/// <param name="entry">発生させるエフェクト設定です。</param>
 		void EmitEntry(const ComboEffectEntry& entry);
-		// エフェクトの発生基準位置を取得する
+
+		/// <summary>
+		/// エフェクトの発生基準位置を取得します。
+		/// </summary>
+		/// <param name="entry">位置タイプや追従先名を含むエフェクト設定です。</param>
+		/// <returns>ワールド座標での発生基準位置を返します。</returns>
 		Vector3 GetEffectBasePosition(const ComboEffectEntry& entry) const;
 	private:
 		GloblEffectData data_;
@@ -105,22 +167,41 @@ namespace Combo {
 	/// </summary>
 	class ComboAudio {
 	public:
-		// ゲーム全体で共有する音声管理と、このコンボの音声設定を適用する。
+		/// <summary>
+		/// ゲーム全体で共有する音声管理を設定します。
+		/// </summary>
+		/// <param name="audioManager">音声再生に使うAudioManagerです。所有権は受け取りません。</param>
 		void Initialize(Engine::AudioManager* audioManager);
 
-		// 開始
+		/// <summary>
+		/// コンボ音声状態を開始し、再生済みフラグをリセットします。
+		/// </summary>
+		/// <param name="owner">コンボを実行するキャラクターです。必要な位置情報などを参照します。</param>
 		void Enter(Character::BaseCharacter* owner);
 
-		// 更新
+		/// <summary>
+		/// 時間条件に応じた攻撃音などを更新します。
+		/// </summary>
+		/// <param name="ctx">音声条件の判定に使うキャラクターコンテキストです。</param>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer, float dt);
 
-		// 終了
+		/// <summary>
+		/// コンボ音声状態を終了します。
+		/// </summary>
+		/// <param name="owner">コンボを終了するキャラクターです。</param>
 		void Exit(Character::BaseCharacter* owner);
 
-		// 攻撃が相手へ命中した瞬間の音を再生する。
+		/// <summary>
+		/// 攻撃が相手へ命中した瞬間の音を再生します。
+		/// </summary>
 		void OnHit();
 
-		// 保存・エディタ編集対象となる音声設定を取得する。
+		/// <summary>
+		/// 保存・エディター編集対象となる音声設定を取得します。
+		/// </summary>
+		/// <returns>編集可能な音声設定参照を返します。</returns>
 		GlobalAudio& GetData() { return data_; }
 
 

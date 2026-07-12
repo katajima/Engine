@@ -84,7 +84,7 @@ void BaseStage::InitializePlayerCar(Engine::EntityManager* entityManager, std::u
 	const Vector3& position, const Vector3& rotation) {
 	// 派生ステージが所有するプレイヤー車を生成する。
 	playerCar = std::make_unique<PlayerCar>();
-	playerCar->Initialize(entityManager, {}, position, rotation);
+	playerCar->Initialize(entityManager, audioManager,{}, position, rotation);
 	// ステージ共通の地面高さを車へ設定する。
 	playerCar->SetGroundHeight(kDefaultPlayerCarGroundHeight);
 }

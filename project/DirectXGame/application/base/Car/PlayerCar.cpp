@@ -27,9 +27,10 @@ namespace {
 	constexpr float kHeadlightPositionY = 1.0f;
 }
 
-void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, const Vector3& rotate) {
+void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, const Vector3& rotate) {
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
+	this->audioManager = audioManager;
 	pos_ = pos;
 	// 車体
 	objectComponent_ = std::make_unique<ObjectComponent>();

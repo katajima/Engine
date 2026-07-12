@@ -149,7 +149,7 @@ void CharacterDebugScene::InitializeBase(){
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetEntityManager(), cameraManager_.get());
+	stage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager_.get());
 }
 // デバック関係初期化
 void CharacterDebugScene::InitializeDebug(){

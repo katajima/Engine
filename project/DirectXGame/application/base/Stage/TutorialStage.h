@@ -15,7 +15,7 @@ class EffectSystem;
 class TutorialStage : public BaseStage {
 public:
 	// 初期化
-	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
+	void Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) override;
 
 	// 更新
 	void Update(float dt) override;

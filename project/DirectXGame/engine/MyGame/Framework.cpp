@@ -1,4 +1,4 @@
-#include"Framework.h"
+﻿#include"Framework.h"
 
 void Engine::Framework::Initialize()
 {
@@ -11,8 +11,8 @@ void Engine::Framework::Initialize()
 	input_->Intialize(winApp_.get());
 
 	// 音
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
+	//audioManager_ = std::make_unique<AudioManager>();
+	//audioManager_->Initialize();
 
 
 	// グローバル

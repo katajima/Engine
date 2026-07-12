@@ -29,7 +29,7 @@ namespace {
 	constexpr float kGroundTextureScrollLimit = 1.0f;
 }
 
-void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+void SelectStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d
 	this->camera = cameraManager->GetCamera();	// カメラ取得
 	// 空初期化

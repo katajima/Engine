@@ -3,7 +3,7 @@
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
-void MainStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d
 	this->camera = cameraManager->GetCamera();	// カメラ取得
 	// 海初期化
@@ -35,7 +35,7 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, CameraManager* 
 	
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
+	playerCar_->Initialize(entityManager, audioManager,{},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
 	playerCar_->SetGroundHeight(-2.9f);
 }
 

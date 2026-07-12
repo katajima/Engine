@@ -15,6 +15,7 @@ namespace Engine {
 	class EntityManager;
 	class Object3d;
 	class Camera;
+	class AudioManager;
 }
 
 /// <summary>
@@ -29,7 +30,7 @@ public:
 	}
 
 	// 初期化
-	virtual void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) = 0;
+	virtual void Initialize(Engine::EntityManager* entityManager,Engine::AudioManager* audioManager, CameraManager* cameraManager) = 0;
 
 	// 更新
 	virtual void Update(float dt) = 0;
@@ -147,6 +148,7 @@ protected: // 貰いもの
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::Camera* camera = nullptr;
 	CameraManager* cameraManager = nullptr;
+	Engine::AudioManager* audioManager = nullptr;
 	// エフェクト
 	EffectSystem* effect = nullptr;
 };

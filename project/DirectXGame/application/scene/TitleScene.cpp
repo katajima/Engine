@@ -1,5 +1,5 @@
 ﻿#include"TitleScene.h"
-
+#include <DirectXGame/engine/Audio/Audio.h>
 
 
 namespace {
@@ -23,11 +23,9 @@ namespace {
 
 void TitleScene::Initialize()
 {
-	// 入力初期化
-	input_ = GetInput();
 	// タイトル画面でも共通入力を利用し、キーボードとコントローラーを同じ操作へ変換する。
 	inputCoordinator_ = std::make_unique<InputCoordinator>();
-	inputCoordinator_->Initialize(input_);
+	inputCoordinator_->Initialize(GetInput());
 	// カメラ
 	InitializeCamera();
 	// リソース
@@ -41,12 +39,15 @@ void TitleScene::Initialize()
 
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
-	titleStage_->Initialize( GetEntityManager(),cameraManager_.get());
+	titleStage_->Initialize( GetEntityManager(),GetAudioManager(), cameraManager_.get());
 	titleStage_->SetEffect(effect_.get());
 
 	// UI
 	titleUI_ = std::make_unique<TitleUI>();
 	titleUI_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+
+	GetAudioManager()->Play("titleWind.mp3", true,0.5f);
+
 
 	// プレイヤー
 	objectComponent_ = std::make_unique<ObjectComponent>();

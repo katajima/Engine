@@ -6,6 +6,8 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <algorithm>
 
+#include <DirectXGame/engine/Audio/Audio.h>
+
 void Engine::SceneManager::Init() {
 	fade_ = std::make_unique<Fade>();
 	fade_->Initialize(entityManager);
@@ -51,6 +53,7 @@ void Engine::SceneManager::Update()
 			scene_->SetEntityManager(entityManager);
 			scene_->SetWinApp(winApp);
 			// シーンやエディタから音源一覧と再生機能を利用できるよう共有する。
+			//audioManager->StopAll();
 			scene_->SetAudioManager(audioManager);
 
 			dxCommon->GetPostEffectManager()->ClearPostEffectBlock();

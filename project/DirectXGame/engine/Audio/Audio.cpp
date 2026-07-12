@@ -1,11 +1,21 @@
 #include "Audio.h"
+#include "DirectXGame/engine/Base/Logger.h"
 
 #include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cstring>
 #include <fstream>
+#include <format>
+#include <mfapi.h>
+#include <mfidl.h>
+#include <mfreadwrite.h>
+#include <limits>
 #include <system_error>
+
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
 
 namespace {
 	// AudioManagerが直接読み込める拡張子か判定する。
@@ -13,7 +23,12 @@ namespace {
 		std::string extension = filePath.extension().string();
 		std::transform(extension.begin(), extension.end(), extension.begin(),
 			[](unsigned char character) { return static_cast<char>(std::tolower(character)); });
-		return extension == ".wav";
+		return extension == ".wav" || extension == ".mp3";
+	}
+
+	// 音声処理のログへ共通プレフィックスと改行を付ける。
+	void AudioLog(const std::string& message) {
+		Logger::Log("[Audio] " + message + "\n");
 	}
 }
 
@@ -21,24 +36,42 @@ void Engine::AudioManager::Initialize(const std::string& directoryPath) {
 	// 二重初期化された場合にもVoiceや音源を残さないよう、先に既存状態を解放する。
 	Finalize();
 	directoryPath_ = directoryPath;
+	AudioLog(std::format("Initialize begin. directory={}", directoryPath_));
 
-	// XAudio2本体と最終出力先のマスターボイスを生成する。
-	HRESULT result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	assert(SUCCEEDED(result));
+	// MP3デコードに使用するMedia FoundationをAudioManagerの寿命に合わせて開始する。
+	HRESULT result = MFStartup(MF_VERSION);
 	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: MFStartup failed. hr=0x{:08X}", static_cast<unsigned long>(result)));
 		return;
 	}
+	isMediaFoundationStarted_ = true;
+	AudioLog("Media Foundation created for MP3 decoding.");
+
+	// XAudio2本体と最終出力先のマスターボイスを生成する。
+	result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	assert(SUCCEEDED(result));
+	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: XAudio2Create failed. hr=0x{:08X}", static_cast<unsigned long>(result)));
+		return;
+	}
+	AudioLog("XAudio2 engine created.");
 
 	result = xAudio2_->CreateMasteringVoice(&masterVoice_);
 	assert(SUCCEEDED(result));
 	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: MasteringVoice creation failed. hr=0x{:08X}", static_cast<unsigned long>(result)));
 		xAudio2_.Reset();
 		return;
 	}
+	AudioLog("MasteringVoice created.");
 
 }
 
 void Engine::AudioManager::Finalize() {
+	const bool hadAudioSystem = xAudio2_ != nullptr || isMediaFoundationStarted_;
+	if (hadAudioSystem) {
+		AudioLog(std::format("Finalize begin. sounds={}, voices={}", soundDatas_.size(), playingVoices_.size()));
+	}
 	// SourceVoiceはXAudio2本体より先にすべて破棄する必要がある。
 	StopAll();
 
@@ -57,8 +90,17 @@ void Engine::AudioManager::Finalize() {
 		masterVoice_ = nullptr;
 	}
 	xAudio2_.Reset();
+	// AudioManagerで開始したMedia Foundationだけを対になる呼び出しで終了する。
+	if (isMediaFoundationStarted_) {
+		MFShutdown();
+		isMediaFoundationStarted_ = false;
+		AudioLog("Media Foundation shut down.");
+	}
 	nextSoundHandle_ = 1;
 	nextVoiceHandle_ = 1;
+	if (hadAudioSystem) {
+		AudioLog("Finalize complete.");
+	}
 }
 
 void Engine::AudioManager::Update() {
@@ -67,6 +109,8 @@ void Engine::AudioManager::Update() {
 		XAUDIO2_VOICE_STATE voiceState{};
 		voiceIterator->second.sourceVoice->GetState(&voiceState);
 		if (voiceState.BuffersQueued == 0) {
+			AudioLog(std::format("Playback completed. voiceHandle={}, soundHandle={}",
+				voiceIterator->first, voiceIterator->second.soundHandle));
 			DestroyVoice(voiceIterator->second.sourceVoice);
 			voiceIterator = playingVoices_.erase(voiceIterator);
 		} else {
@@ -76,6 +120,7 @@ void Engine::AudioManager::Update() {
 }
 
 void Engine::AudioManager::ReloadSoundFiles() {
+	AudioLog(std::format("Sound directory scan begin. directory={}", directoryPath_));
 	// 再走査前に既存のVoiceと音源を解放し、一覧と実データの対応を維持する。
 	StopAll();
 	for (auto& [soundHandle, soundData] : soundDatas_) {
@@ -91,10 +136,11 @@ void Engine::AudioManager::ReloadSoundFiles() {
 	const std::filesystem::path rootPath(directoryPath_);
 	std::error_code fileSystemError;
 	if (!std::filesystem::exists(rootPath, fileSystemError)) {
+		AudioLog(std::format("WARNING: Sound directory was not found. directory={}", directoryPath_));
 		return;
 	}
 
-	// サブフォルダも含めてWAVファイルを収集する。
+	// サブフォルダも含めてWAVとMP3ファイルを収集する。
 	std::vector<std::filesystem::path> filePaths;
 	std::filesystem::recursive_directory_iterator iterator(
 		rootPath, std::filesystem::directory_options::skip_permission_denied, fileSystemError);
@@ -135,22 +181,30 @@ void Engine::AudioManager::ReloadSoundFiles() {
 		soundIdToHandle_[NormalizeSoundId(fileInfo.id)] = soundHandle;
 		soundFiles_.push_back(std::move(fileInfo));
 	}
+	AudioLog(std::format("Sound directory scan complete. discovered={}, loaded={}",
+		filePaths.size(), soundFiles_.size()));
 }
 
 Engine::SoundHandle Engine::AudioManager::LoadWave(const std::string& filename) {
 	// 初期化前、または読み込みに失敗したファイルには無効ハンドルを返す。
 	if (xAudio2_ == nullptr) {
+		AudioLog(std::format("ERROR: Load requested before XAudio2 initialization. file={}", filename));
 		return 0;
 	}
 
 	SoundData soundData{};
-	if (!LoadWaveData(filename, soundData)) {
+	AudioLog(std::format("Load begin. file={}", filename));
+	if (!LoadAudioData(filename, soundData)) {
+		AudioLog(std::format("ERROR: Load failed. file={}", filename));
 		return 0;
 	}
 
 	// 0を無効値として予約し、正常な音源には1以上のハンドルを割り当てる。
 	const SoundHandle soundHandle = nextSoundHandle_++;
 	soundDatas_.emplace(soundHandle, soundData);
+	AudioLog(std::format("Load succeeded. handle={}, bytes={}, channels={}, sampleRate={}, file={}",
+		soundHandle, soundData.bufferSize, soundData.wfex.nChannels,
+		soundData.wfex.nSamplesPerSec, filename));
 	return soundHandle;
 }
 
@@ -164,6 +218,7 @@ void Engine::AudioManager::UnloadWave(SoundHandle soundHandle) {
 
 	UnloadSoundData(soundIterator->second);
 	soundDatas_.erase(soundIterator);
+	AudioLog(std::format("Sound unloaded. soundHandle={}", soundHandle));
 
 	// 公開一覧とID索引からも同じ音源を削除する。
 	std::erase_if(soundFiles_, [soundHandle](const SoundFileInfo& fileInfo) {
@@ -182,6 +237,7 @@ Engine::VoiceHandle Engine::AudioManager::Play(SoundHandle soundHandle, bool loo
 	// 指定音源が存在しない場合は再生せず、無効な再生ハンドルを返す。
 	auto soundIterator = soundDatas_.find(soundHandle);
 	if (soundIterator == soundDatas_.end() || xAudio2_ == nullptr) {
+		AudioLog(std::format("WARNING: Play rejected. invalid soundHandle={}", soundHandle));
 		return 0;
 	}
 
@@ -190,8 +246,11 @@ Engine::VoiceHandle Engine::AudioManager::Play(SoundHandle soundHandle, bool loo
 	IXAudio2SourceVoice* sourceVoice = nullptr;
 	HRESULT result = xAudio2_->CreateSourceVoice(&sourceVoice, &soundIterator->second.wfex);
 	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: SourceVoice creation failed. soundHandle={}, hr=0x{:08X}",
+			soundHandle, static_cast<unsigned long>(result)));
 		return 0;
 	}
+	AudioLog(std::format("SourceVoice created. soundHandle={}", soundHandle));
 
 	// ループ指定時だけ無限ループを設定し、通常再生はバッファ末尾で終了させる。
 	XAUDIO2_BUFFER audioBuffer{};
@@ -208,6 +267,8 @@ Engine::VoiceHandle Engine::AudioManager::Play(SoundHandle soundHandle, bool loo
 		result = sourceVoice->Start();
 	}
 	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: Playback setup failed. soundHandle={}, hr=0x{:08X}",
+			soundHandle, static_cast<unsigned long>(result)));
 		DestroyVoice(sourceVoice);
 		return 0;
 	}
@@ -215,12 +276,20 @@ Engine::VoiceHandle Engine::AudioManager::Play(SoundHandle soundHandle, bool loo
 	// 同じ音源の多重再生を個別に管理できるよう、再生ごとにハンドルを発行する。
 	const VoiceHandle voiceHandle = nextVoiceHandle_++;
 	playingVoices_.emplace(voiceHandle, PlayingVoice{ sourceVoice, soundHandle });
+	AudioLog(std::format("Playback started. voiceHandle={}, soundHandle={}, loop={}, volume={:.2f}",
+		voiceHandle, soundHandle, loop, volume));
 	return voiceHandle;
 }
 
 Engine::VoiceHandle Engine::AudioManager::Play(const std::string& soundId, bool loop, float volume) {
 	// JSON等へ保存された相対パスIDを実行時ハンドルへ変換して再生する。
-	return Play(FindSoundHandle(soundId), loop, volume);
+	const SoundHandle soundHandle = FindSoundHandle(soundId);
+	if (soundHandle == 0) {
+		AudioLog(std::format("WARNING: Sound ID was not found. id={}", soundId));
+		return 0;
+	}
+	AudioLog(std::format("Play requested by ID. id={}, soundHandle={}", soundId, soundHandle));
+	return Play(soundHandle, loop, volume);
 }
 
 void Engine::AudioManager::Stop(VoiceHandle voiceHandle) {
@@ -232,6 +301,7 @@ void Engine::AudioManager::Stop(VoiceHandle voiceHandle) {
 
 	DestroyVoice(voiceIterator->second.sourceVoice);
 	playingVoices_.erase(voiceIterator);
+	AudioLog(std::format("Playback stopped. voiceHandle={}", voiceHandle));
 }
 
 void Engine::AudioManager::StopAll(SoundHandle soundHandle) {
@@ -270,6 +340,22 @@ Engine::SoundHandle Engine::AudioManager::FindSoundHandle(const std::string& sou
 	// 大文字小文字と区切り文字の差を吸収して保存済みIDを検索する。
 	const auto idIterator = soundIdToHandle_.find(NormalizeSoundId(soundId));
 	return idIterator != soundIdToHandle_.end() ? idIterator->second : 0;
+}
+
+bool Engine::AudioManager::LoadAudioData(const std::string& filename, SoundData& soundData) const {
+	// 拡張子を小文字へ揃え、対応するデコーダーへ処理を振り分ける。
+	std::string extension = std::filesystem::path(filename).extension().string();
+	std::transform(extension.begin(), extension.end(), extension.begin(),
+		[](unsigned char character) { return static_cast<char>(std::tolower(character)); });
+	if (extension == ".wav") {
+		return LoadWaveData(filename, soundData);
+	}
+	if (extension == ".mp3") {
+		return LoadMp3Data(filename, soundData);
+	}
+
+	AudioLog(std::format("ERROR: Unsupported audio extension. extension={}, file={}", extension, filename));
+	return false;
 }
 
 bool Engine::AudioManager::LoadWaveData(const std::string& filename, SoundData& soundData) const {
@@ -329,6 +415,123 @@ bool Engine::AudioManager::LoadWaveData(const std::string& filename, SoundData& 
 	soundData.bufferSize = static_cast<unsigned int>(audioBytes.size());
 	soundData.pBuffer = new BYTE[soundData.bufferSize];
 	std::copy(audioBytes.begin(), audioBytes.end(), soundData.pBuffer);
+	return true;
+}
+
+bool Engine::AudioManager::LoadMp3Data(const std::string& filename, SoundData& soundData) const {
+	// MP3デコード基盤が開始できていない場合は、安全にロード失敗として扱う。
+	if (!isMediaFoundationStarted_) {
+		AudioLog(std::format("ERROR: MP3 decode requested before Media Foundation startup. file={}", filename));
+		return false;
+	}
+
+	// Media Foundationへ渡すため、相対パスを絶対ワイド文字パスへ変換する。
+	std::error_code pathError;
+	const std::filesystem::path absolutePath = std::filesystem::absolute(filename, pathError);
+	if (pathError) {
+		AudioLog(std::format("ERROR: Failed to resolve MP3 path. file={}", filename));
+		return false;
+	}
+
+	Microsoft::WRL::ComPtr<IMFSourceReader> sourceReader;
+	HRESULT result = MFCreateSourceReaderFromURL(absolutePath.c_str(), nullptr, &sourceReader);
+	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: MP3 SourceReader creation failed. hr=0x{:08X}, file={}",
+			static_cast<unsigned long>(result), filename));
+		return false;
+	}
+	AudioLog(std::format("MP3 SourceReader created. file={}", filename));
+
+	// 出力形式を非圧縮PCMへ指定し、既存のXAudio2再生経路で扱えるようにする。
+	Microsoft::WRL::ComPtr<IMFMediaType> requestedMediaType;
+	result = MFCreateMediaType(&requestedMediaType);
+	if (SUCCEEDED(result)) {
+		result = requestedMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+	}
+	if (SUCCEEDED(result)) {
+		result = requestedMediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+	}
+	if (SUCCEEDED(result)) {
+		result = sourceReader->SetCurrentMediaType(
+			MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, requestedMediaType.Get());
+	}
+	if (FAILED(result)) {
+		AudioLog(std::format("ERROR: MP3 PCM output format setup failed. hr=0x{:08X}, file={}",
+			static_cast<unsigned long>(result), filename));
+		return false;
+	}
+
+	// SourceReaderが決定したチャンネル数やサンプルレートをXAudio2形式へ変換する。
+	Microsoft::WRL::ComPtr<IMFMediaType> decodedMediaType;
+	result = sourceReader->GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, &decodedMediaType);
+	WAVEFORMATEX* decodedWaveFormat = nullptr;
+	UINT32 waveFormatSize = 0;
+	if (SUCCEEDED(result)) {
+		result = MFCreateWaveFormatExFromMFMediaType(
+			decodedMediaType.Get(), &decodedWaveFormat, &waveFormatSize);
+	}
+	if (FAILED(result) || decodedWaveFormat == nullptr) {
+		AudioLog(std::format("ERROR: MP3 wave format conversion failed. hr=0x{:08X}, file={}",
+			static_cast<unsigned long>(result), filename));
+		return false;
+	}
+	soundData.wfex = *decodedWaveFormat;
+	CoTaskMemFree(decodedWaveFormat);
+
+	// 全サンプルを順番に読み、1つの連続PCMバッファへ結合する。
+	std::vector<BYTE> decodedBytes;
+	while (true) {
+		DWORD actualStreamIndex = 0;
+		DWORD streamFlags = 0;
+		LONGLONG timestamp = 0;
+		Microsoft::WRL::ComPtr<IMFSample> sample;
+		result = sourceReader->ReadSample(
+			MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &actualStreamIndex,
+			&streamFlags, &timestamp, &sample);
+		if (FAILED(result)) {
+			AudioLog(std::format("ERROR: MP3 sample read failed. hr=0x{:08X}, file={}",
+				static_cast<unsigned long>(result), filename));
+			return false;
+		}
+		if ((streamFlags & MF_SOURCE_READERF_ENDOFSTREAM) != 0) {
+			break;
+		}
+		if (!sample) {
+			continue;
+		}
+
+		Microsoft::WRL::ComPtr<IMFMediaBuffer> mediaBuffer;
+		result = sample->ConvertToContiguousBuffer(&mediaBuffer);
+		if (FAILED(result)) {
+			AudioLog(std::format("ERROR: MP3 sample buffer conversion failed. hr=0x{:08X}, file={}",
+				static_cast<unsigned long>(result), filename));
+			return false;
+		}
+
+		BYTE* bufferData = nullptr;
+		DWORD currentLength = 0;
+		result = mediaBuffer->Lock(&bufferData, nullptr, &currentLength);
+		if (FAILED(result)) {
+			AudioLog(std::format("ERROR: MP3 sample buffer lock failed. hr=0x{:08X}, file={}",
+				static_cast<unsigned long>(result), filename));
+			return false;
+		}
+		decodedBytes.insert(decodedBytes.end(), bufferData, bufferData + currentLength);
+		mediaBuffer->Unlock();
+	}
+
+	// XAudio2のバッファサイズ型へ収まらない異常に大きい音源はロードしない。
+	if (decodedBytes.empty() || decodedBytes.size() > (std::numeric_limits<unsigned int>::max)()) {
+		AudioLog(std::format("ERROR: MP3 decoded buffer is empty or too large. file={}", filename));
+		soundData.wfex = {};
+		return false;
+	}
+
+	soundData.bufferSize = static_cast<unsigned int>(decodedBytes.size());
+	soundData.pBuffer = new BYTE[soundData.bufferSize];
+	std::copy(decodedBytes.begin(), decodedBytes.end(), soundData.pBuffer);
+	AudioLog(std::format("MP3 decoded to PCM. bytes={}, channels={}, sampleRate={}, file={}",
+		soundData.bufferSize, soundData.wfex.nChannels, soundData.wfex.nSamplesPerSec, filename));
 	return true;
 }
 

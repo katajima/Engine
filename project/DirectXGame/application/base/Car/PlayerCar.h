@@ -5,6 +5,11 @@
 #include <DirectXGame/engine/Light/Lights.h>
 
 class EffectSystem;
+namespace Engine {
+	class EntityManager;
+	class GlobalVariables;
+	class AudioManager;
+}
 /// <summary>
 /// プレイヤー車
 /// </summary>
@@ -17,7 +22,7 @@ public:
 	/// </summary>
 	/// <param name="entity3DManager"></param>
 	/// <param name="globalVariables"></param>
-	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,const Vector3& pos, const Vector3& rotate);
+	void Initialize(Engine::EntityManager* entityManager,Engine::AudioManager* audioManager, Engine::GlobalVariables* globalVariables,const Vector3& pos, const Vector3& rotate);
 
 
 	void SetGroundHeight(float height) { height_ = height; }
@@ -137,6 +142,7 @@ private:
 private:
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
+	Engine::AudioManager* audioManager = nullptr;
 	// エフェクト
 	EffectSystem* effect = nullptr;
 };

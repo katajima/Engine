@@ -31,7 +31,7 @@ void TitleStage::InitializeStone() {
 	stone5_->GetWorldTransform().translate_ = { 0,-28,2000 };
 };
 
-void TitleStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+void TitleStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d
 	this->camera = cameraManager->GetCamera();	// カメラ取得
 	// 空初期化
@@ -49,7 +49,7 @@ void TitleStage::Initialize(Engine::EntityManager* entityManager, CameraManager*
 
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, { 0,Math::DegreesToRadians(-90),0 });
+	playerCar_->Initialize(entityManager, audioManager,{}, playerCarPos_, { 0,Math::DegreesToRadians(-90),0 });
 	playerCar_->SetGroundHeight(0.1f);
 
 }

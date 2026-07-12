@@ -39,7 +39,7 @@ void ResultScene::Initialize() {
 
 	// ステージ初期化
 	resultStage_ = std::make_unique<ResultStage>();
-	resultStage_->Initialize(GetEntityManager(), cameraManager_.get());
+	resultStage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager_.get());
 	resultStage_->SetEffect(effect_.get());
 
 	// リザルトUI初期化

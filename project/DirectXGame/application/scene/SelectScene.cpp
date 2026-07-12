@@ -1,5 +1,5 @@
 ﻿#include "SelectScene.h"
-
+#include <DirectXGame/engine/Audio/Audio.h>
 
 namespace {
 	// セレクト画面用カメラの初期座標。
@@ -33,7 +33,7 @@ void SelectScene::Initialize() {
 
 	// ステージ生成
 	selectStage_ = std::make_unique<SelectStage>();
-	selectStage_->Initialize(GetEntityManager(), cameraManager_.get());
+	selectStage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager_.get());
 	selectStage_->SetEffect(effect_.get());
 	selectStage_->GetPlayerCar()->GetStateMachine()->ChangeState(CarMainState::SelectMove);
 	// UI生成

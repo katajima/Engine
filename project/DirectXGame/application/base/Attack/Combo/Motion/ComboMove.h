@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <DirectXGame/engine/struct/Vector3.h>
 
@@ -26,54 +26,142 @@ namespace Combo {
 
 	class ComboMove {
 	public:
-		// 開始
+		/// <summary>
+		/// コンボ移動に必要な所有者、Transform、移動システムなどの参照を取得して開始状態を作ります。
+		/// </summary>
+		/// <param name="owner">コンボを実行するキャラクターです。所有権は受け取りません。</param>
+		/// <param name="ctx">移動、カメラ、ロックオンなど外部システム参照をまとめたコンテキストです。</param>
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 
-		// 更新
+		/// <summary>
+		/// コンボデータに従い、時間経過に応じた移動要求や慣性を更新します。
+		/// </summary>
+		/// <param name="ctx">接地状態や移動システムなどを参照するコンテキストです。</param>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer);
 
-		// 終了
+		/// <summary>
+		/// コンボ移動終了時の一時状態を解除します。
+		/// </summary>
+		/// <param name="owner">コンボ移動を終了するキャラクターです。</param>
 		void Exit(Character::BaseCharacter* owner);
 
 	public:
-		// 移動できるか
+		/// <summary>
+		/// 現在コンボ移動を実行できる状態か取得します。
+		/// </summary>
+		/// <returns>移動要求を出せる場合はtrue、停止中や無効状態ならfalseです。</returns>
 		bool IsMove() const { return isMove_; }
-		// データ構造体取得
+
+		/// <summary>
+		/// コンボ移動の調整データを取得します。
+		/// </summary>
+		/// <returns>編集可能な移動データ参照を返します。</returns>
 		GlobalMove& GetData() { return data_; }
-		// 方向取得
+
+		/// <summary>
+		/// 移動の基準方向を取得します。
+		/// </summary>
+		/// <returns>ワールド空間での方向ベクトルを返します。</returns>
 		Vector3 GetDirection() const { return direction_; }
-		// 方向指定
+
+		/// <summary>
+		/// 移動の基準方向を設定します。
+		/// </summary>
+		/// <param name="dire">設定する方向ベクトルです。呼び出し側で必要に応じて正規化してください。</param>
 		void SetDirection(const Vector3& dire) { direction_ = dire; }
-		// ターゲット位置取得
+
+		/// <summary>
+		/// ターゲット移動で使う目標位置を取得します。
+		/// </summary>
+		/// <returns>現在解決されているターゲット位置を返します。</returns>
 		Vector3 GetTargetPosition() const { return targetPos_; }
-		// ターゲット
+
+		/// <summary>
+		/// 現在追従・接近対象として使うTransformを取得します。
+		/// </summary>
+		/// <returns>ターゲットがある場合はTransform、見つからない場合はnullptrです。</returns>
 		const Engine::WorldTransform* GetTarget();
 	private:
-		// 移動タイプによる処理
+		/// <summary>
+		/// 移動タイプに応じて通常移動、ターゲット移動、瞬間移動などを処理します。
+		/// </summary>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void MoveTypeProcess(float timer, float dt);
-		// 移動タイプによる方向指定処理
+
+		/// <summary>
+		/// 移動タイプに合わせて移動方向や目標位置を更新します。
+		/// </summary>
 		void MoveTypeDirectionProcess();
-		// ローカル移動ベクトルを基準方向へ変換した最終方向を作る
+
+		/// <summary>
+		/// ローカル移動ベクトルを基準方向やカメラ方向へ変換し、最終移動方向を作ります。
+		/// </summary>
+		/// <returns>ワールド空間での移動方向を返します。</returns>
 		Vector3 BuildMoveDirection() const;
-		// ターゲット接近時の停止位置を作る
+
+		/// <summary>
+		/// ターゲットへ接近する際、停止半径を考慮した到達目標位置を計算します。
+		/// </summary>
+		/// <returns>停止半径を反映したワールド座標を返します。</returns>
 		Vector3 BuildTargetMoveGoal() const;
-		// ターゲット移動タイプによる移動処理
+
+		/// <summary>
+		/// ターゲット移動用の移動要求を作成して適用します。
+		/// </summary>
+		/// <param name="request">書き込み先の移動要求です。</param>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
+		/// <returns>ターゲット移動を適用した場合はtrue、適用しなかった場合はfalseです。</returns>
 		bool ApplyTargetMove(MoveRequest& request, float dt);
-		// 移動時間内の進行度から速度倍率を計算する
+
+		/// <summary>
+		/// 移動時間内の進行度から速度倍率を計算します。
+		/// </summary>
+		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
+		/// <returns>速度に掛ける倍率を返します。</returns>
 		float CalculateMoveCurveScale(float timer) const;
-		// 攻撃開始前から引き継いだ移動慣性を今フレームの移動要求へ追加する
+
+		/// <summary>
+		/// 攻撃開始前から引き継いだ移動慣性を、今フレームの移動要求へ追加します。
+		/// </summary>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void RequestMoveInertia(float dt);
-		// 接地状態に応じた摩擦または空気抵抗で移動慣性を減衰する
+
+		/// <summary>
+		/// 接地状態に応じた摩擦または空気抵抗で、保持している移動慣性を減衰します。
+		/// </summary>
+		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void ApplyMoveInertiaResistance(float dt);
-		// ターゲット有無に応じた移動速度取得
+
+		/// <summary>
+		/// ターゲット有無に応じて使用する移動速度を取得します。
+		/// </summary>
+		/// <returns>有効な移動速度ベクトルを返します。</returns>
 		Vector3 GetActiveMoveSpeed() const;
-		// ターゲット有無に応じたローカル移動方向取得
+
+		/// <summary>
+		/// ターゲット有無に応じて使用するローカル移動方向を取得します。
+		/// </summary>
+		/// <returns>ローカル空間での移動方向を返します。</returns>
 		Vector3 GetActiveLocalMoveVector() const;
-		// ターゲット有無に応じてローカル移動方向を正規化するか取得
+
+		/// <summary>
+		/// ターゲット有無に応じてローカル移動方向を正規化するか取得します。
+		/// </summary>
+		/// <returns>正規化する場合はtrue、そのまま使う場合はfalseです。</returns>
 		bool GetActiveNormalizeLocalMove() const;
-		// ターゲット有無に応じたターゲット移動タイプ取得
+
+		/// <summary>
+		/// ターゲット有無に応じて使用するターゲット移動タイプを取得します。
+		/// </summary>
+		/// <returns>有効なターゲット移動タイプを返します。</returns>
 		TargetMoveType GetActiveTargetMoveType() const;
-		// ターゲット有無に応じた接近停止半径取得
+
+		/// <summary>
+		/// ターゲット有無に応じて使用する接近停止半径を取得します。
+		/// </summary>
+		/// <returns>停止半径をワールド単位で返します。</returns>
 		float GetActiveMoveTargetRadius() const;
 	private:
 		// 移動
@@ -90,7 +178,7 @@ namespace Combo {
 		const Character::BaseCharacter* traget = nullptr;
 		// 攻撃移動システム
 		MoveRequestSystem* moveRequestSystem = nullptr;
-		//
+		// カメラ基準移動を計算するために参照するカメラ（非所有）
 		const Engine::Camera* camera = nullptr;
 	private:
 		// データ

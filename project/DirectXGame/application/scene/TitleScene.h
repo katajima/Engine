@@ -46,8 +46,6 @@ private:
 	// カメラ初期化
 	void InitializeCamera();
 private:
-	Engine::Input* input_ = nullptr;
-	Engine::Audio* audio_ = nullptr;
 	// タイトル画面のコントローラー入力とキーボード入力を統合して管理する。
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 private:

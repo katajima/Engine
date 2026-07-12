@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <DirectXGame/engine/Effect/EffectGlovalData.h>
 #include "DirectXGame/application/base/Effect/EffectEditorSerializer.h"
@@ -6,76 +6,203 @@
 #include <array>
 
 /// <summary>
-/// effectエディタークラス
+/// エフェクトとパーティクル群の追加、編集、削除、保存を行うデバッグエディターです。
 /// </summary>
 class EffectEditor {
 public:
 
-	// 初期化
+	/// <summary>
+	/// エフェクト編集に必要な参照と保存ヘルパーを初期化します。
+	/// </summary>
+	/// <param name="effectComponent">編集対象のエフェクトコンポーネントです。所有権は受け取りません。</param>
+	/// <param name="globalVariables">保存・読み込みに使うグローバル変数管理です。所有権は受け取りません。</param>
 	void Initialize(Engine::EffectComponent* effectComponent, Engine::GlobalVariables* globalVariables);
 
-	// 更新
+	/// <summary>
+	/// エディターUI、デバッグ発生、保存対象データを更新します。
+	/// </summary>
+	/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 	void Update(float dt);
-	// 初期登録やUI追加で使うエフェクトデータを登録
+
+	/// <summary>
+	/// 初期登録やUI追加で使うエフェクトデータを登録します。
+	/// </summary>
+	/// <param name="name">登録するエフェクト名です。既存名の場合は既存データを優先します。</param>
+	/// <param name="particleName">エフェクトが参照するパーティクル群名です。</param>
 	void AddEffectGlobalData(const std::string& name, const std::string& particleName);
-	// 保存データを実際のエミッターへ反映
+
+	/// <summary>
+	/// 保存データを実際のエミッターへ反映します。
+	/// </summary>
+	/// <param name="name">反映先のエフェクト名です。</param>
+	/// <param name="shapeType">エミッターの形状種別です。</param>
+	/// <param name="data">反映するエフェクト設定です。</param>
 	void SetEffectGlobalData(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
 
-	// 保存済みレジストリにあるUI追加エフェクトを読み込む
+	/// <summary>
+	/// 保存済みレジストリにあるUI追加エフェクトを読み込み、エディターに復元します。
+	/// </summary>
 	void LoadRegisteredEffectGlobalDatas();
-	// 保存済みレジストリにあるUI追加パーティクル群を読み込む
+
+	/// <summary>
+	/// 保存済みレジストリにあるUI追加パーティクル群を読み込み、エフェクトコンポーネントに復元します。
+	/// </summary>
 	void LoadRegisteredParticleGroups();
 
+	/// <summary>
+	/// エディターが保持しているエフェクト設定一覧を取得します。
+	/// </summary>
+	/// <returns>エフェクト名をキーにした設定マップのコピーを返します。</returns>
 	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectGlobalDatas_; };
 private:
-	// エフェクトの追加、名前変更、削除を行う管理UI
+	/// <summary>
+	/// エフェクトの追加、名前変更、削除を行う管理UIを描画します。
+	/// </summary>
 	void DrawEffectManagement();
-	// 新しいエフェクト名が使用できるか検証
+
+	/// <summary>
+	/// 新しいエフェクト名が使用できるか検証します。
+	/// </summary>
+	/// <param name="effectName">検証するエフェクト名です。</param>
+	/// <returns>空文字や重複がなく使用できる場合はtrue、それ以外はfalseです。</returns>
 	bool ValidateNewEffectName(const std::string& effectName);
-	// UI入力から新しいエフェクトを追加
+
+	/// <summary>
+	/// UI入力内容から新しいエフェクトを追加し、保存レジストリへ登録します。
+	/// </summary>
 	void AddEffectFromEditor();
-	// 選択中のエフェクト名を変更
+
+	/// <summary>
+	/// 選択中のエフェクト名を変更し、保存レジストリを更新します。
+	/// </summary>
+	/// <param name="oldName">変更前のエフェクト名です。</param>
+	/// <param name="newName">変更後のエフェクト名です。</param>
 	void RenameEffect(const std::string& oldName, const std::string& newName);
-	// 選択中のエフェクトを削除
+
+	/// <summary>
+	/// 選択中のエフェクトを削除し、初期登録で復活しないよう削除済みリストへ記録します。
+	/// </summary>
+	/// <param name="effectName">削除するエフェクト名です。</param>
 	void DeleteEffect(const std::string& effectName);
-	// エフェクト一覧の保存グループへ登録
+
+	/// <summary>
+	/// エフェクト一覧の保存グループへ名前を登録します。
+	/// </summary>
+	/// <param name="name">登録するエフェクト名です。</param>
 	void RegisterEffectName(const std::string& name);
-	// エフェクト一覧の保存グループから登録解除
+
+	/// <summary>
+	/// エフェクト一覧の保存グループから名前を登録解除します。
+	/// </summary>
+	/// <param name="name">登録解除するエフェクト名です。</param>
 	void UnregisterEffectName(const std::string& name);
-	// 削除済みリストへ登録し、初期登録で復活しないようにする
+
+	/// <summary>
+	/// 削除済みリストへ登録し、初期登録処理で同名エフェクトが復活しないようにします。
+	/// </summary>
+	/// <param name="name">削除済みとして扱うエフェクト名です。</param>
 	void RegisterDeletedEffectName(const std::string& name);
-	// 削除済みリストから外し、同名再追加を許可する
+
+	/// <summary>
+	/// 削除済みリストから外し、同名エフェクトの再追加を許可します。
+	/// </summary>
+	/// <param name="name">削除済み扱いを解除するエフェクト名です。</param>
 	void UnregisterDeletedEffectName(const std::string& name);
-	// 削除済みとして保存されているか確認
+
+	/// <summary>
+	/// 指定名が削除済みとして保存されているか確認します。
+	/// </summary>
+	/// <param name="name">確認するエフェクト名です。</param>
+	/// <returns>削除済みリストに含まれる場合はtrue、それ以外はfalseです。</returns>
 	bool IsDeletedEffectName(const std::string& name) const;
-	// パーティクル群の追加、名前変更、削除、編集を行う管理UI
+
+	/// <summary>
+	/// パーティクル群の追加、名前変更、削除、編集を行う管理UIを描画します。
+	/// </summary>
 	void DrawParticleGroupEditor();
-	// パーティクル群の詳細設定を描画
+
+	/// <summary>
+	/// パーティクル群の詳細設定UIを描画します。
+	/// </summary>
+	/// <param name="particleName">編集対象のパーティクル群名です。</param>
+	/// <param name="group">編集対象のパーティクル群データです。</param>
 	void DrawParticleGroupDetail(const std::string& particleName, Engine::ParticleGroup& group);
-	// 新しいパーティクル群名が使用できるか検証
+
+	/// <summary>
+	/// 新しいパーティクル群名が使用できるか検証します。
+	/// </summary>
+	/// <param name="particleName">検証するパーティクル群名です。</param>
+	/// <returns>空文字や重複がなく使用できる場合はtrue、それ以外はfalseです。</returns>
 	bool ValidateNewParticleGroupName(const std::string& particleName);
-	// UI入力から新しいパーティクル群を追加
+
+	/// <summary>
+	/// UI入力内容から新しいパーティクル群を追加し、保存レジストリへ登録します。
+	/// </summary>
 	void AddParticleGroupFromEditor();
-	// 選択中のパーティクル群名を変更
+
+	/// <summary>
+	/// 選択中のパーティクル群名を変更し、参照しているエフェクト設定も更新します。
+	/// </summary>
+	/// <param name="oldName">変更前のパーティクル群名です。</param>
+	/// <param name="newName">変更後のパーティクル群名です。</param>
 	void RenameParticleGroup(const std::string& oldName, const std::string& newName);
-	// 選択中のパーティクル群を削除
+
+	/// <summary>
+	/// 選択中のパーティクル群を削除し、削除済みリストへ記録します。
+	/// </summary>
+	/// <param name="particleName">削除するパーティクル群名です。</param>
 	void DeleteParticleGroup(const std::string& particleName);
-	// パーティクル群一覧の保存グループへ登録
+
+	/// <summary>
+	/// パーティクル群一覧の保存グループへ名前を登録します。
+	/// </summary>
+	/// <param name="name">登録するパーティクル群名です。</param>
 	void RegisterParticleGroupName(const std::string& name);
-	// パーティクル群一覧の保存グループから登録解除
+
+	/// <summary>
+	/// パーティクル群一覧の保存グループから名前を登録解除します。
+	/// </summary>
+	/// <param name="name">登録解除するパーティクル群名です。</param>
 	void UnregisterParticleGroupName(const std::string& name);
-	// 削除済みパーティクル群リストへ登録
+
+	/// <summary>
+	/// 削除済みパーティクル群リストへ登録します。
+	/// </summary>
+	/// <param name="name">削除済みとして扱うパーティクル群名です。</param>
 	void RegisterDeletedParticleGroupName(const std::string& name);
-	// 削除済みパーティクル群リストから解除
+
+	/// <summary>
+	/// 削除済みパーティクル群リストから解除し、同名再追加を許可します。
+	/// </summary>
+	/// <param name="name">削除済み扱いを解除するパーティクル群名です。</param>
 	void UnregisterDeletedParticleGroupName(const std::string& name);
-	// 削除済みパーティクル群として保存されているか確認
+
+	/// <summary>
+	/// 指定名が削除済みパーティクル群として保存されているか確認します。
+	/// </summary>
+	/// <param name="name">確認するパーティクル群名です。</param>
+	/// <returns>削除済みリストに含まれる場合はtrue、それ以外はfalseです。</returns>
 	bool IsDeletedParticleGroupName(const std::string& name) const;
-	// パーティクル名変更を参照中のエフェクトへ反映
+
+	/// <summary>
+	/// パーティクル名変更を参照中のエフェクト設定へ反映します。
+	/// </summary>
+	/// <param name="oldName">変更前のパーティクル群名です。</param>
+	/// <param name="newName">変更後のパーティクル群名です。</param>
 	void RenameParticleReferences(const std::string& oldName, const std::string& newName);
 private:
-	// 選択中エフェクトの詳細編集UIを描画する
+	/// <summary>
+	/// 選択中エフェクトの詳細編集UIを描画します。
+	/// </summary>
+	/// <param name="name">編集対象のエフェクト名です。</param>
+	/// <param name="data">編集対象のエフェクト設定です。</param>
 	void DrawEffectDetail(const std::string& name, EffectGlobalData& data);
 
+	/// <summary>
+	/// 指定名のエフェクトをデバッグ用に発生させます。
+	/// </summary>
+	/// <param name="name">発生させるエフェクト名です。</param>
+	/// <param name="pos">発生位置です。ワールド座標で指定します。</param>
 	void Emit(const std::string& name, const Vector3& pos);
 private:// エフェクトのグローバルデータ
 	std::map<std::string, EffectGlobalData> effectGlobalDatas_;

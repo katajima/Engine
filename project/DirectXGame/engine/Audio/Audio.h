@@ -26,7 +26,7 @@ namespace Engine {
 		// Soundディレクトリを再走査し、音源一覧を最新状態へ更新する。
 		void ReloadSoundFiles();
 
-		// 指定したWAVファイルを読み込み、利用可能な音源ハンドルを返す。
+		// 指定したWAVまたはMP3ファイルを読み込み、利用可能な音源ハンドルを返す。
 		SoundHandle LoadWave(const std::string& filename);
 
 		// 指定した音源を解放する。再生中の場合は該当するVoiceも停止する。
@@ -66,8 +66,14 @@ namespace Engine {
 			SoundHandle soundHandle = 0;                // Voiceが参照している音源。
 		};
 
+		// 拡張子に応じてWAVまたはMP3をPCMメモリへ読み込む。
+		bool LoadAudioData(const std::string& filename, SoundData& soundData) const;
+
 		// WAVファイルをメモリへ読み込む。
 		bool LoadWaveData(const std::string& filename, SoundData& soundData) const;
+
+		// Media FoundationでMP3をPCMへデコードしてメモリへ読み込む。
+		bool LoadMp3Data(const std::string& filename, SoundData& soundData) const;
 
 		// SoundDataが所有するPCMバッファを解放する。
 		void UnloadSoundData(SoundData& soundData) const;
@@ -87,6 +93,7 @@ namespace Engine {
 		SoundHandle nextSoundHandle_ = 1; // 次に発行する音源ハンドル。
 		VoiceHandle nextVoiceHandle_ = 1; // 次に発行する再生ハンドル。
 		std::string directoryPath_ = "Resources/Sound/"; // 音源を検索する基準ディレクトリ。
+		bool isMediaFoundationStarted_ = false; // MP3デコード基盤を開始済みか示すフラグ。
 	};
 
 	/// <summary>
