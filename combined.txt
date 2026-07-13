@@ -329,6 +329,7 @@
     └── └── └── └── ├── GameEventController.h
     └── └── └── └── ├── GameFlowController.cpp
     └── └── └── └── ├── GameFlowController.h
+    └── └── └── └── ├── GameplaySession.cpp
     └── └── └── └── ├── GameplaySession.h
     └── └── └── └── ├── Menu/
     └── └── └── └── └── └── MenuSelectionController.h
@@ -15111,7 +15112,7 @@ float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpee
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -15130,7 +15131,13 @@ namespace Engine {
 class BaseCamera
 {
 public:
-	virtual ~BaseCamera() = default; 
+	virtual ~BaseCamera()
+	{
+		// 派生カメラが所有する描画カメラのD3Dリソースを、シーン破棄時に確実に解放する
+		if (uniqueCamera_) {
+			uniqueCamera_->Finalize();
+		}
+	}
 	/// <summary>カメラ固有の制御器と描画カメラを初期化する。</summary>
 	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラではnullptrを許容する。</param>
 	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>
@@ -16040,9 +16047,15 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraManager.cpp
 ============================================================
-﻿#include "CameraManager.h"
+#include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
+
+CameraManager::~CameraManager()
+{
+	// シーン破棄時にCameraManager所有のD3Dリソースを確実に解放する
+	Finalize();
+}
 
 void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
@@ -16062,6 +16075,45 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
 	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
 	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());						// デフォルトカメラ設定
+}
+
+void CameraManager::Finalize()
+{
+	// 登録カメラは非所有なので、先に参照だけ切る
+	cameras.clear();
+
+	// 各描画システムが保持しているCameraの非所有ポインタを無効化する
+	if (entityManager) {
+		if (entityManager->GetObject3dCommon()) {
+			entityManager->GetObject3dCommon()->SetDefaultCamera(nullptr);
+		}
+		if (entityManager->GetEffectManager()) {
+			if (entityManager->GetEffectManager()->GetParticleManager()) {
+				entityManager->GetEffectManager()->GetParticleManager()->SetCamera(nullptr);
+			}
+			if (entityManager->GetEffectManager()->GetGpuParticleManager()) {
+				entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(nullptr);
+			}
+		}
+		if (entityManager->Get3DLineCommon()) {
+			entityManager->Get3DLineCommon()->SetDefaultCamera(nullptr);
+		}
+		if (entityManager->GetObject3dInstanceManager()) {
+			entityManager->GetObject3dInstanceManager()->SetCamera(nullptr);
+		}
+	}
+
+	// CameraManagerが所有する出力カメラを明示解放する
+	if (camera) {
+		camera->Finalize();
+		camera.reset();
+	}
+
+	entityManager = nullptr;
+	globalVariables = nullptr;
+	inputSystem = nullptr;
+	isInterpolating = false;
+	currentTime = 0.0f;
 }
 
 void CameraManager::Update()
@@ -16233,7 +16285,7 @@ void CameraManager::DeleteCamera(const std::string& name)
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraManager.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "BaseCamera.h"
 
 /// <summary>CameraManagerへ登録する非所有カメラ情報。</summary>
@@ -16248,6 +16300,8 @@ struct CameraInfo {
 class CameraManager
 {
 public:
+	// デストラクタ
+	~CameraManager();
 
 	/// <summary>シーン共通の出力カメラを生成し、描画システムへ設定する。</summary>
 	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラのみの場合はnullptrを許容する。</param>
@@ -16257,6 +16311,8 @@ public:
 
 	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
 	void Update();
+	/// <summary>登録解除と所有カメラの解放を行う。</summary>
+	void Finalize();
 
 	/// <summary>呼び出し側が所有するカメラを名前付きで登録する。</summary>
 	/// <param name="cameraInfo">登録する非所有カメラと初期使用状態。cameraはnullptr不可。</param>
@@ -32139,6 +32195,91 @@ private: // 貰いもの
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Game/GameplaySession.cpp
+============================================================
+﻿#include "GameplaySession.h"
+
+void GameplaySession::Initialize(Engine::Input* input, Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables, Character::PlayerType playerType,
+	const Vector3& playerPosition) {
+	// シーン入力をアクション入力へ変換する管理クラスを生成する。
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(input);
+
+	// キャラクターや弾が共有するエフェクトシステムを生成する。
+	effectSystem_ = std::make_unique<EffectSystem>();
+	effectSystem_->Initialize(entityManager, globalVariables);
+
+	// 全ゲームプレイシーンで使用する追従カメラを生成する。
+	followCamera_ = std::make_unique<FollowCamera>();
+	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
+
+	// 追従カメラを既定カメラとしてカメラ管理へ登録する。
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables);
+	cameraManager_->AddCamera({ followCamera_.get(), true }, "followCamera");
+	entityManager->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
+
+	// キャラクターと弾が登録するヒットボックスを管理する。
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(entityManager);
+
+	// シーン内に存在する弾を一括管理する。
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(entityManager, globalVariables, nullptr);
+	bulletManager_->SetEffect(effectSystem_.get());
+
+	// 必殺技ポイントを一括管理する。
+	specialPointManager_ = std::make_unique<SpecialPointManager>();
+	specialPointManager_->Initialize(entityManager, globalVariables);
+
+	// 共通システムを接続してキャラクター管理を初期化する。
+	characterManager_ = std::make_unique<Character::CharacterManager>();
+	characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), entityManager,
+		globalVariables, cameraManager_->GetCamera());
+	characterManager_->SetEffect(effectSystem_.get());
+	characterManager_->SetFollowCamera(followCamera_.get());
+	characterManager_->SetBulletManager(bulletManager_.get());
+	characterManager_->SetCameraManager(cameraManager_.get());
+	characterManager_->SetSpecialPointManager(specialPointManager_.get());
+
+	// 指定された座標をTransformの移動値へ設定してプレイヤーを生成する。
+	Transform playerTransform{};
+	playerTransform.translate = playerPosition;
+	characterManager_->CreateCharacter(playerType, "", playerTransform);
+	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+	inputCoordinator_->SetOwner(characterManager_->GetPlayer());
+
+	// 各管理クラスから毎フレームの衝突対象を収集するシステムを生成する。
+	collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
+	collisionRegistrationSystem_->Initialize(globalVariables, entityManager->Get3DLineCommon(), hitBoxSystem_.get(),
+		characterManager_.get(), specialPointManager_.get(), bulletManager_.get());
+
+	// GPUパーティクルでも共通カメラを使用する。
+	entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+}
+
+void GameplaySession::Finalize() {
+	// キャラクターや弾が持つカメラ参照を、カメラ本体より先に破棄する。
+	collisionRegistrationSystem_.reset();
+	hitBoxSystem_.reset();
+	bulletManager_.reset();
+	characterManager_.reset();
+	specialPointManager_.reset();
+	effectSystem_.reset();
+
+	// カメラ管理が描画系へ渡した非所有ポインタを外してからカメラを破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	// 登録元カメラが所有するEngine::Cameraを破棄する。
+	followCamera_.reset();
+	inputCoordinator_.reset();
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Game/GameplaySession.h
 ============================================================
 ﻿#pragma once
@@ -32161,6 +32302,14 @@ File Path: project/DirectXGame/application/base/Game/GameplaySession.h
 class GameplaySession {
 public:
 	/// <summary>
+	/// 所有しているゲームプレイ共通リソースを破棄する。
+	/// </summary>
+	~GameplaySession() {
+		// シーン側からFinalizeが呼ばれなかった場合でもGPUリソースを残さない。
+		Finalize();
+	}
+
+	/// <summary>
 	/// 入力、カメラ、キャラクター、弾、衝突判定などの共通基盤を初期化する。
 	/// </summary>
 	/// <param name="input">物理入力。</param>
@@ -32170,63 +32319,12 @@ public:
 	/// <param name="playerPosition">プレイヤーの初期座標。</param>
 	void Initialize(Engine::Input* input, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Character::PlayerType playerType,
-		const Vector3& playerPosition) {
-		// シーン入力をアクション入力へ変換する管理クラスを生成する。
-		inputCoordinator_ = std::make_unique<InputCoordinator>();
-		inputCoordinator_->Initialize(input);
+		const Vector3& playerPosition);
 
-		// キャラクターや弾が共有するエフェクトシステムを生成する。
-		effectSystem_ = std::make_unique<EffectSystem>();
-		effectSystem_->Initialize(entityManager, globalVariables);
-
-		// 全ゲームプレイシーンで使用する追従カメラを生成する。
-		followCamera_ = std::make_unique<FollowCamera>();
-		followCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
-
-		// 追従カメラを既定カメラとしてカメラ管理へ登録する。
-		cameraManager_ = std::make_unique<CameraManager>();
-		cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables);
-		cameraManager_->AddCamera({ followCamera_.get(), true }, "followCamera");
-		entityManager->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
-
-		// キャラクターと弾が登録するヒットボックスを管理する。
-		hitBoxSystem_ = std::make_unique<HitBox::System>();
-		hitBoxSystem_->Initialize(entityManager);
-
-		// シーン内に存在する弾を一括管理する。
-		bulletManager_ = std::make_unique<BulletManager>();
-		bulletManager_->Initialize(entityManager, globalVariables, nullptr);
-		bulletManager_->SetEffect(effectSystem_.get());
-
-		// 必殺技ポイントを一括管理する。
-		specialPointManager_ = std::make_unique<SpecialPointManager>();
-		specialPointManager_->Initialize(entityManager, globalVariables);
-
-		// 共通システムを接続してキャラクター管理を初期化する。
-		characterManager_ = std::make_unique<Character::CharacterManager>();
-		characterManager_->Initialize(inputCoordinator_->GetInputSystem(), hitBoxSystem_.get(), entityManager,
-			globalVariables, cameraManager_->GetCamera());
-		characterManager_->SetEffect(effectSystem_.get());
-		characterManager_->SetFollowCamera(followCamera_.get());
-		characterManager_->SetBulletManager(bulletManager_.get());
-		characterManager_->SetCameraManager(cameraManager_.get());
-		characterManager_->SetSpecialPointManager(specialPointManager_.get());
-
-		// 指定された座標をTransformの移動値へ設定してプレイヤーを生成する。
-		Transform playerTransform{};
-		playerTransform.translate = playerPosition;
-		characterManager_->CreateCharacter(playerType, "", playerTransform);
-		followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
-		inputCoordinator_->SetOwner(characterManager_->GetPlayer());
-
-		// 各管理クラスから毎フレームの衝突対象を収集するシステムを生成する。
-		collisionRegistrationSystem_ = std::make_unique<CollisionRegistrationSystem>();
-		collisionRegistrationSystem_->Initialize(globalVariables, entityManager->Get3DLineCommon(), hitBoxSystem_.get(),
-			characterManager_.get(), specialPointManager_.get(), bulletManager_.get());
-
-		// GPUパーティクルでも共通カメラを使用する。
-		entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	}
+	/// <summary>
+	/// 入力、カメラ、キャラクター、弾、衝突判定などの共通基盤を終了する。
+	/// </summary>
+	void Finalize();
 
 	// 物理入力とゲーム入力をまとめる入力管理を取得する。
 	InputCoordinator* GetInputCoordinator() const { return inputCoordinator_.get(); }
@@ -32249,23 +32347,23 @@ public:
 
 private:
 	// 物理入力、アクション入力、コマンドをまとめて管理する。
-	std::unique_ptr<InputCoordinator> inputCoordinator_;
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 	// ゲームプレイ共通の追従カメラ。
-	std::unique_ptr<FollowCamera> followCamera_;
+	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
 	// シーンで利用するカメラを管理する。
-	std::unique_ptr<CameraManager> cameraManager_;
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 	// ゲームプレイ中のエフェクトを管理する。
-	std::unique_ptr<EffectSystem> effectSystem_;
+	std::unique_ptr<EffectSystem> effectSystem_ = nullptr;
 	// 必殺技ポイントを管理する。
-	std::unique_ptr<SpecialPointManager> specialPointManager_;
+	std::unique_ptr<SpecialPointManager> specialPointManager_ = nullptr;
 	// プレイヤーと敵キャラクターを管理する。
-	std::unique_ptr<Character::CharacterManager> characterManager_;
+	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
 	// シーン内の弾を管理する。
-	std::unique_ptr<BulletManager> bulletManager_;
+	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
 	// ヒットボックスを管理する。
-	std::unique_ptr<HitBox::System> hitBoxSystem_;
+	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
 	// 各管理クラスの衝突対象を登録する。
-	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_;
+	std::unique_ptr<CollisionRegistrationSystem> collisionRegistrationSystem_ = nullptr;
 };
 
 
@@ -40418,7 +40516,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/CustomScene.cpp
 ============================================================
-﻿#include "CustomScene.h"
+#include "CustomScene.h"
 
 void CustomScene::Initialize() {
 
@@ -40456,7 +40554,21 @@ void CustomScene::Initialize() {
 	SetCamera(cameraManager_->GetCamera());
 }
 
-void CustomScene::Finalize() {}
+void CustomScene::Finalize() {
+	// カメラ参照を持つカスタム画面の要素を先に破棄する。
+	customSystem_.reset();
+	customUI_.reset();
+	customStage_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	inputCoordinator_.reset();
+	input = nullptr;
+}
 
 void CustomScene::Update() {
 	// シーン内の入力を一度だけ更新する
@@ -40570,7 +40682,7 @@ File Path: project/DirectXGame/application/scene/EffectScene.h
 ============================================================
 File Path: project/DirectXGame/application/scene/GamePlayScene.cpp
 ============================================================
-﻿#include "GamePlayScene.h"
+#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -40651,8 +40763,33 @@ void GamePlayScene::Initialize() {
 
 // 終了
 void GamePlayScene::Finalize() {
-	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
-	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	// エンティティ側のインスタンシング描画リソースをシーン終了時に空にする。
+	if (GetEntityManager() && GetEntityManager()->GetObject3dInstanceManager()) {
+		GetEntityManager()->GetObject3dInstanceManager()->AllClear();
+	}
+	// 共通基盤内の衝突情報を、関連オブジェクト破棄前に消しておく。
+	if (gameplaySession_ && gameplaySession_->GetCollisionRegistrationSystem()) {
+		gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	}
+
+	// カメラ参照を持つUI/進行/ステージを先に破棄する。
+	poseUI_.reset();
+	poseSystem_.reset();
+	gameUI.reset();
+	stage_.reset();
+	gameFlowController_.reset();
+
+	// GameplaySession内のCameraManagerと追従カメラを明示終了する。
+	if (gameplaySession_) {
+		gameplaySession_->Finalize();
+		gameplaySession_.reset();
+	}
+
+	// GameplaySessionのCameraManagerへ登録していた追加カメラを破棄する。
+	stageCamera_.reset();
+	fixedCamera_.reset();
+	universeCamera_.reset();
+	input = nullptr;
 }
 
 #pragma endregion 初期化関係
@@ -40849,7 +40986,6 @@ private:
 	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
-	Engine::Audio* audio = nullptr;
 	DebugTimer debugTimer_;
 	// ゲームプレイシーンで共通利用する基盤システム
 	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
@@ -40887,7 +41023,7 @@ File Path: project/DirectXGame/application/scene/ModelScene.h
 ============================================================
 File Path: project/DirectXGame/application/scene/ResultScene.cpp
 ============================================================
-﻿#include "ResultScene.h"
+#include "ResultScene.h"
 
 
 namespace {
@@ -40955,6 +41091,21 @@ void ResultScene::Initialize() {
 
 // 終了
 void ResultScene::Finalize() {
+	// リザルト画面のUI/ステージはカメラ参照を持つため先に破棄する。
+	overUI_.reset();
+	resultSystem_.reset();
+	resultScoreUI_.reset();
+	resultUI_.reset();
+	resultStage_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	resultCamera_.reset();
+	inputCoordinator_.reset();
 };
 
 // 毎フレーム更新
@@ -41074,7 +41225,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/SampleScene.cpp
 ============================================================
-﻿#include "SampleScene.h"
+#include "SampleScene.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
@@ -41256,10 +41407,37 @@ void SampleScene::InitSprite() {
 
 // 終了
 void SampleScene::Finalize() {
-	cameraManager_->GetCamera()->Clear();
-	cameraManager_->Clear();
+	// パーティクルとスプライトはカメラ参照を持つため先に破棄する。
+	particleEmitter2d_.reset();
+	meshParticleEmitter.reset();
+	triangleParticleEmitter.reset();
+	lineParticleEmitter.reset();
+	splineParticleEmitter.reset();
+	cornerParticleEmitter.reset();
+	sphereParticleEmitter.reset();
+	aabbParticleEmitter_.reset();
+	sprite2dP_.reset();
+	sprite_.reset();
+	plane_.reset();
+	skyBox.reset();
+	directional.reset();
+	collisionManager2d_.reset();
+	collisionManager_.reset();
+	audioTest_.reset();
 
-	fixedCamera_->GetUniqueCamera()->Clear();
+	// 生ポインタはEntityManager所有なので、シーン側では参照だけ無効化する。
+	testObject_ = nullptr;
+	sky_ = nullptr;
+	object3dInstanceManager_ = nullptr;
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	fixedCamera_.reset();
+	inputCoordinator_.reset();
+	input_ = nullptr;
 
 };
 
@@ -41529,7 +41707,7 @@ public:
 ============================================================
 File Path: project/DirectXGame/application/scene/SelectScene.cpp
 ============================================================
-﻿#include "SelectScene.h"
+#include "SelectScene.h"
 #include <DirectXGame/engine/Audio/Audio.h>
 
 namespace {
@@ -41579,7 +41757,22 @@ void SelectScene::Initialize() {
 
 
 // 終了
-void SelectScene::Finalize() {}
+void SelectScene::Finalize() {
+	// カメラ参照を持つステージ/UI/システムを先に破棄する。
+	selectSystem_.reset();
+	selectUI_.reset();
+	selectStage_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	selectCamera_.reset();
+	inputCoordinator_.reset();
+	input = nullptr;
+}
 
 // 毎フレーム更新
 void SelectScene::Update() {
@@ -41687,15 +41880,13 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/TestScene.cpp
 ============================================================
-﻿#include"TestScene.h"
+#include"TestScene.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 #include "DirectXGame/engine/math/Random.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 void TestScene::Initialize()
 {
-	//オーディオの初期化
-	//audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = GetInput();
 	// ImGui初期化
@@ -41726,7 +41917,41 @@ void TestScene::Initialize()
 
 void TestScene::Finalize()
 {
+	// エンティティ側が所有しているオブジェクトを先に掃除し、カメラ参照を残さない。
+	if (GetEntityManager()) {
+		GetEntityManager()->ObjectClean();
+		if (GetEntityManager()->GetObject3dInstanceManager()) {
+			GetEntityManager()->GetObject3dInstanceManager()->AllClear();
+		}
+	}
 
+	// 生ポインタはEntityManager所有なので、シーン側では参照だけ無効化する。
+	skinObjects.clear();
+	skinObject = nullptr;
+	skinObject2 = nullptr;
+	skyBoxObject = nullptr;
+	skyBoxObject2 = nullptr;
+	oceanObject = nullptr;
+
+	// GPUリソースを持つシーン所有物を明示的に破棄する。
+	sprite_.clear();
+	loadData_.reset();
+	ocean_.reset();
+	skyBox2.reset();
+	skyBox.reset();
+	directional.reset();
+	spot.reset();
+	point.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	fixedCamera_.reset();
+	inputCoordinator_.reset();
+	imGuiManager = nullptr;
+	input_ = nullptr;
 }
 
 void TestScene::Update()
@@ -42327,7 +42552,6 @@ private:
 
 private:
 	Engine::Input* input_ = nullptr;
-	Engine::Audio* audio_ = nullptr;
 	Engine::ImGuiManager* imGuiManager = nullptr;
 	// シーン内の入力をまとめて管理する
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
@@ -42407,7 +42631,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/TitleScene.cpp
 ============================================================
-﻿#include"TitleScene.h"
+#include"TitleScene.h"
 #include <DirectXGame/engine/Audio/Audio.h>
 
 
@@ -42478,8 +42702,28 @@ void TitleScene::Initialize()
 }
 
 void TitleScene::Finalize(){
-	GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
-	GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+	// タイトル演出のパーティクルを、関連オブジェクト破棄前に消す。
+	if (GetEntityManager() && GetEntityManager()->GetEffectManager()) {
+		GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
+		GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+	}
+
+	// カメラ参照を持つ描画オブジェクトから順に破棄する。
+	weapon_.reset();
+	objectComponentShadow_.reset();
+	objectComponent_.reset();
+	titleUI_.reset();
+	titleStage_.reset();
+	loadData_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	titleCamera_.reset();
+	inputCoordinator_.reset();
 
 }
 
@@ -42655,7 +42899,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/TutorialScene.cpp
 ============================================================
-﻿#include "TutorialScene.h"
+#include "TutorialScene.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
@@ -42706,8 +42950,28 @@ void TutorialScene::Initialize() {
 }
 
 void TutorialScene::Finalize() {
-	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
-	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	// エンティティ側のインスタンシング描画リソースをシーン終了時に空にする。
+	if (GetEntityManager() && GetEntityManager()->GetObject3dInstanceManager()) {
+		GetEntityManager()->GetObject3dInstanceManager()->AllClear();
+	}
+	// 共通基盤内の衝突情報を、関連オブジェクト破棄前に消しておく。
+	if (gameplaySession_ && gameplaySession_->GetCollisionRegistrationSystem()) {
+		gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	}
+
+	// カメラ参照を持つUI/システム/ステージを先に破棄する。
+	poseUI_.reset();
+	poseSystem_.reset();
+	tutorialUI_.reset();
+	tutorialSystem_.reset();
+	tutorialStage_.reset();
+
+	// GameplaySession内のCameraManagerと追従カメラを明示終了する。
+	if (gameplaySession_) {
+		gameplaySession_->Finalize();
+		gameplaySession_.reset();
+	}
+	input = nullptr;
 }
 
 void TutorialScene::Update() {
@@ -42843,7 +43107,6 @@ private:
 	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
-	Engine::Audio* audio = nullptr;
 	// ゲームプレイシーンで共通利用する基盤システム
 	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
 private:
@@ -44244,6 +44507,8 @@ File Path: project/DirectXGame/engine/3d/Model/ModelData.cpp
 ============================================================
 #include "ModelData.h"
 #include "ModelCommon.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
+#include <format>
 
 #pragma region Laod
 
@@ -44624,6 +44889,8 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 		}
 
 		SkinCluster& skinCluster = *mesh->skinCluster;
+		// LiveObject出力でメッシュ単位のスキニングリソースを判別できるようにする
+		const std::wstring meshDebugName = StringUtility::ConvertString(mesh->name.empty() ? std::format("Mesh{}", meshIndex) : mesh->name);
 
 		//SkinCluster skinCluster;
 		skinCluster.srvUavIndices.wellSrvIndex = modelCommon->GetSrvManager()->Allocate();
@@ -44633,6 +44900,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// palette用のResourceを確保
 		skinCluster.paletteResource = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * modelData.skeleton.joints.size());
+		skinCluster.paletteResource->SetName(std::format(L"SkinCluster Palette : {}", meshDebugName).c_str());
 		WellForGPU* mappedPalette = nullptr;
 		skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 		std::memset(mappedPalette, 0, sizeof(WellForGPU) * modelData.skeleton.joints.size());
@@ -44646,6 +44914,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
 		skinCluster.influenceResource = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * mesh->vertices.size());
+		skinCluster.influenceResource->SetName(std::format(L"SkinCluster Influence : {}", meshDebugName).c_str());
 		VertexInfluence* mappedInfluence = nullptr;
 		skinCluster.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
 		std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * mesh->vertices.size()); // 仮埋め。weightを0にしておく。
@@ -44673,6 +44942,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// outputVertex用のResourceを確保。
 		skinCluster.outputVertexResource = modelCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(VertexData) * mesh->vertices.size());
+		skinCluster.outputVertexResource->SetName(std::format(L"SkinCluster OutputVertex : {}", meshDebugName).c_str());
 		VertexData* mappedOutputVertex = nullptr;
 
 		// 初期状態を UAV 用に遷移させる
@@ -44699,6 +44969,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// skinningInfomation
 		skinCluster.skinningInfomation = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SkinningInfomation));
+		skinCluster.skinningInfomation->SetName(std::format(L"SkinCluster SkinningInfo : {}", meshDebugName).c_str());
 		skinCluster.skinningInfomation->Map(0, nullptr, reinterpret_cast<void**>(&skinCluster.skinningInfomationDeta));
 		skinCluster.skinningInfomationDeta->numVertices = static_cast<uint32_t>(mesh->vertices.size());
 
@@ -44929,7 +45200,11 @@ File Path: project/DirectXGame/engine/3d/Model/ModelManager.cpp
 
 Engine::ModelManager::ModelManager(){}
 
-Engine::ModelManager::~ModelManager(){}
+Engine::ModelManager::~ModelManager()
+{
+	// DirectXCommonから明示Finalizeされなかった場合でもモデルを解放する
+	Finalize();
+}
 
 void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -44942,6 +45217,28 @@ void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 	// モデル共通クラス初期化
 	modelCommon_ = std::make_unique<ModelCommon>();
 	modelCommon_->Initialize(command, dxgiDevice, srvManager);
+}
+
+void Engine::ModelManager::Finalize()
+{
+	// 非同期読み込み中のモデルが残っている場合は、modelsを触る前に完了させる
+	if (IsLoading()) {
+		WaitAllLoadFinished();
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		// モデルが持つメッシュ、マテリアル、スキニング用D3D12リソースをここで解放する
+		models.clear();
+		loadingModelKeys_.clear();
+	}
+
+	// モデル共通クラスはモデル本体より後に解放する
+	modelCommon_.reset();
+	command = nullptr;
+	dxgiDevice = nullptr;
+	srvManager = nullptr;
+	dxCommon = nullptr;
 }
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
@@ -45079,6 +45376,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
+		// 終了処理
+		void Finalize();
 
 		/// <summary>
 		/// モデルファイルの読み込み
@@ -46553,7 +46852,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/Object3dInstanceManager.cpp
 ============================================================
-﻿#include "Object3dInstanceManager.h"
+#include "Object3dInstanceManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
@@ -46562,13 +46861,21 @@ File Path: project/DirectXGame/engine/3d/Object/Object3dInstanceManager.cpp
 #include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/engine/Utility/StringUtility.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+
+#include <format>
+#include <ranges>
 
 
 #pragma region Object3dInstanceManager
 
 Engine::Object3dInstanceManager::Object3dInstanceManager() = default;
-Engine::Object3dInstanceManager::~Object3dInstanceManager() = default;
+Engine::Object3dInstanceManager::~Object3dInstanceManager()
+{
+	// EntityManager側から明示Finalizeされなかった場合でもGPUリソースを閉じる
+	Finalize();
+}
 
 
 void Engine::Object3dInstanceManager::Initialize(DirectXCommon* dxCommon) {
@@ -46585,6 +46892,50 @@ void Engine::Object3dInstanceManager::Initialize(DirectXCommon* dxCommon) {
 	// パイプライン生成
 	CreateGraphicsPipeline();
 	CreateShadowMapPipeline();
+}
+
+void Engine::Object3dInstanceManager::Finalize()
+{
+	// 各インスタンシンググループがMapしたUploadリソースを閉じてから破棄する
+	for (auto& group : objectGroups | std::views::values) {
+		ReleaseGroupResource(group);
+	}
+	for (auto& group : objectTranslucentGroups | std::views::values) {
+		ReleaseGroupResource(group);
+	}
+	objectGroups.clear();
+	objectTranslucentGroups.clear();
+
+	// PSO/RootSignatureはインスタンス用バッファより後に解放する
+	psoManager_.reset();
+	rootSignature.Reset();
+	shadowRootSignature.Reset();
+	for (auto& pipelineState : graphicsPipelineState) {
+		pipelineState.Reset();
+	}
+	shadowGraphicsPipelineState.Reset();
+
+	dxCommon = nullptr;
+	srvManager = nullptr;
+	modelManager = nullptr;
+	entity3DManager = nullptr;
+	camera_ = nullptr;
+}
+
+void Engine::Object3dInstanceManager::ReleaseGroupResource(ObjectGroup& group)
+{
+	// インスタンシングデータは生成時にMapしたまま更新するので、解放前にUnmapする
+	if (group.resource && group.instanceData) {
+		group.resource->Unmap(0, nullptr);
+		group.instanceData = nullptr;
+	}
+
+	group.resource.Reset();
+	group.object.clear();
+	group.idMap.clear();
+	group.instanceCount = 0;
+	group.model = nullptr;
+	group.mesh = nullptr;
 }
 
 
@@ -46844,17 +47195,16 @@ void Engine::Object3dInstanceManager::DrawCommonSetting(RasterizerType rasteType
 
 void Engine::Object3dInstanceManager::Clear(const std::string& name) {
 	auto it = objectGroups.find(name);
-	if (it == objectGroups.end()) return;
-	it->second.object.clear();
-	it->second.idMap.clear();
-	it->second.instanceCount = 0;
-
+	if (it != objectGroups.end()) {
+		ReleaseGroupResource(it->second);
+		objectGroups.erase(it);
+	}
 
 	auto it2 = objectTranslucentGroups.find(name);
-	if (it2 == objectTranslucentGroups.end()) return;
-	it2->second.object.clear();
-	it2->second.idMap.clear();
-	it2->second.instanceCount = 0;
+	if (it2 != objectTranslucentGroups.end()) {
+		ReleaseGroupResource(it2->second);
+		objectTranslucentGroups.erase(it2);
+	}
 }
 
 #pragma region Create
@@ -46883,6 +47233,7 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	// GPUリソースの作成
 	objectGroup.resource = dxCommon->GetDXGIDevice()->CreateBufferResource(
 		sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource->SetName(std::format(L"Object3dInstance : {}", StringUtility::ConvertString(name)).c_str());
 	// マッピング
 	objectGroup.resource->Map(0, nullptr,
 		reinterpret_cast<void**>(&objectGroup.
@@ -46936,6 +47287,7 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	// GPUリソースの作成
 	objectGroup.resource = dxCommon->GetDXGIDevice()->CreateBufferResource(
 		sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource->SetName(std::format(L"Object3dInstance Mesh : {}", StringUtility::ConvertString(name)).c_str());
 	// マッピング
 	objectGroup.resource->Map(0, nullptr,
 		reinterpret_cast<void**>(&objectGroup.
@@ -47348,7 +47700,7 @@ void Engine::Object3dInstanceManager::BlendMuliply() {
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/Object3dInstanceManager.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include<wrl.h>
 using namespace Microsoft::WRL;
@@ -47443,6 +47795,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
+		// 終了処理
+		void Finalize();
 		// エンティティ3dの設定
 		void SetEntity3D(EntityManager* entity3DManager) { this->entity3DManager = entity3DManager; };
 
@@ -47488,6 +47842,12 @@ namespace Engine {
 		}
 		// 全てクリーン
 		void AllClear() {
+			for (auto& obj : objectGroups) {
+				ReleaseGroupResource(obj.second);
+			}
+			for (auto& obj : objectTranslucentGroups) {
+				ReleaseGroupResource(obj.second);
+			}
 			objectTranslucentGroups.clear();
 			objectGroups.clear();
 		}
@@ -47504,6 +47864,8 @@ namespace Engine {
 	private:
 
 		ObjectGroup& GroupContains(const std::string& groupName, ObjectInstance::TransparencyType transparencyType, bool& isReturn);
+		// インスタンシング用GPUリソースを解放する
+		void ReleaseGroupResource(ObjectGroup& group);
 
 	private:
 		// ルートシグネチャの作成
@@ -47739,6 +48101,33 @@ File Path: project/DirectXGame/engine/Animation/Animation.cpp
 #include <algorithm>
 #include <execution> // C++17 以降
 #include <numeric>
+
+void Engine::SkinCluster::Finalize()
+{
+	// パレット用Uploadリソースは常時Mapして更新するため、破棄前に必ずUnmapする
+	if (paletteResource && !mappedPalette.empty()) {
+		paletteResource->Unmap(0, nullptr);
+		mappedPalette = {};
+	}
+
+	// インフルエンス用UploadリソースもMapしたまま保持しているので、ここで対応して閉じる
+	if (influenceResource && !mappedInfluence.empty()) {
+		influenceResource->Unmap(0, nullptr);
+		mappedInfluence = {};
+	}
+
+	// スキニング情報用UploadリソースのCPU書き込みポインタを無効化する
+	if (skinningInfomation && skinningInfomationDeta) {
+		skinningInfomation->Unmap(0, nullptr);
+		skinningInfomationDeta = nullptr;
+	}
+
+	// GPUリソース本体を明示的に解放して、LiveObjectの残りを減らす
+	influenceResource.Reset();
+	paletteResource.Reset();
+	outputVertexResource.Reset();
+	skinningInfomation.Reset();
+}
 
 void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
@@ -48205,6 +48594,19 @@ namespace Engine {
 	/// スキンクラスター
 	/// </summary>
 	struct SkinCluster {
+		// 生成時はGPUリソースを持っていない空の状態にしておく
+		SkinCluster() = default;
+		// GPUリソースを二重解放しないようコピーは禁止する
+		SkinCluster(const SkinCluster&) = delete;
+		SkinCluster& operator=(const SkinCluster&) = delete;
+		// LoadBone内の一時オブジェクトから所有権を移せるようムーブは許可する
+		SkinCluster(SkinCluster&&) noexcept = default;
+		SkinCluster& operator=(SkinCluster&&) noexcept = default;
+		// Mapしたリソースを確実にUnmapしてからComPtrを解放する
+		~SkinCluster() { Finalize(); }
+		// スキニング用GPUリソースの終了処理
+		void Finalize();
+
 		SkinningSRVUAV srvUavIndices;
 
 		std::vector<Matrix4x4> inverseBindPoseMatrices;
@@ -48245,7 +48647,7 @@ namespace Engine {
 		/// 
 		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> skinningInfomation;
-		SkinningInfomation* skinningInfomationDeta;
+		SkinningInfomation* skinningInfomationDeta = nullptr;
 
 	};
 
@@ -49099,6 +49501,12 @@ namespace {
 	}
 }
 
+Engine::AudioManager::~AudioManager()
+{
+	// Frameworkから明示Finalizeされなかった場合でもVoiceとPCMバッファを解放する
+	Finalize();
+}
+
 void Engine::AudioManager::Initialize(const std::string& directoryPath) {
 	// 二重初期化された場合にもVoiceや音源を残さないよう、先に既存状態を解放する。
 	Finalize();
@@ -49650,6 +50058,8 @@ namespace Engine {
 	/// </summary>
 	class AudioManager {
 	public:
+		// デストラクタ
+		~AudioManager();
 		// XAudio2を初期化し、音声を再生できる状態にする。
 		void Initialize(const std::string& directoryPath = "Resources/Sound/");
 
@@ -51501,6 +51911,12 @@ File Path: project/DirectXGame/engine/Base/Load/LoadLevelData.cpp
 #include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
+LoadLevelData::~LoadLevelData()
+{
+	// 終了処理漏れでも、レベルデータが生成したカメラやライトを確実に破棄する。
+	ClearData();
+}
+
 void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::ModelManager* modelManager, Engine::Camera* camera,
 	const std::string extensionName, const std::string fileName)
 {
@@ -51705,8 +52121,15 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 
 void LoadLevelData::ClearData()  
 {  
+	// Initialize前や二重Finalize時は破棄済みなので何もしない。
+	if (!levelData_) {
+		return;
+	}
+
 	// "LevelObject" タグを持つオブジェクトを全削除  
-	entityManager->EraseObject3DByTag("LevelObject");  
+	if (entityManager) {
+		entityManager->EraseObject3DByTag("LevelObject");
+	}
 	levelData_->objects.clear();  
 	levelData_->players.clear();  
 	levelData_->enemys.clear();  
@@ -51721,14 +52144,19 @@ void LoadLevelData::ClearData()
 	for (auto& light : lights_) {
 		light.reset();
 	}
-	entityManager->GetLightManager()->ClearLights();
+	if (entityManager && entityManager->GetLightManager()) {
+		entityManager->GetLightManager()->ClearLights();
+	}
 	lights_.clear();
 
 
 	// カメラの削除処理を修正  
 	for (auto& camera : cameras_) {  
-		cameraManager->DeleteCamera(camera->GetName());
-		camera.release();
+		// CameraManagerは非所有参照だけを持つため、先に登録を外してからunique_ptrで破棄する。
+		if (cameraManager && camera) {
+			cameraManager->DeleteCamera(camera->GetName());
+		}
+		camera.reset();
 	}  
 	cameras_.clear();  
 }
@@ -51762,6 +52190,8 @@ namespace Engine {
 class LoadLevelData
 {
 public:
+	// デストラクタ
+	~LoadLevelData();
 
 	// 初期化
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera, 
@@ -51845,6 +52275,7 @@ File Path: project/DirectXGame/engine/Base/Texture/TextureManager.cpp
 ============================================================
 #include "TextureManager.h"
 #include"DirectXGame/engine/Utility/StringUtility.h"
+#include<format>
 #include<unordered_map>
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -51940,6 +52371,8 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 		textureData.metadata = mipImages.GetMetadata();
 	}
 	textureData.resource = CreateTextureResource(textureData.metadata);
+	// LiveObject出力にテクスチャパスを表示して、残ったリソースの所有元を追いやすくする
+	textureData.resource->SetName(StringUtility::ConvertString(std::format("Texture : {}", filePath)).c_str());
 	textureData.intermediateResource = UploadTextureData(textureData.resource.Get(), mipImages);
 
 
@@ -52584,6 +53017,12 @@ Engine::Camera::Camera()
 
 }
 
+Engine::Camera::~Camera()
+{
+	// シーン破棄時にカメラ用GPUリソースを確実に解放する
+	Finalize();
+}
+
 void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 	dxCommon = cameraCommon->GetDxCommon();				// DX共通クラス
 	postEffectManager = dxCommon->GetPostEffectManager();	// ポストエフェクト管理クラス
@@ -52595,12 +53034,30 @@ void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 
 	// リソース生成
 	resource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
+	resource->SetName(L"Camera Data");
 	//書き込むためのアドレスを取得
 	resource->Map(0, nullptr, reinterpret_cast<void**>(&data));
 
 	data->worldPosition = Vector3{ 1.0f,1.0f,1.0f };
 	data->normal = { 0,0,0 };
 	isProjection_ = true;
+}
+
+void Engine::Camera::Finalize()
+{
+	// カメラ専用のポストエフェクトパイプラインを先に解放する
+	postEffectPipeline_.reset();
+
+	// カメラ定数バッファはMapしたまま更新するため、破棄前にUnmapする
+	if (resource && data) {
+		resource->Unmap(0, nullptr);
+		data = nullptr;
+	}
+
+	resource.Reset();
+	dxCommon = nullptr;
+	postEffectManager = nullptr;
+	input = nullptr;
 }
 
 void Engine::Camera::GetCommandList(int index) {
@@ -52770,9 +53227,13 @@ namespace Engine {
 	public: // メンバ関数
 		// コンストラクタ
 		Camera();
+		// デストラクタ
+		~Camera();
 
 		// 初期化
 		void Initialize(CameraCommon* cameraCommon);
+		// 終了処理
+		void Finalize();
 
 		// コマンドバインド設定
 		void GetCommandList(int index);
@@ -57246,6 +57707,10 @@ void Engine::DirectXCommon::Finalize()
 	if (textureManager_) {
 		textureManager_->ReleaseIntermediateResources();
 	}
+	// LiveObject確認前にモデル管理下のメッシュ/スキニング/マテリアルリソースを確実に破棄する。
+	if (modelManager_) {
+		modelManager_->Finalize();
+	}
 
 	// DirectXCommonが所有するGPUリソースを依存関係の深い順に明示解放する。
 	postEffectManager_.reset();
@@ -57264,6 +57729,9 @@ void Engine::DirectXCommon::Finalize()
 	scissorRect_.reset();
 	fence_.reset();
 	command_.reset();
+	if (DXGIDevice_) {
+		DXGIDevice_->ReportLiveObjects();
+	}
 	DXGIDevice_.reset();
 }
 
@@ -57600,17 +58068,23 @@ File Path: project/DirectXGame/engine/DirectX/D3DResourceLeakchecker/D3DResource
 #include<dxgidebug.h>
 #include<wrl.h>
 
-Engine::D3DResourceLeakchecker::~D3DResourceLeakchecker()
+void Engine::D3DResourceLeakchecker::ReportLiveObjects()
 {
 	//リソースリークチェック
 	Microsoft::WRL::ComPtr < IDXGIDebug> debug;
 
 	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
+		// DebugLayer内部の管理オブジェクトを除外し、アプリ側のD3D12リソースだけを確認する。
+		const DXGI_DEBUG_RLO_FLAGS flags = static_cast<DXGI_DEBUG_RLO_FLAGS>(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL);
+		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, flags);
 	}
 }
+
+Engine::D3DResourceLeakchecker::~D3DResourceLeakchecker()
+{
+	// main終了時はプロセス終了処理に近く簡易レポートになりやすいため、Framework::Finalize側で明示的に確認する。
+}
+
 
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/D3DResourceLeakchecker/D3DResourceLeakchecker.h
@@ -57622,6 +58096,10 @@ namespace Engine {
 	class D3DResourceLeakchecker
 	{
 	public:
+		/// <summary>
+		/// DirectX関連リソースの生存状況を出力
+		/// </summary>
+		static void ReportLiveObjects();
 
 		/// <summary>
 		/// デストラクタ
@@ -57629,6 +58107,7 @@ namespace Engine {
 		~D3DResourceLeakchecker();
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.cpp
@@ -57793,8 +58272,8 @@ void Engine::DXGIDevice::Initialize()
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		// デバッグコントローラを有効化する
 		debugController->EnableDebugLayer();
-		// さらにGPU側でもチェックを行うようにする
-		debugController->SetEnableGPUBasedValidation(TRUE);
+		// GPU Based Validationは内部管理オブジェクトが多く、通常の終了時リーク確認ではノイズになるため無効にする。
+		debugController->SetEnableGPUBasedValidation(FALSE);
 	}
 #endif // _DEBUG
 
@@ -57871,6 +58350,17 @@ void Engine::DXGIDevice::Initialize()
 		filter.DenyList.pSeverityList = severities;
 		// 指定したメッセージの表示を抑制する
 		infoQueue->PushStorageFilter(&filter);
+	}
+#endif // _DEBUG
+}
+
+void Engine::DXGIDevice::ReportLiveObjects()
+{
+#ifdef _DEBUG
+	// デバイス解放前にD3D12 DebugDeviceから標準形式のLiveObjectレポートを出す。
+	Microsoft::WRL::ComPtr<ID3D12DebugDevice> debugDevice = nullptr;
+	if (device_ && SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&debugDevice)))) {
+		debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
 	}
 #endif // _DEBUG
 }
@@ -58013,6 +58503,8 @@ namespace Engine {
 		// 初期化
 		void Initialize();
 
+		// D3D12デバイスが保持している生存オブジェクトを出力
+		void ReportLiveObjects();
 
 		// DXGIデバイスの取得
 		ID3D12Device* GetDevice() { return device_.Get(); };
@@ -58347,7 +58839,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/RenderTexture/RenderTexture.cpp
 ============================================================
-﻿#include "RenderTexture.h"
+#include "RenderTexture.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -58357,6 +58849,7 @@ File Path: project/DirectXGame/engine/DirectX/RenderTexture/RenderTexture.cpp
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include "DirectXGame/engine/Offscreen/Posteffect.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
 
 #include "imgui.h"
 
@@ -58372,13 +58865,11 @@ void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command,
 	this->srvManager = srvManager;			// SRV管理クラス
 	this->rtvManager = rvtManager;			// RTV管理クラス
 	this->renderingCommon = renderingCommon;	// レンダリング共通クラス
-
+	name_ = name;							// デバッグ名
 
 	CreateResourcePixel();
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
-
-	name_ = name;
 
 	type_ = type;
 
@@ -58470,6 +58961,8 @@ void Engine::RenderTexture::CreateResource()
 		IID_PPV_ARGS(&resource_)
 	);
 	assert(SUCCEEDED(hr_));
+	// LiveObject表示でレンダーテクスチャの残存元を追えるよう名前を付ける。
+	resource_->SetName(StringUtility::ConvertString("RenderTexture : " + name_).c_str());
 }
 
 void Engine::RenderTexture::CreateResourcePixel()
@@ -58507,6 +59000,8 @@ void Engine::RenderTexture::CreateResourcePixel()
 		IID_PPV_ARGS(&resource_)
 	);
 	assert(SUCCEEDED(hr_));
+	// LiveObject表示でレンダーテクスチャの残存元を追えるよう名前を付ける。
+	resource_->SetName(StringUtility::ConvertString("RenderTexture : " + name_).c_str());
 }
 
 
@@ -58690,6 +59185,14 @@ namespace Engine {
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 		}
+		// デバッグ名設定
+		void SetResourceName(const wchar_t* name)
+		{
+			// LiveObject表示で定数バッファの残存元を追えるよう名前を付ける。
+			if (resource_ && name) {
+				resource_->SetName(name);
+			}
+		}
 		// グラフィックパイプラインにバッファを設定
 		void SetGraphicsRootConstantBufferView(int index)
 		{
@@ -58731,6 +59234,7 @@ File Path: project/DirectXGame/engine/DirectX/Resource/IndexBufferResource.h
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include<algorithm>
+#include<string>
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -58815,6 +59319,12 @@ namespace Engine {
 		Type* Data() const { return data_; };
 		// リソース取得
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
+		// デバッグレイヤーのLiveObject出力にインデックスバッファ名を表示する
+		void SetResourceName(const std::wstring& name) {
+			if (resource_) {
+				resource_->SetName(name.c_str());
+			}
+		}
 		// バッファビュー取得
 		D3D12_INDEX_BUFFER_VIEW GetIndexxBufferView() { return bufferView; }
 	private:
@@ -59078,6 +59588,7 @@ File Path: project/DirectXGame/engine/DirectX/Resource/VertexBufferResource.h
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
+#include<string>
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -59187,6 +59698,12 @@ namespace Engine {
 
 		// リソース取得
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
+		// デバッグレイヤーのLiveObject出力に頂点バッファ名を表示する
+		void SetResourceName(const std::wstring& name) {
+			if (resource_) {
+				resource_->SetName(name.c_str());
+			}
+		}
 		// バッファビュー取得
 		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return bufferView; }
 	private:
@@ -59199,6 +59716,7 @@ namespace Engine {
 
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/ScissorRect/ScissorRect.cpp
@@ -67319,7 +67837,7 @@ void Engine::TorusPrimitive::UniqeUpdate()
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Primitive/Primitive.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -67356,7 +67874,8 @@ namespace Engine {
 	/// </summary>
 	class BasePrimitive {
 	public:
-		~BasePrimitive() = default;
+		// 派生プリミティブをBasePrimitive経由で破棄しても、派生側まで正しく解放する。
+		virtual ~BasePrimitive() = default;
 
 		enum class PsoType {
 			kDefault,
@@ -69989,21 +70508,57 @@ File Path: project/DirectXGame/engine/Light/LightCommon.cpp
 
 
 
+Engine::LightManager::~LightManager()
+{
+	// EntityManager破棄時にライト用GPUリソースを確実に解放する
+	Finalize();
+}
+
 void Engine::LightManager::Initialize(DirectXCommon* dxCommon)
 {
 	this->dxCommon = dxCommon;	// DX共通クラス
 
 	//平行光源用のリソースを作る
 	directionalLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
+	directionalLightResource->SetName(L"Light Directional");
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 
 	// ポイントライト用のリソース
 	pointLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
+	pointLightResource->SetName(L"Light Point");
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 	//スポットライト用のリソースを作る
 	spotLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
+	spotLightResource->SetName(L"Light Spot");
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+}
+
+void Engine::LightManager::Finalize()
+{
+	// ライト一覧を先に解放して、GPU転送先ポインタへの参照を残さないようにする
+	ClearLights();
+
+	// 平行光源用Uploadリソースを閉じる
+	if (directionalLightResource && directionalLightData) {
+		directionalLightResource->Unmap(0, nullptr);
+		directionalLightData = nullptr;
+	}
+	// ポイントライト用Uploadリソースを閉じる
+	if (pointLightResource && pointLightData) {
+		pointLightResource->Unmap(0, nullptr);
+		pointLightData = nullptr;
+	}
+	// スポットライト用Uploadリソースを閉じる
+	if (spotLightResource && spotLightData) {
+		spotLightResource->Unmap(0, nullptr);
+		spotLightData = nullptr;
+	}
+
+	directionalLightResource.Reset();
+	pointLightResource.Reset();
+	spotLightResource.Reset();
+	dxCommon = nullptr;
 }
 
 
@@ -70181,6 +70736,7 @@ namespace Engine {
 	class LightManager
 	{
 	public:
+		~LightManager();
 		// ライト使うかの構造体
 		struct IsLight {
 			bool dire;
@@ -70190,6 +70746,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
+		// 終了処理
+		void Finalize();
 		// ライン描画
 		void DrawLight(IsLight is = { true,true,true }, int dire = 3, int point = 5, int spot = 6);
 		// 更新
@@ -71153,13 +71711,19 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Line/LineCommon.cpp
 ============================================================
-﻿#include "LineCommon.h"
+#include "LineCommon.h"
 #include "combaseapi.h"
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
+Engine::LineCommon::~LineCommon()
+{
+	// EntityManager破棄時にライン描画用GPUリソースを確実に解放する
+	Finalize();
+}
 
 void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -71177,6 +71741,7 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 
 	// マテリアル
 	materialResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Material));
+	materialResource->SetName(L"Line Material");
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
@@ -71186,6 +71751,7 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 
 	// ビューリソース生成
 	viewResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
+	viewResource->SetName(L"Line View");
 	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
 
 	*cameraWVP = MakeIdentity4x4();
@@ -71193,6 +71759,38 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 	// 初期化
 	lineMeshData_.Initialize(dxCommon);
 	lineDebugMeshData_.Initialize(dxCommon);
+}
+
+void Engine::LineCommon::Finalize()
+{
+	// ラインメッシュが持つ頂点/インデックスリソースを先に解放する
+	if (lineMeshData_.GetMesh()) {
+		lineMeshData_.Clear();
+	}
+	if (lineDebugMeshData_.GetMesh()) {
+		lineDebugMeshData_.Clear();
+	}
+
+	// マテリアル用Uploadリソースを閉じる
+	if (materialResource && materialData) {
+		materialResource->Unmap(0, nullptr);
+		materialData = nullptr;
+	}
+	// カメラ行列用Uploadリソースを閉じる
+	if (viewResource && cameraWVP) {
+		viewResource->Unmap(0, nullptr);
+		cameraWVP = nullptr;
+	}
+
+	materialResource.Reset();
+	viewResource.Reset();
+	rootSignature.Reset();
+	graphicsPipelineState.Reset();
+	rootSignature2.Reset();
+	graphicsPipelineState2.Reset();
+	psoManager_.reset();
+	dxCommon = nullptr;
+	camera = nullptr;
 }
 
 void Engine::LineCommon::Update()
@@ -71324,7 +71922,7 @@ void Engine::LineCommon::CreateGraphicsPipeline()
 ============================================================
 File Path: project/DirectXGame/engine/Line/LineCommon.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <array>  
 #include <cstdint>  
 #include <d3d12.h>  
@@ -71341,9 +71939,12 @@ namespace Engine {
     class LineCommon
     {
     public:
+        ~LineCommon();
 
         // 初期化  
         void Initialize(DirectXCommon* dxCommon);
+        // 終了処理
+        void Finalize();
         // 更新  
         void Update();
         // 描画  
@@ -71674,7 +72275,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Manager/Entity/EntityManager.cpp
 ============================================================
-﻿#include "EntityManager.h"
+#include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
@@ -71710,6 +72311,12 @@ namespace {
 			return left->GetCameraSortDepth() > right->GetCameraSortDepth();
 			});
 	}
+}
+
+Engine::EntityManager::~EntityManager()
+{
+	// Frameworkから明示Finalizeされなかった場合でもGPUリソースを閉じる
+	Finalize();
 }
 
 void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
@@ -71764,6 +72371,45 @@ void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 	spriteCommon_ = std::make_unique<SpriteCommon>();
 	spriteCommon_->Initialize(dxCommon);
 
+}
+
+void Engine::EntityManager::Finalize()
+{
+	// Entity本体が持つObject3d/Primitive/Trailなどを先に破棄する
+	entities_.clear();
+	opaqueObjects.clear();
+	transparentObjects.clear();
+
+	// エフェクト系はライト/ラインへの非所有ポインタを持つため、先に解放する
+	effectManager_.reset();
+
+	// インスタンシング用Uploadリソースを明示的に閉じてから解放する
+	if (object3dInstanceManager_) {
+		object3dInstanceManager_->Finalize();
+		object3dInstanceManager_.reset();
+	}
+
+	// ライト/ラインはMapした定数バッファを持つため、明示的にUnmapして閉じる
+	if (lightManager_) {
+		lightManager_->Finalize();
+		lightManager_.reset();
+	}
+	if (lineCommon_) {
+		lineCommon_->Finalize();
+		lineCommon_.reset();
+	}
+
+	// 残りの共通描画リソースを解放する
+	primitiveCommon_.reset();
+	skinningCommon_.reset();
+	skyBoxCommon_.reset();
+	object3dCommon_.reset();
+	oceanManager_.reset();
+	cameraCommon_.reset();
+	spriteCommon_.reset();
+
+	audioManager_ = nullptr;
+	dxCommon = nullptr;
 }
 
 void Engine::EntityManager::UpdateImgui()
@@ -72042,7 +72688,7 @@ void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
 ============================================================
 File Path: project/DirectXGame/engine/Manager/Entity/EntityManager.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 // C++
 #include"memory"
@@ -72087,10 +72733,12 @@ namespace Engine {
 	{
 	public:
 
-
+		~EntityManager();
 
 		// 初期化
 		void Initialize(DirectXCommon* directXCommon);
+		// 終了処理
+		void Finalize();
 
 		// ImGui
 		void UpdateImgui();
@@ -75405,6 +76053,8 @@ File Path: project/DirectXGame/engine/Mesh/ModelMesh.cpp
 ============================================================
 #include "ModelMesh.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
+#include <format>
 
 void Engine::ModelMesh::Initialize(DirectXCommon* dxcommon)
 {
@@ -75414,6 +76064,10 @@ void Engine::ModelMesh::Initialize(DirectXCommon* dxcommon)
 	vbvResorce_.CreateBufferView(dxCommon, vertices, vertices.size());
 	// インデックスリソース生成
 	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
+	// LiveObject出力で所有メッシュを判断できるよう、D3D12リソースへ名前を付ける
+	const std::wstring meshName = StringUtility::ConvertString(name.empty() ? "UnnamedMesh" : name);
+	vbvResorce_.SetResourceName(std::format(L"ModelMesh VB : {}", meshName));
+	indexResorce_.SetResourceName(std::format(L"ModelMesh IB : {}", meshName));
 }
 
 void Engine::ModelMesh::UpdateVertexBuffer()
@@ -75829,13 +76483,19 @@ void Engine::Framework::Finalize()
 	}
 
 	// シーンはDirectXリソースを持つため、DirectXCommonを破棄する前に終了させる。
-	sceneManager_.reset();
+	if (sceneManager_) {
+		sceneManager_->Finalize();
+		sceneManager_.reset();
+	}
 
 	// シーン生成用ファクトリはシーン破棄後に不要になるため解放する。
 	sceneFactory_.reset();
 
 	// エンティティ群が持つGPUリソースを、DirectXCommonより先に解放する。
-	entityManager_.reset();
+	if (entityManager_) {
+		entityManager_->Finalize();
+		entityManager_.reset();
+	}
 
 	// DirectX
 	if (dxCommon_) {
@@ -75981,7 +76641,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/MyGame.cpp
 ============================================================
-﻿#include "MyGame.h"
+#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
@@ -76053,6 +76713,14 @@ void Engine::MyGame::Initialize() {
 
 void Engine::MyGame::Finalize()
 {
+	// MyGameが直接所有するGPUリソース持ちのプリミティブを、DirectXCommon解放前に破棄する。
+	primi.reset();
+	primiPlane.reset();
+	primiStar.reset();
+	primiTrai.reset();
+	primiRing.reset();
+	cylinder_.reset();
+
 	GpuParticleManager* gpuParticleManager_ = entityManager_->GetEffectManager()->GetGpuParticleManager();
 	gpuParticleManager_->ClearEmitterAll();
 	gpuParticleManager_->ClearGroupParticleAll();
@@ -76358,7 +77026,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Offscreen/PostEffect.cpp
 ============================================================
-﻿#include "PostEffect.h"
+#include "PostEffect.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -76372,6 +77040,8 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	this->dxCommon = dxCommon;
 
 	vertexResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(ScreenVertexData) * 4);
+	// LiveObject表示でポストエフェクトの頂点バッファを判別できるよう名前を付ける。
+	vertexResource->SetName(L"PostEffect Screen Vertex");
 	//リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つの分のサイズ
@@ -76390,23 +77060,27 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kVignette:
 		cbVignette_ = std::make_unique<Engine::ConstantBuffer<VignetteGPU>>();
 		cbVignette_->CreateBuffer(dxCommon);
+		cbVignette_->SetResourceName(L"PostEffect Vignette CB");
 		cbVignette_->Data()->scale = 16.0f;
 		cbVignette_->Data()->squared = 0.8f;
 		break;
 	case PostEffectType::kSmoothing:
 		cbSmoothig_ = std::make_unique<Engine::ConstantBuffer<SmoothigGPU>>();
 		cbSmoothig_->CreateBuffer(dxCommon);
+		cbSmoothig_->SetResourceName(L"PostEffect Smoothing CB");
 		cbSmoothig_->Data()->num = 3;
 		break;
 	case PostEffectType::kGaussian:
 		cbGaussian_ = std::make_unique<Engine::ConstantBuffer<GaussianGPU>>();
 		cbGaussian_->CreateBuffer(dxCommon);
+		cbGaussian_->SetResourceName(L"PostEffect Gaussian CB");
 		cbGaussian_->Data()->num = 3;
 		cbGaussian_->Data()->sigma = 2.0f;
 		break;
 	case PostEffectType::kOitline:
 		cbOutline_ = std::make_unique<Engine::ConstantBuffer<OutlineGPU>>();
 		cbOutline_->CreateBuffer(dxCommon);
+		cbOutline_->SetResourceName(L"PostEffect Outline CB");
 		cbOutline_->Data()->num = 3;
 		cbOutline_->Data()->weightSquared = 0.002f;
 		cbOutline_->Data()->projectionInverse = Identity();
@@ -76414,6 +77088,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kRadialBlur:
 		cbRadialBlur_ = std::make_unique<Engine::ConstantBuffer<RadialBlurGPU>>();
 		cbRadialBlur_->CreateBuffer(dxCommon);
+		cbRadialBlur_->SetResourceName(L"PostEffect RadialBlur CB");
 		cbRadialBlur_->Data()->center = Vector2{ 0.5f,0.5f };
 		cbRadialBlur_->Data()->numSamples = 10;
 		cbRadialBlur_->Data()->blurWidth = 0.01f;
@@ -76421,6 +77096,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kDissolve:
 		cbDissolve_ = std::make_unique<Engine::ConstantBuffer<DissolveGPU>>();
 		cbDissolve_->CreateBuffer(dxCommon);
+		cbDissolve_->SetResourceName(L"PostEffect Dissolve CB");
 		cbDissolve_->Data()->threshold = 0.5f;
 		cbDissolve_->Data()->edge = 0.03f;
 		cbDissolve_->Data()->color.x = 1.0f;
@@ -76430,11 +77106,13 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kRandom:
 		cbRandom_ = std::make_unique<Engine::ConstantBuffer<RandomGPU>>();
 		cbRandom_->CreateBuffer(dxCommon);
+		cbRandom_->SetResourceName(L"PostEffect Random CB");
 		cbRandom_->Data()->time = 0.0f;
 		break;
 	case PostEffectType::kBloom:
 		cbBloom_ = std::make_unique<Engine::ConstantBuffer<BloomGPU>>();
 		cbBloom_->CreateBuffer(dxCommon);
+		cbBloom_->SetResourceName(L"PostEffect Bloom CB");
 		cbBloom_->Data()->threshold = 0.9f;
 		cbBloom_->Data()->intensity = 1.0f;
 		break;
@@ -77016,7 +77694,7 @@ void Engine::PostEffectCombine::CreateRootSignature() {
 ============================================================
 File Path: project/DirectXGame/engine/Offscreen/PostEffect.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 #include "DirectXGame/engine/struct/VertexDeta.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
@@ -77102,6 +77780,9 @@ namespace Engine {
 	class IPostEffect
 	{
 	public:
+		// 派生ポストエフェクトをIPostEffect経由で破棄しても、派生側まで正しく解放する。
+		virtual ~IPostEffect() = default;
+
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon, std::string psName);
 
@@ -82271,6 +82952,8 @@ namespace Engine {
 		Engine::Camera* GetCamara() { return camera; }
 		// 終了したか
 		bool IsInitialized() const { return initialized_; }
+		// 初期化状態設定
+		void SetInitialized(bool initialized) { initialized_ = initialized; }
 		// シーンデータ取得
 		SceneData& GetSceneData();
 
@@ -82520,7 +83203,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/scene/SceneManager.cpp
 ============================================================
-﻿#include"SceneManager.h"
+#include"SceneManager.h"
 #include"cassert"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -82587,6 +83270,8 @@ void Engine::SceneManager::Update()
 			
 			
 			scene_->Initialize();
+			// Finalize時に初期化済みシーンか判定できるよう状態を記録する。
+			scene_->SetInitialized(true);
 			SetCamera(scene_->GetCamara());
 
 			// フェードイン開始
@@ -82649,14 +83334,36 @@ void Engine::SceneManager::DrawForeground2D() {
 
 Engine::SceneManager::~SceneManager()
 {
-	// Finalize中に scene_ が変更・reset されても安全なように、所有権を退避
-	std::unique_ptr<BaseScene> dying = std::move(scene_);
-	if (dying)
-	{
-		dying->Finalize();
-		// dying がスコープを抜けるときに確実に delete される
+	// Framework側から明示Finalizeされなかった場合でもシーン所有物を破棄する
+	Finalize();
+}
+
+void Engine::SceneManager::Finalize()
+{
+	// 実行中シーンは終了処理を呼んでから破棄する
+	if (scene_) {
+		scene_->Finalize();
+		scene_.reset();
 	}
-	// scene_ は既に nullptr（move済み）
+
+	// 予約中シーンも初期化済みなら終了処理を通し、カメラなどのGPUリソースを先に解放する
+	if (nextScene_ && nextScene_->IsInitialized()) {
+		nextScene_->Finalize();
+	}
+	// 未初期化の予約シーンはFinalizeせず、所有物だけ破棄する
+	nextScene_.reset();
+
+	// フェード用SpriteもD3Dリソースを持つので、D3D終了前に破棄する
+	fade_.reset();
+
+	sceneFactory = nullptr;
+	dxCommon = nullptr;
+	entityManager = nullptr;
+	input = nullptr;
+	globalVariables = nullptr;
+	camera = nullptr;
+	audioManager = nullptr;
+	winApp = nullptr;
 }
 
 void Engine::SceneManager::ChangeScene(const std::string& sceneName, float duration)
@@ -82720,6 +83427,8 @@ namespace Engine {
 
 		// デストラクタ
 		~SceneManager();
+		// 終了処理
+		void Finalize();
 
 		void SetSceneFactory(AbstractSceneFactory* sceneFactory) { this->sceneFactory = sceneFactory; };
 		// DirectX共通クラス設定
@@ -86532,6 +87241,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\GameplaySession.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Pose\PoseSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />
@@ -88401,6 +89111,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\GameplaySession.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
