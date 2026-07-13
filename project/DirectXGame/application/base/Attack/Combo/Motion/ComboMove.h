@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <DirectXGame/engine/struct/Vector3.h>
 
@@ -175,7 +175,7 @@ namespace Combo {
 		// ロックオンシステム
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット
-		const Character::BaseCharacter* traget = nullptr;
+		const Character::BaseCharacter* target = nullptr;
 		// 攻撃移動システム
 		MoveRequestSystem* moveRequestSystem = nullptr;
 		// カメラ基準移動を計算するために参照するカメラ（非所有）

@@ -4,7 +4,7 @@ struct VertexShaderOutput
     float4 position : SV_Position;
     float2 texcoord : TEXCOORD0;
     float4 color : COLOR0;
-    
+
     float3 basis_col0 : TEXCOORD1;
     float3 basis_col1 : TEXCOORD2;
     float3 basis_col2 : TEXCOORD3;
@@ -25,7 +25,7 @@ struct ParticleMaterial
 
 struct Material
 {
-    
+
     float4 color;
     int enableLighting;
     float alphaClipping;
@@ -36,7 +36,7 @@ struct Material
     int useLig;
     int useHem;
     int useNormalMap;
-    int useSpeculerMap;
+    int useSpecularMap;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 

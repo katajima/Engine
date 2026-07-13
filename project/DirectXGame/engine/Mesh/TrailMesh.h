@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "DirectXGame/engine/Mesh/Base/BaseMesh.h"
 #include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
@@ -21,7 +21,7 @@ namespace Engine {
 	public:
 		std::vector<TrailVertexData> verticesTrail;
 	private:
-		VertexBuffer<TrailVertexData> vbvResorce_;
-		IndexBuffer<uint32_t> indexResorce_;
+		VertexBuffer<TrailVertexData> vbvResource_;
+		IndexBuffer<uint32_t> indexResource_;
 	};
 }

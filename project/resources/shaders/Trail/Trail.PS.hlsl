@@ -3,7 +3,7 @@
 //色など三角形の表面の材質を決定するものMaterial
 struct Material
 {
-    
+
     float4 color;
     int enableLighting;
     float4x4 uvTransform;
@@ -11,7 +11,7 @@ struct Material
     int useLig;
     int useHem;
     int useNormalMap;
-    int useSpeculerMap;
+    int useSpecularMap;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 
@@ -31,8 +31,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     PixelShaderOutput output;
     float4 transformedUV = mul(float4(input.texcoord.xy, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(sSampler, transformedUV.xy);
-    
-    
+
+
     output.color = gMaterial.color * textureColor;
    // output.color.a = gMaterial.color.a * textureColor.a;
     if (textureColor.a <= 0.5f)
@@ -43,7 +43,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     {
         discard;
     }
-    
-    
+
+
     return output;
 }

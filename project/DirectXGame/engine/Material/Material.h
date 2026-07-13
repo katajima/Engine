@@ -27,13 +27,13 @@ namespace Engine {
 		void GetCommandListMaterial(int index);
 
 		// テクスチャコマンドリスト設定
-		void GetCommandListTexture(int indexDiffuse, int normalIndex = 0, int speculerIndex = 0, int environmentIndex = 0);
+		void GetCommandListTexture(int indexDiffuse, int normalIndex = 0, int specularIndex = 0, int environmentIndex = 0);
 
-		
+
 		// テクスチャ読み込み
 		void LoadTex();
 
-		
+
 		// マテリアルインスタンス取得
 		MaterialInstance& GetMaterialInstance() { return materialInstance_; }
 
@@ -41,19 +41,19 @@ namespace Engine {
 		// GPUデータ更新
 		void GPUData();
 	public:
-		
+
 		// テクスチャ構造体
 		struct Tex {
 			std::string diffuseFilePath;
 			std::string normalFilePath;
-			std::string speculerFilePath;
+			std::string specularFilePath;
 			std::string environmentFilePath;
 
 
 			//テクスチャ番号
 			uint32_t diffuseIndex = 0;
 			uint32_t normalIndex = 0;
-			uint32_t speculerIndex = 0;
+			uint32_t specularIndex = 0;
 			uint32_t environmentIndex = 0;
 		};
 		Tex tex_;
@@ -71,7 +71,7 @@ namespace Engine {
 			int32_t useLig;
 			int32_t useHim;
 			int32_t useNormalMap;
-			int32_t useSpeculerMap;
+			int32_t useSpecularMap;
 			float padding2[3];
 		};
 
@@ -84,7 +84,7 @@ namespace Engine {
 		MaterialInstance materialInstance_;
 
 	private:
-		
+
 		DirectXCommon* dxCommon = nullptr;
 		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cbResource_;
 		// テクスチャ数

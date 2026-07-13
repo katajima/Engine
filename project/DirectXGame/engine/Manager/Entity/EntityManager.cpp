@@ -74,7 +74,7 @@ void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 
 
 	// スキニング共通クラス初期化
-	skinningCommon_ = std::make_unique<SkinningConmmon>();
+	skinningCommon_ = std::make_unique<SkinningCommon>();
 	skinningCommon_->Initialize(dxCommon);
 
 	// ライン共通クラス初期化

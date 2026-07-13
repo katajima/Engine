@@ -34,7 +34,7 @@ void Engine::Object3dInstanceManager::Initialize(DirectXCommon* dxCommon) {
 	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(),
 		dxCommon->GetDXCCompiler());
 
-	
+
 	// パイプライン生成
 	CreateGraphicsPipeline();
 	CreateShadowMapPipeline();
@@ -315,7 +315,7 @@ void Engine::Object3dInstanceManager::DrawCommonSetting(RasterizerType rasteType
 				graphicsPipelineState[3].Get());
 		}
 		break;
-	case BlendType::MODE_MUlLIPLY:
+	case BlendType::MODE_MULTIPLY:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
 			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[4].Get());
@@ -412,7 +412,7 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
 	RasterizerType    rasteType, BlendType    blendType, ObjectInstance::TransparencyType transparencyType) {
-	
+
 
 	bool isReturn = false;
 
@@ -657,7 +657,7 @@ void Engine::Object3dInstanceManager::CreateRootSignature() {
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[13] = {};
 
-	//CD3DX12_ROOT_PARAMETER 
+	//CD3DX12_ROOT_PARAMETER
 
 	// マテリアル (b0) をピクセルシェーダで使用する
 	PSOFunction::SetRootParameter(rootParameters[0], 0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);

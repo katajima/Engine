@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/Entity/Entity.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -12,7 +12,7 @@
 namespace Engine {
 	class EntityManager;
 	class Object3dCommon;
-	class SkinningConmmon;
+	class SkinningCommon;
 	class ImGuiManager;
 	class SkyBoxCommon;
 	class OceanManager;
@@ -114,7 +114,7 @@ namespace Engine {
 
 		/// <summary>
 		/// コライダー
-		/// </summary>	
+		/// </summary>
 
 		// コライダーコンポーネント
 		std::unique_ptr<ColliderComponent> colliderComponent_;
@@ -202,7 +202,7 @@ namespace Engine {
 
 	private:
 		Object3dCommon*		object3dCommon = nullptr;
-		SkinningConmmon*	skinningConmmon = nullptr;
+		SkinningCommon*	skinningCommon = nullptr;
 		ImGuiManager*		imGuiManager = nullptr;
 		EntityManager*		entityManager = nullptr;
 		LineCommon*			lineCommon = nullptr;

@@ -13,16 +13,16 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 	this->inputSystem = inputSystem;
 
 	// クリアUI
-	text_clera = std::make_unique<Engine::Sprite>();
-	InitSprite(text_clera.get(), "resources/Texture/text/clear.dds", cleraTextData_.pos_, cleraTextData_.scale_);
-	text_clera->SetSize(cleraTextData_.size_);
-	text_clera->SetColor(cleraTextData_.color_);
+	text_clear = std::make_unique<Engine::Sprite>();
+	InitSprite(text_clear.get(), "resources/Texture/text/clear.dds", clearTextData_.pos_, clearTextData_.scale_);
+	text_clear->SetSize(clearTextData_.size_);
+	text_clear->SetColor(clearTextData_.color_);
 
 	// ゲームオーバーUI
 	text_over = std::make_unique<Engine::Sprite>();
-	InitSprite(text_over.get(), "resources/Texture/text/over.dds", cleraTextData_.pos_, cleraTextData_.scale_);
-	text_over->SetSize(cleraTextData_.size_);
-	text_over->SetColor(cleraTextData_.color_);
+	InitSprite(text_over.get(), "resources/Texture/text/over.dds", clearTextData_.pos_, clearTextData_.scale_);
+	text_over->SetSize(clearTextData_.size_);
+	text_over->SetColor(clearTextData_.color_);
 
 	text_bar = std::make_unique<Engine::Sprite>();
 	InitSprite(text_bar.get(), "resources/Texture/Image.dds", barTextData_.pos_, barTextData_.scale_);
@@ -33,10 +33,10 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 	InitUICount("hitCount", hitTextData.pos_, hitTextData.instance,true);
 	Engine::UICount* hitCount = GetUICount("hitCount");
 	hitCount->SetMaxSize(hitTextData.size, hitTextData.offset);	// 最大サイズ
-	hitCount->SetTextuerSize(hitTextData.textuerSize);				// テクスチャサイズ
+	hitCount->SetTextureSize(hitTextData.textureSize);				// テクスチャサイズ
 	hitCount->SetCountMax(hitTextData.countmax);							// カウント最大数
 	hitCount->SetCountColor(hitTextData.color_);	// 色指定
-	hitCount->GetNameSprite()->SetTextureName("resources/Texture/text/Hit.dds");	
+	hitCount->GetNameSprite()->SetTextureName("resources/Texture/text/Hit.dds");
 	hitCount->GetNameSprite()->SetSize(hitTextData.nameSize);	// サイズ指定
 	hitCount->GetNameSprite()->SetColor(hitTextData.nameColor_);	// 色指定
 
@@ -46,7 +46,7 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 	InitUICount("WaveCount", waveTextData.pos_, waveTextData.instance, true);
 	Engine::UICount* waveCount = GetUICount("WaveCount");
 	waveCount->SetMaxSize(waveTextData.size, waveTextData.offset);	// 最大サイズ
-	waveCount->SetTextuerSize(waveTextData.textuerSize);				// テクスチャサイズ
+	waveCount->SetTextureSize(waveTextData.textureSize);				// テクスチャサイズ
 	waveCount->SetCountMax(waveTextData.countmax);							// カウント最大数
 	waveCount->SetCountColor(waveTextData.color_);	// 色指定
 	waveCount->GetNameSprite()->SetTextureName("resources/Texture/text/wave.dds");
@@ -58,7 +58,7 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 	InitUICount("WaveSecondsCount", secondTextData.pos_, secondTextData.instance, true);
 	Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
 	waveSecondsCount->SetMaxSize(secondTextData.size, secondTextData.offset);	// 最大サイズ
-	waveSecondsCount->SetTextuerSize(secondTextData.textuerSize);				// テクスチャサイズ
+	waveSecondsCount->SetTextureSize(secondTextData.textureSize);				// テクスチャサイズ
 	waveSecondsCount->SetCountMax(secondTextData.countmax);							// カウント最大数
 	waveSecondsCount->SetCountColor(secondTextData.color_);	// 色指定
 	waveSecondsCount->GetNameSprite()->SetTextureName("resources/Texture/text/seconds.dds");
@@ -69,14 +69,14 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 
 void GameUI::Update(float dt){
 	if (player == nullptr) return;
-	
+
 	Engine::UICount* hitCount = GetUICount("hitCount");
-	
+
 	hitCount->SetCount(ConvertUtility::ToFloat(player->GetAttackController()->GetHitCounter().GetHitCount()));
-	
-	
+
+
 	if (player->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
-		
+
 		hitCount->SetCountColor({ 1,1,1,0.0f });
 		hitCount->GetNameSprite()->SetColor({ 1,1,1,0.0f });
 	}
@@ -86,8 +86,8 @@ void GameUI::Update(float dt){
 
 		Color coNn = hitTextData.color_;
 		Color coNe = hitTextData.nameColor_;
-		
-		
+
+
 		if (isT) {
 			hitCount->SetCountColor({ coNn.r ,coNn.g ,coNn.b ,1.0f - t });
 			hitCount->GetNameSprite()->SetColor({ coNe.r ,coNe.g ,coNe.b ,1.0f - t });
@@ -102,7 +102,7 @@ void GameUI::Update(float dt){
 	Engine::UICount* waveCount = GetUICount("WaveCount");
 	waveCount->SetCount(ConvertUtility::ToFloat(data_.flowData_.currentWave));
 
-	
+
 	Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
 	waveSecondsCount->SetCount(data_.flowData_.elapsedTime);
 

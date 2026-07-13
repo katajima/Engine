@@ -26,7 +26,7 @@ namespace Combo {
 	// 移動方法
 	enum class MoveType {
 		kInput,		// 入力方向基準
-		kTraget,	// ターゲット方向基準
+		kTarget,	// ターゲット方向基準
 		kForward,	// 自キャラ前方基準
 		kLockAt,	// カメラ方向基準
 	};
@@ -205,7 +205,7 @@ namespace Combo {
 		float maxFallSpeed = 0.0f;
 		// 開始時に重力速度をリセットするか
 		bool isResetGravity = false;
-		
+
 		// ローカル移動ベクトル
 		// X=Right, Y=Up, Z=Forward
 		// 例:
@@ -247,7 +247,7 @@ namespace Combo {
 		bool isTargetDirection = false;
 
 		// 移動タイプ
-		MoveType moveType = MoveType::kTraget;
+		MoveType moveType = MoveType::kTarget;
 		// ロックオンタイプ
 		LockOnData lockOnData{};
 		// ターゲットがいる時だけ使う移動上書き
@@ -310,7 +310,7 @@ namespace Combo {
 		float stateEndTime = 0.5f;
 		// ステート移行時間
 		float stateNextTime = 0.45f;
-		// 強制的に次のコンボに移行するか 
+		// 強制的に次のコンボに移行するか
 		bool isCompulsionNext = false;
 		///	終了条件 ///
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
@@ -380,7 +380,7 @@ namespace Combo {
 		GlobalCondition condition{};
 		// エフェクト
 		GloblEffectData effect{};
-		// カメラ 
+		// カメラ
 		GlobalCameraData camera{};
 		// 次のコンボへの接続
 		GlobalConnection connection{};

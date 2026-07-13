@@ -16,8 +16,9 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
-void Engine::DirectXCommon::Intialize(WinApp* winApp) {
+void Engine::DirectXCommon::Initialize(WinApp* winApp) {
 
 	InitializeFixFPS();	// 固定FPS初期化
 
@@ -30,7 +31,7 @@ void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 	srvManager_->Initialize(DXGIDevice_.get(), command_.get()); // SRV
 	rtvManager_->Initialize(DXGIDevice_.get(), command_.get()); // RTV
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
-	depthStencil_->Initialize(DXGIDevice_.get(), command_.get(), dsvManager_.get(), srvManager_.get()); // デプスステンシル     
+	depthStencil_->Initialize(DXGIDevice_.get(), command_.get(), dsvManager_.get(), srvManager_.get()); // デプスステンシル
 
 
 	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
@@ -45,7 +46,7 @@ void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 	WinApp::SetSwapChain(swapChain_.get());
 
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
-	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
+	postEffectManager_->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
 
 	imguiManager_->Initialize(this);
 }
@@ -207,7 +208,7 @@ void Engine::DirectXCommon::InitializeFixFPS()
 
 void Engine::DirectXCommon::UpdateFixFPS()
 {
-	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
+	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / ConvertUtility::kDefaultFps));
 
 	while (true) {
 		auto now = std::chrono::steady_clock::now();

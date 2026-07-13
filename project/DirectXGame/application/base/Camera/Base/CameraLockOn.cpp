@@ -1,5 +1,6 @@
 #include "CameraLockOn.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 #include <algorithm>
 #include <cmath>
@@ -22,7 +23,7 @@ Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 	targetRotate.z = 0.0f;
 
 	const float lerpRate = std::clamp(data.rotateSpeed, 0.0f, 1.0f);
-	const float t = 1.0f - std::pow(1.0f - lerpRate, dt * 60.0f);
+	const float t = 1.0f - std::pow(1.0f - lerpRate, dt * ConvertUtility::kDefaultFps);
 
 	Vector3 result = transform.rotate;
 	result.x = Math::LerpShortAngle(result.x, targetRotate.x, t);

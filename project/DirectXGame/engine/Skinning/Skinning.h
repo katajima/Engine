@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
@@ -8,7 +8,7 @@ namespace Engine {
 	/// <summary>
 	/// スキニング共通クラス
 	/// </summary>
-	class SkinningConmmon
+	class SkinningCommon
 	{
 	public:
 		// 初期化

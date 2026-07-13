@@ -1,4 +1,4 @@
-﻿#include"Object3dCommon.h"
+#include"Object3dCommon.h"
 #include"Object3d.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
 
@@ -29,7 +29,7 @@ Engine::Object3d::~Object3d() = default;
 void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType) {
 	this->entityManager = entityManager;														// エンティティ3d
 	this->object3dCommon = entityManager->GetObject3dCommon();								// オブジェクト共通クラス
-	this->skinningConmmon = entityManager->GetSkinningConmmon();								// スキニング共通クラス
+	this->skinningCommon = entityManager->GetSkinningCommon();								// スキニング共通クラス
 	this->imGuiManager = entityManager->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();// ImGui管理クラス
 	this->skyBoxCommon = entityManager->GetSkyBoxCommon();									// スカイボックス共通クラス
 	this->oceanManager = entityManager->GetOceanManager();									// 波管理クラス

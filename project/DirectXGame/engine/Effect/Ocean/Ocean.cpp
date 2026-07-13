@@ -1,8 +1,9 @@
-﻿#include "Ocean.h"
+#include "Ocean.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "OceanManager.h"
 #include "imgui.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 
 
@@ -22,14 +23,14 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 rang
 	mesh_->vertices.push_back({ .position = {-range_.range.x, 0.0f, range_.range.y, 1.0f} ,.texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右上
 	mesh_->vertices.push_back({ .position = {range_.range.x, 0.0f, -range_.range.y, 1.0f} ,.texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
 	mesh_->vertices.push_back({ .position = {-range_.range.x, 0.0f, -range_.range.y, 1.0f} ,.texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右下
-	
-	mesh_->SetIndice(0);
-	mesh_->SetIndice(1);
-	mesh_->SetIndice(2);
 
-	mesh_->SetIndice(1);
-	mesh_->SetIndice(3);
-	mesh_->SetIndice(2);
+	mesh_->SetIndex(0);
+	mesh_->SetIndex(1);
+	mesh_->SetIndex(2);
+
+	mesh_->SetIndex(1);
+	mesh_->SetIndex(3);
+	mesh_->SetIndex(2);
 
 	mesh_->Initialize(dxCommon);
 
@@ -62,14 +63,14 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 rang
 	cbWaveResource_.Data()[0].time = 0;
 	cbWaveResource_.Data()[0].waveDirection = { 0,1 };
 	cbWaveResource_.Data()[0].flag = true;
-	
+
 	cbWaveResource_.Data()[1].amplitude = 1.0f;
 	cbWaveResource_.Data()[1].frequency = 2.0f;
 	cbWaveResource_.Data()[1].speed = 1.0f;
 	cbWaveResource_.Data()[1].time = 0;
 	cbWaveResource_.Data()[1].waveDirection = { 0.5f,0.5f };
 	cbWaveResource_.Data()[1].flag = true;
-	
+
 	cbWaveResource_.Data()[2].amplitude = 0.5f;
 	cbWaveResource_.Data()[2].frequency = 2.0f;
 	cbWaveResource_.Data()[2].speed = 1.0f;
@@ -83,7 +84,8 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 rang
 void Engine::Ocean::Update()
 {
 	for (size_t i = 0; i < index_; ++i) {
-		cbWaveResource_.Data()[i].time += 1.0f / 60.0f;
+		// 波の時間はゲーム時間倍率に合わせて進める
+		cbWaveResource_.Data()[i].time += MyGame::GameTime();
 	}
 	material->GPUData();
 }
@@ -101,7 +103,7 @@ void Engine::Ocean::UpdateImgui()
 
 
 
-		
+
 
 		ImGui::Separator();
 		ImGui::Text("waveData");

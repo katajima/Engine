@@ -33,13 +33,13 @@ namespace Engine {
 		// 共通初期化
 		void CommonParticleInit(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName);
 		// 固有の出現処理
-		virtual void EmitUniqe() = 0;
+		virtual void EmitUnique() = 0;
 		// 固有の更新
-		virtual void UpdateUniqe() {}; //
+		virtual void UpdateUnique() {}; //
 		// ImGuiのデバック処理
 		virtual void DebugImGui() {};
 		// グローバルバリアブル適応(固有)
-		virtual void ApplyGlobalVariablesUniqe() {}; // グローバル変数適用
+		virtual void ApplyGlobalVariablesUnique() {}; // グローバル変数適用
 		// グローバルバリアブル適応(共通)
 		void ApplyGlobalVariables(); // グローバル変数適用
 
@@ -87,7 +87,7 @@ namespace Engine {
 		// 透明度あるか設定
 		void SetIsAlpha(bool is) { isFlag.isAlpha = is; }
 		// 加速させるか設定
-		void SetIsAcceleration(bool is) { isFlag.isAcceleration = is; } // 
+		void SetIsAcceleration(bool is) { isFlag.isAcceleration = is; } //
 		// スケール変更設定
 		void SetIsLifeTimeScale(bool is) { isFlag.isLifeTimeScale_ = is; }
 		// スケール拡縮法設定
@@ -99,7 +99,7 @@ namespace Engine {
 		// サイズを変化させるか設定
 		void SetIsScaling(bool is) { isFlag.isScaling_ = is; }
 
-	public: // 
+	public: //
 		// カラー設定
 		void SetColorMinMax(Vector4 min, Vector4 max) { emitData_.colorRange.min = min; emitData_.colorRange.max = max; }
 		// サイズ設定

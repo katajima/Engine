@@ -1,4 +1,4 @@
-﻿#include "BaseEnemy.h"
+#include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -10,7 +10,7 @@
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
-#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 #include "EnemyWaveExitState.h"
@@ -37,7 +37,7 @@ namespace Character {
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
 
-	
+
 #pragma region
 
 	void BaseEnemy::InitializeEffect(const Vector3& pos) {
@@ -68,7 +68,7 @@ namespace Character {
 		// オブジェクトインスタンシング初期化
 		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
 			, Engine::ObjectInstance::TransparencyType::kNo, false);
-		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
+		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定
 		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 		objectComponent_->SetInstancingSRT({1,1,1}, {}, position);	// SRT設定
 
@@ -122,7 +122,7 @@ namespace Character {
 			};
 
 
-		
+
 		// 衝突応答処理初期化
 		hitResponse_ = std::make_unique<HitResponse>();
 		hitResponse_->SetOwner(moveComponent_->GetMoveRequestSystem());
@@ -189,7 +189,7 @@ namespace Character {
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 		// 移動コンポーネント更新
-		if (ctx.isDebug) moveComponent_->SetControlType(MovementComponent::ControlType::Manual); 
+		if (ctx.isDebug) moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
 		else moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 		moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(), ctx);
 
@@ -206,7 +206,7 @@ namespace Character {
 		if(weapon_)
 		weapon_->Update();
 
-		
+
 	}
 
 	void BaseEnemy::InitializeBaseEnemyAddItem() {
@@ -228,7 +228,7 @@ namespace Character {
 		globalData_.turnSpeed = GetValue<float>("回転速度");
 	}
 
-#pragma endregion 
+#pragma endregion
 
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
@@ -252,7 +252,7 @@ namespace Character {
 		}
 		else if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this)) {
 			slotPos = crowdSlot->position;
-		}		
+		}
 
 		attackSystem_->Update(
 			GetTime(),
@@ -284,11 +284,11 @@ namespace Character {
 	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {
-		return GetAttackController()->GeyLockOnSysutem()->GetTarget();
+		return GetAttackController()->GetLockOnSystem()->GetTarget();
 	}
 
 	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
-		GetAttackController()->GeyLockOnSysutem()->SetTargets({ target });
+		GetAttackController()->GetLockOnSystem()->SetTargets({ target });
 	}
 
 }

@@ -1,4 +1,4 @@
-﻿#include"LightInstans.hlsli"
+#include"LightInstance.hlsli"
 
 
 SamplerState sSampler           : register(s0);
@@ -40,7 +40,7 @@ ConstantBuffer<ShadowData> gShadowData : register(b6);
 struct PixelShaderOutput
 {
     float4 color : SV_TARGET0;
-    
+
 };
 
 float CalculateDepthShadow(float3 worldPosition, float3 normal)
@@ -79,15 +79,15 @@ float CalculateDepthShadow(float3 worldPosition, float3 normal)
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
-  
-    
+
+
     float4 transformedUV = mul(float4(input.texcoord.xy, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTextures[int(input.textureIndex)].Sample(sSampler, transformedUV.xy);
     //float4 textureColor = gTextures[int(input.textureIndex)].Sample(sSampler, input.texcoord);
-   
+
     if (gMaterial.enableLighting != 0) // Lightingする場合
     {
-        
+
         float3 normal = input.normal;
         float3 tangent = input.tangent;
         float3 biNormal = input.biNormal;
@@ -96,7 +96,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         if (gMaterial.useNormalMap)
         {
             float3 localNormal = g_Normalmap.Sample(sSampler, transformedUV.xy).xyz * 2.0f - 1.0f;
-            
+
             float3x3 TBN = (float3x3(input.tangent.xyz, input.biNormal, input.normal)); // または必要なら transpose
             float3 worldNormal = normalize(mul(localNormal, TBN));
 
@@ -108,13 +108,13 @@ PixelShaderOutput main(VertexShaderOutput input)
         float3 allSpot = SpotLightFunc(input, textureColor, toEye, normal);
 
         allDire *= CalculateDepthShadow(input.worldPosition, normal);
-        
-        
-        
-        
+
+
+
+
         output.color.rgb = allDire + allPoint + allSpot;
-        
-        
+
+
         output.color.a = gMaterial.color.a * textureColor.a * gMaterial.alpha;
 
         if (textureColor.a <= gMaterial.alphaClipping)

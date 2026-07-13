@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 #include "LevelData.h"
 #include <json.hpp>
 #include <vector>
 #include <map>
 
 
-namespace LoadDataFanc 
+namespace LoadDataFanc
 {
 	// ファイル読みこみ
 	nlohmann::json FileData(const std::string fullpath);

@@ -53,7 +53,7 @@ namespace Engine {
 
 	public: //メンバ関数
 		//初期化
-		void Intialize(WinApp* winApp);
+		void Initialize(WinApp* winApp);
 		//更新
 		void Update();
 

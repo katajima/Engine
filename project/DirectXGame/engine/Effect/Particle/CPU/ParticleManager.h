@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // DirectX
 #include<d3d12.h>
@@ -70,7 +70,7 @@ namespace Engine {
 		float materialShininess = 20.0f;																// スペキュラの強さ
 		bool materialUseLig = false;																	// ライト計算を使うか
 		bool materialUseNormalMap = false;															// ノーマルマップを使うか
-		bool materialUseSpeculerMap = false;															// スペキュラマップを使うか
+		bool materialUseSpecularMap = false;															// スペキュラマップを使うか
 		bool materialUseEnvironment = false;															// 環境マップを使うか
 		float materialAlphaClipping = 0.5f;															// アルファクリッピング値
 		float materialAlpha = 1.0f;																	// 全体アルファ
@@ -156,7 +156,7 @@ namespace Engine {
 				group.second.particle.clear();
 			}
 		}
-		
+
 	private:
 		// ルートシグネチャの作成
 		void CreateRootSignature();
@@ -197,7 +197,7 @@ namespace Engine {
 		// フィールド関係
 		std::vector<Field::FieldEffect*> fieldEffect_;
 
-	private: //PSO関係 
+	private: //PSO関係
 		////ルートシグネチャデスク
 		D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 		////ルートシグネチャ

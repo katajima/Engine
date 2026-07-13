@@ -42,19 +42,19 @@ void Engine::SkyBox::Initialize(EntityManager* entityManager, std::string txtueN
 	for (int i = 0; i < 6; ++i) { // 6面
 		// 頂点データを追加
 		for (int j = 0; j < 4; ++j) { // 各面の4頂点
-			mesh_->verticesskyBox.push_back({
+			mesh_->verticesSkyBox.push_back({
 				positions[i][j],      // 座標
 				});
 		}
 
 		// インデックスデータを追加 (2つの三角形)
-		mesh_->SetIndice(vertexOffset + 0);
-		mesh_->SetIndice(vertexOffset + 2);
-		mesh_->SetIndice(vertexOffset + 1);
+		mesh_->SetIndex(vertexOffset + 0);
+		mesh_->SetIndex(vertexOffset + 2);
+		mesh_->SetIndex(vertexOffset + 1);
 
-		mesh_->SetIndice(vertexOffset + 2);
-		mesh_->SetIndice(vertexOffset + 3);
-		mesh_->SetIndice(vertexOffset + 1);
+		mesh_->SetIndex(vertexOffset + 2);
+		mesh_->SetIndex(vertexOffset + 3);
+		mesh_->SetIndex(vertexOffset + 1);
 
 		vertexOffset += 4; // 次の面に移動
 	}

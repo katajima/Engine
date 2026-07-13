@@ -43,7 +43,7 @@ void Engine::BaseParticleEmitter::CommonParticleInit(Engine::ParticleManager* pa
 }
 
 void Engine::BaseParticleEmitter::ApplyGlobalVariables() {
-	
+
 }
 
 
@@ -68,7 +68,7 @@ void Engine::BaseParticleEmitter::Emit()
 			return;
 		}
 		for (int i = 0; i < index; i++) {
-			EmitUniqe();
+			EmitUnique();
 		}
 	}
 }
@@ -95,8 +95,8 @@ void Engine::BaseParticleEmitter::Update() {
 		if (ImGui::Button("MODE_ADD")) {
 			particleGroup.blendType = EmitData::BlendType::MODE_ADD;
 		}
-		if (ImGui::Button("MODE_MUlLIPLY")) {
-			particleGroup.blendType = EmitData::BlendType::MODE_MUlLIPLY;
+		if (ImGui::Button("MODE_MULTIPLY")) {
+			particleGroup.blendType = EmitData::BlendType::MODE_MULTIPLY;
 		}
 		if (ImGui::Button("MODE_SUBTRACT")) {
 			particleGroup.blendType = EmitData::BlendType::MODE_SUBTRACT;
@@ -138,10 +138,10 @@ void Engine::BaseParticleEmitter::Update() {
 
 		ImGui::DragFloat3("rotateVelocity", &emitData_.rotateVelocity.median.x, 0.01f);
 		ImGui::DragFloat3("rotateVelocity.range", &emitData_.rotateVelocity.range.x, 0.01f);
-		
+
 		ImGui::DragFloat3("velocity", &emitData_.velocity.median.x, 0.1f);
 		ImGui::DragFloat3("velocity.range", &emitData_.velocity.range.x, 0.1f);
-		
+
 		ImGui::DragFloat3("acceleration", &emitData_.acceleration.median.x, 0.1f);
 		ImGui::DragFloat3("acceleration.range", &emitData_.acceleration.range.x, 0.1f);
 
@@ -150,7 +150,7 @@ void Engine::BaseParticleEmitter::Update() {
 
 		ImGui::DragInt("count", &emitData_.count.median, 1.0f);
 		ImGui::DragInt("count.range", &emitData_.count.range, 1.0f);
-		
+
 		ImGui::DragFloat("frequency", &frequency_, 0.01f);
 
 		ImGui::Separator(); // 水平線を引く
@@ -170,7 +170,7 @@ void Engine::BaseParticleEmitter::Update() {
 
 	EmitMinMax();
 
-	UpdateUniqe();
+	UpdateUnique();
 
 	// 出現
 	frequencyTime_ += MyGame::GameTime();
@@ -195,7 +195,7 @@ void Engine::BaseParticleEmitter::Update() {
 
 // 最小最大値算出
 void Engine::BaseParticleEmitter::EmitMinMax() {
-	//	範囲 
+	//	範囲
 	ConversionRange(emitData_.colorRange);
 };
 

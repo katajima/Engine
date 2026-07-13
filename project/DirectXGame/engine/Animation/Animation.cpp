@@ -19,21 +19,21 @@ void Engine::SkinCluster::Finalize()
 	}
 
 	// スキニング情報用UploadリソースのCPU書き込みポインタを無効化する
-	if (skinningInfomation && skinningInfomationDeta) {
-		skinningInfomation->Unmap(0, nullptr);
-		skinningInfomationDeta = nullptr;
+	if (skinningInformation && skinningInformationData) {
+		skinningInformation->Unmap(0, nullptr);
+		skinningInformationData = nullptr;
 	}
 
 	// GPUリソース本体を明示的に解放して、LiveObjectの残りを減らす
 	influenceResource.Reset();
 	paletteResource.Reset();
 	outputVertexResource.Reset();
-	skinningInfomation.Reset();
+	skinningInformation.Reset();
 }
 
 void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
-	
+
 	for (Joint& joint : skeleton.joints) {
 		// 対象のJointのAnimationがあれば、値の適用を行う。下記のif文はC++17から可能になった初期化付きif文。
 		if (auto it = animation.nodeAnimations.find(joint.name); it != animation.nodeAnimations.end()) {
@@ -95,9 +95,9 @@ void Engine::AnimationFunction::UpdateSkeleton(Skeleton& skeleton)
 	// すべてのJointを更新。親が先に処理されるので通常ループで処理可能になっている
 	for (Joint& joint : skeleton.joints) {
 		// ローカル行列を計算
-		
+
 		joint.localMatrix = MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
-		
+
 		// 親が存在する場合は親の変換を適用
 		if (joint.parent) {
 			// 親の行列を先に掛ける
@@ -198,7 +198,7 @@ void Engine::AnimationFunction::SetAnimation(ModelData& modelData, const std::st
 		}
 	}
 
-	
+
 }
 
 Engine::Joint* Engine::AnimationFunction::FindJointByName(Skeleton& skeleton, const std::string& name)
@@ -252,7 +252,7 @@ void Engine::AnimationFunction::UpdateSkinCluster(SkinCluster& skinCluster, cons
 		cachedSkeletonMatrices[i] = skeleton.joints[i].skeletonSpaceMatrix;
 	}
 
-	
+
 
 	std::vector<size_t> indices(jointCount);
 	std::iota(indices.begin(), indices.end(), 0);

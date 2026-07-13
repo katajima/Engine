@@ -1,4 +1,4 @@
-﻿#include "ParticleManager.h"
+#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -186,7 +186,7 @@ namespace {
 			data.materialShininess = material.shininess_;
 			data.materialUseLig = material.useLig_ != 0;
 			data.materialUseNormalMap = material.useNormalMap_ != 0;
-			data.materialUseSpeculerMap = material.useSpeculerMap_ != 0;
+			data.materialUseSpecularMap = material.useSpecularMap_ != 0;
 			data.materialUseEnvironment = material.useEnvironment_;
 			data.materialAlphaClipping = material.alphaClipping_;
 			data.materialAlpha = material.alpha_;
@@ -232,7 +232,7 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
 			}
 			break;
-		case EmitData::BlendType::MODE_MUlLIPLY:
+		case EmitData::BlendType::MODE_MULTIPLY:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
 				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
 			}
@@ -266,7 +266,7 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[9].Get());
 			}
 			break;
-		case EmitData::BlendType::MODE_MUlLIPLY:
+		case EmitData::BlendType::MODE_MULTIPLY:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
 				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[10].Get());
 			}
@@ -329,7 +329,7 @@ void Engine::ParticleManager::Update() {
 					// パーティクルデータをGPUに送る
 					ParticleFunction::WorldDataForGPU(group, particleIterator, camera);
 
-					// 加算 
+					// 加算
 					++group.instanceCount;
 				}
 
@@ -550,7 +550,7 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 		material.shininess_ = data.materialShininess;
 		material.useLig_ = data.materialUseLig;
 		material.useNormalMap_ = data.materialUseNormalMap;
-		material.useSpeculerMap_ = data.materialUseSpeculerMap;
+		material.useSpecularMap_ = data.materialUseSpecularMap;
 		material.useEnvironment_ = data.materialUseEnvironment;
 		material.alphaClipping_ = data.materialAlphaClipping;
 		material.alpha_ = data.materialAlpha;

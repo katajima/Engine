@@ -2,7 +2,7 @@
 
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Material.h"
-#include "DirectXGame/engine/struct/VertexDeta.h"
+#include "DirectXGame/engine/struct/VertexData.h"
 
 
 #include "vector"
@@ -56,16 +56,16 @@ namespace Engine {
 		// 三角面追加
 		void SetTriangle(const Triangle& triangle) { triangles.push_back(triangle); }
 		// インデックス追加
-		void SetIndice(uint32_t indice) { indices.push_back(indice); }
+		void SetIndex(uint32_t index) { indices.push_back(index); }
 		// インデックスクリア
 		void ClearIndices() { indices.clear(); }
 		// 頂点時間設定
 		void SetVerticesTimer(float time) { verticesTimer.push_back(time); };
 		// 時間を進める
-		void AddVerticeTimer(int num, float time) { verticesTimer[num] += time; }
+		void AddVertexTimer(int num, float time) { verticesTimer[num] += time; }
 		// 頂点時間削除
-		void EraseVerticeTimer() { verticesTimer.erase(verticesTimer.begin()); };
-		// インデックス時間設定 
+		void EraseVertexTimer() { verticesTimer.erase(verticesTimer.begin()); };
+		// インデックス時間設定
 		void SetIndicesTimer(float time) { indicesTimer.push_back(time); }
 		// メッシュインデックス取得
 		uint32_t GetMeshIndex() const { return meshIndex; }

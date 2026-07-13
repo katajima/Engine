@@ -1,4 +1,4 @@
-﻿#include "ComboEditor.h"
+#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManager.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -25,9 +25,9 @@ namespace Combo {
 	}
 
 	// 所有者設定
-	void Editor::SetOwner(Character::BaseCharacter* owner) { 
+	void Editor::SetOwner(Character::BaseCharacter* owner) {
 		// 所有者設定
-		this->owner = owner; 
+		this->owner = owner;
 		// 所有者の攻撃制御からコンボシステムを取得
 		this->comboSystem = owner->GetAttackController()->GetComboSystem();
 		// コンボシステムからコンボエディターブロックを作成
@@ -39,8 +39,8 @@ namespace Combo {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
-		comboSystem->SertIsDebug(isComboEditorActive_);
-		
+		comboSystem->SetIsDebug(isComboEditorActive_);
+
 		// ノード管理の描画
 		DrawNodeManagement();
 		// 開始コンボ設定の描画
@@ -652,7 +652,7 @@ namespace Combo {
 		// 何もなければ何もしない
 		if (comboEditorBlocks_.empty()) return;
 
-		// 
+		//
 		Engine::ImGuiManager::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
 
 		ImGui::Separator();

@@ -1,4 +1,4 @@
-﻿#include "Primitive2D.h"
+#include "Primitive2D.h"
 #include "SpriteCommon.h"
 
 void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
@@ -106,9 +106,9 @@ void Engine::Primitive2D::CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2)
 	mesh->vertices.push_back({ .position = {p2.x, p2.y, 0.0f, 1.0f}, .texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
 
 	// **反時計回り (CCW) に変更**
-	mesh->SetIndice(0);
-	mesh->SetIndice(2);
-	mesh->SetIndice(1);
+	mesh->SetIndex(0);
+	mesh->SetIndex(2);
+	mesh->SetIndex(1);
 }
 
 void Engine::Primitive2D::CreateCircle(float radius, int segments)
@@ -139,14 +139,14 @@ void Engine::Primitive2D::CreateCircle(float radius, int segments)
 
 	// インデックスの設定 (CW: 時計回り)
 	for (int i = 1; i < segments; ++i) {
-		mesh->SetIndice(0);       // 中心点
-		mesh->SetIndice(i);       // 現在の頂点
-		mesh->SetIndice(i + 1);   // 次の頂点
+		mesh->SetIndex(0);       // 中心点
+		mesh->SetIndex(i);       // 現在の頂点
+		mesh->SetIndex(i + 1);   // 次の頂点
 	}
 	// 最後の三角形 (円の閉じる部分)
-	mesh->SetIndice(0);
-	mesh->SetIndice(segments);
-	mesh->SetIndice(1); // 最初の円周頂点とつなげる
+	mesh->SetIndex(0);
+	mesh->SetIndex(segments);
+	mesh->SetIndex(1); // 最初の円周頂点とつなげる
 }
 
 void Engine::Primitive2D::CreateRing(float innerRadius, float outerRadius, int segments)
@@ -188,14 +188,14 @@ void Engine::Primitive2D::CreateRing(float innerRadius, float outerRadius, int s
 		int inner2 = inner1 + 2;
 
 		// 一つ目の三角形 (CCWに修正)
-		mesh->SetIndice(outer1);
-		mesh->SetIndice(outer2);
-		mesh->SetIndice(inner1);
+		mesh->SetIndex(outer1);
+		mesh->SetIndex(outer2);
+		mesh->SetIndex(inner1);
 
 		// 二つ目の三角形 (CCWに修正)
-		mesh->SetIndice(inner1);
-		mesh->SetIndice(outer2);
-		mesh->SetIndice(inner2);
+		mesh->SetIndex(inner1);
+		mesh->SetIndex(outer2);
+		mesh->SetIndex(inner2);
 	}
 
 }
@@ -236,9 +236,9 @@ void Engine::Primitive2D::CreateStar(float innerRadius, float outerRadius, int s
 
 	// インデックス生成 (CCW: 反時計回り)
 	for (int i = 1; i <= segments * 2; ++i) {
-		mesh->SetIndice(0); // 中心点
-		mesh->SetIndice(i); // 現在の頂点
-		mesh->SetIndice((i % (segments * 2)) + 1); // 次の頂点（ループ処理）
+		mesh->SetIndex(0); // 中心点
+		mesh->SetIndex(i); // 現在の頂点
+		mesh->SetIndex((i % (segments * 2)) + 1); // 次の頂点（ループ処理）
 	}
 }
 
@@ -257,12 +257,12 @@ void Engine::Primitive2D::CreateCube(Vector2 size)
 	mesh->vertices.push_back({ .position = { halfSize.x, -halfSize.y, 0.0f, 1.0f}, .texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, -1.0f} }); // 右下
 
 	// **時計回り (CW) に修正**
-	mesh->SetIndice(0);
-	mesh->SetIndice(2);
-	mesh->SetIndice(1);
-	mesh->SetIndice(2);
-	mesh->SetIndice(3);
-	mesh->SetIndice(1);
+	mesh->SetIndex(0);
+	mesh->SetIndex(2);
+	mesh->SetIndex(1);
+	mesh->SetIndex(2);
+	mesh->SetIndex(3);
+	mesh->SetIndex(1);
 }
 
 

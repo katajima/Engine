@@ -1,4 +1,4 @@
-﻿#include "GameStartUI.h"
+#include "GameStartUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
@@ -42,7 +42,7 @@ void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	InitUICount("numCount", numPosition_, 1, false);
 	Engine::UICount* hitCount = GetUICount("numCount");
 	hitCount->SetMaxSize(numUiSize_, {});	// 最大サイズ
-	hitCount->SetTextuerSize(kCountTextureSize);		// テクスチャサイズ
+	hitCount->SetTextureSize(kCountTextureSize);		// テクスチャサイズ
 	hitCount->SetCountMax(kMaximumCountDigit);		// カウント最大数
 	hitCount->SetCountColor(numUiColor_);	// 色指定
 }

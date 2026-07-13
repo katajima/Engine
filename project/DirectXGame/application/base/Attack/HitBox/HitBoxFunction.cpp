@@ -109,7 +109,7 @@ namespace HitBox {
 		// 敵ステート設定
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
-		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
+		player->GetAttackController()->GetLockOnSystem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
 		player->GetAttackController()->GetHitCounter().Hit();
 		if (result.notifyComboHit) {
@@ -143,7 +143,7 @@ namespace HitBox {
 		// プレイヤーステート設定
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
-		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
+		enemy->GetAttackController()->GetLockOnSystem()->SetHitTag(player->GetTagNumber());
 		// 敵側コンボにも命中を通知し、ヒット音と命中条件を同じタイミングで処理する。
 		if (result.notifyComboHit) {
 			enemy->GetAttackController()->GetComboSystem()->NotifyAttackHit();

@@ -33,9 +33,9 @@ namespace Engine {
 		//コマンドリスト設定
 		void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2);
 		// 頂点リソース取得
-		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vbvResorce_.GetVertexResource(); };
+		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vbvResource_.GetVertexResource(); };
 		// 頂点バッファビュー取得
-		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vbvResorce_.GetVertexBufferView(); }
+		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vbvResource_.GetVertexBufferView(); }
 
 
 		// メッシュごとのスキンクラスタ
@@ -50,7 +50,7 @@ namespace Engine {
 		std::string name;						// メッシュ名
 		Vector3 position;						// 位置
 	private:
-		VertexBuffer<VertexData> vbvResorce_;
-		IndexBuffer<uint32_t> indexResorce_;
+		VertexBuffer<VertexData> vbvResource_;
+		IndexBuffer<uint32_t> indexResource_;
 	};
 }

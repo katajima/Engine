@@ -42,7 +42,7 @@ namespace
 	}
 }
 
-void Engine::Input::Intialize(WinApp* winApp)
+void Engine::Input::Initialize(WinApp* winApp)
 {
 	HRESULT result;
 

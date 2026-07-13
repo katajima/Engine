@@ -29,14 +29,14 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 		return;
 	}
 	// テクスチャ枚数上限チェック
-	assert(srvManager->IsMaxTextuer());
+	assert(srvManager->IsMaxTexture());
 
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = StringUtility::ConvertString(filePath);
 
 	// hdr
-	bool isHdr = filePath.ends_with(".hdr"); // 
+	bool isHdr = filePath.ends_with(".hdr"); //
 	bool isDds = filePathW.ends_with(L".dds");//
 
 
@@ -209,10 +209,10 @@ const DirectX::TexMetadata& Engine::TextureManager::GetMataData(const std::strin
 
 void Engine::TextureManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange)
 {
-	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
+	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
 	parameter.DescriptorTable.pDescriptorRanges = &descriptorRange; // Tableの中身の配列を指定
-	parameter.DescriptorTable.NumDescriptorRanges = 1; // Tableで利用する数 
+	parameter.DescriptorTable.NumDescriptorRanges = 1; // Tableで利用する数
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata)
@@ -234,7 +234,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::CreateTextureReso
 	//利用するHeapの設定。非常に特殊な運用。02_04exで一般的なケースがある
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT; //細かい設定を行う
-	
+
 
 	//3. Resourceを生成する
 
@@ -261,7 +261,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::UploadTextureData
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture.Get(), 0, UINT(subresources.size()));
 	Microsoft::WRL::ComPtr < ID3D12Resource> intermediateResource = dxgiDevice->CreateBufferResource(intermediateSize);
 	UpdateSubresources(command->GetList(), texture.Get(), intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
-	// Textureへの転送後は利用できるよう、D3D12_RESORCE_STATE_COPYからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
+	// Textureへの転送後は利用できるよう、D3D12_RESOURCE_STATE_COPYからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;

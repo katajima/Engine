@@ -8,25 +8,25 @@ void Engine::ModelMesh::Initialize(DirectXCommon* dxcommon)
 	// DX共通クラス
 	this->dxCommon = dxcommon;
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(dxCommon, vertices, vertices.size());
+	vbvResource_.CreateBufferView(dxCommon, vertices, vertices.size());
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
+	indexResource_.CreateBufferView(dxCommon, indices, indices.size());
 	// LiveObject出力で所有メッシュを判断できるよう、D3D12リソースへ名前を付ける
 	const std::wstring meshName = StringUtility::ConvertString(name.empty() ? "UnnamedMesh" : name);
-	vbvResorce_.SetResourceName(std::format(L"ModelMesh VB : {}", meshName));
-	indexResorce_.SetResourceName(std::format(L"ModelMesh IB : {}", meshName));
+	vbvResource_.SetResourceName(std::format(L"ModelMesh VB : {}", meshName));
+	indexResource_.SetResourceName(std::format(L"ModelMesh IB : {}", meshName));
 }
 
 void Engine::ModelMesh::UpdateVertexBuffer()
 {
 	// 頂点リソース更新
-	vbvResorce_.UpdateBuffer(vertices);
+	vbvResource_.UpdateBuffer(vertices);
 }
 
 void Engine::ModelMesh::UpdateIndexBuffer()
 {
 	// インデックスリソース更新
-	indexResorce_.UpdateBuffer(indices);
+	indexResource_.UpdateBuffer(indices);
 }
 
 void Engine::ModelMesh::Clear()
@@ -39,33 +39,33 @@ void Engine::ModelMesh::Clear()
 void Engine::ModelMesh::GetCommandList()
 {
 	// 頂点バッファの設定
-	vbvResorce_.IASetVertexBuffers();
+	vbvResource_.IASetVertexBuffers();
 	// インデックスバッファ設定
-	indexResorce_.IASetIndexBuffer();
+	indexResource_.IASetIndexBuffer();
 
 }
 
 void Engine::ModelMesh::GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& vbv)
 {
 	// 頂点バッファの設定
-	vbvResorce_.IASetVertexBuffers(vbv);
+	vbvResource_.IASetVertexBuffers(vbv);
 	// インデックスバッファ設定
-	indexResorce_.IASetIndexBuffer();
+	indexResource_.IASetIndexBuffer();
 }
 
 
 void Engine::ModelMesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv)
 {
 	// 頂点バッファの設定
-	vbvResorce_.IASetVertexBuffersSlot(vbv);
+	vbvResource_.IASetVertexBuffersSlot(vbv);
 	// インデックスバッファ設定
-	indexResorce_.IASetIndexBuffer();
+	indexResource_.IASetIndexBuffer();
 }
 
 void Engine::ModelMesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2)
 {
 	// 頂点バッファの設定
-	vbvResorce_.IASetVertexBuffersSlot(vbv,vbv2);
+	vbvResource_.IASetVertexBuffersSlot(vbv,vbv2);
 	// インデックスバッファ設定
-	indexResorce_.IASetIndexBuffer();
+	indexResource_.IASetIndexBuffer();
 }

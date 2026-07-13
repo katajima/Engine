@@ -1,6 +1,7 @@
 
 #include "Fade.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 /// <summary>
 /// 初期化
@@ -25,8 +26,8 @@ void Engine::Fade::Initialize(EntityManager* entityManager) {
 void Engine::Fade::Update() {
 	if (status_ == Status::None) return;
 
-	// 時間更新
-	counter_ += 1.0f / 60.0f;
+	// フェード時間はゲーム時間倍率を反映して進める
+	counter_ += MyGame::GameTime();
 
 
 	if (counter_ > duration_) {
@@ -39,21 +40,21 @@ void Engine::Fade::Update() {
 	case Status::FadeIn:// フェードイン
 	{
 		alpha = std::clamp(1.0f - t, 0.0f, 1.0f);
-		
-	} 
+
+	}
 	break;
 	case Status::FadeOut:// フェードアウト
 	{
 		alpha = std::clamp(t, 0.0f, 1.0f);
-	} 
+	}
 	break;
 	}
 	// スプライトサイズ、色更新
 	sprite_->SetSize({ static_cast<float>(WinApp::GetClientWidth()),static_cast<float>(WinApp::GetClientHeight()) });
 	sprite_->SetColor(Color(baseColor_.r, baseColor_.g, baseColor_.b, alpha));
 	sprite_->Update();
-	if (t >= 1.0f) { 
-		Stop(); 
+	if (t >= 1.0f) {
+		Stop();
 	};
 #ifdef _DEBUG
 	ImGui::Begin("UUU");

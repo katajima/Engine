@@ -22,7 +22,7 @@ void Engine::Material::Initialize(DirectXCommon* dxcommon)
 	GetMaterialInstance().shininess_ = 20.0f;
 	GetMaterialInstance().enableLighting_ = true;	// ライティング
 	GetMaterialInstance().useNormalMap_ = false;	// ノーマルマップ
-	GetMaterialInstance().useSpeculerMap_ = false;// スペキュラーマップ
+	GetMaterialInstance().useSpecularMap_ = false;// スペキュラーマップ
 	GetMaterialInstance().useEnvironment_ = false;// 環境マップ
 
 	// GPUデータ
@@ -34,14 +34,14 @@ void Engine::Material::GetCommandListMaterial(int index)
 	cbResource_->SetGraphicsRootConstantBufferView(index);
 }
 
-void Engine::Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex, int environmentIndex)
+void Engine::Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int specularIndex, int environmentIndex)
 {
 	TextureManager* tex = dxCommon->GetTextureManager();
 	auto command = dxCommon->GetCommandList();
 
 	// テクスチャのバインド
 	command->SetGraphicsRootDescriptorTable(indexDiffuse, tex->GetSrvHandleGPU(tex_.diffuseFilePath));
-	
+
 	// ノーマルマップ
 	if (GetMaterialInstance().useNormalMap_) {
 
@@ -49,8 +49,8 @@ void Engine::Material::GetCommandListTexture(int indexDiffuse, int normalIndex, 
 		command->SetGraphicsRootDescriptorTable(9, tex->GetSrvHandleGPU(tex_.normalFilePath));
 	}
 	// スペキュラーマップ
-	if (GetMaterialInstance().useSpeculerMap_) {
-		command->SetGraphicsRootDescriptorTable(speculerIndex, tex->GetSrvHandleGPU(tex_.speculerFilePath));
+	if (GetMaterialInstance().useSpecularMap_) {
+		command->SetGraphicsRootDescriptorTable(specularIndex, tex->GetSrvHandleGPU(tex_.specularFilePath));
 	}
 
 	// 環境マップ
@@ -75,7 +75,7 @@ void Engine::Material::GPUData()
 	cbResource_->Data()->alphaClipping = GetMaterialInstance().alphaClipping_;
 	// ノーマル/スペキュラマップの使用フラグは、OFFになった時もGPUへ必ず反映する
 	cbResource_->Data()->useNormalMap = GetMaterialInstance().useNormalMap_;
-	cbResource_->Data()->useSpeculerMap = GetMaterialInstance().useSpeculerMap_;
+	cbResource_->Data()->useSpecularMap = GetMaterialInstance().useSpecularMap_;
 }
 
 void Engine::Material::LoadTex()
@@ -101,20 +101,20 @@ void Engine::Material::LoadTex()
 		tex_.normalIndex = tex->GetTextureIndexByFilePath(tex_.normalFilePath);
 	}
 
-	
-	if (tex_.speculerFilePath == "") {
-		GetMaterialInstance().useSpeculerMap_ = false;
+
+	if (tex_.specularFilePath == "") {
+		GetMaterialInstance().useSpecularMap_ = false;
 	}
 	else {
-		GetMaterialInstance().useSpeculerMap_ = true;
+		GetMaterialInstance().useSpecularMap_ = true;
 	}
-	
+
 	// スペキュラーマップ
-	if (GetMaterialInstance().useSpeculerMap_) {
+	if (GetMaterialInstance().useSpecularMap_) {
 
-		tex->LoadTexture(tex_.speculerFilePath);
+		tex->LoadTexture(tex_.specularFilePath);
 
-		tex_.speculerIndex = tex->GetTextureIndexByFilePath(tex_.speculerFilePath);
+		tex_.specularIndex = tex->GetTextureIndexByFilePath(tex_.specularFilePath);
 	}
 
 	if (tex_.environmentFilePath == "") {
@@ -142,7 +142,7 @@ void Engine::Material::SetGPUMaterialInstance(const MaterialInstance& materialIn
 	cbResourcePtr->Data()->uvTransform = MakeAffineMatrix(materialInstance.transform.scale, materialInstance.transform.rotate, materialInstance.transform.translate);
 	// ノーマル/スペキュラマップの使用フラグは、OFFになった時もGPUへ必ず反映する
 	cbResourcePtr->Data()->useNormalMap = materialInstance.useNormalMap_;
-	cbResourcePtr->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
+	cbResourcePtr->Data()->useSpecularMap = materialInstance.useSpecularMap_;
 
 
 

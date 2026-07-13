@@ -1,4 +1,4 @@
-﻿// engine
+// engine
 #include"Model.h"
 #include"ModelCommon.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
@@ -23,7 +23,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 	this->dxCommon = dxCommon;						// DX共通クラス
 	this->srvManager = modelCommon->GetSrvManager();// SRV管理クラス
 
-	
+
 	std::string dire = directorypath;
 
 	if (file != "") {
@@ -76,14 +76,14 @@ void Engine::Model::Draw()
 {
 }
 
-void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr)
+void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr)
 {
 	auto commandList = modelCommon->GetCommand()->GetList();
 
 	int i = 0;
 	for (auto& mesh : modelData.mesh)
 	{
-		mesh->material->SetGPUMaterialInstance(matetials[i], cbResourcePtr[i]);
+		mesh->material->SetGPUMaterialInstance(materials[i], cbResourcePtr[i]);
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 

@@ -1,10 +1,11 @@
-﻿#pragma once
+#pragma once
 // C++
 #include <optional>
 #include <memory>
 
 // 自作
 #include <DirectXGame/engine/struct/Structs.h>
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 // 前方宣言
 class EffectSystem;
@@ -106,13 +107,13 @@ namespace Character {
 		float GetStrength() const { return parameters->strength; }
 		// 防御力取得
 		float GetDefense() const { return parameters->defense; }
-		
+
 		// スタミナがあるか
 		bool IsGetStamina() const {
 			return !parameters->stamina.IsEmpty();
 		}
 
-		// 
+		//
 
 		// HP取得
 		Gage& HP() const { return parameters->HP; };
@@ -132,7 +133,7 @@ namespace Character {
 		Type characterType_ = Type::None;							// キャラクターの種類
 		std::unique_ptr<BasicParameters> parameters;				// 基本パラメータ
 
-		float deltaTime_ = 1.0f / 60.0f;
+		float deltaTime_ = ConvertUtility::kDefaultDeltaTime;	// パラメータ回復用の基準デルタタイム
 
 	};
 }

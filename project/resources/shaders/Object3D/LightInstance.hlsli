@@ -1,4 +1,4 @@
-﻿#include"Object3dInstance.hlsli"
+#include"Object3dInstance.hlsli"
 
 static const int kMaxLight = 3;
 
@@ -72,7 +72,7 @@ struct Material
     int useLig;
     int useHem;
     int useNormalMap;
-    int useSpeculerMap;
+    int useSpecularMap;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 
@@ -173,7 +173,7 @@ float3 DirectionalLightFunc(VertexShaderOutput input, float4 textureColor, float
             specularPow = SpecularPow(gDirectionalLight.direction, toEye, normal, gMaterial.shininess);
         }
             
-        if (gMaterial.useSpeculerMap)
+        if (gMaterial.useSpecularMap)
         {
               //  float specPower = g_Specularmap.Sample(sSampler, input.texcoord).r;
             

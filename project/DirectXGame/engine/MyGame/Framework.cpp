@@ -8,7 +8,7 @@ void Engine::Framework::Initialize()
 
 	// Input
 	input_ = std::make_unique<Input>();
-	input_->Intialize(winApp_.get());
+	input_->Initialize(winApp_.get());
 
 	// 音
 	audioManager_ = std::make_unique<AudioManager>();
@@ -17,10 +17,10 @@ void Engine::Framework::Initialize()
 
 	// グローバル
 	globalVariables_ = std::make_unique<GlobalVariables>();
-	
+
 	// DirectX
 	dxCommon_ = std::make_unique<Engine::DirectXCommon>();
-	dxCommon_->Intialize(winApp_.get());
+	dxCommon_->Initialize(winApp_.get());
 	dxCommon_->GetImGuiManager()->SetInput(input_.get());
 
 	// 3D全般
@@ -88,11 +88,11 @@ void Engine::Framework::Update()
 	// Input
 	input_->Update();
 
-	
+
 	// Windowsのメッセージ処理
 	if(winApp_->ProcessMessage()) {
 		// ゲームループを抜ける
-		endRequst_ = true;
+		endRequest_ = true;
 	};
 }
 
@@ -104,7 +104,7 @@ void Engine::Framework::Run()
 		// 毎フレーム更新
 		Update();
 		// 終了リクエストが来たら抜ける
-		if (IsEndRequst()) {
+		if (IsEndRequest()) {
 			break;
 		}
 		// 描画

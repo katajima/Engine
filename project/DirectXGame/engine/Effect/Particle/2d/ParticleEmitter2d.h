@@ -48,7 +48,7 @@ namespace Engine {
 		void SetEnableLighting(int lighting) { enableLighting_ = lighting; }
 		// 出現させるか設定
 		void SetIsEmit(bool is) { isEmit = is; } // 出すか
-	public: // 
+	public: //
 		// カラー設定
 		void SetColorMinMax(Vector4 min, Vector4 max) { emitData_.colorRange.min = min; emitData_.colorRange.max = max; } // カラー
 		// サイズ設定
@@ -67,7 +67,7 @@ namespace Engine {
 		Range<Vector2> range_;	// 出現範囲
 	private:
 		// 固有の更新
-		void EmitUniqe();
+		void EmitUnique();
 
 	private:
 		// 出すか

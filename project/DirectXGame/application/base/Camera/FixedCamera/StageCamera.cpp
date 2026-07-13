@@ -7,7 +7,7 @@ void StageCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->SetFarClip(10000.0f);
+	uniqueCamera_->SetFarClip(Engine::Camera::kDefaultFarClip);	// 共通のFarクリップ距離を設定
 
 	// カメラ位置と回転設定
 	uniqueCamera_->SetTranslate(position);

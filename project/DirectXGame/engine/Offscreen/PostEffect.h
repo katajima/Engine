@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DirectXGame/engine/struct/VertexDeta.h"
+#include "DirectXGame/engine/struct/VertexData.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
 
@@ -59,7 +59,7 @@ namespace Engine {
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 		Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-		
+
 		std::unique_ptr	<ConstantBuffer<VignetteGPU>>	cbVignette_;
 		std::unique_ptr <ConstantBuffer<SmoothigGPU>>	cbSmoothig_;
 		std::unique_ptr <ConstantBuffer<GaussianGPU>>	cbGaussian_;

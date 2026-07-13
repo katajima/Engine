@@ -1,4 +1,4 @@
-﻿#include "RangeBombingSpecial.h"
+#include "RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -30,13 +30,13 @@ void RangeBombingSpecial::Initialize(Engine::EntityManager* entityManager, Engin
 	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
 
 	// シリンダー生成
-	ctlinder_ = std::make_unique<Engine::CylinderPrimitive>();
-	ctlinder_->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.dds");
-	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
+	cylinder_ = std::make_unique<Engine::CylinderPrimitive>();
+	cylinder_->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.dds");
+	cylinder_->Data() = cylinderParam;	//　パラメータ代入
 
 	// レティクル
 	objectReticle_ = entityManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.dds", camera);
-	objectReticle_->SetPrimitive(std::move(ctlinder_));
+	objectReticle_->SetPrimitive(std::move(cylinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	objectReticle_->GetWorldTransform().rotate_ = provisionalData_.rotate;

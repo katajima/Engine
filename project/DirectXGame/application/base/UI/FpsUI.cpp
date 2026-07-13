@@ -14,7 +14,7 @@ void FpsUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityMa
 	fpsCount->SetInput(inputSystem);					// 入力設定
 	fpsCount->SetPos({ 32,48 });				// 位置設定
 	fpsCount->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });	// 最大値サイズ設定
-	fpsCount->SetTextuerSize({ 64,96 });	// テクスチャサイズ設定
+	fpsCount->SetTextureSize({ 64,96 });	// テクスチャサイズ設定
 	fpsCount->SetCountMax(999);				// カウント量設定
 
 }

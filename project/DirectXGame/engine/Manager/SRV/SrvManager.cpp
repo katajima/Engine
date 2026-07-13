@@ -47,12 +47,12 @@ D3D12_GPU_DESCRIPTOR_HANDLE Engine::SrvManager::GetGPUDescriptorHandle(uint32_t 
 	return handleGPU;
 }
 
-void Engine::SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata matadata)
+void Engine::SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata metadata)
 {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = matadata.format;
+	srvDesc.Format = metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	if (matadata.IsCubemap()) {
+	if (metadata.IsCubemap()) {
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 		srvDesc.TextureCube.MostDetailedMip = 0;
 		srvDesc.TextureCube.MipLevels = UINT_MAX;
@@ -60,10 +60,10 @@ void Engine::SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource
 	}
 	else {
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-		srvDesc.Texture2D.MipLevels = UINT(matadata.mipLevels);
+		srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 	}
 
-	
+
 	dxgiDevice->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
@@ -123,7 +123,7 @@ void Engine::SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex,
 	command->GetList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
 }
 
-bool Engine::SrvManager::IsMaxTextuer()
+bool Engine::SrvManager::IsMaxTexture()
 {
 	if (kMaxSRVCount > useIndex_) {
 		return true;

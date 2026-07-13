@@ -33,7 +33,7 @@ enum class UIMeterType {
 
 
 // ペア方向
-enum class UIPairDrectionType {
+enum class UIPairDirectionType {
 	Top,
 	Down,
 	Right,

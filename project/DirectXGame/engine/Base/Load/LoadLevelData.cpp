@@ -25,6 +25,7 @@ void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::Mod
 	// 凍結してフルパスを得る 
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
+
 	levelData_ = std::make_unique<LevelData>();
 	// "objects"の全オブジェクトを走査 
 	for (nlohmann::json& object : deserialized["objects"]) {

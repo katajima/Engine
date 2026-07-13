@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 #include "vector"
 #include "string"
@@ -16,7 +17,7 @@ public:
 	};
 
 	// ダメージの数値を連撃の1つ1つで変えるのか
-	enum OneHitDamegeType {
+	enum OneHitDamageType {
 		kConstant,	// 一定のダメージ(変化がない)
 		kCustom,	// 1つ1つで変える
 	};
@@ -79,10 +80,10 @@ public:
 	// 連撃の実行状態を初期化する
 	void Reset();
 	// 連撃内のダメージ変更方式を取得する
-	OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
+	OneHitDamageType GetOneHitDamageType() const { return oneHitDamageType; }
 
 private:
-	OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 各ヒットのダメージ方式
+	OneHitDamageType oneHitDamageType = OneHitDamageType::kConstant;	// 各ヒットのダメージ方式
 	float interval = 0.1f;		// ダメージを発生させる間隔
 	int num = 2;				// ダメージを発生させる回数
 	std::vector<float> damages;	// ヒットごとのダメージ
@@ -212,9 +213,9 @@ struct HitReactionData {
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
 	// ヒットストップ（相手）
-	float targetHitStopTime = 3.0f / 60.0f;
+	float targetHitStopTime = 3.0f * ConvertUtility::kDefaultDeltaTime;
 	// ヒットストップ（自分）
-	float selfHitStopTime = 3.0f / 60.0f;
+	float selfHitStopTime = 3.0f * ConvertUtility::kDefaultDeltaTime;
 	// 一回しかヒットストップしない(自分)
 	bool isSingleHitStop = true;
 	// 自分側ヒットストップの発生ルール

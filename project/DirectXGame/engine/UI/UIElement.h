@@ -55,11 +55,11 @@ namespace Engine {
 		std::string mainName_;
 		Vector2 leftTopPos_{};	// 画面左上位置(ImGuiImage)
 		Vector2 ratio_{};		// 画面サイズとImGuiImageにした比率
-		bool isDebuck_ = false;	// デバッグか
+		bool isDebug_ = false;	// デバッグか
 		int instance_ = 1;		// 生成量
 		Vector2 pos_ = {};		// 位置
 		bool useNameSprite_ = false;
-		
+
 	};
 
 	// 通常
@@ -179,7 +179,7 @@ namespace Engine {
 	private:
 		Vector2 size_ = {};
 		Vector2 offsetSize = {};
-		//Vector2 
+		//Vector2
 		std::unique_ptr<BaseSprite> meterSprite;
 		std::unique_ptr<BaseSprite> backgroundSprite;
 		std::unique_ptr<BaseSprite> nameSprite_;
@@ -202,7 +202,7 @@ namespace Engine {
 		// 間隔設定
 		void SetOffset(float offset) { offset_ = offset; }
 		// ペアの方向設定
-		void SetUIPairDrectionType(UIPairDrectionType type) { type_ = type; }
+		void SetUIPairDirectionType(UIPairDirectionType type) { type_ = type; }
 	protected:
 		// 固有描画
 		void UniqueDraw()override;
@@ -210,7 +210,7 @@ namespace Engine {
 		void InitSprite()override;
 	private:
 		float offset_ = 10.0f;
-		UIPairDrectionType type_ = UIPairDrectionType::Right;
+		UIPairDirectionType type_ = UIPairDirectionType::Right;
 		std::unique_ptr<BaseSprite> firstSprite;
 		std::unique_ptr<BaseSprite> secondSprite;
 	};
@@ -247,7 +247,7 @@ namespace Engine {
 			}
 		}
 		// テクスチャサイズ設定
-		void SetTextuerSize(const Vector2& size) {
+		void SetTextureSize(const Vector2& size) {
 			texSize_ = size;
 			for (auto& count : countSprite_) {
 				count->GetSprite()->SetTextureSize(size);

@@ -13,7 +13,7 @@ void ResultScoreUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	Engine::UICount* scoreUI = GetUICount("scoreUI");
 	scoreUI->SetMaxSize(uiSize_, offset);	// 最大サイズ
 	
-	scoreUI->SetTextuerSize(uiSize_);		// テクスチャサイズ
+	scoreUI->SetTextureSize(uiSize_);		// テクスチャサイズ
 	scoreUI->SetCountMax(99999);							// カウント最大数
 	scoreUI->SetCountColor(uiColor_);	// 色指定
 	scoreUI->GetNameSprite()->SetTextureName("resources/Texture/text/textScore.dds");

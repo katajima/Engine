@@ -17,7 +17,7 @@ void Engine::DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvMan
 
 void Engine::DepthStencil::ClearDepthView()
 {
-	
+
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // Format。基本的にはResourceに合わせる
@@ -27,7 +27,7 @@ void Engine::DepthStencil::ClearDepthView()
 	dxgiDevice->GetDevice()->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvManager->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetCPUHandleDepthStencilResorce()
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetCPUHandleDepthStencilResource()
 {
 	return dsvManager->GetCPUDescriptorHandle(dsvIndex_);
 }
@@ -92,12 +92,12 @@ void Engine::DepthStencil::CreateDepthStencilView()
 	);
 
 	srvIndex_ = srvManager->Allocate();
-	
+
 	// SRVを作成
-	DirectX::TexMetadata matadata{};
-	matadata.format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	matadata.mipLevels = 1;
-	srvManager->CreateSRVforTexture2D(srvIndex_, depthStencilResource_.Get(), matadata);
+	DirectX::TexMetadata metadata{};
+	metadata.format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	metadata.mipLevels = 1;
+	srvManager->CreateSRVforTexture2D(srvIndex_, depthStencilResource_.Get(), metadata);
 
 }
 

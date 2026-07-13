@@ -74,7 +74,7 @@ namespace Engine {
 
 
 		// 固有の更新
-		virtual void UniqeUpdate() = 0;
+		virtual void UniqueUpdate() = 0;
 
 	public:
 		// メッシュ初期化
@@ -106,7 +106,7 @@ namespace Engine {
 
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapePlane plane;
 		ShapeParameter::ShapePlane prePlane;
@@ -121,7 +121,7 @@ namespace Engine {
 		void MeshInitialize() override { triangle.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeTriangle triangle;
 		ShapeParameter::ShapeTriangle preTriangle;
@@ -136,7 +136,7 @@ namespace Engine {
 		void MeshInitialize() override { circle.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Circle circle;
 		ShapeParameter::Circle preCircle;
@@ -151,7 +151,7 @@ namespace Engine {
 		void MeshInitialize() override { cube.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeCube cube;
 		ShapeParameter::ShapeCube preCube;
@@ -166,7 +166,7 @@ namespace Engine {
 		void MeshInitialize() override { star.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Star star;
 		ShapeParameter::Star preStar;
@@ -181,7 +181,7 @@ namespace Engine {
 		void MeshInitialize() override { crescent.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Crescent crescent;
 		ShapeParameter::Crescent preCrescent;
@@ -196,7 +196,7 @@ namespace Engine {
 		void MeshInitialize() override { ring.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Ring ring;
 		ShapeParameter::Ring preRing;
@@ -211,7 +211,7 @@ namespace Engine {
 		void MeshInitialize() override { cross.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeCross cross;
 		ShapeParameter::ShapeCross preCross;
@@ -226,7 +226,7 @@ namespace Engine {
 		void MeshInitialize() override { cylinder.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Cylinder cylinder;
 		ShapeParameter::Cylinder preCylinder;
@@ -241,7 +241,7 @@ namespace Engine {
 		void MeshInitialize() override { sphere.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeSphere sphere;
 		ShapeParameter::ShapeSphere preSphere;
@@ -256,7 +256,7 @@ namespace Engine {
 		void MeshInitialize() override { arrow.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeArrow arrow;
 		ShapeParameter::ShapeArrow preArrow;
@@ -271,7 +271,7 @@ namespace Engine {
 		void MeshInitialize() override { tube.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Tube tube;
 		ShapeParameter::Tube preTube;
@@ -286,7 +286,7 @@ namespace Engine {
 		void MeshInitialize() override { pyramid.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Pyramid pyramid;
 		ShapeParameter::Pyramid prePyramid;
@@ -301,7 +301,7 @@ namespace Engine {
 		void MeshInitialize() override { torus.Create(mesh.get()); };
 	private:
 		// 固有の更新
-		void UniqeUpdate() override;
+		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Torus torus;
 		ShapeParameter::Torus preTorus;

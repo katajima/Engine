@@ -40,14 +40,14 @@ public:
 	void SetReticleParent(Engine::WorldTransform* parent);
 
 public:
-	
+
 
 	// 描画するか
 	void SetIsDraw(bool is);
 	// ステージ設定
 	void SetStage(MainStage* stage) { this->stage = stage;};
 
-	
+
 
 	// 半径設定
 	void SetRadius(float rad);
@@ -55,7 +55,7 @@ public:
 	// 半径爆心
 	float GetRadius() const { return dataRange_.reticleRad_; };
 
-	// 爆心位置 
+	// 爆心位置
 	Vector3 GetRangeBombingPos() const { return dataRange_.rangeBombingPos; }
 
 	// フォローカメラと弾マネージャー設定
@@ -69,9 +69,9 @@ private:
 	MainStage* stage = nullptr;
 private:
 	Engine::Object3d* objectReticle_ = nullptr;				// オブジェクトレティクル
-	std::unique_ptr<Engine::CylinderPrimitive> ctlinder_ = nullptr;
+	std::unique_ptr<Engine::CylinderPrimitive> cylinder_ = nullptr;
 private:
-	
+
 
 
 	struct Data {
@@ -85,7 +85,7 @@ private:
 		Vector3 rangeBombingPos{};				// レンジボムの位置
 	};
 	Data dataRange_;
-	
+
 
 private: // 一旦
 

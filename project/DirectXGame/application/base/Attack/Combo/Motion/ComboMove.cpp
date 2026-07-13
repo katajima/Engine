@@ -6,6 +6,7 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 #include <algorithm>
 #include <cmath>
 
@@ -15,9 +16,9 @@ namespace Combo {
 	void ComboMove::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		moveComponent = owner->GetMoveComponent();
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
-		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
+		lockOnSystem = owner->GetAttackController()->GetLockOnSystem();
 		moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
-		
+
 		// カメラ取得
 		if(owner->GetCameraManager())
 		camera = owner->GetCameraManager()->GetCamera();
@@ -27,11 +28,11 @@ namespace Combo {
 		moveInertiaVelocity_.y = 0.0f;
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData;
-		traget = lockOnSystem->SoftLockOn();
+		target = lockOnSystem->SoftLockOn();
 		targetWorldTransform = nullptr;
-		if (traget) {
-			targetWorldTransform = traget->GetConstWorldTransform();
-			targetPos_ = traget->GetWorldPosition();
+		if (target) {
+			targetWorldTransform = target->GetConstWorldTransform();
+			targetPos_ = target->GetWorldPosition();
 		}
 
 		stickDirection_ = ctx.worldStickDirection;
@@ -124,8 +125,8 @@ namespace Combo {
 			data_.moveInertiaGroundFriction : data_.moveInertiaAirResistance;
 		const float clampedResistance = std::clamp(resistance, 0.0f, 1.0f);
 
-		// 60FPS基準の減衰率を経過時間に合わせて累乗し、フレームレート差を吸収する
-		const float referenceFrameCount = dt * 60.0f;
+		// 既定FPS基準の減衰率を経過時間に合わせて累乗し、フレームレート差を吸収する
+		const float referenceFrameCount = dt * ConvertUtility::kDefaultFps;
 		const float damping = std::pow(1.0f - clampedResistance, referenceFrameCount);
 		moveInertiaVelocity_ *= damping;
 	}
@@ -151,8 +152,8 @@ namespace Combo {
 			case MoveType::kForward:
 				break;
 
-			case MoveType::kTraget:
-				if (!traget) {
+			case MoveType::kTarget:
+				if (!target) {
 					// ターゲットなし上書きがない場合は、従来通りターゲット移動を発生させない
 					if (!data_.noTargetMove.enabled) {
 						canMove = false;
@@ -171,7 +172,7 @@ namespace Combo {
 			}
 
 			if (canMove) {
-				if (data_.moveType != MoveType::kTraget || !traget) {
+				if (data_.moveType != MoveType::kTarget || !target) {
 					request.velocity = Multiply(moveDirection_, dt);
 				}
 				// 攻撃ごとの踏み込み感を作るため、時間進行に応じた速度倍率を掛ける
@@ -208,9 +209,9 @@ namespace Combo {
 			break;
 		}
 
-		case MoveType::kTraget: // ターゲット方向
+		case MoveType::kTarget: // ターゲット方向
 		{
-			if (traget) {
+			if (target) {
 				direction_ = Subtract(targetPos_, worldTransform->translate_);
 
 				if (data_.isFlattenTargetDirection) {
@@ -290,7 +291,7 @@ namespace Combo {
 	}
 
 	bool ComboMove::ApplyTargetMove(MoveRequest& request, float dt) {
-		if (!traget) {
+		if (!target) {
 			return false;
 		}
 
@@ -382,44 +383,44 @@ namespace Combo {
 	}
 
 	Vector3 ComboMove::GetActiveMoveSpeed() const {
-		if (traget && data_.targetMove.enabled) {
+		if (target && data_.targetMove.enabled) {
 			return data_.targetMove.moveSpeed;
 		}
-		if (!traget && data_.noTargetMove.enabled) {
+		if (!target && data_.noTargetMove.enabled) {
 			return data_.noTargetMove.moveSpeed;
 		}
 		return data_.moveSpeed;
 	}
 
 	Vector3 ComboMove::GetActiveLocalMoveVector() const {
-		if (traget && data_.targetMove.enabled) {
+		if (target && data_.targetMove.enabled) {
 			return data_.targetMove.localMoveVector;
 		}
-		if (!traget && data_.noTargetMove.enabled) {
+		if (!target && data_.noTargetMove.enabled) {
 			return data_.noTargetMove.localMoveVector;
 		}
 		return data_.localMoveVector;
 	}
 
 	bool ComboMove::GetActiveNormalizeLocalMove() const {
-		if (traget && data_.targetMove.enabled) {
+		if (target && data_.targetMove.enabled) {
 			return data_.targetMove.isNormalizeLocalMove;
 		}
-		if (!traget && data_.noTargetMove.enabled) {
+		if (!target && data_.noTargetMove.enabled) {
 			return data_.noTargetMove.isNormalizeLocalMove;
 		}
 		return data_.isNormalizeLocalMove;
 	}
 
 	TargetMoveType ComboMove::GetActiveTargetMoveType() const {
-		if (traget && data_.targetMove.enabled) {
+		if (target && data_.targetMove.enabled) {
 			return data_.targetMove.targetMoveType;
 		}
 		return data_.lockOnData.targetMoveType;
 	}
 
 	float ComboMove::GetActiveMoveTargetRadius() const {
-		if (traget && data_.targetMove.enabled) {
+		if (target && data_.targetMove.enabled) {
 			return data_.targetMove.moveTargetRadius;
 		}
 		return data_.lockOnData.moveTargetRadius;

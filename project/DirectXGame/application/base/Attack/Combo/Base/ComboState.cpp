@@ -1,4 +1,4 @@
-﻿#include "ComboState.h"
+#include "ComboState.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
@@ -12,7 +12,7 @@ namespace Combo {
 
 	// 開始
 	void NodeState::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
-		// 時間初期化 
+		// 時間初期化
 		timeInState = 0.0f;
 		hasHit_ = false;
 		// アニメーションの設定
@@ -49,8 +49,8 @@ namespace Combo {
 		const bool isLockOn =
 			owner &&
 			owner->GetAttackController() &&
-			owner->GetAttackController()->GeyLockOnSysutem() &&
-			owner->GetAttackController()->GeyLockOnSysutem()->IsLockOn();
+			owner->GetAttackController()->GetLockOnSystem() &&
+			owner->GetAttackController()->GetLockOnSystem()->IsLockOn();
 		const std::weak_ptr<NodeState>& lockOnTarget = isLockOn ? it->second.lockOn : it->second.noLockOn;
 		if (auto next = lockOnTarget.lock()) {
 			// ロックオン用の分岐が設定されている場合は、地上/空中やヒット状態より優先する
@@ -145,7 +145,7 @@ namespace Combo {
 		// コンボ終了 → 通常ステートに戻す
 		owner->GetWeapon()->SetTrailEmit(false);
 		if (ctx.inputData.jumpTrigger) {
-			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump); 
+			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump);
 		}
 		else {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Idle);

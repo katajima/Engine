@@ -54,7 +54,7 @@ void Engine::BaseGpuParticleEmitter::Init(DirectXCommon* dxCommon, LineCommon* l
 
 
 	// 派生クラス固有の初期化
-	InitUniqe();
+	InitUnique();
 }
 
 void Engine::BaseGpuParticleEmitter::UpdateImGui()
@@ -170,7 +170,7 @@ void Engine::BaseGpuParticleEmitter::UpdateImGui()
 		ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetTextureManager()->GetSrvHandleGPU(group->GetTextureName()).ptr);
 		ImGui::Image(imguiTexture, ImVec2(100, 100));
 		// 派生クラス固有の更新
-		UpdateImGuiUniqe();
+		UpdateImGuiUnique();
 		ImGui::TreePop();
 	}
 
@@ -204,7 +204,7 @@ void Engine::BaseGpuParticleEmitter::Update(float deltaTime)
 	// グループがあるなら
 	if (group) {
 		// 派生クラス固有の更新
-		UpdateUniqe(deltaTime);
+		UpdateUnique(deltaTime);
 		int count = int(cbEmitterCommon_.count);
 		int threadGroupCount = (count + count_ - 1) / count_;
 	}
@@ -216,7 +216,7 @@ void Engine::BaseGpuParticleEmitter::Update(float deltaTime)
 
 #pragma region Sphere
 
-void Engine::GpuParticleEmitterSphere::InitUniqe()
+void Engine::GpuParticleEmitterSphere::InitUnique()
 {
 	// 球エミッター
 	cbEmitterCommon_.sphereRadius = 1.0f;
@@ -226,11 +226,11 @@ void Engine::GpuParticleEmitterSphere::InitUniqe()
 	cbEmitterCommon_.shapeType = type_;
 }
 
-void Engine::GpuParticleEmitterSphere::UpdateUniqe(float deltaTime)
+void Engine::GpuParticleEmitterSphere::UpdateUnique(float deltaTime)
 {
 }
 
-void Engine::GpuParticleEmitterSphere::UpdateImGuiUniqe()
+void Engine::GpuParticleEmitterSphere::UpdateImGuiUnique()
 {
 	ImGui::Separator();
 	ImGui::Text("Sphere");
@@ -248,7 +248,7 @@ void Engine::GpuParticleEmitterSphere::DrawLine()
 
 
 #pragma region AABB
-void Engine::GpuParticleEmitterAABB::InitUniqe()
+void Engine::GpuParticleEmitterAABB::InitUnique()
 {
 	// 球エミッター
 	cbEmitterCommon_.size = Vector3{ 1.0f ,1.0f,1.0f };
@@ -259,12 +259,12 @@ void Engine::GpuParticleEmitterAABB::InitUniqe()
 	cbEmitterCommon_.shapeType = type_;
 }
 
-void Engine::GpuParticleEmitterAABB::UpdateUniqe(float deltaTime)
+void Engine::GpuParticleEmitterAABB::UpdateUnique(float deltaTime)
 {
 	//cbEmitterAABB_.SetComputeRootConstantBufferView(1);		// エミッター
 }
 
-void Engine::GpuParticleEmitterAABB::UpdateImGuiUniqe()
+void Engine::GpuParticleEmitterAABB::UpdateImGuiUnique()
 {
 	ImGui::Separator();
 	ImGui::Text("AABB");
@@ -283,25 +283,25 @@ void Engine::GpuParticleEmitterAABB::DrawLine()
 
 
 #pragma region Point
-void Engine::GpuParticleEmitterPoint::InitUniqe()
+void Engine::GpuParticleEmitterPoint::InitUnique()
 {
 	// 球エミッター
-	
+
 	type_ = EmitterType::Point;
 	cbEmitterCommon_.shapeType = type_;
 }
 
-void Engine::GpuParticleEmitterPoint::UpdateUniqe(float deltaTime)
+void Engine::GpuParticleEmitterPoint::UpdateUnique(float deltaTime)
 {
 	//cbEmitterPoint_.SetComputeRootConstantBufferView(1);		// エミッター
 }
 
-void Engine::GpuParticleEmitterPoint::UpdateImGuiUniqe()
+void Engine::GpuParticleEmitterPoint::UpdateImGuiUnique()
 {
 	ImGui::Separator();
 	ImGui::Text("Point");
 	ImGui::Separator();
-	
+
 	ImGui::Separator();
 	ImGui::Text("Interpolation");
 	ImGui::Separator();

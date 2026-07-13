@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -217,7 +217,7 @@ namespace Combo {
 		bool IsComboFinished() const {
 			return comboStateMachine_->IsComboFinished();
 		}
-		void SertIsDebug(bool is) { isDebug = is; }
+		void SetIsDebug(bool is) { isDebug = is; }
 	public:
 		// データ設定
 		void SetData(ComboData& data, const GlobalData& gData);
@@ -256,7 +256,7 @@ namespace Combo {
 		void UpdateCooldowns(float dt);
 		void StartCooldown(const std::shared_ptr<NodeState>& node);
 
-		
+
 	private:
 		// コンボステートマシーン
 		std::unique_ptr<StateMachine> comboStateMachine_ = nullptr;
@@ -269,7 +269,7 @@ namespace Combo {
 		//
 		std::string name = "";
 
-		// 保存データマップ 
+		// 保存データマップ
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;

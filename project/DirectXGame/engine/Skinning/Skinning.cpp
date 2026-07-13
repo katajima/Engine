@@ -1,7 +1,7 @@
-﻿#include "Skinning.h"
+#include "Skinning.h"
 
 
-void Engine::SkinningConmmon::Initialize(DirectXCommon* dxCommon)
+void Engine::SkinningCommon::Initialize(DirectXCommon* dxCommon)
 {
 	this->dxCommon = dxCommon;
 
@@ -18,7 +18,7 @@ void Engine::SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 	CreateShadowMapPipeline();
 }
 
-void Engine::SkinningConmmon::CreateRootSignature()
+void Engine::SkinningCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE computeDescriptorRange[4] = {};
 	PSOFunction::SetDescriptorRange(computeDescriptorRange[0], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Palette
@@ -29,18 +29,18 @@ void Engine::SkinningConmmon::CreateRootSignature()
 
 
 	D3D12_ROOT_PARAMETER computeRootParameters[5] = {};
-	PSOFunction::SetRootParameter(computeRootParameters[0],0, D3D12_SHADER_VISIBILITY_ALL,D3D12_ROOT_PARAMETER_TYPE_CBV); // gSkinningInfomation
+	PSOFunction::SetRootParameter(computeRootParameters[0],0, D3D12_SHADER_VISIBILITY_ALL,D3D12_ROOT_PARAMETER_TYPE_CBV); // gSkinningInformation
 
 	PSOFunction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL); //Palette
 	PSOFunction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL); //InputVertices
 	PSOFunction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL); //Influence
 	PSOFunction::SetRootParameter(computeRootParameters[4], computeDescriptorRange[3], D3D12_SHADER_VISIBILITY_ALL); //OutputVertices
-	
+
 
 	csPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 }
 
-void Engine::SkinningConmmon::CreateGraphicsPipeline()
+void Engine::SkinningCommon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 
@@ -123,42 +123,42 @@ void Engine::SkinningConmmon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("INDEX", 0, DXGI_FORMAT_R32G32B32A32_SINT, 1);
 
 
-	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Skining/NewSkinning.VS.hlsl");
-	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Skining/SkinningObject3d.PS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Skinning/NewSkinning.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Skinning/SkinningObject3d.PS.hlsl");
 
 
 
 	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_SOLID_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
 	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
-	
+
 	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_SOLID_BACK, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
 	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
 
 	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_WIREFRAME_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
 	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
-	
+
 	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
 	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
 
 	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_SOLID_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
 	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
-	
+
 	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_SOLID_NONE, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
 	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
 
 	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_WIREFRAME_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
 	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
-	
+
 	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
 	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
 
 
-	csPsoManager_->SetShaderFileName(L"resources/shaders/Skining/Skinning.CS.hlsl");
-	
+	csPsoManager_->SetShaderFileName(L"resources/shaders/Skinning/Skinning.CS.hlsl");
+
 	csPsoManager_->ComputePipelineState();
 }
 
-void Engine::SkinningConmmon::CreateShadowMapPipeline()
+void Engine::SkinningCommon::CreateShadowMapPipeline()
 {
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	PSOFunction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -177,7 +177,7 @@ void Engine::SkinningConmmon::CreateShadowMapPipeline()
 	psoManager_->CreatePso(PSOType::ShadowMap, rootParameters, _countof(rootParameters), nullptr, 0,
 		D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Skining/NewSkinning.VS.hlsl");
-	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Skining/SkinningObject3d.PS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Skinning/NewSkinning.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Skinning/SkinningObject3d.PS.hlsl");
 	psoManager_->SetRenderTargetFormats(1, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, DXGI_FORMAT_D24_UNORM_S8_UINT);
 }

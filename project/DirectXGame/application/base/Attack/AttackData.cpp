@@ -105,7 +105,7 @@ void Duration::Reset() {
 	isFinish = false;
 }
 
-// ダメージ取得 
+// ダメージ取得
 float Duration::GetDamage() const {
 	return damage;
 };
@@ -141,7 +141,7 @@ void Continuous::Reset() {
 float Continuous::GetDamage() const
 {
 	float damage = 0;
-	switch (oneHitDamegeType)
+	switch (oneHitDamageType)
 	{
 	case DamageData::kConstant:	// 一定
 		damage = this->damage;

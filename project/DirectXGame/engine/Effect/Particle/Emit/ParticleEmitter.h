@@ -11,7 +11,7 @@ namespace Engine {
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 	};
@@ -23,13 +23,13 @@ namespace Engine {
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 		// 範囲設定
 		void SetRange(Vector3 min, Vector3 max);
@@ -45,13 +45,13 @@ namespace Engine {
 
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 		// 半径設定
 		void SetRadius(float radius) { radius_ = radius; }
@@ -66,15 +66,15 @@ namespace Engine {
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// 固有更新
-		void UpdateUniqe() override;
+		void UpdateUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 		// 半径設定
 		void SetRadius(float radius) { corner.radius = radius; }
@@ -91,13 +91,13 @@ namespace Engine {
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 		// セグメント設定
 		void SetSegment(Vector3 origin, Vector3 end);
@@ -114,13 +114,13 @@ namespace Engine {
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 		// コントロールポイント追加
 		void AddControlPoints(const Vector3& pos) { controlPoints.push_back(pos); }
@@ -140,13 +140,13 @@ namespace Engine {
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 		// 頂点設定
 		void SetTriangle(Triangle triangle) { triangle_ = triangle; }
@@ -164,13 +164,13 @@ namespace Engine {
 
 	private:
 		// パーティクル発生
-		void EmitUniqe() override;
+		void EmitUnique() override;
 		// デバックImGui
 		void DebugImGui() override;
 		// エミッターライン描画
 		void DrawEmitterLine() override;
 		// グローバルバリアブル適応
-		void ApplyGlobalVariablesUniqe() override;
+		void ApplyGlobalVariablesUnique() override;
 	public:
 
 	private:

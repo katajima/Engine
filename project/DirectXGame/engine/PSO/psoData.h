@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "PSOFunction.h"
 
 
@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/math/MathFunctions.h"
 
 namespace Engine {
-	// 
+	//
 	enum class PSOType {
 		UvInterpolation_MODE_SOLID_BACK,		// UV補間ありソリッド(背面カリング)
 		NoUvInterpolation_MODE_SOLID_BACK,		// UV補間なしソリッド(背面カリング)
@@ -37,7 +37,7 @@ namespace Engine {
 	{
 		MODE_ADD,
 		MODE_SUBTRACT,
-		MODE_MUlLIPLY,
+		MODE_MULTIPLY,
 	};
 
 

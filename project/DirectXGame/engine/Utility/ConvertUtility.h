@@ -8,6 +8,11 @@
 // 変換
 namespace ConvertUtility
 {
+	// フレーム基準の変換で使う既定FPS
+	inline constexpr float kDefaultFps = 60.0f;
+	// 既定FPSから求める基準デルタタイム
+	inline constexpr float kDefaultDeltaTime = 1.0f / kDefaultFps;
+
 	// Vector4 to Vector3
 	static Vector3 ToVector3(const Vector4& vec4)
 	{
@@ -83,7 +88,7 @@ namespace ConvertUtility
 	static float ToFloat(const uint32_t& v) {
 		return static_cast<float>(v);
 	}
-	
+
 	// int to bool
 	static bool ToBool(const int& v) {
 		return v != 0;
@@ -100,11 +105,11 @@ namespace ConvertUtility
 		return static_cast<float>(timeInMilliseconds) / 1000.0f;
 	}
 	// フレームから秒数に変換
-	static float FramesToSeconds(int frameCount, float fps = 60.0f) {
+	static float FramesToSeconds(int frameCount, float fps = kDefaultFps) {
 		return static_cast<float>(frameCount) / fps;
 	}
 	// フレーム数に変換
-	static int SecondsToFrames(float seconds, float fps)
+	static int SecondsToFrames(float seconds, float fps = kDefaultFps)
 	{
 		return static_cast<int>(seconds * fps);
 	}

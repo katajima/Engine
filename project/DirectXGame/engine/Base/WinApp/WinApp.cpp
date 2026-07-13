@@ -31,7 +31,7 @@ LRESULT CALLBACK Engine::WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, 
 		}
 		return 0;
 	}
-	if (isFnish_) {
+	if (isFinish_) {
 
 		//OSに応じて、アプリの終了を伝える
 		PostQuitMessage(0);

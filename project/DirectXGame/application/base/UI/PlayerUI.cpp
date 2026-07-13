@@ -1,4 +1,4 @@
-﻿#include "PlayerUI.h"
+#include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
@@ -25,7 +25,7 @@ void PlayerUI::Draw()
 {
 	// 描画
 	DrawUIElement();
-	
+
 
 	// テキストMAX
 	if (isTextMax_) {
@@ -45,8 +45,8 @@ void PlayerUI::InitializeOperationUI() {
 	InitUIPair("normalAttack", attackTextData.pos);
 	Engine::UIPair* normalAttackPair = GetUIPair("normalAttack");
 	normalAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
-	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
+	normalAttackPair->SetUIPairDirectionType(UIPairDirectionType::Right);	// 右方向
+	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); //
 	normalAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
 	normalAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
 	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
@@ -54,22 +54,22 @@ void PlayerUI::InitializeOperationUI() {
 	normalAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
 	// 通常攻撃UI初期化
-	InitUIPair("havyAttack", attackTextData.pos2);
-	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
-	havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
-	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds"); // 
-	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
-	havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
-	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
-	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
-	havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
+	InitUIPair("heavyAttack", attackTextData.pos2);
+	Engine::UIPair* heavyAttackPair = GetUIPair("heavyAttack");
+	heavyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
+	heavyAttackPair->SetUIPairDirectionType(UIPairDirectionType::Right);	// 右方向
+	heavyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds"); //
+	heavyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
+	heavyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
+	heavyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
+	heavyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
+	heavyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
 	// 必殺技UI初期化
 	InitUIPair("special", spTextData.pos + Vector2{0,50});
 	Engine::UIPair* specialPair = GetUIPair("special");
 	specialPair->SetOffset(spTextData.offset);
-	specialPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	specialPair->SetUIPairDirectionType(UIPairDirectionType::Right);			// 右方向
 	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_rb.dds");
 	specialPair->GetFirstSprite()->SetAnchorPoint(spTextData.anchorPoint);			// アンカーポイント設定
 	specialPair->GetFirstSprite()->SetSize(spTextData.size);				// サイズ設定
@@ -85,7 +85,7 @@ void PlayerUI::InitializeOperationUI() {
 	InitUIPair("jump", jumpTextData.pos + Vector2{ 0,100 });
 	Engine::UIPair* jumpPair = GetUIPair("jump");
 	jumpPair->SetOffset(jumpTextData.offset);
-	jumpPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	jumpPair->SetUIPairDirectionType(UIPairDirectionType::Right);			// 右方向
 	jumpPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_a.dds");
 	jumpPair->GetFirstSprite()->SetAnchorPoint(jumpTextData.anchorPoint);			// アンカーポイント設定
 	jumpPair->GetFirstSprite()->SetSize(jumpTextData.size);				// サイズ設定
@@ -100,7 +100,7 @@ void PlayerUI::InitializeOperationUI() {
 	InitUIPair("skill", skillTextData.pos + Vector2{ 0,150 });
 	Engine::UIPair* skillPair = GetUIPair("skill");
 	skillPair->SetOffset(skillTextData.offset);
-	skillPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	skillPair->SetUIPairDirectionType(UIPairDirectionType::Right);			// 右方向
 	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds");
 	skillPair->GetFirstSprite()->SetAnchorPoint(skillTextData.anchorPoint);			// アンカーポイント設定
 	skillPair->GetFirstSprite()->SetSize(skillTextData.size);				// サイズ設定
@@ -114,12 +114,12 @@ void PlayerUI::InitializeOperationUI() {
 	InitUIPair("evade", evadeTextData.pos + Vector2{ 0,200 });
 	Engine::UIPair* evadePair = GetUIPair("evade");
 	evadePair->SetOffset(evadeTextData.offset);
-	evadePair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	evadePair->SetUIPairDirectionType(UIPairDirectionType::Right);			// 右方向
 	evadePair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lb.dds");
 	evadePair->GetFirstSprite()->SetAnchorPoint(evadeTextData.anchorPoint);			// アンカーポイント設定
 	evadePair->GetFirstSprite()->SetSize(evadeTextData.size);				// サイズ設定
 	evadePair->GetFirstSprite()->SetColor(evadeTextData.color);	// 色設定
-	evadePair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
+	evadePair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dash.dds");
 	evadePair->GetSecondSprite()->SetAnchorPoint(evadeTextData.anchorPoint2);			// アンカーポイント設定
 	evadePair->GetSecondSprite()->SetSize(evadeTextData.size2);						// サイズ設定
 	evadePair->GetSecondSprite()->SetColor(evadeTextData.color);	// 色設定
@@ -143,15 +143,15 @@ void PlayerUI::InitializePlayerUI() {
 	// 初期化スペシャルUI
 	spSpriteData.color = { 0,0,1,1 };
 	spSpriteData.maxMeter = 20.0f;
-	InitUIMeter("SpecailBer", spSpriteData.pos + Vector2{ 0,50 }, true);
-	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");
-	specailBer->SetMaxSize(spSpriteData.size, spSpriteData.offset);		// 最大サイズ
-	specailBer->SetMeterMinMax(0.0f, spSpriteData.maxMeter);					// メータ最大値最小値
-	specailBer->GetMeterSprite()->SetColor(spSpriteData.color);				// 色指定
-	specailBer->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	specailBer->GetNameSprite()->SetTextureName("resources/Texture/text/SP.dds");	// 次のスプライト設定
-	specailBer->GetNameSprite()->SetSize(spSpriteData.nameSize);				// サイズ設定
-	specailBer->GetNameSprite()->SetColor(spSpriteData.nameColor);			// 色指定
+	InitUIMeter("SpecialBar", spSpriteData.pos + Vector2{ 0,50 }, true);
+	Engine::UIMeter* specialBar = GetUIMeter("SpecialBar");
+	specialBar->SetMaxSize(spSpriteData.size, spSpriteData.offset);		// 最大サイズ
+	specialBar->SetMeterMinMax(0.0f, spSpriteData.maxMeter);					// メータ最大値最小値
+	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);				// 色指定
+	specialBar->SetMeterType(UIMeterType::Left);									// メータの増える方向
+	specialBar->GetNameSprite()->SetTextureName("resources/Texture/text/SP.dds");	// 次のスプライト設定
+	specialBar->GetNameSprite()->SetSize(spSpriteData.nameSize);				// サイズ設定
+	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);			// 色指定
 
 	// スタミナUI初期化
 	staminaSpriteData.maxMeter = 100;
@@ -188,7 +188,7 @@ void PlayerUI::InitializePlayerUI() {
 
 void PlayerUI::UpdatePlayerUI(float dt) {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
-	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
+	Engine::UIMeter* specialBar = GetUIMeter("SpecialBar");	// スペシャル
 	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スペシャル
 	hpber->SetMeterMinMax(parameterComponent->HP().minValue, parameterComponent->HP().maxValue);	// メータ最大値
 	hpber->SetMeter(parameterComponent->HP().value);								// メータ
@@ -196,5 +196,5 @@ void PlayerUI::UpdatePlayerUI(float dt) {
 	staminaBer->SetMeterMinMax(parameterComponent->Stamina().minValue, parameterComponent->Stamina().maxValue);
 	staminaBer->SetMeter(parameterComponent->Stamina().value);
 
-	specailBer->SetMeter(sizeSpecialGauge_);// メータ
+	specialBar->SetMeter(sizeSpecialGauge_);// メータ
 }

@@ -41,7 +41,7 @@ namespace Engine {
 
 		// SRV生成関数(テクスチャ用)
 		// SRV生成(テクスチャ用)
-		void CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata matadata);
+		void CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata metadata);
 		// SRV生成(Structured Buffer用)
 		void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 		//
@@ -58,7 +58,7 @@ namespace Engine {
 		// SRVセットコマンド
 		void SetGraphicsRootdescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
 		// 最大量に達したか
-		bool IsMaxTextuer();
+		bool IsMaxTexture();
 		// 終了
 		void Finalize();
 

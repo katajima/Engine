@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <DirectXGame/application/base/Attack/Hit/HitCounter.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
@@ -7,7 +7,7 @@
 namespace Character {
 	class ParameterComponent;
 }
-class BaseWeapon;	
+class BaseWeapon;
 namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
@@ -25,7 +25,7 @@ public:
 	// 攻撃状態に応じてヒットカウンターとコンボを更新する
 	void Update(const Character::CharacterContext& ctx);
 
-	
+
 public:
 	// 攻撃ヒットカウンタークラス取得
 	HitCounter& GetHitCounter() { return hitCounter_; }
@@ -34,7 +34,7 @@ public:
 	// コンボシステムクラス取得
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
 	// ロックオンシステム取得
-	LockOnSystem* GeyLockOnSysutem() { return lockOnSystem_.get(); }
+	LockOnSystem* GetLockOnSystem() { return lockOnSystem_.get(); }
 
 	// 攻撃中か取得
 	bool IsAttack() const { return isAttack_; }
@@ -55,7 +55,7 @@ private:
 	// 攻撃ヒットカウンター
 	HitCounter hitCounter_;
 	// 攻撃パラメーター補正
-	std::unique_ptr<CombatStat> combatStat_;	
+	std::unique_ptr<CombatStat> combatStat_;
 	// コンボシステム
 	std::unique_ptr<Combo::System> comboSystem_;
 	// ロックオンシステム

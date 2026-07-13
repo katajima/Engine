@@ -29,7 +29,7 @@ namespace Engine {
 	class PostEffectManager {
 	public:
 		// 初期化
-		void Intialize(DXGIDevice* DXGIDevice, Command* command,
+		void Initialize(DXGIDevice* DXGIDevice, Command* command,
 			SrvManager* srvManager, RtvManager* rvtManager,
 			RenderingCommon* renderingCommon, DepthStencil* depthStencil,
 			Barrier* barrier, ScissorRect* scissorRect,

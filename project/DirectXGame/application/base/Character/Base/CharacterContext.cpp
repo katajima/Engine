@@ -1,4 +1,4 @@
-﻿#include "CharacterContext.h"
+#include "CharacterContext.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"
@@ -16,7 +16,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->deathSystem = owner->GetDeathSystem();								// 死亡システム
-	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
+	this->lockOnSystem = owner->GetAttackController()->GetLockOnSystem();		// ロックオンシステム
 	this->hitMotionSystem = owner->GetHitMotionSystem();						// レスポンスシステム
 	this->parameters = owner->GetCharacterParameterComponent();					// パラメータ
 }
@@ -65,7 +65,7 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 
 	// 攻撃時の重力
 	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
-	
+
 
 	// 状態に応じたフラグ設定
 	switch (ctx.state)
@@ -98,17 +98,17 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 		break;
 	case CharacterMainState::Die: // 死亡中
 		// 動けないようにする
-		ctx.isCanMove = false;	
+		ctx.isCanMove = false;
 		// 死亡中の重力
-		ctx.isGravity = deathSystem->GetData().isGravity;	
+		ctx.isGravity = deathSystem->GetData().isGravity;
 		break;
 	case CharacterMainState::Fainting: // 気絶中
 	case CharacterMainState::Damage: // 被弾中
 		// 動けないようにする
 		ctx.isCanMove = false;
 		// ダメージを受けている
-		ctx.isDamage = true;	
-		break;	
+		ctx.isDamage = true;
+		break;
 	default:
 		break;
 	}

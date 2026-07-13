@@ -37,8 +37,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
     EmitSpawns emitSpawn;           // エミット形状
     EmitDirections emitDirection;   // エミット方向
 
-    
-    
+
+
     generator.seed = (float3(globalIndex, 0, 0) + gPerFrame.time) * gPerFrame.time;
 
     // スレッド数に応じて各スレッドがemit処理を分担
@@ -47,22 +47,22 @@ void main(uint3 DTid : SV_DispatchThreadID)
         int freeListIndex;
         InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
 
-        if (0 <= freeListIndex && freeListIndex < gMaxInstance.maxInstanse)
+        if (0 <= freeListIndex && freeListIndex < gMaxInstance.maxInstance)
         {
             uint particleIndex = gFreeList[freeListIndex];
 
-            
+
             gParticle[particleIndex].translate = emitSpawn.EmitSphere(generator, gEmitterCommon.spawnShape, gEmitterCommon.translate, gEmitter.radius);
-           
-            
-            gParticle[particleIndex].velocity = 
-            emitDirection.EmitDirection(generator, gEmitterCommon.directionType, 
+
+
+            gParticle[particleIndex].velocity =
+            emitDirection.EmitDirection(generator, gEmitterCommon.directionType,
             gParticle[particleIndex].translate, gEmitterCommon.translate,
             gEmitterCommon.velocity, gEmitterCommon.velocityRange, gEmitterCommon.force);
-            
-           
+
+
             EmitSetting_Set(generator, gParticle[particleIndex], gEmitterCommon, gEmitterTrail);
-          
+
 
         }
         else

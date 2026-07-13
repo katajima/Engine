@@ -1,4 +1,4 @@
-﻿#include "PostEffectManager.h"
+#include "PostEffectManager.h"
 
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManager.h"
@@ -14,7 +14,7 @@
 #include"imgui.h"
 
 
-void Engine::PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
+void Engine::PostEffectManager::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
 {
 	this->dxgiDevice = DXGIDevice;				// デバイス
 	this->command = command;						// コマンド
@@ -48,7 +48,7 @@ void Engine::PostEffectManager::PreDrawOffscreen()
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResource();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture_->GetRTVHandle();
 	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
@@ -85,7 +85,7 @@ void Engine::PostEffectManager::PreDraw2dOffscreen()
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResource();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextureEnd_->GetRTVHandle();
 	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
@@ -203,7 +203,7 @@ void Engine::PostEffectManager::PreEnd(RenderTexture* renderTexture)
 	// 描画先のRTVとDSVを設定する
 	// このポストエフェクトでは深度バッファを使用しないため、DSVは設定しない
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRTVHandle();
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResource();
 	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 

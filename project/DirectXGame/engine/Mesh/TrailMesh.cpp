@@ -1,14 +1,14 @@
-﻿#include "TrailMesh.h"
+#include "TrailMesh.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void Engine::TrailMesh::CreateMesh(size_t instance)
 {
-	size_t sise = instance;
+	size_t size = instance;
 
 	// リサイズ
-	verticesTrail.resize(sise);
-	indices.resize(sise);
+	verticesTrail.resize(size);
+	indices.resize(size);
 }
 
 void Engine::TrailMesh::Initialize(DirectXCommon* dxcommon)
@@ -17,17 +17,17 @@ void Engine::TrailMesh::Initialize(DirectXCommon* dxcommon)
 	this->dxCommon = dxcommon;
 
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(dxCommon, verticesTrail, verticesTrail.size());
+	vbvResource_.CreateBufferView(dxCommon, verticesTrail, verticesTrail.size());
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
+	indexResource_.CreateBufferView(dxCommon, indices, indices.size());
 
 }
 
 void Engine::TrailMesh::GetCommandList()
 {
 	// 頂点バッファの設定
-	vbvResorce_.IASetVertexBuffers();
+	vbvResource_.IASetVertexBuffers();
 	// インデックスバッファ設定
-	indexResorce_.IASetIndexBuffer();
+	indexResource_.IASetIndexBuffer();
 
 }

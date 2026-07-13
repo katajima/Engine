@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<d3d12.h>
@@ -59,7 +59,7 @@ namespace Engine {
 	public: // メンバ関数
 
 		// 初期化
-		void Intialize(WinApp* winApp);
+		void Initialize(WinApp* winApp);
 
 		//終了処理
 		void Finalize();

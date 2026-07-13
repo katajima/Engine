@@ -5,19 +5,19 @@
 void Engine::SkyBoxMesh::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
-	this->dxCommon = dxcommon;	
+	this->dxCommon = dxcommon;
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(dxCommon, verticesskyBox, verticesskyBox.size());
+	vbvResource_.CreateBufferView(dxCommon, verticesSkyBox, verticesSkyBox.size());
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
+	indexResource_.CreateBufferView(dxCommon, indices, indices.size());
 
 }
 
 void Engine::SkyBoxMesh::GetCommandList()
 {
 	// 頂点バッファの設定
-	vbvResorce_.IASetVertexBuffers();
+	vbvResource_.IASetVertexBuffers();
 	// インデックスバッファ設定
-	indexResorce_.IASetIndexBuffer();
+	indexResource_.IASetIndexBuffer();
 
 }

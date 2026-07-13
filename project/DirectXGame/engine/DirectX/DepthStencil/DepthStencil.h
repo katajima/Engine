@@ -29,7 +29,7 @@ namespace Engine {
 		// デプスをクリア
 		void ClearDepthView();
 		// デプスステンシルリソースのCPUハンドルの取得
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResorce();
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResource();
 
 		// デプスSRVハンドル取得
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();

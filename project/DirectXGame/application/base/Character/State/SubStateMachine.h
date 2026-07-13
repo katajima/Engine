@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <functional>
 #include <cassert>
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 namespace Character {
     /// <summary>
@@ -38,7 +39,7 @@ namespace Character {
         }
 
         // 更新
-        void Update(float deltaTime = 1.0f / 60.0f) {
+        void Update(float deltaTime = ConvertUtility::kDefaultDeltaTime) {
             if (state_) state_->Update(deltaTime);
         }
         // 現在のステート取得

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GpuParticleData.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 
 namespace Engine {
@@ -44,11 +45,11 @@ namespace Engine {
 	protected:
 
 		// 固有の初期化
-		virtual void InitUniqe() = 0;
+		virtual void InitUnique() = 0;
 		// 固有の更新
-		virtual void UpdateUniqe(float deltaTime) = 0;
+		virtual void UpdateUnique(float deltaTime) = 0;
 		// 固有のImGui更新
-		virtual void UpdateImGuiUniqe() = 0;
+		virtual void UpdateImGuiUnique() = 0;
 		// ライン描画
 		virtual void DrawLine() = 0;
 
@@ -60,7 +61,7 @@ namespace Engine {
 
 		float time_ = 0.0f;			// 経過時間()
 		float interval_ = 0.02f;	// 発生間隔()
-		float deltaTime_ = 1.0f / 60.0f;
+		float deltaTime_ = ConvertUtility::kDefaultDeltaTime;	// 未指定時に使う基準デルタタイム
 
 		EmitterType type_ = EmitterType::Sphere;
 
@@ -80,11 +81,11 @@ namespace Engine {
 	{
 	public:
 		// 球エミッターのパラメータ
-		void InitUniqe() override;
+		void InitUnique() override;
 		// 固有の更新
-		void UpdateUniqe(float deltaTime) override;
+		void UpdateUnique(float deltaTime) override;
 		// 固有のImGui更新
-		void UpdateImGuiUniqe() override;
+		void UpdateImGuiUnique() override;
 		// ライン描画
 		void DrawLine() override;
 
@@ -96,11 +97,11 @@ namespace Engine {
 	{
 	public:
 		// 球エミッターのパラメータ
-		void InitUniqe() override;
+		void InitUnique() override;
 		// 固有の更新
-		void UpdateUniqe(float deltaTime) override;
+		void UpdateUnique(float deltaTime) override;
 		// 固有のImGui更新
-		void UpdateImGuiUniqe() override;
+		void UpdateImGuiUnique() override;
 		// ライン描画
 		void DrawLine() override;
 
@@ -112,11 +113,11 @@ namespace Engine {
 	{
 	public:
 		// 球エミッターのパラメータ
-		void InitUniqe() override;
+		void InitUnique() override;
 		// 固有の更新
-		void UpdateUniqe(float deltaTime) override;
+		void UpdateUnique(float deltaTime) override;
 		// 固有のImGui更新
-		void UpdateImGuiUniqe() override;
+		void UpdateImGuiUnique() override;
 		// ライン描画
 		void DrawLine() override;
 	private:

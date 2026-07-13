@@ -1,4 +1,4 @@
-﻿#include "ParticleEmitter2d.h"
+#include "ParticleEmitter2d.h"
 // engine
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
@@ -74,7 +74,7 @@ void Engine::ParticleEmitter2d::Emit() {
 			return;
 		}
 		for (int i = 0; i < index; i++) {
-			EmitUniqe();
+			EmitUnique();
 		}
 	}
 }
@@ -122,7 +122,7 @@ void Engine::ParticleEmitter2d::SetAcceleration(Vector2 acceleration, Vector2 ra
 	emitData_.acceleration.range = range;
 }
 
-void Engine::ParticleEmitter2d::EmitUniqe() {
+void Engine::ParticleEmitter2d::EmitUnique() {
 	ParticleGroup2d& particleGroup = particleManager->GetParticleGroups(particleName_);
 	auto& rnd = particleManager->GetRandomEngine();
 

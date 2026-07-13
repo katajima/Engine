@@ -35,10 +35,10 @@ namespace Combo {
 
 		// シーケンサーにコンボデータを適用させる
 		SequencerApplyToState();
-		// ステートのコンボデータ取得	
+		// ステートのコンボデータ取得
 		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
 		// ステートの時間設定
-		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, ConvertUtility::kDefaultFps));
 	}
 
 	void EditorBlock::UpdateImGui(float dt, bool isActive) {
@@ -50,7 +50,7 @@ namespace Combo {
 			comboSystem->GetComboStateMachine()->SetRoot(state);
 		}
 		if (isActive)
-			state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+			state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, ConvertUtility::kDefaultFps));
 
 #ifdef _DEBUG
 
@@ -96,10 +96,10 @@ namespace Combo {
 		ImGuiCamera();
 		// コンボ接続設定
 		ImGuiConnection();
-		// ステートのコンボデータ取得	
+		// ステートのコンボデータ取得
 		ComboData& comboData = state->Data();
 		// ステートの時間設定
-		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, ConvertUtility::kDefaultFps));
 		comboData.SetIsDebug(true);
 		ImGui::End();
 
@@ -545,7 +545,7 @@ namespace Combo {
 			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
 
 			// ターゲットなら
-			if (data_.move.moveType == Combo::MoveType::kTraget) {
+			if (data_.move.moveType == Combo::MoveType::kTarget) {
 				static const char* LockOnTypeLabels[] = {
 				"当てた相手",
 				"近い相手",
@@ -769,7 +769,7 @@ namespace Combo {
 
 	void EditorBlock::SequencerApplyToState() {
 
-		// ステートのコンボデータ取得	
+		// ステートのコンボデータ取得
 		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
 
 		// 移動データ
@@ -947,8 +947,8 @@ namespace Combo {
 		for (int i = 0; i < static_cast<int>(data_.effect.comboEffects.size()); ++i) {
 			const ComboEffectEntry& entry = data_.effect.comboEffects[i];
 			sequence_.UpsertEvent(AttackEvent{
-				.startFrame = ConvertUtility::SecondsToFrames(entry.startTime, 60.0f),
-				.endFrame = ConvertUtility::SecondsToFrames(entry.endTime, 60.0f),
+				.startFrame = ConvertUtility::SecondsToFrames(entry.startTime, ConvertUtility::kDefaultFps),
+				.endFrame = ConvertUtility::SecondsToFrames(entry.endTime, ConvertUtility::kDefaultFps),
 				.color = 0x00AAFFFF,
 				.name = MakeComboEffectSequenceName(i)
 				});

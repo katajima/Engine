@@ -15,7 +15,7 @@ struct ParticleGPU
 
 struct Material
 {
-    
+
     float4 color;
     int enableLighting;
     float alphaClipping;
@@ -26,6 +26,6 @@ struct Material
     int useLig;
     int useHem;
     int useNormalMap;
-    int useSpeculerMap;
+    int useSpecularMap;
 };
 ConstantBuffer<Material> gMaterial : register(b0);

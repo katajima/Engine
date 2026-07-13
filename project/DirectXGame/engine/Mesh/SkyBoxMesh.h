@@ -17,9 +17,9 @@ namespace Engine {
 		void GetCommandList();
 
 	public:
-		std::vector<SkyBoxVertexData> verticesskyBox;
+		std::vector<SkyBoxVertexData> verticesSkyBox;
 	private:
-		VertexBuffer<SkyBoxVertexData> vbvResorce_;
-		IndexBuffer<uint32_t> indexResorce_;
+		VertexBuffer<SkyBoxVertexData> vbvResource_;
+		IndexBuffer<uint32_t> indexResource_;
 	};
 }

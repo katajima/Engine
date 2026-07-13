@@ -55,14 +55,14 @@ namespace Engine {
 		std::unique_ptr<TorusPrimitive> primi = nullptr;
 		std::unique_ptr<PlanePrimitive> primiPlane = nullptr;
 		std::unique_ptr<StarPrimitive> primiStar = nullptr;
-		std::unique_ptr<TrianglePrimitive> primiTrai = nullptr;
+		std::unique_ptr<TrianglePrimitive> primitiveTriangle = nullptr;
 
 		std::unique_ptr<RingPrimitive> primiRing = nullptr;
 		std::unique_ptr<CylinderPrimitive> cylinder_ = nullptr;
 
 	private:
 		// ゲーム終了フラグ
-		bool endRequst_ = false;
+		bool endRequest_ = false;
 		//
 		std::vector<std::string> scenenames_;
 

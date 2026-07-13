@@ -12,6 +12,7 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
+#include "DirectXGame/engine/Base/WinApp/WinApp.h"
 
 // 前方宣言
 namespace Engine {
@@ -24,6 +25,11 @@ namespace Engine {
 	// カメラ
 	class Camera {
 	public: // メンバ関数
+		// カメラ共通の既定Farクリップ距離
+		static constexpr float kDefaultFarClip = 10000.0f;
+		// ウィンドウ既定サイズから求める投影用アスペクト比
+		static constexpr float kDefaultAspectRatio = static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight);
+
 		// コンストラクタ
 		Camera();
 		// デストラクタ
@@ -46,8 +52,8 @@ namespace Engine {
 
 		// 向いている方向
 		void LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector);
-		
-		
+
+
 	public: // 取得　設定
 		// Fov設定
 		void SetFovY(const float fovY) { fovY_ = fovY; }
@@ -116,8 +122,8 @@ namespace Engine {
 		bool isProjection_ = true;
 		float fovY_ = 0.45f;
 		float nearClip_ = 0.1f;
-		float farClip_ = 10000.0f;
-		float aspect_ = float(1280) / float(720);
+		float farClip_ = kDefaultFarClip;
+		float aspect_ = kDefaultAspectRatio;
 		Transform transform_;
 	private:
 		Matrix4x4 worldMatrix_;

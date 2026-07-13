@@ -181,8 +181,8 @@ void Engine::RenderTexture::CreateSRV()
 	// インデックス割りて
 	srvIndex_ = srvManager->Allocate();
 	// SRVを作成
-	DirectX::TexMetadata matadata{};
-	matadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	matadata.mipLevels = 1;
-	srvManager->CreateSRVforTexture2D(srvIndex_, resource_.Get(), matadata);
+	DirectX::TexMetadata metadata{};
+	metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	metadata.mipLevels = 1;
+	srvManager->CreateSRVforTexture2D(srvIndex_, resource_.Get(), metadata);
 }

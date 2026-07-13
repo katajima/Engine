@@ -1,9 +1,10 @@
 #include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
-const float Engine::MyGame::kDeltaTime_ = 1.0f / 60.0f;
+const float Engine::MyGame::kDeltaTime_ = ConvertUtility::kDefaultDeltaTime;
 float Engine::MyGame::kTimeSpeed_ = 1.0f;
 float Engine::MyGame::nowTime = 0.0f;
 
@@ -74,7 +75,7 @@ void Engine::MyGame::Finalize()
 	primi.reset();
 	primiPlane.reset();
 	primiStar.reset();
-	primiTrai.reset();
+	primitiveTriangle.reset();
 	primiRing.reset();
 	cylinder_.reset();
 
@@ -172,7 +173,7 @@ void Engine::MyGame::InitializeResource()
 
 	// Resources/Sound以下の全WAVファイルを取得し、音源一覧と再生データを構築する。
 	audioManager_->ReloadSoundFiles();
-		
+
 	// ModelData;
 	LoadModel();
 
@@ -181,7 +182,7 @@ void Engine::MyGame::InitializeResource()
 	/// パーティクル
 	/// </summary>
 	CreateParticle();
-	
+
 
 }
 
@@ -191,7 +192,7 @@ void Engine::MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon_->GetModelManager();
 
-	
+
 	/// <summary>
 	/// テスト用フリーモデル
 	/// </summary>
@@ -298,7 +299,7 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModelAsync("enemyBodySS01.obj",		"Character/enemy/enemySS01"); // 本体
 	modelManager->LoadModelAsync("enemyPropellerSS01.obj",	"Character/enemy/enemySS01"); // プロペラ
 	modelManager->LoadModelAsync("enemyMuzzleSS01.obj",		"Character/enemy/enemySS01"); // 武器
-	
+
 
 	// ここまでに投げた非同期モデル読み込みを待ち、GPU転送もまとめて完了させる。
 	modelManager->WaitAllLoadFinished();

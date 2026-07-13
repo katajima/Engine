@@ -1,7 +1,7 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/engine/struct/VertexDeta.h"
+#include "DirectXGame/engine/struct/VertexData.h"
 
 #include"map"
 #include"optional"
@@ -141,7 +141,7 @@ namespace Engine {
 	/// <summary>
 	/// スキニングの頂点数記録用
 	/// </summary>
-	struct SkinningInfomation {
+	struct SkinningInformation {
 		uint32_t numVertices;
 	};
 
@@ -176,7 +176,7 @@ namespace Engine {
 		std::vector<Matrix4x4> inverseBindPoseMatrices;
 		std::map<std::string, JointWeightData> skinClusterData;	// ← 全体で1つだけ
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> influenceResource;
 		D3D12_VERTEX_BUFFER_VIEW influenceBufferView;
@@ -184,7 +184,7 @@ namespace Engine {
 		std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> influenceSrvHandle;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> paletteResource;
 		std::span<WellForGPU> mappedPalette;
@@ -192,13 +192,13 @@ namespace Engine {
 
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> inputVertexSrvHandle;
 
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 
 
@@ -208,10 +208,10 @@ namespace Engine {
 		std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> outputVertexUavHandle;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
-		Microsoft::WRL::ComPtr < ID3D12Resource> skinningInfomation;
-		SkinningInfomation* skinningInfomationDeta = nullptr;
+		Microsoft::WRL::ComPtr < ID3D12Resource> skinningInformation;
+		SkinningInformation* skinningInformationData = nullptr;
 
 	};
 
@@ -224,7 +224,7 @@ namespace Engine {
 		// 任意の時刻の値を取得する(Vector3)
 		Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time);
 
-		// 任意の時刻の値を取得する(Quaternion) 
+		// 任意の時刻の値を取得する(Quaternion)
 		Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, float time);
 
 		// スケルトン更新

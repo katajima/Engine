@@ -73,7 +73,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 
-	
+
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
 			max = Max(max, pMesh->vertices[vertexIndex].position.xyz());
 		}
@@ -88,7 +88,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 			Vector3 vert[3];
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
-				pMesh->SetIndice(vertexIndex);
+				pMesh->SetIndex(vertexIndex);
 
 				vert[element] = pMesh->vertices[vertexIndex].position.xyz();
 			}
@@ -207,7 +207,7 @@ void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData,
 			aiString textureFilePath;
 			material->GetTexture(aiTextureType_SPECULAR, 0, &textureFilePath);
 			std::cout << "Mesh[" << meshIndex << "] Specular: " << textureFilePath.C_Str() << std::endl;
-			pMaterial->tex_.speculerFilePath = directoryPath + "/" + textureFilePath.C_Str();
+			pMaterial->tex_.specularFilePath = directoryPath + "/" + textureFilePath.C_Str();
 		}
 
 		// Normal / Height
@@ -299,7 +299,7 @@ Engine::Node Engine::LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32
 	node->mTransformation.Decompose(scale, rotate, translate); // assimpの行列からSRTを抽出する関数を利用
 
 	result.transform.scale = { scale.x,scale.y,scale.z }; // Scaleはそのまま
-	result.transform.rotate = { rotate.x,-rotate.y,-rotate.z,rotate.w }; // x軸を反転、さらに回転方向が逆なので軸を反転させる	
+	result.transform.rotate = { rotate.x,-rotate.y,-rotate.z,rotate.w }; // x軸を反転、さらに回転方向が逆なので軸を反転させる
 	result.transform.translate = { -translate.x,translate.y,translate.z }; // x軸を反転
 
 	result.localMatrix = MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
@@ -460,11 +460,11 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 
 
-		// skinningInfomation
-		skinCluster.skinningInfomation = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SkinningInfomation));
-		skinCluster.skinningInfomation->SetName(std::format(L"SkinCluster SkinningInfo : {}", meshDebugName).c_str());
-		skinCluster.skinningInfomation->Map(0, nullptr, reinterpret_cast<void**>(&skinCluster.skinningInfomationDeta));
-		skinCluster.skinningInfomationDeta->numVertices = static_cast<uint32_t>(mesh->vertices.size());
+		// skinningInformation
+		skinCluster.skinningInformation = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SkinningInformation));
+		skinCluster.skinningInformation->SetName(std::format(L"SkinCluster SkinningInfo : {}", meshDebugName).c_str());
+		skinCluster.skinningInformation->Map(0, nullptr, reinterpret_cast<void**>(&skinCluster.skinningInformationData));
+		skinCluster.skinningInformationData->numVertices = static_cast<uint32_t>(mesh->vertices.size());
 
 
 
@@ -540,7 +540,7 @@ void Engine::DebugModel::ImguiSkin(ModelData& modelData)
 		//ImGui::InputInt("inputVerticesIndex", &index);
 		//index = static_cast<int>(modelData.skinning.outputVerticesUavIndex);
 		//ImGui::InputInt("outputVerticesUavIndex", &index);
-		////index = static_cast<int>(modelData.skinCluster.skinningInfomationDeta->numVertices);
+		////index = static_cast<int>(modelData.skinCluster.skinningInformationData->numVertices);
 		//ImGui::InputInt("numVertices", &index);
 	}
 }

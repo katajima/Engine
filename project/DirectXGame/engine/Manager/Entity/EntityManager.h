@@ -150,7 +150,7 @@ namespace Engine {
 		// ライトマネージャー取得
 		LightManager* GetLightManager() { return lightManager_.get(); }
 		// スキニング共通クラス取得
-		SkinningConmmon* GetSkinningConmmon() { return skinningCommon_.get(); }
+		SkinningCommon* GetSkinningCommon() { return skinningCommon_.get(); }
 		// カメラ共通クラス取得
 		CameraCommon* GetCameraCommon() { return cameraCommon_.get(); }
 		// ライン共通クラス取得
@@ -195,7 +195,7 @@ namespace Engine {
 		std::unique_ptr<LightManager> lightManager_ = nullptr;
 
 		// スキニング
-		std::unique_ptr<SkinningConmmon> skinningCommon_ = nullptr;
+		std::unique_ptr<SkinningCommon> skinningCommon_ = nullptr;
 
 		// カメラコモン
 		std::unique_ptr <CameraCommon> cameraCommon_ = nullptr;

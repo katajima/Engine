@@ -13,12 +13,12 @@ void Engine::ShapeParameter::ShapePlane::Create(ModelMesh* mesh, bool isInv)
 	mesh->vertices.push_back({ .position = {width,-height,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,normal } });	// 左下
 	mesh->vertices.push_back({ .position = {-width,-height,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,normal } });	// 右下
 
-	mesh->SetIndice(0);
-	mesh->SetIndice(1);
-	mesh->SetIndice(2);
-	mesh->SetIndice(2);
-	mesh->SetIndice(1);
-	mesh->SetIndice(3);
+	mesh->SetIndex(0);
+	mesh->SetIndex(1);
+	mesh->SetIndex(2);
+	mesh->SetIndex(2);
+	mesh->SetIndex(1);
+	mesh->SetIndex(3);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
@@ -48,24 +48,24 @@ void Engine::ShapeParameter::ShapeCross::Create(ModelMesh* mesh)
 
 	// インデックスデータの生成
 	// 上のアーム
-	mesh->SetIndice(0); mesh->SetIndice(1); mesh->SetIndice(2);
-	mesh->SetIndice(0); mesh->SetIndice(2); mesh->SetIndice(11);
+	mesh->SetIndex(0); mesh->SetIndex(1); mesh->SetIndex(2);
+	mesh->SetIndex(0); mesh->SetIndex(2); mesh->SetIndex(11);
 
 	// 右のアーム
-	mesh->SetIndice(2); mesh->SetIndice(3); mesh->SetIndice(4);
-	mesh->SetIndice(2); mesh->SetIndice(4); mesh->SetIndice(5);
+	mesh->SetIndex(2); mesh->SetIndex(3); mesh->SetIndex(4);
+	mesh->SetIndex(2); mesh->SetIndex(4); mesh->SetIndex(5);
 
 	// 下のアーム
-	mesh->SetIndice(5); mesh->SetIndice(7); mesh->SetIndice(8);
-	mesh->SetIndice(5); mesh->SetIndice(6); mesh->SetIndice(7);
+	mesh->SetIndex(5); mesh->SetIndex(7); mesh->SetIndex(8);
+	mesh->SetIndex(5); mesh->SetIndex(6); mesh->SetIndex(7);
 
 	// 左のアーム
-	mesh->SetIndice(8); mesh->SetIndice(9); mesh->SetIndice(10);
-	mesh->SetIndice(8); mesh->SetIndice(10); mesh->SetIndice(11);
+	mesh->SetIndex(8); mesh->SetIndex(9); mesh->SetIndex(10);
+	mesh->SetIndex(8); mesh->SetIndex(10); mesh->SetIndex(11);
 
 	// 中央の四角形
-	mesh->SetIndice(2); mesh->SetIndice(5); mesh->SetIndice(8);
-	mesh->SetIndice(2); mesh->SetIndice(8); mesh->SetIndice(11);
+	mesh->SetIndex(2); mesh->SetIndex(5); mesh->SetIndex(8);
+	mesh->SetIndex(2); mesh->SetIndex(8); mesh->SetIndex(11);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
@@ -79,9 +79,9 @@ void Engine::ShapeParameter::ShapeTriangle::Create(ModelMesh* mesh)
 	mesh->vertices.push_back({ .position = {rightPos.x,rightPos.y,0.0f,1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
 	mesh->vertices.push_back({ .position = {leftPos.x,leftPos.y,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
 
-	mesh->SetIndice(0);
-	mesh->SetIndice(2);
-	mesh->SetIndice(1);
+	mesh->SetIndex(0);
+	mesh->SetIndex(2);
+	mesh->SetIndex(1);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
@@ -117,9 +117,9 @@ void Engine::ShapeParameter::Circle::Create(ModelMesh* mesh)
 
 	// インデックスの設定
 	for (int i = 1; i <= segments; ++i) {
-		mesh->SetIndice(0);       // 中心点
-		mesh->SetIndice(i + 1);   // 次の頂点
-		mesh->SetIndice(i);       // 現在の頂点
+		mesh->SetIndex(0);       // 中心点
+		mesh->SetIndex(i + 1);   // 次の頂点
+		mesh->SetIndex(i);       // 現在の頂点
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -164,9 +164,9 @@ void Engine::ShapeParameter::Star::Create(ModelMesh* mesh)
 
 	// インデックス生成（面の向きを反転）
 	for (int i = 1; i <= segments * 2; ++i) {
-		mesh->SetIndice(0);                                   // 中心点
-		mesh->SetIndice(i);                                   // 現在の頂点
-		mesh->SetIndice((i % (segments * 2)) + 1);            // 次の頂点（ループ処理）
+		mesh->SetIndex(0);                                   // 中心点
+		mesh->SetIndex(i);                                   // 現在の頂点
+		mesh->SetIndex((i % (segments * 2)) + 1);            // 次の頂点（ループ処理）
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -225,13 +225,13 @@ void Engine::ShapeParameter::Crescent::Create(ModelMesh* mesh)
 		int next = (i + 1) % (segments + 1);
 
 		// 外側の円の三角形（反転）
-		mesh->SetIndice(innerOffset + i);
-		mesh->SetIndice(outerOffset + next);
-		mesh->SetIndice(outerOffset + i);
+		mesh->SetIndex(innerOffset + i);
+		mesh->SetIndex(outerOffset + next);
+		mesh->SetIndex(outerOffset + i);
 
-		mesh->SetIndice(innerOffset + i);
-		mesh->SetIndice(innerOffset + next);
-		mesh->SetIndice(outerOffset + next);
+		mesh->SetIndex(innerOffset + i);
+		mesh->SetIndex(innerOffset + next);
+		mesh->SetIndex(outerOffset + next);
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -276,14 +276,14 @@ void Engine::ShapeParameter::Ring::Create(ModelMesh* mesh)
 		int baseIndex = index * 4;
 
 		// 三角形1: 外側現在点 (①)、外側次点 (②)、内側現在点 (③)
-		mesh->SetIndice(baseIndex);
-		mesh->SetIndice(baseIndex + 1);
-		mesh->SetIndice(baseIndex + 2);
+		mesh->SetIndex(baseIndex);
+		mesh->SetIndex(baseIndex + 1);
+		mesh->SetIndex(baseIndex + 2);
 
 		// 三角形2: 外側次点 (②)、内側次点 (④)、内側現在点 (③)
-		mesh->SetIndice(baseIndex + 1);
-		mesh->SetIndice(baseIndex + 3);
-		mesh->SetIndice(baseIndex + 2);
+		mesh->SetIndex(baseIndex + 1);
+		mesh->SetIndex(baseIndex + 3);
+		mesh->SetIndex(baseIndex + 2);
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -343,14 +343,14 @@ void Engine::ShapeParameter::ShapeSphere::Create(ModelMesh* mesh)
 			int second = first + longitudeSegments + 1;
 
 			// 三角形1（インデックス順序を反転）
-			mesh->SetIndice(first + 1);
-			mesh->SetIndice(second);
-			mesh->SetIndice(first);
+			mesh->SetIndex(first + 1);
+			mesh->SetIndex(second);
+			mesh->SetIndex(first);
 
 			// 三角形2（インデックス順序を反転）
-			mesh->SetIndice(first + 1);
-			mesh->SetIndice(second + 1);
-			mesh->SetIndice(second);
+			mesh->SetIndex(first + 1);
+			mesh->SetIndex(second + 1);
+			mesh->SetIndex(second);
 
 		}
 	}
@@ -401,13 +401,13 @@ void Engine::ShapeParameter::ShapeArrow::Create(ModelMesh* mesh)
 		int bottom2 = (i + 1) * 2 + 1;
 
 		// 三角形を生成
-		mesh->SetIndice(top2);
-		mesh->SetIndice(bottom1);
-		mesh->SetIndice(top1);
+		mesh->SetIndex(top2);
+		mesh->SetIndex(bottom1);
+		mesh->SetIndex(top1);
 
-		mesh->SetIndice(bottom2);
-		mesh->SetIndice(bottom1);
-		mesh->SetIndice(top2);
+		mesh->SetIndex(bottom2);
+		mesh->SetIndex(bottom1);
+		mesh->SetIndex(top2);
 	}
 
 	// 矢の頭の生成（円錐）
@@ -442,9 +442,9 @@ void Engine::ShapeParameter::ShapeArrow::Create(ModelMesh* mesh)
 
 		// 頭の三角形を生成
 
-		mesh->SetIndice(base2);
-		mesh->SetIndice(base1);
-		mesh->SetIndice(headTipIndex);
+		mesh->SetIndex(base2);
+		mesh->SetIndex(base1);
+		mesh->SetIndex(headTipIndex);
 
 	}
 
@@ -504,13 +504,13 @@ void Engine::ShapeParameter::ShapeCube::Create(ModelMesh* mesh)
 		}
 
 		// インデックスデータを追加 (2つの三角形)
-		mesh->SetIndice(vertexOffset + 0);
-		mesh->SetIndice(vertexOffset + 1);
-		mesh->SetIndice(vertexOffset + 2);
+		mesh->SetIndex(vertexOffset + 0);
+		mesh->SetIndex(vertexOffset + 1);
+		mesh->SetIndex(vertexOffset + 2);
 
-		mesh->SetIndice(vertexOffset + 2);
-		mesh->SetIndice(vertexOffset + 1);
-		mesh->SetIndice(vertexOffset + 3);
+		mesh->SetIndex(vertexOffset + 2);
+		mesh->SetIndex(vertexOffset + 1);
+		mesh->SetIndex(vertexOffset + 3);
 
 		vertexOffset += 4; // 次の面に移動
 	}
@@ -551,13 +551,13 @@ void Engine::ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 		mesh->vertices.push_back({ Vector4{ sinNext * outerRadius, cosNext * outerRadius, halfHeight, 1.0f }, Vector2{ uNext, 1.0f }, Vector3{ sinNext, cosNext, 0.0f } });
 
 		int baseIndex = index * 4;
-		mesh->SetIndice(baseIndex + 0);
-		mesh->SetIndice(baseIndex + 2);
-		mesh->SetIndice(baseIndex + 1);
+		mesh->SetIndex(baseIndex + 0);
+		mesh->SetIndex(baseIndex + 2);
+		mesh->SetIndex(baseIndex + 1);
 
-		mesh->SetIndice(baseIndex + 1);
-		mesh->SetIndice(baseIndex + 2);
-		mesh->SetIndice(baseIndex + 3);
+		mesh->SetIndex(baseIndex + 1);
+		mesh->SetIndex(baseIndex + 2);
+		mesh->SetIndex(baseIndex + 3);
 	}
 
 	if (isCover) {
@@ -574,9 +574,9 @@ void Engine::ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 			mesh->vertices.push_back({ Vector4{ sinNext * outerRadius, cosNext * outerRadius, halfHeight, 1.0f }, Vector2{ sinNext * 0.5f + 0.5f, cosNext * 0.5f + 0.5f }, Vector3{ 0.0f, 0.0f, 1.0f } });
 
 			int topBaseIndex = segments * 4 + index * 3;
-			mesh->SetIndice(topBaseIndex + 0); // 中央点
-			mesh->SetIndice(topBaseIndex + 2);
-			mesh->SetIndice(topBaseIndex + 1);
+			mesh->SetIndex(topBaseIndex + 0); // 中央点
+			mesh->SetIndex(topBaseIndex + 2);
+			mesh->SetIndex(topBaseIndex + 1);
 		}
 
 		// 底面の生成 (反時計回りに反転)
@@ -592,9 +592,9 @@ void Engine::ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 			mesh->vertices.push_back({ Vector4{ sinNext * innerRadius, cosNext * innerRadius, -halfHeight, 1.0f }, Vector2{ sinNext * 0.5f + 0.5f, cosNext * 0.5f + 0.5f }, Vector3{ 0.0f, 0.0f, -1.0f } });
 
 			int bottomBaseIndex = segments * 4 + segments * 3 + index * 3;
-			mesh->SetIndice(bottomBaseIndex + 0); // 中央点
-			mesh->SetIndice(bottomBaseIndex + 1);
-			mesh->SetIndice(bottomBaseIndex + 2);
+			mesh->SetIndex(bottomBaseIndex + 0); // 中央点
+			mesh->SetIndex(bottomBaseIndex + 1);
+			mesh->SetIndex(bottomBaseIndex + 2);
 		}
 	}
 
@@ -665,39 +665,39 @@ void Engine::ShapeParameter::Tube::Create(ModelMesh* mesh)
 		int bottomInner2 = (i + 1) * 4 + 3; // 内側下の次の頂点
 
 		// 外側の三角形（反転）
-		mesh->SetIndice(topOuter2);
-		mesh->SetIndice(bottomOuter1);
-		mesh->SetIndice(topOuter1);
+		mesh->SetIndex(topOuter2);
+		mesh->SetIndex(bottomOuter1);
+		mesh->SetIndex(topOuter1);
 
-		mesh->SetIndice(topOuter2);
-		mesh->SetIndice(bottomOuter2);
-		mesh->SetIndice(bottomOuter1);
+		mesh->SetIndex(topOuter2);
+		mesh->SetIndex(bottomOuter2);
+		mesh->SetIndex(bottomOuter1);
 
 		// 内側の三角形（反転）
-		mesh->SetIndice(bottomInner1);
-		mesh->SetIndice(topInner2);
-		mesh->SetIndice(topInner1);
+		mesh->SetIndex(bottomInner1);
+		mesh->SetIndex(topInner2);
+		mesh->SetIndex(topInner1);
 
-		mesh->SetIndice(bottomInner2);
-		mesh->SetIndice(topInner2);
-		mesh->SetIndice(bottomInner1);
+		mesh->SetIndex(bottomInner2);
+		mesh->SetIndex(topInner2);
+		mesh->SetIndex(bottomInner1);
 
 		// 外側と内側の三角形（反転）
-		mesh->SetIndice(topInner1);
-		mesh->SetIndice(topOuter2);
-		mesh->SetIndice(topOuter1);
+		mesh->SetIndex(topInner1);
+		mesh->SetIndex(topOuter2);
+		mesh->SetIndex(topOuter1);
 
-		mesh->SetIndice(topInner2);
-		mesh->SetIndice(topOuter2);
-		mesh->SetIndice(topInner1);
+		mesh->SetIndex(topInner2);
+		mesh->SetIndex(topOuter2);
+		mesh->SetIndex(topInner1);
 
-		mesh->SetIndice(bottomOuter2);
-		mesh->SetIndice(bottomInner1);
-		mesh->SetIndice(bottomOuter1);
+		mesh->SetIndex(bottomOuter2);
+		mesh->SetIndex(bottomInner1);
+		mesh->SetIndex(bottomOuter1);
 
-		mesh->SetIndice(bottomInner2);
-		mesh->SetIndice(bottomInner1);
-		mesh->SetIndice(bottomOuter2);
+		mesh->SetIndex(bottomInner2);
+		mesh->SetIndex(bottomInner1);
+		mesh->SetIndex(bottomOuter2);
 	}
 
 	// バッファの更新
@@ -746,14 +746,14 @@ void Engine::ShapeParameter::Pyramid::Create(ModelMesh* mesh)
 		int next = (i % segments) + 1;
 
 		// 側面の三角形（反転）
-		mesh->SetIndice(0);   // 頂点（上）
-		mesh->SetIndice(next); // 底面の次の頂点
-		mesh->SetIndice(i);   // 底面の現在の頂点
+		mesh->SetIndex(0);   // 頂点（上）
+		mesh->SetIndex(next); // 底面の次の頂点
+		mesh->SetIndex(i);   // 底面の現在の頂点
 
 		// 底面の三角形（反転）
-		mesh->SetIndice(next); // 次の頂点
-		mesh->SetIndice(i);    // 現在の頂点
-		mesh->SetIndice(0);    // 中心点（ここでは利用しない）
+		mesh->SetIndex(next); // 次の頂点
+		mesh->SetIndex(i);    // 現在の頂点
+		mesh->SetIndex(0);    // 中心点（ここでは利用しない）
 	}
 
 	// バッファの更新
@@ -805,13 +805,13 @@ void Engine::ShapeParameter::Torus::Create(ModelMesh* mesh)
 			int first = (i * (segments + 1)) + j;
 			int second = first + segments + 1;
 
-			mesh->SetIndice(first);
-			mesh->SetIndice(second);
-			mesh->SetIndice(first + 1);
+			mesh->SetIndex(first);
+			mesh->SetIndex(second);
+			mesh->SetIndex(first + 1);
 
-			mesh->SetIndice(second);
-			mesh->SetIndice(second + 1);
-			mesh->SetIndice(first + 1);
+			mesh->SetIndex(second);
+			mesh->SetIndex(second + 1);
+			mesh->SetIndex(first + 1);
 		}
 	}
 

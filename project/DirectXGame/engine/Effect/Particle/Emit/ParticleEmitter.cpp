@@ -1,4 +1,4 @@
-﻿
+
 // engine
 #include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -113,7 +113,7 @@ void Engine::PointParticleEmitter::Initialize(Engine::ParticleManager* particleM
 // デバック線描画
 void Engine::PointParticleEmitter::DrawEmitterLine() {}
 // パーティクル発生
-void Engine::PointParticleEmitter::EmitUniqe() {
+void Engine::PointParticleEmitter::EmitUnique() {
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
@@ -134,10 +134,10 @@ void Engine::AABBParticleEmitter::Initialize(Engine::ParticleManager* particleMa
 	//globalVariables_->AddItem(emitName,"rangeAABB.min", range_.min);
 	//globalVariables_->AddItem(emitName,"rangeAABB.max", range_.max);
 	//// グローバル変数適用
-	//ApplyGlobalVariablesUniqe();
+	//ApplyGlobalVariablesUnique();
 }
 
-void Engine::AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::AABBParticleEmitter::ApplyGlobalVariablesUnique() {
 	//range_.min = globalVariables_->GetValue<Vector3>(emitName_,"rangeAABB.min");
 	//range_.max = globalVariables_->GetValue<Vector3>(emitName_,"rangeAABB.max");
 }
@@ -145,11 +145,11 @@ void Engine::AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
 // デバック線描画
 void Engine::AABBParticleEmitter::DrawEmitterLine() { lineCommon->GetDebugLineMeshData().AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
 // パーティクル発生
-void Engine::AABBParticleEmitter::EmitUniqe() {
+void Engine::AABBParticleEmitter::EmitUnique() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 	auto& rnd = particleManager->GetRandomEngine();
 
-	ApplyGlobalVariablesUniqe();
+	ApplyGlobalVariablesUnique();
 
 	Vector3 pos{};
 	Vector3 normal{};
@@ -279,10 +279,10 @@ void Engine::SphereParticleEmitter::Initialize(Engine::ParticleManager* particle
 
 	//globalVariables_->AddItem(emitName, "radiusShpere", radius_);
 	//// グローバル変数適用
-	//ApplyGlobalVariablesUniqe();
+	//ApplyGlobalVariablesUnique();
 }
 
-void Engine::SphereParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::SphereParticleEmitter::ApplyGlobalVariablesUnique() {
 	//radius_ = globalVariables_->GetValue<float>(emitName_, "radiusShpere");
 }
 
@@ -296,8 +296,8 @@ void Engine::SphereParticleEmitter::DrawEmitterLine() {
 	lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 });
 }
 // パーティクル発生
-void Engine::SphereParticleEmitter::EmitUniqe() {
-	ApplyGlobalVariablesUniqe();
+void Engine::SphereParticleEmitter::EmitUnique() {
+	ApplyGlobalVariablesUnique();
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 	auto& randomEngine = particleManager->GetRandomEngine();
@@ -347,24 +347,24 @@ void Engine::CornerParticleEmitter::Initialize(Engine::ParticleManager* particle
 	//globalVariables_->AddItem(emitName, "corner.radius", corner.radius);
 
 	//// グローバル変数適用
-	//ApplyGlobalVariablesUniqe();
+	//ApplyGlobalVariablesUnique();
 }
 
-void Engine::CornerParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::CornerParticleEmitter::ApplyGlobalVariablesUnique() {
 	/*corner.segment = globalVariables_->GetValue<int>(emitName_, "corner.segment");
 	corner.radius = globalVariables_->GetValue<float>(emitName_, "radiusShpere");*/
 
 }
 
-void Engine::CornerParticleEmitter::UpdateUniqe() {
-	ApplyGlobalVariablesUniqe();
+void Engine::CornerParticleEmitter::UpdateUnique() {
+	ApplyGlobalVariablesUnique();
 	corner.center = transform_.worldMat_.GetWorldPosition();
 }
 
 // デバック線描画
 void Engine::CornerParticleEmitter::DrawEmitterLine() { lineCommon->GetDebugLineMeshData().AddLineCorner(corner, transform_); }
 // パーティクル発生
-void Engine::CornerParticleEmitter::EmitUniqe() {
+void Engine::CornerParticleEmitter::EmitUnique() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 	auto& randomEngine = particleManager->GetRandomEngine();
 	const Vector3 centerPos = transform_.worldMat_.GetWorldPosition();
@@ -437,10 +437,10 @@ void Engine::LineParticleEmitter::Initialize(Engine::ParticleManager* particleMa
 	//globalVariables_->AddItem(emitName, "segment.ends", segment_.end);
 
 	//// グローバル変数適用
-	//ApplyGlobalVariablesUniqe();
+	//ApplyGlobalVariablesUnique();
 }
 
-void Engine::LineParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::LineParticleEmitter::ApplyGlobalVariablesUnique() {
 	/*segment_.origin = globalVariables_->GetValue<Vector3>(emitName_, "segment.origin");
 	segment_.end = globalVariables_->GetValue<Vector3>(emitName_, "segment.ends");*/
 
@@ -459,7 +459,7 @@ void Engine::LineParticleEmitter::SetSegment(Vector3 origin, Vector3 end)
 	segment_.end = end;
 }
 // パーティクル発生
-void Engine::LineParticleEmitter::EmitUniqe() {
+void Engine::LineParticleEmitter::EmitUnique() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 
@@ -491,8 +491,8 @@ void Engine::SplineParticleEmitter::Initialize(Engine::ParticleManager* particle
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
 
-void Engine::SplineParticleEmitter::ApplyGlobalVariablesUniqe() {
-	
+void Engine::SplineParticleEmitter::ApplyGlobalVariablesUnique() {
+
 }
 
 // デバック線描画
@@ -510,7 +510,7 @@ void Engine::SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
 	}
 }
 // パーティクル発生
-void Engine::SplineParticleEmitter::EmitUniqe() {
+void Engine::SplineParticleEmitter::EmitUnique() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 
@@ -553,7 +553,7 @@ void Engine::TriangleParticleEmitter::Initialize(Engine::ParticleManager* partic
 
 }
 
-void Engine::TriangleParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::TriangleParticleEmitter::ApplyGlobalVariablesUnique() {
 
 }
 
@@ -562,7 +562,7 @@ void Engine::TriangleParticleEmitter::DrawEmitterLine() {
 	lineCommon->GetDebugLineMeshData().AddLineTriangle(triangle_, transform_);
 }
 // パーティクル発生
-void Engine::TriangleParticleEmitter::EmitUniqe() {
+void Engine::TriangleParticleEmitter::EmitUnique() {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager->GetRandomEngine();
@@ -606,8 +606,8 @@ void Engine::MeshParticleEmitter::Initialize(Engine::ParticleManager* particleMa
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
 
-void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
-	
+void Engine::MeshParticleEmitter::ApplyGlobalVariablesUnique() {
+
 }
 // デバック線描画
 void Engine::MeshParticleEmitter::DrawEmitterLine() {
@@ -620,7 +620,7 @@ void Engine::MeshParticleEmitter::DrawEmitterLine() {
 	}
 }
 // パーティクル発生
-void Engine::MeshParticleEmitter::EmitUniqe() {
+void Engine::MeshParticleEmitter::EmitUnique() {
 	if (!modelMesh_ || modelMesh_->GetTriangles().empty()) {
 		return;
 	}

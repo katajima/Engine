@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
@@ -140,10 +140,10 @@ namespace Engine {
 		SpriteCommon* spriteCommon = nullptr;
 
 		// インデクスデータ
-		IndexBuffer<uint32_t> indexResorce_;
+		IndexBuffer<uint32_t> indexResource_;
 		std::vector<uint32_t> indices;
 
-		VertexBuffer<VertexData> vbvResorce_;
+		VertexBuffer<VertexData> vbvResource_;
 		std::vector<VertexData> vertices;
 
 
@@ -165,7 +165,7 @@ namespace Engine {
 
 		WorldTransform2d worldTransform2d;
 
-		Vector2 size = { 640.0f,360.0f };											// サイズ													
+		Vector2 size = { 640.0f,360.0f };											// サイズ
 		bool isActive_ = true;
 	private:
 

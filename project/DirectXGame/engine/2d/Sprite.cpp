@@ -1,4 +1,4 @@
-﻿#include"Sprite.h"
+#include"Sprite.h"
 #include"SpriteCommon.h"
 #include <iostream>
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
@@ -20,7 +20,7 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	indices.push_back(3);
 	indices.push_back(2);
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(spriteCommon->GetDxCommon(), indices, indices.size());
+	indexResource_.CreateBufferView(spriteCommon->GetDxCommon(), indices, indices.size());
 
 	// 頂点データ設定
 	vertices.push_back({});
@@ -28,7 +28,7 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	vertices.push_back({});
 	vertices.push_back({});
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(spriteCommon->GetDxCommon(), vertices, vertices.size());
+	vbvResource_.CreateBufferView(spriteCommon->GetDxCommon(), vertices, vertices.size());
 
 
 	// マテリアル
@@ -116,19 +116,19 @@ void Engine::Sprite::Update()
 	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
 
 	// 頂点データ更新（サイズから構築）
-	vbvResorce_.Data()[0].position = { left,  bottom, 0.0f, 1.0f };
-	vbvResorce_.Data()[1].position = { left,  top,    0.0f, 1.0f };
-	vbvResorce_.Data()[2].position = { right, bottom, 0.0f, 1.0f };
-	vbvResorce_.Data()[3].position = { right, top,    0.0f, 1.0f };
+	vbvResource_.Data()[0].position = { left,  bottom, 0.0f, 1.0f };
+	vbvResource_.Data()[1].position = { left,  top,    0.0f, 1.0f };
+	vbvResource_.Data()[2].position = { right, bottom, 0.0f, 1.0f };
+	vbvResource_.Data()[3].position = { right, top,    0.0f, 1.0f };
 
 	// UV と normal は変更なし
 	for (int i = 0; i < 4; ++i) {
-		vbvResorce_.Data()[i].normal = { 0.0f, 0.0f, -1.0f };
+		vbvResource_.Data()[i].normal = { 0.0f, 0.0f, -1.0f };
 	}
-	vbvResorce_.Data()[0].texcoord = { tex_left,  tex_bottom };
-	vbvResorce_.Data()[1].texcoord = { tex_left,  tex_top };
-	vbvResorce_.Data()[2].texcoord = { tex_right, tex_bottom };
-	vbvResorce_.Data()[3].texcoord = { tex_right, tex_top };
+	vbvResource_.Data()[0].texcoord = { tex_left,  tex_bottom };
+	vbvResource_.Data()[1].texcoord = { tex_left,  tex_top };
+	vbvResource_.Data()[2].texcoord = { tex_right, tex_bottom };
+	vbvResource_.Data()[3].texcoord = { tex_right, tex_top };
 
 	// 変換行列
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
@@ -175,8 +175,8 @@ void Engine::Sprite::Draw(PSOType type)
 		material->GetCommandListTexture(2, 2, 2);
 
 
-		vbvResorce_.IASetVertexBuffers();
-		indexResorce_.IASetIndexBuffer();
+		vbvResource_.IASetVertexBuffers();
+		indexResource_.IASetIndexBuffer();
 
 		//トランスフォームMatrixResource
 		transformation->GetCommandList(1);
@@ -187,8 +187,8 @@ void Engine::Sprite::Draw(PSOType type)
 }
 
 void Engine::Sprite::GetCommandList() {
-	vbvResorce_.IASetVertexBuffers();
-	indexResorce_.IASetIndexBuffer();
+	vbvResource_.IASetVertexBuffers();
+	indexResource_.IASetIndexBuffer();
 };
 
 void Engine::Sprite::AdjusttextureSize()

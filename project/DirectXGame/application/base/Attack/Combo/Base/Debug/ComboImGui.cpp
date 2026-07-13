@@ -23,7 +23,7 @@ void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequen
 	ImGui::Separator();
 
 	if (isPlaying && isActive) {
-		currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
+		currentFrame += static_cast<int>(dt * ConvertUtility::kDefaultFps); // 既定FPS換算
 	}
 
 	// 最大値に行ったら戻す
@@ -36,7 +36,7 @@ void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequen
 }
 
 
-void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
+void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 	bool isActive, int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
 	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
 
@@ -45,7 +45,7 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.0f, 10.0f, "%.2f");
 		ImGui::Checkbox("アニメーションループ", &animationData.animationLoop);
 
-		float endTime = static_cast<float>(maxFrame) /60.0f;
+		float endTime = static_cast<float>(maxFrame) / ConvertUtility::kDefaultFps;
 
 		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
@@ -143,7 +143,7 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetCollData().hitBoxData.lifeTime;
 
 	// コンボ終了時間
-	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
+	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, ConvertUtility::kDefaultFps);
 
 	// 移動時間
 	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.startTime;
@@ -168,9 +168,9 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	}
 }
 
-void Combo::ComboImGui::AddSequencerEvent(AttackSequence& sequence, float startFrame, float endFrame, 
+void Combo::ComboImGui::AddSequencerEvent(AttackSequence& sequence, float startFrame, float endFrame,
 	unsigned int color, const std::string& name) {
-	sequence.AddEvent({ ConvertUtility::SecondsToFrames(startFrame,60.0f) , ConvertUtility::SecondsToFrames(endFrame,60.0f), color, name });
+	sequence.AddEvent({ ConvertUtility::SecondsToFrames(startFrame, ConvertUtility::kDefaultFps) , ConvertUtility::SecondsToFrames(endFrame, ConvertUtility::kDefaultFps), color, name });
 }
 
 #pragma endregion // シーケンサー

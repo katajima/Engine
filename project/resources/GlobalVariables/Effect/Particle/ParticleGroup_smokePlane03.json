@@ -135,7 +135,7 @@
             "type": "bool",
             "value": false
         },
-        "material.useSpeculerMap": {
+        "material.useSpecularMap": {
             "type": "bool",
             "value": false
         },

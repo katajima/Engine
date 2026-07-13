@@ -37,7 +37,7 @@ namespace EmitData {
 		kTop,
 		kBottom,
 	};
-	
+
 	// 描画モード
 	enum class RasterizerType
 	{
@@ -49,7 +49,7 @@ namespace EmitData {
 	{
 		MODE_ADD,
 		MODE_SUBTRACT,
-		MODE_MUlLIPLY,
+		MODE_MULTIPLY,
 	};
 
 	// 各種フラグ
@@ -66,7 +66,7 @@ namespace EmitData {
 		bool isLifeTimeVelocity = false;						// 速度
 		bool isBounce = false;									// 跳ねるか
 		bool isAcceleration = false;							// 加速度を付けるか
-		bool isLineInterpolation = false;						// ライン補間するか	
+		bool isLineInterpolation = false;						// ライン補間するか
 		bool isScaling_ = false;								// サイズを大きくするか
 	};
 

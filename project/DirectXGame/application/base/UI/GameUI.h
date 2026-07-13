@@ -28,33 +28,33 @@ public:
 	void SetGamePlayData(const Game::GameData data) { data_ = data; };
 
 private:
-	std::unique_ptr<Engine::Sprite> text_clera;
+	std::unique_ptr<Engine::Sprite> text_clear;
 	std::unique_ptr<Engine::Sprite> text_over;
 	std::unique_ptr<Engine::Sprite> text_bar;
 private:
 	Character::BasePlayer* player;
 	Game::GameData data_;
 private:
-	struct CleraTextData {
+	struct ClearTextData {
 		Vector2 pos_ = { 300,200 };
 		Vector2 scale_ = { 100 * 1.5f,33 * 1.5f };
 		float size_ = 2.0f;
-		
+
 		Color color_ = { 0,1,0,1 };
 	};
-	CleraTextData cleraTextData_;
+	ClearTextData clearTextData_;
 
-	
+
 	struct HitTextData {
 		Vector2 pos_ = { 1000,180 };
 		int instance = 3;
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 100 * 1.5f,33 * 1.5f };
 		Vector2 offset = { 20.0f,0.0f };
-		Vector2 textuerSize = { 64,96 };
+		Vector2 textureSize = { 64,96 };
 		float countmax = 999;
 
-		
+
 		Color color_ = { 0.9f,0.9f ,0.9f ,1.0f };
 		Color nameColor_ = { 0.9f,0.9f ,0.9f ,1.0f };
 	};
@@ -66,7 +66,7 @@ private:
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 100 * 1.5f,33 * 1.5f };
 		Vector2 offset = { 20.0f,0.0f };
-		Vector2 textuerSize = { 64,96 };
+		Vector2 textureSize = { 64,96 };
 		float countmax = 9;
 
 
@@ -74,14 +74,14 @@ private:
 		Color nameColor_ = { 0.9f,0.9f ,0.9f ,1.0f };
 	};
 	WaveTextData waveTextData;
-	
+
 	struct WaveTimeTextData {
 		Vector2 pos_ = { 850,50 };
 		int instance = 3;
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 64 ,64  };
 		Vector2 offset = { 20.0f,0.0f };
-		Vector2 textuerSize = { 64,96 };
+		Vector2 textureSize = { 64,96 };
 		float countmax = 999;
 
 

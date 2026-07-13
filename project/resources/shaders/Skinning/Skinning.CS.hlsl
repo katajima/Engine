@@ -25,11 +25,11 @@ StructuredBuffer<VertexInfluence> gInfluence : register(t2);
 
 RWStructuredBuffer<Vertex> gOutputVertices : register(u0);
 
-struct SkinningInfomation
+struct SkinningInformation
 {
     uint numVertices;
 };
-ConstantBuffer<SkinningInfomation> gSkinningInfomation : register(b0);
+ConstantBuffer<SkinningInformation> gSkinningInformation : register(b0);
 
 
 
@@ -37,7 +37,7 @@ ConstantBuffer<SkinningInfomation> gSkinningInfomation : register(b0);
 void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint vertexIndex = DTid.x;
-    if (vertexIndex < gSkinningInfomation.numVertices)
+    if (vertexIndex < gSkinningInformation.numVertices)
     {
         Vertex input = gInputVertices[vertexIndex];
         VertexInfluence influence = gInfluence[vertexIndex];

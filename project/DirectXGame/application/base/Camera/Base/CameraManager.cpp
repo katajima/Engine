@@ -1,5 +1,6 @@
 #include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 
 CameraManager::~CameraManager()
@@ -19,7 +20,7 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	camera->Initialize(entityManager->GetCameraCommon());
 	camera->SetRotate({ 0.36f,0,0 });			// 回転指定
 	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
-	camera->SetFarClip(10000.0f);						// farZを10000に
+	camera->SetFarClip(Engine::Camera::kDefaultFarClip);	// 共通のFarクリップ距離を設定
 	isGameCamera = true;								// ゲームに使用する
 
 	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
@@ -82,7 +83,8 @@ void CameraManager::Update()
 
 		// 補間中
 		if (isInterpolating) {
-			currentTime += 1.0f / 60.0f; // 仮に60FPS固定
+			// カメラ補間時間はゲーム時間倍率を反映して進める
+			currentTime += Engine::MyGame::GameTime();
 
 			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
 
@@ -105,7 +107,7 @@ void CameraManager::Update()
 			}
 		}
 	}
-	
+
 
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
 	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());				// デフォルトカメラ設定
@@ -138,7 +140,7 @@ void CameraManager::SetUseCamera(const std::string& name, float time) {
 		}
 		// カメラ使用
 		it->second->SetUseCamera(true);
-		
+
 
 		if (time <= 0.0f) {
 			// 即時切り替え
@@ -155,11 +157,11 @@ void CameraManager::SetUseCamera(const std::string& name, float time) {
 			// 初期トランスフォーム計算
 			startTransform.translate = camera->GetTranslate();
 			startTransform.rotate = MakeQuaternionFromEuler(camera->GetRotate());
-			
+
 			// ターゲットトランスフォーム計算
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
 			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
-			
+
 		}
 	}
 }

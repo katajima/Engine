@@ -45,7 +45,7 @@ namespace Engine {
 		void Draw();
 
 		// スキニング用描画
-		void DrawSkinning(std::vector<MaterialInstance> matetials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr);
+		void DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr);
 
 		// ModelData取得
 		ModelData& GetModelData() { return modelData; }
@@ -53,7 +53,7 @@ namespace Engine {
 		float GetMaterialAlpha();
 
 	public:
-		
+
 	private:
 		// モデル共通クラス
 		ModelCommon* modelCommon = nullptr;

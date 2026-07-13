@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
@@ -34,7 +34,7 @@ namespace Engine {
 		virtual void Draw() = 0;
 
 		// 終了フラグのチェック
-		virtual bool IsEndRequst() { return endRequst_; }
+		virtual bool IsEndRequest() { return endRequest_; }
 
 		// デストラクタ
 		virtual ~Framework() = default;
@@ -44,7 +44,7 @@ namespace Engine {
 
 	protected:
 		// ゲーム終了フラグ
-		bool endRequst_ = false;
+		bool endRequest_ = false;
 		// ウィンアップ
 
 		std::unique_ptr <WinApp> winApp_ = nullptr;
@@ -60,7 +60,7 @@ namespace Engine {
 		// エンティティ全般
 		std::unique_ptr<EntityManager> entityManager_ = nullptr;
 
-		
+
 		// シーンマネージャー
 		std::unique_ptr<SceneManager> sceneManager_ = nullptr;
 

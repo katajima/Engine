@@ -1,4 +1,4 @@
-﻿#include "Primitive.h"
+#include "Primitive.h"
 
 #include"PrimitiveCommon.h"
 
@@ -84,7 +84,7 @@ void Engine::BasePrimitive::Update(float deltaTime)
 	mesh->material->GPUData();
 
 	// 固有の更新
-	UniqeUpdate();
+	UniqueUpdate();
 }
 
 void Engine::BasePrimitive::Draw()
@@ -138,12 +138,12 @@ void Engine::PlanePrimitive::InvNormal()
 
 }
 
-void Engine::PlanePrimitive::UniqeUpdate()
+void Engine::PlanePrimitive::UniqueUpdate()
 {
 	prePlane = plane;
 }
 
-void Engine::TrianglePrimitive::UniqeUpdate()
+void Engine::TrianglePrimitive::UniqueUpdate()
 {
 	if (triangle != preTriangle) {
 		triangle.Create(mesh.get());
@@ -152,7 +152,7 @@ void Engine::TrianglePrimitive::UniqeUpdate()
 	preTriangle = triangle;
 }
 
-void Engine::CirclePrimitive::UniqeUpdate()
+void Engine::CirclePrimitive::UniqueUpdate()
 {
 	if (preCircle != circle) {
 		circle.Create(mesh.get());
@@ -167,7 +167,7 @@ void Engine::CirclePrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void Engine::CubePrimitive::UniqeUpdate()
+void Engine::CubePrimitive::UniqueUpdate()
 {
 	if (preCube != cube) {
 		cube.Create(mesh.get());
@@ -182,7 +182,7 @@ void Engine::CubePrimitive::UniqeUpdate()
 
 }
 
-void Engine::StarPrimitive::UniqeUpdate()
+void Engine::StarPrimitive::UniqueUpdate()
 {
 	if ((preStar != star)) {
 		star.Create(mesh.get());
@@ -200,7 +200,7 @@ void Engine::StarPrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void Engine::CrescentPrimitive::UniqeUpdate()
+void Engine::CrescentPrimitive::UniqueUpdate()
 {
 	if ((preCrescent != crescent)) {
 		crescent.Create(mesh.get());
@@ -227,7 +227,7 @@ void Engine::CrescentPrimitive::UniqeUpdate()
 
 }
 
-void Engine::RingPrimitive::UniqeUpdate()
+void Engine::RingPrimitive::UniqueUpdate()
 {
 	if ((preRing != ring)) {
 		ring.Create(mesh.get());
@@ -247,7 +247,7 @@ void Engine::RingPrimitive::UniqeUpdate()
 
 }
 
-void Engine::CrossPrimitive::UniqeUpdate()
+void Engine::CrossPrimitive::UniqueUpdate()
 {
 	if ((preCross != cross)) {
 		cross.Create(mesh.get());
@@ -263,7 +263,7 @@ void Engine::CrossPrimitive::UniqeUpdate()
 
 }
 
-void Engine::CylinderPrimitive::UniqeUpdate()
+void Engine::CylinderPrimitive::UniqueUpdate()
 {
 	if ((preCylinder != cylinder)) {
 		cylinder.Create(mesh.get());
@@ -285,7 +285,7 @@ void Engine::CylinderPrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void Engine::SpherePrimitive::UniqeUpdate()
+void Engine::SpherePrimitive::UniqueUpdate()
 {
 	if ((sphere != preSphere)) {
 		sphere.Create(mesh.get());
@@ -303,7 +303,7 @@ void Engine::SpherePrimitive::UniqeUpdate()
 
 }
 
-void Engine::ArrowPrimitive::UniqeUpdate()
+void Engine::ArrowPrimitive::UniqueUpdate()
 {
 	if (preArrow != arrow) {
 		arrow.Create(mesh.get());
@@ -312,7 +312,7 @@ void Engine::ArrowPrimitive::UniqeUpdate()
 	preArrow = arrow;
 }
 
-void Engine::TubePrimitive::UniqeUpdate()
+void Engine::TubePrimitive::UniqueUpdate()
 {
 	if ((preTube != tube)) {
 		tube.Create(mesh.get());
@@ -332,7 +332,7 @@ void Engine::TubePrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void Engine::PyramidPrimitive::UniqeUpdate()
+void Engine::PyramidPrimitive::UniqueUpdate()
 {
 	if ((prePyramid != pyramid)) {
 		pyramid.Create(mesh.get());
@@ -352,7 +352,7 @@ void Engine::PyramidPrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void Engine::TorusPrimitive::UniqeUpdate()
+void Engine::TorusPrimitive::UniqueUpdate()
 {
 	if ((torus != preTorus)) {
 		torus.Create(mesh.get());

@@ -28,8 +28,8 @@ namespace Engine {
 	public:
 		std::vector<LineVertexData> verticesline;
 	private:
-		VertexBuffer<LineVertexData> vbvResorce_;
-		IndexBuffer<uint32_t> indexResorce_;
+		VertexBuffer<LineVertexData> vbvResource_;
+		IndexBuffer<uint32_t> indexResource_;
 	};
 }
 

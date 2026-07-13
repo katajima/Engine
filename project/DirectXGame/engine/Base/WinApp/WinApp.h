@@ -65,7 +65,7 @@ namespace Engine {
 			}
 		}
 		// 終了させる
-		static void IsFinish() { isFnish_ = true; }
+		static void IsFinish() { isFinish_ = true; }
 
 		//クライアント領域のサイズ
 		static const int32_t kClientWidth = 1280;
@@ -78,7 +78,7 @@ namespace Engine {
 		inline static float ratioHeight = 0;
 
 
-		inline static bool isFnish_ = false;
+		inline static bool isFinish_ = false;
 
 		// フルスクリーン設定
 		static void ToggleFullscreen();

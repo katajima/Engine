@@ -1,4 +1,4 @@
-﻿#include "RenderComponent.h"
+#include "RenderComponent.h"
 
 
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
@@ -79,7 +79,7 @@ void Engine::RenderComponent::Draw()
 
 			int i = 0;
 			for (auto& mesh : model->GetModelData().mesh) {
-				
+
 				//mesh->material->SetGPUMaterialInstance(materialInstances_[i], cbResources_[i].get());
 
 
@@ -104,7 +104,7 @@ void Engine::RenderComponent::Draw()
 
 				DrawSetting();
 
-				
+
 				mesh->material->GetCommandListMaterial(0);
 
 				mesh->material->GetCommandListTexture(2, 7, 8);
@@ -298,7 +298,7 @@ void Engine::RenderComponent::ObjectNormalTypeDiscrimination(PSOType type)
 
 void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 {
-	SkinningConmmon* skinning = entityManager->GetSkinningConmmon();
+	SkinningCommon* skinning = entityManager->GetSkinningCommon();
 
 	// 描画前準備
 	skinning->DrawComputeSetting();
@@ -310,7 +310,7 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
 		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, mesh->skinCluster->influenceSrvHandle.second);
 		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, mesh->skinCluster->outputVertexUavHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInfomation->GetGPUVirtualAddress());
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInformation->GetGPUVirtualAddress());
 
 
 		skinning->GetDxCommon()->GetCommandList()->Dispatch(UINT(mesh->vertices.size() + 1023) / 1024, 1, 1);
@@ -380,7 +380,7 @@ void Engine::RenderComponent::DrawSettingOcean()
 #pragma region MyRegion
 
 void Engine::RenderComponent::SetModel(Engine::Model* model) {
-	this->model = model; 
+	this->model = model;
 
 	materialInstances_.clear();
 	int i = 0;

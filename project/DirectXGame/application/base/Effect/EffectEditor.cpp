@@ -105,7 +105,7 @@ namespace {
 	}
 }
 
-void EffectEditor::Initialize(Engine::EffectComponent* effectComponent, 
+void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 	Engine::GlobalVariables* globalVariables) {
 
 	this->effectComponent = effectComponent;
@@ -122,7 +122,7 @@ void EffectEditor::Update(float dt) {
 
 	DrawParticleGroupEditor();
 	DrawEffectManagement();
-	
+
 	if (effectGlobalDatas_.empty()) {
 		ImGui::TextDisabled("エフェクトを追加してください。");
 	}
@@ -142,7 +142,7 @@ void EffectEditor::Update(float dt) {
 				timer = 0.0f;
 			}
 		}
-	
+
 
 		// --- 選択されているブロックだけ表示 ---
 		for (auto& combo : effectGlobalDatas_) {
@@ -178,7 +178,7 @@ void EffectEditor::Update(float dt) {
 			globalVariables->SaveFile(kDeletedParticleRegistryGroup);
 		}
 	}
-	
+
 	ImGui::End();
 #endif // _DEBUG
 
@@ -673,7 +673,7 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 			if (ImGui::Checkbox("Use Normal Map", &data.materialUseNormalMap)) {
 				saveData = true;
 			}
-			if (ImGui::Checkbox("Use Specular Map", &data.materialUseSpeculerMap)) {
+			if (ImGui::Checkbox("Use Specular Map", &data.materialUseSpecularMap)) {
 				saveData = true;
 			}
 		}
@@ -1057,7 +1057,7 @@ void EffectEditorSerializer::WriteParticleGroupData(const std::string& particleN
 	writer.Value(groupName, "material.shininess", data.materialShininess);
 	writer.Value(groupName, "material.useLig", data.materialUseLig);
 	writer.Value(groupName, "material.useNormalMap", data.materialUseNormalMap);
-	writer.Value(groupName, "material.useSpeculerMap", data.materialUseSpeculerMap);
+	writer.Value(groupName, "material.useSpecularMap", data.materialUseSpecularMap);
 	writer.Value(groupName, "material.useEnvironment", data.materialUseEnvironment);
 	writer.Value(groupName, "material.alphaClipping", data.materialAlphaClipping);
 	writer.Value(groupName, "material.alpha", data.materialAlpha);
@@ -1141,7 +1141,7 @@ void EffectEditorSerializer::LoadParticleGroupData(const std::string& particleNa
 	if (globalVariables_->HasKey(groupName, "material.shininess")) data.materialShininess = globalVariables_->GetValue<float>(groupName, "material.shininess");
 	if (globalVariables_->HasKey(groupName, "material.useLig")) data.materialUseLig = globalVariables_->GetValue<bool>(groupName, "material.useLig");
 	if (globalVariables_->HasKey(groupName, "material.useNormalMap")) data.materialUseNormalMap = globalVariables_->GetValue<bool>(groupName, "material.useNormalMap");
-	if (globalVariables_->HasKey(groupName, "material.useSpeculerMap")) data.materialUseSpeculerMap = globalVariables_->GetValue<bool>(groupName, "material.useSpeculerMap");
+	if (globalVariables_->HasKey(groupName, "material.useSpecularMap")) data.materialUseSpecularMap = globalVariables_->GetValue<bool>(groupName, "material.useSpecularMap");
 	if (globalVariables_->HasKey(groupName, "material.useEnvironment")) data.materialUseEnvironment = globalVariables_->GetValue<bool>(groupName, "material.useEnvironment");
 	if (globalVariables_->HasKey(groupName, "material.alphaClipping")) data.materialAlphaClipping = globalVariables_->GetValue<float>(groupName, "material.alphaClipping");
 	if (globalVariables_->HasKey(groupName, "material.alpha")) data.materialAlpha = globalVariables_->GetValue<float>(groupName, "material.alpha");
@@ -1326,7 +1326,7 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 		"TRIANGLE",	// 三角形
 		"MESH",		// メッシュ
 	};
-	
+
 	EmitterShapeType keep = data.shapeType;
 	Engine::ImGuiManager::Select("エミッタ形状", ShapeTypeLabels, data.shapeType);
 	if (keep != data.shapeType) {
@@ -1354,7 +1354,7 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 
 	// 出現
 	ImGui::DragInt("出現量(中央値)", &data.emitData.count.median, 0.1f);
-	ImGui::DragInt("出現量(振れ幅)", &data.emitData.count.range, 0.1f); 
+	ImGui::DragInt("出現量(振れ幅)", &data.emitData.count.range, 0.1f);
 
 	// 生存時間
 	ImGui::DragFloat("生存時間(中央値)", &data.emitData.lifeTime.median, 0.1f);
@@ -1365,12 +1365,12 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	bool isLight = data.enableLighting;
 	ImGui::Checkbox("ライティング", &isLight);
 	data.enableLighting = isLight;
-	
+
 	if (ImGui::CollapsingHeader("ビルボード")) {
 		ImGui::Checkbox("ビルボードのz回転するか", &data.isFlag.billboardRotZ);
 		ImGui::Checkbox("ビルボードするか", &data.isFlag.usebillboard);
 		ImGui::Checkbox("ビルボードY軸するか", &data.isFlag.usebillboardY);
-		
+
 	}
 	if (ImGui::CollapsingHeader("速度")) {
 		ImGui::DragFloat3("速度(中央値)", &data.emitData.velocity.median.x, 0.1f);
@@ -1387,7 +1387,7 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 		ImGui::Checkbox("回転速度を使用するか", &data.isFlag.isRotateVelocity);
 		ImGui::DragFloat3("回転速度(中央値)", &data.emitData.rotateVelocity.median.x, 0.1f);
 		ImGui::DragFloat3("回転速度(振れ幅)", &data.emitData.rotateVelocity.range.x, 0.1f);
-		
+
 	}
 	if (ImGui::CollapsingHeader("拡縮")) {
 		ImGui::DragFloat3("サイズ(中央値)", &data.emitData.size.median.x, 0.1f);
@@ -1409,7 +1409,7 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 		ImGui::ColorEdit4("最小値", &data.emitData.colorRange.min.x);
 		ImGui::ColorEdit4("最大値", &data.emitData.colorRange.max.x);
 		ImGui::Checkbox("透過するか", &data.isFlag.isAlpha);
-		ImGui::DragFloat("透過クリップ値", &data.alphaClipping);		
+		ImGui::DragFloat("透過クリップ値", &data.alphaClipping);
 	}
 
 	if (ImGui::CollapsingHeader("形状によってのパラメータ")) {

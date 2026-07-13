@@ -1,4 +1,4 @@
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -10,7 +10,7 @@
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
-#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Base/BaseSpecial.h>
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
@@ -155,7 +155,7 @@ namespace Character {
 		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
 		attackController_->GetHitCounter().SetHitTimer(2.0f);
 
-		// 
+		//
 		ReloadComboData();
 	}
 	// ステート初期化and追加
@@ -246,7 +246,7 @@ namespace Character {
 		attackController_->Update(ctx);
 		// 応答システム
 		hitMotionSystem_->Update(ctx.dt);
-		
+
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 
@@ -260,7 +260,7 @@ namespace Character {
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetObjectComponent()->GetWorldTransform(),
 			*GetObjectComponent()->GetRigidBodyComponent(), ctx);
-		
+
 		deathSystem_->Update(ctx.dt);
 
 #ifdef _DEBUG
@@ -294,7 +294,7 @@ namespace Character {
 			return;
 		}
 
-		LockOnSystem* lockOnSystem = attackController_->GeyLockOnSysutem();
+		LockOnSystem* lockOnSystem = attackController_->GetLockOnSystem();
 		if (!lockOnSystem) {
 			// ロックオンシステムが無い場合はカメラだけ解除しておく
 			if (followCamera) {
