@@ -44806,7 +44806,7 @@ void Engine::DebugModel::ImguiModel(ModelData& modelData)
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/ModelData.h
 ============================================================
-#pragma once
+﻿#pragma once
 
 // engine
 #include"DirectXGame/engine/math/MathFunctions.h"
@@ -44837,13 +44837,13 @@ namespace Engine {
 	//モデルデータ
 	struct ModelData
 	{
-		std::string name;										// 名前
-		bool isNormalmap;										// ノーマルマップを使っているか？
+		std::string name = "";										// 名前
+		bool isNormalmap = false;										// ノーマルマップを使っているか？
 		std::unordered_map<uint32_t, Vector3> meshOffsetMap;	// オフセット位置
-		Node rootNode;											// ノードデータ
-		bool isAssimp;											// アシンプか
-		bool isAmimetion;										// アニメーションするか
-		bool isTangent;											// タンジェント
+		Node rootNode{};											// ノードデータ
+		bool isAssimp = false;											// アシンプか
+		bool isAmimetion = false;										// アニメーションするか
+		bool isTangent = false;											// タンジェント
 		std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 		std::vector<uint32_t> cachedLineIndices_;				// ライン
 
@@ -44855,9 +44855,9 @@ namespace Engine {
 		float blendTime = 0.0f;									// ブレンドに使う経過時間
 		float blendDuration = 0.3f;								// ブレンドにかける合計時間
 		bool isBlending = false;
-		Skeleton skeleton;										// スケルトン
+		Skeleton skeleton{};										// スケルトン
 
-		int pad;												// パディング
+		int pad = 0;												// パディング
 	};
 
 
@@ -44925,6 +44925,11 @@ File Path: project/DirectXGame/engine/3d/Model/ModelManager.cpp
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
+
+Engine::ModelManager::ModelManager(){}
+
+Engine::ModelManager::~ModelManager(){}
 
 void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -45031,7 +45036,7 @@ bool Engine::ModelManager::IsLoading() const
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/ModelManager.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<string>
@@ -45067,8 +45072,8 @@ namespace Engine {
 	/// </summary>
 	class ModelManager {
 	public:
-		ModelManager() = default;
-		~ModelManager() = default;
+		ModelManager();
+		~ModelManager();
 		ModelManager(ModelManager&) = delete;
 		ModelManager& operator=(ModelManager&) = delete;
 
@@ -51838,7 +51843,7 @@ namespace Logger
 ============================================================
 File Path: project/DirectXGame/engine/Base/Texture/TextureManager.cpp
 ============================================================
-﻿#include "TextureManager.h"
+#include "TextureManager.h"
 #include"DirectXGame/engine/Utility/StringUtility.h"
 #include<unordered_map>
 
@@ -51993,6 +51998,16 @@ void Engine::TextureManager::LoadAllTexturesInDirectory(const std::string& direc
 	}
 
 	debugTimerTex_.EndTimer();
+}
+
+void Engine::TextureManager::ReleaseIntermediateResources()
+{
+	std::lock_guard<std::mutex> lock(textureMutex_);
+
+	// 転送完了後はDefaultヒープ側のresourceだけ残せばよいので、一時アップロードリソースを解放する。
+	for (auto& [filePath, textureData] : textureDatas) {
+		textureData.intermediateResource.Reset();
+	}
 }
 
 
@@ -52167,6 +52182,9 @@ namespace Engine {
 		//データを転送するUploadTextureData関数を作る
 		[[nodiscard]]
 		Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+
+		// GPU転送完了後に不要になるアップロード用中間リソースを解放
+		void ReleaseIntermediateResources();
 
 	private:
 
@@ -57154,7 +57172,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/Common/DirectXCommon.cpp
 ============================================================
-﻿#include "DirectXCommon.h"
+#include "DirectXCommon.h"
 #include<format>
 #include<cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -57208,7 +57226,45 @@ void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 
 void Engine::DirectXCommon::Finalize()
 {
-	imguiManager_->Finalize();
+	// 非同期モデル読み込みが残っている場合は、GPUリソースを解放する前に完了させる。
+	if (modelManager_ && modelManager_->IsLoading()) {
+		modelManager_->WaitAllLoadFinished();
+	}
+
+	// GPUが参照中のリソースを解放しないよう、終了前にキューの完了を待つ。
+	if (fence_) {
+		fence_->WaitGPU();
+	}
+
+	// ImGuiが内部で持つD3D12リソースを解放する。
+	if (imguiManager_) {
+		imguiManager_->Finalize();
+		imguiManager_.reset();
+	}
+
+	// テクスチャ転送用の一時リソースはGPU待機後に不要になるため、明示的に解放する。
+	if (textureManager_) {
+		textureManager_->ReleaseIntermediateResources();
+	}
+
+	// DirectXCommonが所有するGPUリソースを依存関係の深い順に明示解放する。
+	postEffectManager_.reset();
+	shadowMap_.reset();
+	renderingCommon_.reset();
+	modelManager_.reset();
+	textureManager_.reset();
+	depthStencil_.reset();
+	dsvManager_.reset();
+	srvManager_.reset();
+	rtvManager_.reset();
+	swapChain_.reset();
+	dxcCompiler_.reset();
+	barrier_.reset();
+	viewPort_.reset();
+	scissorRect_.reset();
+	fence_.reset();
+	command_.reset();
+	DXGIDevice_.reset();
 }
 
 void Engine::DirectXCommon::SceneDraw(SceneManager* sceneManager, EntityManager* entity3DManager)
@@ -57797,8 +57853,8 @@ void Engine::DXGIDevice::Initialize()
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 		// エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-		// 警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		// 警告は終了時のLiveObject確認でも出るため、ログ出力だけにしてブレークはしない。
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
 
 		// 抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIds[] = {
@@ -58176,6 +58232,12 @@ File Path: project/DirectXGame/engine/DirectX/Fence/Fence.cpp
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
+Engine::Fence::~Fence()
+{
+	// 終了処理漏れでもイベントハンドルを残さないようにする。
+	Finalize();
+}
+
 void Engine::Fence::Initialize(DXGIDevice* dxgi, Command* command)
 {
 	this->dxgi = dxgi;		// デバイス
@@ -58184,8 +58246,22 @@ void Engine::Fence::Initialize(DXGIDevice* dxgi, Command* command)
 	CreateFence();	// フェンス生成
 }
 
+void Engine::Fence::Finalize()
+{
+	// CreateEventで作成した待機イベントを閉じ、Debug時のハンドルリークを防ぐ。
+	if (fenceEvent_) {
+		CloseHandle(fenceEvent_);
+		fenceEvent_ = nullptr;
+	}
+}
+
 void Engine::Fence::WaitGPU()
 {
+	// 初期化前や終了処理後に呼ばれた場合は何もしない。
+	if (!command || !fence_ || !fenceEvent_) {
+		return;
+	}
+
 	// フェンスの値を更新し、GPUとの同期
 	fenceValue_++;
 	//commandQueue->Signal(fence.Get(), fenceValue);
@@ -58237,10 +58313,13 @@ namespace Engine {
 	{
 	public:
 		Fence() = default;
-		~Fence() = default;
+		// デストラクタ
+		~Fence();
 
 		// 初期化
 		void Initialize(DXGIDevice* dxgi, Command* command);
+		// 終了
+		void Finalize();
 		// GPUを待機
 		void WaitGPU();
 	private:
@@ -58256,7 +58335,7 @@ namespace Engine {
 		// フェンスバリュー
 		UINT64 fenceValue_ = 0;
 		// フェンスイベント
-		HANDLE fenceEvent_;
+		HANDLE fenceEvent_ = nullptr;
 		// エラー半別
 		HRESULT hr_ = S_FALSE;
 
@@ -75709,7 +75788,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/Framework.cpp
 ============================================================
-﻿#include"Framework.h"
+#include"Framework.h"
 
 void Engine::Framework::Initialize()
 {
@@ -75744,14 +75823,44 @@ void Engine::Framework::Initialize()
 
 void Engine::Framework::Finalize()
 {
+	// 最後の描画で使ったシーン/エンティティのGPUリソースを安全に破棄するため、先にGPU完了を待つ。
+	if (dxCommon_ && dxCommon_->GetFence()) {
+		dxCommon_->GetFence()->WaitGPU();
+	}
+
+	// シーンはDirectXリソースを持つため、DirectXCommonを破棄する前に終了させる。
+	sceneManager_.reset();
+
+	// シーン生成用ファクトリはシーン破棄後に不要になるため解放する。
+	sceneFactory_.reset();
+
+	// エンティティ群が持つGPUリソースを、DirectXCommonより先に解放する。
+	entityManager_.reset();
+
 	// DirectX
-	dxCommon_->Finalize();
+	if (dxCommon_) {
+		WinApp::SetSwapChain(nullptr);
+		dxCommon_->Finalize();
+		dxCommon_.reset();
+	}
 
 	// 音
-	audioManager_->Finalize();
+	if (audioManager_) {
+		audioManager_->Finalize();
+		audioManager_.reset();
+	}
+
+	// グローバル変数
+	globalVariables_.reset();
+
+	// 入力
+	input_.reset();
 
 	// WindowsAPIの終了処理
-	winApp_->Finalize();
+	if (winApp_) {
+		winApp_->Finalize();
+		winApp_.reset();
+	}
 
 }
 
