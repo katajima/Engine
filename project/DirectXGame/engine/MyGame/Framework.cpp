@@ -1,4 +1,4 @@
-﻿#include"Framework.h"
+#include"Framework.h"
 
 void Engine::Framework::Initialize()
 {
@@ -33,14 +33,44 @@ void Engine::Framework::Initialize()
 
 void Engine::Framework::Finalize()
 {
+	// 最後の描画で使ったシーン/エンティティのGPUリソースを安全に破棄するため、先にGPU完了を待つ。
+	if (dxCommon_ && dxCommon_->GetFence()) {
+		dxCommon_->GetFence()->WaitGPU();
+	}
+
+	// シーンはDirectXリソースを持つため、DirectXCommonを破棄する前に終了させる。
+	sceneManager_.reset();
+
+	// シーン生成用ファクトリはシーン破棄後に不要になるため解放する。
+	sceneFactory_.reset();
+
+	// エンティティ群が持つGPUリソースを、DirectXCommonより先に解放する。
+	entityManager_.reset();
+
 	// DirectX
-	dxCommon_->Finalize();
+	if (dxCommon_) {
+		WinApp::SetSwapChain(nullptr);
+		dxCommon_->Finalize();
+		dxCommon_.reset();
+	}
 
 	// 音
-	audioManager_->Finalize();
+	if (audioManager_) {
+		audioManager_->Finalize();
+		audioManager_.reset();
+	}
+
+	// グローバル変数
+	globalVariables_.reset();
+
+	// 入力
+	input_.reset();
 
 	// WindowsAPIの終了処理
-	winApp_->Finalize();
+	if (winApp_) {
+		winApp_->Finalize();
+		winApp_.reset();
+	}
 
 }
 

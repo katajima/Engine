@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<string>
@@ -34,8 +34,8 @@ namespace Engine {
 	/// </summary>
 	class ModelManager {
 	public:
-		ModelManager() = default;
-		~ModelManager() = default;
+		ModelManager();
+		~ModelManager();
 		ModelManager(ModelManager&) = delete;
 		ModelManager& operator=(ModelManager&) = delete;
 

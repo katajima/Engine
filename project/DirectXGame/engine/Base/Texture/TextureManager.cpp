@@ -1,4 +1,4 @@
-﻿#include "TextureManager.h"
+#include "TextureManager.h"
 #include"DirectXGame/engine/Utility/StringUtility.h"
 #include<unordered_map>
 
@@ -153,6 +153,16 @@ void Engine::TextureManager::LoadAllTexturesInDirectory(const std::string& direc
 	}
 
 	debugTimerTex_.EndTimer();
+}
+
+void Engine::TextureManager::ReleaseIntermediateResources()
+{
+	std::lock_guard<std::mutex> lock(textureMutex_);
+
+	// 転送完了後はDefaultヒープ側のresourceだけ残せばよいので、一時アップロードリソースを解放する。
+	for (auto& [filePath, textureData] : textureDatas) {
+		textureData.intermediateResource.Reset();
+	}
 }
 
 

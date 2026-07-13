@@ -73,8 +73,8 @@ void Engine::DXGIDevice::Initialize()
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 		// エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-		// 警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		// 警告は終了時のLiveObject確認でも出るため、ログ出力だけにしてブレークはしない。
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
 
 		// 抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIds[] = {

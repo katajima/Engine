@@ -62,6 +62,9 @@ namespace Engine {
 		[[nodiscard]]
 		Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
+		// GPU転送完了後に不要になるアップロード用中間リソースを解放
+		void ReleaseIntermediateResources();
+
 	private:
 
 

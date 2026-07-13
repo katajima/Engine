@@ -21,10 +21,13 @@ namespace Engine {
 	{
 	public:
 		Fence() = default;
-		~Fence() = default;
+		// デストラクタ
+		~Fence();
 
 		// 初期化
 		void Initialize(DXGIDevice* dxgi, Command* command);
+		// 終了
+		void Finalize();
 		// GPUを待機
 		void WaitGPU();
 	private:
@@ -40,7 +43,7 @@ namespace Engine {
 		// フェンスバリュー
 		UINT64 fenceValue_ = 0;
 		// フェンスイベント
-		HANDLE fenceEvent_;
+		HANDLE fenceEvent_ = nullptr;
 		// エラー半別
 		HRESULT hr_ = S_FALSE;
 

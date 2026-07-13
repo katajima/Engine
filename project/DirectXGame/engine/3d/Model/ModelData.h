@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // engine
 #include"DirectXGame/engine/math/MathFunctions.h"
@@ -29,13 +29,13 @@ namespace Engine {
 	//モデルデータ
 	struct ModelData
 	{
-		std::string name;										// 名前
-		bool isNormalmap;										// ノーマルマップを使っているか？
+		std::string name = "";										// 名前
+		bool isNormalmap = false;										// ノーマルマップを使っているか？
 		std::unordered_map<uint32_t, Vector3> meshOffsetMap;	// オフセット位置
-		Node rootNode;											// ノードデータ
-		bool isAssimp;											// アシンプか
-		bool isAmimetion;										// アニメーションするか
-		bool isTangent;											// タンジェント
+		Node rootNode{};											// ノードデータ
+		bool isAssimp = false;											// アシンプか
+		bool isAmimetion = false;										// アニメーションするか
+		bool isTangent = false;											// タンジェント
 		std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 		std::vector<uint32_t> cachedLineIndices_;				// ライン
 
@@ -47,9 +47,9 @@ namespace Engine {
 		float blendTime = 0.0f;									// ブレンドに使う経過時間
 		float blendDuration = 0.3f;								// ブレンドにかける合計時間
 		bool isBlending = false;
-		Skeleton skeleton;										// スケルトン
+		Skeleton skeleton{};										// スケルトン
 
-		int pad;												// パディング
+		int pad = 0;												// パディング
 	};
 
 

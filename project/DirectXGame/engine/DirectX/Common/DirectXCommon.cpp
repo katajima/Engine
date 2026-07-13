@@ -1,4 +1,4 @@
-﻿#include "DirectXCommon.h"
+#include "DirectXCommon.h"
 #include<format>
 #include<cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -52,7 +52,45 @@ void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 
 void Engine::DirectXCommon::Finalize()
 {
-	imguiManager_->Finalize();
+	// 非同期モデル読み込みが残っている場合は、GPUリソースを解放する前に完了させる。
+	if (modelManager_ && modelManager_->IsLoading()) {
+		modelManager_->WaitAllLoadFinished();
+	}
+
+	// GPUが参照中のリソースを解放しないよう、終了前にキューの完了を待つ。
+	if (fence_) {
+		fence_->WaitGPU();
+	}
+
+	// ImGuiが内部で持つD3D12リソースを解放する。
+	if (imguiManager_) {
+		imguiManager_->Finalize();
+		imguiManager_.reset();
+	}
+
+	// テクスチャ転送用の一時リソースはGPU待機後に不要になるため、明示的に解放する。
+	if (textureManager_) {
+		textureManager_->ReleaseIntermediateResources();
+	}
+
+	// DirectXCommonが所有するGPUリソースを依存関係の深い順に明示解放する。
+	postEffectManager_.reset();
+	shadowMap_.reset();
+	renderingCommon_.reset();
+	modelManager_.reset();
+	textureManager_.reset();
+	depthStencil_.reset();
+	dsvManager_.reset();
+	srvManager_.reset();
+	rtvManager_.reset();
+	swapChain_.reset();
+	dxcCompiler_.reset();
+	barrier_.reset();
+	viewPort_.reset();
+	scissorRect_.reset();
+	fence_.reset();
+	command_.reset();
+	DXGIDevice_.reset();
 }
 
 void Engine::DirectXCommon::SceneDraw(SceneManager* sceneManager, EntityManager* entity3DManager)

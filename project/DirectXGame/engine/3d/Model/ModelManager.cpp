@@ -5,6 +5,11 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+
+Engine::ModelManager::ModelManager(){}
+
+Engine::ModelManager::~ModelManager(){}
+
 void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 {
 	this->dxCommon = dxCommon;	// DX共通クラス
