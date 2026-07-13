@@ -76,6 +76,8 @@ namespace Engine {
 		Engine::Camera* GetCamara() { return camera; }
 		// 終了したか
 		bool IsInitialized() const { return initialized_; }
+		// 初期化状態設定
+		void SetInitialized(bool initialized) { initialized_ = initialized; }
 		// シーンデータ取得
 		SceneData& GetSceneData();
 

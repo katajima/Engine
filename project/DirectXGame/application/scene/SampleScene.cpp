@@ -1,4 +1,4 @@
-﻿#include "SampleScene.h"
+#include "SampleScene.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
@@ -180,10 +180,37 @@ void SampleScene::InitSprite() {
 
 // 終了
 void SampleScene::Finalize() {
-	cameraManager_->GetCamera()->Clear();
-	cameraManager_->Clear();
+	// パーティクルとスプライトはカメラ参照を持つため先に破棄する。
+	particleEmitter2d_.reset();
+	meshParticleEmitter.reset();
+	triangleParticleEmitter.reset();
+	lineParticleEmitter.reset();
+	splineParticleEmitter.reset();
+	cornerParticleEmitter.reset();
+	sphereParticleEmitter.reset();
+	aabbParticleEmitter_.reset();
+	sprite2dP_.reset();
+	sprite_.reset();
+	plane_.reset();
+	skyBox.reset();
+	directional.reset();
+	collisionManager2d_.reset();
+	collisionManager_.reset();
+	audioTest_.reset();
 
-	fixedCamera_->GetUniqueCamera()->Clear();
+	// 生ポインタはEntityManager所有なので、シーン側では参照だけ無効化する。
+	testObject_ = nullptr;
+	sky_ = nullptr;
+	object3dInstanceManager_ = nullptr;
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	fixedCamera_.reset();
+	inputCoordinator_.reset();
+	input_ = nullptr;
 
 };
 

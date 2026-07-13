@@ -1,4 +1,4 @@
-﻿#include "MyGame.h"
+#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
@@ -70,6 +70,14 @@ void Engine::MyGame::Initialize() {
 
 void Engine::MyGame::Finalize()
 {
+	// MyGameが直接所有するGPUリソース持ちのプリミティブを、DirectXCommon解放前に破棄する。
+	primi.reset();
+	primiPlane.reset();
+	primiStar.reset();
+	primiTrai.reset();
+	primiRing.reset();
+	cylinder_.reset();
+
 	GpuParticleManager* gpuParticleManager_ = entityManager_->GetEffectManager()->GetGpuParticleManager();
 	gpuParticleManager_->ClearEmitterAll();
 	gpuParticleManager_->ClearGroupParticleAll();

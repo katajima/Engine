@@ -14,6 +14,8 @@ namespace Engine {
 	/// </summary>
 	class AudioManager {
 	public:
+		// デストラクタ
+		~AudioManager();
 		// XAudio2を初期化し、音声を再生できる状態にする。
 		void Initialize(const std::string& directoryPath = "Resources/Sound/");
 

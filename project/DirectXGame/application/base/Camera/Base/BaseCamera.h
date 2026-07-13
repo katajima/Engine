@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -17,7 +17,13 @@ namespace Engine {
 class BaseCamera
 {
 public:
-	virtual ~BaseCamera() = default; 
+	virtual ~BaseCamera()
+	{
+		// 派生カメラが所有する描画カメラのD3Dリソースを、シーン破棄時に確実に解放する
+		if (uniqueCamera_) {
+			uniqueCamera_->Finalize();
+		}
+	}
 	/// <summary>カメラ固有の制御器と描画カメラを初期化する。</summary>
 	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラではnullptrを許容する。</param>
 	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>

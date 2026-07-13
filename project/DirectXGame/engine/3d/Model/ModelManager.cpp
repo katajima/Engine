@@ -8,7 +8,11 @@
 
 Engine::ModelManager::ModelManager(){}
 
-Engine::ModelManager::~ModelManager(){}
+Engine::ModelManager::~ModelManager()
+{
+	// DirectXCommonから明示Finalizeされなかった場合でもモデルを解放する
+	Finalize();
+}
 
 void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -21,6 +25,28 @@ void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 	// モデル共通クラス初期化
 	modelCommon_ = std::make_unique<ModelCommon>();
 	modelCommon_->Initialize(command, dxgiDevice, srvManager);
+}
+
+void Engine::ModelManager::Finalize()
+{
+	// 非同期読み込み中のモデルが残っている場合は、modelsを触る前に完了させる
+	if (IsLoading()) {
+		WaitAllLoadFinished();
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		// モデルが持つメッシュ、マテリアル、スキニング用D3D12リソースをここで解放する
+		models.clear();
+		loadingModelKeys_.clear();
+	}
+
+	// モデル共通クラスはモデル本体より後に解放する
+	modelCommon_.reset();
+	command = nullptr;
+	dxgiDevice = nullptr;
+	srvManager = nullptr;
+	dxCommon = nullptr;
 }
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)

@@ -4,6 +4,33 @@
 #include <execution> // C++17 以降
 #include <numeric>
 
+void Engine::SkinCluster::Finalize()
+{
+	// パレット用Uploadリソースは常時Mapして更新するため、破棄前に必ずUnmapする
+	if (paletteResource && !mappedPalette.empty()) {
+		paletteResource->Unmap(0, nullptr);
+		mappedPalette = {};
+	}
+
+	// インフルエンス用UploadリソースもMapしたまま保持しているので、ここで対応して閉じる
+	if (influenceResource && !mappedInfluence.empty()) {
+		influenceResource->Unmap(0, nullptr);
+		mappedInfluence = {};
+	}
+
+	// スキニング情報用UploadリソースのCPU書き込みポインタを無効化する
+	if (skinningInfomation && skinningInfomationDeta) {
+		skinningInfomation->Unmap(0, nullptr);
+		skinningInfomationDeta = nullptr;
+	}
+
+	// GPUリソース本体を明示的に解放して、LiveObjectの残りを減らす
+	influenceResource.Reset();
+	paletteResource.Reset();
+	outputVertexResource.Reset();
+	skinningInfomation.Reset();
+}
+
 void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
 	

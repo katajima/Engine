@@ -21,6 +21,7 @@ namespace Engine {
 	class LightManager
 	{
 	public:
+		~LightManager();
 		// ライト使うかの構造体
 		struct IsLight {
 			bool dire;
@@ -30,6 +31,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
+		// 終了処理
+		void Finalize();
 		// ライン描画
 		void DrawLight(IsLight is = { true,true,true }, int dire = 3, int point = 5, int spot = 6);
 		// 更新

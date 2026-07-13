@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "DirectXGame/engine/struct/VertexDeta.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
@@ -84,6 +84,9 @@ namespace Engine {
 	class IPostEffect
 	{
 	public:
+		// 派生ポストエフェクトをIPostEffect経由で破棄しても、派生側まで正しく解放する。
+		virtual ~IPostEffect() = default;
+
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon, std::string psName);
 

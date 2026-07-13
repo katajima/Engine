@@ -130,7 +130,6 @@ private:
 
 private:
 	Engine::Input* input_ = nullptr;
-	Engine::Audio* audio_ = nullptr;
 	Engine::ImGuiManager* imGuiManager = nullptr;
 	// シーン内の入力をまとめて管理する
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;

@@ -204,6 +204,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Custom\CustomSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\GameplaySession.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Pose\PoseSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />

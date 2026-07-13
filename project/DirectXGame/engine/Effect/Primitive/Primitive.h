@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -35,7 +35,8 @@ namespace Engine {
 	/// </summary>
 	class BasePrimitive {
 	public:
-		~BasePrimitive() = default;
+		// 派生プリミティブをBasePrimitive経由で破棄しても、派生側まで正しく解放する。
+		virtual ~BasePrimitive() = default;
 
 		enum class PsoType {
 			kDefault,

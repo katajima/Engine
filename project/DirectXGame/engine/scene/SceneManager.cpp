@@ -1,4 +1,4 @@
-﻿#include"SceneManager.h"
+#include"SceneManager.h"
 #include"cassert"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -65,6 +65,8 @@ void Engine::SceneManager::Update()
 			
 			
 			scene_->Initialize();
+			// Finalize時に初期化済みシーンか判定できるよう状態を記録する。
+			scene_->SetInitialized(true);
 			SetCamera(scene_->GetCamara());
 
 			// フェードイン開始
@@ -127,14 +129,36 @@ void Engine::SceneManager::DrawForeground2D() {
 
 Engine::SceneManager::~SceneManager()
 {
-	// Finalize中に scene_ が変更・reset されても安全なように、所有権を退避
-	std::unique_ptr<BaseScene> dying = std::move(scene_);
-	if (dying)
-	{
-		dying->Finalize();
-		// dying がスコープを抜けるときに確実に delete される
+	// Framework側から明示Finalizeされなかった場合でもシーン所有物を破棄する
+	Finalize();
+}
+
+void Engine::SceneManager::Finalize()
+{
+	// 実行中シーンは終了処理を呼んでから破棄する
+	if (scene_) {
+		scene_->Finalize();
+		scene_.reset();
 	}
-	// scene_ は既に nullptr（move済み）
+
+	// 予約中シーンも初期化済みなら終了処理を通し、カメラなどのGPUリソースを先に解放する
+	if (nextScene_ && nextScene_->IsInitialized()) {
+		nextScene_->Finalize();
+	}
+	// 未初期化の予約シーンはFinalizeせず、所有物だけ破棄する
+	nextScene_.reset();
+
+	// フェード用SpriteもD3Dリソースを持つので、D3D終了前に破棄する
+	fade_.reset();
+
+	sceneFactory = nullptr;
+	dxCommon = nullptr;
+	entityManager = nullptr;
+	input = nullptr;
+	globalVariables = nullptr;
+	camera = nullptr;
+	audioManager = nullptr;
+	winApp = nullptr;
 }
 
 void Engine::SceneManager::ChangeScene(const std::string& sceneName, float duration)

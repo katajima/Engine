@@ -1,4 +1,4 @@
-﻿#include "TutorialScene.h"
+#include "TutorialScene.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
@@ -49,8 +49,28 @@ void TutorialScene::Initialize() {
 }
 
 void TutorialScene::Finalize() {
-	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
-	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	// エンティティ側のインスタンシング描画リソースをシーン終了時に空にする。
+	if (GetEntityManager() && GetEntityManager()->GetObject3dInstanceManager()) {
+		GetEntityManager()->GetObject3dInstanceManager()->AllClear();
+	}
+	// 共通基盤内の衝突情報を、関連オブジェクト破棄前に消しておく。
+	if (gameplaySession_ && gameplaySession_->GetCollisionRegistrationSystem()) {
+		gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	}
+
+	// カメラ参照を持つUI/システム/ステージを先に破棄する。
+	poseUI_.reset();
+	poseSystem_.reset();
+	tutorialUI_.reset();
+	tutorialSystem_.reset();
+	tutorialStage_.reset();
+
+	// GameplaySession内のCameraManagerと追従カメラを明示終了する。
+	if (gameplaySession_) {
+		gameplaySession_->Finalize();
+		gameplaySession_.reset();
+	}
+	input = nullptr;
 }
 
 void TutorialScene::Update() {

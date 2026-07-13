@@ -1,5 +1,7 @@
 #include "ModelData.h"
 #include "ModelCommon.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
+#include <format>
 
 #pragma region Laod
 
@@ -380,6 +382,8 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 		}
 
 		SkinCluster& skinCluster = *mesh->skinCluster;
+		// LiveObject出力でメッシュ単位のスキニングリソースを判別できるようにする
+		const std::wstring meshDebugName = StringUtility::ConvertString(mesh->name.empty() ? std::format("Mesh{}", meshIndex) : mesh->name);
 
 		//SkinCluster skinCluster;
 		skinCluster.srvUavIndices.wellSrvIndex = modelCommon->GetSrvManager()->Allocate();
@@ -389,6 +393,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// palette用のResourceを確保
 		skinCluster.paletteResource = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * modelData.skeleton.joints.size());
+		skinCluster.paletteResource->SetName(std::format(L"SkinCluster Palette : {}", meshDebugName).c_str());
 		WellForGPU* mappedPalette = nullptr;
 		skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 		std::memset(mappedPalette, 0, sizeof(WellForGPU) * modelData.skeleton.joints.size());
@@ -402,6 +407,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
 		skinCluster.influenceResource = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * mesh->vertices.size());
+		skinCluster.influenceResource->SetName(std::format(L"SkinCluster Influence : {}", meshDebugName).c_str());
 		VertexInfluence* mappedInfluence = nullptr;
 		skinCluster.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
 		std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * mesh->vertices.size()); // 仮埋め。weightを0にしておく。
@@ -429,6 +435,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// outputVertex用のResourceを確保。
 		skinCluster.outputVertexResource = modelCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(VertexData) * mesh->vertices.size());
+		skinCluster.outputVertexResource->SetName(std::format(L"SkinCluster OutputVertex : {}", meshDebugName).c_str());
 		VertexData* mappedOutputVertex = nullptr;
 
 		// 初期状態を UAV 用に遷移させる
@@ -455,6 +462,7 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 		// skinningInfomation
 		skinCluster.skinningInfomation = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SkinningInfomation));
+		skinCluster.skinningInfomation->SetName(std::format(L"SkinCluster SkinningInfo : {}", meshDebugName).c_str());
 		skinCluster.skinningInfomation->Map(0, nullptr, reinterpret_cast<void**>(&skinCluster.skinningInfomationDeta));
 		skinCluster.skinningInfomationDeta->numVertices = static_cast<uint32_t>(mesh->vertices.size());
 

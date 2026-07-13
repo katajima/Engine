@@ -1,10 +1,16 @@
-﻿#include "LineCommon.h"
+#include "LineCommon.h"
 #include "combaseapi.h"
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
+Engine::LineCommon::~LineCommon()
+{
+	// EntityManager破棄時にライン描画用GPUリソースを確実に解放する
+	Finalize();
+}
 
 void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -22,6 +28,7 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 
 	// マテリアル
 	materialResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Material));
+	materialResource->SetName(L"Line Material");
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
@@ -31,6 +38,7 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 
 	// ビューリソース生成
 	viewResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
+	viewResource->SetName(L"Line View");
 	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
 
 	*cameraWVP = MakeIdentity4x4();
@@ -38,6 +46,38 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 	// 初期化
 	lineMeshData_.Initialize(dxCommon);
 	lineDebugMeshData_.Initialize(dxCommon);
+}
+
+void Engine::LineCommon::Finalize()
+{
+	// ラインメッシュが持つ頂点/インデックスリソースを先に解放する
+	if (lineMeshData_.GetMesh()) {
+		lineMeshData_.Clear();
+	}
+	if (lineDebugMeshData_.GetMesh()) {
+		lineDebugMeshData_.Clear();
+	}
+
+	// マテリアル用Uploadリソースを閉じる
+	if (materialResource && materialData) {
+		materialResource->Unmap(0, nullptr);
+		materialData = nullptr;
+	}
+	// カメラ行列用Uploadリソースを閉じる
+	if (viewResource && cameraWVP) {
+		viewResource->Unmap(0, nullptr);
+		cameraWVP = nullptr;
+	}
+
+	materialResource.Reset();
+	viewResource.Reset();
+	rootSignature.Reset();
+	graphicsPipelineState.Reset();
+	rootSignature2.Reset();
+	graphicsPipelineState2.Reset();
+	psoManager_.reset();
+	dxCommon = nullptr;
+	camera = nullptr;
 }
 
 void Engine::LineCommon::Update()

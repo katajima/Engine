@@ -72,6 +72,10 @@ void Engine::DirectXCommon::Finalize()
 	if (textureManager_) {
 		textureManager_->ReleaseIntermediateResources();
 	}
+	// LiveObject確認前にモデル管理下のメッシュ/スキニング/マテリアルリソースを確実に破棄する。
+	if (modelManager_) {
+		modelManager_->Finalize();
+	}
 
 	// DirectXCommonが所有するGPUリソースを依存関係の深い順に明示解放する。
 	postEffectManager_.reset();
@@ -90,6 +94,9 @@ void Engine::DirectXCommon::Finalize()
 	scissorRect_.reset();
 	fence_.reset();
 	command_.reset();
+	if (DXGIDevice_) {
+		DXGIDevice_->ReportLiveObjects();
+	}
 	DXGIDevice_.reset();
 }
 

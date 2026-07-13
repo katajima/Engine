@@ -35,6 +35,8 @@ namespace Engine {
 
 		// デストラクタ
 		~SceneManager();
+		// 終了処理
+		void Finalize();
 
 		void SetSceneFactory(AbstractSceneFactory* sceneFactory) { this->sceneFactory = sceneFactory; };
 		// DirectX共通クラス設定

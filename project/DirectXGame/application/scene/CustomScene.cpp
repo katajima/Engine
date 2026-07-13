@@ -1,4 +1,4 @@
-﻿#include "CustomScene.h"
+#include "CustomScene.h"
 
 void CustomScene::Initialize() {
 
@@ -36,7 +36,21 @@ void CustomScene::Initialize() {
 	SetCamera(cameraManager_->GetCamera());
 }
 
-void CustomScene::Finalize() {}
+void CustomScene::Finalize() {
+	// カメラ参照を持つカスタム画面の要素を先に破棄する。
+	customSystem_.reset();
+	customUI_.reset();
+	customStage_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	inputCoordinator_.reset();
+	input = nullptr;
+}
 
 void CustomScene::Update() {
 	// シーン内の入力を一度だけ更新する

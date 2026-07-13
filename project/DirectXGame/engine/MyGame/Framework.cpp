@@ -39,13 +39,19 @@ void Engine::Framework::Finalize()
 	}
 
 	// シーンはDirectXリソースを持つため、DirectXCommonを破棄する前に終了させる。
-	sceneManager_.reset();
+	if (sceneManager_) {
+		sceneManager_->Finalize();
+		sceneManager_.reset();
+	}
 
 	// シーン生成用ファクトリはシーン破棄後に不要になるため解放する。
 	sceneFactory_.reset();
 
 	// エンティティ群が持つGPUリソースを、DirectXCommonより先に解放する。
-	entityManager_.reset();
+	if (entityManager_) {
+		entityManager_->Finalize();
+		entityManager_.reset();
+	}
 
 	// DirectX
 	if (dxCommon_) {

@@ -21,6 +21,8 @@ namespace Engine {
 class LoadLevelData
 {
 public:
+	// デストラクタ
+	~LoadLevelData();
 
 	// 初期化
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera, 

@@ -158,6 +158,19 @@ namespace Engine {
 	/// スキンクラスター
 	/// </summary>
 	struct SkinCluster {
+		// 生成時はGPUリソースを持っていない空の状態にしておく
+		SkinCluster() = default;
+		// GPUリソースを二重解放しないようコピーは禁止する
+		SkinCluster(const SkinCluster&) = delete;
+		SkinCluster& operator=(const SkinCluster&) = delete;
+		// LoadBone内の一時オブジェクトから所有権を移せるようムーブは許可する
+		SkinCluster(SkinCluster&&) noexcept = default;
+		SkinCluster& operator=(SkinCluster&&) noexcept = default;
+		// Mapしたリソースを確実にUnmapしてからComPtrを解放する
+		~SkinCluster() { Finalize(); }
+		// スキニング用GPUリソースの終了処理
+		void Finalize();
+
 		SkinningSRVUAV srvUavIndices;
 
 		std::vector<Matrix4x4> inverseBindPoseMatrices;
@@ -198,7 +211,7 @@ namespace Engine {
 		/// 
 		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> skinningInfomation;
-		SkinningInfomation* skinningInfomationDeta;
+		SkinningInfomation* skinningInfomationDeta = nullptr;
 
 	};
 

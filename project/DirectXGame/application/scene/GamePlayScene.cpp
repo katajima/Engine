@@ -1,4 +1,4 @@
-﻿#include "GamePlayScene.h"
+#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -79,8 +79,33 @@ void GamePlayScene::Initialize() {
 
 // 終了
 void GamePlayScene::Finalize() {
-	GetEntityManager()->GetObject3dInstanceManager()->AllClear();
-	gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	// エンティティ側のインスタンシング描画リソースをシーン終了時に空にする。
+	if (GetEntityManager() && GetEntityManager()->GetObject3dInstanceManager()) {
+		GetEntityManager()->GetObject3dInstanceManager()->AllClear();
+	}
+	// 共通基盤内の衝突情報を、関連オブジェクト破棄前に消しておく。
+	if (gameplaySession_ && gameplaySession_->GetCollisionRegistrationSystem()) {
+		gameplaySession_->GetCollisionRegistrationSystem()->GetCollisionManager()->Clear();
+	}
+
+	// カメラ参照を持つUI/進行/ステージを先に破棄する。
+	poseUI_.reset();
+	poseSystem_.reset();
+	gameUI.reset();
+	stage_.reset();
+	gameFlowController_.reset();
+
+	// GameplaySession内のCameraManagerと追従カメラを明示終了する。
+	if (gameplaySession_) {
+		gameplaySession_->Finalize();
+		gameplaySession_.reset();
+	}
+
+	// GameplaySessionのCameraManagerへ登録していた追加カメラを破棄する。
+	stageCamera_.reset();
+	fixedCamera_.reset();
+	universeCamera_.reset();
+	input = nullptr;
 }
 
 #pragma endregion 初期化関係

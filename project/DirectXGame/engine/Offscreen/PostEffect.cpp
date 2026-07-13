@@ -1,4 +1,4 @@
-﻿#include "PostEffect.h"
+#include "PostEffect.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -12,6 +12,8 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	this->dxCommon = dxCommon;
 
 	vertexResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(ScreenVertexData) * 4);
+	// LiveObject表示でポストエフェクトの頂点バッファを判別できるよう名前を付ける。
+	vertexResource->SetName(L"PostEffect Screen Vertex");
 	//リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つの分のサイズ
@@ -30,23 +32,27 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kVignette:
 		cbVignette_ = std::make_unique<Engine::ConstantBuffer<VignetteGPU>>();
 		cbVignette_->CreateBuffer(dxCommon);
+		cbVignette_->SetResourceName(L"PostEffect Vignette CB");
 		cbVignette_->Data()->scale = 16.0f;
 		cbVignette_->Data()->squared = 0.8f;
 		break;
 	case PostEffectType::kSmoothing:
 		cbSmoothig_ = std::make_unique<Engine::ConstantBuffer<SmoothigGPU>>();
 		cbSmoothig_->CreateBuffer(dxCommon);
+		cbSmoothig_->SetResourceName(L"PostEffect Smoothing CB");
 		cbSmoothig_->Data()->num = 3;
 		break;
 	case PostEffectType::kGaussian:
 		cbGaussian_ = std::make_unique<Engine::ConstantBuffer<GaussianGPU>>();
 		cbGaussian_->CreateBuffer(dxCommon);
+		cbGaussian_->SetResourceName(L"PostEffect Gaussian CB");
 		cbGaussian_->Data()->num = 3;
 		cbGaussian_->Data()->sigma = 2.0f;
 		break;
 	case PostEffectType::kOitline:
 		cbOutline_ = std::make_unique<Engine::ConstantBuffer<OutlineGPU>>();
 		cbOutline_->CreateBuffer(dxCommon);
+		cbOutline_->SetResourceName(L"PostEffect Outline CB");
 		cbOutline_->Data()->num = 3;
 		cbOutline_->Data()->weightSquared = 0.002f;
 		cbOutline_->Data()->projectionInverse = Identity();
@@ -54,6 +60,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kRadialBlur:
 		cbRadialBlur_ = std::make_unique<Engine::ConstantBuffer<RadialBlurGPU>>();
 		cbRadialBlur_->CreateBuffer(dxCommon);
+		cbRadialBlur_->SetResourceName(L"PostEffect RadialBlur CB");
 		cbRadialBlur_->Data()->center = Vector2{ 0.5f,0.5f };
 		cbRadialBlur_->Data()->numSamples = 10;
 		cbRadialBlur_->Data()->blurWidth = 0.01f;
@@ -61,6 +68,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kDissolve:
 		cbDissolve_ = std::make_unique<Engine::ConstantBuffer<DissolveGPU>>();
 		cbDissolve_->CreateBuffer(dxCommon);
+		cbDissolve_->SetResourceName(L"PostEffect Dissolve CB");
 		cbDissolve_->Data()->threshold = 0.5f;
 		cbDissolve_->Data()->edge = 0.03f;
 		cbDissolve_->Data()->color.x = 1.0f;
@@ -70,11 +78,13 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 	case PostEffectType::kRandom:
 		cbRandom_ = std::make_unique<Engine::ConstantBuffer<RandomGPU>>();
 		cbRandom_->CreateBuffer(dxCommon);
+		cbRandom_->SetResourceName(L"PostEffect Random CB");
 		cbRandom_->Data()->time = 0.0f;
 		break;
 	case PostEffectType::kBloom:
 		cbBloom_ = std::make_unique<Engine::ConstantBuffer<BloomGPU>>();
 		cbBloom_->CreateBuffer(dxCommon);
+		cbBloom_->SetResourceName(L"PostEffect Bloom CB");
 		cbBloom_->Data()->threshold = 0.9f;
 		cbBloom_->Data()->intensity = 1.0f;
 		break;

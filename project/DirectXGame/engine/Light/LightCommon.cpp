@@ -4,21 +4,57 @@
 
 
 
+Engine::LightManager::~LightManager()
+{
+	// EntityManager破棄時にライト用GPUリソースを確実に解放する
+	Finalize();
+}
+
 void Engine::LightManager::Initialize(DirectXCommon* dxCommon)
 {
 	this->dxCommon = dxCommon;	// DX共通クラス
 
 	//平行光源用のリソースを作る
 	directionalLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
+	directionalLightResource->SetName(L"Light Directional");
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 
 	// ポイントライト用のリソース
 	pointLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
+	pointLightResource->SetName(L"Light Point");
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 	//スポットライト用のリソースを作る
 	spotLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
+	spotLightResource->SetName(L"Light Spot");
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+}
+
+void Engine::LightManager::Finalize()
+{
+	// ライト一覧を先に解放して、GPU転送先ポインタへの参照を残さないようにする
+	ClearLights();
+
+	// 平行光源用Uploadリソースを閉じる
+	if (directionalLightResource && directionalLightData) {
+		directionalLightResource->Unmap(0, nullptr);
+		directionalLightData = nullptr;
+	}
+	// ポイントライト用Uploadリソースを閉じる
+	if (pointLightResource && pointLightData) {
+		pointLightResource->Unmap(0, nullptr);
+		pointLightData = nullptr;
+	}
+	// スポットライト用Uploadリソースを閉じる
+	if (spotLightResource && spotLightData) {
+		spotLightResource->Unmap(0, nullptr);
+		spotLightData = nullptr;
+	}
+
+	directionalLightResource.Reset();
+	pointLightResource.Reset();
+	spotLightResource.Reset();
+	dxCommon = nullptr;
 }
 
 

@@ -3,6 +3,7 @@
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
+#include<string>
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -112,6 +113,12 @@ namespace Engine {
 
 		// リソース取得
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
+		// デバッグレイヤーのLiveObject出力に頂点バッファ名を表示する
+		void SetResourceName(const std::wstring& name) {
+			if (resource_) {
+				resource_->SetName(name.c_str());
+			}
+		}
 		// バッファビュー取得
 		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return bufferView; }
 	private:

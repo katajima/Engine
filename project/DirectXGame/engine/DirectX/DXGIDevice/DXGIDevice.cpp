@@ -13,8 +13,8 @@ void Engine::DXGIDevice::Initialize()
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		// デバッグコントローラを有効化する
 		debugController->EnableDebugLayer();
-		// さらにGPU側でもチェックを行うようにする
-		debugController->SetEnableGPUBasedValidation(TRUE);
+		// GPU Based Validationは内部管理オブジェクトが多く、通常の終了時リーク確認ではノイズになるため無効にする。
+		debugController->SetEnableGPUBasedValidation(FALSE);
 	}
 #endif // _DEBUG
 
@@ -91,6 +91,17 @@ void Engine::DXGIDevice::Initialize()
 		filter.DenyList.pSeverityList = severities;
 		// 指定したメッセージの表示を抑制する
 		infoQueue->PushStorageFilter(&filter);
+	}
+#endif // _DEBUG
+}
+
+void Engine::DXGIDevice::ReportLiveObjects()
+{
+#ifdef _DEBUG
+	// デバイス解放前にD3D12 DebugDeviceから標準形式のLiveObjectレポートを出す。
+	Microsoft::WRL::ComPtr<ID3D12DebugDevice> debugDevice = nullptr;
+	if (device_ && SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&debugDevice)))) {
+		debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
 	}
 #endif // _DEBUG
 }

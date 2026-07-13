@@ -1,4 +1,4 @@
-﻿#include "Object3dInstanceManager.h"
+#include "Object3dInstanceManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
@@ -7,13 +7,21 @@
 #include "DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h"
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/engine/Utility/StringUtility.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+
+#include <format>
+#include <ranges>
 
 
 #pragma region Object3dInstanceManager
 
 Engine::Object3dInstanceManager::Object3dInstanceManager() = default;
-Engine::Object3dInstanceManager::~Object3dInstanceManager() = default;
+Engine::Object3dInstanceManager::~Object3dInstanceManager()
+{
+	// EntityManager側から明示Finalizeされなかった場合でもGPUリソースを閉じる
+	Finalize();
+}
 
 
 void Engine::Object3dInstanceManager::Initialize(DirectXCommon* dxCommon) {
@@ -30,6 +38,50 @@ void Engine::Object3dInstanceManager::Initialize(DirectXCommon* dxCommon) {
 	// パイプライン生成
 	CreateGraphicsPipeline();
 	CreateShadowMapPipeline();
+}
+
+void Engine::Object3dInstanceManager::Finalize()
+{
+	// 各インスタンシンググループがMapしたUploadリソースを閉じてから破棄する
+	for (auto& group : objectGroups | std::views::values) {
+		ReleaseGroupResource(group);
+	}
+	for (auto& group : objectTranslucentGroups | std::views::values) {
+		ReleaseGroupResource(group);
+	}
+	objectGroups.clear();
+	objectTranslucentGroups.clear();
+
+	// PSO/RootSignatureはインスタンス用バッファより後に解放する
+	psoManager_.reset();
+	rootSignature.Reset();
+	shadowRootSignature.Reset();
+	for (auto& pipelineState : graphicsPipelineState) {
+		pipelineState.Reset();
+	}
+	shadowGraphicsPipelineState.Reset();
+
+	dxCommon = nullptr;
+	srvManager = nullptr;
+	modelManager = nullptr;
+	entity3DManager = nullptr;
+	camera_ = nullptr;
+}
+
+void Engine::Object3dInstanceManager::ReleaseGroupResource(ObjectGroup& group)
+{
+	// インスタンシングデータは生成時にMapしたまま更新するので、解放前にUnmapする
+	if (group.resource && group.instanceData) {
+		group.resource->Unmap(0, nullptr);
+		group.instanceData = nullptr;
+	}
+
+	group.resource.Reset();
+	group.object.clear();
+	group.idMap.clear();
+	group.instanceCount = 0;
+	group.model = nullptr;
+	group.mesh = nullptr;
 }
 
 
@@ -289,17 +341,16 @@ void Engine::Object3dInstanceManager::DrawCommonSetting(RasterizerType rasteType
 
 void Engine::Object3dInstanceManager::Clear(const std::string& name) {
 	auto it = objectGroups.find(name);
-	if (it == objectGroups.end()) return;
-	it->second.object.clear();
-	it->second.idMap.clear();
-	it->second.instanceCount = 0;
-
+	if (it != objectGroups.end()) {
+		ReleaseGroupResource(it->second);
+		objectGroups.erase(it);
+	}
 
 	auto it2 = objectTranslucentGroups.find(name);
-	if (it2 == objectTranslucentGroups.end()) return;
-	it2->second.object.clear();
-	it2->second.idMap.clear();
-	it2->second.instanceCount = 0;
+	if (it2 != objectTranslucentGroups.end()) {
+		ReleaseGroupResource(it2->second);
+		objectTranslucentGroups.erase(it2);
+	}
 }
 
 #pragma region Create
@@ -328,6 +379,7 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	// GPUリソースの作成
 	objectGroup.resource = dxCommon->GetDXGIDevice()->CreateBufferResource(
 		sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource->SetName(std::format(L"Object3dInstance : {}", StringUtility::ConvertString(name)).c_str());
 	// マッピング
 	objectGroup.resource->Map(0, nullptr,
 		reinterpret_cast<void**>(&objectGroup.
@@ -381,6 +433,7 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 	// GPUリソースの作成
 	objectGroup.resource = dxCommon->GetDXGIDevice()->CreateBufferResource(
 		sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource->SetName(std::format(L"Object3dInstance Mesh : {}", StringUtility::ConvertString(name)).c_str());
 	// マッピング
 	objectGroup.resource->Map(0, nullptr,
 		reinterpret_cast<void**>(&objectGroup.

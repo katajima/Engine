@@ -41,6 +41,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
+		// 終了処理
+		void Finalize();
 
 		/// <summary>
 		/// モデルファイルの読み込み

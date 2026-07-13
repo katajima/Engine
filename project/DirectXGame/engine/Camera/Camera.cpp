@@ -26,6 +26,12 @@ Engine::Camera::Camera()
 
 }
 
+Engine::Camera::~Camera()
+{
+	// シーン破棄時にカメラ用GPUリソースを確実に解放する
+	Finalize();
+}
+
 void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 	dxCommon = cameraCommon->GetDxCommon();				// DX共通クラス
 	postEffectManager = dxCommon->GetPostEffectManager();	// ポストエフェクト管理クラス
@@ -37,12 +43,30 @@ void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 
 	// リソース生成
 	resource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
+	resource->SetName(L"Camera Data");
 	//書き込むためのアドレスを取得
 	resource->Map(0, nullptr, reinterpret_cast<void**>(&data));
 
 	data->worldPosition = Vector3{ 1.0f,1.0f,1.0f };
 	data->normal = { 0,0,0 };
 	isProjection_ = true;
+}
+
+void Engine::Camera::Finalize()
+{
+	// カメラ専用のポストエフェクトパイプラインを先に解放する
+	postEffectPipeline_.reset();
+
+	// カメラ定数バッファはMapしたまま更新するため、破棄前にUnmapする
+	if (resource && data) {
+		resource->Unmap(0, nullptr);
+		data = nullptr;
+	}
+
+	resource.Reset();
+	dxCommon = nullptr;
+	postEffectManager = nullptr;
+	input = nullptr;
 }
 
 void Engine::Camera::GetCommandList(int index) {

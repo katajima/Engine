@@ -26,9 +26,13 @@ namespace Engine {
 	public: // メンバ関数
 		// コンストラクタ
 		Camera();
+		// デストラクタ
+		~Camera();
 
 		// 初期化
 		void Initialize(CameraCommon* cameraCommon);
+		// 終了処理
+		void Finalize();
 
 		// コマンドバインド設定
 		void GetCommandList(int index);

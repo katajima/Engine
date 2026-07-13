@@ -40,6 +40,14 @@ namespace Engine {
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 		}
+		// デバッグ名設定
+		void SetResourceName(const wchar_t* name)
+		{
+			// LiveObject表示で定数バッファの残存元を追えるよう名前を付ける。
+			if (resource_ && name) {
+				resource_->SetName(name);
+			}
+		}
 		// グラフィックパイプラインにバッファを設定
 		void SetGraphicsRootConstantBufferView(int index)
 		{

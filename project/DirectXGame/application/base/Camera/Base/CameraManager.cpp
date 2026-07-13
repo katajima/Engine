@@ -1,6 +1,12 @@
-﻿#include "CameraManager.h"
+#include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
+
+CameraManager::~CameraManager()
+{
+	// シーン破棄時にCameraManager所有のD3Dリソースを確実に解放する
+	Finalize();
+}
 
 void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
@@ -20,6 +26,45 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
 	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
 	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());						// デフォルトカメラ設定
+}
+
+void CameraManager::Finalize()
+{
+	// 登録カメラは非所有なので、先に参照だけ切る
+	cameras.clear();
+
+	// 各描画システムが保持しているCameraの非所有ポインタを無効化する
+	if (entityManager) {
+		if (entityManager->GetObject3dCommon()) {
+			entityManager->GetObject3dCommon()->SetDefaultCamera(nullptr);
+		}
+		if (entityManager->GetEffectManager()) {
+			if (entityManager->GetEffectManager()->GetParticleManager()) {
+				entityManager->GetEffectManager()->GetParticleManager()->SetCamera(nullptr);
+			}
+			if (entityManager->GetEffectManager()->GetGpuParticleManager()) {
+				entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(nullptr);
+			}
+		}
+		if (entityManager->Get3DLineCommon()) {
+			entityManager->Get3DLineCommon()->SetDefaultCamera(nullptr);
+		}
+		if (entityManager->GetObject3dInstanceManager()) {
+			entityManager->GetObject3dInstanceManager()->SetCamera(nullptr);
+		}
+	}
+
+	// CameraManagerが所有する出力カメラを明示解放する
+	if (camera) {
+		camera->Finalize();
+		camera.reset();
+	}
+
+	entityManager = nullptr;
+	globalVariables = nullptr;
+	inputSystem = nullptr;
+	isInterpolating = false;
+	currentTime = 0.0f;
 }
 
 void CameraManager::Update()

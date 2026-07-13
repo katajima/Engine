@@ -1,4 +1,4 @@
-﻿#include"TitleScene.h"
+#include"TitleScene.h"
 #include <DirectXGame/engine/Audio/Audio.h>
 
 
@@ -69,8 +69,28 @@ void TitleScene::Initialize()
 }
 
 void TitleScene::Finalize(){
-	GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
-	GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+	// タイトル演出のパーティクルを、関連オブジェクト破棄前に消す。
+	if (GetEntityManager() && GetEntityManager()->GetEffectManager()) {
+		GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
+		GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+	}
+
+	// カメラ参照を持つ描画オブジェクトから順に破棄する。
+	weapon_.reset();
+	objectComponentShadow_.reset();
+	objectComponent_.reset();
+	titleUI_.reset();
+	titleStage_.reset();
+	loadData_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	titleCamera_.reset();
+	inputCoordinator_.reset();
 
 }
 

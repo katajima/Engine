@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include<wrl.h>
 using namespace Microsoft::WRL;
@@ -93,6 +93,8 @@ namespace Engine {
 
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
+		// 終了処理
+		void Finalize();
 		// エンティティ3dの設定
 		void SetEntity3D(EntityManager* entity3DManager) { this->entity3DManager = entity3DManager; };
 
@@ -138,6 +140,12 @@ namespace Engine {
 		}
 		// 全てクリーン
 		void AllClear() {
+			for (auto& obj : objectGroups) {
+				ReleaseGroupResource(obj.second);
+			}
+			for (auto& obj : objectTranslucentGroups) {
+				ReleaseGroupResource(obj.second);
+			}
 			objectTranslucentGroups.clear();
 			objectGroups.clear();
 		}
@@ -154,6 +162,8 @@ namespace Engine {
 	private:
 
 		ObjectGroup& GroupContains(const std::string& groupName, ObjectInstance::TransparencyType transparencyType, bool& isReturn);
+		// インスタンシング用GPUリソースを解放する
+		void ReleaseGroupResource(ObjectGroup& group);
 
 	private:
 		// ルートシグネチャの作成

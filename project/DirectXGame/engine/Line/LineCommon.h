@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>  
 #include <cstdint>  
 #include <d3d12.h>  
@@ -15,9 +15,12 @@ namespace Engine {
     class LineCommon
     {
     public:
+        ~LineCommon();
 
         // 初期化  
         void Initialize(DirectXCommon* dxCommon);
+        // 終了処理
+        void Finalize();
         // 更新  
         void Update();
         // 描画  

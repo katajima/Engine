@@ -4,14 +4,19 @@
 #include<dxgidebug.h>
 #include<wrl.h>
 
-Engine::D3DResourceLeakchecker::~D3DResourceLeakchecker()
+void Engine::D3DResourceLeakchecker::ReportLiveObjects()
 {
 	//リソースリークチェック
 	Microsoft::WRL::ComPtr < IDXGIDebug> debug;
 
 	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
+		// DebugLayer内部の管理オブジェクトを除外し、アプリ側のD3D12リソースだけを確認する。
+		const DXGI_DEBUG_RLO_FLAGS flags = static_cast<DXGI_DEBUG_RLO_FLAGS>(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL);
+		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, flags);
 	}
+}
+
+Engine::D3DResourceLeakchecker::~D3DResourceLeakchecker()
+{
+	// main終了時はプロセス終了処理に近く簡易レポートになりやすいため、Framework::Finalize側で明示的に確認する。
 }

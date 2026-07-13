@@ -1,4 +1,4 @@
-﻿#include "SelectScene.h"
+#include "SelectScene.h"
 #include <DirectXGame/engine/Audio/Audio.h>
 
 namespace {
@@ -48,7 +48,22 @@ void SelectScene::Initialize() {
 
 
 // 終了
-void SelectScene::Finalize() {}
+void SelectScene::Finalize() {
+	// カメラ参照を持つステージ/UI/システムを先に破棄する。
+	selectSystem_.reset();
+	selectUI_.reset();
+	selectStage_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	selectCamera_.reset();
+	inputCoordinator_.reset();
+	input = nullptr;
+}
 
 // 毎フレーム更新
 void SelectScene::Update() {

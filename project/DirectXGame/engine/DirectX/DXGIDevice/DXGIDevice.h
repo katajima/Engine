@@ -24,6 +24,8 @@ namespace Engine {
 		// 初期化
 		void Initialize();
 
+		// D3D12デバイスが保持している生存オブジェクトを出力
+		void ReportLiveObjects();
 
 		// DXGIデバイスの取得
 		ID3D12Device* GetDevice() { return device_.Get(); };

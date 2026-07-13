@@ -4,6 +4,7 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include<algorithm>
+#include<string>
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -88,6 +89,12 @@ namespace Engine {
 		Type* Data() const { return data_; };
 		// リソース取得
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
+		// デバッグレイヤーのLiveObject出力にインデックスバッファ名を表示する
+		void SetResourceName(const std::wstring& name) {
+			if (resource_) {
+				resource_->SetName(name.c_str());
+			}
+		}
 		// バッファビュー取得
 		D3D12_INDEX_BUFFER_VIEW GetIndexxBufferView() { return bufferView; }
 	private:

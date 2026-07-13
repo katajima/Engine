@@ -1,4 +1,4 @@
-﻿#include "EntityManager.h"
+#include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
@@ -34,6 +34,12 @@ namespace {
 			return left->GetCameraSortDepth() > right->GetCameraSortDepth();
 			});
 	}
+}
+
+Engine::EntityManager::~EntityManager()
+{
+	// Frameworkから明示Finalizeされなかった場合でもGPUリソースを閉じる
+	Finalize();
 }
 
 void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
@@ -88,6 +94,45 @@ void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 	spriteCommon_ = std::make_unique<SpriteCommon>();
 	spriteCommon_->Initialize(dxCommon);
 
+}
+
+void Engine::EntityManager::Finalize()
+{
+	// Entity本体が持つObject3d/Primitive/Trailなどを先に破棄する
+	entities_.clear();
+	opaqueObjects.clear();
+	transparentObjects.clear();
+
+	// エフェクト系はライト/ラインへの非所有ポインタを持つため、先に解放する
+	effectManager_.reset();
+
+	// インスタンシング用Uploadリソースを明示的に閉じてから解放する
+	if (object3dInstanceManager_) {
+		object3dInstanceManager_->Finalize();
+		object3dInstanceManager_.reset();
+	}
+
+	// ライト/ラインはMapした定数バッファを持つため、明示的にUnmapして閉じる
+	if (lightManager_) {
+		lightManager_->Finalize();
+		lightManager_.reset();
+	}
+	if (lineCommon_) {
+		lineCommon_->Finalize();
+		lineCommon_.reset();
+	}
+
+	// 残りの共通描画リソースを解放する
+	primitiveCommon_.reset();
+	skinningCommon_.reset();
+	skyBoxCommon_.reset();
+	object3dCommon_.reset();
+	oceanManager_.reset();
+	cameraCommon_.reset();
+	spriteCommon_.reset();
+
+	audioManager_ = nullptr;
+	dxCommon = nullptr;
 }
 
 void Engine::EntityManager::UpdateImgui()

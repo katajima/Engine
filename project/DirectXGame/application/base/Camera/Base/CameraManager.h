@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "BaseCamera.h"
 
 /// <summary>CameraManagerへ登録する非所有カメラ情報。</summary>
@@ -13,6 +13,8 @@ struct CameraInfo {
 class CameraManager
 {
 public:
+	// デストラクタ
+	~CameraManager();
 
 	/// <summary>シーン共通の出力カメラを生成し、描画システムへ設定する。</summary>
 	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラのみの場合はnullptrを許容する。</param>
@@ -22,6 +24,8 @@ public:
 
 	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
 	void Update();
+	/// <summary>登録解除と所有カメラの解放を行う。</summary>
+	void Finalize();
 
 	/// <summary>呼び出し側が所有するカメラを名前付きで登録する。</summary>
 	/// <param name="cameraInfo">登録する非所有カメラと初期使用状態。cameraはnullptr不可。</param>

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // C++
 #include"memory"
@@ -43,10 +43,12 @@ namespace Engine {
 	{
 	public:
 
-
+		~EntityManager();
 
 		// 初期化
 		void Initialize(DirectXCommon* directXCommon);
+		// 終了処理
+		void Finalize();
 
 		// ImGui
 		void UpdateImgui();

@@ -1,4 +1,4 @@
-﻿#include "RenderTexture.h"
+#include "RenderTexture.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -8,6 +8,7 @@
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include "DirectXGame/engine/Offscreen/Posteffect.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
 
 #include "imgui.h"
 
@@ -23,13 +24,11 @@ void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command,
 	this->srvManager = srvManager;			// SRV管理クラス
 	this->rtvManager = rvtManager;			// RTV管理クラス
 	this->renderingCommon = renderingCommon;	// レンダリング共通クラス
-
+	name_ = name;							// デバッグ名
 
 	CreateResourcePixel();
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
-
-	name_ = name;
 
 	type_ = type;
 
@@ -121,6 +120,8 @@ void Engine::RenderTexture::CreateResource()
 		IID_PPV_ARGS(&resource_)
 	);
 	assert(SUCCEEDED(hr_));
+	// LiveObject表示でレンダーテクスチャの残存元を追えるよう名前を付ける。
+	resource_->SetName(StringUtility::ConvertString("RenderTexture : " + name_).c_str());
 }
 
 void Engine::RenderTexture::CreateResourcePixel()
@@ -158,6 +159,8 @@ void Engine::RenderTexture::CreateResourcePixel()
 		IID_PPV_ARGS(&resource_)
 	);
 	assert(SUCCEEDED(hr_));
+	// LiveObject表示でレンダーテクスチャの残存元を追えるよう名前を付ける。
+	resource_->SetName(StringUtility::ConvertString("RenderTexture : " + name_).c_str());
 }
 
 

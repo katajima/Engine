@@ -1,4 +1,4 @@
-﻿#include "ResultScene.h"
+#include "ResultScene.h"
 
 
 namespace {
@@ -66,6 +66,21 @@ void ResultScene::Initialize() {
 
 // 終了
 void ResultScene::Finalize() {
+	// リザルト画面のUI/ステージはカメラ参照を持つため先に破棄する。
+	overUI_.reset();
+	resultSystem_.reset();
+	resultScoreUI_.reset();
+	resultUI_.reset();
+	resultStage_.reset();
+	effect_.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	resultCamera_.reset();
+	inputCoordinator_.reset();
 };
 
 // 毎フレーム更新

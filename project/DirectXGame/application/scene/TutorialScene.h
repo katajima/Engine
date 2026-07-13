@@ -60,7 +60,6 @@ private:
 	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;
-	Engine::Audio* audio = nullptr;
 	// ゲームプレイシーンで共通利用する基盤システム
 	std::unique_ptr<GameplaySession> gameplaySession_ = nullptr;
 private:

@@ -1,5 +1,7 @@
 #include "ModelMesh.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
+#include <format>
 
 void Engine::ModelMesh::Initialize(DirectXCommon* dxcommon)
 {
@@ -9,6 +11,10 @@ void Engine::ModelMesh::Initialize(DirectXCommon* dxcommon)
 	vbvResorce_.CreateBufferView(dxCommon, vertices, vertices.size());
 	// インデックスリソース生成
 	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
+	// LiveObject出力で所有メッシュを判断できるよう、D3D12リソースへ名前を付ける
+	const std::wstring meshName = StringUtility::ConvertString(name.empty() ? "UnnamedMesh" : name);
+	vbvResorce_.SetResourceName(std::format(L"ModelMesh VB : {}", meshName));
+	indexResorce_.SetResourceName(std::format(L"ModelMesh IB : {}", meshName));
 }
 
 void Engine::ModelMesh::UpdateVertexBuffer()

@@ -32,6 +32,12 @@ namespace {
 	}
 }
 
+Engine::AudioManager::~AudioManager()
+{
+	// Frameworkから明示Finalizeされなかった場合でもVoiceとPCMバッファを解放する
+	Finalize();
+}
+
 void Engine::AudioManager::Initialize(const std::string& directoryPath) {
 	// 二重初期化された場合にもVoiceや音源を残さないよう、先に既存状態を解放する。
 	Finalize();

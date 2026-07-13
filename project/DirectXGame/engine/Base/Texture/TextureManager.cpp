@@ -1,5 +1,6 @@
 #include "TextureManager.h"
 #include"DirectXGame/engine/Utility/StringUtility.h"
+#include<format>
 #include<unordered_map>
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -95,6 +96,8 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 		textureData.metadata = mipImages.GetMetadata();
 	}
 	textureData.resource = CreateTextureResource(textureData.metadata);
+	// LiveObject出力にテクスチャパスを表示して、残ったリソースの所有元を追いやすくする
+	textureData.resource->SetName(StringUtility::ConvertString(std::format("Texture : {}", filePath)).c_str());
 	textureData.intermediateResource = UploadTextureData(textureData.resource.Get(), mipImages);
 
 

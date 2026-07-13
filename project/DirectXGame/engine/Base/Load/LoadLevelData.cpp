@@ -7,6 +7,12 @@
 #include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
+LoadLevelData::~LoadLevelData()
+{
+	// 終了処理漏れでも、レベルデータが生成したカメラやライトを確実に破棄する。
+	ClearData();
+}
+
 void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::ModelManager* modelManager, Engine::Camera* camera,
 	const std::string extensionName, const std::string fileName)
 {
@@ -211,8 +217,15 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 
 void LoadLevelData::ClearData()  
 {  
+	// Initialize前や二重Finalize時は破棄済みなので何もしない。
+	if (!levelData_) {
+		return;
+	}
+
 	// "LevelObject" タグを持つオブジェクトを全削除  
-	entityManager->EraseObject3DByTag("LevelObject");  
+	if (entityManager) {
+		entityManager->EraseObject3DByTag("LevelObject");
+	}
 	levelData_->objects.clear();  
 	levelData_->players.clear();  
 	levelData_->enemys.clear();  
@@ -227,14 +240,19 @@ void LoadLevelData::ClearData()
 	for (auto& light : lights_) {
 		light.reset();
 	}
-	entityManager->GetLightManager()->ClearLights();
+	if (entityManager && entityManager->GetLightManager()) {
+		entityManager->GetLightManager()->ClearLights();
+	}
 	lights_.clear();
 
 
 	// カメラの削除処理を修正  
 	for (auto& camera : cameras_) {  
-		cameraManager->DeleteCamera(camera->GetName());
-		camera.release();
+		// CameraManagerは非所有参照だけを持つため、先に登録を外してからunique_ptrで破棄する。
+		if (cameraManager && camera) {
+			cameraManager->DeleteCamera(camera->GetName());
+		}
+		camera.reset();
 	}  
 	cameras_.clear();  
 }

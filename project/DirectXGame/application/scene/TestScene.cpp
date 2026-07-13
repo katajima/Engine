@@ -1,12 +1,10 @@
-﻿#include"TestScene.h"
+#include"TestScene.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 #include "DirectXGame/engine/math/Random.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 void TestScene::Initialize()
 {
-	//オーディオの初期化
-	//audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = GetInput();
 	// ImGui初期化
@@ -37,7 +35,41 @@ void TestScene::Initialize()
 
 void TestScene::Finalize()
 {
+	// エンティティ側が所有しているオブジェクトを先に掃除し、カメラ参照を残さない。
+	if (GetEntityManager()) {
+		GetEntityManager()->ObjectClean();
+		if (GetEntityManager()->GetObject3dInstanceManager()) {
+			GetEntityManager()->GetObject3dInstanceManager()->AllClear();
+		}
+	}
 
+	// 生ポインタはEntityManager所有なので、シーン側では参照だけ無効化する。
+	skinObjects.clear();
+	skinObject = nullptr;
+	skinObject2 = nullptr;
+	skyBoxObject = nullptr;
+	skyBoxObject2 = nullptr;
+	oceanObject = nullptr;
+
+	// GPUリソースを持つシーン所有物を明示的に破棄する。
+	sprite_.clear();
+	loadData_.reset();
+	ocean_.reset();
+	skyBox2.reset();
+	skyBox.reset();
+	directional.reset();
+	spot.reset();
+	point.reset();
+
+	// CameraManagerが描画系へ渡した参照を外してからカメラ本体を破棄する。
+	if (cameraManager_) {
+		cameraManager_->Finalize();
+		cameraManager_.reset();
+	}
+	fixedCamera_.reset();
+	inputCoordinator_.reset();
+	imGuiManager = nullptr;
+	input_ = nullptr;
 }
 
 void TestScene::Update()
