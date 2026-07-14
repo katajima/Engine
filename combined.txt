@@ -458,6 +458,7 @@
     └── └──     ├── CharacterDebugScene.h
     └── └──     ├── CustomScene.cpp
     └── └──     ├── CustomScene.h
+    └── └──     ├── EffectScene.cpp
     └── └──     ├── EffectScene.h
     └── └──     ├── GamePlayScene.cpp
     └── └──     ├── GamePlayScene.h
@@ -40682,9 +40683,127 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/scene/EffectScene.cpp
+============================================================
+﻿#include "EffectScene.h"
+
+void EffectScene::Initialize() {
+	// デバッグシーンで使用する入力管理を一括初期化する
+	inputCoordinator_ = std::make_unique<InputCoordinator>();
+	inputCoordinator_->Initialize(GetInput());
+	// カメラ管理
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
+	// カメラ追加
+	
+
+
+	// スカイボックス初期化
+	skyBox = std::make_unique<Engine::SkyBox>();
+	skyBox->Initialize(GetEntityManager(), "resources/Texture/hdr/sky.dds");
+
+	// 空
+	sky_ = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManager_->GetCamera());
+	sky_->GetWorldTransform().scale_ = skyBoxScale_;
+	sky_->SetSkyBox(skyBox.get());
+	
+	// エフェクト
+	effect_ = std::make_unique<EffectSystem>();
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
+	// エフェクトコンポーネント初期化
+	effectComponent_ = std::make_unique<Engine::EffectComponent>();
+	effectComponent_->Init(GetEntityManager(), GetGlobalVariables());
+
+	// カメラ設定
+	SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
+}
+
+void EffectScene::Finalize()
+{}
+
+void EffectScene::Update()
+{
+	
+
+	// 時間
+	float dt = GetTime();
+
+	// 入力更新とデバッグ対象へのコマンド実行を一括で行う
+	inputCoordinator_->Update(dt, nullptr);
+
+
+	GetEntityManager()->Get3DLineCommon()->GetDebugLineMeshData().AddGrid(1000.0f, 1000.0f, 1.0f, {1,1,1,1});
+
+	// カメラ管理の更新
+	cameraManager_->Update();
+	// Effect更新
+	effect_->Update(dt);
+}
+
+void EffectScene::Draw3D() {}
+
+void EffectScene::Draw2D() {}
+
+
+============================================================
 File Path: project/DirectXGame/application/scene/EffectScene.h
 ============================================================
-#pragma once
+﻿#pragma once
+// engine
+#include"DirectXGame/engine/scene/SceneManager.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
+#include"DirectXGame/engine/Utility/TimerUtility.h"
+#include"DirectXGame/engine/base/Load/LoadLevelData.h"
+
+// application
+#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+
+#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Input/InputCoordinator.h"
+
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
+
+class EffectScene : public Engine::BaseScene {
+public:
+
+	// 初期化
+	void Initialize() override;
+
+	// 終了
+	void Finalize() override;
+
+	// 毎フレーム更新
+	void Update() override;
+
+	// 描画3d
+	void Draw3D() override;
+	// 描画2d
+	void Draw2D() override;
+private:
+	// 物理入力、アクション入力、コマンドをまとめて管理する
+	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
+
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_;
+	// エフェクト
+	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
+	// エフェクト
+	std::unique_ptr<EffectSystem> effect_;
+private:
+	// スカイボックス
+	std::unique_ptr<Engine::SkyBox> skyBox = nullptr;
+	// 空
+	Engine::Object3d* sky_ = nullptr;
+
+	// 空スケール
+	Vector3 skyBoxScale_ = { 100,100,100 };
+};
 
 
 ============================================================
@@ -41642,6 +41761,7 @@ File Path: project/DirectXGame/application/scene/SceneFactory.cpp
 #include "TutorialScene.h"
 #include "CharacterDebugScene.h"
 #include "CustomScene.h"
+#include "EffectScene.h"
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
@@ -41673,6 +41793,9 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
     if (sceneName == "CUSTOM") {             // カスタムシーン
         return std::make_unique<CustomScene>();
     }
+	if (sceneName == "EFFECT") {              // エフェクトシーン
+		return std::make_unique<EffectScene>();
+	}
 
     // 未登録のシーン名が渡された場合は生成できないことを通知する
     return nullptr;
@@ -41682,7 +41805,7 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
 ============================================================
 File Path: project/DirectXGame/application/scene/SceneFactory.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/scene/AbstractSceneFactory.h"
 
 
@@ -41694,6 +41817,8 @@ class SampleScene;
 class ResultScene;
 class TutorialScene;
 class CharacterDebugScene;
+class CustomScene;
+class EffectScene;
 class BaseScene;
 
 // このゲーム用のシーン工場
@@ -76669,7 +76794,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/MyGame.cpp
 ============================================================
-#include "MyGame.h"
+﻿#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
@@ -76722,6 +76847,7 @@ void Engine::MyGame::Initialize() {
 	scenenames_.push_back("TUTORIAL");
 	scenenames_.push_back("CHARACTER");
 	scenenames_.push_back("CUSTOM");
+	scenenames_.push_back("EFFECT");
 
 #ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");
@@ -87330,6 +87456,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp" />
+    <ClCompile Include="DirectXGame\application\scene\EffectScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp" />
@@ -89150,6 +89277,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Game\GameplaySession.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\EffectScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
