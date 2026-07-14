@@ -11204,12 +11204,17 @@ bool HitMotionSystem::GetIsTime(float dt, float& time) {
 #pragma region MyRegion
 // ダメージ
 void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
+	// パラメータ未初期化時はダメージ処理を行わない。
+	if (!parameter) {
+		return;
+	}
 
 	for (auto& damage : damageMotions_) {
 		damage.Update(dt);
 
 		if (damage.GetDamageData().IsAttack()) {
-			parameter->parameters->HP.value -= damage.GetDamageData().GetDamage();
+			// リアクションデータの攻撃属性を渡し、死亡時の報酬判定に使えるようにする。
+			owner->ApplyAttackDamage(damage.GetDamageData().GetDamage(), data_.attribute);
 		}
 
 	}
@@ -14744,8 +14749,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 		// 敵ステート変更
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move);
-		// ダメージ
-		enemy->AddDamage(parameter_.damage);
+		// 必殺ミサイルのダメージとして記録し、撃破時にSPを出さない判定へつなげる。
+		enemy->ApplyAttackDamage(parameter_.damage, AttackAttribute::Special);
 
 		this->owner->GetAttackController()->GetHitCounter().Hit();
 		
@@ -18043,6 +18048,16 @@ namespace Character {
 			parameterComponent_->HP().value = 0.0f;
 		}
 	}
+	// 攻撃属性付きダメージ
+	void BaseCharacter::ApplyAttackDamage(float damage, AttackAttribute attribute) {
+		const float hpBefore = GetHP();	// ダメージ前のHP
+		AddDamage(damage);				// 既存のHP減算と下限処理を使用
+
+		// 生存中からHP0になった瞬間だけ、死亡原因の攻撃属性を記録する。
+		if (hpBefore > 0.0f && GetHP() <= 0.0f) {
+			fatalAttackAttribute_ = attribute;
+		}
+	}
 	// 削除フラグ
 	bool BaseCharacter::GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 	// 削除する
@@ -18106,10 +18121,11 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 
 class HitResponse;
@@ -18200,6 +18216,16 @@ namespace Character {
 		/// <summary>現在HPへダメージを適用する。</summary>
 		/// <param name="damage">減算するダメージ量。負数の扱いはパラメータ実装に従う。</param>
 		void AddDamage(float damage);
+		/// <summary>攻撃属性付きのダメージを適用し、死亡した場合はキル属性として記録する。</summary>
+		/// <param name="damage">減算するダメージ量。</param>
+		/// <param name="attribute">ダメージを発生させた攻撃属性。</param>
+		void ApplyAttackDamage(float damage, AttackAttribute attribute);
+		/// <summary>死亡原因になった攻撃属性を取得する。</summary>
+		/// <returns>最後にHPを0以下にした攻撃属性。</returns>
+		AttackAttribute GetFatalAttackAttribute() const { return fatalAttackAttribute_; }
+		/// <summary>必殺技で倒されたか取得する。</summary>
+		/// <returns>死亡原因が必殺属性ならtrue。</returns>
+		bool WasKilledBySpecialAttack() const { return fatalAttackAttribute_ == AttackAttribute::Special; }
 		// 削除フラグ
 		bool  GetDelete() const;
 		// 削除する
@@ -18346,6 +18372,8 @@ namespace Character {
 		std::unique_ptr<CharacterContextSystem> contextSystem_ = nullptr;
 		//
 		bool isMove = true;
+		// HPを0にした攻撃属性
+		AttackAttribute fatalAttackAttribute_ = AttackAttribute::None;
 
 		std::unique_ptr < Engine::WorldTransform> worldCollider_= nullptr;
 	protected: // 貰いもの(アプリケーション層)
@@ -22775,6 +22803,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.c
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
@@ -23054,6 +23083,19 @@ namespace Character {
 		return waveExitState_ && waveExitState_->HasStarted();
 	}
 
+	void BaseEnemy::DropSpecialPointOnDeath(const Vector3& position, int point) {
+		// 必殺技で倒した敵からはSPを生成せず、SPの再回収ループを防ぐ。
+		if (WasKilledBySpecialAttack()) {
+			return;
+		}
+		// 管理クラスが未設定のシーンでも死亡処理を止めない。
+		if (!GetSpecialPointManager()) {
+			return;
+		}
+
+		GetSpecialPointManager()->AddPoint(position, point);
+	}
+
 	const BaseCharacter* BaseEnemy::GetTarget() {
 		return GetAttackController()->GetLockOnSystem()->GetTarget();
 	}
@@ -23068,7 +23110,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "EnemyData.h"
 
@@ -23143,6 +23185,10 @@ namespace Character {
 		bool IsWaveExiting() const;
 		// 退場完了後に削除されても撃破と判定しないための識別
 		bool IsWaveExitRemoval() const;
+		/// <summary>死亡時のSPポイントを、必殺技キルでなければ生成する。</summary>
+		/// <param name="position">SPポイントを出すワールド座標。</param>
+		/// <param name="point">加算されるSP量。</param>
+		void DropSpecialPointOnDeath(const Vector3& position, int point);
 
 	public:
 		// ID設定
@@ -23841,7 +23887,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/MediumMeleeEnemyState.cpp
 ============================================================
-﻿#include "MediumMeleeEnemyState.h"
+#include "MediumMeleeEnemyState.h"
 #include "MediumMeleeEnemy.h"
 
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -23933,7 +23979,8 @@ namespace Character {
 
 	void MediumMeleeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		// 必殺技で倒された場合は、BaseEnemy側でSPポイント生成を抑制する。
+		static_cast<BaseEnemy*>(character)->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	
 		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());
@@ -24484,7 +24531,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemyState.cpp
 ============================================================
-﻿#include "SmallCartEnemyState.h"
+#include "SmallCartEnemyState.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "SmallCartEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -24553,13 +24600,15 @@ namespace Character {
 	void SmallCartEnemyDieState::Enter()
 	{
 		timer_ = dieTimer_;
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 4,4.0f,0 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ -4,4.0f,0 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,4 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,-4 }, 1);
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(character);	// SP生成判定を共通化するための敵基底クラス
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 4,4.0f,0 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ -4,4.0f,0 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,4 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,-4 }, 1);
 	}
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemyState.h
@@ -24720,7 +24769,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemyState.cpp
 ============================================================
-﻿#include "SmallMeleeEnemyState.h"
+#include "SmallMeleeEnemyState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -24810,7 +24859,8 @@ namespace Character {
 
 	void SmallMeleeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
-		character->GetSpecialPointManager()->AddPoint(
+		// 必殺技で倒された場合は、BaseEnemy側でSPポイント生成を抑制する。
+		static_cast<BaseEnemy*>(character)->DropSpecialPointOnDeath(
 			character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());
@@ -25385,7 +25435,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/SmallRangeEnemyState.cpp
 ============================================================
-﻿#include "SmallRangeEnemyState.h"
+#include "SmallRangeEnemyState.h"
 #include "SmallRangeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -25487,7 +25537,8 @@ namespace Character {
 
 	void SmallRangeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		// 必殺技で倒された場合は、BaseEnemy側でSPポイント生成を抑制する。
+		static_cast<BaseEnemy*>(character)->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());
 		character->GetEffect()->Emit("EmitterDeathEnemyScrapIronRod", character->GetWorldTransform().GetWorldPosition());
@@ -25510,6 +25561,7 @@ namespace Character {
 		}
 	}
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/SmallRangeEnemyState.h
@@ -38481,6 +38533,7 @@ File Path: project/DirectXGame/application/base/UI/PlayerUI.cpp
 #include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <cmath>
 
 void PlayerUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
@@ -38677,13 +38730,57 @@ void PlayerUI::UpdatePlayerUI(float dt) {
 	staminaBer->SetMeter(parameterComponent->Stamina().value);
 
 	specialBar->SetMeter(sizeSpecialGauge_);// メータ
+	UpdateSpecialReadyVisual(dt, specialBar);
+}
+
+void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
+	// SPが満タンの間だけ、ゲージと案内アイコンを明るく点滅させる。
+	if (isTextMax_) {
+		specialReadyEffectTimer_ += dt;
+		const float pulse = (std::sin(specialReadyEffectTimer_ * 8.0f) + 1.0f) * 0.5f;
+		const Color readyGaugeColor = {
+			0.2f + 0.6f * pulse,
+			0.8f + 0.2f * pulse,
+			1.0f,
+			1.0f
+		};
+		const Color readyIconColor = {
+			1.0f,
+			0.85f + 0.15f * pulse,
+			0.2f + 0.8f * pulse,
+			1.0f
+		};
+
+		specialBar->GetMeterSprite()->SetColor(readyGaugeColor);
+		specialBar->GetNameSprite()->SetColor(readyIconColor);
+		textMax_->SetColor(readyIconColor);
+		textRB_->SetColor(readyIconColor);
+
+		if (Engine::UIPair* specialPair = GetUIPair("special")) {
+			specialPair->GetFirstSprite()->SetColor(readyIconColor);
+			specialPair->GetSecondSprite()->SetColor(readyIconColor);
+		}
+		return;
+	}
+
+	// 満タンでない時は通常色へ戻し、次回満タン時の点滅を最初から始める。
+	specialReadyEffectTimer_ = 0.0f;
+	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);
+	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);
+	textMax_->SetColor(maxTextData_.color_);
+	textRB_->SetColor(rbData_.color_);
+
+	if (Engine::UIPair* specialPair = GetUIPair("special")) {
+		specialPair->GetFirstSprite()->SetColor(spTextData.color);
+		specialPair->GetSecondSprite()->SetColor(spTextData.color);
+	}
 }
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/UI/PlayerUI.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
@@ -38712,6 +38809,9 @@ private:
 	// プレイヤーUI
 	void InitializePlayerUI();
 
+	// SP満タン時の見た目更新
+	void UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar);
+
 	void UpdatePlayerUI(float dt);
 
 public:
@@ -38732,6 +38832,7 @@ private:
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;
+	float specialReadyEffectTimer_ = 0.0f;	// SP満タン強調用タイマー
 private:
 	// メータUIデータ
 	struct MeterUIData {
