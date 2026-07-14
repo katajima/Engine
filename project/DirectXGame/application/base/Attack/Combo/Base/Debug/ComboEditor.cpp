@@ -54,7 +54,15 @@ namespace Combo {
 		// isComboEditorActive_ はプレビュー再生と攻撃デバッグ処理の有効状態として渡す
 		UpdateImGui(dt);
 
+		// コンボエディター上でクリック、ドラッグ、文字入力している間はゲーム操作へ入力を流さない。
+		isInputCaptured_ =
+			(ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) ||
+				ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows));
+
 		ImGui::End();
+#else
+		// リリースビルドではエディター入力は存在しないため、入力抑制を解除する。
+		isInputCaptured_ = false;
 #endif // _DEBUG
 	};
 

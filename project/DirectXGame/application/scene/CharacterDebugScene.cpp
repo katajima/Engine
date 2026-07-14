@@ -167,6 +167,8 @@ void CharacterDebugScene::InitializeDebug(){
 
 // 入力関係更新
 void CharacterDebugScene::UpdateInput(float dt){
+	// コンボエディター操作中は、マウスやキーボード入力でデバッグ対象が動かないようにする。
+	inputCoordinator_->SetPlayerInputBlocked(comboEditor_ && comboEditor_->IsInputCaptured());
 	// 入力更新とデバッグ対象へのコマンド実行を一括で行う
 	inputCoordinator_->Update(dt, debugTarget);
 

@@ -359,7 +359,7 @@
         "コンボ中の移動速度カーブ": {
             "enumType": "MoveSpeedCurveType",
             "type": "enum",
-            "value": 0
+            "value": 2
         },
         "コンボ中の移動速度カーブ強度": {
             "type": "float",

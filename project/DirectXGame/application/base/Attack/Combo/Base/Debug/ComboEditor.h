@@ -15,6 +15,8 @@ namespace Combo {
 
 		// コンボエディターがアクティブか取得
 		bool IsActive() const { return isComboEditorActive_; }
+		// コンボエディターがマウスやキーボード入力を使用中か取得
+		bool IsInputCaptured() const { return isInputCaptured_; }
 
 		// 所有者設定
 		void SetOwner(Character::BaseCharacter* owner);
@@ -94,5 +96,7 @@ namespace Combo {
 
 		// コンボエディターがアクティブか
 		bool isComboEditorActive_ = true;
+		// エディター操作中にプレイヤー入力を止めるための入力取得状態
+		bool isInputCaptured_ = false;
 	};
 }

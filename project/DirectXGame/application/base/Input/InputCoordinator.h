@@ -40,6 +40,10 @@ public:
 	void Update(float deltaTime) {
 		inputSystem_->Update(deltaTime);
 		inputManager_->Update(deltaTime);
+		if (isPlayerInputBlocked_) {
+			// エディター操作中は移動やカメラなどが参照するプレイヤー入力だけを止める。
+			inputSystem_->ClearPlayerInput();
+		}
 	}
 
 	/// <summary>
@@ -50,7 +54,7 @@ public:
 		Update(deltaTime);
 
 		Character::ICommand* command = inputHandler_->HandleInput();
-		if (command && owner) {
+		if (!isPlayerInputBlocked_ && command && owner) {
 			command->Exec(*owner);
 		}
 	}
@@ -72,6 +76,11 @@ public:
 	/// アクション入力管理を取得する
 	/// </summary>
 	InputManager* GetInputManager() { return inputManager_.get(); }
+
+	/// <summary>
+	/// プレイヤー操作入力の実行を止めるか設定する
+	/// </summary>
+	void SetPlayerInputBlocked(bool isBlocked) { isPlayerInputBlocked_ = isBlocked; }
 
 private:
 	/// <summary>
@@ -99,4 +108,5 @@ private:
 	std::unique_ptr<InputSystem> inputSystem_ = nullptr; // ゲーム全体が参照する入力状態
 	std::unique_ptr<InputManager> inputManager_ = nullptr; // アクションへ変換した入力状態
 	std::unique_ptr<Character::InputHander> inputHandler_ = nullptr; // 入力からコマンドを選択するハンドラー
+	bool isPlayerInputBlocked_ = false; // エディター操作中などにプレイヤーだけ動かさない
 };

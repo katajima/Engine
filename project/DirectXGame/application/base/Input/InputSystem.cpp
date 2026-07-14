@@ -23,6 +23,13 @@ void InputSystem::Update(float dt) {
 	GameInputUpdate(dt);
 }
 
+void InputSystem::ClearPlayerInput() {
+	// UIやエディター操作中にキャラクターだけが反応しないよう、ゲーム操作入力は残してプレイヤー操作を空にする。
+	const bool isControllerConnected = playerInputData_.isControllerConnected;
+	playerInputData_ = PlayerInputData{};
+	playerInputData_.isControllerConnected = isControllerConnected;
+}
+
 void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();

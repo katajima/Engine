@@ -25,6 +25,8 @@ public:
 	/// </summary>
 	/// <param name="dt"></param>
 	void Update(float dt);
+	// プレイヤー操作だけを空にする
+	void ClearPlayerInput();
 private:
 	// プレイヤー操作の入力データの更新
 	void PlayerInputUpdate(float dt);
