@@ -1,6 +1,7 @@
 #include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <cmath>
 
 void PlayerUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
@@ -197,4 +198,48 @@ void PlayerUI::UpdatePlayerUI(float dt) {
 	staminaBer->SetMeter(parameterComponent->Stamina().value);
 
 	specialBar->SetMeter(sizeSpecialGauge_);// メータ
+	UpdateSpecialReadyVisual(dt, specialBar);
+}
+
+void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
+	// SPが満タンの間だけ、ゲージと案内アイコンを明るく点滅させる。
+	if (isTextMax_) {
+		specialReadyEffectTimer_ += dt;
+		const float pulse = (std::sin(specialReadyEffectTimer_ * 8.0f) + 1.0f) * 0.5f;
+		const Color readyGaugeColor = {
+			0.2f + 0.6f * pulse,
+			0.8f + 0.2f * pulse,
+			1.0f,
+			1.0f
+		};
+		const Color readyIconColor = {
+			1.0f,
+			0.85f + 0.15f * pulse,
+			0.2f + 0.8f * pulse,
+			1.0f
+		};
+
+		specialBar->GetMeterSprite()->SetColor(readyGaugeColor);
+		specialBar->GetNameSprite()->SetColor(readyIconColor);
+		textMax_->SetColor(readyIconColor);
+		textRB_->SetColor(readyIconColor);
+
+		if (Engine::UIPair* specialPair = GetUIPair("special")) {
+			specialPair->GetFirstSprite()->SetColor(readyIconColor);
+			specialPair->GetSecondSprite()->SetColor(readyIconColor);
+		}
+		return;
+	}
+
+	// 満タンでない時は通常色へ戻し、次回満タン時の点滅を最初から始める。
+	specialReadyEffectTimer_ = 0.0f;
+	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);
+	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);
+	textMax_->SetColor(maxTextData_.color_);
+	textRB_->SetColor(rbData_.color_);
+
+	if (Engine::UIPair* specialPair = GetUIPair("special")) {
+		specialPair->GetFirstSprite()->SetColor(spTextData.color);
+		specialPair->GetSecondSprite()->SetColor(spTextData.color);
+	}
 }

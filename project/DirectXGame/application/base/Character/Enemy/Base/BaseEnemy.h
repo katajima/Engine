@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "EnemyData.h"
 
@@ -73,6 +73,10 @@ namespace Character {
 		bool IsWaveExiting() const;
 		// 退場完了後に削除されても撃破と判定しないための識別
 		bool IsWaveExitRemoval() const;
+		/// <summary>死亡時のSPポイントを、必殺技キルでなければ生成する。</summary>
+		/// <param name="position">SPポイントを出すワールド座標。</param>
+		/// <param name="point">加算されるSP量。</param>
+		void DropSpecialPointOnDeath(const Vector3& position, int point);
 
 	public:
 		// ID設定

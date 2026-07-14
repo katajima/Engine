@@ -1,4 +1,4 @@
-﻿#include "SmallMeleeEnemyState.h"
+#include "SmallMeleeEnemyState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -88,7 +88,8 @@ namespace Character {
 
 	void SmallMeleeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
-		character->GetSpecialPointManager()->AddPoint(
+		// 必殺技で倒された場合は、BaseEnemy側でSPポイント生成を抑制する。
+		static_cast<BaseEnemy*>(character)->DropSpecialPointOnDeath(
 			character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());

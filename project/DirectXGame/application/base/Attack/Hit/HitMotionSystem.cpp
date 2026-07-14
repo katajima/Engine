@@ -307,12 +307,17 @@ bool HitMotionSystem::GetIsTime(float dt, float& time) {
 #pragma region MyRegion
 // ダメージ
 void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
+	// パラメータ未初期化時はダメージ処理を行わない。
+	if (!parameter) {
+		return;
+	}
 
 	for (auto& damage : damageMotions_) {
 		damage.Update(dt);
 
 		if (damage.GetDamageData().IsAttack()) {
-			parameter->parameters->HP.value -= damage.GetDamageData().GetDamage();
+			// リアクションデータの攻撃属性を渡し、死亡時の報酬判定に使えるようにする。
+			owner->ApplyAttackDamage(damage.GetDamageData().GetDamage(), data_.attribute);
 		}
 
 	}

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
@@ -27,6 +27,9 @@ private:
 	// プレイヤーUI
 	void InitializePlayerUI();
 
+	// SP満タン時の見た目更新
+	void UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar);
+
 	void UpdatePlayerUI(float dt);
 
 public:
@@ -47,6 +50,7 @@ private:
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;
+	float specialReadyEffectTimer_ = 0.0f;	// SP満タン強調用タイマー
 private:
 	// メータUIデータ
 	struct MeterUIData {

@@ -63,6 +63,16 @@ namespace Character {
 			parameterComponent_->HP().value = 0.0f;
 		}
 	}
+	// 攻撃属性付きダメージ
+	void BaseCharacter::ApplyAttackDamage(float damage, AttackAttribute attribute) {
+		const float hpBefore = GetHP();	// ダメージ前のHP
+		AddDamage(damage);				// 既存のHP減算と下限処理を使用
+
+		// 生存中からHP0になった瞬間だけ、死亡原因の攻撃属性を記録する。
+		if (hpBefore > 0.0f && GetHP() <= 0.0f) {
+			fatalAttackAttribute_ = attribute;
+		}
+	}
 	// 削除フラグ
 	bool BaseCharacter::GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 	// 削除する

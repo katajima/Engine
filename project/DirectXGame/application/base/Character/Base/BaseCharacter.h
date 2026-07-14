@@ -1,7 +1,8 @@
-﻿#pragma once
+#pragma once
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 
 class HitResponse;
@@ -92,6 +93,16 @@ namespace Character {
 		/// <summary>現在HPへダメージを適用する。</summary>
 		/// <param name="damage">減算するダメージ量。負数の扱いはパラメータ実装に従う。</param>
 		void AddDamage(float damage);
+		/// <summary>攻撃属性付きのダメージを適用し、死亡した場合はキル属性として記録する。</summary>
+		/// <param name="damage">減算するダメージ量。</param>
+		/// <param name="attribute">ダメージを発生させた攻撃属性。</param>
+		void ApplyAttackDamage(float damage, AttackAttribute attribute);
+		/// <summary>死亡原因になった攻撃属性を取得する。</summary>
+		/// <returns>最後にHPを0以下にした攻撃属性。</returns>
+		AttackAttribute GetFatalAttackAttribute() const { return fatalAttackAttribute_; }
+		/// <summary>必殺技で倒されたか取得する。</summary>
+		/// <returns>死亡原因が必殺属性ならtrue。</returns>
+		bool WasKilledBySpecialAttack() const { return fatalAttackAttribute_ == AttackAttribute::Special; }
 		// 削除フラグ
 		bool  GetDelete() const;
 		// 削除する
@@ -238,6 +249,8 @@ namespace Character {
 		std::unique_ptr<CharacterContextSystem> contextSystem_ = nullptr;
 		//
 		bool isMove = true;
+		// HPを0にした攻撃属性
+		AttackAttribute fatalAttackAttribute_ = AttackAttribute::None;
 
 		std::unique_ptr < Engine::WorldTransform> worldCollider_= nullptr;
 	protected: // 貰いもの(アプリケーション層)

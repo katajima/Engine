@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
@@ -281,6 +282,19 @@ namespace Character {
 
 	bool BaseEnemy::IsWaveExitRemoval() const {
 		return waveExitState_ && waveExitState_->HasStarted();
+	}
+
+	void BaseEnemy::DropSpecialPointOnDeath(const Vector3& position, int point) {
+		// 必殺技で倒した敵からはSPを生成せず、SPの再回収ループを防ぐ。
+		if (WasKilledBySpecialAttack()) {
+			return;
+		}
+		// 管理クラスが未設定のシーンでも死亡処理を止めない。
+		if (!GetSpecialPointManager()) {
+			return;
+		}
+
+		GetSpecialPointManager()->AddPoint(position, point);
 	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {

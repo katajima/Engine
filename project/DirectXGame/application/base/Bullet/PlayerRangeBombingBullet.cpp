@@ -69,8 +69,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 		// 敵ステート変更
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move);
-		// ダメージ
-		enemy->AddDamage(parameter_.damage);
+		// 必殺ミサイルのダメージとして記録し、撃破時にSPを出さない判定へつなげる。
+		enemy->ApplyAttackDamage(parameter_.damage, AttackAttribute::Special);
 
 		this->owner->GetAttackController()->GetHitCounter().Hit();
 		

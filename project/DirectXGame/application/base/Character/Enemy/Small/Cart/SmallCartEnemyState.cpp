@@ -1,4 +1,4 @@
-﻿#include "SmallCartEnemyState.h"
+#include "SmallCartEnemyState.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "SmallCartEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -67,10 +67,11 @@ namespace Character {
 	void SmallCartEnemyDieState::Enter()
 	{
 		timer_ = dieTimer_;
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 4,4.0f,0 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ -4,4.0f,0 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,4 }, 1);
-		character->GetSpecialPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,-4 }, 1);
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(character);	// SP生成判定を共通化するための敵基底クラス
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 4,4.0f,0 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ -4,4.0f,0 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,4 }, 1);
+		enemy->DropSpecialPointOnDeath(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,-4 }, 1);
 	}
 }
