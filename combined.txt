@@ -5334,7 +5334,15 @@ namespace Combo {
 		// isComboEditorActive_ はプレビュー再生と攻撃デバッグ処理の有効状態として渡す
 		UpdateImGui(dt);
 
+		// コンボエディター上でクリック、ドラッグ、文字入力している間はゲーム操作へ入力を流さない。
+		isInputCaptured_ =
+			(ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) ||
+				ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows));
+
 		ImGui::End();
+#else
+		// リリースビルドではエディター入力は存在しないため、入力抑制を解除する。
+		isInputCaptured_ = false;
 #endif // _DEBUG
 	};
 
@@ -6097,6 +6105,8 @@ namespace Combo {
 
 		// コンボエディターがアクティブか取得
 		bool IsActive() const { return isComboEditorActive_; }
+		// コンボエディターがマウスやキーボード入力を使用中か取得
+		bool IsInputCaptured() const { return isInputCaptured_; }
 
 		// 所有者設定
 		void SetOwner(Character::BaseCharacter* owner);
@@ -6176,6 +6186,8 @@ namespace Combo {
 
 		// コンボエディターがアクティブか
 		bool isComboEditorActive_ = true;
+		// エディター操作中にプレイヤー入力を止めるための入力取得状態
+		bool isInputCaptured_ = false;
 	};
 }
 
@@ -34039,6 +34051,10 @@ public:
 	void Update(float deltaTime) {
 		inputSystem_->Update(deltaTime);
 		inputManager_->Update(deltaTime);
+		if (isPlayerInputBlocked_) {
+			// エディター操作中は移動やカメラなどが参照するプレイヤー入力だけを止める。
+			inputSystem_->ClearPlayerInput();
+		}
 	}
 
 	/// <summary>
@@ -34049,7 +34065,7 @@ public:
 		Update(deltaTime);
 
 		Character::ICommand* command = inputHandler_->HandleInput();
-		if (command && owner) {
+		if (!isPlayerInputBlocked_ && command && owner) {
 			command->Exec(*owner);
 		}
 	}
@@ -34071,6 +34087,11 @@ public:
 	/// アクション入力管理を取得する
 	/// </summary>
 	InputManager* GetInputManager() { return inputManager_.get(); }
+
+	/// <summary>
+	/// プレイヤー操作入力の実行を止めるか設定する
+	/// </summary>
+	void SetPlayerInputBlocked(bool isBlocked) { isPlayerInputBlocked_ = isBlocked; }
 
 private:
 	/// <summary>
@@ -34098,6 +34119,7 @@ private:
 	std::unique_ptr<InputSystem> inputSystem_ = nullptr; // ゲーム全体が参照する入力状態
 	std::unique_ptr<InputManager> inputManager_ = nullptr; // アクションへ変換した入力状態
 	std::unique_ptr<Character::InputHander> inputHandler_ = nullptr; // 入力からコマンドを選択するハンドラー
+	bool isPlayerInputBlocked_ = false; // エディター操作中などにプレイヤーだけ動かさない
 };
 
 
@@ -34726,6 +34748,13 @@ void InputSystem::Update(float dt) {
 	GameInputUpdate(dt);
 }
 
+void InputSystem::ClearPlayerInput() {
+	// UIやエディター操作中にキャラクターだけが反応しないよう、ゲーム操作入力は残してプレイヤー操作を空にする。
+	const bool isControllerConnected = playerInputData_.isControllerConnected;
+	playerInputData_ = PlayerInputData{};
+	playerInputData_.isControllerConnected = isControllerConnected;
+}
+
 void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();
@@ -34877,6 +34906,8 @@ public:
 	/// </summary>
 	/// <param name="dt"></param>
 	void Update(float dt);
+	// プレイヤー操作だけを空にする
+	void ClearPlayerInput();
 private:
 	// プレイヤー操作の入力データの更新
 	void PlayerInputUpdate(float dt);
@@ -34899,6 +34930,7 @@ private:
 	// 入力クラス
 	Engine::Input* input = nullptr;
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Item/Scrap/ScrapData.h
@@ -41158,6 +41190,8 @@ void CharacterDebugScene::InitializeDebug(){
 
 // 入力関係更新
 void CharacterDebugScene::UpdateInput(float dt){
+	// コンボエディター操作中は、マウスやキーボード入力でデバッグ対象が動かないようにする。
+	inputCoordinator_->SetPlayerInputBlocked(comboEditor_ && comboEditor_->IsInputCaptured());
 	// 入力更新とデバッグ対象へのコマンド実行を一括で行う
 	inputCoordinator_->Update(dt, debugTarget);
 
