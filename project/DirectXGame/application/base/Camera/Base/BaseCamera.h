@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -77,6 +77,10 @@ public:
 	bool GetUseCamera() const { return useCamera; }
 	// カメラ使用フラグ設定
 	void SetUseCamera(bool is) { useCamera = is; }
+
+protected:
+	void CreateFixedCamera(Engine::EntityManager* entityManager,const Transform& transform, float farClip);
+
 protected:
 	// カメラ使用フラグ
 	bool useCamera = false;

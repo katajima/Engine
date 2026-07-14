@@ -4,11 +4,15 @@ void EffectScene::Initialize() {
 	// デバッグシーンで使用する入力管理を一括初期化する
 	inputCoordinator_ = std::make_unique<InputCoordinator>();
 	inputCoordinator_->Initialize(GetInput());
+	
+	effectCamera_ = std::make_unique<EffectCamera>();
+	effectCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
-	
+	cameraManager_->AddCamera({ effectCamera_.get(),true }, "effectCamera");
 
 
 	// スカイボックス初期化

@@ -1,4 +1,4 @@
-#include "FixedCamera.h"
+﻿#include "FixedCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void FixedCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position)

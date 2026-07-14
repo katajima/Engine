@@ -7,9 +7,8 @@
 
 // application
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
-#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
-#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
+
 
 #include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
@@ -38,7 +37,10 @@ private:
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_;
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト用カメラ
+	std::unique_ptr<EffectCamera> effectCamera_ = nullptr;
+
 	// エフェクト
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 	// エフェクト
