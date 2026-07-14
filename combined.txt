@@ -148,6 +148,8 @@
     └── └── └── └── └── ├── CameraZoom.cpp
     └── └── └── └── └── └── CameraZoom.h
     └── └── └── └── ├── FixedCamera/
+    └── └── └── └── └── ├── EffectCamera.cpp
+    └── └── └── └── └── ├── EffectCamera.h
     └── └── └── └── └── ├── FixedCamera.cpp
     └── └── └── └── └── ├── FixedCamera.h
     └── └── └── └── └── ├── ResultCamera.cpp
@@ -15099,7 +15101,7 @@ private: // 一旦
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.cpp
 ============================================================
-#include "BaseCamera.h"
+﻿#include "BaseCamera.h"
 
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
@@ -15110,12 +15112,29 @@ File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.cpp
 /// <returns></returns>
 float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
 
+void BaseCamera::CreateFixedCamera(Engine::EntityManager* entityManager, const Transform& transform, float farClip) {
+	this->entityManager = entityManager;	// エンティティ3d
+
+	// カメラ初期化
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
+	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
+	uniqueCamera_->SetFarClip(farClip);
+
+	// カメラ位置と回転設定
+	uniqueCamera_->SetTranslate(transform.translate);
+	uniqueCamera_->SetRotate(transform.rotate);
+
+
+	// ポストエフェクト追加
+	uniqueCamera_->AddEffectBlock("copy", Engine::PostEffectBlockType::kCopy, true);
+}
+
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -15194,6 +15213,10 @@ public:
 	bool GetUseCamera() const { return useCamera; }
 	// カメラ使用フラグ設定
 	void SetUseCamera(bool is) { useCamera = is; }
+
+protected:
+	void CreateFixedCamera(Engine::EntityManager* entityManager,const Transform& transform, float farClip);
+
 protected:
 	// カメラ使用フラグ
 	bool useCamera = false;
@@ -16595,9 +16618,75 @@ private:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/EffectCamera.cpp
+============================================================
+﻿#include "EffectCamera.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+
+void EffectCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+	Engine::GlobalVariables* globalVariables, Vector3 position){
+	CreateFixedCamera(entityManager, { {1,1,1},provisionalData_.rotate,provisionalData_.translate },
+		provisionalData_.farClip_);
+}
+
+void EffectCamera::Update() {
+	// カメラを使っているなら
+	if (useCamera) {
+		uniqueCamera_->GetPostEffectManager()->AddPipeline(uniqueCamera_->GetPostEffectPipeline());
+	}
+#ifdef _DEBUG
+	// デバッグラインを表示
+	entityManager->Get3DLineCommon()->GetLineMeshData().AddCameraLine(*uniqueCamera_.get());
+#endif // _DEBUG
+
+	// カメラ更新
+	uniqueCamera_->UpdateMatrix();
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h
+============================================================
+﻿#pragma once
+#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+
+
+/// <summary>
+/// 固定カメラ
+/// </summary>
+class EffectCamera : public BaseFixedCamera
+{
+public:
+	///< summary>
+	/// 初期化
+	///</summary>
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) override;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	void Update() override;
+private:
+
+
+
+private: // 一旦
+
+	struct ProvisionalData {
+		Vector3 translate = { 0, 25, -50 };
+		Vector3 rotate = { 0.341f, 0.0f, 0.0f };
+		float farClip_ = 15000.0f;
+	};
+	ProvisionalData provisionalData_;
+
+};
+
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/FixedCamera/FixedCamera.cpp
 ============================================================
-#include "FixedCamera.h"
+﻿#include "FixedCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void FixedCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position)
@@ -40691,11 +40780,15 @@ void EffectScene::Initialize() {
 	// デバッグシーンで使用する入力管理を一括初期化する
 	inputCoordinator_ = std::make_unique<InputCoordinator>();
 	inputCoordinator_->Initialize(GetInput());
+	
+	effectCamera_ = std::make_unique<EffectCamera>();
+	effectCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
-	
+	cameraManager_->AddCamera({ effectCamera_.get(),true }, "effectCamera");
 
 
 	// スカイボックス初期化
@@ -40759,9 +40852,8 @@ File Path: project/DirectXGame/application/scene/EffectScene.h
 
 // application
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
-#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
-#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
+
 
 #include"DirectXGame/application/base/Camera/Base/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
@@ -40790,7 +40882,10 @@ private:
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_;
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト用カメラ
+	std::unique_ptr<EffectCamera> effectCamera_ = nullptr;
+
 	// エフェクト
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 	// エフェクト
@@ -87358,6 +87453,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.cpp" />
@@ -87804,6 +87900,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.h" />
@@ -89282,6 +89379,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\scene\EffectScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -90590,6 +90690,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Game\GameplaySession.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
