@@ -16622,9 +16622,17 @@ File Path: project/DirectXGame/application/base/Camera/FixedCamera/EffectCamera.
 ============================================================
 ﻿#include "EffectCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
-void EffectCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
-	Engine::GlobalVariables* globalVariables, Vector3 position){
+#include <cmath>
+
+void EffectCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position) {
+	(void)position;							// EffectCameraは固定の初期位置を使う
+	this->inputSystem = inputSystem;			// エフェクト確認用カメラの操作入力
+	this->entityManager = entityManager;		// デバッグライン描画で参照するエンティティ管理
+	this->globalVariables = globalVariables;	// 将来のカメラ保存設定用に保持する
 	CreateFixedCamera(entityManager, { {1,1,1},provisionalData_.rotate,provisionalData_.translate },
 		provisionalData_.farClip_);
 }
@@ -16633,6 +16641,7 @@ void EffectCamera::Update() {
 	// カメラを使っているなら
 	if (useCamera) {
 		uniqueCamera_->GetPostEffectManager()->AddPipeline(uniqueCamera_->GetPostEffectPipeline());
+		UpdateEffectCameraControl(GetTime());
 	}
 #ifdef _DEBUG
 	// デバッグラインを表示
@@ -16641,6 +16650,40 @@ void EffectCamera::Update() {
 
 	// カメラ更新
 	uniqueCamera_->UpdateMatrix();
+}
+
+void EffectCamera::UpdateEffectCameraControl(float dt) {
+	if (!inputSystem || !uniqueCamera_) {
+		return;
+	}
+
+	// 入力状態を取得し、WASD/左スティックで移動、矢印/右スティック/右ドラッグで視点回転する。
+	const PlayerInputData playerInput = inputSystem->GetPlayerInputData();
+	Transform transform = uniqueCamera_->GetTransform();
+	transform.rotate.y += playerInput.lookStick.x * provisionalData_.rotateSpeed * dt;
+	transform.rotate.x -= playerInput.lookStick.y * provisionalData_.rotateSpeed * dt;
+	transform.rotate.x = Math::Clamp(transform.rotate.x, provisionalData_.minPitch, provisionalData_.maxPitch);
+
+	// カメラのYawを基準に、水平移動用の前方・右方向を作る。
+	const float sinYaw = std::sin(transform.rotate.y);
+	const float cosYaw = std::cos(transform.rotate.y);
+	const Vector3 forward = { sinYaw,0.0f,cosYaw };
+	const Vector3 right = { cosYaw,0.0f,-sinYaw };
+	const float moveSpeed = playerInput.dashHeld ? provisionalData_.dashMoveSpeed : provisionalData_.moveSpeed;
+
+	// 左右と前後の平面移動を反映する。
+	transform.translate += right * (playerInput.moveShick.x * moveSpeed * dt);
+	transform.translate += forward * (playerInput.moveShick.y * moveSpeed * dt);
+
+	// Spaceで上昇、Q/RTで下降し、確認中の高さをすばやく調整できるようにする。
+	if (playerInput.jumpPressed) {
+		transform.translate.y += provisionalData_.verticalSpeed * dt;
+	}
+	if (playerInput.lockOnHeld) {
+		transform.translate.y -= provisionalData_.verticalSpeed * dt;
+	}
+
+	uniqueCamera_->SetTransform(transform);
 }
 
 
@@ -16667,16 +16710,24 @@ public:
 	///</summary>
 	void Update() override;
 private:
-
-
+	// 入力に応じてエフェクト確認用の自由移動カメラを更新する
+	void UpdateEffectCameraControl(float dt);
 
 private: // 一旦
 
+	// エフェクト確認カメラの初期値と操作速度をまとめた暫定設定です。
 	struct ProvisionalData {
-		Vector3 translate = { 0, 25, -50 };
-		Vector3 rotate = { 0.341f, 0.0f, 0.0f };
-		float farClip_ = 15000.0f;
+		Vector3 translate = { 0, 25, -50 };	// 初期位置
+		Vector3 rotate = { 0.341f, 0.0f, 0.0f };	// 初期回転
+		float farClip_ = 15000.0f;			// 遠クリップ距離
+		float moveSpeed = 35.0f;			// 通常移動速度
+		float dashMoveSpeed = 90.0f;		// ダッシュ時の移動速度
+		float rotateSpeed = 1.8f;			// 視点回転速度
+		float verticalSpeed = 28.0f;		// 上下移動速度
+		float minPitch = -1.45f;			// 下向き回転の制限
+		float maxPitch = 1.45f;			// 上向き回転の制限
 	};
+	// エフェクト確認カメラに使う暫定設定データです。
 	ProvisionalData provisionalData_;
 
 };
@@ -29327,6 +29378,10 @@ namespace {
 	const char* kParticleRegistryGroup = "ParticleEditor";
 	const char* kDeletedParticleRegistryGroup = "ParticleEditorDeleted";
 	const char* kParticleDataPrefix = "ParticleGroup_";
+	const char* kPrimitiveRegistryGroup = "EffectPrimitiveEditor";
+	const char* kPrimitiveDataPrefix = "EffectPrimitive_";
+	const char* kPrimitivePreviewParticleName = "__EffectPrimitivePreviewParticle";
+	const char* kPrimitivePreviewEmitterName = "__EffectPrimitivePreviewEmitter";
 
 	bool DrawPrimitiveShapeParameters(Engine::ParticleGroupEditorData& data) {
 		// 選択中プリミティブに対応した形状パラメータだけを表示し、変更があれば保存対象にする。
@@ -29416,6 +29471,75 @@ namespace {
 		}
 		return changed;
 	}
+
+	bool DrawShapeTypeCombo(const char* label, Engine::ShapeParameter::ShapeType& shapeType) {
+		// ShapeTypeはNoneが-1なので、単純な配列index変換では1つずれる。明示対応で安全に選択する。
+		struct ShapeLabel {
+			const char* label;
+			Engine::ShapeParameter::ShapeType value;
+		};
+		static constexpr ShapeLabel kShapeLabels[] = {
+			{ "None", Engine::ShapeParameter::ShapeType::None },
+			{ "Plane", Engine::ShapeParameter::ShapeType::Plane },
+			{ "Triangle", Engine::ShapeParameter::ShapeType::Triangle },
+			{ "Cross", Engine::ShapeParameter::ShapeType::Cross },
+			{ "Cube", Engine::ShapeParameter::ShapeType::Cube },
+			{ "Circle", Engine::ShapeParameter::ShapeType::Circle },
+			{ "Star", Engine::ShapeParameter::ShapeType::Star },
+			{ "Crescent", Engine::ShapeParameter::ShapeType::Crescent },
+			{ "Ring", Engine::ShapeParameter::ShapeType::Ring },
+			{ "Sphere", Engine::ShapeParameter::ShapeType::Sphere },
+			{ "Arrow", Engine::ShapeParameter::ShapeType::Arrow },
+			{ "Cylinder", Engine::ShapeParameter::ShapeType::Cylinder },
+			{ "Tube", Engine::ShapeParameter::ShapeType::Tube },
+			{ "Pyramid", Engine::ShapeParameter::ShapeType::Pyramid },
+			{ "Torus", Engine::ShapeParameter::ShapeType::Torus },
+		};
+
+		const char* preview = "Unknown";
+		for (const ShapeLabel& item : kShapeLabels) {
+			if (item.value == shapeType) {
+				preview = item.label;
+				break;
+			}
+		}
+
+		bool changed = false;
+		if (ImGui::BeginCombo(label, preview)) {
+			for (const ShapeLabel& item : kShapeLabels) {
+				const bool selected = (item.value == shapeType);
+				if (ImGui::Selectable(item.label, selected)) {
+					shapeType = item.value;
+					changed = true;
+				}
+				if (selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		return changed;
+	}
+
+	void CopyPrimitiveShapeData(const Engine::ParticleGroupEditorData& source, Engine::ParticleGroupEditorData& destination) {
+		// プリミティブ形状に関わる保存項目だけをパーティクル群へ反映する。
+		destination.shapeType = source.shapeType;
+		destination.plane = source.plane;
+		destination.triangle = source.triangle;
+		destination.cross = source.cross;
+		destination.cube = source.cube;
+		destination.circle = source.circle;
+		destination.star = source.star;
+		destination.crescent = source.crescent;
+		destination.ring = source.ring;
+		destination.sphere = source.sphere;
+		destination.arrow = source.arrow;
+		destination.cylinder = source.cylinder;
+		destination.tube = source.tube;
+		destination.pyramid = source.pyramid;
+		destination.torus = source.torus;
+		destination.isEditorPrimitive = true;
+	}
 }
 
 void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
@@ -29425,6 +29549,7 @@ void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 	this->globalVariables = globalVariables;
 	serializer_.Initialize(globalVariables);
 	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
+	LoadRegisteredPrimitiveDefinitions();
 
 }
 
@@ -29433,63 +29558,75 @@ void EffectEditor::Update(float dt) {
 #ifdef _DEBUG
 	ImGui::Begin("Effect");
 
-	DrawParticleGroupEditor();
-	DrawEffectManagement();
-
-	if (effectGlobalDatas_.empty()) {
-		ImGui::TextDisabled("エフェクトを追加してください。");
-	}
-	else {
-		// エディターに表示変更するエフェクト選定
-		Engine::ImGuiUtility::SelectMapKey("Selected Effect", selectedBlockName_, effectGlobalDatas_);
-		ImGui::Separator();
-		ImGui::Text("Editing: %s", selectedBlockName_.c_str());
-		ImGui::Checkbox("出現", &isSpawnEmit);
-		ImGui::DragFloat3("位置", &spawnEmitPos.x, 0.1f);
-		ImGui::DragFloat("頻度", &frequency, 0.01f);
-
-		if (isSpawnEmit) {
-			timer += dt;
-			if (frequency < timer) {
-				Emit(selectedBlockName_, spawnEmitPos);
-				timer = 0.0f;
+	if (ImGui::BeginTabBar("EffectEditorTabs")) {
+		if (ImGui::BeginTabItem("Effect Select")) {
+			DrawEffectManagement();
+			if (!effectGlobalDatas_.empty()) {
+				// 編集対象のエフェクトを選択する。
+				Engine::ImGuiUtility::SelectMapKey("Selected Effect", selectedBlockName_, effectGlobalDatas_);
+				ImGui::Text("Editing: %s", selectedBlockName_.c_str());
 			}
+			else {
+				ImGui::TextDisabled("エフェクトを追加してください。");
+			}
+			ImGui::EndTabItem();
 		}
 
+		if (ImGui::BeginTabItem("Emitter Settings")) {
+			if (effectGlobalDatas_.empty()) {
+				ImGui::TextDisabled("エフェクトを追加してください。");
+			}
+			else {
+				// 選択中エフェクトの発火確認とエミッター設定をまとめる。
+				Engine::ImGuiUtility::SelectMapKey("Selected Effect", selectedBlockName_, effectGlobalDatas_);
+				ImGui::Separator();
+				ImGui::Text("Editing: %s", selectedBlockName_.c_str());
+				ImGui::Checkbox("出現", &isSpawnEmit);
+				ImGui::DragFloat3("位置", &spawnEmitPos.x, 0.1f);
+				ImGui::DragFloat("頻度", &frequency, 0.01f);
 
-		// --- 選択されているブロックだけ表示 ---
-		for (auto& combo : effectGlobalDatas_) {
-			const std::string& name = combo.first;
+				if (isSpawnEmit) {
+					timer += dt;
+					if (frequency < timer) {
+						Emit(selectedBlockName_, spawnEmitPos);
+						timer = 0.0f;
+					}
+				}
 
-			// 選択中だけ表示
-			const bool nowChoice = (name == selectedBlockName_);
+				for (auto& combo : effectGlobalDatas_) {
+					const std::string& name = combo.first;
+					const bool nowChoice = (name == selectedBlockName_);
+					if (!nowChoice) continue;
 
-			if (!nowChoice) continue;
-
-			// エディターでの調整
-			DrawEffectDetail(name, combo.second);
-			// データの保存
-			serializer_.SaveEffectData(name, combo.second);
+					// エディターでの調整
+					DrawEffectDetail(name, combo.second);
+					// データの保存
+					serializer_.SaveEffectData(name, combo.second);
+				}
+			}
+			ImGui::EndTabItem();
 		}
 
-		// セーブ
-		if (ImGui::Button("Save")) {
-			for (auto& it : effectGlobalDatas_) {
-				globalVariables->SaveFile(it.first);
-			}
-			for (auto& particle : effectComponent->GetParticleManager()->GetParticleGroups()) {
-				// 手動セーブ時は現在のパーティクル群実体を外部保存データへ反映してから書き出す。
-				Engine::ParticleGroupEditorData particleData =
-					effectComponent->GetParticleManager()->GetEditorParticleGroupData(particle.first);
-				serializer_.RegisterParticleGroupData(particle.first, particleData);
-				serializer_.SaveParticleGroupData(particle.first, particleData);
-				globalVariables->SaveFile(kParticleDataPrefix + particle.first);
-			}
-			globalVariables->SaveFile(kEffectRegistryGroup);
-			globalVariables->SaveFile(kDeletedEffectRegistryGroup);
-			globalVariables->SaveFile(kParticleRegistryGroup);
-			globalVariables->SaveFile(kDeletedParticleRegistryGroup);
+		if (ImGui::BeginTabItem("Particle Groups")) {
+			DrawParticleGroupEditor();
+			ImGui::EndTabItem();
 		}
+
+		if (ImGui::BeginTabItem("Primitive Library")) {
+			DrawPrimitiveLibraryEditor();
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Save Settings")) {
+			// 手動で全設定をまとめて保存する。
+			if (ImGui::Button("Save All Effect Settings")) {
+				SaveAllEditorData();
+			}
+			ImGui::TextWrapped("Effect, particle group, primitive definition, and registry data are saved together.");
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
 	}
 
 	ImGui::End();
@@ -29740,6 +29877,439 @@ void EffectEditor::DrawEffectManagement() {
 	ImGui::Separator();
 }
 
+void EffectEditor::DrawPrimitiveLibraryEditor() {
+	ImGui::SeparatorText("Primitive Definition Management");
+
+	// 新しいプリミティブ定義を追加するための入力欄です。
+	Engine::ImGuiUtility::InputText("New Primitive Name", newPrimitiveDefinitionNameBuffer_);
+	DrawShapeTypeCombo("New Primitive Shape", newPrimitiveDefinitionData_.shapeType);
+	ImGui::PushID("NewPrimitiveShape");
+	DrawPrimitiveShapeParameters(newPrimitiveDefinitionData_);
+	ImGui::PopID();
+	if (ImGui::Button("Add Primitive Definition")) {
+		AddPrimitiveDefinitionFromEditor();
+	}
+
+	if (!primitiveManagementMessage_.empty()) {
+		ImGui::TextWrapped("%s", primitiveManagementMessage_.c_str());
+	}
+
+	ImGui::SeparatorText("Primitive Definition Detail");
+	if (primitiveDefinitionDatas_.empty()) {
+		ImGui::TextDisabled("プリミティブ定義を追加してください。");
+		return;
+	}
+
+	Engine::ImGuiUtility::SelectMapKey("Selected Primitive Definition", selectedPrimitiveDefinitionName_,
+		primitiveDefinitionDatas_, "No Primitive Definition");
+	if (selectedPrimitiveDefinitionName_.empty() ||
+		primitiveDefinitionDatas_.find(selectedPrimitiveDefinitionName_) == primitiveDefinitionDatas_.end()) {
+		return;
+	}
+
+	// 選択中の定義を編集し、変更があれば即保存する。
+	Engine::ParticleGroupEditorData& data = primitiveDefinitionDatas_[selectedPrimitiveDefinitionName_];
+	bool saveData = false;
+	if (DrawShapeTypeCombo("Shape", data.shapeType)) {
+		saveData = true;
+	}
+	ImGui::PushID("EditPrimitiveShape");
+	if (DrawPrimitiveShapeParameters(data)) {
+		saveData = true;
+	}
+	ImGui::PopID();
+
+	if (ImGui::Button("Save Primitive Definition")) {
+		saveData = true;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Delete Primitive Definition")) {
+		DeletePrimitiveDefinition(selectedPrimitiveDefinitionName_);
+		ClearPrimitivePreview();
+		return;
+	}
+
+	if (saveData) {
+		SavePrimitiveDefinitionData(selectedPrimitiveDefinitionName_, data);
+		globalVariables->SaveFile(kPrimitiveDataPrefix + selectedPrimitiveDefinitionName_);
+		globalVariables->SaveFile(kPrimitiveRegistryGroup);
+		primitiveManagementMessage_ = "Saved primitive definition: " + selectedPrimitiveDefinitionName_;
+	}
+
+	DrawPrimitivePreviewControls(selectedPrimitiveDefinitionName_, data);
+}
+
+void EffectEditor::DrawPrimitivePreviewControls(const std::string& primitiveName, const Engine::ParticleGroupEditorData& data) {
+	ImGui::SeparatorText("Primitive Preview");
+
+	// プレビューは保存対象に含めない内部パーティクルで、編集中の形状を実画面へ確認するためだけに使う。
+	if (ImGui::Checkbox("Show Editing Primitive", &isPrimitivePreviewEnabled_)) {
+		primitivePreviewTimer_ = 0.0f;
+		if (!isPrimitivePreviewEnabled_) {
+			ClearPrimitivePreview();
+		}
+	}
+	ImGui::DragFloat3("Preview Position", &primitivePreviewPosition_.x, 0.1f);
+	ImGui::DragFloat3("Preview Size", &primitivePreviewSize_.x, 0.1f, 0.01f, 1000.0f);
+	ImGui::DragFloat3("Preview Rotate", &primitivePreviewRotate_.x, 0.01f);
+	ImGui::ColorEdit4("Preview Color", &primitivePreviewColor_.x);
+
+	if (!isPrimitivePreviewEnabled_) {
+		return;
+	}
+
+	EnsurePrimitivePreview(primitiveName, data);
+	EmitPrimitivePreview();
+}
+
+void EffectEditor::EnsurePrimitivePreview(const std::string& primitiveName, const Engine::ParticleGroupEditorData& data) {
+	if (effectComponent == nullptr) {
+		return;
+	}
+
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+	if (particleManager == nullptr) {
+		return;
+	}
+
+	const bool needsRecreate =
+		previewPrimitiveName_ != primitiveName ||
+		previewPrimitiveShapeType_ != data.shapeType ||
+		!particleManager->GetParticleGroups().Contains(kPrimitivePreviewParticleName);
+
+	Engine::ParticleGroupEditorData previewData = data;
+	previewData.texturePath = data.texturePath.empty() ? "resources/Texture/Image.dds" : data.texturePath;
+	previewData.blendType = EmitData::BlendType::MODE_ADD;
+	previewData.rasterizerType = EmitData::RasterizerType::MODE_SOLID_NONE;
+	previewData.isEditorPrimitive = true;
+	previewData.materialColor = primitivePreviewColor_;
+	previewData.materialEnableLighting = false;
+	previewData.materialAlpha = primitivePreviewColor_.w;
+
+	if (needsRecreate) {
+		// 形状種別が変わった時は、参照メッシュも変わるため一時パーティクル群を作り直す。
+		particleManager->RemoveParticleGroup(kPrimitivePreviewParticleName);
+		if (!particleManager->CreateEditorParticleGroup(kPrimitivePreviewParticleName, previewData)) {
+			ClearPrimitivePreview();
+			return;
+		}
+		previewPrimitiveName_ = primitiveName;
+		previewPrimitiveShapeType_ = data.shapeType;
+	}
+	else {
+		// サイズなどの形状パラメータ変更は、既存の一時パーティクル群へ即反映する。
+		particleManager->ApplyEditorParticleGroupData(kPrimitivePreviewParticleName, previewData);
+	}
+
+	if (!effectComponent->HasEmitter(kPrimitivePreviewEmitterName)) {
+		// 点エミッターを1つだけ持ち、プレビュー位置に同じ見た目の粒子を短周期で出す。
+		effectComponent->AddEmitter(kPrimitivePreviewEmitterName, kPrimitivePreviewParticleName, EmitterShapeType::POINT);
+	}
+}
+
+void EffectEditor::EmitPrimitivePreview() {
+	Engine::BaseParticleEmitter* emitter = effectComponent->GetBaseEmitter(kPrimitivePreviewEmitterName);
+	if (emitter == nullptr) {
+		return;
+	}
+
+	// 短寿命の粒子を出し直して、カメラや描画順が通常パーティクルと同じプレビューにする。
+	primitivePreviewTimer_ += ImGui::GetIO().DeltaTime;
+	if (primitivePreviewTimer_ < 0.05f) {
+		return;
+	}
+	primitivePreviewTimer_ = 0.0f;
+
+	emitter->SetPos(primitivePreviewPosition_);
+	emitter->SetCount(1, 0);
+	emitter->SetFrequency(0.0f);
+	emitter->SetLifeTime(0.12f, 0.0f);
+	emitter->SetSize(primitivePreviewSize_, {});
+	emitter->SetRotate(primitivePreviewRotate_, {});
+	emitter->SetVelocity({}, {});
+	emitter->SetColorMinMax(primitivePreviewColor_, primitivePreviewColor_);
+	emitter->SetAlphaClipping(0.01f);
+	emitter->SetEnableLighting(false);
+	emitter->SetUsebillboard(false);
+	emitter->SetIsAlpha(false);
+	emitter->SetIsEmit(true);
+	emitter->Emit();
+	emitter->SetIsEmit(false);
+}
+
+void EffectEditor::ClearPrimitivePreview() {
+	previewPrimitiveName_.clear();
+	previewPrimitiveShapeType_ = Engine::ShapeParameter::ShapeType::None;
+	primitivePreviewTimer_ = 0.0f;
+	if (effectComponent == nullptr) {
+		return;
+	}
+
+	// プレビューは内部用途なので、無効化時にエミッターとパーティクル群をまとめて破棄する。
+	effectComponent->RemoveEmitter(kPrimitivePreviewEmitterName);
+	if (Engine::ParticleManager* particleManager = effectComponent->GetParticleManager()) {
+		particleManager->RemoveParticleGroup(kPrimitivePreviewParticleName);
+	}
+}
+
+void EffectEditor::ApplyPrimitiveDefinitionToParticleGroup(const std::string& particleName, const std::string& primitiveName) {
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+	auto primitiveIt = primitiveDefinitionDatas_.find(primitiveName);
+	if (primitiveIt == primitiveDefinitionDatas_.end()) {
+		particleManagementMessage_ = "Primitive definition was not found.";
+		return;
+	}
+	if (!particleManager->GetParticleGroups().Contains(particleName)) {
+		particleManagementMessage_ = "Particle group was not found.";
+		return;
+	}
+
+	// パーティクル群のテクスチャやブレンド設定を残したまま、形状定義だけ差し替える。
+	Engine::ParticleGroupEditorData data = particleManager->GetEditorParticleGroupData(particleName);
+	CopyPrimitiveShapeData(primitiveIt->second, data);
+	particleManager->RecreateEditorParticleGroup(particleName, data);
+	particleManager->ApplyEditorParticleGroupData(particleName, data);
+	serializer_.RegisterParticleGroupData(particleName, data);
+	serializer_.SaveParticleGroupData(particleName, data);
+	globalVariables->SaveFile(kParticleDataPrefix + particleName);
+	particleManagementMessage_ = "Applied primitive '" + primitiveName + "' to particle '" + particleName + "'.";
+}
+
+bool EffectEditor::ValidateNewPrimitiveDefinitionName(const std::string& primitiveName) {
+	if (primitiveName.empty()) {
+		primitiveManagementMessage_ = "Primitive name is required.";
+		return false;
+	}
+	for (const unsigned char c : primitiveName) {
+		if (!std::isalnum(c) && c != '_') {
+			primitiveManagementMessage_ = "Use only letters, numbers, and underscores in primitive names.";
+			return false;
+		}
+	}
+	if (primitiveDefinitionDatas_.find(primitiveName) != primitiveDefinitionDatas_.end() ||
+		globalVariables->HasGroup(kPrimitiveDataPrefix + primitiveName)) {
+		primitiveManagementMessage_ = "A primitive definition with that name already exists.";
+		return false;
+	}
+	return true;
+}
+
+void EffectEditor::AddPrimitiveDefinitionFromEditor() {
+	const std::string primitiveName = newPrimitiveDefinitionNameBuffer_.data();
+	if (!ValidateNewPrimitiveDefinitionName(primitiveName)) {
+		return;
+	}
+
+	// 新規定義は形状だけを保存対象にする。
+	primitiveDefinitionDatas_[primitiveName] = newPrimitiveDefinitionData_;
+	RegisterPrimitiveDefinitionName(primitiveName);
+	SavePrimitiveDefinitionData(primitiveName, primitiveDefinitionDatas_[primitiveName]);
+	globalVariables->SaveFile(kPrimitiveDataPrefix + primitiveName);
+	globalVariables->SaveFile(kPrimitiveRegistryGroup);
+
+	selectedPrimitiveDefinitionName_ = primitiveName;
+	newPrimitiveDefinitionNameBuffer_.fill('\0');
+	primitiveManagementMessage_ = "Added primitive definition: " + primitiveName;
+}
+
+void EffectEditor::LoadRegisteredPrimitiveDefinitions() {
+	if (!globalVariables) {
+		return;
+	}
+
+	// レジストリグループを作成し、保存済み定義とレジストリ漏れの定義を復元する。
+	globalVariables->CreateGroup(kPrimitiveRegistryGroup);
+	globalVariables->SetGroupCategory(kPrimitiveRegistryGroup, "Effect/Primitive");
+
+	std::set<std::string> primitiveNames;
+	for (const std::string& primitiveName : globalVariables->GetKeys(kPrimitiveRegistryGroup)) {
+		primitiveNames.insert(primitiveName);
+	}
+	for (const std::string& groupName : globalVariables->GetGroupNames()) {
+		if (groupName.rfind(kPrimitiveDataPrefix, 0) == 0) {
+			primitiveNames.insert(groupName.substr(std::strlen(kPrimitiveDataPrefix)));
+		}
+	}
+
+	for (const std::string& primitiveName : primitiveNames) {
+		const std::string groupName = kPrimitiveDataPrefix + primitiveName;
+		if (!globalVariables->HasGroup(groupName)) {
+			continue;
+		}
+		Engine::ParticleGroupEditorData data;
+		LoadPrimitiveDefinitionData(primitiveName, data);
+		primitiveDefinitionDatas_[primitiveName] = data;
+		RegisterPrimitiveDefinitionName(primitiveName);
+	}
+}
+
+void EffectEditor::RegisterPrimitiveDefinitionName(const std::string& name) {
+	globalVariables->SetGroupCategory(kPrimitiveRegistryGroup, "Effect/Primitive");
+	globalVariables->CreateGroup(kPrimitiveRegistryGroup);
+	globalVariables->AddItem(kPrimitiveRegistryGroup, name, name);
+}
+
+void EffectEditor::UnregisterPrimitiveDefinitionName(const std::string& name) {
+	globalVariables->RemoveItem(kPrimitiveRegistryGroup, name);
+}
+
+void EffectEditor::DeletePrimitiveDefinition(const std::string& name) {
+	if (name.empty() || primitiveDefinitionDatas_.find(name) == primitiveDefinitionDatas_.end()) {
+		primitiveManagementMessage_ = "The selected primitive definition no longer exists.";
+		return;
+	}
+
+	primitiveDefinitionDatas_.erase(name);
+	UnregisterPrimitiveDefinitionName(name);
+	globalVariables->RemoveGroup(kPrimitiveDataPrefix + name);
+	globalVariables->RemoveSavedFile(kPrimitiveDataPrefix + name);
+	globalVariables->SaveFile(kPrimitiveRegistryGroup);
+	selectedPrimitiveDefinitionName_.clear();
+	primitiveManagementMessage_ = "Deleted primitive definition: " + name;
+}
+
+void EffectEditor::SavePrimitiveDefinitionData(const std::string& name, const Engine::ParticleGroupEditorData& data) {
+	const std::string groupName = kPrimitiveDataPrefix + name;
+	globalVariables->CreateGroup(groupName);
+	globalVariables->SetGroupCategory(groupName, "Effect/Primitive");
+	Engine::GlobalVariableWriter writer(globalVariables, Engine::GlobalVariableWriteMode::Save);
+
+	// プリミティブ定義は形状パラメータだけを保存する。
+	writer.EnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
+	writer.Value(groupName, "shape.plane.width", data.plane.width);
+	writer.Value(groupName, "shape.plane.height", data.plane.height);
+	writer.Value(groupName, "shape.triangle.upPos", data.triangle.upPos);
+	writer.Value(groupName, "shape.triangle.leftPos", data.triangle.leftPos);
+	writer.Value(groupName, "shape.triangle.rightPos", data.triangle.rightPos);
+	writer.Value(groupName, "shape.cross.armLength", data.cross.armLength);
+	writer.Value(groupName, "shape.cross.armWidth", data.cross.armWidth);
+	writer.Value(groupName, "shape.cube.size", data.cube.size);
+	writer.Value(groupName, "shape.circle.radius", data.circle.radius);
+	writer.Value(groupName, "shape.circle.segments", data.circle.segments);
+	writer.Value(groupName, "shape.star.innerRadius", data.star.innerRadius);
+	writer.Value(groupName, "shape.star.outerRadius", data.star.outerRadius);
+	writer.Value(groupName, "shape.star.segments", data.star.segments);
+	writer.Value(groupName, "shape.crescent.innerRadius", data.crescent.innerRadius);
+	writer.Value(groupName, "shape.crescent.outerRadius", data.crescent.outerRadius);
+	writer.Value(groupName, "shape.crescent.distance", data.crescent.distance);
+	writer.Value(groupName, "shape.crescent.segments", data.crescent.segments);
+	writer.Value(groupName, "shape.ring.innerRadius", data.ring.innerRadius);
+	writer.Value(groupName, "shape.ring.outerRadius", data.ring.outerRadius);
+	writer.Value(groupName, "shape.ring.segments", data.ring.segments);
+	writer.Value(groupName, "shape.sphere.radius", data.sphere.radius);
+	writer.Value(groupName, "shape.sphere.latitudeSegments", data.sphere.latitudeSegments);
+	writer.Value(groupName, "shape.sphere.longitudeSegments", data.sphere.longitudeSegments);
+	writer.Value(groupName, "shape.sphere.isTopBased", data.sphere.isTopBased);
+	writer.Value(groupName, "shape.arrow.shaftLength", data.arrow.shaftLength);
+	writer.Value(groupName, "shape.arrow.shaftRadius", data.arrow.shaftRadius);
+	writer.Value(groupName, "shape.arrow.headLength", data.arrow.headLength);
+	writer.Value(groupName, "shape.arrow.headRadius", data.arrow.headRadius);
+	writer.Value(groupName, "shape.arrow.segments", data.arrow.segments);
+	writer.Value(groupName, "shape.cylinder.innerRadius", data.cylinder.innerRadius);
+	writer.Value(groupName, "shape.cylinder.outerRadius", data.cylinder.outerRadius);
+	writer.Value(groupName, "shape.cylinder.height", data.cylinder.height);
+	writer.Value(groupName, "shape.cylinder.segments", data.cylinder.segments);
+	writer.Value(groupName, "shape.cylinder.isCover", data.cylinder.isCover);
+	writer.Value(groupName, "shape.tube.radius", data.tube.radius);
+	writer.Value(groupName, "shape.tube.innerRadius", data.tube.innerRadius);
+	writer.Value(groupName, "shape.tube.height", data.tube.height);
+	writer.Value(groupName, "shape.tube.segments", data.tube.segments);
+	writer.Value(groupName, "shape.pyramid.radius", data.pyramid.radius);
+	writer.Value(groupName, "shape.pyramid.height", data.pyramid.height);
+	writer.Value(groupName, "shape.pyramid.segments", data.pyramid.segments);
+	writer.Value(groupName, "shape.torus.innerRadius", data.torus.innerRadius);
+	writer.Value(groupName, "shape.torus.outerRadius", data.torus.outerRadius);
+	writer.Value(groupName, "shape.torus.segments", data.torus.segments);
+	writer.Value(groupName, "shape.torus.tubeSegments", data.torus.tubeSegments);
+}
+
+void EffectEditor::LoadPrimitiveDefinitionData(const std::string& name, Engine::ParticleGroupEditorData& data) {
+	const std::string groupName = kPrimitiveDataPrefix + name;
+	if (globalVariables->HasKey(groupName, "shapeType")) {
+		data.shapeType = globalVariables->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
+	}
+	if (globalVariables->HasKey(groupName, "shape.plane.width")) data.plane.width = globalVariables->GetValue<float>(groupName, "shape.plane.width");
+	if (globalVariables->HasKey(groupName, "shape.plane.height")) data.plane.height = globalVariables->GetValue<float>(groupName, "shape.plane.height");
+	if (globalVariables->HasKey(groupName, "shape.triangle.upPos")) data.triangle.upPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.upPos");
+	if (globalVariables->HasKey(groupName, "shape.triangle.leftPos")) data.triangle.leftPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.leftPos");
+	if (globalVariables->HasKey(groupName, "shape.triangle.rightPos")) data.triangle.rightPos = globalVariables->GetValue<Vector2>(groupName, "shape.triangle.rightPos");
+	if (globalVariables->HasKey(groupName, "shape.cross.armLength")) data.cross.armLength = globalVariables->GetValue<float>(groupName, "shape.cross.armLength");
+	if (globalVariables->HasKey(groupName, "shape.cross.armWidth")) data.cross.armWidth = globalVariables->GetValue<float>(groupName, "shape.cross.armWidth");
+	if (globalVariables->HasKey(groupName, "shape.cube.size")) data.cube.size = globalVariables->GetValue<Vector3>(groupName, "shape.cube.size");
+	if (globalVariables->HasKey(groupName, "shape.circle.radius")) data.circle.radius = globalVariables->GetValue<float>(groupName, "shape.circle.radius");
+	if (globalVariables->HasKey(groupName, "shape.circle.segments")) data.circle.segments = globalVariables->GetValue<int32_t>(groupName, "shape.circle.segments");
+	if (globalVariables->HasKey(groupName, "shape.star.innerRadius")) data.star.innerRadius = globalVariables->GetValue<float>(groupName, "shape.star.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.star.outerRadius")) data.star.outerRadius = globalVariables->GetValue<float>(groupName, "shape.star.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.star.segments")) data.star.segments = globalVariables->GetValue<int32_t>(groupName, "shape.star.segments");
+	if (globalVariables->HasKey(groupName, "shape.crescent.innerRadius")) data.crescent.innerRadius = globalVariables->GetValue<float>(groupName, "shape.crescent.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.crescent.outerRadius")) data.crescent.outerRadius = globalVariables->GetValue<float>(groupName, "shape.crescent.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.crescent.distance")) data.crescent.distance = globalVariables->GetValue<float>(groupName, "shape.crescent.distance");
+	if (globalVariables->HasKey(groupName, "shape.crescent.segments")) data.crescent.segments = globalVariables->GetValue<int32_t>(groupName, "shape.crescent.segments");
+	if (globalVariables->HasKey(groupName, "shape.ring.innerRadius")) data.ring.innerRadius = globalVariables->GetValue<float>(groupName, "shape.ring.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.ring.outerRadius")) data.ring.outerRadius = globalVariables->GetValue<float>(groupName, "shape.ring.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.ring.segments")) data.ring.segments = globalVariables->GetValue<int32_t>(groupName, "shape.ring.segments");
+	if (globalVariables->HasKey(groupName, "shape.sphere.radius")) data.sphere.radius = globalVariables->GetValue<float>(groupName, "shape.sphere.radius");
+	if (globalVariables->HasKey(groupName, "shape.sphere.latitudeSegments")) data.sphere.latitudeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.sphere.latitudeSegments");
+	if (globalVariables->HasKey(groupName, "shape.sphere.longitudeSegments")) data.sphere.longitudeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.sphere.longitudeSegments");
+	if (globalVariables->HasKey(groupName, "shape.sphere.isTopBased")) data.sphere.isTopBased = globalVariables->GetValue<bool>(groupName, "shape.sphere.isTopBased");
+	if (globalVariables->HasKey(groupName, "shape.arrow.shaftLength")) data.arrow.shaftLength = globalVariables->GetValue<float>(groupName, "shape.arrow.shaftLength");
+	if (globalVariables->HasKey(groupName, "shape.arrow.shaftRadius")) data.arrow.shaftRadius = globalVariables->GetValue<float>(groupName, "shape.arrow.shaftRadius");
+	if (globalVariables->HasKey(groupName, "shape.arrow.headLength")) data.arrow.headLength = globalVariables->GetValue<float>(groupName, "shape.arrow.headLength");
+	if (globalVariables->HasKey(groupName, "shape.arrow.headRadius")) data.arrow.headRadius = globalVariables->GetValue<float>(groupName, "shape.arrow.headRadius");
+	if (globalVariables->HasKey(groupName, "shape.arrow.segments")) data.arrow.segments = globalVariables->GetValue<int32_t>(groupName, "shape.arrow.segments");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.innerRadius")) data.cylinder.innerRadius = globalVariables->GetValue<float>(groupName, "shape.cylinder.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.outerRadius")) data.cylinder.outerRadius = globalVariables->GetValue<float>(groupName, "shape.cylinder.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.height")) data.cylinder.height = globalVariables->GetValue<float>(groupName, "shape.cylinder.height");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.segments")) data.cylinder.segments = globalVariables->GetValue<int32_t>(groupName, "shape.cylinder.segments");
+	if (globalVariables->HasKey(groupName, "shape.cylinder.isCover")) data.cylinder.isCover = globalVariables->GetValue<bool>(groupName, "shape.cylinder.isCover");
+	if (globalVariables->HasKey(groupName, "shape.tube.radius")) data.tube.radius = globalVariables->GetValue<float>(groupName, "shape.tube.radius");
+	if (globalVariables->HasKey(groupName, "shape.tube.innerRadius")) data.tube.innerRadius = globalVariables->GetValue<float>(groupName, "shape.tube.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.tube.height")) data.tube.height = globalVariables->GetValue<float>(groupName, "shape.tube.height");
+	if (globalVariables->HasKey(groupName, "shape.tube.segments")) data.tube.segments = globalVariables->GetValue<int32_t>(groupName, "shape.tube.segments");
+	if (globalVariables->HasKey(groupName, "shape.pyramid.radius")) data.pyramid.radius = globalVariables->GetValue<float>(groupName, "shape.pyramid.radius");
+	if (globalVariables->HasKey(groupName, "shape.pyramid.height")) data.pyramid.height = globalVariables->GetValue<float>(groupName, "shape.pyramid.height");
+	if (globalVariables->HasKey(groupName, "shape.pyramid.segments")) data.pyramid.segments = globalVariables->GetValue<int32_t>(groupName, "shape.pyramid.segments");
+	if (globalVariables->HasKey(groupName, "shape.torus.innerRadius")) data.torus.innerRadius = globalVariables->GetValue<float>(groupName, "shape.torus.innerRadius");
+	if (globalVariables->HasKey(groupName, "shape.torus.outerRadius")) data.torus.outerRadius = globalVariables->GetValue<float>(groupName, "shape.torus.outerRadius");
+	if (globalVariables->HasKey(groupName, "shape.torus.segments")) data.torus.segments = globalVariables->GetValue<int32_t>(groupName, "shape.torus.segments");
+	if (globalVariables->HasKey(groupName, "shape.torus.tubeSegments")) data.torus.tubeSegments = globalVariables->GetValue<int32_t>(groupName, "shape.torus.tubeSegments");
+}
+
+void EffectEditor::SaveAllEditorData() {
+	// エフェクト、パーティクル群、プリミティブ定義、各レジストリをまとめて保存する。
+	for (auto& [effectName, effectData] : effectGlobalDatas_) {
+		serializer_.SaveEffectData(effectName, effectData);
+		globalVariables->SaveFile(effectName);
+	}
+
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+	for (auto& particle : particleManager->GetParticleGroups()) {
+		if (particle.first == kPrimitivePreviewParticleName) {
+			// プレビュー用パーティクルは一時表示だけに使うため、保存データへ混ぜない。
+			continue;
+		}
+
+		Engine::ParticleGroupEditorData particleData = particleManager->GetEditorParticleGroupData(particle.first);
+		serializer_.RegisterParticleGroupData(particle.first, particleData);
+		serializer_.SaveParticleGroupData(particle.first, particleData);
+		globalVariables->SaveFile(kParticleDataPrefix + particle.first);
+	}
+
+	for (auto& [primitiveName, primitiveData] : primitiveDefinitionDatas_) {
+		SavePrimitiveDefinitionData(primitiveName, primitiveData);
+		globalVariables->SaveFile(kPrimitiveDataPrefix + primitiveName);
+	}
+
+	globalVariables->SaveFile(kEffectRegistryGroup);
+	globalVariables->SaveFile(kDeletedEffectRegistryGroup);
+	globalVariables->SaveFile(kParticleRegistryGroup);
+	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
+	globalVariables->SaveFile(kPrimitiveRegistryGroup);
+	managementMessage_ = "Saved all effect editor settings.";
+	particleManagementMessage_ = managementMessage_;
+	primitiveManagementMessage_ = managementMessage_;
+}
+
 void EffectEditor::DrawParticleGroupEditor() {
 	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
 
@@ -29751,24 +30321,7 @@ void EffectEditor::DrawParticleGroupEditor() {
 	Engine::ImGuiUtility::InputText("New Particle Group Name", newParticleGroupNameBuffer_);
 	Engine::ImGuiUtility::InputText("New Texture Path", newParticleTexturePathBuffer_);
 
-	static const char* ShapeLabels[] = {
-		"None",
-		"Plane",
-		"Triangle",
-		"Cross",
-		"Cube",
-		"Circle",
-		"Star",
-		"Crescent",
-		"Ring",
-		"Sphere",
-		"Arrow",
-		"Cylinder",
-		"Tube",
-		"Pyramid",
-		"Torus",
-	};
-	Engine::ImGuiUtility::SelectEnum("New Shape", ShapeLabels, newParticleGroupData_.shapeType);
+	DrawShapeTypeCombo("New Shape", newParticleGroupData_.shapeType);
 
 	static const char* RasterizerLabels[] = {
 		"Solid Back",
@@ -29870,24 +30423,19 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	}
 	Engine::ImGuiUtility::HelpMarker("Texture Path is applied immediately with Apply Texture. Shape changes recreate the group.");
 
-	static const char* ShapeLabels[] = {
-		"None",
-		"Plane",
-		"Triangle",
-		"Cross",
-		"Cube",
-		"Circle",
-		"Star",
-		"Crescent",
-		"Ring",
-		"Sphere",
-		"Arrow",
-		"Cylinder",
-		"Tube",
-		"Pyramid",
-		"Torus",
-	};
-	if (Engine::ImGuiUtility::SelectEnum("Shape", ShapeLabels, data.shapeType)) {
+	if (!primitiveDefinitionDatas_.empty()) {
+		ImGui::SeparatorText("Apply Primitive Definition");
+		Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
+			primitiveDefinitionDatas_, "No Primitive Definition");
+		if (ImGui::Button("Apply Primitive To Particle") && !selectedApplyPrimitiveName_.empty()) {
+			ApplyPrimitiveDefinitionToParticleGroup(particleName, selectedApplyPrimitiveName_);
+			data = particleManager->GetEditorParticleGroupData(particleName);
+			recreate = false;
+			saveData = false;
+		}
+	}
+
+	if (DrawShapeTypeCombo("Shape", data.shapeType)) {
 		recreate = true;
 	}
 	if (DrawPrimitiveShapeParameters(data)) {
@@ -30808,7 +31356,7 @@ void EffectEditor::Emit(const std::string& name, const Vector3& pos) {
 ============================================================
 File Path: project/DirectXGame/application/base/Effect/EffectEditor.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <DirectXGame/engine/Effect/EffectGlovalData.h>
 #include "DirectXGame/application/base/Effect/EffectEditorSerializer.h"
@@ -30932,6 +31480,42 @@ private:
 	void DrawParticleGroupEditor();
 
 	/// <summary>
+	/// パーティクルへ適用するプリミティブ定義の追加、編集、保存を行うUIを描画します。
+	/// </summary>
+	void DrawPrimitiveLibraryEditor();
+
+	/// <summary>
+	/// 選択中プリミティブ定義を画面上で確認するプレビューUIを描画します。
+	/// </summary>
+	/// <param name="primitiveName">プレビュー元のプリミティブ定義名です。</param>
+	/// <param name="data">プレビューへ反映するプリミティブ定義データです。</param>
+	void DrawPrimitivePreviewControls(const std::string& primitiveName, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// プレビュー用の一時パーティクル群とエミッターを必要に応じて生成します。
+	/// </summary>
+	/// <param name="primitiveName">プレビュー元のプリミティブ定義名です。</param>
+	/// <param name="data">生成・反映に使うプリミティブ定義データです。</param>
+	void EnsurePrimitivePreview(const std::string& primitiveName, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// プレビュー用の一時パーティクルを発生させ、編集中形状を画面へ表示します。
+	/// </summary>
+	void EmitPrimitivePreview();
+
+	/// <summary>
+	/// プレビュー用に作った内部パーティクル群とエミッターを削除します。
+	/// </summary>
+	void ClearPrimitivePreview();
+
+	/// <summary>
+	/// プリミティブ定義をパーティクル群へ反映します。
+	/// </summary>
+	/// <param name="particleName">反映先のパーティクル群名です。</param>
+	/// <param name="primitiveName">反映元のプリミティブ定義名です。</param>
+	void ApplyPrimitiveDefinitionToParticleGroup(const std::string& particleName, const std::string& primitiveName);
+
+	/// <summary>
 	/// パーティクル群の詳細設定UIを描画します。
 	/// </summary>
 	/// <param name="particleName">編集対象のパーティクル群名です。</param>
@@ -31000,6 +31584,60 @@ private:
 	/// <param name="oldName">変更前のパーティクル群名です。</param>
 	/// <param name="newName">変更後のパーティクル群名です。</param>
 	void RenameParticleReferences(const std::string& oldName, const std::string& newName);
+
+	/// <summary>
+	/// 新しいプリミティブ定義名が使用できるか検証します。
+	/// </summary>
+	/// <param name="primitiveName">検証するプリミティブ定義名です。</param>
+	/// <returns>使用できる場合はtrue、それ以外はfalseです。</returns>
+	bool ValidateNewPrimitiveDefinitionName(const std::string& primitiveName);
+
+	/// <summary>
+	/// UI入力内容からプリミティブ定義を追加します。
+	/// </summary>
+	void AddPrimitiveDefinitionFromEditor();
+
+	/// <summary>
+	/// 保存済みプリミティブ定義を読み込みます。
+	/// </summary>
+	void LoadRegisteredPrimitiveDefinitions();
+
+	/// <summary>
+	/// プリミティブ定義名を保存レジストリへ登録します。
+	/// </summary>
+	/// <param name="name">登録するプリミティブ定義名です。</param>
+	void RegisterPrimitiveDefinitionName(const std::string& name);
+
+	/// <summary>
+	/// プリミティブ定義名を保存レジストリから外します。
+	/// </summary>
+	/// <param name="name">登録解除するプリミティブ定義名です。</param>
+	void UnregisterPrimitiveDefinitionName(const std::string& name);
+
+	/// <summary>
+	/// プリミティブ定義を削除します。
+	/// </summary>
+	/// <param name="name">削除するプリミティブ定義名です。</param>
+	void DeletePrimitiveDefinition(const std::string& name);
+
+	/// <summary>
+	/// プリミティブ定義を保存します。
+	/// </summary>
+	/// <param name="name">保存するプリミティブ定義名です。</param>
+	/// <param name="data">保存するプリミティブ定義データです。</param>
+	void SavePrimitiveDefinitionData(const std::string& name, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// プリミティブ定義を読み込みます。
+	/// </summary>
+	/// <param name="name">読み込むプリミティブ定義名です。</param>
+	/// <param name="data">読み込んだプリミティブ定義データです。</param>
+	void LoadPrimitiveDefinitionData(const std::string& name, Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// エディタ全体の設定を保存します。
+	/// </summary>
+	void SaveAllEditorData();
 private:
 	/// <summary>
 	/// 選択中エフェクトの詳細編集UIを描画します。
@@ -31048,6 +31686,34 @@ private:// エフェクトのグローバルデータ
 	std::string particleManagementMessage_;
 	// 新規追加時のパーティクル群メタデータ
 	Engine::ParticleGroupEditorData newParticleGroupData_{};
+	// 選択中のプリミティブ定義名
+	std::string selectedPrimitiveDefinitionName_;
+	// パーティクルへ適用するプリミティブ定義名
+	std::string selectedApplyPrimitiveName_;
+	// 新規追加するプリミティブ定義名入力
+	std::array<char, 128> newPrimitiveDefinitionNameBuffer_{};
+	// 新規追加・編集に使うプリミティブ定義データ
+	Engine::ParticleGroupEditorData newPrimitiveDefinitionData_{};
+	// 保存済みプリミティブ定義一覧
+	std::map<std::string, Engine::ParticleGroupEditorData> primitiveDefinitionDatas_;
+	// プリミティブ定義UIの結果やエラー文
+	std::string primitiveManagementMessage_;
+	// プリミティブ定義の画面プレビューを有効にするか
+	bool isPrimitivePreviewEnabled_ = false;
+	// プレビュー用パーティクルを発生させるワールド位置
+	Vector3 primitivePreviewPosition_ = { 0.0f, 2.0f, 0.0f };
+	// プレビュー用パーティクルの表示サイズ
+	Vector3 primitivePreviewSize_ = { 1.0f, 1.0f, 1.0f };
+	// プレビュー用パーティクルの回転
+	Vector3 primitivePreviewRotate_ = {};
+	// プレビュー用パーティクルの色
+	Vector4 primitivePreviewColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+	// プレビューを再発生させるまでの経過時間
+	float primitivePreviewTimer_ = 0.0f;
+	// 現在プレビューへ反映済みのプリミティブ定義名
+	std::string previewPrimitiveName_;
+	// 現在プレビューへ反映済みのプリミティブ形状
+	Engine::ShapeParameter::ShapeType previewPrimitiveShapeType_ = Engine::ShapeParameter::ShapeType::None;
 private:
 	// 出現させるか
 	bool isSpawnEmit = false;
@@ -41026,8 +41692,8 @@ void EffectScene::UpdateInput()
 		return;
 	}
 
-	// Spaceで選択中のエフェクトを単発発火する
-	if (input->IsTriggerKey(DIK_SPACE)) {
+	// Fで選択中のエフェクトを単発発火する。Spaceはエフェクトカメラ上昇に使う。
+	if (input->IsTriggerKey(DIK_F)) {
 		EmitPreview(selectedPreviewIndex_);
 	}
 
@@ -41136,7 +41802,7 @@ void EffectScene::UpdateImGui()
 			ImGui::DragFloat3("Velocity Range", &slot.velocityRange.x, 0.1f);
 		}
 	}
-	ImGui::Text("Space: Emit Selected / Enter: Emit All / Tab: Next / A: Auto / Esc: Title");
+	ImGui::Text("F: Emit Selected / Enter: Emit All / Tab: Next / A: Auto / Esc: Title");
 	ImGui::End();
 #endif
 }
