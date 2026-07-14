@@ -257,6 +257,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp" />
+    <ClCompile Include="DirectXGame\application\scene\EffectScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp" />

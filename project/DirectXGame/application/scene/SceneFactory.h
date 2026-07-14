@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/scene/AbstractSceneFactory.h"
 
 
@@ -10,6 +10,8 @@ class SampleScene;
 class ResultScene;
 class TutorialScene;
 class CharacterDebugScene;
+class CustomScene;
+class EffectScene;
 class BaseScene;
 
 // このゲーム用のシーン工場

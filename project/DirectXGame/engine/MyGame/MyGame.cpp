@@ -1,4 +1,4 @@
-#include "MyGame.h"
+﻿#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
@@ -51,6 +51,7 @@ void Engine::MyGame::Initialize() {
 	scenenames_.push_back("TUTORIAL");
 	scenenames_.push_back("CHARACTER");
 	scenenames_.push_back("CUSTOM");
+	scenenames_.push_back("EFFECT");
 
 #ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");

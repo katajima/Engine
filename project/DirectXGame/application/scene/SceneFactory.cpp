@@ -9,6 +9,7 @@
 #include "TutorialScene.h"
 #include "CharacterDebugScene.h"
 #include "CustomScene.h"
+#include "EffectScene.h"
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
@@ -40,6 +41,9 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
     if (sceneName == "CUSTOM") {             // カスタムシーン
         return std::make_unique<CustomScene>();
     }
+	if (sceneName == "EFFECT") {              // エフェクトシーン
+		return std::make_unique<EffectScene>();
+	}
 
     // 未登録のシーン名が渡された場合は生成できないことを通知する
     return nullptr;
