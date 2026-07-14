@@ -250,8 +250,8 @@ void EffectScene::UpdateInput()
 		return;
 	}
 
-	// Spaceで選択中のエフェクトを単発発火する
-	if (input->IsTriggerKey(DIK_SPACE)) {
+	// Fで選択中のエフェクトを単発発火する。Spaceはエフェクトカメラ上昇に使う。
+	if (input->IsTriggerKey(DIK_F)) {
 		EmitPreview(selectedPreviewIndex_);
 	}
 
@@ -360,7 +360,7 @@ void EffectScene::UpdateImGui()
 			ImGui::DragFloat3("Velocity Range", &slot.velocityRange.x, 0.1f);
 		}
 	}
-	ImGui::Text("Space: Emit Selected / Enter: Emit All / Tab: Next / A: Auto / Esc: Title");
+	ImGui::Text("F: Emit Selected / Enter: Emit All / Tab: Next / A: Auto / Esc: Title");
 	ImGui::End();
 #endif
 }

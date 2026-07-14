@@ -1,0 +1,202 @@
+{
+    "EffectPrimitive_HitRing": {
+        "shape.arrow.headLength": {
+            "type": "float",
+            "value": 8.0
+        },
+        "shape.arrow.headRadius": {
+            "type": "float",
+            "value": 8.0
+        },
+        "shape.arrow.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.arrow.shaftLength": {
+            "type": "float",
+            "value": 16.0
+        },
+        "shape.arrow.shaftRadius": {
+            "type": "float",
+            "value": 4.0
+        },
+        "shape.circle.radius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.circle.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.crescent.distance": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.crescent.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.crescent.outerRadius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.crescent.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.cross.armLength": {
+            "type": "float",
+            "value": 10.0
+        },
+        "shape.cross.armWidth": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.cube.size": {
+            "type": "Vector3",
+            "value": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "shape.cylinder.height": {
+            "type": "float",
+            "value": 10.0
+        },
+        "shape.cylinder.innerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.cylinder.isCover": {
+            "type": "bool",
+            "value": true
+        },
+        "shape.cylinder.outerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.cylinder.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.plane.height": {
+            "type": "float",
+            "value": 1.0
+        },
+        "shape.plane.width": {
+            "type": "float",
+            "value": 1.0
+        },
+        "shape.pyramid.height": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.pyramid.radius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.pyramid.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.ring.innerRadius": {
+            "type": "float",
+            "value": 4.0
+        },
+        "shape.ring.outerRadius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.ring.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.sphere.isTopBased": {
+            "type": "bool",
+            "value": false
+        },
+        "shape.sphere.latitudeSegments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.sphere.longitudeSegments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.sphere.radius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.star.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.star.outerRadius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.star.segments": {
+            "type": "int32_t",
+            "value": 5
+        },
+        "shape.torus.innerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.torus.outerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.torus.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.torus.tubeSegments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.triangle.leftPos": {
+            "type": "Vector2",
+            "value": [
+                1.0,
+                -1.0
+            ]
+        },
+        "shape.triangle.rightPos": {
+            "type": "Vector2",
+            "value": [
+                -1.0,
+                -1.0
+            ]
+        },
+        "shape.triangle.upPos": {
+            "type": "Vector2",
+            "value": [
+                0.0,
+                1.0
+            ]
+        },
+        "shape.tube.height": {
+            "type": "float",
+            "value": 10.0
+        },
+        "shape.tube.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.tube.radius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.tube.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shapeType": {
+            "enumType": "ShapeType",
+            "type": "enum",
+            "value": 7
+        }
+    }
+}

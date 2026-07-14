@@ -1,0 +1,8 @@
+{
+    "EffectPrimitiveEditor": {
+        "HitRing": {
+            "type": "string",
+            "value": "HitRing"
+        }
+    }
+}

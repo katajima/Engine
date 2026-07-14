@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <DirectXGame/engine/Effect/EffectGlovalData.h>
 #include "DirectXGame/application/base/Effect/EffectEditorSerializer.h"
@@ -122,6 +122,42 @@ private:
 	void DrawParticleGroupEditor();
 
 	/// <summary>
+	/// パーティクルへ適用するプリミティブ定義の追加、編集、保存を行うUIを描画します。
+	/// </summary>
+	void DrawPrimitiveLibraryEditor();
+
+	/// <summary>
+	/// 選択中プリミティブ定義を画面上で確認するプレビューUIを描画します。
+	/// </summary>
+	/// <param name="primitiveName">プレビュー元のプリミティブ定義名です。</param>
+	/// <param name="data">プレビューへ反映するプリミティブ定義データです。</param>
+	void DrawPrimitivePreviewControls(const std::string& primitiveName, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// プレビュー用の一時パーティクル群とエミッターを必要に応じて生成します。
+	/// </summary>
+	/// <param name="primitiveName">プレビュー元のプリミティブ定義名です。</param>
+	/// <param name="data">生成・反映に使うプリミティブ定義データです。</param>
+	void EnsurePrimitivePreview(const std::string& primitiveName, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// プレビュー用の一時パーティクルを発生させ、編集中形状を画面へ表示します。
+	/// </summary>
+	void EmitPrimitivePreview();
+
+	/// <summary>
+	/// プレビュー用に作った内部パーティクル群とエミッターを削除します。
+	/// </summary>
+	void ClearPrimitivePreview();
+
+	/// <summary>
+	/// プリミティブ定義をパーティクル群へ反映します。
+	/// </summary>
+	/// <param name="particleName">反映先のパーティクル群名です。</param>
+	/// <param name="primitiveName">反映元のプリミティブ定義名です。</param>
+	void ApplyPrimitiveDefinitionToParticleGroup(const std::string& particleName, const std::string& primitiveName);
+
+	/// <summary>
 	/// パーティクル群の詳細設定UIを描画します。
 	/// </summary>
 	/// <param name="particleName">編集対象のパーティクル群名です。</param>
@@ -190,6 +226,60 @@ private:
 	/// <param name="oldName">変更前のパーティクル群名です。</param>
 	/// <param name="newName">変更後のパーティクル群名です。</param>
 	void RenameParticleReferences(const std::string& oldName, const std::string& newName);
+
+	/// <summary>
+	/// 新しいプリミティブ定義名が使用できるか検証します。
+	/// </summary>
+	/// <param name="primitiveName">検証するプリミティブ定義名です。</param>
+	/// <returns>使用できる場合はtrue、それ以外はfalseです。</returns>
+	bool ValidateNewPrimitiveDefinitionName(const std::string& primitiveName);
+
+	/// <summary>
+	/// UI入力内容からプリミティブ定義を追加します。
+	/// </summary>
+	void AddPrimitiveDefinitionFromEditor();
+
+	/// <summary>
+	/// 保存済みプリミティブ定義を読み込みます。
+	/// </summary>
+	void LoadRegisteredPrimitiveDefinitions();
+
+	/// <summary>
+	/// プリミティブ定義名を保存レジストリへ登録します。
+	/// </summary>
+	/// <param name="name">登録するプリミティブ定義名です。</param>
+	void RegisterPrimitiveDefinitionName(const std::string& name);
+
+	/// <summary>
+	/// プリミティブ定義名を保存レジストリから外します。
+	/// </summary>
+	/// <param name="name">登録解除するプリミティブ定義名です。</param>
+	void UnregisterPrimitiveDefinitionName(const std::string& name);
+
+	/// <summary>
+	/// プリミティブ定義を削除します。
+	/// </summary>
+	/// <param name="name">削除するプリミティブ定義名です。</param>
+	void DeletePrimitiveDefinition(const std::string& name);
+
+	/// <summary>
+	/// プリミティブ定義を保存します。
+	/// </summary>
+	/// <param name="name">保存するプリミティブ定義名です。</param>
+	/// <param name="data">保存するプリミティブ定義データです。</param>
+	void SavePrimitiveDefinitionData(const std::string& name, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// プリミティブ定義を読み込みます。
+	/// </summary>
+	/// <param name="name">読み込むプリミティブ定義名です。</param>
+	/// <param name="data">読み込んだプリミティブ定義データです。</param>
+	void LoadPrimitiveDefinitionData(const std::string& name, Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// エディタ全体の設定を保存します。
+	/// </summary>
+	void SaveAllEditorData();
 private:
 	/// <summary>
 	/// 選択中エフェクトの詳細編集UIを描画します。
@@ -238,6 +328,34 @@ private:// エフェクトのグローバルデータ
 	std::string particleManagementMessage_;
 	// 新規追加時のパーティクル群メタデータ
 	Engine::ParticleGroupEditorData newParticleGroupData_{};
+	// 選択中のプリミティブ定義名
+	std::string selectedPrimitiveDefinitionName_;
+	// パーティクルへ適用するプリミティブ定義名
+	std::string selectedApplyPrimitiveName_;
+	// 新規追加するプリミティブ定義名入力
+	std::array<char, 128> newPrimitiveDefinitionNameBuffer_{};
+	// 新規追加・編集に使うプリミティブ定義データ
+	Engine::ParticleGroupEditorData newPrimitiveDefinitionData_{};
+	// 保存済みプリミティブ定義一覧
+	std::map<std::string, Engine::ParticleGroupEditorData> primitiveDefinitionDatas_;
+	// プリミティブ定義UIの結果やエラー文
+	std::string primitiveManagementMessage_;
+	// プリミティブ定義の画面プレビューを有効にするか
+	bool isPrimitivePreviewEnabled_ = false;
+	// プレビュー用パーティクルを発生させるワールド位置
+	Vector3 primitivePreviewPosition_ = { 0.0f, 2.0f, 0.0f };
+	// プレビュー用パーティクルの表示サイズ
+	Vector3 primitivePreviewSize_ = { 1.0f, 1.0f, 1.0f };
+	// プレビュー用パーティクルの回転
+	Vector3 primitivePreviewRotate_ = {};
+	// プレビュー用パーティクルの色
+	Vector4 primitivePreviewColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+	// プレビューを再発生させるまでの経過時間
+	float primitivePreviewTimer_ = 0.0f;
+	// 現在プレビューへ反映済みのプリミティブ定義名
+	std::string previewPrimitiveName_;
+	// 現在プレビューへ反映済みのプリミティブ形状
+	Engine::ShapeParameter::ShapeType previewPrimitiveShapeType_ = Engine::ShapeParameter::ShapeType::None;
 private:
 	// 出現させるか
 	bool isSpawnEmit = false;
