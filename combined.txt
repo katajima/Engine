@@ -27279,7 +27279,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -27409,6 +27409,7 @@ namespace Character {
 		ui_ = std::make_unique<PlayerUI>();
 		ui_->Initialize(inputSystem, entityManager, globalVariables);
 		ui_->SetCharacterParameter(GetCharacterParameterComponent());
+		ui_->SetFollowTarget(&GetObjectComponent()->GetWorldTransform(), camera);
 
 
 		// コンテキストシステム
@@ -27599,9 +27600,6 @@ namespace Character {
 	void NormalPlayer::Draw2D() {
 		// UI表示
 		ui_->SetIsTextmax(special_->GetIsSpecial());
-
-
-		ui_->SetIsTextRB(special_->GetIsSpecial() || special_->IsAction());
 
 		ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
@@ -28049,14 +28047,12 @@ namespace Character {
 		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
 
 		// UIを表示しない
-		player->GetPlayerUI()->SetIsTextRB(false);
 		RangeBombingSpecial* rangeSp = static_cast<RangeBombingSpecial*>(special);
 
 		rangeSp->InAction();	// アクション中
 		rangeSp->SetIsDraw(false);	// 描画
 		if (special->GetPhese() == 0) {	// 最初フェーズなら
 			// UI描画
-			player->GetPlayerUI()->SetIsTextRB(true);
 			// スペシャル描画
 			rangeSp->SetIsDraw(true);
 		}
@@ -28066,12 +28062,7 @@ namespace Character {
 		}
 	}
 
-	void PlayerStateSpecial::Exit()
-	{
-		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
-
-		player->GetPlayerUI()->SetIsTextRB(false);
-	}
+	void PlayerStateSpecial::Exit(){}
 
 	void PlayerStateSpecial::Enter()
 	{
@@ -32720,13 +32711,17 @@ namespace Game {
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
 		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 120, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 50, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 30, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Rush", 1, 30, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Rush", 1, 30, leftSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+
+		
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 30, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit01", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -32735,13 +32730,13 @@ namespace Game {
 		// WAVE 2: 左右から寄せ、片側にはあえて逃げ道を残す（2群衆 / 合計13体）
 		const Character::CrowdBehaviorSettings wave2Encircle = Character::CrowdBehaviorSettings::Encircle(12.0f);
 		const Character::CrowdBehaviorSettings wave2Distributed = Character::CrowdBehaviorSettings::DistributedEncircle(15.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 25, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 5, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 50, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 20, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
 		data.battleWaveIndex_ = 2;
 		data.time_.max = 28.0f;
 		CreateGameEvent("battle02", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit02", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -32750,13 +32745,13 @@ namespace Game {
 		// WAVE 3: 前後から列が入れ替わって攻める波状攻撃（2群衆 / 合計17体）
 		const Character::CrowdBehaviorSettings wave3Assault = Character::CrowdBehaviorSettings::WaveAssault(2.2f, 3);
 		const Character::CrowdBehaviorSettings wave3Line = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::Line);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 30, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 100, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 50, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
 		data.battleWaveIndex_ = 3;
 		data.time_.max = 32.0f;
 		CreateGameEvent("battle03", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit03", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -32765,14 +32760,14 @@ namespace Game {
 		// WAVE 4: 流動する外周と役割分担する追跡隊で移動を強制する（2群衆 / 合計20体）
 		const Character::CrowdBehaviorSettings wave4Flow = Character::CrowdBehaviorSettings::FlowCrowd(13.0f);
 		const Character::CrowdBehaviorSettings wave4Hunting = Character::CrowdBehaviorSettings::Hunting();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 25, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 8, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 2, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 75, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 40, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 20, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
 		data.battleWaveIndex_ = 4;
 		data.time_.max = 36.0f;
 		CreateGameEvent("battle04", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit04", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -32782,21 +32777,21 @@ namespace Game {
 		const Character::CrowdBehaviorSettings wave5Pressure = Character::CrowdBehaviorSettings::PressureCrowd();
 		const Character::CrowdBehaviorSettings wave5Adaptive = Character::CrowdBehaviorSettings::DensityAdaptive();
 		const Character::CrowdBehaviorSettings wave5Vanguard = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::VShape);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 28, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 8, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
-		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 50, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 16, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 24, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
 		data.battleWaveIndex_ = 5;
 		data.time_.max = 45.0f;
 		CreateGameEvent("battle05", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit05", data);
 
 		data.changeType_ = GameEventChangeType::kTime;
 		data.eventType_ = GameEventType::kEnd;
 		data.time_.max = 3.0f;
-		data.enemyDelete = true;
+		data.enemyDelete = false;
 		data.enemyWaveExit = false;
 
 		CreateGameEvent("result", data);
@@ -36481,7 +36476,7 @@ public:
 	bool IsNextStateTime() const { return nextStateTimer_ < timer; }
 
 private:
-	Vector3 upVelocity_ = {0,700,0};
+	Vector3 upVelocity_ = {0,200,0};
 	float glavityScale_ = 2.0f;
 	float nextStateTimer_ = 0.75f;
 	//
@@ -36545,6 +36540,7 @@ private:
 
 
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Special/Point/SpecialPointStateMachine.cpp
@@ -38710,8 +38706,10 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/UI/PlayerUI.cpp
 ============================================================
-#include "PlayerUI.h"
+﻿#include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <cmath>
 
@@ -38738,19 +38736,11 @@ void PlayerUI::Draw()
 {
 	// 描画
 	DrawUIElement();
+}
 
-
-	// テキストMAX
-	if (isTextMax_) {
-		textMax_->Update();
-		textMax_->Draw();
-	};
-
-	// テキストRB
-	if (isTextRB_) {
-		textRB_->Update();
-		textRB_->Draw();
-	}
+void PlayerUI::SetFollowTarget(Engine::WorldTransform* target, Engine::Camera* camera) {
+	followTarget_ = target;		// UIを追従させるプレイヤー本体
+	followCamera_ = camera;		// ワールド座標から画面座標へ変換するカメラ
 }
 
 void PlayerUI::InitializeOperationUI() {
@@ -38843,66 +38833,65 @@ void PlayerUI::InitializeOperationUI() {
 void PlayerUI::InitializePlayerUI() {
 
 	// HPUI初期化
-	InitUIMeter("HPBer", hpSpriteData.pos, true);		// 初期化HP
+	InitUIMeter("HPBer", hpSpriteData.pos, false);		// 初期化HP
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");
 	hpber->SetMaxSize(hpSpriteData.size, hpSpriteData.offset);				// 最大サイズ
 	hpber->SetMeterMinMax(0.0f, hpSpriteData.maxMeter);						// メータ最大値最小値
 	hpber->GetMeterSprite()->SetColor(hpSpriteData.color);					// 色指定
 	hpber->SetMeterType(UIMeterType::Left);										// メータの増える方向
-	hpber->GetNameSprite()->SetTextureName("resources/Texture/text/HP.dds");	// 次のスプライト設定
-	hpber->GetNameSprite()->SetSize(hpSpriteData.nameSize);					// サイズ設定
-	hpber->GetNameSprite()->SetColor(hpSpriteData.nameColor);					// 色指定
 
 	// 初期化スペシャルUI
-	spSpriteData.color = { 0,0,1,1 };
+	spSpriteData.color = { 0,0,1,0.75f };
 	spSpriteData.maxMeter = 20.0f;
-	InitUIMeter("SpecialBar", spSpriteData.pos + Vector2{ 0,50 }, true);
+	InitUIMeter("SpecialBar", spSpriteData.pos + Vector2{ 0,50 }, false);
 	Engine::UIMeter* specialBar = GetUIMeter("SpecialBar");
 	specialBar->SetMaxSize(spSpriteData.size, spSpriteData.offset);		// 最大サイズ
 	specialBar->SetMeterMinMax(0.0f, spSpriteData.maxMeter);					// メータ最大値最小値
 	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);				// 色指定
 	specialBar->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	specialBar->GetNameSprite()->SetTextureName("resources/Texture/text/SP.dds");	// 次のスプライト設定
-	specialBar->GetNameSprite()->SetSize(spSpriteData.nameSize);				// サイズ設定
-	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);			// 色指定
 
 	// スタミナUI初期化
 	staminaSpriteData.maxMeter = 100;
-	staminaSpriteData.color = { 1,1,0,1 };
+	staminaSpriteData.color = { 1,1,0,0.75f };
 	staminaSpriteData.nameSize.x = 256;
-	InitUIMeter("StaminaBer", staminaSpriteData.pos + Vector2{ 0,100 }, true);
+	InitUIMeter("StaminaBer", staminaSpriteData.pos + Vector2{ 0,100 }, false);
 	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");
 	staminaBer->SetMaxSize(staminaSpriteData.size, staminaSpriteData.offset);		// 最大サイズ
 	staminaBer->SetMeterMinMax(0.0f, staminaSpriteData.maxMeter);					// メータ最大値最小値
 	staminaBer->GetMeterSprite()->SetColor(staminaSpriteData.color);				// 色指定
 	staminaBer->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	staminaBer->GetNameSprite()->SetTextureName("resources/Texture/text/stamina.dds");	// 次のスプライト設定
-	staminaBer->GetNameSprite()->SetSize(staminaSpriteData.nameSize);				// サイズ設定
-	staminaBer->GetNameSprite()->SetColor(staminaSpriteData.nameColor);				// 色指定
-
-
-	// maxテキストスプライト初期化
-	textMax_ = std::make_unique<Engine::Sprite>();
-	textMax_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/max.dds");
-	textMax_->SetColor(maxTextData_.color_);					// 色設定
-	textMax_->SetPosition(maxTextData_.pos_);					// 位置設定
-	textMax_->SetRotation(maxTextData_.rotate_);				// 回転設定
-	textMax_->SetAnchorPoint(maxTextData_.anchorPoint_);		// アンカーポイント設定
-	textMax_->SetSize(maxTextData_.size_);						// サイズ設定
-
-	// rbテキストスプライト初期化
-	textRB_ = std::make_unique<Engine::Sprite>();
-	textRB_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/RB.dds");
-	textRB_->SetColor(Color::WHITE());							// 色指定
-	textRB_->SetPosition(rbData_.pos_);							// 位置設定
-	textRB_->SetAnchorPoint(rbData_.anchorPoint_);				// アンカーポイント設定
-	textRB_->SetSize(rbData_.size_);							// サイズ設定
 }
 
 void PlayerUI::UpdatePlayerUI(float dt) {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specialBar = GetUIMeter("SpecialBar");	// スペシャル
-	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スペシャル
+	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スタミナ
+	if (!hpber || !specialBar || !staminaBer || !parameterComponent) {
+		return;
+	}
+
+	// 追従対象がある場合は、プレイヤー頭上のワールド座標をスクリーン座標へ変換する。
+	Vector2 basePos = hpSpriteData.pos;
+	if (followTarget_ && followCamera_) {
+		Engine::WorldTransform followPoint;
+		followPoint.Initialize();
+		followPoint.translate_ = followTarget_->GetWorldPosition() + followUIData_.worldOffset;
+		followPoint.Update();
+
+		basePos = GetScreenPos(followPoint, followCamera_);
+		if (basePos.x <= -99.0f && basePos.y <= -99.0f) {
+			basePos = followUIData_.hiddenPos;
+		}
+		else {
+			basePos += followUIData_.screenOffset;
+		}
+	}
+
+	// HP/SP/Staminaをプレイヤー上へ縦並びで配置する。
+	hpber->SetPos(basePos);
+	specialBar->SetPos(basePos + Vector2{ 0.0f,followUIData_.rowInterval });
+	staminaBer->SetPos(basePos + Vector2{ 0.0f,followUIData_.rowInterval * 2.0f });
+	
 	hpber->SetMeterMinMax(parameterComponent->HP().minValue, parameterComponent->HP().maxValue);	// メータ最大値
 	hpber->SetMeter(parameterComponent->HP().value);								// メータ
 
@@ -38922,20 +38911,17 @@ void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
 			0.2f + 0.6f * pulse,
 			0.8f + 0.2f * pulse,
 			1.0f,
-			1.0f
+			0.75f
 		};
 		const Color readyIconColor = {
 			1.0f,
 			0.85f + 0.15f * pulse,
 			0.2f + 0.8f * pulse,
-			1.0f
+			0.75f
 		};
 
 		specialBar->GetMeterSprite()->SetColor(readyGaugeColor);
-		specialBar->GetNameSprite()->SetColor(readyIconColor);
-		textMax_->SetColor(readyIconColor);
-		textRB_->SetColor(readyIconColor);
-
+		
 		if (Engine::UIPair* specialPair = GetUIPair("special")) {
 			specialPair->GetFirstSprite()->SetColor(readyIconColor);
 			specialPair->GetSecondSprite()->SetColor(readyIconColor);
@@ -38946,10 +38932,7 @@ void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
 	// 満タンでない時は通常色へ戻し、次回満タン時の点滅を最初から始める。
 	specialReadyEffectTimer_ = 0.0f;
 	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);
-	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);
-	textMax_->SetColor(maxTextData_.color_);
-	textRB_->SetColor(rbData_.color_);
-
+	
 	if (Engine::UIPair* specialPair = GetUIPair("special")) {
 		specialPair->GetFirstSprite()->SetColor(spTextData.color);
 		specialPair->GetSecondSprite()->SetColor(spTextData.color);
@@ -38960,12 +38943,16 @@ void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
 ============================================================
 File Path: project/DirectXGame/application/base/UI/PlayerUI.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
 namespace Character {
 	class ParameterComponent;
+}
+namespace Engine {
+	class Camera;
+	class WorldTransform;
 }
 /// <summary>
 /// プレイヤーUIクラス
@@ -38997,19 +38984,18 @@ private:
 public:
 
 	void SetCharacterParameter(Character::ParameterComponent* parameter) { parameterComponent = parameter; };
+	// 追従対象と描画カメラ設定
+	void SetFollowTarget(Engine::WorldTransform* target, Engine::Camera* camera);
 
 	// スペシャルゲージサイズ設定
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
 	// maxテクスチャ映すか
 	void SetIsTextmax(bool is) { isTextMax_ = is; }
-	// RBボタンテクスチャ映すか
-	void SetIsTextRB(bool is) { isTextRB_ = is; }
 private:
 	Character::ParameterComponent* parameterComponent = nullptr;
-	
-	std::unique_ptr<Engine::Sprite> textMax_;
-	std::unique_ptr<Engine::Sprite> textRB_;
-	bool isTextRB_ = false;
+	Engine::WorldTransform* followTarget_ = nullptr;	// UI追従対象のワールドトランスフォーム
+	Engine::Camera* followCamera_ = nullptr;			// ワールド座標をスクリーン座標へ変換するカメラ
+
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;
 	float specialReadyEffectTimer_ = 0.0f;	// SP満タン強調用タイマー
@@ -39017,18 +39003,26 @@ private:
 	// メータUIデータ
 	struct MeterUIData {
 		Vector2 pos = { 30,600 };
-		Color color = { 0,1,0,1 };
-		Color nameColor = { 0.75f,0.75f ,0.75f ,1.0f };
+		Color color = { 0,1,0,0.75f };
+		Color nameColor = { 0.75f,0.75f ,0.75f ,0.75f };
 
 		float maxMeter = 100.0f;
 		Vector2 offset = { 4.0f,4.0f };
 
-		Vector2 size = { 200.0f,30.0f };
+		Vector2 size = { 100.0f,15.0f };
 		Vector2 nameSize = { 60.0f,40.0f };
 	};
 	MeterUIData hpSpriteData;
 	MeterUIData spSpriteData;
 	MeterUIData staminaSpriteData;
+
+	struct FollowUIData {
+		Vector3 worldOffset = { 0.0f,2.0f,0.0f };	// プレイヤー左側にUIを置くための高さ基準
+		Vector2 screenOffset = { 100.0f,25.0f };	// スクリーン上でメーター全体をプレイヤー左側へ寄せるオフセット
+		float rowInterval = 16.0f;					// HP/SP/Staminaを縦に並べる間隔
+		Vector2 hiddenPos = { -1000.0f,-1000.0f };	// 画面外やカメラ未設定時の退避座標
+	};
+	FollowUIData followUIData_;
 
 	struct TextData {
 		Vector2 pos = { 1120,420 };
@@ -39050,21 +39044,12 @@ private:
 	TextData skillTextData;
 	TextData evadeTextData;
 
-	struct MaxTextData {
-		float size_ = 0.25f;
-		Vector2 pos_ = { 30,650 };
-		float rotate_ = Math::DegreesToRadians(-30);
-		Vector2 anchorPoint_ = { 0.5f,0.5f };
-		Color color_ = { 1,0,0,1 };
-	};
-	MaxTextData maxTextData_;
-
 	struct RBData {
 		float size_ = 0.2f;
 		Vector2 pos_ = { 1280 / 2,550 };
 		float rotate_ = Math::DegreesToRadians(-30);
 		Vector2 anchorPoint_ = { 0.5f,0.5f };
-		Color color_ = { 1,1,1,1 };
+		Color color_ = { 1,1,1,0.75f };
 	};
 	RBData rbData_;
 
@@ -76605,8 +76590,10 @@ Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* came
 		matViewProjection = Multiply(camera->GetViewMatrix(), camera->GetProjectionMatrix());;
 	}
 
-	// ビューポート行列
-	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(Engine::WinApp::GetClientWidth()), static_cast<float> (Engine::WinApp::GetClientHeight()), 0, 1);
+	// UIスプライトと同じ基準解像度へ変換し、フルスクリーン時もUI上の位置がずれないようにする。
+	const float uiWidth = static_cast<float>(Engine::WinApp::GetClientWidth(false));
+	const float uiHeight = static_cast<float>(Engine::WinApp::GetClientHeight(false));
+	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, uiWidth, uiHeight, 0, 1);
 
 	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
 	if (!IsInFrustum(matViewProjection, wPos)) {
@@ -76781,12 +76768,13 @@ static float DistancePointToPlane(const Vector3& point, const Vector3& A, const 
 bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
 // 前方宣言
-class Camera;
-class WorldTransform;
+namespace Engine {
+	class Camera;
+	class WorldTransform;
+}
 
 // スクリーン位置取得
-Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera);
-
+Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* camera);
 
 
 ============================================================
