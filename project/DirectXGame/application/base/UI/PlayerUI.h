@@ -1,9 +1,13 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
 namespace Character {
 	class ParameterComponent;
+}
+namespace Engine {
+	class Camera;
+	class WorldTransform;
 }
 /// <summary>
 /// プレイヤーUIクラス
@@ -35,19 +39,18 @@ private:
 public:
 
 	void SetCharacterParameter(Character::ParameterComponent* parameter) { parameterComponent = parameter; };
+	// 追従対象と描画カメラ設定
+	void SetFollowTarget(Engine::WorldTransform* target, Engine::Camera* camera);
 
 	// スペシャルゲージサイズ設定
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
 	// maxテクスチャ映すか
 	void SetIsTextmax(bool is) { isTextMax_ = is; }
-	// RBボタンテクスチャ映すか
-	void SetIsTextRB(bool is) { isTextRB_ = is; }
 private:
 	Character::ParameterComponent* parameterComponent = nullptr;
-	
-	std::unique_ptr<Engine::Sprite> textMax_;
-	std::unique_ptr<Engine::Sprite> textRB_;
-	bool isTextRB_ = false;
+	Engine::WorldTransform* followTarget_ = nullptr;	// UI追従対象のワールドトランスフォーム
+	Engine::Camera* followCamera_ = nullptr;			// ワールド座標をスクリーン座標へ変換するカメラ
+
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;
 	float specialReadyEffectTimer_ = 0.0f;	// SP満タン強調用タイマー
@@ -55,18 +58,26 @@ private:
 	// メータUIデータ
 	struct MeterUIData {
 		Vector2 pos = { 30,600 };
-		Color color = { 0,1,0,1 };
-		Color nameColor = { 0.75f,0.75f ,0.75f ,1.0f };
+		Color color = { 0,1,0,0.75f };
+		Color nameColor = { 0.75f,0.75f ,0.75f ,0.75f };
 
 		float maxMeter = 100.0f;
 		Vector2 offset = { 4.0f,4.0f };
 
-		Vector2 size = { 200.0f,30.0f };
+		Vector2 size = { 100.0f,15.0f };
 		Vector2 nameSize = { 60.0f,40.0f };
 	};
 	MeterUIData hpSpriteData;
 	MeterUIData spSpriteData;
 	MeterUIData staminaSpriteData;
+
+	struct FollowUIData {
+		Vector3 worldOffset = { 0.0f,2.0f,0.0f };	// プレイヤー左側にUIを置くための高さ基準
+		Vector2 screenOffset = { 100.0f,25.0f };	// スクリーン上でメーター全体をプレイヤー左側へ寄せるオフセット
+		float rowInterval = 16.0f;					// HP/SP/Staminaを縦に並べる間隔
+		Vector2 hiddenPos = { -1000.0f,-1000.0f };	// 画面外やカメラ未設定時の退避座標
+	};
+	FollowUIData followUIData_;
 
 	struct TextData {
 		Vector2 pos = { 1120,420 };
@@ -88,21 +99,12 @@ private:
 	TextData skillTextData;
 	TextData evadeTextData;
 
-	struct MaxTextData {
-		float size_ = 0.25f;
-		Vector2 pos_ = { 30,650 };
-		float rotate_ = Math::DegreesToRadians(-30);
-		Vector2 anchorPoint_ = { 0.5f,0.5f };
-		Color color_ = { 1,0,0,1 };
-	};
-	MaxTextData maxTextData_;
-
 	struct RBData {
 		float size_ = 0.2f;
 		Vector2 pos_ = { 1280 / 2,550 };
 		float rotate_ = Math::DegreesToRadians(-30);
 		Vector2 anchorPoint_ = { 0.5f,0.5f };
-		Color color_ = { 1,1,1,1 };
+		Color color_ = { 1,1,1,0.75f };
 	};
 	RBData rbData_;
 

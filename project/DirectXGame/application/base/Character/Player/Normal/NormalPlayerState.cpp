@@ -276,14 +276,12 @@ namespace Character {
 		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
 
 		// UIを表示しない
-		player->GetPlayerUI()->SetIsTextRB(false);
 		RangeBombingSpecial* rangeSp = static_cast<RangeBombingSpecial*>(special);
 
 		rangeSp->InAction();	// アクション中
 		rangeSp->SetIsDraw(false);	// 描画
 		if (special->GetPhese() == 0) {	// 最初フェーズなら
 			// UI描画
-			player->GetPlayerUI()->SetIsTextRB(true);
 			// スペシャル描画
 			rangeSp->SetIsDraw(true);
 		}
@@ -293,12 +291,7 @@ namespace Character {
 		}
 	}
 
-	void PlayerStateSpecial::Exit()
-	{
-		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
-
-		player->GetPlayerUI()->SetIsTextRB(false);
-	}
+	void PlayerStateSpecial::Exit(){}
 
 	void PlayerStateSpecial::Enter()
 	{

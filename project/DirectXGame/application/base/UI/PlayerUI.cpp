@@ -1,5 +1,7 @@
-#include "PlayerUI.h"
+﻿#include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <cmath>
 
@@ -26,19 +28,11 @@ void PlayerUI::Draw()
 {
 	// 描画
 	DrawUIElement();
+}
 
-
-	// テキストMAX
-	if (isTextMax_) {
-		textMax_->Update();
-		textMax_->Draw();
-	};
-
-	// テキストRB
-	if (isTextRB_) {
-		textRB_->Update();
-		textRB_->Draw();
-	}
+void PlayerUI::SetFollowTarget(Engine::WorldTransform* target, Engine::Camera* camera) {
+	followTarget_ = target;		// UIを追従させるプレイヤー本体
+	followCamera_ = camera;		// ワールド座標から画面座標へ変換するカメラ
 }
 
 void PlayerUI::InitializeOperationUI() {
@@ -131,66 +125,65 @@ void PlayerUI::InitializeOperationUI() {
 void PlayerUI::InitializePlayerUI() {
 
 	// HPUI初期化
-	InitUIMeter("HPBer", hpSpriteData.pos, true);		// 初期化HP
+	InitUIMeter("HPBer", hpSpriteData.pos, false);		// 初期化HP
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");
 	hpber->SetMaxSize(hpSpriteData.size, hpSpriteData.offset);				// 最大サイズ
 	hpber->SetMeterMinMax(0.0f, hpSpriteData.maxMeter);						// メータ最大値最小値
 	hpber->GetMeterSprite()->SetColor(hpSpriteData.color);					// 色指定
 	hpber->SetMeterType(UIMeterType::Left);										// メータの増える方向
-	hpber->GetNameSprite()->SetTextureName("resources/Texture/text/HP.dds");	// 次のスプライト設定
-	hpber->GetNameSprite()->SetSize(hpSpriteData.nameSize);					// サイズ設定
-	hpber->GetNameSprite()->SetColor(hpSpriteData.nameColor);					// 色指定
 
 	// 初期化スペシャルUI
-	spSpriteData.color = { 0,0,1,1 };
+	spSpriteData.color = { 0,0,1,0.75f };
 	spSpriteData.maxMeter = 20.0f;
-	InitUIMeter("SpecialBar", spSpriteData.pos + Vector2{ 0,50 }, true);
+	InitUIMeter("SpecialBar", spSpriteData.pos + Vector2{ 0,50 }, false);
 	Engine::UIMeter* specialBar = GetUIMeter("SpecialBar");
 	specialBar->SetMaxSize(spSpriteData.size, spSpriteData.offset);		// 最大サイズ
 	specialBar->SetMeterMinMax(0.0f, spSpriteData.maxMeter);					// メータ最大値最小値
 	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);				// 色指定
 	specialBar->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	specialBar->GetNameSprite()->SetTextureName("resources/Texture/text/SP.dds");	// 次のスプライト設定
-	specialBar->GetNameSprite()->SetSize(spSpriteData.nameSize);				// サイズ設定
-	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);			// 色指定
 
 	// スタミナUI初期化
 	staminaSpriteData.maxMeter = 100;
-	staminaSpriteData.color = { 1,1,0,1 };
+	staminaSpriteData.color = { 1,1,0,0.75f };
 	staminaSpriteData.nameSize.x = 256;
-	InitUIMeter("StaminaBer", staminaSpriteData.pos + Vector2{ 0,100 }, true);
+	InitUIMeter("StaminaBer", staminaSpriteData.pos + Vector2{ 0,100 }, false);
 	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");
 	staminaBer->SetMaxSize(staminaSpriteData.size, staminaSpriteData.offset);		// 最大サイズ
 	staminaBer->SetMeterMinMax(0.0f, staminaSpriteData.maxMeter);					// メータ最大値最小値
 	staminaBer->GetMeterSprite()->SetColor(staminaSpriteData.color);				// 色指定
 	staminaBer->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	staminaBer->GetNameSprite()->SetTextureName("resources/Texture/text/stamina.dds");	// 次のスプライト設定
-	staminaBer->GetNameSprite()->SetSize(staminaSpriteData.nameSize);				// サイズ設定
-	staminaBer->GetNameSprite()->SetColor(staminaSpriteData.nameColor);				// 色指定
-
-
-	// maxテキストスプライト初期化
-	textMax_ = std::make_unique<Engine::Sprite>();
-	textMax_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/max.dds");
-	textMax_->SetColor(maxTextData_.color_);					// 色設定
-	textMax_->SetPosition(maxTextData_.pos_);					// 位置設定
-	textMax_->SetRotation(maxTextData_.rotate_);				// 回転設定
-	textMax_->SetAnchorPoint(maxTextData_.anchorPoint_);		// アンカーポイント設定
-	textMax_->SetSize(maxTextData_.size_);						// サイズ設定
-
-	// rbテキストスプライト初期化
-	textRB_ = std::make_unique<Engine::Sprite>();
-	textRB_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/RB.dds");
-	textRB_->SetColor(Color::WHITE());							// 色指定
-	textRB_->SetPosition(rbData_.pos_);							// 位置設定
-	textRB_->SetAnchorPoint(rbData_.anchorPoint_);				// アンカーポイント設定
-	textRB_->SetSize(rbData_.size_);							// サイズ設定
 }
 
 void PlayerUI::UpdatePlayerUI(float dt) {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specialBar = GetUIMeter("SpecialBar");	// スペシャル
-	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スペシャル
+	Engine::UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スタミナ
+	if (!hpber || !specialBar || !staminaBer || !parameterComponent) {
+		return;
+	}
+
+	// 追従対象がある場合は、プレイヤー頭上のワールド座標をスクリーン座標へ変換する。
+	Vector2 basePos = hpSpriteData.pos;
+	if (followTarget_ && followCamera_) {
+		Engine::WorldTransform followPoint;
+		followPoint.Initialize();
+		followPoint.translate_ = followTarget_->GetWorldPosition() + followUIData_.worldOffset;
+		followPoint.Update();
+
+		basePos = GetScreenPos(followPoint, followCamera_);
+		if (basePos.x <= -99.0f && basePos.y <= -99.0f) {
+			basePos = followUIData_.hiddenPos;
+		}
+		else {
+			basePos += followUIData_.screenOffset;
+		}
+	}
+
+	// HP/SP/Staminaをプレイヤー上へ縦並びで配置する。
+	hpber->SetPos(basePos);
+	specialBar->SetPos(basePos + Vector2{ 0.0f,followUIData_.rowInterval });
+	staminaBer->SetPos(basePos + Vector2{ 0.0f,followUIData_.rowInterval * 2.0f });
+	
 	hpber->SetMeterMinMax(parameterComponent->HP().minValue, parameterComponent->HP().maxValue);	// メータ最大値
 	hpber->SetMeter(parameterComponent->HP().value);								// メータ
 
@@ -210,20 +203,17 @@ void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
 			0.2f + 0.6f * pulse,
 			0.8f + 0.2f * pulse,
 			1.0f,
-			1.0f
+			0.75f
 		};
 		const Color readyIconColor = {
 			1.0f,
 			0.85f + 0.15f * pulse,
 			0.2f + 0.8f * pulse,
-			1.0f
+			0.75f
 		};
 
 		specialBar->GetMeterSprite()->SetColor(readyGaugeColor);
-		specialBar->GetNameSprite()->SetColor(readyIconColor);
-		textMax_->SetColor(readyIconColor);
-		textRB_->SetColor(readyIconColor);
-
+		
 		if (Engine::UIPair* specialPair = GetUIPair("special")) {
 			specialPair->GetFirstSprite()->SetColor(readyIconColor);
 			specialPair->GetSecondSprite()->SetColor(readyIconColor);
@@ -234,10 +224,7 @@ void PlayerUI::UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar) {
 	// 満タンでない時は通常色へ戻し、次回満タン時の点滅を最初から始める。
 	specialReadyEffectTimer_ = 0.0f;
 	specialBar->GetMeterSprite()->SetColor(spSpriteData.color);
-	specialBar->GetNameSprite()->SetColor(spSpriteData.nameColor);
-	textMax_->SetColor(maxTextData_.color_);
-	textRB_->SetColor(rbData_.color_);
-
+	
 	if (Engine::UIPair* specialPair = GetUIPair("special")) {
 		specialPair->GetFirstSprite()->SetColor(spTextData.color);
 		specialPair->GetSecondSprite()->SetColor(spTextData.color);

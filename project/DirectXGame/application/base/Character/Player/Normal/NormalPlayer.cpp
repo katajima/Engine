@@ -1,4 +1,4 @@
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -128,6 +128,7 @@ namespace Character {
 		ui_ = std::make_unique<PlayerUI>();
 		ui_->Initialize(inputSystem, entityManager, globalVariables);
 		ui_->SetCharacterParameter(GetCharacterParameterComponent());
+		ui_->SetFollowTarget(&GetObjectComponent()->GetWorldTransform(), camera);
 
 
 		// コンテキストシステム
@@ -318,9 +319,6 @@ namespace Character {
 	void NormalPlayer::Draw2D() {
 		// UI表示
 		ui_->SetIsTextmax(special_->GetIsSpecial());
-
-
-		ui_->SetIsTextRB(special_->GetIsSpecial() || special_->IsAction());
 
 		ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 

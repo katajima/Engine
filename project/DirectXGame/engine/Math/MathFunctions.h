@@ -142,9 +142,10 @@ static float DistancePointToPlane(const Vector3& point, const Vector3& A, const 
 bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
 // 前方宣言
-class Camera;
-class WorldTransform;
+namespace Engine {
+	class Camera;
+	class WorldTransform;
+}
 
 // スクリーン位置取得
-Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera);
-
+Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* camera);

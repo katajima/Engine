@@ -49,7 +49,7 @@ public:
 	bool IsNextStateTime() const { return nextStateTimer_ < timer; }
 
 private:
-	Vector3 upVelocity_ = {0,700,0};
+	Vector3 upVelocity_ = {0,200,0};
 	float glavityScale_ = 2.0f;
 	float nextStateTimer_ = 0.75f;
 	//

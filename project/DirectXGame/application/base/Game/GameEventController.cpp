@@ -57,13 +57,17 @@ namespace Game {
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
 		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 120, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 50, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 30, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Rush", 1, 30, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Rush", 1, 30, leftSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+
+		
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 30, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit01", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -72,13 +76,13 @@ namespace Game {
 		// WAVE 2: 左右から寄せ、片側にはあえて逃げ道を残す（2群衆 / 合計13体）
 		const Character::CrowdBehaviorSettings wave2Encircle = Character::CrowdBehaviorSettings::Encircle(12.0f);
 		const Character::CrowdBehaviorSettings wave2Distributed = Character::CrowdBehaviorSettings::DistributedEncircle(15.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 25, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 5, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 50, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 20, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
 		data.battleWaveIndex_ = 2;
 		data.time_.max = 28.0f;
 		CreateGameEvent("battle02", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit02", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -87,13 +91,13 @@ namespace Game {
 		// WAVE 3: 前後から列が入れ替わって攻める波状攻撃（2群衆 / 合計17体）
 		const Character::CrowdBehaviorSettings wave3Assault = Character::CrowdBehaviorSettings::WaveAssault(2.2f, 3);
 		const Character::CrowdBehaviorSettings wave3Line = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::Line);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 30, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 100, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 50, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
 		data.battleWaveIndex_ = 3;
 		data.time_.max = 32.0f;
 		CreateGameEvent("battle03", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit03", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -102,14 +106,14 @@ namespace Game {
 		// WAVE 4: 流動する外周と役割分担する追跡隊で移動を強制する（2群衆 / 合計20体）
 		const Character::CrowdBehaviorSettings wave4Flow = Character::CrowdBehaviorSettings::FlowCrowd(13.0f);
 		const Character::CrowdBehaviorSettings wave4Hunting = Character::CrowdBehaviorSettings::Hunting();
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 25, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 8, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 2, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 75, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 40, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 20, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
 		data.battleWaveIndex_ = 4;
 		data.time_.max = 36.0f;
 		CreateGameEvent("battle04", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit04", data);
 		data.eventType_ = GameEventType::kBattle;
@@ -119,21 +123,21 @@ namespace Game {
 		const Character::CrowdBehaviorSettings wave5Pressure = Character::CrowdBehaviorSettings::PressureCrowd();
 		const Character::CrowdBehaviorSettings wave5Adaptive = Character::CrowdBehaviorSettings::DensityAdaptive();
 		const Character::CrowdBehaviorSettings wave5Vanguard = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::VShape);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 28, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 8, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
-		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 50, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 16, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 24, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
 		data.battleWaveIndex_ = 5;
 		data.time_.max = 45.0f;
 		CreateGameEvent("battle05", data);
 		data.eventType_ = GameEventType::kWaveExit;
-		data.enemyWaveExit = true;
+		data.enemyWaveExit = false;
 		data.time_.max = 1.2f;
 		CreateGameEvent("waveExit05", data);
 
 		data.changeType_ = GameEventChangeType::kTime;
 		data.eventType_ = GameEventType::kEnd;
 		data.time_.max = 3.0f;
-		data.enemyDelete = true;
+		data.enemyDelete = false;
 		data.enemyWaveExit = false;
 
 		CreateGameEvent("result", data);

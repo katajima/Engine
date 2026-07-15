@@ -496,8 +496,10 @@ Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* came
 		matViewProjection = Multiply(camera->GetViewMatrix(), camera->GetProjectionMatrix());;
 	}
 
-	// ビューポート行列
-	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(Engine::WinApp::GetClientWidth()), static_cast<float> (Engine::WinApp::GetClientHeight()), 0, 1);
+	// UIスプライトと同じ基準解像度へ変換し、フルスクリーン時もUI上の位置がずれないようにする。
+	const float uiWidth = static_cast<float>(Engine::WinApp::GetClientWidth(false));
+	const float uiHeight = static_cast<float>(Engine::WinApp::GetClientHeight(false));
+	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, uiWidth, uiHeight, 0, 1);
 
 	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
 	if (!IsInFrustum(matViewProjection, wPos)) {
