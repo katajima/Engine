@@ -2890,6 +2890,19 @@ namespace Combo {
 		// アニメーションのルートモーションを使うか？
 		bool isAnimationRootMotion = false;
 
+		// 攻撃前の移動中に別アニメーションを再生するか
+		bool usePreMoveAnimation = false;
+		// 攻撃前の移動中に再生するアニメーション名
+		std::string preMoveAnimationName = "";
+		// 攻撃前移動アニメーションの再生速度
+		float preMoveAnimationSpeed = 1.0f;
+		// 攻撃前移動アニメーションから攻撃アニメーションへ切り替える時間
+		float preMoveAnimationEndTime = 0.2f;
+		// 攻撃前移動アニメーションのブレンド時間
+		float preMoveAnimationBlendTime = 0.1f;
+		// 攻撃前移動アニメーションをループ再生するか
+		bool preMoveAnimationLoop = true;
+
 		// コンボ中にキャラクター本体のTransformアニメーションを使用するか
 		bool isTransformAnimation = false;
 		// Transformアニメーションの開始時間
@@ -4239,6 +4252,13 @@ namespace Combo {
 			writer.Value(groupName, "アニメーションループ", data.animation.animationLoop);
 			writer.Value(groupName, "アニメーションを一定時間で止めるか", data.animation.animationStop);
 			writer.Value(groupName, "アニメーション停止時間", data.animation.animationStopTime);
+			// 攻撃前移動アニメーション設定をコンボ単位で保存対象へ登録する
+			writer.Value(groupName, "攻撃前移動アニメーション使用", data.animation.usePreMoveAnimation);
+			writer.Value(groupName, "攻撃前移動アニメーション名前", data.animation.preMoveAnimationName);
+			writer.Value(groupName, "攻撃前移動アニメーション速度", data.animation.preMoveAnimationSpeed);
+			writer.Value(groupName, "攻撃前移動アニメーション終了時間", data.animation.preMoveAnimationEndTime);
+			writer.Value(groupName, "攻撃前移動アニメーション遷移時間", data.animation.preMoveAnimationBlendTime);
+			writer.Value(groupName, "攻撃前移動アニメーションループ", data.animation.preMoveAnimationLoop);
 			// Transformアニメーション設定をコンボ単位で保存対象へ登録する
 			writer.Value(groupName, "Transformアニメーション使用", data.animation.isTransformAnimation);
 			writer.Value(groupName, "Transformアニメーション開始時間", data.animation.transformStartTime);
@@ -4544,6 +4564,25 @@ namespace Combo {
 			data.animation.animationLoop = globalVariables->GetValue<bool>(name, "アニメーションループ");
 			data.animation.animationStop = globalVariables->GetValue<bool>(name, "アニメーションを一定時間で止めるか");
 			data.animation.animationStopTime = globalVariables->GetValue<float>(name, "アニメーション停止時間");
+			// 旧保存データに攻撃前移動アニメーション項目が無い場合は、構造体の既定値を使う
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション使用")) {
+				data.animation.usePreMoveAnimation = globalVariables->GetValue<bool>(name, "攻撃前移動アニメーション使用");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション名前")) {
+				data.animation.preMoveAnimationName = globalVariables->GetValue<std::string>(name, "攻撃前移動アニメーション名前");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション速度")) {
+				data.animation.preMoveAnimationSpeed = globalVariables->GetValue<float>(name, "攻撃前移動アニメーション速度");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション終了時間")) {
+				data.animation.preMoveAnimationEndTime = globalVariables->GetValue<float>(name, "攻撃前移動アニメーション終了時間");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション遷移時間")) {
+				data.animation.preMoveAnimationBlendTime = globalVariables->GetValue<float>(name, "攻撃前移動アニメーション遷移時間");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーションループ")) {
+				data.animation.preMoveAnimationLoop = globalVariables->GetValue<bool>(name, "攻撃前移動アニメーションループ");
+			}
 			// 保存済みのTransformアニメーション設定を実行データへ読み込む
 			data.animation.isTransformAnimation = globalVariables->GetValue<bool>(name, "Transformアニメーション使用");
 			data.animation.transformStartTime = globalVariables->GetValue<float>(name, "Transformアニメーション開始時間");
@@ -7341,6 +7380,17 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
 
+		// 攻撃前の接近や踏み込み中だけ別アニメーションを再生する設定
+		ImGui::SeparatorText("攻撃前移動アニメーション");
+		ImGui::Checkbox("攻撃前移動アニメーションを使用", &animationData.usePreMoveAnimation);
+		if (animationData.usePreMoveAnimation) {
+			Engine::ImGuiManager::Select("移動アニメーション", animationData.preMoveAnimationName, animations);
+			ImGui::SliderFloat("移動アニメーション速度", &animationData.preMoveAnimationSpeed, 0.1f, 10.0f, "%.2f");
+			ImGui::DragFloat("攻撃アニメーションへ切り替える時間", &animationData.preMoveAnimationEndTime, 0.01f, 0.0f, endTime, "%.2f");
+			ImGui::SliderFloat("移動から攻撃へのブレンド時間", &animationData.preMoveAnimationBlendTime, 0.0f, 10.0f, "%.2f");
+			ImGui::Checkbox("移動アニメーションループ", &animationData.preMoveAnimationLoop);
+		}
+
 		// キャラクター本体へ加算するTransformアニメーションを編集する
 		ImGui::SeparatorText("トランスフォームアニメーション");
 		ImGui::Checkbox("Transformアニメーションを使用", &animationData.isTransformAnimation);
@@ -7364,13 +7414,26 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 	}
 
 	if (isActive) {
-		// ループ再生
-		animation->SetIsLoop(false);
-		// アニメーション設定
-		animation->SetAnimation(nowAnimationName, 0);
-		// ステートのアニメーション時間設定
-		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
-		animation->SetAnimationTime(animationTime);
+		// 現在フレームを秒へ変換し、攻撃前移動アニメーションと攻撃アニメーションのプレビューを切り替える
+		const float previewTime = ConvertUtility::FramesToSeconds(currentFrame);
+		const bool previewPreMoveAnimation =
+			animationData.usePreMoveAnimation &&
+			!animationData.preMoveAnimationName.empty() &&
+			previewTime < animationData.preMoveAnimationEndTime;
+
+		if (previewPreMoveAnimation) {
+			// 攻撃前移動時間中は、移動用アニメーションをその時間位置で表示する
+			animation->SetIsLoop(animationData.preMoveAnimationLoop);
+			animation->SetAnimation(animationData.preMoveAnimationName, 0);
+			animation->SetAnimationTime(previewTime * animationData.preMoveAnimationSpeed);
+		}
+		else {
+			// 攻撃アニメーションは移動アニメーション終了後を0秒として表示する
+			const float attackPreviewTime = (std::max)(previewTime - animationData.preMoveAnimationEndTime, 0.0f);
+			animation->SetIsLoop(false);
+			animation->SetAnimation(nowAnimationName, 0);
+			animation->SetAnimationTime(attackPreviewTime * animationData.animationSpeed);
+		}
 	}
 }
 
@@ -8650,7 +8713,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboAnimation.cpp
 ============================================================
-﻿#include "ComboAnimation.h"
+#include "ComboAnimation.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -8667,6 +8730,9 @@ namespace Combo {
 		worldTransform_ = &owner->GetObjectComponent()->GetWorldTransform();
 		appliedTransformOffset_ = Transform{};
 		appliedTransformOffset_.scale = {};
+		isPlayingPreMoveAnimation_ = false;
+		hasStartedAttackAnimation_ = false;
+		attackAnimationStartTime_ = 0.0f;
 
 		// アニメーションの設定
 		if(owner->GetObjectComponent()->GetObject3D())
@@ -8677,12 +8743,16 @@ namespace Combo {
 		movementComponent = owner->GetMoveComponent();
 		// スケルタルアニメーションが存在しなくてもTransformアニメーションは処理する
 		if (!isAnimation) return;
-		// アニメーションが存在するならアニメーション設定
-		animationComponent->SetAnimation(data_.animationName, data_.animationBlendTime);	// 再生するアニメーション設定
-		animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
-		animationComponent->SetIsLoop(data_.animationLoop);				// ループ再生
-		animationComponent->SetAnimationSpeed(data_.animationSpeed);	// アニメーションスピード設定
-		animationComponent->SetIsPlaying(true);							// アニメーション再生
+		if (CanUsePreMoveAnimation()) {
+			// 攻撃前移動アニメーションを先に再生し、指定時間後に攻撃アニメーションへ切り替える
+			isPlayingPreMoveAnimation_ = true;
+			attackAnimationStartTime_ = data_.preMoveAnimationEndTime;
+			PlaySkeletalAnimation(data_.preMoveAnimationName, data_.preMoveAnimationBlendTime, data_.preMoveAnimationLoop, data_.preMoveAnimationSpeed);
+		}
+		else {
+			// 攻撃前移動アニメーションを使わない場合は従来通り攻撃アニメーションから開始する
+			StartAttackAnimation(0.0f);
+		}
 	}
 
 	// 更新
@@ -8696,7 +8766,12 @@ namespace Combo {
 		// 着地状態か 
 		onGlound = movementComponent ? movementComponent->GetIsLanding() : true;
 
-		// アニメーションスピード設定
+		// 攻撃前移動アニメーション中なら、攻撃アニメーション側の停止処理はまだ行わない
+		if (UpdatePreMoveAnimation(timer, ctx.isSelfHitStop)) {
+			return;
+		}
+
+		// 攻撃アニメーションスピード設定
 		animationComponent->SetAnimationSpeed(data_.animationSpeed);
 
 		// アニメーション再生に関する
@@ -8721,7 +8796,7 @@ namespace Combo {
 
 			if (isDebug && endType == EndConditionType::kOnTimer) {
 				// アニメーション時間設定
-				animationComponent->SetAnimationTime(timer * data_.animationSpeed);
+				animationComponent->SetAnimationTime(CalculateAttackAnimationTime(timer) * data_.animationSpeed);
 			}
 
 			if (ctx.isSelfHitStop) {
@@ -8740,11 +8815,68 @@ namespace Combo {
 			RemoveTransformAnimationOffset();
 		}
 		worldTransform_ = nullptr;
+		isPlayingPreMoveAnimation_ = false;
+		hasStartedAttackAnimation_ = false;
 
 		// アニメーションが存在しないなら終了
 		if (!isAnimation) return;
 		animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定
 		animationComponent->SetIsPlaying(true);
+	}
+
+	bool ComboAnimation::CanUsePreMoveAnimation() const {
+		// 有効化され、名前が入り、切り替え時間が0より大きい場合だけ攻撃前移動アニメーションとして扱う
+		return data_.usePreMoveAnimation &&
+			!data_.preMoveAnimationName.empty() &&
+			data_.preMoveAnimationEndTime > 0.0f;
+	}
+
+	float ComboAnimation::CalculateAttackAnimationTime(float timer) const {
+		// 攻撃前移動アニメーション分の時間を差し引き、攻撃アニメーションは0秒から再生させる
+		return (std::max)(timer - attackAnimationStartTime_, 0.0f);
+	}
+
+	void ComboAnimation::PlaySkeletalAnimation(const std::string& animationName, float blendTime, bool isLoop, float speed) {
+		// アニメーションコンポーネントが無い場合は呼び出し元の状態だけを維持する
+		if (!animationComponent) {
+			return;
+		}
+
+		// 指定されたアニメーションを先頭から再生できる状態へ整える
+		animationComponent->SetAnimation(animationName, blendTime);
+		animationComponent->SetStratAnimeTime();
+		animationComponent->SetIsLoop(isLoop);
+		animationComponent->SetAnimationSpeed(speed);
+		animationComponent->SetIsPlaying(true);
+	}
+
+	void ComboAnimation::StartAttackAnimation(float startTime) {
+		// 攻撃アニメーションの開始時間を記録し、デバッグ時の時間指定にも同じ基準を使う
+		attackAnimationStartTime_ = startTime;
+		isPlayingPreMoveAnimation_ = false;
+		hasStartedAttackAnimation_ = true;
+		PlaySkeletalAnimation(data_.animationName, data_.animationBlendTime, data_.animationLoop, data_.animationSpeed);
+	}
+
+	bool ComboAnimation::UpdatePreMoveAnimation(float timer, bool isHitStop) {
+		// 攻撃前移動アニメーションを使っていない場合は攻撃アニメーション処理へ進ませる
+		if (!isPlayingPreMoveAnimation_) {
+			if (!hasStartedAttackAnimation_) {
+				StartAttackAnimation(0.0f);
+			}
+			return false;
+		}
+
+		// 指定時間に到達したら、攻撃アニメーションを0秒から開始する
+		if (timer >= data_.preMoveAnimationEndTime) {
+			StartAttackAnimation(data_.preMoveAnimationEndTime);
+			return false;
+		}
+
+		// ヒットストップ中は移動用アニメーションも停止し、それ以外は設定速度で再生する
+		animationComponent->SetAnimationSpeed(data_.preMoveAnimationSpeed);
+		animationComponent->SetIsPlaying(!isHitStop);
+		return true;
 	}
 
 	float ComboAnimation::CalculateTransformAnimationRate(float timer) const {
@@ -8843,6 +8975,16 @@ namespace Combo {
 	private:
 		// 指定時間からTransformアニメーションの補間率を計算する
 		float CalculateTransformAnimationRate(float timer) const;
+		// 攻撃前移動アニメーションを使用できる設定か判定する
+		bool CanUsePreMoveAnimation() const;
+		// 攻撃アニメーションの再生時間をコンボ時間から計算する
+		float CalculateAttackAnimationTime(float timer) const;
+		// 指定名のスケルタルアニメーションを再生状態へ設定する
+		void PlaySkeletalAnimation(const std::string& animationName, float blendTime, bool isLoop, float speed);
+		// 攻撃前移動アニメーションから攻撃アニメーションへの切り替えを更新する
+		bool UpdatePreMoveAnimation(float timer, bool isHitStop);
+		// 攻撃アニメーションを開始し、必要なら再生時間を初期化する
+		void StartAttackAnimation(float startTime);
 		// 前フレームとの差分でTransformアニメーションを適用する
 		void ApplyTransformAnimation(float timer);
 		// 現在適用中のTransformオフセットを取り除く
@@ -8865,6 +9007,12 @@ namespace Combo {
 		Engine::WorldTransform* worldTransform_ = nullptr;
 		// 前フレームまでに適用したTransformオフセット
 		Transform appliedTransformOffset_{};
+		// 攻撃前移動アニメーションを現在再生しているか
+		bool isPlayingPreMoveAnimation_ = false;
+		// 攻撃アニメーションをすでに開始したか
+		bool hasStartedAttackAnimation_ = false;
+		// 攻撃アニメーションの再生開始として扱うコンボ時間
+		float attackAnimationStartTime_ = 0.0f;
 
 	};
 
