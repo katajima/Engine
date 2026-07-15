@@ -572,6 +572,13 @@ namespace Combo {
 			writer.Value(groupName, "アニメーションループ", data.animation.animationLoop);
 			writer.Value(groupName, "アニメーションを一定時間で止めるか", data.animation.animationStop);
 			writer.Value(groupName, "アニメーション停止時間", data.animation.animationStopTime);
+			// 攻撃前移動アニメーション設定をコンボ単位で保存対象へ登録する
+			writer.Value(groupName, "攻撃前移動アニメーション使用", data.animation.usePreMoveAnimation);
+			writer.Value(groupName, "攻撃前移動アニメーション名前", data.animation.preMoveAnimationName);
+			writer.Value(groupName, "攻撃前移動アニメーション速度", data.animation.preMoveAnimationSpeed);
+			writer.Value(groupName, "攻撃前移動アニメーション終了時間", data.animation.preMoveAnimationEndTime);
+			writer.Value(groupName, "攻撃前移動アニメーション遷移時間", data.animation.preMoveAnimationBlendTime);
+			writer.Value(groupName, "攻撃前移動アニメーションループ", data.animation.preMoveAnimationLoop);
 			// Transformアニメーション設定をコンボ単位で保存対象へ登録する
 			writer.Value(groupName, "Transformアニメーション使用", data.animation.isTransformAnimation);
 			writer.Value(groupName, "Transformアニメーション開始時間", data.animation.transformStartTime);
@@ -877,6 +884,25 @@ namespace Combo {
 			data.animation.animationLoop = globalVariables->GetValue<bool>(name, "アニメーションループ");
 			data.animation.animationStop = globalVariables->GetValue<bool>(name, "アニメーションを一定時間で止めるか");
 			data.animation.animationStopTime = globalVariables->GetValue<float>(name, "アニメーション停止時間");
+			// 旧保存データに攻撃前移動アニメーション項目が無い場合は、構造体の既定値を使う
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション使用")) {
+				data.animation.usePreMoveAnimation = globalVariables->GetValue<bool>(name, "攻撃前移動アニメーション使用");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション名前")) {
+				data.animation.preMoveAnimationName = globalVariables->GetValue<std::string>(name, "攻撃前移動アニメーション名前");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション速度")) {
+				data.animation.preMoveAnimationSpeed = globalVariables->GetValue<float>(name, "攻撃前移動アニメーション速度");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション終了時間")) {
+				data.animation.preMoveAnimationEndTime = globalVariables->GetValue<float>(name, "攻撃前移動アニメーション終了時間");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーション遷移時間")) {
+				data.animation.preMoveAnimationBlendTime = globalVariables->GetValue<float>(name, "攻撃前移動アニメーション遷移時間");
+			}
+			if (globalVariables->HasKey(name, "攻撃前移動アニメーションループ")) {
+				data.animation.preMoveAnimationLoop = globalVariables->GetValue<bool>(name, "攻撃前移動アニメーションループ");
+			}
 			// 保存済みのTransformアニメーション設定を実行データへ読み込む
 			data.animation.isTransformAnimation = globalVariables->GetValue<bool>(name, "Transformアニメーション使用");
 			data.animation.transformStartTime = globalVariables->GetValue<float>(name, "Transformアニメーション開始時間");

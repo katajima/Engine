@@ -1,4 +1,4 @@
-﻿#include "ComboAnimation.h"
+#include "ComboAnimation.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -15,6 +15,9 @@ namespace Combo {
 		worldTransform_ = &owner->GetObjectComponent()->GetWorldTransform();
 		appliedTransformOffset_ = Transform{};
 		appliedTransformOffset_.scale = {};
+		isPlayingPreMoveAnimation_ = false;
+		hasStartedAttackAnimation_ = false;
+		attackAnimationStartTime_ = 0.0f;
 
 		// アニメーションの設定
 		if(owner->GetObjectComponent()->GetObject3D())
@@ -25,12 +28,16 @@ namespace Combo {
 		movementComponent = owner->GetMoveComponent();
 		// スケルタルアニメーションが存在しなくてもTransformアニメーションは処理する
 		if (!isAnimation) return;
-		// アニメーションが存在するならアニメーション設定
-		animationComponent->SetAnimation(data_.animationName, data_.animationBlendTime);	// 再生するアニメーション設定
-		animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
-		animationComponent->SetIsLoop(data_.animationLoop);				// ループ再生
-		animationComponent->SetAnimationSpeed(data_.animationSpeed);	// アニメーションスピード設定
-		animationComponent->SetIsPlaying(true);							// アニメーション再生
+		if (CanUsePreMoveAnimation()) {
+			// 攻撃前移動アニメーションを先に再生し、指定時間後に攻撃アニメーションへ切り替える
+			isPlayingPreMoveAnimation_ = true;
+			attackAnimationStartTime_ = data_.preMoveAnimationEndTime;
+			PlaySkeletalAnimation(data_.preMoveAnimationName, data_.preMoveAnimationBlendTime, data_.preMoveAnimationLoop, data_.preMoveAnimationSpeed);
+		}
+		else {
+			// 攻撃前移動アニメーションを使わない場合は従来通り攻撃アニメーションから開始する
+			StartAttackAnimation(0.0f);
+		}
 	}
 
 	// 更新
@@ -44,7 +51,12 @@ namespace Combo {
 		// 着地状態か 
 		onGlound = movementComponent ? movementComponent->GetIsLanding() : true;
 
-		// アニメーションスピード設定
+		// 攻撃前移動アニメーション中なら、攻撃アニメーション側の停止処理はまだ行わない
+		if (UpdatePreMoveAnimation(timer, ctx.isSelfHitStop)) {
+			return;
+		}
+
+		// 攻撃アニメーションスピード設定
 		animationComponent->SetAnimationSpeed(data_.animationSpeed);
 
 		// アニメーション再生に関する
@@ -69,7 +81,7 @@ namespace Combo {
 
 			if (isDebug && endType == EndConditionType::kOnTimer) {
 				// アニメーション時間設定
-				animationComponent->SetAnimationTime(timer * data_.animationSpeed);
+				animationComponent->SetAnimationTime(CalculateAttackAnimationTime(timer) * data_.animationSpeed);
 			}
 
 			if (ctx.isSelfHitStop) {
@@ -88,11 +100,68 @@ namespace Combo {
 			RemoveTransformAnimationOffset();
 		}
 		worldTransform_ = nullptr;
+		isPlayingPreMoveAnimation_ = false;
+		hasStartedAttackAnimation_ = false;
 
 		// アニメーションが存在しないなら終了
 		if (!isAnimation) return;
 		animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定
 		animationComponent->SetIsPlaying(true);
+	}
+
+	bool ComboAnimation::CanUsePreMoveAnimation() const {
+		// 有効化され、名前が入り、切り替え時間が0より大きい場合だけ攻撃前移動アニメーションとして扱う
+		return data_.usePreMoveAnimation &&
+			!data_.preMoveAnimationName.empty() &&
+			data_.preMoveAnimationEndTime > 0.0f;
+	}
+
+	float ComboAnimation::CalculateAttackAnimationTime(float timer) const {
+		// 攻撃前移動アニメーション分の時間を差し引き、攻撃アニメーションは0秒から再生させる
+		return (std::max)(timer - attackAnimationStartTime_, 0.0f);
+	}
+
+	void ComboAnimation::PlaySkeletalAnimation(const std::string& animationName, float blendTime, bool isLoop, float speed) {
+		// アニメーションコンポーネントが無い場合は呼び出し元の状態だけを維持する
+		if (!animationComponent) {
+			return;
+		}
+
+		// 指定されたアニメーションを先頭から再生できる状態へ整える
+		animationComponent->SetAnimation(animationName, blendTime);
+		animationComponent->SetStratAnimeTime();
+		animationComponent->SetIsLoop(isLoop);
+		animationComponent->SetAnimationSpeed(speed);
+		animationComponent->SetIsPlaying(true);
+	}
+
+	void ComboAnimation::StartAttackAnimation(float startTime) {
+		// 攻撃アニメーションの開始時間を記録し、デバッグ時の時間指定にも同じ基準を使う
+		attackAnimationStartTime_ = startTime;
+		isPlayingPreMoveAnimation_ = false;
+		hasStartedAttackAnimation_ = true;
+		PlaySkeletalAnimation(data_.animationName, data_.animationBlendTime, data_.animationLoop, data_.animationSpeed);
+	}
+
+	bool ComboAnimation::UpdatePreMoveAnimation(float timer, bool isHitStop) {
+		// 攻撃前移動アニメーションを使っていない場合は攻撃アニメーション処理へ進ませる
+		if (!isPlayingPreMoveAnimation_) {
+			if (!hasStartedAttackAnimation_) {
+				StartAttackAnimation(0.0f);
+			}
+			return false;
+		}
+
+		// 指定時間に到達したら、攻撃アニメーションを0秒から開始する
+		if (timer >= data_.preMoveAnimationEndTime) {
+			StartAttackAnimation(data_.preMoveAnimationEndTime);
+			return false;
+		}
+
+		// ヒットストップ中は移動用アニメーションも停止し、それ以外は設定速度で再生する
+		animationComponent->SetAnimationSpeed(data_.preMoveAnimationSpeed);
+		animationComponent->SetIsPlaying(!isHitStop);
+		return true;
 	}
 
 	float ComboAnimation::CalculateTransformAnimationRate(float timer) const {

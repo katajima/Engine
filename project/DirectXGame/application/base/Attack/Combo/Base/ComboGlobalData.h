@@ -275,6 +275,19 @@ namespace Combo {
 		// アニメーションのルートモーションを使うか？
 		bool isAnimationRootMotion = false;
 
+		// 攻撃前の移動中に別アニメーションを再生するか
+		bool usePreMoveAnimation = false;
+		// 攻撃前の移動中に再生するアニメーション名
+		std::string preMoveAnimationName = "";
+		// 攻撃前移動アニメーションの再生速度
+		float preMoveAnimationSpeed = 1.0f;
+		// 攻撃前移動アニメーションから攻撃アニメーションへ切り替える時間
+		float preMoveAnimationEndTime = 0.2f;
+		// 攻撃前移動アニメーションのブレンド時間
+		float preMoveAnimationBlendTime = 0.1f;
+		// 攻撃前移動アニメーションをループ再生するか
+		bool preMoveAnimationLoop = true;
+
 		// コンボ中にキャラクター本体のTransformアニメーションを使用するか
 		bool isTransformAnimation = false;
 		// Transformアニメーションの開始時間

@@ -916,6 +916,30 @@
             "type": "string",
             "value": ""
         },
+        "攻撃前移動アニメーションループ": {
+            "type": "bool",
+            "value": true
+        },
+        "攻撃前移動アニメーション使用": {
+            "type": "bool",
+            "value": true
+        },
+        "攻撃前移動アニメーション名前": {
+            "type": "string",
+            "value": "SwordRun01"
+        },
+        "攻撃前移動アニメーション終了時間": {
+            "type": "float",
+            "value": 0.20000000298023224
+        },
+        "攻撃前移動アニメーション速度": {
+            "type": "float",
+            "value": 2.0899999141693115
+        },
+        "攻撃前移動アニメーション遷移時間": {
+            "type": "float",
+            "value": 0.550000011920929
+        },
         "攻撃属性": {
             "enumType": "AttackAttribute",
             "type": "enum",

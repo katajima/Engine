@@ -50,6 +50,17 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
 
+		// 攻撃前の接近や踏み込み中だけ別アニメーションを再生する設定
+		ImGui::SeparatorText("攻撃前移動アニメーション");
+		ImGui::Checkbox("攻撃前移動アニメーションを使用", &animationData.usePreMoveAnimation);
+		if (animationData.usePreMoveAnimation) {
+			Engine::ImGuiManager::Select("移動アニメーション", animationData.preMoveAnimationName, animations);
+			ImGui::SliderFloat("移動アニメーション速度", &animationData.preMoveAnimationSpeed, 0.1f, 10.0f, "%.2f");
+			ImGui::DragFloat("攻撃アニメーションへ切り替える時間", &animationData.preMoveAnimationEndTime, 0.01f, 0.0f, endTime, "%.2f");
+			ImGui::SliderFloat("移動から攻撃へのブレンド時間", &animationData.preMoveAnimationBlendTime, 0.0f, 10.0f, "%.2f");
+			ImGui::Checkbox("移動アニメーションループ", &animationData.preMoveAnimationLoop);
+		}
+
 		// キャラクター本体へ加算するTransformアニメーションを編集する
 		ImGui::SeparatorText("トランスフォームアニメーション");
 		ImGui::Checkbox("Transformアニメーションを使用", &animationData.isTransformAnimation);
@@ -73,13 +84,26 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 	}
 
 	if (isActive) {
-		// ループ再生
-		animation->SetIsLoop(false);
-		// アニメーション設定
-		animation->SetAnimation(nowAnimationName, 0);
-		// ステートのアニメーション時間設定
-		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
-		animation->SetAnimationTime(animationTime);
+		// 現在フレームを秒へ変換し、攻撃前移動アニメーションと攻撃アニメーションのプレビューを切り替える
+		const float previewTime = ConvertUtility::FramesToSeconds(currentFrame);
+		const bool previewPreMoveAnimation =
+			animationData.usePreMoveAnimation &&
+			!animationData.preMoveAnimationName.empty() &&
+			previewTime < animationData.preMoveAnimationEndTime;
+
+		if (previewPreMoveAnimation) {
+			// 攻撃前移動時間中は、移動用アニメーションをその時間位置で表示する
+			animation->SetIsLoop(animationData.preMoveAnimationLoop);
+			animation->SetAnimation(animationData.preMoveAnimationName, 0);
+			animation->SetAnimationTime(previewTime * animationData.preMoveAnimationSpeed);
+		}
+		else {
+			// 攻撃アニメーションは移動アニメーション終了後を0秒として表示する
+			const float attackPreviewTime = (std::max)(previewTime - animationData.preMoveAnimationEndTime, 0.0f);
+			animation->SetIsLoop(false);
+			animation->SetAnimation(nowAnimationName, 0);
+			animation->SetAnimationTime(attackPreviewTime * animationData.animationSpeed);
+		}
 	}
 }
 

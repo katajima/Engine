@@ -40,6 +40,16 @@ namespace Combo {
 	private:
 		// 指定時間からTransformアニメーションの補間率を計算する
 		float CalculateTransformAnimationRate(float timer) const;
+		// 攻撃前移動アニメーションを使用できる設定か判定する
+		bool CanUsePreMoveAnimation() const;
+		// 攻撃アニメーションの再生時間をコンボ時間から計算する
+		float CalculateAttackAnimationTime(float timer) const;
+		// 指定名のスケルタルアニメーションを再生状態へ設定する
+		void PlaySkeletalAnimation(const std::string& animationName, float blendTime, bool isLoop, float speed);
+		// 攻撃前移動アニメーションから攻撃アニメーションへの切り替えを更新する
+		bool UpdatePreMoveAnimation(float timer, bool isHitStop);
+		// 攻撃アニメーションを開始し、必要なら再生時間を初期化する
+		void StartAttackAnimation(float startTime);
 		// 前フレームとの差分でTransformアニメーションを適用する
 		void ApplyTransformAnimation(float timer);
 		// 現在適用中のTransformオフセットを取り除く
@@ -62,6 +72,12 @@ namespace Combo {
 		Engine::WorldTransform* worldTransform_ = nullptr;
 		// 前フレームまでに適用したTransformオフセット
 		Transform appliedTransformOffset_{};
+		// 攻撃前移動アニメーションを現在再生しているか
+		bool isPlayingPreMoveAnimation_ = false;
+		// 攻撃アニメーションをすでに開始したか
+		bool hasStartedAttackAnimation_ = false;
+		// 攻撃アニメーションの再生開始として扱うコンボ時間
+		float attackAnimationStartTime_ = 0.0f;
 
 	};
 
