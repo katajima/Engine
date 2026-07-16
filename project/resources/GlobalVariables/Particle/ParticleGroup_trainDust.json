@@ -48,7 +48,7 @@
         },
         "isFlag.isLine": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.isLineInterpolation": {
             "type": "bool",
@@ -138,6 +138,15 @@
         "material.useSpecularMap": {
             "type": "bool",
             "value": false
+        },
+        "meshSourceType": {
+            "enumType": "ParticleMeshSourceType",
+            "type": "enum",
+            "value": 0
+        },
+        "modelName": {
+            "type": "string",
+            "value": ""
         },
         "rasterizerType": {
             "enumType": "RasterizerType",
@@ -340,7 +349,7 @@
         "shapeType": {
             "enumType": "ShapeType",
             "type": "enum",
-            "value": 5
+            "value": 0
         },
         "texturePath": {
             "type": "string",

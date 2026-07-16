@@ -7,6 +7,10 @@
         "HitStar": {
             "type": "string",
             "value": "HitStar"
+        },
+        "Plane": {
+            "type": "string",
+            "value": "Plane"
         }
     }
 }

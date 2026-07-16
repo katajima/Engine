@@ -102,6 +102,19 @@ namespace {
 		const Vector3& end = triangle.vertices[(edgeIndex + 1) % 3];
 		return Lerp(start, end, Random01(randomEngine));
 	}
+
+	void DrawEmitPositionLine(Engine::LineCommon* lineCommon, const Vector3& emitPos)
+	{
+		if (lineCommon == nullptr) {
+			return;
+		}
+
+		// 実際にパーティクルが出た位置を小さい球で示し、形状ラインとは別に発生点を確認できるようにする。
+		Sphere sphere{};
+		sphere.center = emitPos;
+		sphere.radius = 0.15f;
+		lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 0.0f,1.0f,0.2f,1.0f }, 6, 6);
+	}
 }
 
 #pragma region Point
@@ -111,13 +124,22 @@ void Engine::PointParticleEmitter::Initialize(Engine::ParticleManager* particleM
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
 // デバック線描画
-void Engine::PointParticleEmitter::DrawEmitterLine() {}
+void Engine::PointParticleEmitter::DrawEmitterLine() {
+	Sphere sphere{};
+	sphere.center = transform_.worldMat_.GetWorldPosition();
+	sphere.radius = 0.25f;
+	lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 }, 8, 8);
+}
 // パーティクル発生
 void Engine::PointParticleEmitter::EmitUnique() {
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
+	const Vector3 emitPos = transform_.worldMat_.GetWorldPosition();
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, emitPos);
+	}
 
-	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), transform_.worldMat_.GetWorldPosition());
+	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), emitPos);
 }
 #pragma endregion
 
@@ -243,6 +265,9 @@ void Engine::AABBParticleEmitter::EmitUnique() {
 		normal = Math::NormalizeSafe(localPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon);
 	}
 
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, particleManager->GetRandomEngine(), pos, centerPos, normal);
 }
 
@@ -317,6 +342,9 @@ void Engine::SphereParticleEmitter::EmitUnique() {
 	}
 	Vector3 pos = centerPos + normal * distance;
 
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 //
@@ -393,6 +421,9 @@ void Engine::CornerParticleEmitter::EmitUnique() {
 	const Vector3 normal = emitType_ == EmitData::EmitType::kEdge
 		? Math::NormalizeSafe(rotatedPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon)
 		: rotationMatrix.Transform({ 0.0f,1.0f,0.0f }).Normalize();
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 
@@ -467,6 +498,9 @@ void Engine::LineParticleEmitter::EmitUnique() {
 	Vector3 diff = segment_.origin + segment_.diff() * t;
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + diff;
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 
 	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
@@ -522,6 +556,9 @@ void Engine::SplineParticleEmitter::EmitUnique() {
 	}
 
 	pos = CatmullRom(controlPoints, t) + transform_.worldMat_.GetWorldPosition();
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 
 	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
@@ -580,6 +617,9 @@ void Engine::TriangleParticleEmitter::EmitUnique() {
 	Vector3 normal = triangle_.GetNormal();
 	if (emitType_ == EmitData::EmitType::kEdge) {
 		normal = Math::NormalizeSafe(localPos - triangle_.GetCentroid(), normal, kEmitterEpsilon);
+	}
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
 	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
@@ -646,6 +686,9 @@ void Engine::MeshParticleEmitter::EmitUnique() {
 		normal = Math::NormalizeSafe(localPos - tri.GetCentroid(), normal, kEmitterEpsilon);
 	}
 
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
 

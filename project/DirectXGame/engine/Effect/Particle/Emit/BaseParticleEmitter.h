@@ -75,7 +75,7 @@ namespace Engine {
 		void SetIsEmit(bool is) { isEmit = is; }
 
 		// フラグ設定
-		void SetIsFlag(const EmitData::IsFlag& is) { isFlag = is; }
+		void SetIsFlag(const EmitData::IsFlag& is) { isFlag = is; isLine = is.isLine; }
 		// 線形補間設定
 		void SetIsLineInterpolation(bool is) { isFlag.isLineInterpolation = is; }
 		// 重力設定

@@ -1,4 +1,4 @@
-﻿#include "EffectEditor.h"
+#include "EffectEditor.h"
 #include "DirectXGame/engine/Base/Imgui/ImGuiUtility.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
@@ -12,6 +12,7 @@
 namespace {
 	const char* kEffectRegistryGroup = "EffectEditor";
 	const char* kDeletedEffectRegistryGroup = "EffectEditorDeleted";
+	const char* kEffectEditorSettingsGroup = "EffectEditorSettings";
 	const char* kParticleRegistryGroup = "ParticleEditor";
 	const char* kDeletedParticleRegistryGroup = "ParticleEditorDeleted";
 	const char* kParticleDataPrefix = "ParticleGroup_";
@@ -19,6 +20,7 @@ namespace {
 	const char* kPrimitiveDataPrefix = "EffectPrimitive_";
 	const char* kPrimitivePreviewParticleName = "__EffectPrimitivePreviewParticle";
 	const char* kPrimitivePreviewEmitterName = "__EffectPrimitivePreviewEmitter";
+	const char* kParticleGroupPreviewEmitterName = "__ParticleGroupPreviewEmitter";
 
 	bool DrawPrimitiveShapeParameters(Engine::ParticleGroupEditorData& data) {
 		// 選択中プリミティブに対応した形状パラメータだけを表示し、変更があれば保存対象にする。
@@ -230,6 +232,7 @@ void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 	serializer_.Initialize(globalVariables);
 	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
 	LoadRegisteredPrimitiveDefinitions();
+	LoadEditorUiSettings();
 
 }
 
@@ -988,9 +991,60 @@ void EffectEditor::SaveAllEditorData() {
 	globalVariables->SaveFile(kParticleRegistryGroup);
 	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
 	globalVariables->SaveFile(kPrimitiveRegistryGroup);
+	SaveEditorUiSettings();
 	managementMessage_ = "Saved all effect editor settings.";
 	particleManagementMessage_ = managementMessage_;
 	primitiveManagementMessage_ = managementMessage_;
+}
+
+void EffectEditor::SaveEmitterData(const std::string& name, const EffectGlobalData& data) {
+	// 指定エミッタだけをGlobalVariablesへ反映し、該当ファイルを保存する。
+	if (name.empty()) {
+		emitterSettingsMessage_ = "Emitter name is required.";
+		return;
+	}
+
+	globalVariables->SetGroupCategory(name, "Effect");
+	serializer_.RegisterEffectData(name, data);
+	serializer_.SaveEffectData(name, data);
+	globalVariables->SaveFile(name);
+	globalVariables->SaveFile(kEffectRegistryGroup);
+	emitterSettingsMessage_ = "Saved emitter: " + name;
+}
+
+void EffectEditor::SaveParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
+	// 指定パーティクル群だけをGlobalVariablesへ反映し、該当ファイルを保存する。
+	if (particleName.empty()) {
+		particleManagementMessage_ = "Particle group name is required.";
+		return;
+	}
+
+	serializer_.RegisterParticleGroupData(particleName, data);
+	serializer_.SaveParticleGroupData(particleName, data);
+	globalVariables->SaveFile(kParticleDataPrefix + particleName);
+	globalVariables->SaveFile(kParticleRegistryGroup);
+	particleManagementMessage_ = "Saved particle group: " + particleName;
+}
+
+void EffectEditor::SaveEditorUiSettings() {
+	// データ本体ではなく、Effectエディタで最後に選んだUI状態だけを保存する。
+	globalVariables->CreateGroup(kEffectEditorSettingsGroup);
+	globalVariables->SetGroupCategory(kEffectEditorSettingsGroup, "Effect");
+	Engine::GlobalVariableWriter writer(globalVariables, Engine::GlobalVariableWriteMode::Save);
+	writer.Value(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName", selectedApplyPrimitiveName_);
+	globalVariables->SaveFile(kEffectEditorSettingsGroup);
+}
+
+void EffectEditor::LoadEditorUiSettings() {
+	// 起動時にプリミティブ適用コンボの最後の選択状態を復元する。
+	globalVariables->CreateGroup(kEffectEditorSettingsGroup);
+	globalVariables->SetGroupCategory(kEffectEditorSettingsGroup, "Effect");
+	Engine::GlobalVariableWriter writer(globalVariables, Engine::GlobalVariableWriteMode::Register);
+	writer.Value(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName", selectedApplyPrimitiveName_);
+
+	if (globalVariables->HasKey(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName")) {
+		selectedApplyPrimitiveName_ = globalVariables->GetValue<std::string>(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName");
+	}
 }
 
 void EffectEditor::DrawParticleGroupEditor() {
@@ -1089,6 +1143,99 @@ void EffectEditor::DrawParticleGroupEditor() {
 	ImGui::Separator();
 }
 
+void EffectEditor::DrawParticleGroupPreviewControls(const std::string& particleName) {
+	ImGui::SeparatorText("Particle Group Preview");
+
+	// エフェクト定義を作らず、選択中のパーティクル群だけを一時エミッターで発生確認する。
+	if (ImGui::Checkbox("出現##ParticleGroupPreview", &isParticleGroupPreviewEnabled_)) {
+		particleGroupPreviewTimer_ = 0.0f;
+		if (!isParticleGroupPreviewEnabled_) {
+			ClearParticleGroupPreview();
+		}
+	}
+	ImGui::DragFloat3("位置##ParticleGroupPreview", &particleGroupPreviewPosition_.x, 0.1f);
+	ImGui::DragFloat("頻度##ParticleGroupPreview", &particleGroupPreviewFrequency_, 0.01f, 0.01f, 1000.0f);
+	ImGui::DragInt("出現量##ParticleGroupPreview", &particleGroupPreviewCount_, 1, 1, 1024);
+	ImGui::DragFloat("生存時間##ParticleGroupPreview", &particleGroupPreviewLifeTime_, 0.01f, 0.01f, 1000.0f);
+	ImGui::DragFloat3("サイズ##ParticleGroupPreview", &particleGroupPreviewSize_.x, 0.1f, 0.01f, 1000.0f);
+	ImGui::DragFloat3("回転##ParticleGroupPreview", &particleGroupPreviewRotate_.x, 0.01f);
+	ImGui::ColorEdit4("色##ParticleGroupPreview", &particleGroupPreviewColor_.x);
+
+	if (!isParticleGroupPreviewEnabled_) {
+		return;
+	}
+
+	EnsureParticleGroupPreviewEmitter(particleName);
+	particleGroupPreviewTimer_ += ImGui::GetIO().DeltaTime;
+	if (particleGroupPreviewFrequency_ <= particleGroupPreviewTimer_) {
+		EmitParticleGroupPreview(particleName);
+		particleGroupPreviewTimer_ = 0.0f;
+	}
+}
+
+void EffectEditor::EnsureParticleGroupPreviewEmitter(const std::string& particleName) {
+	if (effectComponent == nullptr || particleName.empty()) {
+		return;
+	}
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+	if (particleManager == nullptr || !particleManager->GetParticleGroups().Contains(particleName)) {
+		ClearParticleGroupPreview();
+		return;
+	}
+
+	if (!effectComponent->HasEmitter(kParticleGroupPreviewEmitterName)) {
+		// 選択中パーティクル群の見た目確認だけに使う内部Pointエミッターを作る。
+		effectComponent->AddEmitter(kParticleGroupPreviewEmitterName, particleName, EmitterShapeType::POINT);
+	}
+
+	if (Engine::BaseParticleEmitter* emitter = effectComponent->GetBaseEmitter(kParticleGroupPreviewEmitterName)) {
+		// Particle Groupsの選択が変わったら、同じ一時エミッターの参照先だけ差し替える。
+		emitter->SetParticleName(particleName);
+		emitter->SetIsEmit(false);
+		previewParticleGroupName_ = particleName;
+	}
+}
+
+void EffectEditor::EmitParticleGroupPreview(const std::string& particleName) {
+	EnsureParticleGroupPreviewEmitter(particleName);
+	Engine::BaseParticleEmitter* emitter = effectComponent ? effectComponent->GetBaseEmitter(kParticleGroupPreviewEmitterName) : nullptr;
+	if (emitter == nullptr) {
+		return;
+	}
+
+	Engine::ParticleGroupEditorData data = effectComponent->GetParticleManager()->GetEditorParticleGroupData(particleName);
+
+	// Emitter Settingsの発生確認と同じく、現在の確認用パラメータで手動発生させる。
+	// 挙動フラグはパーティクル群側の状態を反映し、見た目確認が保存済み設定からずれないようにする。
+	emitter->SetPos(particleGroupPreviewPosition_);
+	emitter->SetCount(particleGroupPreviewCount_, 0);
+	emitter->SetFrequency(0.0f);
+	emitter->SetLifeTime(particleGroupPreviewLifeTime_, 0.0f);
+	emitter->SetSize(particleGroupPreviewSize_, {});
+	emitter->SetRotate(particleGroupPreviewRotate_, {});
+	emitter->SetVelocity({}, {});
+	emitter->SetColorMinMax(particleGroupPreviewColor_, particleGroupPreviewColor_);
+	emitter->SetIsFlag(data.isFlag);
+	emitter->SetLifeTimeScaleTopBottom(data.topBottom);
+	emitter->SetUvTransformVeloctiy(data.uvTransformVelocity);
+	emitter->SetAlphaClipping(data.materialAlphaClipping);
+	emitter->SetEnableLighting(data.materialEnableLighting);
+	emitter->SetIsEmit(true);
+	emitter->Emit();
+	emitter->SetIsEmit(false);
+}
+
+void EffectEditor::ClearParticleGroupPreview() {
+	previewParticleGroupName_.clear();
+	particleGroupPreviewTimer_ = 0.0f;
+	if (effectComponent == nullptr) {
+		return;
+	}
+
+	// 内部確認用エミッターは保存対象ではないため、不要になったら即破棄する。
+	effectComponent->RemoveEmitter(kParticleGroupPreviewEmitterName);
+}
+
 void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engine::ParticleGroup& group) {
 	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
 	Engine::ParticleGroupEditorData data = particleManager->GetEditorParticleGroupData(particleName);
@@ -1096,9 +1243,18 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 	}
 
+	DrawParticleGroupPreviewControls(particleName);
+
 	ImGui::SeparatorText("Particle Group Detail");
 	bool recreate = false;
 	bool saveData = false;
+	if (ImGui::Button("Save This Particle Group")) {
+		// 変更が無い場合でも、現在のパーティクル群だけを明示的に保存できるようにする。
+		saveData = true;
+	}
+	if (!particleManagementMessage_.empty()) {
+		ImGui::TextWrapped("%s", particleManagementMessage_.c_str());
+	}
 
 	if (Engine::ImGuiUtility::InputText("Texture Path", editParticleTexturePathBuffer_)) {
 		data.texturePath = editParticleTexturePathBuffer_.data();
@@ -1126,8 +1282,10 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	else {
 		if (!primitiveDefinitionDatas_.empty()) {
 			ImGui::SeparatorText("Apply Primitive Definition");
-			Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
-				primitiveDefinitionDatas_, "No Primitive Definition");
+			if (Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
+				primitiveDefinitionDatas_, "No Primitive Definition")) {
+				SaveEditorUiSettings();
+			}
 			if (ImGui::Button("Apply Primitive To Particle") && !selectedApplyPrimitiveName_.empty()) {
 				ApplyPrimitiveDefinitionToParticleGroup(particleName, selectedApplyPrimitiveName_);
 				data = particleManager->GetEditorParticleGroupData(particleName);
@@ -1180,6 +1338,10 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 		saveData = true;
 	}
 	if (ImGui::Checkbox("Billboard Z Rotation", &data.isFlag.billboardRotZ)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("ライン描画##ParticleGroup", &data.isFlag.isLine)) {
+		// パーティクル群単体プレビューでもエミッター形状と発生位置ラインを確認できるようにする。
 		saveData = true;
 	}
 	if (ImGui::Checkbox("Alpha Over Life", &data.isFlag.isAlpha)) {
@@ -1256,10 +1418,7 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	if (saveData) {
 		particleManager->ApplyEditorParticleGroupData(particleName, data);
 		data = particleManager->GetEditorParticleGroupData(particleName);
-		serializer_.RegisterParticleGroupData(particleName, data);
-		serializer_.SaveParticleGroupData(particleName, data);
-		globalVariables->SaveFile(kParticleDataPrefix + particleName);
-		globalVariables->SaveFile(kParticleRegistryGroup);
+		SaveParticleGroupData(particleName, data);
 	}
 }
 
@@ -1475,6 +1634,7 @@ void EffectEditor::RenameParticleGroup(const std::string& oldName, const std::st
 	}
 
 	Engine::ParticleGroupEditorData data = effectComponent->GetParticleManager()->GetEditorParticleGroupData(oldName);
+	const bool previewWasTarget = previewParticleGroupName_ == oldName;
 	if (!effectComponent->GetParticleManager()->RenameParticleGroup(oldName, newName)) {
 		particleManagementMessage_ = "Could not rename particle group.";
 		return;
@@ -1500,6 +1660,10 @@ void EffectEditor::RenameParticleGroup(const std::string& oldName, const std::st
 		}
 	}
 
+	if (previewWasTarget) {
+		previewParticleGroupName_ = newName;
+		EnsureParticleGroupPreviewEmitter(newName);
+	}
 	selectedParticleGroupName_ = newName;
 	editParticleTexturePathBuffer_.fill('\0');
 	particleManagementMessage_ = "Renamed particle group: " + oldName + " -> " + newName;
@@ -1509,6 +1673,10 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 	if (particleName.empty() || !effectComponent->GetParticleManager()->GetParticleGroups().Contains(particleName)) {
 		particleManagementMessage_ = "The selected particle group no longer exists.";
 		return;
+	}
+
+	if (previewParticleGroupName_ == particleName) {
+		ClearParticleGroupPreview();
 	}
 
 	for (auto& [effectName, effectData] : effectGlobalDatas_) {
@@ -1905,6 +2073,12 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	ImGui::SeparatorText("Emitter Detail");
 	// パーティクル選択
 	Engine::ImGuiManager::Select("Particle Group", data.particleName, effectComponent->GetParticleManager()->GetParticleGroups());
+	if (ImGui::Button("Save This Emitter")) {
+		SaveEmitterData(name, data);
+	}
+	if (!emitterSettingsMessage_.empty()) {
+		ImGui::TextWrapped("%s", emitterSettingsMessage_.c_str());
+	}
 
 	static const char* ShapeTypeLabels[] = {
 		"AABB",		// AABB
@@ -1958,6 +2132,8 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	bool isLight = data.enableLighting;
 	ImGui::Checkbox("ライティング", &isLight);
 	data.enableLighting = isLight;
+	// エミッター形状ラインと実際の発生位置マーカーを表示するか。
+	ImGui::Checkbox("ライン描画", &data.isFlag.isLine);
 
 	if (ImGui::CollapsingHeader("ビルボード")) {
 		ImGui::Checkbox("ビルボードのz回転するか", &data.isFlag.billboardRotZ);

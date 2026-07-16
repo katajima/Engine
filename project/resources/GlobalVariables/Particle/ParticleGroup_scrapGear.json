@@ -64,7 +64,7 @@
         },
         "isFlag.usebillboard": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.usebillboardY": {
             "type": "bool",
@@ -138,6 +138,15 @@
         "material.useSpecularMap": {
             "type": "bool",
             "value": false
+        },
+        "meshSourceType": {
+            "enumType": "ParticleMeshSourceType",
+            "type": "enum",
+            "value": 1
+        },
+        "modelName": {
+            "type": "string",
+            "value": "gear.obj"
         },
         "rasterizerType": {
             "enumType": "RasterizerType",

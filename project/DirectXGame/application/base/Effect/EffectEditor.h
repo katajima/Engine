@@ -165,6 +165,29 @@ private:
 	void DrawParticleGroupDetail(const std::string& particleName, Engine::ParticleGroup& group);
 
 	/// <summary>
+	/// 選択中パーティクル群を、エフェクト定義なしで発生確認するUIを描画します。
+	/// </summary>
+	/// <param name="particleName">発生確認するパーティクル群名です。</param>
+	void DrawParticleGroupPreviewControls(const std::string& particleName);
+
+	/// <summary>
+	/// パーティクル群確認用の一時エミッターを生成、または参照先を更新します。
+	/// </summary>
+	/// <param name="particleName">一時エミッターが参照するパーティクル群名です。</param>
+	void EnsureParticleGroupPreviewEmitter(const std::string& particleName);
+
+	/// <summary>
+	/// パーティクル群確認用の一時エミッターからパーティクルを発生させます。
+	/// </summary>
+	/// <param name="particleName">発生させるパーティクル群名です。</param>
+	void EmitParticleGroupPreview(const std::string& particleName);
+
+	/// <summary>
+	/// パーティクル群確認用の一時エミッターを削除します。
+	/// </summary>
+	void ClearParticleGroupPreview();
+
+	/// <summary>
 	/// 新しいパーティクル群名が使用できるか検証します。
 	/// </summary>
 	/// <param name="particleName">検証するパーティクル群名です。</param>
@@ -280,6 +303,30 @@ private:
 	/// エディタ全体の設定を保存します。
 	/// </summary>
 	void SaveAllEditorData();
+
+	/// <summary>
+	/// 指定エミッタの設定を個別に保存します。
+	/// </summary>
+	/// <param name="name">保存するエミッタ名です。</param>
+	/// <param name="data">保存するエミッタ設定です。</param>
+	void SaveEmitterData(const std::string& name, const EffectGlobalData& data);
+
+	/// <summary>
+	/// 指定パーティクル群の設定を個別に保存します。
+	/// </summary>
+	/// <param name="particleName">保存するパーティクル群名です。</param>
+	/// <param name="data">保存するパーティクル群設定です。</param>
+	void SaveParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// EffectエディタのUI状態を保存します。
+	/// </summary>
+	void SaveEditorUiSettings();
+
+	/// <summary>
+	/// EffectエディタのUI状態を読み込みます。
+	/// </summary>
+	void LoadEditorUiSettings();
 private:
 	/// <summary>
 	/// 選択中エフェクトの詳細編集UIを描画します。
@@ -310,6 +357,8 @@ private:// エフェクトのグローバルデータ
 	std::string pendingDeleteEffectName_;
 	// 管理UIの結果やエラー文
 	std::string managementMessage_;
+	// エミッタ設定UIの保存結果やエラー文
+	std::string emitterSettingsMessage_;
 	// 選択中のパーティクル群名
 	std::string selectedParticleGroupName_;
 	// 新規追加するパーティクル群名入力
@@ -356,6 +405,26 @@ private:// エフェクトのグローバルデータ
 	std::string previewPrimitiveName_;
 	// 現在プレビューへ反映済みのプリミティブ形状
 	Engine::ShapeParameter::ShapeType previewPrimitiveShapeType_ = Engine::ShapeParameter::ShapeType::None;
+	// 選択中パーティクル群の発生確認を有効にするか
+	bool isParticleGroupPreviewEnabled_ = false;
+	// パーティクル群確認用エミッターが現在参照しているパーティクル群名
+	std::string previewParticleGroupName_;
+	// パーティクル群確認用エミッターの発生位置
+	Vector3 particleGroupPreviewPosition_ = {};
+	// パーティクル群確認用パーティクルのサイズ
+	Vector3 particleGroupPreviewSize_ = { 1.0f, 1.0f, 1.0f };
+	// パーティクル群確認用パーティクルの回転
+	Vector3 particleGroupPreviewRotate_ = {};
+	// パーティクル群確認用パーティクルの色
+	Vector4 particleGroupPreviewColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+	// パーティクル群確認用の発生頻度
+	float particleGroupPreviewFrequency_ = 0.2f;
+	// パーティクル群確認用の発生タイマー
+	float particleGroupPreviewTimer_ = 0.0f;
+	// パーティクル群確認用の一回あたり発生数
+	int particleGroupPreviewCount_ = 1;
+	// パーティクル群確認用の寿命
+	float particleGroupPreviewLifeTime_ = 1.0f;
 private:
 	// 出現させるか
 	bool isSpawnEmit = false;
