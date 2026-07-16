@@ -30990,6 +30990,18 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	if (ImGui::DragFloat3("UV Scale Velocity", &data.uvTransformVelocity.scale.x, 0.001f)) {
 		saveData = true;
 	}
+	if (ImGui::DragFloat3("UV Translate", &data.uvTransform.translate.x, 0.001f)) {
+		data.materialTransform = data.uvTransform;
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Rotate", &data.uvTransform.rotate.x, 0.001f)) {
+		data.materialTransform = data.uvTransform;
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Scale", &data.uvTransform.scale.x, 0.001f)) {
+		data.materialTransform = data.uvTransform;
+		saveData = true;
+	}
 	if (ImGui::Checkbox("Billboard", &data.isFlag.usebillboard)) {
 		saveData = true;
 	}
@@ -31446,6 +31458,7 @@ void EffectEditorSerializer::WriteParticleGroupData(const std::string& particleN
 	writer.Value(groupName, "isEditorPrimitive", data.isEditorPrimitive);
 	writer.Value(groupName, "isUVClamp", data.isUVClamp);
 	writer.Value(groupName, "uvTransformVelocity", data.uvTransformVelocity);
+	writer.Value(groupName, "uvTransform", data.uvTransform);
 	writer.Value(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
 	writer.Value(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
 	writer.Value(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
@@ -31549,6 +31562,13 @@ void EffectEditorSerializer::LoadParticleGroupData(const std::string& particleNa
 	if (globalVariables_->HasKey(groupName, "topBottom")) data.topBottom = globalVariables_->GetEnumValue<EmitData::TopBottom>(groupName, "topBottom");
 	if (globalVariables_->HasKey(groupName, "gravitationalAcceleration")) data.gravitationalAcceleration = globalVariables_->GetValue<float>(groupName, "gravitationalAcceleration");
 	if (globalVariables_->HasKey(groupName, "material.transform")) data.materialTransform = globalVariables_->GetValue<Transform>(groupName, "material.transform");
+	if (globalVariables_->HasKey(groupName, "uvTransform")) {
+		data.uvTransform = globalVariables_->GetValue<Transform>(groupName, "uvTransform");
+	}
+	else {
+		// 旧保存データは従来のmaterial.transformをUV本体として引き継ぐ。
+		data.uvTransform = data.materialTransform;
+	}
 	if (globalVariables_->HasKey(groupName, "material.color")) data.materialColor = globalVariables_->GetValue<Vector4>(groupName, "material.color");
 	if (globalVariables_->HasKey(groupName, "material.enableLighting")) data.materialEnableLighting = globalVariables_->GetValue<bool>(groupName, "material.enableLighting");
 	if (globalVariables_->HasKey(groupName, "material.environmentCoefficient")) data.materialEnvironmentCoefficient = globalVariables_->GetValue<float>(groupName, "material.environmentCoefficient");
@@ -63122,7 +63142,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/EffectGlovalData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Effect/EffectComponent.h"
 
 /// <summary>
@@ -63142,7 +63162,7 @@ struct EffectGlobalData {
 	// 出現データ
 	Engine::EffectEmitData emitData;
 	// UVトランスフォーム
-	Transform uvTransformVeloctiy{};
+	Transform uvTransformVeloctiy{ {},{},{0.0f,0.0f,0.0f} };
 	// αクリッピング
 	float alphaClipping = 0.5f; 
 	// ライティング
@@ -64421,9 +64441,11 @@ void Engine::ParticleFunction::WorldDataForGPU(ParticleGroup2d& group, std::list
 
 void Engine::ParticleFunction::MaterialEffect(ParticleGroup& group)
 {
-	group.material->GetMaterialInstance().transform.translate += group.uvTransformVeloctiy_.translate;
-	group.material->GetMaterialInstance().transform.rotate += group.uvTransformVeloctiy_.rotate;
-	group.material->GetMaterialInstance().transform.scale += group.uvTransformVeloctiy_.scale;
+	// UV本体に速度を加算し、その結果をマテリアルへ反映する。
+	group.uvTransform_.translate += group.uvTransformVeloctiy_.translate;
+	group.uvTransform_.rotate += group.uvTransformVeloctiy_.rotate;
+	group.uvTransform_.scale += group.uvTransformVeloctiy_.scale;
+	group.material->GetMaterialInstance().transform = group.uvTransform_;
 	group.material->GPUData();
 }
 
@@ -64444,7 +64466,8 @@ void Engine::ParticleFunction::Create(ParticleGroup& particleGroup, const std::s
 	particleGroup.material->LoadTex();
 	particleGroup.material->GetMaterialInstance().enableLighting_ = false;
 	particleGroup.material->GetMaterialInstance().useEnvironment_ = false;
-
+	// マテリアルの初期UV値を、保存・速度更新の基準値にも保持する。
+	particleGroup.uvTransform_ = particleGroup.material->GetMaterialInstance().transform;
 
 	// パーティクルリソース生成
 	particleGroup.sbParticleResource_.CreateBuffer(dxCommon, kNumMaxInstance);
@@ -64524,7 +64547,7 @@ void Engine::ParticleFunction::Create(ParticleGroup2d& particleGroup, const std:
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleData.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include <DirectXGame/engine/2d/Sprite.h>
 #include "DirectXGame/engine/Effect/Particle/Emit/EmitData.h"
@@ -64590,6 +64613,7 @@ namespace Engine {
 		EmitData::RasterizerType rasteType{};									// ラスタライザタイプ
 		EmitData::BlendType blendType{};										// ブレンドタイプ
 		Transform uvTransformVeloctiy_{ {},{},{0,0,0} };						// uvトランスフォーム
+		Transform uvTransform_{};										// UVトランスフォームの現在値
 		float kGravitationalAcceleration = 9.8f;								// 重力
 		bool isUVClamp = false;												// UVを
 	};
@@ -65061,7 +65085,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleManager.cpp
 ============================================================
-﻿#include "ParticleManager.h"
+#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -65243,6 +65267,7 @@ namespace {
 		data.blendType = group.blendType;
 		data.isUVClamp = group.isUVClamp;
 		data.uvTransformVelocity = group.uvTransformVeloctiy_;
+		data.uvTransform = group.uvTransform_;
 		data.isFlag = group.isFlag;
 		data.emitType = group.emitType;
 		data.topBottom = group.topBottom;
@@ -65670,7 +65695,8 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 			group.material->tex_.diffuseFilePath = resolvedTexturePath;
 			group.material->LoadTex();
 		}
-		material.transform = data.materialTransform;
+		group.uvTransform_ = data.uvTransform;
+		material.transform = data.uvTransform;
 		material.color = Color(data.materialColor.x, data.materialColor.y, data.materialColor.z, data.materialColor.w);
 		material.enableLighting_ = data.materialEnableLighting;
 		material.environmentCoefficient_ = data.materialEnvironmentCoefficient;
@@ -65914,6 +65940,7 @@ namespace Engine {
 		bool isEditorPrimitive = false;																// エディタ所有プリミティブで作ったか
 		bool isUVClamp = false;																		// UVクランプ描画を使うか
 		Transform uvTransformVelocity{ {}, {}, {0.0f, 0.0f, 0.0f} };									// UVトランスフォームの速度
+		Transform uvTransform{};																// UVトランスフォームの現在値
 		EmitData::IsFlag isFlag{};																	// パーティクル挙動フラグ
 		EmitData::EmitType emitType = EmitData::EmitType::kRandom;									// メッシュからの発生方法
 		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;								// ライフタイムスケールの基準
