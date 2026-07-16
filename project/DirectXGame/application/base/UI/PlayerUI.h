@@ -73,7 +73,7 @@ private:
 
 	struct FollowUIData {
 		Vector3 worldOffset = { 0.0f,2.0f,0.0f };	// プレイヤー左側にUIを置くための高さ基準
-		Vector2 screenOffset = { 100.0f,25.0f };	// スクリーン上でメーター全体をプレイヤー左側へ寄せるオフセット
+		Vector2 screenOffset = { 50.0f,50.0f };	// スクリーン上でメーター全体をプレイヤー左側へ寄せるオフセット
 		float rowInterval = 16.0f;					// HP/SP/Staminaを縦に並べる間隔
 		Vector2 hiddenPos = { -1000.0f,-1000.0f };	// 画面外やカメラ未設定時の退避座標
 	};

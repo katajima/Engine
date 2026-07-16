@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // C++
 #include <imgui.h>
 #include <list>
@@ -24,6 +24,16 @@ namespace Engine {
 class EffectSystem;
 class InputSystem;
 
+/// <summary>
+/// リザルト画面の進行フェーズ。
+/// </summary>
+enum class ResultPhase {
+	// スコアを0から最終値まで加算表示する。
+	kScoreCount,
+	// メニュー項目の選択と決定を受け付ける。
+	kMenuWait,
+};
+
 class ResultSystem {
 public:
 	/// <summary>
@@ -39,7 +49,8 @@ public:
 	/// 更新
 	/// </summary>
 	/// <param name="dt"></param>
-	void Update(float dt);
+	/// <param name="targetScore"></param>
+	void Update(float dt, float targetScore);
 
 	/// <summary>
 	/// 選択されているインデックスの取得
@@ -47,8 +58,45 @@ public:
 	/// <returns></returns>
 	int GetSelectedIndex() const { return menuSelectionController_.GetSelectedIndex(); }
 
+	/// <summary>
+	/// UIに表示するスコアの取得
+	/// </summary>
+	/// <returns></returns>
+	float GetDisplayScore() const { return displayScore_; }
+
+	/// <summary>
+	/// メニュー操作を表示できるか取得
+	/// </summary>
+	/// <returns></returns>
+	bool IsMenuActive() const { return phase_ == ResultPhase::kMenuWait; }
+
+private:
+	/// <summary>
+	/// フェーズを切り替える
+	/// </summary>
+	/// <param name="nextPhase"></param>
+	void ChangePhase(ResultPhase nextPhase);
+
+	/// <summary>
+	/// スコア加算表示フェーズを更新する
+	/// </summary>
+	/// <param name="dt"></param>
+	/// <param name="targetScore"></param>
+	void UpdateScoreCount(float dt, float targetScore);
+
+	/// <summary>
+	/// メニュー入力待ちフェーズを更新する
+	/// </summary>
+	/// <param name="dt"></param>
+	void UpdateMenuWait(float dt);
 
 private:
 	// リザルト画面の項目移動とシーン遷移を処理する。
 	MenuSelectionController menuSelectionController_;
+	// 現在のリザルト進行フェーズ。
+	ResultPhase phase_ = ResultPhase::kScoreCount;
+	// フェーズ内で経過した時間。
+	float phaseTimer_ = 0.0f;
+	// UIに表示するための加算中スコア。
+	float displayScore_ = 0.0f;
 };

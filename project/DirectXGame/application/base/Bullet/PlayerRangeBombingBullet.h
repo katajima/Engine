@@ -1,6 +1,8 @@
 #pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include <DirectXGame/engine/Effect/EffectComponent.h>
+#include <cstddef>
+#include <string>
 
 /// <summary>
 /// 範囲攻撃用弾クラス
@@ -62,6 +64,7 @@ private:
 
 
 	float trailTime_ = 0.0f;
+	const std::string trailName_ = "RangeBombingTrail"; // 弾ごとのEffectComponent内で管理するトレイル名
 
 private: //パーティクルエミッター
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
@@ -76,6 +79,9 @@ private: // 一旦
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
 		const float trailWidth = 0.2f; // トレイルの幅
+		const float trailMinEmitDistance = 0.05f; // トレイル頂点を追加する最小移動距離
+		const size_t trailMaxSegmentCount = 96; // トレイルが保持する最大分割数
+		const Color trailColor = { 0.35f,0.85f,1.0f,0.85f }; // トレイルの色
 		const float collRadius = 8.0f; // 当たり判定の半径
 		const float damage = 50.0f; // ダメージ量
 		const float skyX = 1000.0f;

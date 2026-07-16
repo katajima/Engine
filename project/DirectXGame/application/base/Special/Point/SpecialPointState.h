@@ -51,7 +51,7 @@ public:
 private:
 	Vector3 upVelocity_ = {0,200,0};
 	float glavityScale_ = 2.0f;
-	float nextStateTimer_ = 0.75f;
+	float nextStateTimer_ = 0.5f;
 	//
 	float groundY = -1.0f;
 };
@@ -92,8 +92,9 @@ public:
 	// 終了
 	void Exit() override;
 private:
+	Vector3 upVelocity_ = { 0,50,0 };
 	// 移動速度
-	float speed_ = 100;
+	float speed_ = 50.0f;
 
 
 };

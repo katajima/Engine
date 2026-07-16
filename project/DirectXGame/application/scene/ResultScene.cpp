@@ -90,7 +90,7 @@ void ResultScene::Update() {
 	inputCoordinator_->Update(GetTime());
 
 	// リザルトシステム更新
-	resultSystem_->Update(GetTime());
+	resultSystem_->Update(GetTime(), GetSceneData().score);
 
 	// ステージ更新
 	resultStage_->Update(GetTime());
@@ -100,7 +100,7 @@ void ResultScene::Update() {
 	resultUI_->Update(GetTime());
 
 	// UI更新
-	resultScoreUI_->SetScore(GetSceneData().score);
+	resultScoreUI_->SetScore(resultSystem_->GetDisplayScore());
 	resultScoreUI_->Update(GetTime());
 
 	overUI_->Update();
@@ -117,7 +117,10 @@ void ResultScene::Draw3D() {
 
 // 描画2d
 void ResultScene::Draw2D() {
-	resultUI_->Draw();
+	// メニュー入力待ちになってから選択UIを表示する。
+	if (resultSystem_->IsMenuActive()) {
+		resultUI_->Draw();
+	}
 
 	resultScoreUI_->Draw();
 

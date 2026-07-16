@@ -66,7 +66,6 @@ void SpecialPointIdleState::Enter() {
 // 更新
 void SpecialPointIdleState::Update(float dt) {
 	timer += dt;
-
 	object_->GetObjectComponent()->GetWorldTransform().rotate_.y += rotateSpeed_ * dt;
 
 	// 一定時間経過で終了状態へ
@@ -95,11 +94,13 @@ void SpecialPointIdleState::Exit() {
 // 開始
 void SpecialPointMoveState::Enter() {
 	timer = 0.0f;
-	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
+	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(true);
+	object_->GetObjectComponent()->GetRigidBodyComponent()->AddForce(upVelocity_);
 };
 // 更新
 void SpecialPointMoveState::Update(float dt) {
 	timer += dt;
+	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
 
 	Vector3 dire = Normalize(object_->GetTargetPos() - object_->GetObjectComponent()->GetWorldPosition());
 

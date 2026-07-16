@@ -69,7 +69,7 @@ void SpecialPoint::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	sphere->Enable();					// コライダ有効
 	sphere->SetTag(CollisionTag::Item);	// タグ設定
 	sphere->SetLayer(CollisionLayer::Environment);// レイヤー設定
-	sphere->radius = 4.0f; // 半径を適宜設定
+	sphere->radius = 1.0f; // 半径を適宜設定
 	colliderComponent->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）

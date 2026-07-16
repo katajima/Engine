@@ -1,4 +1,4 @@
-#include "PlayerRangeBombingBullet.h"
+﻿#include "PlayerRangeBombingBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
@@ -26,8 +26,6 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	// 基盤の初期化
 	BaseInitialize(entityManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
-	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
-	//object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	
