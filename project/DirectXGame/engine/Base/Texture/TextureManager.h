@@ -43,6 +43,12 @@ namespace Engine {
 		// テクスチャ番号取得
 		uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
+		// 指定パスのテクスチャがロード済みかを確認
+		bool HasTexture(const std::string& filePath) const;
+
+		// ImGuiの選択UIで使うロード済みテクスチャ一覧を取得
+		std::vector<std::string> GetTextureFilePaths() const;
+
 		// テクスチャ番号からGPUハンドルを取得
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePach);
 

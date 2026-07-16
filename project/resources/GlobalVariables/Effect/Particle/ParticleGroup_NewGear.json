@@ -1,5 +1,5 @@
 {
-    "ParticleGroup_enemyPlank": {
+    "ParticleGroup_NewGear": {
         "blendType": {
             "enumType": "BlendType",
             "type": "enum",
@@ -16,7 +16,7 @@
         },
         "isEditorPrimitive": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.billboardRotZ": {
             "type": "bool",
@@ -48,7 +48,7 @@
         },
         "isFlag.isLine": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.isLineInterpolation": {
             "type": "bool",
@@ -64,7 +64,7 @@
         },
         "isFlag.usebillboard": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.usebillboardY": {
             "type": "bool",
@@ -93,7 +93,7 @@
         },
         "material.enableLighting": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "material.environmentCoefficient": {
             "type": "float",
@@ -142,11 +142,11 @@
         "meshSourceType": {
             "enumType": "ParticleMeshSourceType",
             "type": "enum",
-            "value": 0
+            "value": 1
         },
         "modelName": {
             "type": "string",
-            "value": ""
+            "value": "gear.obj"
         },
         "rasterizerType": {
             "enumType": "RasterizerType",
@@ -353,7 +353,7 @@
         },
         "texturePath": {
             "type": "string",
-            "value": "resources/Texture/enemy.dds"
+            "value": "./resources/Models/Scrap/Gear/color.png"
         },
         "topBottom": {
             "enumType": "TopBottom",

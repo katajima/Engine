@@ -1,4 +1,4 @@
-#include "ParticleManager.h"
+﻿#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -15,6 +15,16 @@
 #include <windows.h>
 
 namespace {
+	const char* kFallbackEditorParticleTexturePath = "resources/Texture/Image.dds";
+
+	std::string ResolveEditorParticleTexturePath(Engine::DirectXCommon* dxCommon, const std::string& requestedPath) {
+		// 無効な保存データでもMaterial::LoadTexへ渡す前にロード済みの仮テクスチャへ置き換える。
+		if (dxCommon != nullptr && dxCommon->GetTextureManager() != nullptr &&
+			dxCommon->GetTextureManager()->HasTexture(requestedPath)) {
+			return requestedPath;
+		}
+		return kFallbackEditorParticleTexturePath;
+	}
 	std::unique_ptr<Engine::BasePrimitive> CreateEditorPrimitive(Engine::ShapeParameter::ShapeType shapeType) {
 		// エディタで選ばれた形状に合わせ、ParticleManagerが寿命を持つプリミティブを生成する。
 		switch (shapeType)
@@ -193,6 +203,12 @@ namespace {
 		}
 		return data;
 	}
+}
+
+Engine::TextureManager* Engine::ParticleManager::GetTextureManager() const
+{
+	// エフェクトコンポーネントからTextureManagerへ安全にアクセスできるようにする。
+	return dxCommon != nullptr ? dxCommon->GetTextureManager() : nullptr;
 }
 
 void Engine::ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
@@ -429,6 +445,8 @@ bool Engine::ParticleManager::CreateEditorParticleGroup(const std::string& name,
 	}
 
 	ParticleGroupEditorData storedData = data;
+	// 読み込み済みテクスチャだけを実体へ渡し、無効パスでは仮テクスチャを使う。
+	storedData.texturePath = ResolveEditorParticleTexturePath(dxCommon, storedData.texturePath);
 	if (storedData.meshSourceType == ParticleMeshSourceType::Model) {
 		if (storedData.modelName.empty() || dxCommon == nullptr || dxCommon->GetModelManager() == nullptr) {
 			return false;
@@ -559,6 +577,7 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 
 	// 保存データをパーティクル群の実体へ反映し、次回保存時にも同じ値を取り出せるよう保持する。
 	ParticleGroup& group = particleGroups[name];
+	const std::string resolvedTexturePath = ResolveEditorParticleTexturePath(dxCommon, data.texturePath);
 	auto primitiveIt = editorParticlePrimitives_.find(name);
 	if (data.meshSourceType == ParticleMeshSourceType::Primitive && primitiveIt != editorParticlePrimitives_.end()) {
 		// プリミティブ形状を変更した場合は、パーティクル群が参照するメッシュも再生成する。
@@ -584,8 +603,8 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 	if (group.material) {
 		// テクスチャとマテリアル値を再設定し、GPU転送データにも反映する。
 		MaterialInstance& material = group.material->GetMaterialInstance();
-		if (group.material->tex_.diffuseFilePath != data.texturePath) {
-			group.material->tex_.diffuseFilePath = data.texturePath;
+		if (group.material->tex_.diffuseFilePath != resolvedTexturePath) {
+			group.material->tex_.diffuseFilePath = resolvedTexturePath;
 			group.material->LoadTex();
 		}
 		material.transform = data.materialTransform;
@@ -602,7 +621,9 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 		group.material->GPUData();
 	}
 
-	editorParticleGroupDatas_[name] = CaptureParticleGroupData(group, data);
+	ParticleGroupEditorData storedData = CaptureParticleGroupData(group, data);
+	storedData.texturePath = resolvedTexturePath;
+	editorParticleGroupDatas_[name] = storedData;
 }
 
 #pragma region PSO

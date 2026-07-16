@@ -58,7 +58,6 @@ namespace Engine {
 		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
 		uint32_t instanceCount = 0;													// インスタンス数
 		ModelMesh* mesh = nullptr;														// メッシュ
-		//Emiter emiter;															// エミッター
 		EmitData::IsFlag isFlag;											// 各フラグ
 		EmitData::EmitType emitType = EmitData::EmitType::kRandom;		// エミッターでの出方
 		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;	// 

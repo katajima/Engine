@@ -2,6 +2,7 @@
 #include "DirectXGame/engine/Base/Imgui/ImGuiUtility.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
+#include "DirectXGame/engine/Base/Texture/TextureManager.h"
 #include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 #include <algorithm>
@@ -21,6 +22,7 @@ namespace {
 	const char* kPrimitivePreviewParticleName = "__EffectPrimitivePreviewParticle";
 	const char* kPrimitivePreviewEmitterName = "__EffectPrimitivePreviewEmitter";
 	const char* kParticleGroupPreviewEmitterName = "__ParticleGroupPreviewEmitter";
+	const char* kFallbackParticleTexturePath = "resources/Texture/Image.dds";
 
 	bool DrawPrimitiveShapeParameters(Engine::ParticleGroupEditorData& data) {
 		// 選択中プリミティブに対応した形状パラメータだけを表示し、変更があれば保存対象にする。
@@ -201,6 +203,40 @@ namespace {
 		return changed;
 	}
 
+	bool DrawParticleTextureSelector(const char* comboLabel, const char* inputLabel,
+		std::array<char, 256>& texturePathBuffer, Engine::TextureManager* textureManager) {
+		// ロード済みテクスチャを選択できるようにし、必要な場合だけ手入力も許可する。
+		bool changed = false;
+		const std::string currentPath = texturePathBuffer.data();
+		const char* preview = currentPath.empty() ? "Select loaded texture" : currentPath.c_str();
+		if (ImGui::BeginCombo(comboLabel, preview)) {
+			if (textureManager != nullptr) {
+				for (const std::string& filePath : textureManager->GetTextureFilePaths()) {
+					const bool selected = currentPath == filePath;
+					if (ImGui::Selectable(filePath.c_str(), selected)) {
+						Engine::ImGuiUtility::SetInputTextBuffer(texturePathBuffer, filePath);
+						changed = true;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+		if (Engine::ImGuiUtility::InputText(inputLabel, texturePathBuffer)) {
+			changed = true;
+		}
+		return changed;
+	}
+
+	std::string ResolveParticleTexturePath(Engine::TextureManager* textureManager, const std::string& requestedPath) {
+		// 無効なパスは描画処理へ渡さず、常時ロード済みの仮テクスチャへ置き換える。
+		if (textureManager != nullptr && textureManager->HasTexture(requestedPath)) {
+			return requestedPath;
+		}
+		return kFallbackParticleTexturePath;
+	}
 	void CopyPrimitiveShapeData(const Engine::ParticleGroupEditorData& source, Engine::ParticleGroupEditorData& destination) {
 		// プリミティブ形状に関わる保存項目だけをパーティクル群へ反映する。
 		destination.meshSourceType = Engine::ParticleMeshSourceType::Primitive;
@@ -478,7 +514,10 @@ void EffectEditor::LoadRegisteredParticleGroups() {
 		globalVariables->SetGroupCategory(dataGroupName, "Effect/Particle");
 		serializer_.LoadParticleGroupData(particleName, data);
 		if (!particleManager->GetParticleGroups().Contains(particleName)) {
-			particleManager->CreateEditorParticleGroup(particleName, data);
+			// モデルがまだロードされていなくても、保存メタデータだけは失わない。
+			if (!particleManager->CreateEditorParticleGroup(particleName, data)) {
+				particleManager->SetEditorParticleGroupData(particleName, data);
+			}
 		}
 		else {
 			particleManager->SetEditorParticleGroupData(particleName, data);
@@ -969,16 +1008,39 @@ void EffectEditor::SaveAllEditorData() {
 	}
 
 	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
-	for (auto& particle : particleManager->GetParticleGroups()) {
-		if (particle.first == kPrimitivePreviewParticleName) {
-			// プレビュー用パーティクルは一時表示だけに使うため、保存データへ混ぜない。
+	std::set<std::string> particleNames;
+	for (const auto& particle : particleManager->GetParticleGroups()) {
+		particleNames.insert(particle.first);
+	}
+	for (const std::string& particleName : globalVariables->GetKeys(kParticleRegistryGroup)) {
+		particleNames.insert(particleName);
+	}
+	for (const std::string& groupName : globalVariables->GetGroupNames()) {
+		if (groupName.rfind(kParticleDataPrefix, 0) == 0) {
+			particleNames.insert(groupName.substr(std::strlen(kParticleDataPrefix)));
+		}
+	}
+	for (const std::string& particleName : particleNames) {
+		if (particleName == kPrimitivePreviewParticleName || IsDeletedParticleGroupName(particleName)) {
+			// プレビュー用・削除済みのパーティクル群は保存対象から除外する。
+			continue;
+		}
+		const std::string dataGroupName = kParticleDataPrefix + particleName;
+		if (!globalVariables->HasGroup(dataGroupName)) {
 			continue;
 		}
 
-		Engine::ParticleGroupEditorData particleData = particleManager->GetEditorParticleGroupData(particle.first);
-		serializer_.RegisterParticleGroupData(particle.first, particleData);
-		serializer_.SaveParticleGroupData(particle.first, particleData);
-		globalVariables->SaveFile(kParticleDataPrefix + particle.first);
+		Engine::ParticleGroupEditorData particleData;
+		if (particleManager->GetParticleGroups().Contains(particleName)) {
+			particleData = particleManager->GetEditorParticleGroupData(particleName);
+		}
+		else {
+			// 実体を作れない状態でも、ファイルにあるMeshSourceTypeやモデル名をそのまま保存する。
+			serializer_.LoadParticleGroupData(particleName, particleData);
+		}
+		serializer_.RegisterParticleGroupData(particleName, particleData);
+		serializer_.SaveParticleGroupData(particleName, particleData);
+		globalVariables->SaveFile(dataGroupName);
 	}
 
 	for (auto& [primitiveName, primitiveData] : primitiveDefinitionDatas_) {
@@ -1056,7 +1118,7 @@ void EffectEditor::DrawParticleGroupEditor() {
 
 	ImGui::SeparatorText("Particle Group Management");
 	Engine::ImGuiUtility::InputText("New Particle Group Name", newParticleGroupNameBuffer_);
-	Engine::ImGuiUtility::InputText("New Texture Path", newParticleTexturePathBuffer_);
+	DrawParticleTextureSelector("New Texture", "New Texture Path##newParticleTexture", newParticleTexturePathBuffer_, particleManager->GetTextureManager());
 
 	DrawParticleMeshSourceCombo("New Mesh Source", newParticleGroupData_.meshSourceType);
 	if (newParticleGroupData_.meshSourceType == Engine::ParticleMeshSourceType::Model) {
@@ -1248,20 +1310,30 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	ImGui::SeparatorText("Particle Group Detail");
 	bool recreate = false;
 	bool saveData = false;
-	if (ImGui::Button("Save This Particle Group")) {
-		// 変更が無い場合でも、現在のパーティクル群だけを明示的に保存できるようにする。
+	Engine::TextureManager* textureManager = particleManager->GetTextureManager();
+	const std::string resolvedTexturePath = ResolveParticleTexturePath(textureManager, data.texturePath);
+	if (resolvedTexturePath != data.texturePath) {
+		// 保存済みの無効パスも、画面を開いた時点で安全な仮テクスチャへ切り替える。
+		data.texturePath = resolvedTexturePath;
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 		saveData = true;
+		particleManagementMessage_ = "Texture path not found. Preview texture applied: " + data.texturePath;
 	}
 	if (!particleManagementMessage_.empty()) {
 		ImGui::TextWrapped("%s", particleManagementMessage_.c_str());
 	}
 
-	if (Engine::ImGuiUtility::InputText("Texture Path", editParticleTexturePathBuffer_)) {
+	if (DrawParticleTextureSelector("Texture", "Texture Path##editParticleTexture", editParticleTexturePathBuffer_, particleManager->GetTextureManager())) {
 		data.texturePath = editParticleTexturePathBuffer_.data();
 		saveData = true;
 	}
 	if (ImGui::Button("Apply Texture")) {
-		data.texturePath = editParticleTexturePathBuffer_.data();
+		const std::string requestedTexturePath = editParticleTexturePathBuffer_.data();
+		data.texturePath = ResolveParticleTexturePath(particleManager->GetTextureManager(), requestedTexturePath);
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
+		if (requestedTexturePath != data.texturePath) {
+			particleManagementMessage_ = "Texture path not found. Preview texture applied: " + data.texturePath;
+		}
 		if (group.material) {
 			group.material->tex_.diffuseFilePath = data.texturePath;
 			group.material->LoadTex();
@@ -1405,7 +1477,8 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	}
 
 	if (recreate) {
-		data.texturePath = editParticleTexturePathBuffer_.data();
+		data.texturePath = ResolveParticleTexturePath(textureManager, editParticleTexturePathBuffer_.data());
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 		if (!particleManager->RecreateEditorParticleGroup(particleName, data)) {
 			particleManagementMessage_ = "Could not recreate particle group. Check the mesh source settings.";
 			return;
@@ -1415,9 +1488,17 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 		saveData = true;
 	}
 
+	if (ImGui::Button("Save This Particle Group")) {
+		// すべての編集UIを通った後のdataを使い、選択中パーティクル群だけを明示的に保存する。
+		saveData = true;
+	}
+
 	if (saveData) {
+		// UIで編集したMeshSourceやModel名をそのまま保存データとして保持する。
+		data.texturePath = ResolveParticleTexturePath(textureManager, editParticleTexturePathBuffer_.data());
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 		particleManager->ApplyEditorParticleGroupData(particleName, data);
-		data = particleManager->GetEditorParticleGroupData(particleName);
+		particleManager->SetEditorParticleGroupData(particleName, data);
 		SaveParticleGroupData(particleName, data);
 	}
 }
@@ -1586,10 +1667,11 @@ void EffectEditor::AddParticleGroupFromEditor() {
 		return;
 	}
 
-	newParticleGroupData_.texturePath = newParticleTexturePathBuffer_.data();
-	if (newParticleGroupData_.texturePath.empty()) {
-		particleManagementMessage_ = "Texture path is required.";
-		return;
+	const std::string requestedTexturePath = newParticleTexturePathBuffer_.data();
+	newParticleGroupData_.texturePath = ResolveParticleTexturePath(effectComponent->GetParticleManager()->GetTextureManager(), requestedTexturePath);
+	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
+	if (requestedTexturePath != newParticleGroupData_.texturePath) {
+		particleManagementMessage_ = "Texture path not found. Preview texture applied: " + newParticleGroupData_.texturePath;
 	}
 	if (newParticleGroupData_.meshSourceType == Engine::ParticleMeshSourceType::Model) {
 		if (newParticleGroupData_.modelName.empty()) {
@@ -1707,7 +1789,8 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 
 void EffectEditorSerializer::RegisterParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
 	const std::string groupName = std::string(kParticleDataPrefix) + particleName;
-	globalVariables_->SetGroupCategory(groupName, "Particle");
+	// 個別保存とALL保存で同じEffect/Particleフォルダへ書き出し、読み込み時の重複を防ぐ。
+	globalVariables_->SetGroupCategory(groupName, "Effect/Particle");
 	globalVariables_->CreateGroup(groupName);
 	WriteParticleGroupData(particleName, data, false);
 }

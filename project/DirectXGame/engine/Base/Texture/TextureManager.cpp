@@ -2,6 +2,7 @@
 #include"DirectXGame/engine/Utility/StringUtility.h"
 #include<format>
 #include<unordered_map>
+#include<algorithm>
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
@@ -181,6 +182,26 @@ uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& fi
 	}
 	assert(0);
 	return 0;
+}
+
+bool Engine::TextureManager::HasTexture(const std::string& filePath) const
+{
+	// テクスチャを実際にGPUへ登録済みか確認し、無効なパスの読み込みを防ぐ。
+	std::lock_guard<std::mutex> lock(textureMutex_);
+	return textureDatas.contains(filePath);
+}
+
+std::vector<std::string> Engine::TextureManager::GetTextureFilePaths() const
+{
+	// TextureManagerが保持しているパスだけを返し、エディタの選択肢を有効なものに限定する。
+	std::lock_guard<std::mutex> lock(textureMutex_);
+	std::vector<std::string> filePaths;
+	filePaths.reserve(textureDatas.size());
+	for (const auto& [filePath, textureData] : textureDatas) {
+		filePaths.push_back(filePath);
+	}
+	std::sort(filePaths.begin(), filePaths.end());
+	return filePaths;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::string& filePath)

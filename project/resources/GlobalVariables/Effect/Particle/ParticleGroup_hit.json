@@ -112,9 +112,9 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    17295.0,
+                    17295.0,
+                    17295.0
                 ],
                 "translate": [
                     0.0,
@@ -138,6 +138,15 @@
         "material.useSpecularMap": {
             "type": "bool",
             "value": false
+        },
+        "meshSourceType": {
+            "enumType": "ParticleMeshSourceType",
+            "type": "enum",
+            "value": 0
+        },
+        "modelName": {
+            "type": "string",
+            "value": ""
         },
         "rasterizerType": {
             "enumType": "RasterizerType",
@@ -360,9 +369,9 @@
                     0.0
                 ],
                 "scale": [
-                    0.0,
-                    0.0,
-                    0.0
+                    1.0,
+                    1.0,
+                    1.0
                 ],
                 "translate": [
                     0.0,

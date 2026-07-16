@@ -35,6 +35,7 @@ namespace Engine {
 	class EffectManager;
 	class LineCommon;
 	class PrimitiveCommon;
+	class TextureManager;
 
 	// エディタパーティクル群が参照するメッシュの生成元です。
 	enum class ParticleMeshSourceType {
@@ -143,6 +144,8 @@ namespace Engine {
 		void SetEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
 		// エディタ用保存データを実際のパーティクル群へ反映
 		void ApplyEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
+		// エディタのテクスチャ選択UIから利用するTextureManagerを取得
+		TextureManager* GetTextureManager() const;
 
 		// カメラセット
 		void SetCamera(Camera* camera) { this->camera = camera; }
