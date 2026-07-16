@@ -14,6 +14,15 @@ namespace Character {
 			return request;
 		}
 
+		// 範囲爆撃必殺技中に敵の時間を停止するリクエストを生成する
+		static SlowMotionRequest CreateRangeBombingTimeStop() {
+			SlowMotionRequest request;		// 必殺技のphase0〜1が続く間、毎フレーム更新して停止を維持する
+			request.timeScale_ = 0.0f;
+			request.duration_ = 0.1f;
+			request.priority_ = 20;
+			return request;
+		}
+
 		// 対象へ適用したい時間倍率を取得する
 		float GetTimeScale() const { return timeScale_; }
 

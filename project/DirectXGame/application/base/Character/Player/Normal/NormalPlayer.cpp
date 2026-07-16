@@ -213,11 +213,20 @@ namespace Character {
 		// 被弾後無敵の残り時間を更新し、連続ヒットによる多重ダメージを防ぐ。
 		UpdateDamageInvincible(GetTime());
 
-		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
+		// 範囲爆撃必殺技のphase0〜1では、対象敵の時間を停止する
+		if (slowMotionManager_) {
+			if (special_ && special_->IsAction() && special_->GetPhese() <= 1) {
+				slowMotionManager_->Request(SlowMotionRequest::CreateRangeBombingTimeStop());
+			}
+			else {
+				slowMotionManager_->Stop();
+			}
+		}
+
+		// スロー演出管理クラスを更新し、時間倍率を対象敵へ反映する
 		if (slowMotionManager_) {
 			slowMotionManager_->Update(targetCharacters);
 		}
-
 		// 回避成功ポストエフェクトはスロー中でも実時間で解除したいので、固定デルタタイムで進める
 		if (dodgeSuccessEffect_) {
 			dodgeSuccessEffect_->Update(Engine::MyGame::BaseDeltaTime());
