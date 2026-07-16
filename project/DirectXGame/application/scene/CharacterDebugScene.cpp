@@ -36,6 +36,7 @@ void CharacterDebugScene::Initialize() {
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 }
@@ -62,6 +63,7 @@ void CharacterDebugScene::Update(){
 
 void CharacterDebugScene::Draw3D(){
 	////3Dオブジェクトの描画
+	bulletManager_->Draw();
 	bulletManager_->DrawEffect();
 }
 

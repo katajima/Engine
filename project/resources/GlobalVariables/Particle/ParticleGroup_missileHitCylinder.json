@@ -1,0 +1,375 @@
+{
+    "ParticleGroup_missileHitCylinder": {
+        "blendType": {
+            "enumType": "BlendType",
+            "type": "enum",
+            "value": 0
+        },
+        "emitType": {
+            "enumType": "EmitType",
+            "type": "enum",
+            "value": 0
+        },
+        "gravitationalAcceleration": {
+            "type": "float",
+            "value": 9.800000190734863
+        },
+        "isEditorPrimitive": {
+            "type": "bool",
+            "value": true
+        },
+        "isFlag.billboardRotZ": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isAcceleration": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isAlpha": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isBounce": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isGravity": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isLifeTimeScale": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isLifeTimeVelocity": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isLine": {
+            "type": "bool",
+            "value": true
+        },
+        "isFlag.isLineInterpolation": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isRotateVelocity": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.isScaling": {
+            "type": "bool",
+            "value": false
+        },
+        "isFlag.usebillboard": {
+            "type": "bool",
+            "value": true
+        },
+        "isFlag.usebillboardY": {
+            "type": "bool",
+            "value": false
+        },
+        "isUVClamp": {
+            "type": "bool",
+            "value": true
+        },
+        "material.alpha": {
+            "type": "float",
+            "value": 1.0
+        },
+        "material.alphaClipping": {
+            "type": "float",
+            "value": 0.5
+        },
+        "material.color": {
+            "type": "Vector4",
+            "value": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "material.enableLighting": {
+            "type": "bool",
+            "value": false
+        },
+        "material.environmentCoefficient": {
+            "type": "float",
+            "value": 0.5
+        },
+        "material.shininess": {
+            "type": "float",
+            "value": 20.0
+        },
+        "material.transform": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        "material.useEnvironment": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useLig": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useNormalMap": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useSpecularMap": {
+            "type": "bool",
+            "value": false
+        },
+        "rasterizerType": {
+            "enumType": "RasterizerType",
+            "type": "enum",
+            "value": 0
+        },
+        "shape.arrow.headLength": {
+            "type": "float",
+            "value": 8.0
+        },
+        "shape.arrow.headRadius": {
+            "type": "float",
+            "value": 8.0
+        },
+        "shape.arrow.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.arrow.shaftLength": {
+            "type": "float",
+            "value": 16.0
+        },
+        "shape.arrow.shaftRadius": {
+            "type": "float",
+            "value": 4.0
+        },
+        "shape.circle.radius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.circle.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.crescent.distance": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.crescent.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.crescent.outerRadius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.crescent.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.cross.armLength": {
+            "type": "float",
+            "value": 10.0
+        },
+        "shape.cross.armWidth": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.cube.size": {
+            "type": "Vector3",
+            "value": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "shape.cylinder.height": {
+            "type": "float",
+            "value": 10.0
+        },
+        "shape.cylinder.innerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.cylinder.isCover": {
+            "type": "bool",
+            "value": true
+        },
+        "shape.cylinder.outerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.cylinder.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.plane.height": {
+            "type": "float",
+            "value": 1.0
+        },
+        "shape.plane.width": {
+            "type": "float",
+            "value": 1.0
+        },
+        "shape.pyramid.height": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.pyramid.radius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.pyramid.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.ring.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.ring.outerRadius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.ring.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.sphere.isTopBased": {
+            "type": "bool",
+            "value": false
+        },
+        "shape.sphere.latitudeSegments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.sphere.longitudeSegments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.sphere.radius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.star.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.star.outerRadius": {
+            "type": "float",
+            "value": 5.0
+        },
+        "shape.star.segments": {
+            "type": "int32_t",
+            "value": 5
+        },
+        "shape.torus.innerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.torus.outerRadius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.torus.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.torus.tubeSegments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shape.triangle.leftPos": {
+            "type": "Vector2",
+            "value": [
+                1.0,
+                -1.0
+            ]
+        },
+        "shape.triangle.rightPos": {
+            "type": "Vector2",
+            "value": [
+                -1.0,
+                -1.0
+            ]
+        },
+        "shape.triangle.upPos": {
+            "type": "Vector2",
+            "value": [
+                0.0,
+                1.0
+            ]
+        },
+        "shape.tube.height": {
+            "type": "float",
+            "value": 10.0
+        },
+        "shape.tube.innerRadius": {
+            "type": "float",
+            "value": 2.0
+        },
+        "shape.tube.radius": {
+            "type": "float",
+            "value": 3.0
+        },
+        "shape.tube.segments": {
+            "type": "int32_t",
+            "value": 16
+        },
+        "shapeType": {
+            "enumType": "ShapeType",
+            "type": "enum",
+            "value": 0
+        },
+        "texturePath": {
+            "type": "string",
+            "value": "resources/Texture/effect/gradationLine.dds"
+        },
+        "topBottom": {
+            "enumType": "TopBottom",
+            "type": "enum",
+            "value": 1
+        },
+        "uvTransformVelocity": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        }
+    }
+}

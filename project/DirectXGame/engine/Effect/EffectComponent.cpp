@@ -13,6 +13,17 @@ void Engine::EffectComponent::Init(EntityManager* entityManager, GlobalVariables
 	this->particleManager->SetPrimitiveCommon(this->primitiveCommon);
 }
 
+Engine::ModelManager* Engine::EffectComponent::GetModelManager()
+{
+	if (entityManager == nullptr || entityManager->GetObject3dCommon() == nullptr ||
+		entityManager->GetObject3dCommon()->GetDxCommon() == nullptr) {
+		return nullptr;
+	}
+
+	// エフェクトエディターのモデル選択は、DirectXCommonが管理するロード済みモデル一覧を使う。
+	return entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager();
+}
+
 void Engine::EffectComponent::AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype, WorldTransform* parent)
 {
 

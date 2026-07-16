@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "HitBox.h"
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
 
@@ -88,7 +88,7 @@ namespace HitBox {
 
 		coll->SetTag(tag);			// タグ設定
 		coll->SetLayer(layer);		// レイヤー設定
-		coll->SetCollisionMask((1 << static_cast<uint32_t>(mask)));	// マスク設定
+		coll->SetCollisionMask(static_cast<uint32_t>(mask));	// マスク設定
 
 		return std::move(coll);
 	}

@@ -1,4 +1,4 @@
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -67,7 +67,7 @@ namespace Character {
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->SetTag(CollisionTag::Player);
-		sphere->SetLayer(CollisionLayer::ALL);
+		sphere->SetLayer(CollisionLayer::Player);
 		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = 1.0f; // 半径を適宜設定
 		sphere->SetIsDebugLine(true);

@@ -1,6 +1,7 @@
-#include "EffectEditor.h"
+﻿#include "EffectEditor.h"
 #include "DirectXGame/engine/Base/Imgui/ImGuiUtility.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 #include <algorithm>
@@ -157,8 +158,51 @@ namespace {
 		return changed;
 	}
 
+	bool DrawParticleMeshSourceCombo(const char* label, Engine::ParticleMeshSourceType& meshSourceType) {
+		// パーティクル群が使うメッシュを、エディタ生成プリミティブかロード済みモデルから選ばせる。
+		static const char* kMeshSourceLabels[] = {
+			"Primitive",
+			"Model",
+		};
+		return Engine::ImGuiUtility::SelectEnum(label, kMeshSourceLabels, meshSourceType);
+	}
+
+	bool DrawModelNameCombo(const char* label, std::string& modelName, Engine::ModelManager* modelManager) {
+		if (modelManager == nullptr || modelManager->GetModel().empty()) {
+			ImGui::TextDisabled("No loaded models.");
+			return false;
+		}
+
+		// ModelManagerにロード済みのモデル名だけを選択肢にして、未ロード参照を避ける。
+		bool changed = false;
+		const char* preview = modelName.empty() ? "No Model" : modelName.c_str();
+		if (modelName.empty()) {
+			// 生成元をModelへ切り替えた直後でも再作成できるよう、先頭モデルを仮選択する。
+			modelName = modelManager->GetModel().begin()->first;
+			preview = modelName.c_str();
+			changed = true;
+		}
+
+		if (ImGui::BeginCombo(label, preview)) {
+			for (const auto& [loadedModelName, model] : modelManager->GetModel()) {
+				const bool selected = modelName == loadedModelName;
+				if (ImGui::Selectable(loadedModelName.c_str(), selected)) {
+					modelName = loadedModelName;
+					changed = true;
+				}
+				if (selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		return changed;
+	}
+
 	void CopyPrimitiveShapeData(const Engine::ParticleGroupEditorData& source, Engine::ParticleGroupEditorData& destination) {
 		// プリミティブ形状に関わる保存項目だけをパーティクル群へ反映する。
+		destination.meshSourceType = Engine::ParticleMeshSourceType::Primitive;
+		destination.modelName.clear();
 		destination.shapeType = source.shapeType;
 		destination.plane = source.plane;
 		destination.triangle = source.triangle;
@@ -282,6 +326,8 @@ void EffectEditor::SetEffectGlobalData(const std::string& name, EmitterShapeType
 	emit->GetFrequency() = data.frequency;			// 出現頻度
 	emit->GetEmitData() = data.emitData;			// 出現データ
 	emit->SetIsFlag(data.isFlag);
+	// UVスクロールなどのパーティクルマテリアル変化をエミッターへ反映する。
+	emit->SetUvTransformVeloctiy(data.uvTransformVeloctiy);
 	emit->SetAlphaClipping(data.alphaClipping);		// アルファクリッピング
 	emit->SetEnableLighting(data.enableLighting);	// ライティングの有無
 	emit->SetLifeTimeScaleTopBottom(data.topBottom);// ライフタイムスケールの基準
@@ -614,6 +660,7 @@ void EffectEditor::EnsurePrimitivePreview(const std::string& primitiveName, cons
 		!particleManager->GetParticleGroups().Contains(kPrimitivePreviewParticleName);
 
 	Engine::ParticleGroupEditorData previewData = data;
+	previewData.meshSourceType = Engine::ParticleMeshSourceType::Primitive;
 	previewData.texturePath = data.texturePath.empty() ? "resources/Texture/Image.dds" : data.texturePath;
 	previewData.blendType = EmitData::BlendType::MODE_ADD;
 	previewData.rasterizerType = EmitData::RasterizerType::MODE_SOLID_NONE;
@@ -957,7 +1004,13 @@ void EffectEditor::DrawParticleGroupEditor() {
 	Engine::ImGuiUtility::InputText("New Particle Group Name", newParticleGroupNameBuffer_);
 	Engine::ImGuiUtility::InputText("New Texture Path", newParticleTexturePathBuffer_);
 
-	DrawShapeTypeCombo("New Shape", newParticleGroupData_.shapeType);
+	DrawParticleMeshSourceCombo("New Mesh Source", newParticleGroupData_.meshSourceType);
+	if (newParticleGroupData_.meshSourceType == Engine::ParticleMeshSourceType::Model) {
+		DrawModelNameCombo("New Model", newParticleGroupData_.modelName, effectComponent->GetModelManager());
+	}
+	else {
+		DrawShapeTypeCombo("New Shape", newParticleGroupData_.shapeType);
+	}
 
 	static const char* RasterizerLabels[] = {
 		"Solid Back",
@@ -979,6 +1032,8 @@ void EffectEditor::DrawParticleGroupEditor() {
 	if (!particleManagementMessage_.empty()) {
 		ImGui::TextWrapped("%s", particleManagementMessage_.c_str());
 	}
+
+	ImGui::SeparatorText("Particle Group");
 
 	if (Engine::ImGuiUtility::SelectMapKey("Selected Particle Group", selectedParticleGroupName_,
 		particleManager->GetParticleGroups(), "No Particle Group")) {
@@ -1059,23 +1114,34 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	}
 	Engine::ImGuiUtility::HelpMarker("Texture Path is applied immediately with Apply Texture. Shape changes recreate the group.");
 
-	if (!primitiveDefinitionDatas_.empty()) {
-		ImGui::SeparatorText("Apply Primitive Definition");
-		Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
-			primitiveDefinitionDatas_, "No Primitive Definition");
-		if (ImGui::Button("Apply Primitive To Particle") && !selectedApplyPrimitiveName_.empty()) {
-			ApplyPrimitiveDefinitionToParticleGroup(particleName, selectedApplyPrimitiveName_);
-			data = particleManager->GetEditorParticleGroupData(particleName);
-			recreate = false;
-			saveData = false;
-		}
-	}
-
-	if (DrawShapeTypeCombo("Shape", data.shapeType)) {
+	if (DrawParticleMeshSourceCombo("Mesh Source", data.meshSourceType)) {
 		recreate = true;
 	}
-	if (DrawPrimitiveShapeParameters(data)) {
-		saveData = true;
+
+	if (data.meshSourceType == Engine::ParticleMeshSourceType::Model) {
+		if (DrawModelNameCombo("Model", data.modelName, effectComponent->GetModelManager())) {
+			recreate = true;
+		}
+	}
+	else {
+		if (!primitiveDefinitionDatas_.empty()) {
+			ImGui::SeparatorText("Apply Primitive Definition");
+			Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
+				primitiveDefinitionDatas_, "No Primitive Definition");
+			if (ImGui::Button("Apply Primitive To Particle") && !selectedApplyPrimitiveName_.empty()) {
+				ApplyPrimitiveDefinitionToParticleGroup(particleName, selectedApplyPrimitiveName_);
+				data = particleManager->GetEditorParticleGroupData(particleName);
+				recreate = false;
+				saveData = false;
+			}
+		}
+
+		if (DrawShapeTypeCombo("Shape", data.shapeType)) {
+			recreate = true;
+		}
+		if (DrawPrimitiveShapeParameters(data)) {
+			saveData = true;
+		}
 	}
 
 	static const char* RasterizerLabels[] = {
@@ -1178,7 +1244,10 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 
 	if (recreate) {
 		data.texturePath = editParticleTexturePathBuffer_.data();
-		particleManager->RecreateEditorParticleGroup(particleName, data);
+		if (!particleManager->RecreateEditorParticleGroup(particleName, data)) {
+			particleManagementMessage_ = "Could not recreate particle group. Check the mesh source settings.";
+			return;
+		}
 		selectedParticleGroupName_ = particleName;
 		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 		saveData = true;
@@ -1363,7 +1432,13 @@ void EffectEditor::AddParticleGroupFromEditor() {
 		particleManagementMessage_ = "Texture path is required.";
 		return;
 	}
-	if (newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::None ||
+	if (newParticleGroupData_.meshSourceType == Engine::ParticleMeshSourceType::Model) {
+		if (newParticleGroupData_.modelName.empty()) {
+			particleManagementMessage_ = "Choose a model for the particle group.";
+			return;
+		}
+	}
+	else if (newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::None ||
 		newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::Max) {
 		particleManagementMessage_ = "Choose a valid primitive shape.";
 		return;
@@ -1480,6 +1555,8 @@ void EffectEditorSerializer::WriteParticleGroupData(const std::string& particleN
 		Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
 	// パーティクル群の全保存項目を登録・保存で共有する
 	writer.Value(groupName, "texturePath", data.texturePath);
+	writer.EnumValue<Engine::ParticleMeshSourceType>(groupName, "meshSourceType", data.meshSourceType, "ParticleMeshSourceType");
+	writer.Value(groupName, "modelName", data.modelName);
 	writer.EnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
 	writer.Value(groupName, "shape.plane.width", data.plane.width);
 	writer.Value(groupName, "shape.plane.height", data.plane.height);
@@ -1564,6 +1641,8 @@ void EffectEditorSerializer::LoadParticleGroupData(const std::string& particleNa
 	const std::string groupName = kParticleDataPrefix + particleName;
 	// 旧形式の保存ファイルでも読み込めるよう、追加項目はキーがある場合だけ上書きする。
 	data.texturePath = globalVariables_->GetValue<std::string>(groupName, "texturePath");
+	if (globalVariables_->HasKey(groupName, "meshSourceType")) data.meshSourceType = globalVariables_->GetEnumValue<Engine::ParticleMeshSourceType>(groupName, "meshSourceType");
+	if (globalVariables_->HasKey(groupName, "modelName")) data.modelName = globalVariables_->GetValue<std::string>(groupName, "modelName");
 	data.shapeType = globalVariables_->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
 	if (globalVariables_->HasKey(groupName, "shape.plane.width")) data.plane.width = globalVariables_->GetValue<float>(groupName, "shape.plane.width");
 	if (globalVariables_->HasKey(groupName, "shape.plane.height")) data.plane.height = globalVariables_->GetValue<float>(groupName, "shape.plane.height");
@@ -1712,6 +1791,13 @@ void EffectEditorSerializer::WriteEffectData(const std::string& name, const Effe
 	writer.Value(name, "emitData.sizeAmount.range", data.emitData.sizeAmount.range);
 	writer.Value(name, "emitData.velocity.median", data.emitData.velocity.median);
 	writer.Value(name, "emitData.velocity.range", data.emitData.velocity.range);
+	writer.Value(name, "emitData.isEmit", data.emitData.isEmit);
+	writer.Value(name, "emitData.isLoop", data.emitData.isLoop);
+	writer.Value(name, "emitData.isUniformSize", data.emitData.isUniformSize);
+	writer.Value(name, "emitData.isDirectionRotate", data.emitData.isDirectionRotate);
+	writer.Value(name, "emitData.isNoise", data.emitData.isNoise);
+	writer.Value(name, "emitData.direction", data.emitData.direction);
+	writer.Value(name, "emitData.uvTransformVeloctiy", data.uvTransformVeloctiy);
 
 	writer.Value(name, "emitData.alphaClipping", data.alphaClipping);
 	writer.Value(name, "emitData.enableLighting", data.enableLighting);
@@ -1769,6 +1855,13 @@ void EffectEditorSerializer::LoadEffectData(const std::string& name, EffectGloba
 	data.emitData.sizeAmount.range = globalVariables_->GetValue<Vector3>(name, "emitData.sizeAmount.range");
 	data.emitData.velocity.median = globalVariables_->GetValue<Vector3>(name, "emitData.velocity.median");
 	data.emitData.velocity.range = globalVariables_->GetValue<Vector3>(name, "emitData.velocity.range");
+	if (globalVariables_->HasKey(name, "emitData.isEmit")) data.emitData.isEmit = globalVariables_->GetValue<bool>(name, "emitData.isEmit");
+	if (globalVariables_->HasKey(name, "emitData.isLoop")) data.emitData.isLoop = globalVariables_->GetValue<bool>(name, "emitData.isLoop");
+	if (globalVariables_->HasKey(name, "emitData.isUniformSize")) data.emitData.isUniformSize = globalVariables_->GetValue<bool>(name, "emitData.isUniformSize");
+	if (globalVariables_->HasKey(name, "emitData.isDirectionRotate")) data.emitData.isDirectionRotate = globalVariables_->GetValue<bool>(name, "emitData.isDirectionRotate");
+	if (globalVariables_->HasKey(name, "emitData.isNoise")) data.emitData.isNoise = globalVariables_->GetValue<bool>(name, "emitData.isNoise");
+	if (globalVariables_->HasKey(name, "emitData.direction")) data.emitData.direction = globalVariables_->GetValue<int>(name, "emitData.direction");
+	if (globalVariables_->HasKey(name, "emitData.uvTransformVeloctiy")) data.uvTransformVeloctiy = globalVariables_->GetValue<Transform>(name, "emitData.uvTransformVeloctiy");
 
 	data.alphaClipping = globalVariables_->GetValue<float>(name, "emitData.alphaClipping");
 	data.enableLighting = globalVariables_->GetValue<int>(name, "emitData.enableLighting");
@@ -1808,10 +1901,10 @@ void EffectEditorSerializer::LoadEffectData(const std::string& name, EffectGloba
 	data.topBottom = globalVariables_->GetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom");
 }
 void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& data) {
-	ImGui::Begin("EffectEditor");
-
+	// EffectウィンドウのEmitter Settingsタブ内へ直接描画し、別ウィンドウに分かれないようにする。
+	ImGui::SeparatorText("Emitter Detail");
 	// パーティクル選択
-	Engine::ImGuiManager::Select("Selected Effect", data.particleName, effectComponent->GetParticleManager()->GetParticleGroups());
+	Engine::ImGuiManager::Select("Particle Group", data.particleName, effectComponent->GetParticleManager()->GetParticleGroups());
 
 	static const char* ShapeTypeLabels[] = {
 		"AABB",		// AABB
@@ -1852,6 +1945,9 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	// 出現
 	ImGui::DragInt("出現量(中央値)", &data.emitData.count.median, 0.1f);
 	ImGui::DragInt("出現量(振れ幅)", &data.emitData.count.range, 0.1f);
+	// エミット制御も保存対象なので、エディタから状態を確認・変更できるようにする。
+	ImGui::Checkbox("出現フラグ", &data.emitData.isEmit);
+	ImGui::Checkbox("ループ", &data.emitData.isLoop);
 
 	// 生存時間
 	ImGui::DragFloat("生存時間(中央値)", &data.emitData.lifeTime.median, 0.1f);
@@ -1867,11 +1963,20 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 		ImGui::Checkbox("ビルボードのz回転するか", &data.isFlag.billboardRotZ);
 		ImGui::Checkbox("ビルボードするか", &data.isFlag.usebillboard);
 		ImGui::Checkbox("ビルボードY軸するか", &data.isFlag.usebillboardY);
+		ImGui::Checkbox("進行方向で回転", &data.emitData.isDirectionRotate);
 
+	}
+	if (ImGui::CollapsingHeader("UV")) {
+		// パーティクルマテリアルのUVスクロール速度を保存対象として編集する。
+		ImGui::DragFloat3("UV移動速度", &data.uvTransformVeloctiy.translate.x, 0.001f);
+		ImGui::DragFloat3("UV回転速度", &data.uvTransformVeloctiy.rotate.x, 0.001f);
+		ImGui::DragFloat3("UV拡縮速度", &data.uvTransformVeloctiy.scale.x, 0.001f);
 	}
 	if (ImGui::CollapsingHeader("速度")) {
 		ImGui::DragFloat3("速度(中央値)", &data.emitData.velocity.median.x, 0.1f);
 		ImGui::DragFloat3("速度(振れ幅)", &data.emitData.velocity.range.x, 0.1f);
+		ImGui::Checkbox("ノイズを使用", &data.emitData.isNoise);
+		ImGui::DragInt("ノイズ方向", &data.emitData.direction, 1.0f, 0, 3);
 
 		ImGui::Checkbox("生存時間による速度変化を使用するか", &data.isFlag.isLifeTimeVelocity);
 		ImGui::Checkbox("加速度を使用するか", &data.isFlag.isAcceleration);
@@ -1889,6 +1994,7 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	if (ImGui::CollapsingHeader("拡縮")) {
 		ImGui::DragFloat3("サイズ(中央値)", &data.emitData.size.median.x, 0.1f);
 		ImGui::DragFloat3("サイズ(振れ幅)", &data.emitData.size.range.x, 0.1f);
+		ImGui::Checkbox("XYZ一律サイズ", &data.emitData.isUniformSize);
 		ImGui::Checkbox("生存時間でのサイズ変化を使用するか", &data.isFlag.isLifeTimeScale_);
 		ImGui::Checkbox("サイズ変化を使用するか", &data.isFlag.isScaling_);
 
@@ -1973,7 +2079,6 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 			break;
 		}
 	}
-	ImGui::End();
 }
 
 void EffectEditor::Emit(const std::string& name, const Vector3& pos) {

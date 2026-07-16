@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <cstddef>
@@ -21,7 +21,7 @@ public:
 	// 描画
 	void Draw() override;
 	//　描画エフェクト
-	void DrawP() override;
+	void DrawEffect() override;
 	// 描画2D
 	void Draw2D() override;
 
@@ -73,12 +73,14 @@ private: //パーティクルエミッター
 
 	Engine::Object3d* hitObject2_ = nullptr;
 
+	Engine::WorldTransform trailTransform_;
+
 private: // 一旦
 
 	struct ProvisionalData {
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
-		const float trailWidth = 0.2f; // トレイルの幅
+		const float trailWidth = 0.5f; // トレイルの幅
 		const float trailMinEmitDistance = 0.05f; // トレイル頂点を追加する最小移動距離
 		const size_t trailMaxSegmentCount = 96; // トレイルが保持する最大分割数
 		const Color trailColor = { 0.35f,0.85f,1.0f,0.85f }; // トレイルの色

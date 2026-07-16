@@ -72,7 +72,7 @@
         },
         "isUVClamp": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "material.alpha": {
             "type": "float",
@@ -340,7 +340,7 @@
         "shapeType": {
             "enumType": "ShapeType",
             "type": "enum",
-            "value": 7
+            "value": 5
         },
         "texturePath": {
             "type": "string",

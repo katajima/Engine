@@ -384,6 +384,8 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, model->GetModelData().mesh[0].get(), rasteType, blendType);
 	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
 		.texturePath = textureFilePath,
+		.meshSourceType = ParticleMeshSourceType::Model,
+		.modelName = name,
 		.shapeType = ShapeParameter::ShapeType::Plane,
 		.rasterizerType = rasteType,
 		.blendType = blendType,
@@ -409,6 +411,7 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, primitive->GetModelMesh(), rasteType, blendType);
 	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
 		.texturePath = textureFilePath,
+		.meshSourceType = ParticleMeshSourceType::Primitive,
 		.shapeType = ShapeParameter::ShapeType::Plane,
 		.rasterizerType = rasteType,
 		.blendType = blendType,
@@ -421,21 +424,45 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 
 bool Engine::ParticleManager::CreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data)
 {
-	if (name.empty() || particleGroups.Contains(name) || primitiveCommon == nullptr) {
+	if (name.empty() || particleGroups.Contains(name)) {
 		return false;
 	}
 
-	// パーティクル群が参照するメッシュの寿命を保つため、プリミティブをManager側で所有する。
-	auto primitive = CreateEditorPrimitive(data.shapeType);
-	primitive->Initialize(primitiveCommon, data.texturePath);
-	ApplyPrimitiveShapeData(primitive.get(), data);
+	ParticleGroupEditorData storedData = data;
+	if (storedData.meshSourceType == ParticleMeshSourceType::Model) {
+		if (storedData.modelName.empty() || dxCommon == nullptr || dxCommon->GetModelManager() == nullptr) {
+			return false;
+		}
 
-	BasePrimitive* primitivePtr = primitive.get();
-	editorParticlePrimitives_[name] = std::move(primitive);
-	ParticleFunction::Create(particleGroups[name], name, data.texturePath, kNumMaxInstance,
-		dxCommon, primitivePtr->GetModelMesh(), data.rasterizerType, data.blendType);
-	editorParticleGroupDatas_[name] = data;
-	editorParticleGroupDatas_[name].isEditorPrimitive = true;
+		// モデル使用時はModelManagerが所有するロード済みモデルのメッシュを参照する。
+		Model* model = dxCommon->GetModelManager()->FindModel(storedData.modelName);
+		if (model == nullptr || model->GetModelData().mesh.empty() || model->GetModelData().mesh[0] == nullptr) {
+			return false;
+		}
+
+		editorParticlePrimitives_.erase(name);
+		ParticleFunction::Create(particleGroups[name], name, storedData.texturePath, kNumMaxInstance,
+			dxCommon, model->GetModelData().mesh[0].get(), storedData.rasterizerType, storedData.blendType);
+		storedData.isEditorPrimitive = false;
+	}
+	else {
+		if (primitiveCommon == nullptr) {
+			return false;
+		}
+
+		// プリミティブ使用時は、パーティクル群が参照するメッシュの寿命をManager側で保持する。
+		auto primitive = CreateEditorPrimitive(storedData.shapeType);
+		primitive->Initialize(primitiveCommon, storedData.texturePath);
+		ApplyPrimitiveShapeData(primitive.get(), storedData);
+
+		BasePrimitive* primitivePtr = primitive.get();
+		editorParticlePrimitives_[name] = std::move(primitive);
+		ParticleFunction::Create(particleGroups[name], name, storedData.texturePath, kNumMaxInstance,
+			dxCommon, primitivePtr->GetModelMesh(), storedData.rasterizerType, storedData.blendType);
+		storedData.isEditorPrimitive = true;
+	}
+
+	editorParticleGroupDatas_[name] = storedData;
 	ApplyEditorParticleGroupData(name, editorParticleGroupDatas_[name]);
 	return true;
 }
@@ -446,6 +473,17 @@ bool Engine::ParticleManager::RecreateEditorParticleGroup(const std::string& nam
 		return false;
 	}
 
+	if (data.meshSourceType == ParticleMeshSourceType::Model) {
+		if (data.modelName.empty() || dxCommon == nullptr || dxCommon->GetModelManager() == nullptr ||
+			dxCommon->GetModelManager()->FindModel(data.modelName) == nullptr) {
+			return false;
+		}
+	}
+	else if (primitiveCommon == nullptr) {
+		return false;
+	}
+
+	// 新しい参照先が有効なことを確認してから、既存グループを作り直す。
 	RemoveParticleGroup(name);
 	return CreateEditorParticleGroup(name, data);
 }
@@ -522,10 +560,17 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 	// 保存データをパーティクル群の実体へ反映し、次回保存時にも同じ値を取り出せるよう保持する。
 	ParticleGroup& group = particleGroups[name];
 	auto primitiveIt = editorParticlePrimitives_.find(name);
-	if (primitiveIt != editorParticlePrimitives_.end()) {
+	if (data.meshSourceType == ParticleMeshSourceType::Primitive && primitiveIt != editorParticlePrimitives_.end()) {
 		// プリミティブ形状を変更した場合は、パーティクル群が参照するメッシュも再生成する。
 		ApplyPrimitiveShapeData(primitiveIt->second.get(), data);
 		group.mesh = primitiveIt->second->GetModelMesh();
+	}
+	else if (data.meshSourceType == ParticleMeshSourceType::Model && dxCommon && dxCommon->GetModelManager()) {
+		// モデル名だけ変わった場合も、ロード済みモデルのメッシュへ参照を差し替える。
+		Model* model = dxCommon->GetModelManager()->FindModel(data.modelName);
+		if (model && !model->GetModelData().mesh.empty() && model->GetModelData().mesh[0]) {
+			group.mesh = model->GetModelData().mesh[0].get();
+		}
 	}
 	group.rasteType = data.rasterizerType;
 	group.blendType = data.blendType;

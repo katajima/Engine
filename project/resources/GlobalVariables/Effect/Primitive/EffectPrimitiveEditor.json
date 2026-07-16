@@ -3,6 +3,10 @@
         "HitRing": {
             "type": "string",
             "value": "HitRing"
+        },
+        "HitStar": {
+            "type": "string",
+            "value": "HitStar"
         }
     }
 }

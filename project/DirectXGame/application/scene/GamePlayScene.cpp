@@ -1,4 +1,4 @@
-#include "GamePlayScene.h"
+﻿#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -75,6 +75,9 @@ void GamePlayScene::Initialize() {
 
 	// カメラ設定
 	SetCamera(cameraManager->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager->GetCamera());
 }
 
 // 終了
@@ -214,7 +217,9 @@ void GamePlayScene::Update()
 // 3D描画
 void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
+	gameplaySession_->GetBulletManager()->Draw();
 	gameplaySession_->GetBulletManager()->DrawEffect();
+
 	// ゲーム進行
 	gameFlowController_->Draw();
 }

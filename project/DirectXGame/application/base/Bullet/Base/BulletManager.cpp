@@ -1,4 +1,4 @@
-#include "BulletManager.h"
+﻿#include "BulletManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
@@ -68,7 +68,7 @@ void BulletManager::Draw() {
 void BulletManager::DrawEffect() {
 	// エフェクト描画
 	for (auto& bullet : bullets_) {
-		bullet->DrawP();
+		bullet->DrawEffect();
 	}
 
 	for (auto& projectile : projectiles_) {

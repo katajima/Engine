@@ -43,7 +43,7 @@ public:
 	// 描画3d
 	virtual void Draw() = 0;
 	// 描画エフェクト
-	virtual void DrawP() = 0;
+	virtual void DrawEffect() = 0;
 	// 描画2d
 	virtual void Draw2D() = 0;
 	

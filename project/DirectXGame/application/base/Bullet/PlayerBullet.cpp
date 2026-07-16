@@ -23,7 +23,7 @@ void PlayerBullet::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	param.maxPierceCount = info.type == ProjectileType::PENETRATION ? (std::numeric_limits<int>::max)() : 0;
 	param.collisionTag = CollisionTag::PlayerAttack;
 	param.collisionLayer = CollisionLayer::PlayerAttack;
-	param.collisionMask = 1u << static_cast<uint32_t>(CollisionLayer::Enemy);
+	param.collisionMask = static_cast<uint32_t>(CollisionLayer::Enemy);
 
 	Projectile::ProjectileSpawnInfo resolvedSpawnInfo = spawnInfo;
 	resolvedSpawnInfo.scale = Vector3::Set(0.2f);

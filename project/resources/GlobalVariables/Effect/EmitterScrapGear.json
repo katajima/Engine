@@ -46,9 +46,31 @@
             "type": "int32_t",
             "value": 0
         },
+        "emitData.direction": {
+            "type": "int32_t",
+            "value": 0
+        },
+        "emitData.directionType": {
+            "enumType": "DirectionType",
+            "type": "enum",
+            "value": 4
+        },
+        "emitData.emitType": {
+            "enumType": "EmitType",
+            "type": "enum",
+            "value": 0
+        },
         "emitData.enableLighting": {
             "type": "int32_t",
             "value": 0
+        },
+        "emitData.isDirectionRotate": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isEmit": {
+            "type": "bool",
+            "value": false
         },
         "emitData.isFlag.billboardRotZ": {
             "type": "bool",
@@ -99,6 +121,18 @@
             "value": false
         },
         "emitData.isFlag.usebillboardY": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isLoop": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isNoise": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isUniformSize": {
             "type": "bool",
             "value": false
         },
@@ -223,6 +257,26 @@
             "enumType": "TopBottom",
             "type": "enum",
             "value": 0
+        },
+        "emitData.uvTransformVeloctiy": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
         },
         "emitData.velocity.median": {
             "type": "Vector3",

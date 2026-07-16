@@ -36,9 +36,17 @@ namespace Engine {
 	class LineCommon;
 	class PrimitiveCommon;
 
+	// エディタパーティクル群が参照するメッシュの生成元です。
+	enum class ParticleMeshSourceType {
+		Primitive,
+		Model,
+	};
+
 	// エディタから復元・編集するためのパーティクル群メタデータ
 	struct ParticleGroupEditorData {
 		std::string texturePath = "resources/Texture/Image.dds";										// 使用するテクスチャ
+		ParticleMeshSourceType meshSourceType = ParticleMeshSourceType::Primitive;						// メッシュ生成元
+		std::string modelName = "";													// モデル使用時のロード済みモデル名
 		ShapeParameter::ShapeType shapeType = ShapeParameter::ShapeType::Plane;						// エディタ作成時のプリミティブ形状
 		ShapeParameter::ShapePlane plane{};															// 平面パラメータ
 		ShapeParameter::ShapeTriangle triangle{};														// 三角形パラメータ

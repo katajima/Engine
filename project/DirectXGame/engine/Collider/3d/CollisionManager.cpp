@@ -1,4 +1,4 @@
-﻿#include "CollisionManager.h"
+#include "CollisionManager.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 
@@ -90,9 +90,8 @@ void Engine::CollisionManager::CheckByLayer(ColliderComponent& a, ColliderCompon
 		for (auto* colB : b.GetAllColliders()) {
 			if (!colA->IsEnabled() || !colB->IsEnabled()) continue;
 
-			// ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
-			if (!((1 << static_cast<uint32_t>(colB->GetLayer())) & colA->GetCollisionMask()) ||
-				!((1 << static_cast<uint32_t>(colA->GetLayer())) & colB->GetCollisionMask())) {
+			// CollisionLayerはビット値なので、シフトせずそのままマスク判定に使う。
+			if (!CheckMask(colA, colB)) {
 				continue;
 			}
 

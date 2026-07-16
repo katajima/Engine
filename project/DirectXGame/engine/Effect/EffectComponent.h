@@ -18,6 +18,7 @@ namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
 	class PrimitiveCommon;
+	class ModelManager;
 
 	/// <summary>
 	/// エフェクトコンポーネントクラス
@@ -42,6 +43,8 @@ namespace Engine {
 		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager; }
 		// パーティクルマネージャー取得
 		ParticleManager* GetParticleManager() { return particleManager; }
+		// ロード済みモデル一覧をエフェクトエディターから参照するためのモデルマネージャー取得
+		ModelManager* GetModelManager();
 
 	public: // パーティクルエミッター(CPU)
 

@@ -1,4 +1,4 @@
-﻿#include "PlayerRangeBombingBullet.h"
+#include "PlayerRangeBombingBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
@@ -30,16 +30,21 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	
 
+	trailTransform_.Initialize();
+	trailTransform_.parent_ = &object_->GetWorldTransform();
+	trailTransform_.Update();
+
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(entityManager,globalVariables);	
-
+	effectComponent_->Init(entityManager,globalVariables);
+	// トレイル描画のビュープロジェクション計算に使うカメラを設定する。
+	effectComponent_->SetCamera(camera);
 
 	// コライダ設定
 	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->SetTag(CollisionTag::PlayerAttack);			// タグ設定
 	sphere->SetLayer(CollisionLayer::PlayerAttack);		// レイヤー設定
-	sphere->SetCollisionMask((1 << static_cast<uint32_t>(CollisionLayer::Enemy)));	// マスク設定
+	sphere->SetCollisionMask(static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable(); // 初期状態では無効化
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダコンポーネントに追加	
@@ -108,6 +113,15 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	//// 各演出設定
 	//// ミサイル移動中の煙パーティクルエミッター
 	countIndex_ = UniqueIdGenerator::Generate();
+
+	// 弾の移動軌跡を細いリボン状に残すため、専用設定でトレイルを生成する。
+	Engine::TrailSettings trailSettings{};
+	trailSettings.minEmitDistance = provisionalData_.trailMinEmitDistance;
+	trailSettings.maxSegmentCount = provisionalData_.trailMaxSegmentCount;
+	effectComponent_->AddTrailEffect(trailName_ + std::to_string(countIndex_), "resources/Texture/Image.dds",
+		provisionalData_.trailLifeTime, trailTransform_, trailSettings, provisionalData_.trailColor,
+		{ 0.0f, provisionalData_.trailWidth, 0.0f }, { 0.0f, -provisionalData_.trailWidth, 0.0f });
+	effectComponent_->GetTrailEffect(trailName_ + std::to_string(countIndex_))->SetIsEmit(true);
 
 	// シリンダーパラメーター設定
 	Engine::ShapeParameter::Cylinder cylinderParam;
@@ -266,12 +280,10 @@ void PlayerRangeBombingBullet::Update() {
 		hitObject2_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(provisionalData_.hitObjectRotateX);
 	}
 
+	// トレイルが最新の弾位置を参照できるよう、親のワールド行列を先に更新する。
+	object_->GetWorldTransform().Update();
 	// トレイル発生
-	if (trailTime_ > 0.0f) {
-		//object_->isEmitTrailEffect = true;
-	}
-	trailTime_ = 1;
-
+	trailTransform_.Update();
 	// エフェクト再生
 	if (isEffectPlay_) {
 		time_ += GetTimer();	// 時間更新
@@ -286,17 +298,19 @@ void PlayerRangeBombingBullet::Update() {
 			object_->GetColliderComponent()->ClearColliders();	// コライダクリア
 		}
 	}
+	effectComponent_->Update();	// エフェクトコンポーネント更新
 }
 
 // 描画
 void PlayerRangeBombingBullet::Draw()
 {
-
+	effectComponent_->Draw();	// エフェクトコンポーネント描画
 }
 
 // エフェクト描画
-void PlayerRangeBombingBullet::DrawP()
+void PlayerRangeBombingBullet::DrawEffect()
 {
+	effectComponent_->DrawEffect();
 }
 
 // 2D描画
