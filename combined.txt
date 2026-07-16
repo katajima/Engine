@@ -11808,7 +11808,7 @@ namespace HitBox {
 		}
 
 		// 今後、ここでガード、無敵、属性耐性などを吸収する。
-		// 既存挙動維持のため、必殺技中と回避成功中のプレイヤーだけ無効化する。
+		// 既存挙動維持のため、回避・必殺技・被弾後無敵中のプレイヤーだけ無効化する。
 		if (type_ == UseType::kEnemy && otherColl && otherColl->GetTag() == CollisionTag::Player) {
 			Character::BasePlayer* player = other ? static_cast<Character::BasePlayer*>(other->GetHitReceiver()) : nullptr;
 			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
@@ -11820,6 +11820,14 @@ namespace HitBox {
 				result.notifyComboHit = false;
 			}
 			else if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.applySelfHitStop = false;
+				result.notifyComboHit = false;
+			}
+			else if (player && player->IsDamageInvincible()) {
+				// 被弾後無敵中は、敵攻撃のダメージとリアクションをまとめて無効化する。
 				result.accepted = false;
 				result.applyDamage = false;
 				result.applyReaction = false;
@@ -13251,6 +13259,9 @@ void Projectile::BaseProjectile::OnHitPlayer(Character::BasePlayer* player) {
 	if (player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
 		player->OnDodgeSuccess(); // 回避成功後コンボの受付を開く
 		return; // 回避成功時はダメージと被弾ステートを入れない
+	}
+	if (player->IsDamageInvincible()) {
+		return; // 被弾後無敵中は弾によるダメージと被弾ステートを入れない
 	}
 	player->AddDamage(param_.damage); // ダメージを与える
 	player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
@@ -14729,6 +14740,9 @@ void EnemyBullet::OnHitPlayer(Character::BasePlayer* player) {
 	if (player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
 		player->OnDodgeSuccess();
 		return;
+	}
+	if (player->IsDamageInvincible()) {
+		return; // 被弾後無敵中は敵弾ダメージを無効化する
 	}
 	// 旧敵弾と同様にダメージだけを与え、プレイヤー側の状態判断へ任せる
 	player->AddDamage(GetParam().damage);
@@ -18223,9 +18237,20 @@ namespace Character {
 	float BaseCharacter::GetHP() const { return parameterComponent_->parameters->HP.value; }
 	// ダメージ
 	void BaseCharacter::AddDamage(float damage) {
+		// 無敵時間などでダメージを受けない状態なら、HPと被弾後処理を変更しない。
+		if (ShouldIgnoreDamage(damage)) {
+			return;
+		}
+
+		const float hpBefore = GetHP();				// ダメージ適用前のHP
 		parameterComponent_->HP().Add(-damage);		// HPをダメージ分減算
 		if (GetHP() <= 0) {
 			parameterComponent_->HP().value = 0.0f;
+		}
+
+		// 実際にHPが減った時だけ、派生クラスへ被弾後処理を通知する。
+		if (damage > 0.0f && GetHP() < hpBefore) {
+			OnDamageApplied(damage);
 		}
 	}
 	// 攻撃属性付きダメージ
@@ -18522,6 +18547,13 @@ namespace Character {
 		/// <param name="input">弱攻撃、強攻撃、スキルの入力種別。</param>
 		/// <returns>攻撃要求が受理された場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
+		/// <summary>ダメージを無効化する状態か判定する。</summary>
+		/// <param name="damage">今回適用しようとしているダメージ量。</param>
+		/// <returns>ダメージを無視する場合はtrue。</returns>
+		virtual bool ShouldIgnoreDamage(float damage) const { (void)damage; return false; }
+		/// <summary>HPへダメージが実際に反映された後の通知を受け取る。</summary>
+		/// <param name="damage">実際に適用されたダメージ量。</param>
+		virtual void OnDamageApplied(float damage) { (void)damage; }
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
@@ -27024,6 +27056,37 @@ Character::BasePlayer::~BasePlayer() = default;
 void Character::BasePlayer::AddSpGauge(int d) { special_->AddGauge(d); };
 // SP発動可能？
 bool Character::BasePlayer::GetIsSpecial() const { return special_->GetIsSpecial(); }
+// 被弾後無敵の残り時間を更新
+void Character::BasePlayer::UpdateDamageInvincible(float dt) {
+	// タイマーが残っていない場合は処理しない。
+	if (damageInvincibleTimer_ <= 0.0f) {
+		return;
+	}
+
+	damageInvincibleTimer_ -= dt;
+	if (damageInvincibleTimer_ < 0.0f) {
+		damageInvincibleTimer_ = 0.0f;
+	}
+}
+
+// 被弾後無敵中か取得
+bool Character::BasePlayer::IsDamageInvincible() const {
+	return damageInvincibleTimer_ > 0.0f;
+}
+
+// ダメージ無敵中ならHP減算を無視
+bool Character::BasePlayer::ShouldIgnoreDamage(float damage) const {
+	// 回復や0ダメージは無敵で止めず、正のダメージだけを無視対象にする。
+	return damage > 0.0f && IsDamageInvincible();
+}
+
+// ダメージが通った時に無敵時間を開始
+void Character::BasePlayer::OnDamageApplied(float damage) {
+	// 正のダメージだけを被弾として扱い、被弾直後の連続ダメージを防ぐ。
+	if (damage > 0.0f) {
+		damageInvincibleTimer_ = damageInvincibleDuration_;
+	}
+}
 
 
 ============================================================
@@ -27101,12 +27164,28 @@ namespace Character {
 		void AddSpGauge(int d);
 		// SP発動可能？
 		bool GetIsSpecial() const;
+		/// <summary>被弾後の無敵時間を毎フレーム減らす。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
+		void UpdateDamageInvincible(float dt);
+		/// <summary>現在ダメージ無敵中か取得する。</summary>
+		/// <returns>無敵時間が残っている場合はtrue。</returns>
+		bool IsDamageInvincible() const;
+	protected:
+		/// <summary>ダメージ無敵中はHP減算を無視する。</summary>
+		/// <param name="damage">今回適用しようとしているダメージ量。</param>
+		/// <returns>ダメージを無視する場合はtrue。</returns>
+		bool ShouldIgnoreDamage(float damage) const override;
+		/// <summary>HPへダメージが入った瞬間に短時間の無敵を開始する。</summary>
+		/// <param name="damage">実際に適用されたダメージ量。</param>
+		void OnDamageApplied(float damage) override;
 	protected:
 		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ
 		bool isCreativeMode = false;							// クリエイティブモードかどうか
 		// サブ武器
 		std::unique_ptr<BaseWeapon> subWeapon_ = nullptr;
+		float damageInvincibleTimer_ = 0.0f;		// 被弾後無敵の残り時間
+		float damageInvincibleDuration_ = 1.0f;	// 被弾後に付与する無敵時間
 
 	};
 }
@@ -27510,6 +27589,9 @@ namespace Character {
 				dodgeSuccessComboTimer_ = 0.0f;
 			}
 		}
+
+		// 被弾後無敵の残り時間を更新し、連続ヒットによる多重ダメージを防ぐ。
+		UpdateDamageInvincible(GetTime());
 
 		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
 		if (slowMotionManager_) {
@@ -36477,7 +36559,8 @@ struct SpecialData{
 	int phase_ = 0;
 	// 移動可能か
 	bool isMove_ = true;
-
+	// 時間を止めるか
+	bool isStopTimer_ = false;
 	// 最大値まで行ったか
 	bool IsMax() const { return gauge_ >= maxGauge_; }
 	// フェーズ移行
