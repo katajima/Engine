@@ -70,12 +70,28 @@ namespace Character {
 		void AddSpGauge(int d);
 		// SP発動可能？
 		bool GetIsSpecial() const;
+		/// <summary>被弾後の無敵時間を毎フレーム減らす。</summary>
+		/// <param name="dt">秒単位のフレーム時間。</param>
+		void UpdateDamageInvincible(float dt);
+		/// <summary>現在ダメージ無敵中か取得する。</summary>
+		/// <returns>無敵時間が残っている場合はtrue。</returns>
+		bool IsDamageInvincible() const;
+	protected:
+		/// <summary>ダメージ無敵中はHP減算を無視する。</summary>
+		/// <param name="damage">今回適用しようとしているダメージ量。</param>
+		/// <returns>ダメージを無視する場合はtrue。</returns>
+		bool ShouldIgnoreDamage(float damage) const override;
+		/// <summary>HPへダメージが入った瞬間に短時間の無敵を開始する。</summary>
+		/// <param name="damage">実際に適用されたダメージ量。</param>
+		void OnDamageApplied(float damage) override;
 	protected:
 		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ
 		bool isCreativeMode = false;							// クリエイティブモードかどうか
 		// サブ武器
 		std::unique_ptr<BaseWeapon> subWeapon_ = nullptr;
+		float damageInvincibleTimer_ = 0.0f;		// 被弾後無敵の残り時間
+		float damageInvincibleDuration_ = 1.0f;	// 被弾後に付与する無敵時間
 
 	};
 }

@@ -58,9 +58,20 @@ namespace Character {
 	float BaseCharacter::GetHP() const { return parameterComponent_->parameters->HP.value; }
 	// ダメージ
 	void BaseCharacter::AddDamage(float damage) {
+		// 無敵時間などでダメージを受けない状態なら、HPと被弾後処理を変更しない。
+		if (ShouldIgnoreDamage(damage)) {
+			return;
+		}
+
+		const float hpBefore = GetHP();				// ダメージ適用前のHP
 		parameterComponent_->HP().Add(-damage);		// HPをダメージ分減算
 		if (GetHP() <= 0) {
 			parameterComponent_->HP().value = 0.0f;
+		}
+
+		// 実際にHPが減った時だけ、派生クラスへ被弾後処理を通知する。
+		if (damage > 0.0f && GetHP() < hpBefore) {
+			OnDamageApplied(damage);
 		}
 	}
 	// 攻撃属性付きダメージ

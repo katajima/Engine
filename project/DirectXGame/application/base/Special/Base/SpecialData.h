@@ -37,7 +37,8 @@ struct SpecialData{
 	int phase_ = 0;
 	// 移動可能か
 	bool isMove_ = true;
-
+	// 時間を止めるか
+	bool isStopTimer_ = false;
 	// 最大値まで行ったか
 	bool IsMax() const { return gauge_ >= maxGauge_; }
 	// フェーズ移行

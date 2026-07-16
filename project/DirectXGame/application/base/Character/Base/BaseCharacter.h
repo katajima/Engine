@@ -219,6 +219,13 @@ namespace Character {
 		/// <param name="input">弱攻撃、強攻撃、スキルの入力種別。</param>
 		/// <returns>攻撃要求が受理された場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
+		/// <summary>ダメージを無効化する状態か判定する。</summary>
+		/// <param name="damage">今回適用しようとしているダメージ量。</param>
+		/// <returns>ダメージを無視する場合はtrue。</returns>
+		virtual bool ShouldIgnoreDamage(float damage) const { (void)damage; return false; }
+		/// <summary>HPへダメージが実際に反映された後の通知を受け取る。</summary>
+		/// <param name="damage">実際に適用されたダメージ量。</param>
+		virtual void OnDamageApplied(float damage) { (void)damage; }
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;

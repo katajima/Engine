@@ -210,6 +210,9 @@ namespace Character {
 			}
 		}
 
+		// 被弾後無敵の残り時間を更新し、連続ヒットによる多重ダメージを防ぐ。
+		UpdateDamageInvincible(GetTime());
+
 		// スロー演出管理クラスを更新し、時間切れなら時間倍率を元へ戻す
 		if (slowMotionManager_) {
 			slowMotionManager_->Update(targetCharacters);

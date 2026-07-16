@@ -191,6 +191,9 @@ void Projectile::BaseProjectile::OnHitPlayer(Character::BasePlayer* player) {
 		player->OnDodgeSuccess(); // 回避成功後コンボの受付を開く
 		return; // 回避成功時はダメージと被弾ステートを入れない
 	}
+	if (player->IsDamageInvincible()) {
+		return; // 被弾後無敵中は弾によるダメージと被弾ステートを入れない
+	}
 	player->AddDamage(param_.damage); // ダメージを与える
 	player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 }

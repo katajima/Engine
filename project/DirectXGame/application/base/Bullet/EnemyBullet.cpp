@@ -37,6 +37,9 @@ void EnemyBullet::OnHitPlayer(Character::BasePlayer* player) {
 		player->OnDodgeSuccess();
 		return;
 	}
+	if (player->IsDamageInvincible()) {
+		return; // 被弾後無敵中は敵弾ダメージを無効化する
+	}
 	// 旧敵弾と同様にダメージだけを与え、プレイヤー側の状態判断へ任せる
 	player->AddDamage(GetParam().damage);
 }

@@ -59,7 +59,7 @@ namespace HitBox {
 		}
 
 		// 今後、ここでガード、無敵、属性耐性などを吸収する。
-		// 既存挙動維持のため、必殺技中と回避成功中のプレイヤーだけ無効化する。
+		// 既存挙動維持のため、回避・必殺技・被弾後無敵中のプレイヤーだけ無効化する。
 		if (type_ == UseType::kEnemy && otherColl && otherColl->GetTag() == CollisionTag::Player) {
 			Character::BasePlayer* player = other ? static_cast<Character::BasePlayer*>(other->GetHitReceiver()) : nullptr;
 			if (player && player->GetCurrentMainState() == Character::CharacterMainState::Avoidance) {
@@ -71,6 +71,14 @@ namespace HitBox {
 				result.notifyComboHit = false;
 			}
 			else if (player && player->GetCurrentMainState() == Character::CharacterMainState::Special) {
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.applySelfHitStop = false;
+				result.notifyComboHit = false;
+			}
+			else if (player && player->IsDamageInvincible()) {
+				// 被弾後無敵中は、敵攻撃のダメージとリアクションをまとめて無効化する。
 				result.accepted = false;
 				result.applyDamage = false;
 				result.applyReaction = false;
