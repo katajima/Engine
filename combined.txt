@@ -12131,7 +12131,7 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "HitBox.h"
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
 
@@ -12221,7 +12221,7 @@ namespace HitBox {
 
 		coll->SetTag(tag);			// タグ設定
 		coll->SetLayer(layer);		// レイヤー設定
-		coll->SetCollisionMask((1 << static_cast<uint32_t>(mask)));	// マスク設定
+		coll->SetCollisionMask(static_cast<uint32_t>(mask));	// マスク設定
 
 		return std::move(coll);
 	}
@@ -12959,7 +12959,7 @@ public:
 	// 描画3d
 	virtual void Draw() = 0;
 	// 描画エフェクト
-	virtual void DrawP() = 0;
+	virtual void DrawEffect() = 0;
 	// 描画2d
 	virtual void Draw2D() = 0;
 	
@@ -13542,7 +13542,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletManager.cpp
 ============================================================
-#include "BulletManager.h"
+﻿#include "BulletManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
@@ -13612,7 +13612,7 @@ void BulletManager::Draw() {
 void BulletManager::DrawEffect() {
 	// エフェクト描画
 	for (auto& bullet : bullets_) {
-		bullet->DrawP();
+		bullet->DrawEffect();
 	}
 
 	for (auto& projectile : projectiles_) {
@@ -14786,7 +14786,7 @@ void PlayerBullet::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	param.maxPierceCount = info.type == ProjectileType::PENETRATION ? (std::numeric_limits<int>::max)() : 0;
 	param.collisionTag = CollisionTag::PlayerAttack;
 	param.collisionLayer = CollisionLayer::PlayerAttack;
-	param.collisionMask = 1u << static_cast<uint32_t>(CollisionLayer::Enemy);
+	param.collisionMask = static_cast<uint32_t>(CollisionLayer::Enemy);
 
 	Projectile::ProjectileSpawnInfo resolvedSpawnInfo = spawnInfo;
 	resolvedSpawnInfo.scale = Vector3::Set(0.2f);
@@ -14866,22 +14866,25 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	// 基盤の初期化
 	BaseInitialize(entityManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
-	//object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
-	//object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
 	
 
+	trailTransform_.Initialize();
+	trailTransform_.parent_ = &object_->GetWorldTransform();
+	trailTransform_.Update();
+
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(entityManager,globalVariables);	
-
+	effectComponent_->Init(entityManager,globalVariables);
+	// トレイル描画のビュープロジェクション計算に使うカメラを設定する。
+	effectComponent_->SetCamera(camera);
 
 	// コライダ設定
 	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->SetTag(CollisionTag::PlayerAttack);			// タグ設定
 	sphere->SetLayer(CollisionLayer::PlayerAttack);		// レイヤー設定
-	sphere->SetCollisionMask((1 << static_cast<uint32_t>(CollisionLayer::Enemy)));	// マスク設定
+	sphere->SetCollisionMask(static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable(); // 初期状態では無効化
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダコンポーネントに追加	
@@ -14950,6 +14953,15 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	//// 各演出設定
 	//// ミサイル移動中の煙パーティクルエミッター
 	countIndex_ = UniqueIdGenerator::Generate();
+
+	// 弾の移動軌跡を細いリボン状に残すため、専用設定でトレイルを生成する。
+	Engine::TrailSettings trailSettings{};
+	trailSettings.minEmitDistance = provisionalData_.trailMinEmitDistance;
+	trailSettings.maxSegmentCount = provisionalData_.trailMaxSegmentCount;
+	effectComponent_->AddTrailEffect(trailName_ + std::to_string(countIndex_), "resources/Texture/Image.dds",
+		provisionalData_.trailLifeTime, trailTransform_, trailSettings, provisionalData_.trailColor,
+		{ 0.0f, provisionalData_.trailWidth, 0.0f }, { 0.0f, -provisionalData_.trailWidth, 0.0f });
+	effectComponent_->GetTrailEffect(trailName_ + std::to_string(countIndex_))->SetIsEmit(true);
 
 	// シリンダーパラメーター設定
 	Engine::ShapeParameter::Cylinder cylinderParam;
@@ -15108,12 +15120,10 @@ void PlayerRangeBombingBullet::Update() {
 		hitObject2_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(provisionalData_.hitObjectRotateX);
 	}
 
+	// トレイルが最新の弾位置を参照できるよう、親のワールド行列を先に更新する。
+	object_->GetWorldTransform().Update();
 	// トレイル発生
-	if (trailTime_ > 0.0f) {
-		//object_->isEmitTrailEffect = true;
-	}
-	trailTime_ = 1;
-
+	trailTransform_.Update();
 	// エフェクト再生
 	if (isEffectPlay_) {
 		time_ += GetTimer();	// 時間更新
@@ -15128,17 +15138,19 @@ void PlayerRangeBombingBullet::Update() {
 			object_->GetColliderComponent()->ClearColliders();	// コライダクリア
 		}
 	}
+	effectComponent_->Update();	// エフェクトコンポーネント更新
 }
 
 // 描画
 void PlayerRangeBombingBullet::Draw()
 {
-
+	effectComponent_->Draw();	// エフェクトコンポーネント描画
 }
 
 // エフェクト描画
-void PlayerRangeBombingBullet::DrawP()
+void PlayerRangeBombingBullet::DrawEffect()
 {
+	effectComponent_->DrawEffect();
 }
 
 // 2D描画
@@ -15152,9 +15164,11 @@ void PlayerRangeBombingBullet::Draw2D()
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include <DirectXGame/engine/Effect/EffectComponent.h>
+#include <cstddef>
+#include <string>
 
 /// <summary>
 /// 範囲攻撃用弾クラス
@@ -15173,7 +15187,7 @@ public:
 	// 描画
 	void Draw() override;
 	//　描画エフェクト
-	void DrawP() override;
+	void DrawEffect() override;
 	// 描画2D
 	void Draw2D() override;
 
@@ -15216,6 +15230,7 @@ private:
 
 
 	float trailTime_ = 0.0f;
+	const std::string trailName_ = "RangeBombingTrail"; // 弾ごとのEffectComponent内で管理するトレイル名
 
 private: //パーティクルエミッター
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
@@ -15224,12 +15239,17 @@ private: //パーティクルエミッター
 
 	Engine::Object3d* hitObject2_ = nullptr;
 
+	Engine::WorldTransform trailTransform_;
+
 private: // 一旦
 
 	struct ProvisionalData {
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
-		const float trailWidth = 0.2f; // トレイルの幅
+		const float trailWidth = 0.5f; // トレイルの幅
+		const float trailMinEmitDistance = 0.05f; // トレイル頂点を追加する最小移動距離
+		const size_t trailMaxSegmentCount = 96; // トレイルが保持する最大分割数
+		const Color trailColor = { 0.35f,0.85f,1.0f,0.85f }; // トレイルの色
 		const float collRadius = 8.0f; // 当たり判定の半径
 		const float damage = 50.0f; // ダメージ量
 		const float skyX = 1000.0f;
@@ -23062,7 +23082,7 @@ namespace Character {
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->Enable();					// コライダ有効
 		sphere->SetTag(CollisionTag::Enemy);	// タグ設定
-		sphere->SetLayer(CollisionLayer::ALL);// レイヤー設定
+		sphere->SetLayer(CollisionLayer::Enemy);// レイヤー設定
 		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = colliderRadius; // 半径を適宜設定
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
@@ -27279,7 +27299,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -27348,7 +27368,7 @@ namespace Character {
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->SetTag(CollisionTag::Player);
-		sphere->SetLayer(CollisionLayer::ALL);
+		sphere->SetLayer(CollisionLayer::Player);
 		sphere->SetCollisionMask(0xFFFFFFFF);
 		sphere->radius = 1.0f; // 半径を適宜設定
 		sphere->SetIsDebugLine(true);
@@ -29568,6 +29588,8 @@ File Path: project/DirectXGame/application/base/Effect/EffectEditor.cpp
 #include "EffectEditor.h"
 #include "DirectXGame/engine/Base/Imgui/ImGuiUtility.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/3d/Model/ModelManager.h"
+#include "DirectXGame/engine/Base/Texture/TextureManager.h"
 #include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 #include <algorithm>
@@ -29578,6 +29600,7 @@ File Path: project/DirectXGame/application/base/Effect/EffectEditor.cpp
 namespace {
 	const char* kEffectRegistryGroup = "EffectEditor";
 	const char* kDeletedEffectRegistryGroup = "EffectEditorDeleted";
+	const char* kEffectEditorSettingsGroup = "EffectEditorSettings";
 	const char* kParticleRegistryGroup = "ParticleEditor";
 	const char* kDeletedParticleRegistryGroup = "ParticleEditorDeleted";
 	const char* kParticleDataPrefix = "ParticleGroup_";
@@ -29585,6 +29608,8 @@ namespace {
 	const char* kPrimitiveDataPrefix = "EffectPrimitive_";
 	const char* kPrimitivePreviewParticleName = "__EffectPrimitivePreviewParticle";
 	const char* kPrimitivePreviewEmitterName = "__EffectPrimitivePreviewEmitter";
+	const char* kParticleGroupPreviewEmitterName = "__ParticleGroupPreviewEmitter";
+	const char* kFallbackParticleTexturePath = "resources/Texture/Image.dds";
 
 	bool DrawPrimitiveShapeParameters(Engine::ParticleGroupEditorData& data) {
 		// 選択中プリミティブに対応した形状パラメータだけを表示し、変更があれば保存対象にする。
@@ -29724,8 +29749,85 @@ namespace {
 		return changed;
 	}
 
+	bool DrawParticleMeshSourceCombo(const char* label, Engine::ParticleMeshSourceType& meshSourceType) {
+		// パーティクル群が使うメッシュを、エディタ生成プリミティブかロード済みモデルから選ばせる。
+		static const char* kMeshSourceLabels[] = {
+			"Primitive",
+			"Model",
+		};
+		return Engine::ImGuiUtility::SelectEnum(label, kMeshSourceLabels, meshSourceType);
+	}
+
+	bool DrawModelNameCombo(const char* label, std::string& modelName, Engine::ModelManager* modelManager) {
+		if (modelManager == nullptr || modelManager->GetModel().empty()) {
+			ImGui::TextDisabled("No loaded models.");
+			return false;
+		}
+
+		// ModelManagerにロード済みのモデル名だけを選択肢にして、未ロード参照を避ける。
+		bool changed = false;
+		const char* preview = modelName.empty() ? "No Model" : modelName.c_str();
+		if (modelName.empty()) {
+			// 生成元をModelへ切り替えた直後でも再作成できるよう、先頭モデルを仮選択する。
+			modelName = modelManager->GetModel().begin()->first;
+			preview = modelName.c_str();
+			changed = true;
+		}
+
+		if (ImGui::BeginCombo(label, preview)) {
+			for (const auto& [loadedModelName, model] : modelManager->GetModel()) {
+				const bool selected = modelName == loadedModelName;
+				if (ImGui::Selectable(loadedModelName.c_str(), selected)) {
+					modelName = loadedModelName;
+					changed = true;
+				}
+				if (selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		return changed;
+	}
+
+	bool DrawParticleTextureSelector(const char* comboLabel, const char* inputLabel,
+		std::array<char, 256>& texturePathBuffer, Engine::TextureManager* textureManager) {
+		// ロード済みテクスチャを選択できるようにし、必要な場合だけ手入力も許可する。
+		bool changed = false;
+		const std::string currentPath = texturePathBuffer.data();
+		const char* preview = currentPath.empty() ? "Select loaded texture" : currentPath.c_str();
+		if (ImGui::BeginCombo(comboLabel, preview)) {
+			if (textureManager != nullptr) {
+				for (const std::string& filePath : textureManager->GetTextureFilePaths()) {
+					const bool selected = currentPath == filePath;
+					if (ImGui::Selectable(filePath.c_str(), selected)) {
+						Engine::ImGuiUtility::SetInputTextBuffer(texturePathBuffer, filePath);
+						changed = true;
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+		if (Engine::ImGuiUtility::InputText(inputLabel, texturePathBuffer)) {
+			changed = true;
+		}
+		return changed;
+	}
+
+	std::string ResolveParticleTexturePath(Engine::TextureManager* textureManager, const std::string& requestedPath) {
+		// 無効なパスは描画処理へ渡さず、常時ロード済みの仮テクスチャへ置き換える。
+		if (textureManager != nullptr && textureManager->HasTexture(requestedPath)) {
+			return requestedPath;
+		}
+		return kFallbackParticleTexturePath;
+	}
 	void CopyPrimitiveShapeData(const Engine::ParticleGroupEditorData& source, Engine::ParticleGroupEditorData& destination) {
 		// プリミティブ形状に関わる保存項目だけをパーティクル群へ反映する。
+		destination.meshSourceType = Engine::ParticleMeshSourceType::Primitive;
+		destination.modelName.clear();
 		destination.shapeType = source.shapeType;
 		destination.plane = source.plane;
 		destination.triangle = source.triangle;
@@ -29753,6 +29855,7 @@ void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 	serializer_.Initialize(globalVariables);
 	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
 	LoadRegisteredPrimitiveDefinitions();
+	LoadEditorUiSettings();
 
 }
 
@@ -29849,6 +29952,8 @@ void EffectEditor::SetEffectGlobalData(const std::string& name, EmitterShapeType
 	emit->GetFrequency() = data.frequency;			// 出現頻度
 	emit->GetEmitData() = data.emitData;			// 出現データ
 	emit->SetIsFlag(data.isFlag);
+	// UVスクロールなどのパーティクルマテリアル変化をエミッターへ反映する。
+	emit->SetUvTransformVeloctiy(data.uvTransformVeloctiy);
 	emit->SetAlphaClipping(data.alphaClipping);		// アルファクリッピング
 	emit->SetEnableLighting(data.enableLighting);	// ライティングの有無
 	emit->SetLifeTimeScaleTopBottom(data.topBottom);// ライフタイムスケールの基準
@@ -29996,7 +30101,10 @@ void EffectEditor::LoadRegisteredParticleGroups() {
 		globalVariables->SetGroupCategory(dataGroupName, "Effect/Particle");
 		serializer_.LoadParticleGroupData(particleName, data);
 		if (!particleManager->GetParticleGroups().Contains(particleName)) {
-			particleManager->CreateEditorParticleGroup(particleName, data);
+			// モデルがまだロードされていなくても、保存メタデータだけは失わない。
+			if (!particleManager->CreateEditorParticleGroup(particleName, data)) {
+				particleManager->SetEditorParticleGroupData(particleName, data);
+			}
 		}
 		else {
 			particleManager->SetEditorParticleGroupData(particleName, data);
@@ -30181,6 +30289,7 @@ void EffectEditor::EnsurePrimitivePreview(const std::string& primitiveName, cons
 		!particleManager->GetParticleGroups().Contains(kPrimitivePreviewParticleName);
 
 	Engine::ParticleGroupEditorData previewData = data;
+	previewData.meshSourceType = Engine::ParticleMeshSourceType::Primitive;
 	previewData.texturePath = data.texturePath.empty() ? "resources/Texture/Image.dds" : data.texturePath;
 	previewData.blendType = EmitData::BlendType::MODE_ADD;
 	previewData.rasterizerType = EmitData::RasterizerType::MODE_SOLID_NONE;
@@ -30486,16 +30595,39 @@ void EffectEditor::SaveAllEditorData() {
 	}
 
 	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
-	for (auto& particle : particleManager->GetParticleGroups()) {
-		if (particle.first == kPrimitivePreviewParticleName) {
-			// プレビュー用パーティクルは一時表示だけに使うため、保存データへ混ぜない。
+	std::set<std::string> particleNames;
+	for (const auto& particle : particleManager->GetParticleGroups()) {
+		particleNames.insert(particle.first);
+	}
+	for (const std::string& particleName : globalVariables->GetKeys(kParticleRegistryGroup)) {
+		particleNames.insert(particleName);
+	}
+	for (const std::string& groupName : globalVariables->GetGroupNames()) {
+		if (groupName.rfind(kParticleDataPrefix, 0) == 0) {
+			particleNames.insert(groupName.substr(std::strlen(kParticleDataPrefix)));
+		}
+	}
+	for (const std::string& particleName : particleNames) {
+		if (particleName == kPrimitivePreviewParticleName || IsDeletedParticleGroupName(particleName)) {
+			// プレビュー用・削除済みのパーティクル群は保存対象から除外する。
+			continue;
+		}
+		const std::string dataGroupName = kParticleDataPrefix + particleName;
+		if (!globalVariables->HasGroup(dataGroupName)) {
 			continue;
 		}
 
-		Engine::ParticleGroupEditorData particleData = particleManager->GetEditorParticleGroupData(particle.first);
-		serializer_.RegisterParticleGroupData(particle.first, particleData);
-		serializer_.SaveParticleGroupData(particle.first, particleData);
-		globalVariables->SaveFile(kParticleDataPrefix + particle.first);
+		Engine::ParticleGroupEditorData particleData;
+		if (particleManager->GetParticleGroups().Contains(particleName)) {
+			particleData = particleManager->GetEditorParticleGroupData(particleName);
+		}
+		else {
+			// 実体を作れない状態でも、ファイルにあるMeshSourceTypeやモデル名をそのまま保存する。
+			serializer_.LoadParticleGroupData(particleName, particleData);
+		}
+		serializer_.RegisterParticleGroupData(particleName, particleData);
+		serializer_.SaveParticleGroupData(particleName, particleData);
+		globalVariables->SaveFile(dataGroupName);
 	}
 
 	for (auto& [primitiveName, primitiveData] : primitiveDefinitionDatas_) {
@@ -30508,9 +30640,60 @@ void EffectEditor::SaveAllEditorData() {
 	globalVariables->SaveFile(kParticleRegistryGroup);
 	globalVariables->SaveFile(kDeletedParticleRegistryGroup);
 	globalVariables->SaveFile(kPrimitiveRegistryGroup);
+	SaveEditorUiSettings();
 	managementMessage_ = "Saved all effect editor settings.";
 	particleManagementMessage_ = managementMessage_;
 	primitiveManagementMessage_ = managementMessage_;
+}
+
+void EffectEditor::SaveEmitterData(const std::string& name, const EffectGlobalData& data) {
+	// 指定エミッタだけをGlobalVariablesへ反映し、該当ファイルを保存する。
+	if (name.empty()) {
+		emitterSettingsMessage_ = "Emitter name is required.";
+		return;
+	}
+
+	globalVariables->SetGroupCategory(name, "Effect");
+	serializer_.RegisterEffectData(name, data);
+	serializer_.SaveEffectData(name, data);
+	globalVariables->SaveFile(name);
+	globalVariables->SaveFile(kEffectRegistryGroup);
+	emitterSettingsMessage_ = "Saved emitter: " + name;
+}
+
+void EffectEditor::SaveParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
+	// 指定パーティクル群だけをGlobalVariablesへ反映し、該当ファイルを保存する。
+	if (particleName.empty()) {
+		particleManagementMessage_ = "Particle group name is required.";
+		return;
+	}
+
+	serializer_.RegisterParticleGroupData(particleName, data);
+	serializer_.SaveParticleGroupData(particleName, data);
+	globalVariables->SaveFile(kParticleDataPrefix + particleName);
+	globalVariables->SaveFile(kParticleRegistryGroup);
+	particleManagementMessage_ = "Saved particle group: " + particleName;
+}
+
+void EffectEditor::SaveEditorUiSettings() {
+	// データ本体ではなく、Effectエディタで最後に選んだUI状態だけを保存する。
+	globalVariables->CreateGroup(kEffectEditorSettingsGroup);
+	globalVariables->SetGroupCategory(kEffectEditorSettingsGroup, "Effect");
+	Engine::GlobalVariableWriter writer(globalVariables, Engine::GlobalVariableWriteMode::Save);
+	writer.Value(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName", selectedApplyPrimitiveName_);
+	globalVariables->SaveFile(kEffectEditorSettingsGroup);
+}
+
+void EffectEditor::LoadEditorUiSettings() {
+	// 起動時にプリミティブ適用コンボの最後の選択状態を復元する。
+	globalVariables->CreateGroup(kEffectEditorSettingsGroup);
+	globalVariables->SetGroupCategory(kEffectEditorSettingsGroup, "Effect");
+	Engine::GlobalVariableWriter writer(globalVariables, Engine::GlobalVariableWriteMode::Register);
+	writer.Value(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName", selectedApplyPrimitiveName_);
+
+	if (globalVariables->HasKey(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName")) {
+		selectedApplyPrimitiveName_ = globalVariables->GetValue<std::string>(kEffectEditorSettingsGroup, "selectedApplyPrimitiveName");
+	}
 }
 
 void EffectEditor::DrawParticleGroupEditor() {
@@ -30522,9 +30705,15 @@ void EffectEditor::DrawParticleGroupEditor() {
 
 	ImGui::SeparatorText("Particle Group Management");
 	Engine::ImGuiUtility::InputText("New Particle Group Name", newParticleGroupNameBuffer_);
-	Engine::ImGuiUtility::InputText("New Texture Path", newParticleTexturePathBuffer_);
+	DrawParticleTextureSelector("New Texture", "New Texture Path##newParticleTexture", newParticleTexturePathBuffer_, particleManager->GetTextureManager());
 
-	DrawShapeTypeCombo("New Shape", newParticleGroupData_.shapeType);
+	DrawParticleMeshSourceCombo("New Mesh Source", newParticleGroupData_.meshSourceType);
+	if (newParticleGroupData_.meshSourceType == Engine::ParticleMeshSourceType::Model) {
+		DrawModelNameCombo("New Model", newParticleGroupData_.modelName, effectComponent->GetModelManager());
+	}
+	else {
+		DrawShapeTypeCombo("New Shape", newParticleGroupData_.shapeType);
+	}
 
 	static const char* RasterizerLabels[] = {
 		"Solid Back",
@@ -30546,6 +30735,8 @@ void EffectEditor::DrawParticleGroupEditor() {
 	if (!particleManagementMessage_.empty()) {
 		ImGui::TextWrapped("%s", particleManagementMessage_.c_str());
 	}
+
+	ImGui::SeparatorText("Particle Group");
 
 	if (Engine::ImGuiUtility::SelectMapKey("Selected Particle Group", selectedParticleGroupName_,
 		particleManager->GetParticleGroups(), "No Particle Group")) {
@@ -30601,6 +30792,99 @@ void EffectEditor::DrawParticleGroupEditor() {
 	ImGui::Separator();
 }
 
+void EffectEditor::DrawParticleGroupPreviewControls(const std::string& particleName) {
+	ImGui::SeparatorText("Particle Group Preview");
+
+	// エフェクト定義を作らず、選択中のパーティクル群だけを一時エミッターで発生確認する。
+	if (ImGui::Checkbox("出現##ParticleGroupPreview", &isParticleGroupPreviewEnabled_)) {
+		particleGroupPreviewTimer_ = 0.0f;
+		if (!isParticleGroupPreviewEnabled_) {
+			ClearParticleGroupPreview();
+		}
+	}
+	ImGui::DragFloat3("位置##ParticleGroupPreview", &particleGroupPreviewPosition_.x, 0.1f);
+	ImGui::DragFloat("頻度##ParticleGroupPreview", &particleGroupPreviewFrequency_, 0.01f, 0.01f, 1000.0f);
+	ImGui::DragInt("出現量##ParticleGroupPreview", &particleGroupPreviewCount_, 1, 1, 1024);
+	ImGui::DragFloat("生存時間##ParticleGroupPreview", &particleGroupPreviewLifeTime_, 0.01f, 0.01f, 1000.0f);
+	ImGui::DragFloat3("サイズ##ParticleGroupPreview", &particleGroupPreviewSize_.x, 0.1f, 0.01f, 1000.0f);
+	ImGui::DragFloat3("回転##ParticleGroupPreview", &particleGroupPreviewRotate_.x, 0.01f);
+	ImGui::ColorEdit4("色##ParticleGroupPreview", &particleGroupPreviewColor_.x);
+
+	if (!isParticleGroupPreviewEnabled_) {
+		return;
+	}
+
+	EnsureParticleGroupPreviewEmitter(particleName);
+	particleGroupPreviewTimer_ += ImGui::GetIO().DeltaTime;
+	if (particleGroupPreviewFrequency_ <= particleGroupPreviewTimer_) {
+		EmitParticleGroupPreview(particleName);
+		particleGroupPreviewTimer_ = 0.0f;
+	}
+}
+
+void EffectEditor::EnsureParticleGroupPreviewEmitter(const std::string& particleName) {
+	if (effectComponent == nullptr || particleName.empty()) {
+		return;
+	}
+	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
+	if (particleManager == nullptr || !particleManager->GetParticleGroups().Contains(particleName)) {
+		ClearParticleGroupPreview();
+		return;
+	}
+
+	if (!effectComponent->HasEmitter(kParticleGroupPreviewEmitterName)) {
+		// 選択中パーティクル群の見た目確認だけに使う内部Pointエミッターを作る。
+		effectComponent->AddEmitter(kParticleGroupPreviewEmitterName, particleName, EmitterShapeType::POINT);
+	}
+
+	if (Engine::BaseParticleEmitter* emitter = effectComponent->GetBaseEmitter(kParticleGroupPreviewEmitterName)) {
+		// Particle Groupsの選択が変わったら、同じ一時エミッターの参照先だけ差し替える。
+		emitter->SetParticleName(particleName);
+		emitter->SetIsEmit(false);
+		previewParticleGroupName_ = particleName;
+	}
+}
+
+void EffectEditor::EmitParticleGroupPreview(const std::string& particleName) {
+	EnsureParticleGroupPreviewEmitter(particleName);
+	Engine::BaseParticleEmitter* emitter = effectComponent ? effectComponent->GetBaseEmitter(kParticleGroupPreviewEmitterName) : nullptr;
+	if (emitter == nullptr) {
+		return;
+	}
+
+	Engine::ParticleGroupEditorData data = effectComponent->GetParticleManager()->GetEditorParticleGroupData(particleName);
+
+	// Emitter Settingsの発生確認と同じく、現在の確認用パラメータで手動発生させる。
+	// 挙動フラグはパーティクル群側の状態を反映し、見た目確認が保存済み設定からずれないようにする。
+	emitter->SetPos(particleGroupPreviewPosition_);
+	emitter->SetCount(particleGroupPreviewCount_, 0);
+	emitter->SetFrequency(0.0f);
+	emitter->SetLifeTime(particleGroupPreviewLifeTime_, 0.0f);
+	emitter->SetSize(particleGroupPreviewSize_, {});
+	emitter->SetRotate(particleGroupPreviewRotate_, {});
+	emitter->SetVelocity({}, {});
+	emitter->SetColorMinMax(particleGroupPreviewColor_, particleGroupPreviewColor_);
+	emitter->SetIsFlag(data.isFlag);
+	emitter->SetLifeTimeScaleTopBottom(data.topBottom);
+	emitter->SetUvTransformVeloctiy(data.uvTransformVelocity);
+	emitter->SetAlphaClipping(data.materialAlphaClipping);
+	emitter->SetEnableLighting(data.materialEnableLighting);
+	emitter->SetIsEmit(true);
+	emitter->Emit();
+	emitter->SetIsEmit(false);
+}
+
+void EffectEditor::ClearParticleGroupPreview() {
+	previewParticleGroupName_.clear();
+	particleGroupPreviewTimer_ = 0.0f;
+	if (effectComponent == nullptr) {
+		return;
+	}
+
+	// 内部確認用エミッターは保存対象ではないため、不要になったら即破棄する。
+	effectComponent->RemoveEmitter(kParticleGroupPreviewEmitterName);
+}
+
 void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engine::ParticleGroup& group) {
 	Engine::ParticleManager* particleManager = effectComponent->GetParticleManager();
 	Engine::ParticleGroupEditorData data = particleManager->GetEditorParticleGroupData(particleName);
@@ -30608,16 +30892,35 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 	}
 
+	DrawParticleGroupPreviewControls(particleName);
+
 	ImGui::SeparatorText("Particle Group Detail");
 	bool recreate = false;
 	bool saveData = false;
+	Engine::TextureManager* textureManager = particleManager->GetTextureManager();
+	const std::string resolvedTexturePath = ResolveParticleTexturePath(textureManager, data.texturePath);
+	if (resolvedTexturePath != data.texturePath) {
+		// 保存済みの無効パスも、画面を開いた時点で安全な仮テクスチャへ切り替える。
+		data.texturePath = resolvedTexturePath;
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
+		saveData = true;
+		particleManagementMessage_ = "Texture path not found. Preview texture applied: " + data.texturePath;
+	}
+	if (!particleManagementMessage_.empty()) {
+		ImGui::TextWrapped("%s", particleManagementMessage_.c_str());
+	}
 
-	if (Engine::ImGuiUtility::InputText("Texture Path", editParticleTexturePathBuffer_)) {
+	if (DrawParticleTextureSelector("Texture", "Texture Path##editParticleTexture", editParticleTexturePathBuffer_, particleManager->GetTextureManager())) {
 		data.texturePath = editParticleTexturePathBuffer_.data();
 		saveData = true;
 	}
 	if (ImGui::Button("Apply Texture")) {
-		data.texturePath = editParticleTexturePathBuffer_.data();
+		const std::string requestedTexturePath = editParticleTexturePathBuffer_.data();
+		data.texturePath = ResolveParticleTexturePath(particleManager->GetTextureManager(), requestedTexturePath);
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
+		if (requestedTexturePath != data.texturePath) {
+			particleManagementMessage_ = "Texture path not found. Preview texture applied: " + data.texturePath;
+		}
 		if (group.material) {
 			group.material->tex_.diffuseFilePath = data.texturePath;
 			group.material->LoadTex();
@@ -30626,23 +30929,36 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	}
 	Engine::ImGuiUtility::HelpMarker("Texture Path is applied immediately with Apply Texture. Shape changes recreate the group.");
 
-	if (!primitiveDefinitionDatas_.empty()) {
-		ImGui::SeparatorText("Apply Primitive Definition");
-		Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
-			primitiveDefinitionDatas_, "No Primitive Definition");
-		if (ImGui::Button("Apply Primitive To Particle") && !selectedApplyPrimitiveName_.empty()) {
-			ApplyPrimitiveDefinitionToParticleGroup(particleName, selectedApplyPrimitiveName_);
-			data = particleManager->GetEditorParticleGroupData(particleName);
-			recreate = false;
-			saveData = false;
-		}
-	}
-
-	if (DrawShapeTypeCombo("Shape", data.shapeType)) {
+	if (DrawParticleMeshSourceCombo("Mesh Source", data.meshSourceType)) {
 		recreate = true;
 	}
-	if (DrawPrimitiveShapeParameters(data)) {
-		saveData = true;
+
+	if (data.meshSourceType == Engine::ParticleMeshSourceType::Model) {
+		if (DrawModelNameCombo("Model", data.modelName, effectComponent->GetModelManager())) {
+			recreate = true;
+		}
+	}
+	else {
+		if (!primitiveDefinitionDatas_.empty()) {
+			ImGui::SeparatorText("Apply Primitive Definition");
+			if (Engine::ImGuiUtility::SelectMapKey("Primitive Definition", selectedApplyPrimitiveName_,
+				primitiveDefinitionDatas_, "No Primitive Definition")) {
+				SaveEditorUiSettings();
+			}
+			if (ImGui::Button("Apply Primitive To Particle") && !selectedApplyPrimitiveName_.empty()) {
+				ApplyPrimitiveDefinitionToParticleGroup(particleName, selectedApplyPrimitiveName_);
+				data = particleManager->GetEditorParticleGroupData(particleName);
+				recreate = false;
+				saveData = false;
+			}
+		}
+
+		if (DrawShapeTypeCombo("Shape", data.shapeType)) {
+			recreate = true;
+		}
+		if (DrawPrimitiveShapeParameters(data)) {
+			saveData = true;
+		}
 	}
 
 	static const char* RasterizerLabels[] = {
@@ -30681,6 +30997,10 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 		saveData = true;
 	}
 	if (ImGui::Checkbox("Billboard Z Rotation", &data.isFlag.billboardRotZ)) {
+		saveData = true;
+	}
+	if (ImGui::Checkbox("ライン描画##ParticleGroup", &data.isFlag.isLine)) {
+		// パーティクル群単体プレビューでもエミッター形状と発生位置ラインを確認できるようにする。
 		saveData = true;
 	}
 	if (ImGui::Checkbox("Alpha Over Life", &data.isFlag.isAlpha)) {
@@ -30744,20 +31064,29 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	}
 
 	if (recreate) {
-		data.texturePath = editParticleTexturePathBuffer_.data();
-		particleManager->RecreateEditorParticleGroup(particleName, data);
+		data.texturePath = ResolveParticleTexturePath(textureManager, editParticleTexturePathBuffer_.data());
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
+		if (!particleManager->RecreateEditorParticleGroup(particleName, data)) {
+			particleManagementMessage_ = "Could not recreate particle group. Check the mesh source settings.";
+			return;
+		}
 		selectedParticleGroupName_ = particleName;
 		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 		saveData = true;
 	}
 
+	if (ImGui::Button("Save This Particle Group")) {
+		// すべての編集UIを通った後のdataを使い、選択中パーティクル群だけを明示的に保存する。
+		saveData = true;
+	}
+
 	if (saveData) {
+		// UIで編集したMeshSourceやModel名をそのまま保存データとして保持する。
+		data.texturePath = ResolveParticleTexturePath(textureManager, editParticleTexturePathBuffer_.data());
+		Engine::ImGuiUtility::SetInputTextBuffer(editParticleTexturePathBuffer_, data.texturePath);
 		particleManager->ApplyEditorParticleGroupData(particleName, data);
-		data = particleManager->GetEditorParticleGroupData(particleName);
-		serializer_.RegisterParticleGroupData(particleName, data);
-		serializer_.SaveParticleGroupData(particleName, data);
-		globalVariables->SaveFile(kParticleDataPrefix + particleName);
-		globalVariables->SaveFile(kParticleRegistryGroup);
+		particleManager->SetEditorParticleGroupData(particleName, data);
+		SaveParticleGroupData(particleName, data);
 	}
 }
 
@@ -30925,12 +31254,19 @@ void EffectEditor::AddParticleGroupFromEditor() {
 		return;
 	}
 
-	newParticleGroupData_.texturePath = newParticleTexturePathBuffer_.data();
-	if (newParticleGroupData_.texturePath.empty()) {
-		particleManagementMessage_ = "Texture path is required.";
-		return;
+	const std::string requestedTexturePath = newParticleTexturePathBuffer_.data();
+	newParticleGroupData_.texturePath = ResolveParticleTexturePath(effectComponent->GetParticleManager()->GetTextureManager(), requestedTexturePath);
+	Engine::ImGuiUtility::SetInputTextBuffer(newParticleTexturePathBuffer_, newParticleGroupData_.texturePath);
+	if (requestedTexturePath != newParticleGroupData_.texturePath) {
+		particleManagementMessage_ = "Texture path not found. Preview texture applied: " + newParticleGroupData_.texturePath;
 	}
-	if (newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::None ||
+	if (newParticleGroupData_.meshSourceType == Engine::ParticleMeshSourceType::Model) {
+		if (newParticleGroupData_.modelName.empty()) {
+			particleManagementMessage_ = "Choose a model for the particle group.";
+			return;
+		}
+	}
+	else if (newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::None ||
 		newParticleGroupData_.shapeType == Engine::ShapeParameter::ShapeType::Max) {
 		particleManagementMessage_ = "Choose a valid primitive shape.";
 		return;
@@ -30967,6 +31303,7 @@ void EffectEditor::RenameParticleGroup(const std::string& oldName, const std::st
 	}
 
 	Engine::ParticleGroupEditorData data = effectComponent->GetParticleManager()->GetEditorParticleGroupData(oldName);
+	const bool previewWasTarget = previewParticleGroupName_ == oldName;
 	if (!effectComponent->GetParticleManager()->RenameParticleGroup(oldName, newName)) {
 		particleManagementMessage_ = "Could not rename particle group.";
 		return;
@@ -30992,6 +31329,10 @@ void EffectEditor::RenameParticleGroup(const std::string& oldName, const std::st
 		}
 	}
 
+	if (previewWasTarget) {
+		previewParticleGroupName_ = newName;
+		EnsureParticleGroupPreviewEmitter(newName);
+	}
 	selectedParticleGroupName_ = newName;
 	editParticleTexturePathBuffer_.fill('\0');
 	particleManagementMessage_ = "Renamed particle group: " + oldName + " -> " + newName;
@@ -31001,6 +31342,10 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 	if (particleName.empty() || !effectComponent->GetParticleManager()->GetParticleGroups().Contains(particleName)) {
 		particleManagementMessage_ = "The selected particle group no longer exists.";
 		return;
+	}
+
+	if (previewParticleGroupName_ == particleName) {
+		ClearParticleGroupPreview();
 	}
 
 	for (auto& [effectName, effectData] : effectGlobalDatas_) {
@@ -31031,7 +31376,8 @@ void EffectEditor::DeleteParticleGroup(const std::string& particleName) {
 
 void EffectEditorSerializer::RegisterParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data) {
 	const std::string groupName = std::string(kParticleDataPrefix) + particleName;
-	globalVariables_->SetGroupCategory(groupName, "Particle");
+	// 個別保存とALL保存で同じEffect/Particleフォルダへ書き出し、読み込み時の重複を防ぐ。
+	globalVariables_->SetGroupCategory(groupName, "Effect/Particle");
 	globalVariables_->CreateGroup(groupName);
 	WriteParticleGroupData(particleName, data, false);
 }
@@ -31047,6 +31393,8 @@ void EffectEditorSerializer::WriteParticleGroupData(const std::string& particleN
 		Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
 	// パーティクル群の全保存項目を登録・保存で共有する
 	writer.Value(groupName, "texturePath", data.texturePath);
+	writer.EnumValue<Engine::ParticleMeshSourceType>(groupName, "meshSourceType", data.meshSourceType, "ParticleMeshSourceType");
+	writer.Value(groupName, "modelName", data.modelName);
 	writer.EnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType", data.shapeType, "ShapeType");
 	writer.Value(groupName, "shape.plane.width", data.plane.width);
 	writer.Value(groupName, "shape.plane.height", data.plane.height);
@@ -31131,6 +31479,8 @@ void EffectEditorSerializer::LoadParticleGroupData(const std::string& particleNa
 	const std::string groupName = kParticleDataPrefix + particleName;
 	// 旧形式の保存ファイルでも読み込めるよう、追加項目はキーがある場合だけ上書きする。
 	data.texturePath = globalVariables_->GetValue<std::string>(groupName, "texturePath");
+	if (globalVariables_->HasKey(groupName, "meshSourceType")) data.meshSourceType = globalVariables_->GetEnumValue<Engine::ParticleMeshSourceType>(groupName, "meshSourceType");
+	if (globalVariables_->HasKey(groupName, "modelName")) data.modelName = globalVariables_->GetValue<std::string>(groupName, "modelName");
 	data.shapeType = globalVariables_->GetEnumValue<Engine::ShapeParameter::ShapeType>(groupName, "shapeType");
 	if (globalVariables_->HasKey(groupName, "shape.plane.width")) data.plane.width = globalVariables_->GetValue<float>(groupName, "shape.plane.width");
 	if (globalVariables_->HasKey(groupName, "shape.plane.height")) data.plane.height = globalVariables_->GetValue<float>(groupName, "shape.plane.height");
@@ -31279,6 +31629,13 @@ void EffectEditorSerializer::WriteEffectData(const std::string& name, const Effe
 	writer.Value(name, "emitData.sizeAmount.range", data.emitData.sizeAmount.range);
 	writer.Value(name, "emitData.velocity.median", data.emitData.velocity.median);
 	writer.Value(name, "emitData.velocity.range", data.emitData.velocity.range);
+	writer.Value(name, "emitData.isEmit", data.emitData.isEmit);
+	writer.Value(name, "emitData.isLoop", data.emitData.isLoop);
+	writer.Value(name, "emitData.isUniformSize", data.emitData.isUniformSize);
+	writer.Value(name, "emitData.isDirectionRotate", data.emitData.isDirectionRotate);
+	writer.Value(name, "emitData.isNoise", data.emitData.isNoise);
+	writer.Value(name, "emitData.direction", data.emitData.direction);
+	writer.Value(name, "emitData.uvTransformVeloctiy", data.uvTransformVeloctiy);
 
 	writer.Value(name, "emitData.alphaClipping", data.alphaClipping);
 	writer.Value(name, "emitData.enableLighting", data.enableLighting);
@@ -31336,6 +31693,13 @@ void EffectEditorSerializer::LoadEffectData(const std::string& name, EffectGloba
 	data.emitData.sizeAmount.range = globalVariables_->GetValue<Vector3>(name, "emitData.sizeAmount.range");
 	data.emitData.velocity.median = globalVariables_->GetValue<Vector3>(name, "emitData.velocity.median");
 	data.emitData.velocity.range = globalVariables_->GetValue<Vector3>(name, "emitData.velocity.range");
+	if (globalVariables_->HasKey(name, "emitData.isEmit")) data.emitData.isEmit = globalVariables_->GetValue<bool>(name, "emitData.isEmit");
+	if (globalVariables_->HasKey(name, "emitData.isLoop")) data.emitData.isLoop = globalVariables_->GetValue<bool>(name, "emitData.isLoop");
+	if (globalVariables_->HasKey(name, "emitData.isUniformSize")) data.emitData.isUniformSize = globalVariables_->GetValue<bool>(name, "emitData.isUniformSize");
+	if (globalVariables_->HasKey(name, "emitData.isDirectionRotate")) data.emitData.isDirectionRotate = globalVariables_->GetValue<bool>(name, "emitData.isDirectionRotate");
+	if (globalVariables_->HasKey(name, "emitData.isNoise")) data.emitData.isNoise = globalVariables_->GetValue<bool>(name, "emitData.isNoise");
+	if (globalVariables_->HasKey(name, "emitData.direction")) data.emitData.direction = globalVariables_->GetValue<int>(name, "emitData.direction");
+	if (globalVariables_->HasKey(name, "emitData.uvTransformVeloctiy")) data.uvTransformVeloctiy = globalVariables_->GetValue<Transform>(name, "emitData.uvTransformVeloctiy");
 
 	data.alphaClipping = globalVariables_->GetValue<float>(name, "emitData.alphaClipping");
 	data.enableLighting = globalVariables_->GetValue<int>(name, "emitData.enableLighting");
@@ -31375,10 +31739,16 @@ void EffectEditorSerializer::LoadEffectData(const std::string& name, EffectGloba
 	data.topBottom = globalVariables_->GetEnumValue<EmitData::TopBottom>(name, "emitData.topBottom");
 }
 void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& data) {
-	ImGui::Begin("EffectEditor");
-
+	// EffectウィンドウのEmitter Settingsタブ内へ直接描画し、別ウィンドウに分かれないようにする。
+	ImGui::SeparatorText("Emitter Detail");
 	// パーティクル選択
-	Engine::ImGuiManager::Select("Selected Effect", data.particleName, effectComponent->GetParticleManager()->GetParticleGroups());
+	Engine::ImGuiManager::Select("Particle Group", data.particleName, effectComponent->GetParticleManager()->GetParticleGroups());
+	if (ImGui::Button("Save This Emitter")) {
+		SaveEmitterData(name, data);
+	}
+	if (!emitterSettingsMessage_.empty()) {
+		ImGui::TextWrapped("%s", emitterSettingsMessage_.c_str());
+	}
 
 	static const char* ShapeTypeLabels[] = {
 		"AABB",		// AABB
@@ -31419,6 +31789,9 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	// 出現
 	ImGui::DragInt("出現量(中央値)", &data.emitData.count.median, 0.1f);
 	ImGui::DragInt("出現量(振れ幅)", &data.emitData.count.range, 0.1f);
+	// エミット制御も保存対象なので、エディタから状態を確認・変更できるようにする。
+	ImGui::Checkbox("出現フラグ", &data.emitData.isEmit);
+	ImGui::Checkbox("ループ", &data.emitData.isLoop);
 
 	// 生存時間
 	ImGui::DragFloat("生存時間(中央値)", &data.emitData.lifeTime.median, 0.1f);
@@ -31429,16 +31802,27 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	bool isLight = data.enableLighting;
 	ImGui::Checkbox("ライティング", &isLight);
 	data.enableLighting = isLight;
+	// エミッター形状ラインと実際の発生位置マーカーを表示するか。
+	ImGui::Checkbox("ライン描画", &data.isFlag.isLine);
 
 	if (ImGui::CollapsingHeader("ビルボード")) {
 		ImGui::Checkbox("ビルボードのz回転するか", &data.isFlag.billboardRotZ);
 		ImGui::Checkbox("ビルボードするか", &data.isFlag.usebillboard);
 		ImGui::Checkbox("ビルボードY軸するか", &data.isFlag.usebillboardY);
+		ImGui::Checkbox("進行方向で回転", &data.emitData.isDirectionRotate);
 
+	}
+	if (ImGui::CollapsingHeader("UV")) {
+		// パーティクルマテリアルのUVスクロール速度を保存対象として編集する。
+		ImGui::DragFloat3("UV移動速度", &data.uvTransformVeloctiy.translate.x, 0.001f);
+		ImGui::DragFloat3("UV回転速度", &data.uvTransformVeloctiy.rotate.x, 0.001f);
+		ImGui::DragFloat3("UV拡縮速度", &data.uvTransformVeloctiy.scale.x, 0.001f);
 	}
 	if (ImGui::CollapsingHeader("速度")) {
 		ImGui::DragFloat3("速度(中央値)", &data.emitData.velocity.median.x, 0.1f);
 		ImGui::DragFloat3("速度(振れ幅)", &data.emitData.velocity.range.x, 0.1f);
+		ImGui::Checkbox("ノイズを使用", &data.emitData.isNoise);
+		ImGui::DragInt("ノイズ方向", &data.emitData.direction, 1.0f, 0, 3);
 
 		ImGui::Checkbox("生存時間による速度変化を使用するか", &data.isFlag.isLifeTimeVelocity);
 		ImGui::Checkbox("加速度を使用するか", &data.isFlag.isAcceleration);
@@ -31456,6 +31840,7 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 	if (ImGui::CollapsingHeader("拡縮")) {
 		ImGui::DragFloat3("サイズ(中央値)", &data.emitData.size.median.x, 0.1f);
 		ImGui::DragFloat3("サイズ(振れ幅)", &data.emitData.size.range.x, 0.1f);
+		ImGui::Checkbox("XYZ一律サイズ", &data.emitData.isUniformSize);
 		ImGui::Checkbox("生存時間でのサイズ変化を使用するか", &data.isFlag.isLifeTimeScale_);
 		ImGui::Checkbox("サイズ変化を使用するか", &data.isFlag.isScaling_);
 
@@ -31540,7 +31925,6 @@ void EffectEditor::DrawEffectDetail(const std::string& name, EffectGlobalData& d
 			break;
 		}
 	}
-	ImGui::End();
 }
 
 void EffectEditor::Emit(const std::string& name, const Vector3& pos) {
@@ -31726,6 +32110,29 @@ private:
 	void DrawParticleGroupDetail(const std::string& particleName, Engine::ParticleGroup& group);
 
 	/// <summary>
+	/// 選択中パーティクル群を、エフェクト定義なしで発生確認するUIを描画します。
+	/// </summary>
+	/// <param name="particleName">発生確認するパーティクル群名です。</param>
+	void DrawParticleGroupPreviewControls(const std::string& particleName);
+
+	/// <summary>
+	/// パーティクル群確認用の一時エミッターを生成、または参照先を更新します。
+	/// </summary>
+	/// <param name="particleName">一時エミッターが参照するパーティクル群名です。</param>
+	void EnsureParticleGroupPreviewEmitter(const std::string& particleName);
+
+	/// <summary>
+	/// パーティクル群確認用の一時エミッターからパーティクルを発生させます。
+	/// </summary>
+	/// <param name="particleName">発生させるパーティクル群名です。</param>
+	void EmitParticleGroupPreview(const std::string& particleName);
+
+	/// <summary>
+	/// パーティクル群確認用の一時エミッターを削除します。
+	/// </summary>
+	void ClearParticleGroupPreview();
+
+	/// <summary>
 	/// 新しいパーティクル群名が使用できるか検証します。
 	/// </summary>
 	/// <param name="particleName">検証するパーティクル群名です。</param>
@@ -31841,6 +32248,30 @@ private:
 	/// エディタ全体の設定を保存します。
 	/// </summary>
 	void SaveAllEditorData();
+
+	/// <summary>
+	/// 指定エミッタの設定を個別に保存します。
+	/// </summary>
+	/// <param name="name">保存するエミッタ名です。</param>
+	/// <param name="data">保存するエミッタ設定です。</param>
+	void SaveEmitterData(const std::string& name, const EffectGlobalData& data);
+
+	/// <summary>
+	/// 指定パーティクル群の設定を個別に保存します。
+	/// </summary>
+	/// <param name="particleName">保存するパーティクル群名です。</param>
+	/// <param name="data">保存するパーティクル群設定です。</param>
+	void SaveParticleGroupData(const std::string& particleName, const Engine::ParticleGroupEditorData& data);
+
+	/// <summary>
+	/// EffectエディタのUI状態を保存します。
+	/// </summary>
+	void SaveEditorUiSettings();
+
+	/// <summary>
+	/// EffectエディタのUI状態を読み込みます。
+	/// </summary>
+	void LoadEditorUiSettings();
 private:
 	/// <summary>
 	/// 選択中エフェクトの詳細編集UIを描画します。
@@ -31871,6 +32302,8 @@ private:// エフェクトのグローバルデータ
 	std::string pendingDeleteEffectName_;
 	// 管理UIの結果やエラー文
 	std::string managementMessage_;
+	// エミッタ設定UIの保存結果やエラー文
+	std::string emitterSettingsMessage_;
 	// 選択中のパーティクル群名
 	std::string selectedParticleGroupName_;
 	// 新規追加するパーティクル群名入力
@@ -31917,6 +32350,26 @@ private:// エフェクトのグローバルデータ
 	std::string previewPrimitiveName_;
 	// 現在プレビューへ反映済みのプリミティブ形状
 	Engine::ShapeParameter::ShapeType previewPrimitiveShapeType_ = Engine::ShapeParameter::ShapeType::None;
+	// 選択中パーティクル群の発生確認を有効にするか
+	bool isParticleGroupPreviewEnabled_ = false;
+	// パーティクル群確認用エミッターが現在参照しているパーティクル群名
+	std::string previewParticleGroupName_;
+	// パーティクル群確認用エミッターの発生位置
+	Vector3 particleGroupPreviewPosition_ = {};
+	// パーティクル群確認用パーティクルのサイズ
+	Vector3 particleGroupPreviewSize_ = { 1.0f, 1.0f, 1.0f };
+	// パーティクル群確認用パーティクルの回転
+	Vector3 particleGroupPreviewRotate_ = {};
+	// パーティクル群確認用パーティクルの色
+	Vector4 particleGroupPreviewColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+	// パーティクル群確認用の発生頻度
+	float particleGroupPreviewFrequency_ = 0.2f;
+	// パーティクル群確認用の発生タイマー
+	float particleGroupPreviewTimer_ = 0.0f;
+	// パーティクル群確認用の一回あたり発生数
+	int particleGroupPreviewCount_ = 1;
+	// パーティクル群確認用の寿命
+	float particleGroupPreviewLifeTime_ = 1.0f;
 private:
 	// 出現させるか
 	bool isSpawnEmit = false;
@@ -33512,9 +33965,10 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.cpp
 ============================================================
-﻿#include "ResultSystem.h"
+#include "ResultSystem.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
+#include <algorithm>
 
 namespace {
 	// リザルト画面に表示するメニュー項目数。
@@ -33523,6 +33977,8 @@ namespace {
 	constexpr int kResultPositiveDirectionStep = 1;
 	// シーン表示直後の誤決定を防止する待機時間。
 	constexpr float kResultDecisionDelaySeconds = 0.5f;
+	// スコアを加算表示しきるまでの時間。
+	constexpr float kScoreCountDurationSeconds = 1.0f;
 }
 
 void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
@@ -33538,10 +33994,44 @@ void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* i
 	config.decisionDelay = kResultDecisionDelaySeconds;
 	config.transitionScenes = { "GAMEPLAY", "TITLE" };
 	menuSelectionController_.Initialize(sceneManager, input, config);
+	// リザルト開始時はスコア加算表示から始める。
+	phase_ = ResultPhase::kScoreCount;
+	phaseTimer_ = 0.0f;
+	displayScore_ = 0.0f;
 }
 
-void ResultSystem::Update(float dt) {
+void ResultSystem::Update(float dt, float targetScore) {
+	// 現在のフェーズだけを更新し、リザルト画面の進行を分かりやすく分離する。
+	switch (phase_) {
+	case ResultPhase::kScoreCount:
+		UpdateScoreCount(dt, targetScore);
+		break;
+	case ResultPhase::kMenuWait:
+		UpdateMenuWait(dt);
+		break;
+	}
+}
 
+void ResultSystem::ChangePhase(ResultPhase nextPhase) {
+	// 新しいフェーズの経過時間を0から数えるためにタイマーをリセットする。
+	phase_ = nextPhase;
+	phaseTimer_ = 0.0f;
+}
+
+void ResultSystem::UpdateScoreCount(float dt, float targetScore) {
+	// フェーズ内タイマーを進め、指定時間で最終スコアへ到達する割合を作る。
+	phaseTimer_ += dt;
+	const float countRate = std::clamp(phaseTimer_ / kScoreCountDurationSeconds, 0.0f, 1.0f);
+	displayScore_ = targetScore * countRate;
+
+	// スコア表示が完了したら最終値に固定し、メニュー入力待ちへ進める。
+	if (countRate >= 1.0f) {
+		displayScore_ = targetScore;
+		ChangePhase(ResultPhase::kMenuWait);
+	}
+}
+
+void ResultSystem::UpdateMenuWait(float dt) {
 	// 共通メニュー操作へ更新を委譲する。
 	menuSelectionController_.Update(dt);
 }
@@ -33550,7 +34040,7 @@ void ResultSystem::Update(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 // C++
 #include <imgui.h>
 #include <list>
@@ -33576,6 +34066,16 @@ namespace Engine {
 class EffectSystem;
 class InputSystem;
 
+/// <summary>
+/// リザルト画面の進行フェーズ。
+/// </summary>
+enum class ResultPhase {
+	// スコアを0から最終値まで加算表示する。
+	kScoreCount,
+	// メニュー項目の選択と決定を受け付ける。
+	kMenuWait,
+};
+
 class ResultSystem {
 public:
 	/// <summary>
@@ -33591,7 +34091,8 @@ public:
 	/// 更新
 	/// </summary>
 	/// <param name="dt"></param>
-	void Update(float dt);
+	/// <param name="targetScore"></param>
+	void Update(float dt, float targetScore);
 
 	/// <summary>
 	/// 選択されているインデックスの取得
@@ -33599,10 +34100,47 @@ public:
 	/// <returns></returns>
 	int GetSelectedIndex() const { return menuSelectionController_.GetSelectedIndex(); }
 
+	/// <summary>
+	/// UIに表示するスコアの取得
+	/// </summary>
+	/// <returns></returns>
+	float GetDisplayScore() const { return displayScore_; }
+
+	/// <summary>
+	/// メニュー操作を表示できるか取得
+	/// </summary>
+	/// <returns></returns>
+	bool IsMenuActive() const { return phase_ == ResultPhase::kMenuWait; }
+
+private:
+	/// <summary>
+	/// フェーズを切り替える
+	/// </summary>
+	/// <param name="nextPhase"></param>
+	void ChangePhase(ResultPhase nextPhase);
+
+	/// <summary>
+	/// スコア加算表示フェーズを更新する
+	/// </summary>
+	/// <param name="dt"></param>
+	/// <param name="targetScore"></param>
+	void UpdateScoreCount(float dt, float targetScore);
+
+	/// <summary>
+	/// メニュー入力待ちフェーズを更新する
+	/// </summary>
+	/// <param name="dt"></param>
+	void UpdateMenuWait(float dt);
 
 private:
 	// リザルト画面の項目移動とシーン遷移を処理する。
 	MenuSelectionController menuSelectionController_;
+	// 現在のリザルト進行フェーズ。
+	ResultPhase phase_ = ResultPhase::kScoreCount;
+	// フェーズ内で経過した時間。
+	float phaseTimer_ = 0.0f;
+	// UIに表示するための加算中スコア。
+	float displayScore_ = 0.0f;
 };
 
 
@@ -36121,7 +36659,7 @@ void SpecialPoint::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	sphere->Enable();					// コライダ有効
 	sphere->SetTag(CollisionTag::Item);	// タグ設定
 	sphere->SetLayer(CollisionLayer::Environment);// レイヤー設定
-	sphere->radius = 4.0f; // 半径を適宜設定
+	sphere->radius = 1.0f; // 半径を適宜設定
 	colliderComponent->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
@@ -36346,7 +36884,6 @@ void SpecialPointIdleState::Enter() {
 // 更新
 void SpecialPointIdleState::Update(float dt) {
 	timer += dt;
-
 	object_->GetObjectComponent()->GetWorldTransform().rotate_.y += rotateSpeed_ * dt;
 
 	// 一定時間経過で終了状態へ
@@ -36375,11 +36912,13 @@ void SpecialPointIdleState::Exit() {
 // 開始
 void SpecialPointMoveState::Enter() {
 	timer = 0.0f;
-	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
+	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(true);
+	object_->GetObjectComponent()->GetRigidBodyComponent()->AddForce(upVelocity_);
 };
 // 更新
 void SpecialPointMoveState::Update(float dt) {
 	timer += dt;
+	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
 
 	Vector3 dire = Normalize(object_->GetTargetPos() - object_->GetObjectComponent()->GetWorldPosition());
 
@@ -36478,7 +37017,7 @@ public:
 private:
 	Vector3 upVelocity_ = {0,200,0};
 	float glavityScale_ = 2.0f;
-	float nextStateTimer_ = 0.75f;
+	float nextStateTimer_ = 0.5f;
 	//
 	float groundY = -1.0f;
 };
@@ -36519,8 +37058,9 @@ public:
 	// 終了
 	void Exit() override;
 private:
+	Vector3 upVelocity_ = { 0,50,0 };
 	// 移動速度
-	float speed_ = 100;
+	float speed_ = 50.0f;
 
 
 };
@@ -39018,7 +39558,7 @@ private:
 
 	struct FollowUIData {
 		Vector3 worldOffset = { 0.0f,2.0f,0.0f };	// プレイヤー左側にUIを置くための高さ基準
-		Vector2 screenOffset = { 100.0f,25.0f };	// スクリーン上でメーター全体をプレイヤー左側へ寄せるオフセット
+		Vector2 screenOffset = { 50.0f,50.0f };	// スクリーン上でメーター全体をプレイヤー左側へ寄せるオフセット
 		float rowInterval = 16.0f;					// HP/SP/Staminaを縦に並べる間隔
 		Vector2 hiddenPos = { -1000.0f,-1000.0f };	// 画面外やカメラ未設定時の退避座標
 	};
@@ -41192,6 +41732,7 @@ void CharacterDebugScene::Initialize() {
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 }
@@ -41218,6 +41759,7 @@ void CharacterDebugScene::Update(){
 
 void CharacterDebugScene::Draw3D(){
 	////3Dオブジェクトの描画
+	bulletManager_->Draw();
 	bulletManager_->DrawEffect();
 }
 
@@ -42228,7 +42770,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/GamePlayScene.cpp
 ============================================================
-#include "GamePlayScene.h"
+﻿#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -42305,6 +42847,9 @@ void GamePlayScene::Initialize() {
 
 	// カメラ設定
 	SetCamera(cameraManager->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager->GetCamera());
+	GetEntityManager()->GetObject3dInstanceManager()->SetCamera(cameraManager->GetCamera());
 }
 
 // 終了
@@ -42444,7 +42989,9 @@ void GamePlayScene::Update()
 // 3D描画
 void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
+	gameplaySession_->GetBulletManager()->Draw();
 	gameplaySession_->GetBulletManager()->DrawEffect();
+
 	// ゲーム進行
 	gameFlowController_->Draw();
 }
@@ -42661,7 +43208,7 @@ void ResultScene::Update() {
 	inputCoordinator_->Update(GetTime());
 
 	// リザルトシステム更新
-	resultSystem_->Update(GetTime());
+	resultSystem_->Update(GetTime(), GetSceneData().score);
 
 	// ステージ更新
 	resultStage_->Update(GetTime());
@@ -42671,7 +43218,7 @@ void ResultScene::Update() {
 	resultUI_->Update(GetTime());
 
 	// UI更新
-	resultScoreUI_->SetScore(GetSceneData().score);
+	resultScoreUI_->SetScore(resultSystem_->GetDisplayScore());
 	resultScoreUI_->Update(GetTime());
 
 	overUI_->Update();
@@ -42688,7 +43235,10 @@ void ResultScene::Draw3D() {
 
 // 描画2d
 void ResultScene::Draw2D() {
-	resultUI_->Draw();
+	// メニュー入力待ちになってから選択UIを表示する。
+	if (resultSystem_->IsMenuActive()) {
+		resultUI_->Draw();
+	}
 
 	resultScoreUI_->Draw();
 
@@ -44578,6 +45128,7 @@ void TutorialScene::Update() {
 
 void TutorialScene::Draw3D() {
 	////3Dオブジェクトの描画
+	gameplaySession_->GetBulletManager()->Draw();
 	gameplaySession_->GetBulletManager()->DrawEffect();
 }
 
@@ -53835,6 +54386,7 @@ File Path: project/DirectXGame/engine/Base/Texture/TextureManager.cpp
 #include"DirectXGame/engine/Utility/StringUtility.h"
 #include<format>
 #include<unordered_map>
+#include<algorithm>
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
@@ -54016,6 +54568,26 @@ uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& fi
 	return 0;
 }
 
+bool Engine::TextureManager::HasTexture(const std::string& filePath) const
+{
+	// テクスチャを実際にGPUへ登録済みか確認し、無効なパスの読み込みを防ぐ。
+	std::lock_guard<std::mutex> lock(textureMutex_);
+	return textureDatas.contains(filePath);
+}
+
+std::vector<std::string> Engine::TextureManager::GetTextureFilePaths() const
+{
+	// TextureManagerが保持しているパスだけを返し、エディタの選択肢を有効なものに限定する。
+	std::lock_guard<std::mutex> lock(textureMutex_);
+	std::vector<std::string> filePaths;
+	filePaths.reserve(textureDatas.size());
+	for (const auto& [filePath, textureData] : textureDatas) {
+		filePaths.push_back(filePath);
+	}
+	std::sort(filePaths.begin(), filePaths.end());
+	return filePaths;
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::string& filePath)
 {
 	std::lock_guard<std::mutex> lock(textureMutex_);
@@ -54154,6 +54726,12 @@ namespace Engine {
 
 		// テクスチャ番号取得
 		uint32_t GetTextureIndexByFilePath(const std::string& filePath);
+
+		// 指定パスのテクスチャがロード済みかを確認
+		bool HasTexture(const std::string& filePath) const;
+
+		// ImGuiの選択UIで使うロード済みテクスチャ一覧を取得
+		std::vector<std::string> GetTextureFilePaths() const;
 
 		// テクスチャ番号からGPUハンドルを取得
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePach);
@@ -57972,7 +58550,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Collider/3d/CollisionManager.cpp
 ============================================================
-﻿#include "CollisionManager.h"
+#include "CollisionManager.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 
@@ -58064,9 +58642,8 @@ void Engine::CollisionManager::CheckByLayer(ColliderComponent& a, ColliderCompon
 		for (auto* colB : b.GetAllColliders()) {
 			if (!colA->IsEnabled() || !colB->IsEnabled()) continue;
 
-			// ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
-			if (!((1 << static_cast<uint32_t>(colB->GetLayer())) & colA->GetCollisionMask()) ||
-				!((1 << static_cast<uint32_t>(colA->GetLayer())) & colB->GetCollisionMask())) {
+			// CollisionLayerはビット値なので、シフトせずそのままマスク判定に使う。
+			if (!CheckMask(colA, colB)) {
 				continue;
 			}
 
@@ -62107,6 +62684,17 @@ void Engine::EffectComponent::Init(EntityManager* entityManager, GlobalVariables
 	this->particleManager->SetPrimitiveCommon(this->primitiveCommon);
 }
 
+Engine::ModelManager* Engine::EffectComponent::GetModelManager()
+{
+	if (entityManager == nullptr || entityManager->GetObject3dCommon() == nullptr ||
+		entityManager->GetObject3dCommon()->GetDxCommon() == nullptr) {
+		return nullptr;
+	}
+
+	// エフェクトエディターのモデル選択は、DirectXCommonが管理するロード済みモデル一覧を使う。
+	return entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager();
+}
+
 void Engine::EffectComponent::AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype, WorldTransform* parent)
 {
 
@@ -62393,6 +62981,7 @@ namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
 	class PrimitiveCommon;
+	class ModelManager;
 
 	/// <summary>
 	/// エフェクトコンポーネントクラス
@@ -62417,6 +63006,8 @@ namespace Engine {
 		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager; }
 		// パーティクルマネージャー取得
 		ParticleManager* GetParticleManager() { return particleManager; }
+		// ロード済みモデル一覧をエフェクトエディターから参照するためのモデルマネージャー取得
+		ModelManager* GetModelManager();
 
 	public: // パーティクルエミッター(CPU)
 
@@ -63993,7 +64584,6 @@ namespace Engine {
 		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
 		uint32_t instanceCount = 0;													// インスタンス数
 		ModelMesh* mesh = nullptr;														// メッシュ
-		//Emiter emiter;															// エミッター
 		EmitData::IsFlag isFlag;											// 各フラグ
 		EmitData::EmitType emitType = EmitData::EmitType::kRandom;		// エミッターでの出方
 		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;	// 
@@ -64066,6 +64656,7 @@ namespace Engine {
 
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleField.cpp
@@ -64470,7 +65061,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleManager.cpp
 ============================================================
-#include "ParticleManager.h"
+﻿#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -64487,6 +65078,16 @@ File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleManager.cpp
 #include <windows.h>
 
 namespace {
+	const char* kFallbackEditorParticleTexturePath = "resources/Texture/Image.dds";
+
+	std::string ResolveEditorParticleTexturePath(Engine::DirectXCommon* dxCommon, const std::string& requestedPath) {
+		// 無効な保存データでもMaterial::LoadTexへ渡す前にロード済みの仮テクスチャへ置き換える。
+		if (dxCommon != nullptr && dxCommon->GetTextureManager() != nullptr &&
+			dxCommon->GetTextureManager()->HasTexture(requestedPath)) {
+			return requestedPath;
+		}
+		return kFallbackEditorParticleTexturePath;
+	}
 	std::unique_ptr<Engine::BasePrimitive> CreateEditorPrimitive(Engine::ShapeParameter::ShapeType shapeType) {
 		// エディタで選ばれた形状に合わせ、ParticleManagerが寿命を持つプリミティブを生成する。
 		switch (shapeType)
@@ -64665,6 +65266,12 @@ namespace {
 		}
 		return data;
 	}
+}
+
+Engine::TextureManager* Engine::ParticleManager::GetTextureManager() const
+{
+	// エフェクトコンポーネントからTextureManagerへ安全にアクセスできるようにする。
+	return dxCommon != nullptr ? dxCommon->GetTextureManager() : nullptr;
 }
 
 void Engine::ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
@@ -64856,6 +65463,8 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, model->GetModelData().mesh[0].get(), rasteType, blendType);
 	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
 		.texturePath = textureFilePath,
+		.meshSourceType = ParticleMeshSourceType::Model,
+		.modelName = name,
 		.shapeType = ShapeParameter::ShapeType::Plane,
 		.rasterizerType = rasteType,
 		.blendType = blendType,
@@ -64881,6 +65490,7 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	ParticleFunction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, primitive->GetModelMesh(), rasteType, blendType);
 	editorParticleGroupDatas_[name] = ParticleGroupEditorData{
 		.texturePath = textureFilePath,
+		.meshSourceType = ParticleMeshSourceType::Primitive,
 		.shapeType = ShapeParameter::ShapeType::Plane,
 		.rasterizerType = rasteType,
 		.blendType = blendType,
@@ -64893,21 +65503,47 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 
 bool Engine::ParticleManager::CreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data)
 {
-	if (name.empty() || particleGroups.Contains(name) || primitiveCommon == nullptr) {
+	if (name.empty() || particleGroups.Contains(name)) {
 		return false;
 	}
 
-	// パーティクル群が参照するメッシュの寿命を保つため、プリミティブをManager側で所有する。
-	auto primitive = CreateEditorPrimitive(data.shapeType);
-	primitive->Initialize(primitiveCommon, data.texturePath);
-	ApplyPrimitiveShapeData(primitive.get(), data);
+	ParticleGroupEditorData storedData = data;
+	// 読み込み済みテクスチャだけを実体へ渡し、無効パスでは仮テクスチャを使う。
+	storedData.texturePath = ResolveEditorParticleTexturePath(dxCommon, storedData.texturePath);
+	if (storedData.meshSourceType == ParticleMeshSourceType::Model) {
+		if (storedData.modelName.empty() || dxCommon == nullptr || dxCommon->GetModelManager() == nullptr) {
+			return false;
+		}
 
-	BasePrimitive* primitivePtr = primitive.get();
-	editorParticlePrimitives_[name] = std::move(primitive);
-	ParticleFunction::Create(particleGroups[name], name, data.texturePath, kNumMaxInstance,
-		dxCommon, primitivePtr->GetModelMesh(), data.rasterizerType, data.blendType);
-	editorParticleGroupDatas_[name] = data;
-	editorParticleGroupDatas_[name].isEditorPrimitive = true;
+		// モデル使用時はModelManagerが所有するロード済みモデルのメッシュを参照する。
+		Model* model = dxCommon->GetModelManager()->FindModel(storedData.modelName);
+		if (model == nullptr || model->GetModelData().mesh.empty() || model->GetModelData().mesh[0] == nullptr) {
+			return false;
+		}
+
+		editorParticlePrimitives_.erase(name);
+		ParticleFunction::Create(particleGroups[name], name, storedData.texturePath, kNumMaxInstance,
+			dxCommon, model->GetModelData().mesh[0].get(), storedData.rasterizerType, storedData.blendType);
+		storedData.isEditorPrimitive = false;
+	}
+	else {
+		if (primitiveCommon == nullptr) {
+			return false;
+		}
+
+		// プリミティブ使用時は、パーティクル群が参照するメッシュの寿命をManager側で保持する。
+		auto primitive = CreateEditorPrimitive(storedData.shapeType);
+		primitive->Initialize(primitiveCommon, storedData.texturePath);
+		ApplyPrimitiveShapeData(primitive.get(), storedData);
+
+		BasePrimitive* primitivePtr = primitive.get();
+		editorParticlePrimitives_[name] = std::move(primitive);
+		ParticleFunction::Create(particleGroups[name], name, storedData.texturePath, kNumMaxInstance,
+			dxCommon, primitivePtr->GetModelMesh(), storedData.rasterizerType, storedData.blendType);
+		storedData.isEditorPrimitive = true;
+	}
+
+	editorParticleGroupDatas_[name] = storedData;
 	ApplyEditorParticleGroupData(name, editorParticleGroupDatas_[name]);
 	return true;
 }
@@ -64918,6 +65554,17 @@ bool Engine::ParticleManager::RecreateEditorParticleGroup(const std::string& nam
 		return false;
 	}
 
+	if (data.meshSourceType == ParticleMeshSourceType::Model) {
+		if (data.modelName.empty() || dxCommon == nullptr || dxCommon->GetModelManager() == nullptr ||
+			dxCommon->GetModelManager()->FindModel(data.modelName) == nullptr) {
+			return false;
+		}
+	}
+	else if (primitiveCommon == nullptr) {
+		return false;
+	}
+
+	// 新しい参照先が有効なことを確認してから、既存グループを作り直す。
 	RemoveParticleGroup(name);
 	return CreateEditorParticleGroup(name, data);
 }
@@ -64993,11 +65640,19 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 
 	// 保存データをパーティクル群の実体へ反映し、次回保存時にも同じ値を取り出せるよう保持する。
 	ParticleGroup& group = particleGroups[name];
+	const std::string resolvedTexturePath = ResolveEditorParticleTexturePath(dxCommon, data.texturePath);
 	auto primitiveIt = editorParticlePrimitives_.find(name);
-	if (primitiveIt != editorParticlePrimitives_.end()) {
+	if (data.meshSourceType == ParticleMeshSourceType::Primitive && primitiveIt != editorParticlePrimitives_.end()) {
 		// プリミティブ形状を変更した場合は、パーティクル群が参照するメッシュも再生成する。
 		ApplyPrimitiveShapeData(primitiveIt->second.get(), data);
 		group.mesh = primitiveIt->second->GetModelMesh();
+	}
+	else if (data.meshSourceType == ParticleMeshSourceType::Model && dxCommon && dxCommon->GetModelManager()) {
+		// モデル名だけ変わった場合も、ロード済みモデルのメッシュへ参照を差し替える。
+		Model* model = dxCommon->GetModelManager()->FindModel(data.modelName);
+		if (model && !model->GetModelData().mesh.empty() && model->GetModelData().mesh[0]) {
+			group.mesh = model->GetModelData().mesh[0].get();
+		}
 	}
 	group.rasteType = data.rasterizerType;
 	group.blendType = data.blendType;
@@ -65011,8 +65666,8 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 	if (group.material) {
 		// テクスチャとマテリアル値を再設定し、GPU転送データにも反映する。
 		MaterialInstance& material = group.material->GetMaterialInstance();
-		if (group.material->tex_.diffuseFilePath != data.texturePath) {
-			group.material->tex_.diffuseFilePath = data.texturePath;
+		if (group.material->tex_.diffuseFilePath != resolvedTexturePath) {
+			group.material->tex_.diffuseFilePath = resolvedTexturePath;
 			group.material->LoadTex();
 		}
 		material.transform = data.materialTransform;
@@ -65029,7 +65684,9 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 		group.material->GPUData();
 	}
 
-	editorParticleGroupDatas_[name] = CaptureParticleGroupData(group, data);
+	ParticleGroupEditorData storedData = CaptureParticleGroupData(group, data);
+	storedData.texturePath = resolvedTexturePath;
+	editorParticleGroupDatas_[name] = storedData;
 }
 
 #pragma region PSO
@@ -65224,10 +65881,19 @@ namespace Engine {
 	class EffectManager;
 	class LineCommon;
 	class PrimitiveCommon;
+	class TextureManager;
+
+	// エディタパーティクル群が参照するメッシュの生成元です。
+	enum class ParticleMeshSourceType {
+		Primitive,
+		Model,
+	};
 
 	// エディタから復元・編集するためのパーティクル群メタデータ
 	struct ParticleGroupEditorData {
 		std::string texturePath = "resources/Texture/Image.dds";										// 使用するテクスチャ
+		ParticleMeshSourceType meshSourceType = ParticleMeshSourceType::Primitive;						// メッシュ生成元
+		std::string modelName = "";													// モデル使用時のロード済みモデル名
 		ShapeParameter::ShapeType shapeType = ShapeParameter::ShapeType::Plane;						// エディタ作成時のプリミティブ形状
 		ShapeParameter::ShapePlane plane{};															// 平面パラメータ
 		ShapeParameter::ShapeTriangle triangle{};														// 三角形パラメータ
@@ -65324,6 +65990,8 @@ namespace Engine {
 		void SetEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
 		// エディタ用保存データを実際のパーティクル群へ反映
 		void ApplyEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
+		// エディタのテクスチャ選択UIから利用するTextureManagerを取得
+		TextureManager* GetTextureManager() const;
 
 		// カメラセット
 		void SetCamera(Camera* camera) { this->camera = camera; }
@@ -65747,7 +66415,7 @@ namespace Engine {
 		void SetIsEmit(bool is) { isEmit = is; }
 
 		// フラグ設定
-		void SetIsFlag(const EmitData::IsFlag& is) { isFlag = is; }
+		void SetIsFlag(const EmitData::IsFlag& is) { isFlag = is; isLine = is.isLine; }
 		// 線形補間設定
 		void SetIsLineInterpolation(bool is) { isFlag.isLineInterpolation = is; }
 		// 重力設定
@@ -66313,6 +66981,19 @@ namespace {
 		const Vector3& end = triangle.vertices[(edgeIndex + 1) % 3];
 		return Lerp(start, end, Random01(randomEngine));
 	}
+
+	void DrawEmitPositionLine(Engine::LineCommon* lineCommon, const Vector3& emitPos)
+	{
+		if (lineCommon == nullptr) {
+			return;
+		}
+
+		// 実際にパーティクルが出た位置を小さい球で示し、形状ラインとは別に発生点を確認できるようにする。
+		Sphere sphere{};
+		sphere.center = emitPos;
+		sphere.radius = 0.15f;
+		lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 0.0f,1.0f,0.2f,1.0f }, 6, 6);
+	}
 }
 
 #pragma region Point
@@ -66322,13 +67003,22 @@ void Engine::PointParticleEmitter::Initialize(Engine::ParticleManager* particleM
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
 // デバック線描画
-void Engine::PointParticleEmitter::DrawEmitterLine() {}
+void Engine::PointParticleEmitter::DrawEmitterLine() {
+	Sphere sphere{};
+	sphere.center = transform_.worldMat_.GetWorldPosition();
+	sphere.radius = 0.25f;
+	lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 }, 8, 8);
+}
 // パーティクル発生
 void Engine::PointParticleEmitter::EmitUnique() {
 
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
+	const Vector3 emitPos = transform_.worldMat_.GetWorldPosition();
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, emitPos);
+	}
 
-	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), transform_.worldMat_.GetWorldPosition());
+	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), emitPos);
 }
 #pragma endregion
 
@@ -66454,6 +67144,9 @@ void Engine::AABBParticleEmitter::EmitUnique() {
 		normal = Math::NormalizeSafe(localPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon);
 	}
 
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, particleManager->GetRandomEngine(), pos, centerPos, normal);
 }
 
@@ -66528,6 +67221,9 @@ void Engine::SphereParticleEmitter::EmitUnique() {
 	}
 	Vector3 pos = centerPos + normal * distance;
 
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 //
@@ -66604,6 +67300,9 @@ void Engine::CornerParticleEmitter::EmitUnique() {
 	const Vector3 normal = emitType_ == EmitData::EmitType::kEdge
 		? Math::NormalizeSafe(rotatedPos, Vector3{ 0.0f,1.0f,0.0f }, kEmitterEpsilon)
 		: rotationMatrix.Transform({ 0.0f,1.0f,0.0f }).Normalize();
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, randomEngine, pos, centerPos, normal);
 }
 
@@ -66678,6 +67377,9 @@ void Engine::LineParticleEmitter::EmitUnique() {
 	Vector3 diff = segment_.origin + segment_.diff() * t;
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + diff;
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 
 	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
@@ -66733,6 +67435,9 @@ void Engine::SplineParticleEmitter::EmitUnique() {
 	}
 
 	pos = CatmullRom(controlPoints, t) + transform_.worldMat_.GetWorldPosition();
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 
 	EmitFunction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
@@ -66791,6 +67496,9 @@ void Engine::TriangleParticleEmitter::EmitUnique() {
 	Vector3 normal = triangle_.GetNormal();
 	if (emitType_ == EmitData::EmitType::kEdge) {
 		normal = Math::NormalizeSafe(localPos - triangle_.GetCentroid(), normal, kEmitterEpsilon);
+	}
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
 	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
@@ -66857,6 +67565,9 @@ void Engine::MeshParticleEmitter::EmitUnique() {
 		normal = Math::NormalizeSafe(localPos - tri.GetCentroid(), normal, kEmitterEpsilon);
 	}
 
+	if (isLine) {
+		DrawEmitPositionLine(lineCommon, pos);
+	}
 	CreateShapeParticle(particleGroup, emitData_, directionType_, rng, pos, centerPos, normal);
 }
 
