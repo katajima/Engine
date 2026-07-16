@@ -64,7 +64,7 @@
         },
         "isFlag.usebillboard": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "isFlag.usebillboardY": {
             "type": "bool",
@@ -112,9 +112,9 @@
                     0.0
                 ],
                 "scale": [
-                    17295.0,
-                    17295.0,
-                    17295.0
+                    10457.0,
+                    10457.0,
+                    10457.0
                 ],
                 "translate": [
                     0.0,
@@ -136,6 +136,10 @@
             "value": false
         },
         "material.useSpecularMap": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useSpeculerMap": {
             "type": "bool",
             "value": false
         },
@@ -349,7 +353,7 @@
         "shapeType": {
             "enumType": "ShapeType",
             "type": "enum",
-            "value": 0
+            "value": 5
         },
         "texturePath": {
             "type": "string",

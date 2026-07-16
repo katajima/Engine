@@ -206,9 +206,11 @@ void Engine::ParticleFunction::WorldDataForGPU(ParticleGroup2d& group, std::list
 
 void Engine::ParticleFunction::MaterialEffect(ParticleGroup& group)
 {
-	group.material->GetMaterialInstance().transform.translate += group.uvTransformVeloctiy_.translate;
-	group.material->GetMaterialInstance().transform.rotate += group.uvTransformVeloctiy_.rotate;
-	group.material->GetMaterialInstance().transform.scale += group.uvTransformVeloctiy_.scale;
+	// UV本体に速度を加算し、その結果をマテリアルへ反映する。
+	group.uvTransform_.translate += group.uvTransformVeloctiy_.translate;
+	group.uvTransform_.rotate += group.uvTransformVeloctiy_.rotate;
+	group.uvTransform_.scale += group.uvTransformVeloctiy_.scale;
+	group.material->GetMaterialInstance().transform = group.uvTransform_;
 	group.material->GPUData();
 }
 
@@ -229,7 +231,8 @@ void Engine::ParticleFunction::Create(ParticleGroup& particleGroup, const std::s
 	particleGroup.material->LoadTex();
 	particleGroup.material->GetMaterialInstance().enableLighting_ = false;
 	particleGroup.material->GetMaterialInstance().useEnvironment_ = false;
-
+	// マテリアルの初期UV値を、保存・速度更新の基準値にも保持する。
+	particleGroup.uvTransform_ = particleGroup.material->GetMaterialInstance().transform;
 
 	// パーティクルリソース生成
 	particleGroup.sbParticleResource_.CreateBuffer(dxCommon, kNumMaxInstance);

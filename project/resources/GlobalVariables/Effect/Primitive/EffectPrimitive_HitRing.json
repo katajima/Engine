@@ -102,11 +102,11 @@
         },
         "shape.ring.innerRadius": {
             "type": "float",
-            "value": 4.0
+            "value": 0.5
         },
         "shape.ring.outerRadius": {
             "type": "float",
-            "value": 5.0
+            "value": 2.0
         },
         "shape.ring.segments": {
             "type": "int32_t",

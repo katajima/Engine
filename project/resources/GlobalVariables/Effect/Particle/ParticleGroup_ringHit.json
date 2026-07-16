@@ -112,9 +112,9 @@
                     0.0
                 ],
                 "scale": [
-                    17295.0,
-                    17295.0,
-                    17295.0
+                    0.4000000059604645,
+                    0.4000000059604645,
+                    0.4000000059604645
                 ],
                 "translate": [
                     0.0,
@@ -136,6 +136,10 @@
             "value": false
         },
         "material.useSpecularMap": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useSpeculerMap": {
             "type": "bool",
             "value": false
         },
@@ -255,11 +259,11 @@
         },
         "shape.ring.innerRadius": {
             "type": "float",
-            "value": 2.0
+            "value": 0.5
         },
         "shape.ring.outerRadius": {
             "type": "float",
-            "value": 5.0
+            "value": 2.0
         },
         "shape.ring.segments": {
             "type": "int32_t",
@@ -279,7 +283,7 @@
         },
         "shape.sphere.radius": {
             "type": "float",
-            "value": 3.140000104904175
+            "value": 5.0
         },
         "shape.star.innerRadius": {
             "type": "float",
@@ -349,7 +353,7 @@
         "shapeType": {
             "enumType": "ShapeType",
             "type": "enum",
-            "value": 8
+            "value": 7
         },
         "texturePath": {
             "type": "string",
@@ -360,6 +364,26 @@
             "type": "enum",
             "value": 0
         },
+        "uvTransform": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.4000000059604645,
+                    0.4000000059604645,
+                    0.4000000059604645
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
         "uvTransformVelocity": {
             "type": "Transform",
             "value": {
@@ -369,9 +393,9 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "translate": [
                     0.0,

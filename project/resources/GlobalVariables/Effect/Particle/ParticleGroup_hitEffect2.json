@@ -20,7 +20,7 @@
         },
         "isFlag.billboardRotZ": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "isFlag.isAcceleration": {
             "type": "bool",
@@ -48,7 +48,7 @@
         },
         "isFlag.isLine": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.isLineInterpolation": {
             "type": "bool",
@@ -112,9 +112,9 @@
                     0.0
                 ],
                 "scale": [
-                    17295.0,
-                    17295.0,
-                    17295.0
+                    1.0,
+                    1.0,
+                    1.0
                 ],
                 "translate": [
                     0.0,
@@ -136,6 +136,10 @@
             "value": false
         },
         "material.useSpecularMap": {
+            "type": "bool",
+            "value": false
+        },
+        "material.useSpeculerMap": {
             "type": "bool",
             "value": false
         },
@@ -360,7 +364,7 @@
             "type": "enum",
             "value": 0
         },
-        "uvTransformVelocity": {
+        "uvTransform": {
             "type": "Transform",
             "value": {
                 "rotate": [
@@ -372,6 +376,26 @@
                     1.0,
                     1.0,
                     1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        "uvTransformVelocity": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "translate": [
                     0.0,

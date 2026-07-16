@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include <DirectXGame/engine/2d/Sprite.h>
 #include "DirectXGame/engine/Effect/Particle/Emit/EmitData.h"
@@ -64,6 +64,7 @@ namespace Engine {
 		EmitData::RasterizerType rasteType{};									// ラスタライザタイプ
 		EmitData::BlendType blendType{};										// ブレンドタイプ
 		Transform uvTransformVeloctiy_{ {},{},{0,0,0} };						// uvトランスフォーム
+		Transform uvTransform_{};										// UVトランスフォームの現在値
 		float kGravitationalAcceleration = 9.8f;								// 重力
 		bool isUVClamp = false;												// UVを
 	};

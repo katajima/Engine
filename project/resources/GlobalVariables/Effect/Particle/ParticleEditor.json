@@ -4,10 +4,6 @@
             "type": "string",
             "value": "AnimatedCube"
         },
-        "NewGear": {
-            "type": "string",
-            "value": "NewGear"
-        },
         "cartridge": {
             "type": "string",
             "value": "cartridge"

@@ -64,7 +64,7 @@
         },
         "isFlag.usebillboard": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.usebillboardY": {
             "type": "bool",
@@ -139,14 +139,18 @@
             "type": "bool",
             "value": false
         },
+        "material.useSpeculerMap": {
+            "type": "bool",
+            "value": false
+        },
         "meshSourceType": {
             "enumType": "ParticleMeshSourceType",
             "type": "enum",
-            "value": 0
+            "value": 1
         },
         "modelName": {
             "type": "string",
-            "value": ""
+            "value": "screw.obj"
         },
         "rasterizerType": {
             "enumType": "RasterizerType",
@@ -353,12 +357,32 @@
         },
         "texturePath": {
             "type": "string",
-            "value": "resources/Texture/Image.dds"
+            "value": "./resources/Models/Scrap/Screw/color.png"
         },
         "topBottom": {
             "enumType": "TopBottom",
             "type": "enum",
             "value": 1
+        },
+        "uvTransform": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
         },
         "uvTransformVelocity": {
             "type": "Transform",

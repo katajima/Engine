@@ -1,4 +1,4 @@
-﻿#include "ParticleManager.h"
+#include "ParticleManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -180,6 +180,7 @@ namespace {
 		data.blendType = group.blendType;
 		data.isUVClamp = group.isUVClamp;
 		data.uvTransformVelocity = group.uvTransformVeloctiy_;
+		data.uvTransform = group.uvTransform_;
 		data.isFlag = group.isFlag;
 		data.emitType = group.emitType;
 		data.topBottom = group.topBottom;
@@ -607,7 +608,8 @@ void Engine::ParticleManager::ApplyEditorParticleGroupData(const std::string& na
 			group.material->tex_.diffuseFilePath = resolvedTexturePath;
 			group.material->LoadTex();
 		}
-		material.transform = data.materialTransform;
+		group.uvTransform_ = data.uvTransform;
+		material.transform = data.uvTransform;
 		material.color = Color(data.materialColor.x, data.materialColor.y, data.materialColor.z, data.materialColor.w);
 		material.enableLighting_ = data.materialEnableLighting;
 		material.environmentCoefficient_ = data.materialEnvironmentCoefficient;

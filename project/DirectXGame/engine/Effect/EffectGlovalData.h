@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Effect/EffectComponent.h"
 
 /// <summary>
@@ -18,7 +18,7 @@ struct EffectGlobalData {
 	// 出現データ
 	Engine::EffectEmitData emitData;
 	// UVトランスフォーム
-	Transform uvTransformVeloctiy{};
+	Transform uvTransformVeloctiy{ {},{},{0.0f,0.0f,0.0f} };
 	// αクリッピング
 	float alphaClipping = 0.5f; 
 	// ライティング

@@ -16,7 +16,7 @@
         },
         "isEditorPrimitive": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "isFlag.billboardRotZ": {
             "type": "bool",
@@ -48,7 +48,7 @@
         },
         "isFlag.isLine": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "isFlag.isLineInterpolation": {
             "type": "bool",
@@ -139,6 +139,10 @@
             "type": "bool",
             "value": false
         },
+        "material.useSpeculerMap": {
+            "type": "bool",
+            "value": false
+        },
         "meshSourceType": {
             "enumType": "ParticleMeshSourceType",
             "type": "enum",
@@ -146,7 +150,7 @@
         },
         "modelName": {
             "type": "string",
-            "value": "enemyGear.obj"
+            "value": "gear.obj"
         },
         "rasterizerType": {
             "enumType": "RasterizerType",
@@ -359,6 +363,26 @@
             "enumType": "TopBottom",
             "type": "enum",
             "value": 1
+        },
+        "uvTransform": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
         },
         "uvTransformVelocity": {
             "type": "Transform",

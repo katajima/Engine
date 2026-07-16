@@ -1403,6 +1403,18 @@ void EffectEditor::DrawParticleGroupDetail(const std::string& particleName, Engi
 	if (ImGui::DragFloat3("UV Scale Velocity", &data.uvTransformVelocity.scale.x, 0.001f)) {
 		saveData = true;
 	}
+	if (ImGui::DragFloat3("UV Translate", &data.uvTransform.translate.x, 0.001f)) {
+		data.materialTransform = data.uvTransform;
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Rotate", &data.uvTransform.rotate.x, 0.001f)) {
+		data.materialTransform = data.uvTransform;
+		saveData = true;
+	}
+	if (ImGui::DragFloat3("UV Scale", &data.uvTransform.scale.x, 0.001f)) {
+		data.materialTransform = data.uvTransform;
+		saveData = true;
+	}
 	if (ImGui::Checkbox("Billboard", &data.isFlag.usebillboard)) {
 		saveData = true;
 	}
@@ -1859,6 +1871,7 @@ void EffectEditorSerializer::WriteParticleGroupData(const std::string& particleN
 	writer.Value(groupName, "isEditorPrimitive", data.isEditorPrimitive);
 	writer.Value(groupName, "isUVClamp", data.isUVClamp);
 	writer.Value(groupName, "uvTransformVelocity", data.uvTransformVelocity);
+	writer.Value(groupName, "uvTransform", data.uvTransform);
 	writer.Value(groupName, "isFlag.usebillboard", data.isFlag.usebillboard);
 	writer.Value(groupName, "isFlag.usebillboardY", data.isFlag.usebillboardY);
 	writer.Value(groupName, "isFlag.billboardRotZ", data.isFlag.billboardRotZ);
@@ -1962,6 +1975,13 @@ void EffectEditorSerializer::LoadParticleGroupData(const std::string& particleNa
 	if (globalVariables_->HasKey(groupName, "topBottom")) data.topBottom = globalVariables_->GetEnumValue<EmitData::TopBottom>(groupName, "topBottom");
 	if (globalVariables_->HasKey(groupName, "gravitationalAcceleration")) data.gravitationalAcceleration = globalVariables_->GetValue<float>(groupName, "gravitationalAcceleration");
 	if (globalVariables_->HasKey(groupName, "material.transform")) data.materialTransform = globalVariables_->GetValue<Transform>(groupName, "material.transform");
+	if (globalVariables_->HasKey(groupName, "uvTransform")) {
+		data.uvTransform = globalVariables_->GetValue<Transform>(groupName, "uvTransform");
+	}
+	else {
+		// 旧保存データは従来のmaterial.transformをUV本体として引き継ぐ。
+		data.uvTransform = data.materialTransform;
+	}
 	if (globalVariables_->HasKey(groupName, "material.color")) data.materialColor = globalVariables_->GetValue<Vector4>(groupName, "material.color");
 	if (globalVariables_->HasKey(groupName, "material.enableLighting")) data.materialEnableLighting = globalVariables_->GetValue<bool>(groupName, "material.enableLighting");
 	if (globalVariables_->HasKey(groupName, "material.environmentCoefficient")) data.materialEnvironmentCoefficient = globalVariables_->GetValue<float>(groupName, "material.environmentCoefficient");

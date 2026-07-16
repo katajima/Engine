@@ -20,7 +20,7 @@
         },
         "isFlag.billboardRotZ": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.isAcceleration": {
             "type": "bool",
@@ -64,7 +64,7 @@
         },
         "isFlag.usebillboard": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.usebillboardY": {
             "type": "bool",
@@ -80,7 +80,7 @@
         },
         "material.alphaClipping": {
             "type": "float",
-            "value": 0.5
+            "value": 0.25
         },
         "material.color": {
             "type": "Vector4",
@@ -112,9 +112,9 @@
                     0.0
                 ],
                 "scale": [
-                    17295.0,
-                    17295.0,
-                    17295.0
+                    1.0,
+                    1.0,
+                    1.0
                 ],
                 "translate": [
                     0.0,
@@ -139,19 +139,23 @@
             "type": "bool",
             "value": false
         },
+        "material.useSpeculerMap": {
+            "type": "bool",
+            "value": false
+        },
         "meshSourceType": {
             "enumType": "ParticleMeshSourceType",
             "type": "enum",
-            "value": 0
+            "value": 1
         },
         "modelName": {
             "type": "string",
-            "value": ""
+            "value": "plane.obj"
         },
         "rasterizerType": {
             "enumType": "RasterizerType",
             "type": "enum",
-            "value": 0
+            "value": 1
         },
         "shape.arrow.headLength": {
             "type": "float",
@@ -369,9 +373,9 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "translate": [
                     0.0,

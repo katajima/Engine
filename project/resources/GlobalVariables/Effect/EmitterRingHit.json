@@ -224,9 +224,9 @@
         "emitData.size.median": {
             "type": "Vector3",
             "value": [
-                8.0,
-                0.0,
-                8.0
+                1.0,
+                1.0,
+                1.0
             ]
         },
         "emitData.size.range": {
@@ -267,9 +267,9 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "translate": [
                     0.0,

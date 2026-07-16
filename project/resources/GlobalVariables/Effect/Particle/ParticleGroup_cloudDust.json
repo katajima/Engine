@@ -135,18 +135,9 @@
             "type": "bool",
             "value": false
         },
-        "material.useSpecularMap": {
+        "material.useSpeculerMap": {
             "type": "bool",
             "value": false
-        },
-        "meshSourceType": {
-            "enumType": "ParticleMeshSourceType",
-            "type": "enum",
-            "value": 0
-        },
-        "modelName": {
-            "type": "string",
-            "value": ""
         },
         "rasterizerType": {
             "enumType": "RasterizerType",

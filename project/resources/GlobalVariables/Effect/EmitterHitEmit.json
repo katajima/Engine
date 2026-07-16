@@ -18,7 +18,7 @@
         },
         "emitData.alphaClipping": {
             "type": "float",
-            "value": 0.5
+            "value": 0.25
         },
         "emitData.colorRange.max": {
             "type": "Vector4",
@@ -225,7 +225,7 @@
             "type": "Vector3",
             "value": [
                 0.5,
-                0.5,
+                0.30000001192092896,
                 1.0
             ]
         },
@@ -267,9 +267,9 @@
                     0.0
                 ],
                 "scale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "translate": [
                     0.0,

@@ -68,6 +68,7 @@ namespace Engine {
 		bool isEditorPrimitive = false;																// エディタ所有プリミティブで作ったか
 		bool isUVClamp = false;																		// UVクランプ描画を使うか
 		Transform uvTransformVelocity{ {}, {}, {0.0f, 0.0f, 0.0f} };									// UVトランスフォームの速度
+		Transform uvTransform{};																// UVトランスフォームの現在値
 		EmitData::IsFlag isFlag{};																	// パーティクル挙動フラグ
 		EmitData::EmitType emitType = EmitData::EmitType::kRandom;									// メッシュからの発生方法
 		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;								// ライフタイムスケールの基準
