@@ -16086,13 +16086,14 @@ struct GlobalCameraData {
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.cpp
 ============================================================
-#include "CameraFollow.h"
+﻿#include "CameraFollow.h"
 #include <algorithm>
 #include "CameraCollision.h"
 
 void CameraFollow::Initialize() {
 	data_.followSpeed = 40.0f;
 	data_.useSmooth = true;
+	data_.offset.y = 4.0f;
 	data_.offset.z =  -20.5;
 	// デフォルト位置設定
 	defultOffst = data_.offset;
@@ -17267,8 +17268,8 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	controller = std::make_unique<CameraController>();
 	controller->Initialize(uniqueCamera_.get(), inputSystem);
 
-
-	baseOffset.z = -22.5;
+	baseOffset.y = 10.0f;
+	baseOffset.z = -25;
 }
 
 void FollowCamera::Update() {
@@ -33287,6 +33288,7 @@ namespace Game {
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 30, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Rush", 1, 30, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Rush", 1, 30, leftSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Rush", 1, 30, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 
 		
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 30, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
@@ -37905,7 +37907,20 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 		}	
 	}
 
-	
+	std::unique_ptr<Engine::CylinderPrimitive> cylinderPrimitive = std::make_unique<Engine::CylinderPrimitive>();
+	cylinderPrimitive->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.png", { 1,0,0,0.5f }, "StageLimit");
+	cylinderPrimitive->Data().segments = 4;
+	cylinderPrimitive->Data().innerRadius = 150.0f;
+	cylinderPrimitive->Data().outerRadius = 150.0f;
+
+	cylinderPrimitive->Data().isCover = false;
+	cylinderPrimitive->Data().height = 10.0f;
+
+	stageLimit_ = entityManager->CreateObject3D("StageLimit", Engine::ObjectModelType::kPrimitive, { 0,0,0 }, camera);
+	stageLimit_->SetPrimitive(std::move(cylinderPrimitive));
+	stageLimit_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
+	stageLimit_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
+	stageLimit_->GetWorldTransform().rotate_.y = Math::DegreesToRadians(45);
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
 	playerCar_->Initialize(entityManager, audioManager,{},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
@@ -37914,6 +37929,8 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 
 void MainStage::Update(float dt) {
 	BaseUpdate(dt);
+
+	stageLimit_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.translate.x += dt * 0.10f;
 
 	playerCar_->Update(dt);
 }
@@ -37951,6 +37968,10 @@ private:
 
 public:
 	std::vector<Engine::Object3d*> missiles_;
+	//上限範囲
+	Engine::Object3d* stageLimit_ = nullptr;
+
+
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
