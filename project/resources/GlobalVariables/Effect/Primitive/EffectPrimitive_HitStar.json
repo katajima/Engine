@@ -130,11 +130,11 @@
         },
         "shape.star.innerRadius": {
             "type": "float",
-            "value": 2.0
+            "value": 1.0
         },
         "shape.star.outerRadius": {
             "type": "float",
-            "value": 5.0
+            "value": 2.5
         },
         "shape.star.segments": {
             "type": "int32_t",

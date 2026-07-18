@@ -1,10 +1,11 @@
-#include "CameraFollow.h"
+﻿#include "CameraFollow.h"
 #include <algorithm>
 #include "CameraCollision.h"
 
 void CameraFollow::Initialize() {
 	data_.followSpeed = 40.0f;
 	data_.useSmooth = true;
+	data_.offset.y = 4.0f;
 	data_.offset.z =  -20.5;
 	// デフォルト位置設定
 	defultOffst = data_.offset;

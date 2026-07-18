@@ -2,7 +2,7 @@
     "EffectEditorSettings": {
         "selectedApplyPrimitiveName": {
             "type": "string",
-            "value": "HitRing"
+            "value": "HitStar"
         }
     }
 }

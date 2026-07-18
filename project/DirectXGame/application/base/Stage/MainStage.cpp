@@ -32,7 +32,20 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 		}	
 	}
 
-	
+	std::unique_ptr<Engine::CylinderPrimitive> cylinderPrimitive = std::make_unique<Engine::CylinderPrimitive>();
+	cylinderPrimitive->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.png", { 1,0,0,0.5f }, "StageLimit");
+	cylinderPrimitive->Data().segments = 4;
+	cylinderPrimitive->Data().innerRadius = 150.0f;
+	cylinderPrimitive->Data().outerRadius = 150.0f;
+
+	cylinderPrimitive->Data().isCover = false;
+	cylinderPrimitive->Data().height = 10.0f;
+
+	stageLimit_ = entityManager->CreateObject3D("StageLimit", Engine::ObjectModelType::kPrimitive, { 0,0,0 }, camera);
+	stageLimit_->SetPrimitive(std::move(cylinderPrimitive));
+	stageLimit_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
+	stageLimit_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
+	stageLimit_->GetWorldTransform().rotate_.y = Math::DegreesToRadians(45);
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
 	playerCar_->Initialize(entityManager, audioManager,{},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
@@ -41,6 +54,8 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 
 void MainStage::Update(float dt) {
 	BaseUpdate(dt);
+
+	stageLimit_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.translate.x += dt * 0.10f;
 
 	playerCar_->Update(dt);
 }

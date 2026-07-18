@@ -64,7 +64,7 @@
         },
         "isFlag.usebillboard": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "isFlag.usebillboardY": {
             "type": "bool",
@@ -112,9 +112,9 @@
                     0.0
                 ],
                 "scale": [
-                    10457.0,
-                    10457.0,
-                    10457.0
+                    1.0,
+                    1.0,
+                    1.0
                 ],
                 "translate": [
                     0.0,
@@ -287,11 +287,11 @@
         },
         "shape.star.innerRadius": {
             "type": "float",
-            "value": 2.0
+            "value": 1.0
         },
         "shape.star.outerRadius": {
             "type": "float",
-            "value": 5.0
+            "value": 2.5
         },
         "shape.star.segments": {
             "type": "int32_t",
@@ -364,7 +364,7 @@
             "type": "enum",
             "value": -858993460
         },
-        "uvTransformVelocity": {
+        "uvTransform": {
             "type": "Transform",
             "value": {
                 "rotate": [
@@ -376,6 +376,26 @@
                     1.0,
                     1.0,
                     1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        "uvTransformVelocity": {
+            "type": "Transform",
+            "value": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "translate": [
                     0.0,

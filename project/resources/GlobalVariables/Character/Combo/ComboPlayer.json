@@ -1,5 +1,21 @@
 {
     "ComboPlayer": {
+        "AirLightAttack1": {
+            "type": "string",
+            "value": "AirLightAttack1"
+        },
+        "AirLightAttack2": {
+            "type": "string",
+            "value": "AirLightAttack2"
+        },
+        "AirLightAttack3": {
+            "type": "string",
+            "value": "AirLightAttack3"
+        },
+        "AirLightAttack4": {
+            "type": "string",
+            "value": "AirLightAttack4"
+        },
         "Attack6": {
             "type": "string",
             "value": "Attack6"
@@ -31,6 +47,10 @@
         "HeavyRangeAttack": {
             "type": "string",
             "value": "HeavyRangeAttack"
+        },
+        "HeavyRangeLaunchAttack": {
+            "type": "string",
+            "value": "HeavyRangeLaunchAttack"
         },
         "HheavyLaunch": {
             "type": "string",

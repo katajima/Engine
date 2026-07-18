@@ -60,6 +60,7 @@ namespace Game {
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 30, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Rush", 1, 30, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Rush", 1, 30, leftSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Rush", 1, 30, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
 
 		
 		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 30, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);

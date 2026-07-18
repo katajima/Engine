@@ -25,6 +25,10 @@ private:
 
 public:
 	std::vector<Engine::Object3d*> missiles_;
+	//上限範囲
+	Engine::Object3d* stageLimit_ = nullptr;
+
+
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
