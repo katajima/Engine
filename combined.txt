@@ -2749,6 +2749,10 @@ namespace Combo {
 
 	// 攻撃ノード単位のゲームプレイ調整項目。
 	struct GlobalAction {
+		// このコンボノードの命中でヒットカウントを増やすか
+		bool incrementHitCount = true;
+		// このコンボノード中のヒットカウント加算を最初の一回だけにするか
+		bool incrementHitCountOnce = false;
 		// 個別コストを使うか。falseなら従来どおり入力種別側のコストを使う。
 		bool useCustomStaminaCost = false;
 		float staminaCost = 0.0f;
@@ -3036,6 +3040,8 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		hasHit_ = false;
+		// ノード開始時に一度だけ加算の判定状態をリセットする
+		hasIncrementedHitCount_ = false;
 		// アニメーションの設定
 		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 
@@ -3451,6 +3457,16 @@ namespace Combo {
 			// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
 			comboData.GetComboAudio().OnHit();
         }
+		/// <summary>
+		/// このノードでヒットカウント加算を一度実行済みか取得します。
+		/// </summary>
+		/// <returns>一度でも加算済みならtrue、それ以外はfalseです。</returns>
+		bool HasIncrementedHitCount() const { return hasIncrementedHitCount_; }
+		/// <summary>
+		/// このノードのヒットカウント加算済み状態を設定します。
+		/// </summary>
+		/// <param name="value">加算済みとして扱う場合はtrueです。</param>
+		void SetHasIncrementedHitCount(bool value) { hasIncrementedHitCount_ = value; }
         /// <summary>
         /// このノード中に命中通知が発生したか取得します。
         /// </summary>
@@ -3561,6 +3577,8 @@ namespace Combo {
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;
         bool hasHit_ = false; // このノードの実行中に攻撃が命中したか
+		// 一度だけ加算設定のヒットカウントを既に実行したか
+		bool hasIncrementedHitCount_ = false;
     };
 
     /// <summary>
@@ -3836,10 +3854,28 @@ namespace Combo {
 		return true;
 	}
 
-	void System::NotifyAttackHit() {
-		if (comboStateMachine_) {
-			comboStateMachine_->NotifyCurrentStateHit();
+	bool System::NotifyAttackHit() {
+		if (!comboStateMachine_) {
+			return false;
 		}
+
+		const std::shared_ptr<NodeState> currentNode = comboStateMachine_->GetCurrentState();
+		if (!currentNode) {
+			return false;
+		}
+
+		// コンボノード設定に従い、必要な場合だけ攻撃者のヒットカウンターを更新する。
+		const GlobalAction& action = currentNode->Data().GetActionData();
+		const bool canIncrement = action.incrementHitCount &&
+			(!action.incrementHitCountOnce || !currentNode->HasIncrementedHitCount());
+		if (canIncrement && owner && owner->GetAttackController()) {
+			owner->GetAttackController()->GetHitCounter().Hit();
+			currentNode->SetHasIncrementedHitCount(true);
+		}
+
+		// ヒット条件、遠距離、カメラ、音の通知はカウント設定に関係なく行う。
+		comboStateMachine_->NotifyCurrentStateHit();
+		return true;
 	}
 
 	void System::ClearNode() {
@@ -4136,6 +4172,8 @@ namespace Combo {
 		// 攻撃タイプと遠距離攻撃
 		{
 			writer.Value(groupName, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			writer.Value(groupName, "ヒットカウントを増やす", data.action.incrementHitCount);
+			writer.Value(groupName, "ヒットカウントを一度だけ増やす", data.action.incrementHitCountOnce);
 			writer.Value(groupName, "スタミナコスト", data.action.staminaCost);
 			writer.Value(groupName, "クールダウン", data.action.cooldown);
 			writer.Value(groupName, "空中残り回数要求", data.action.requiredAirRemainCount);
@@ -4436,6 +4474,8 @@ namespace Combo {
 		{
 			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
 			data.action.useCustomStaminaCost = globalVariables->GetValue<bool>(name, "スタミナコスト個別指定");
+			data.action.incrementHitCount = globalVariables->GetValue<bool>(name, "ヒットカウントを増やす");
+			data.action.incrementHitCountOnce = globalVariables->GetValue<bool>(name, "ヒットカウントを一度だけ増やす");
 			data.action.staminaCost = globalVariables->GetValue<float>(name, "スタミナコスト");
 			data.action.cooldown = globalVariables->GetValue<float>(name, "クールダウン");
 			data.action.requiredAirRemainCount = globalVariables->GetValue<int>(name, "空中残り回数要求");
@@ -5041,7 +5081,8 @@ namespace Combo {
 		/// <returns>コンボ開始または遷移要求を受理した場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
 		// 現在のコンボ攻撃が命中したことを通知
-		void NotifyAttackHit();
+		// 命中を通知し、コンボ設定に応じてヒットカウントを加算したか返す
+		bool NotifyAttackHit();
 		// クリア
 		void ClearNode();
 		// 名前設定
@@ -6485,6 +6526,9 @@ namespace Combo {
 		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
 
 		ImGui::SeparatorText("攻撃ノード設定");
+		// コンボの命中をヒットカウントへ反映する設定をノード単位で編集する
+		ImGui::Checkbox("ヒットカウントを増やす", &data_.action.incrementHitCount);
+		ImGui::Checkbox("ヒットカウントを一度だけ増やす", &data_.action.incrementHitCountOnce);
 		ImGui::Checkbox("スタミナコスト個別指定", &data_.action.useCustomStaminaCost);
 		ImGui::DragFloat("スタミナコスト", &data_.action.staminaCost, 0.1f, 0.0f, 999.0f, "%.2f");
 		ImGui::DragFloat("クールダウン", &data_.action.cooldown, 0.01f, 0.0f, 60.0f, "%.2f");
@@ -11867,10 +11911,11 @@ namespace HitBox {
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		player->GetAttackController()->GetLockOnSystem()->SetHitTag(enemy->GetTagNumber());
-		// ヒットカウンターにヒットを通知
-		player->GetAttackController()->GetHitCounter().Hit();
-		if (result.notifyComboHit) {
+		// コンボ中はコンボ設定側で加算を判定し、コンボ外は従来どおり加算する。
+		const bool handledByCombo = result.notifyComboHit &&
 			player->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		if (!handledByCombo) {
+			player->GetAttackController()->GetHitCounter().Hit();
 		}
 	}
 
@@ -37924,7 +37969,7 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
 	playerCar_->Initialize(entityManager, audioManager,{},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
-	playerCar_->SetGroundHeight(-2.9f);
+	playerCar_->SetGroundHeight(0.0f);
 }
 
 void MainStage::Update(float dt) {
