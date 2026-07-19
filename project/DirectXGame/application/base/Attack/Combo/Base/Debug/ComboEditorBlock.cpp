@@ -249,6 +249,9 @@ namespace Combo {
 		Engine::ImGuiManager::Select("攻撃タイプ", ComboTypeLabels, data_.type);
 
 		ImGui::SeparatorText("攻撃ノード設定");
+		// コンボの命中をヒットカウントへ反映する設定をノード単位で編集する
+		ImGui::Checkbox("ヒットカウントを増やす", &data_.action.incrementHitCount);
+		ImGui::Checkbox("ヒットカウントを一度だけ増やす", &data_.action.incrementHitCountOnce);
 		ImGui::Checkbox("スタミナコスト個別指定", &data_.action.useCustomStaminaCost);
 		ImGui::DragFloat("スタミナコスト", &data_.action.staminaCost, 0.1f, 0.0f, 999.0f, "%.2f");
 		ImGui::DragFloat("クールダウン", &data_.action.cooldown, 0.01f, 0.0f, 60.0f, "%.2f");

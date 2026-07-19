@@ -134,6 +134,10 @@ namespace Combo {
 
 	// 攻撃ノード単位のゲームプレイ調整項目。
 	struct GlobalAction {
+		// このコンボノードの命中でヒットカウントを増やすか
+		bool incrementHitCount = true;
+		// このコンボノード中のヒットカウント加算を最初の一回だけにするか
+		bool incrementHitCountOnce = false;
 		// 個別コストを使うか。falseなら従来どおり入力種別側のコストを使う。
 		bool useCustomStaminaCost = false;
 		float staminaCost = 0.0f;

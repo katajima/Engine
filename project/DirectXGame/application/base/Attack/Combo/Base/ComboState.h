@@ -162,6 +162,16 @@ namespace Combo {
 			// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
 			comboData.GetComboAudio().OnHit();
         }
+		/// <summary>
+		/// このノードでヒットカウント加算を一度実行済みか取得します。
+		/// </summary>
+		/// <returns>一度でも加算済みならtrue、それ以外はfalseです。</returns>
+		bool HasIncrementedHitCount() const { return hasIncrementedHitCount_; }
+		/// <summary>
+		/// このノードのヒットカウント加算済み状態を設定します。
+		/// </summary>
+		/// <param name="value">加算済みとして扱う場合はtrueです。</param>
+		void SetHasIncrementedHitCount(bool value) { hasIncrementedHitCount_ = value; }
         /// <summary>
         /// このノード中に命中通知が発生したか取得します。
         /// </summary>
@@ -272,6 +282,8 @@ namespace Combo {
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;
         bool hasHit_ = false; // このノードの実行中に攻撃が命中したか
+		// 一度だけ加算設定のヒットカウントを既に実行したか
+		bool hasIncrementedHitCount_ = false;
     };
 
     /// <summary>

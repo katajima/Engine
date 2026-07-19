@@ -107,7 +107,8 @@ namespace Combo {
 		/// <returns>コンボ開始または遷移要求を受理した場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
 		// 現在のコンボ攻撃が命中したことを通知
-		void NotifyAttackHit();
+		// 命中を通知し、コンボ設定に応じてヒットカウントを加算したか返す
+		bool NotifyAttackHit();
 		// クリア
 		void ClearNode();
 		// 名前設定

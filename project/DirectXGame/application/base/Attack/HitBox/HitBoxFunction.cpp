@@ -118,10 +118,11 @@ namespace HitBox {
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		player->GetAttackController()->GetLockOnSystem()->SetHitTag(enemy->GetTagNumber());
-		// ヒットカウンターにヒットを通知
-		player->GetAttackController()->GetHitCounter().Hit();
-		if (result.notifyComboHit) {
+		// コンボ中はコンボ設定側で加算を判定し、コンボ外は従来どおり加算する。
+		const bool handledByCombo = result.notifyComboHit &&
 			player->GetAttackController()->GetComboSystem()->NotifyAttackHit();
+		if (!handledByCombo) {
+			player->GetAttackController()->GetHitCounter().Hit();
 		}
 	}
 

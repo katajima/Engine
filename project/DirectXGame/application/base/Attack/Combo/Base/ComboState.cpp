@@ -15,6 +15,8 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		hasHit_ = false;
+		// ノード開始時に一度だけ加算の判定状態をリセットする
+		hasIncrementedHitCount_ = false;
 		// アニメーションの設定
 		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 

@@ -156,10 +156,28 @@ namespace Combo {
 		return true;
 	}
 
-	void System::NotifyAttackHit() {
-		if (comboStateMachine_) {
-			comboStateMachine_->NotifyCurrentStateHit();
+	bool System::NotifyAttackHit() {
+		if (!comboStateMachine_) {
+			return false;
 		}
+
+		const std::shared_ptr<NodeState> currentNode = comboStateMachine_->GetCurrentState();
+		if (!currentNode) {
+			return false;
+		}
+
+		// コンボノード設定に従い、必要な場合だけ攻撃者のヒットカウンターを更新する。
+		const GlobalAction& action = currentNode->Data().GetActionData();
+		const bool canIncrement = action.incrementHitCount &&
+			(!action.incrementHitCountOnce || !currentNode->HasIncrementedHitCount());
+		if (canIncrement && owner && owner->GetAttackController()) {
+			owner->GetAttackController()->GetHitCounter().Hit();
+			currentNode->SetHasIncrementedHitCount(true);
+		}
+
+		// ヒット条件、遠距離、カメラ、音の通知はカウント設定に関係なく行う。
+		comboStateMachine_->NotifyCurrentStateHit();
+		return true;
 	}
 
 	void System::ClearNode() {
@@ -456,6 +474,8 @@ namespace Combo {
 		// 攻撃タイプと遠距離攻撃
 		{
 			writer.Value(groupName, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
+			writer.Value(groupName, "ヒットカウントを増やす", data.action.incrementHitCount);
+			writer.Value(groupName, "ヒットカウントを一度だけ増やす", data.action.incrementHitCountOnce);
 			writer.Value(groupName, "スタミナコスト", data.action.staminaCost);
 			writer.Value(groupName, "クールダウン", data.action.cooldown);
 			writer.Value(groupName, "空中残り回数要求", data.action.requiredAirRemainCount);
@@ -756,6 +776,8 @@ namespace Combo {
 		{
 			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
 			data.action.useCustomStaminaCost = globalVariables->GetValue<bool>(name, "スタミナコスト個別指定");
+			data.action.incrementHitCount = globalVariables->GetValue<bool>(name, "ヒットカウントを増やす");
+			data.action.incrementHitCountOnce = globalVariables->GetValue<bool>(name, "ヒットカウントを一度だけ増やす");
 			data.action.staminaCost = globalVariables->GetValue<float>(name, "スタミナコスト");
 			data.action.cooldown = globalVariables->GetValue<float>(name, "クールダウン");
 			data.action.requiredAirRemainCount = globalVariables->GetValue<int>(name, "空中残り回数要求");

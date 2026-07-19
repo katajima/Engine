@@ -49,7 +49,7 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
 	playerCar_->Initialize(entityManager, audioManager,{},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
-	playerCar_->SetGroundHeight(-2.9f);
+	playerCar_->SetGroundHeight(0.0f);
 }
 
 void MainStage::Update(float dt) {
