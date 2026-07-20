@@ -73,6 +73,8 @@ private:
 	std::unique_ptr<PoseSystem> poseSystem_;
 	// ポーズUI
 	std::unique_ptr<PoseUI> poseUI_;
+	// ゲームUI
+	std::unique_ptr<GameUI> gameUI_ = nullptr;
 private:
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_ = nullptr;
@@ -83,8 +85,5 @@ private:
 
 	// ステージ
 	std::unique_ptr<MainStage> stage_ = nullptr;
-private:
-	// ゲームUI
-	std::unique_ptr<GameUI> gameUI = nullptr;
 };
 

@@ -101,6 +101,9 @@ namespace Combo {
 	};
 
 	// 保存項目用遠距離攻撃データ
+	/// <summary>
+	/// コンボ中に生成・制御する遠距離攻撃の設定を保持するデータ。
+	/// </summary>
 	struct GlobalRange {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
@@ -170,6 +173,9 @@ namespace Combo {
 		float finishVolume = 1.0f;         // 終了音の音量。
 	};
 	// 時間
+	/// <summary>
+	/// 入力受付や各種ステートの有効時間範囲を表すデータ。
+	/// </summary>
 	struct StateTime {
 		// 入力受付時間
 		float startTime = 0.1f;
@@ -178,6 +184,9 @@ namespace Combo {
 	};
 
 	// 保存項目移動データ
+	/// <summary>
+	/// コンボ中のキャラクター移動、慣性、重力、追尾などの設定。
+	/// </summary>
 	struct GlobalMoveTargetParameters {
 		bool enabled = false;							// ターゲット有無別の移動設定を使うか
 		Vector3 moveSpeed = { 0.0f, 0.0f, 0.0f };		// 条件一致時の移動速度
@@ -186,6 +195,12 @@ namespace Combo {
 		TargetMoveType targetMoveType = TargetMoveType::kMove;	// ターゲットあり時の接近処理
 		float moveTargetRadius = 1.0f;					// ターゲットあり時の接近停止半径
 	};
+
+	/// <summary>
+
+	/// コンボ中のキャラクター移動、慣性、重力、追尾などの設定。
+
+	/// </summary>
 
 	struct GlobalMove {
 		// 攻撃開始直前の通常移動速度をコンボ中も維持するか
@@ -261,6 +276,9 @@ namespace Combo {
 	};
 
 	// 保存項目アニメーション
+	/// <summary>
+	/// コンボノードで再生する攻撃アニメーションと補助アニメーションの設定。
+	/// </summary>
 	struct GlobalAnimation {
 		// アニメーション名
 		std::string animationName = "";
@@ -308,6 +326,9 @@ namespace Combo {
 	};
 
 	// 保存項目条件データ
+	/// <summary>
+	/// 入力受付、キャンセル、終了、次のステートへの遷移条件を保持するデータ。
+	/// </summary>
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
@@ -334,6 +355,9 @@ namespace Combo {
 	};
 
 	// コンボ中に指定時間で発生させるエフェクト
+	/// <summary>
+	/// コンボ中に指定された時間や条件で発生させる単一のエフェクト設定。
+	/// </summary>
 	struct ComboEffectEntry {
 		std::string effectName = "";					// 発生させるエフェクト名
 		std::string parentName = "Player";				// 発生位置の追従先
@@ -345,6 +369,9 @@ namespace Combo {
 	};
 
 	// 保存項目エフェクトデータ
+	/// <summary>
+	/// コンボ中に使用するトレイル、武器表示、追加エフェクトの設定。
+	/// </summary>
 	struct GloblEffectData {
 		// トレイル発生時間
 		float trailEffectStartTime = 0.1f;
@@ -357,6 +384,9 @@ namespace Combo {
 	};
 
 	// 保存項目用コンボ接続データ
+	/// <summary>
+	/// 地上・空中やヒット結果などの条件別に接続先コンボを保持するデータ。
+	/// </summary>
 	struct GlobalConditionalConnection {
 		std::string groundMiss = "";
 		std::string groundHit = "";
@@ -365,6 +395,12 @@ namespace Combo {
 		std::string lockOn = "";
 		std::string noLockOn = "";
 	};
+
+	/// <summary>
+
+	/// 通常攻撃、強攻撃、スキルから次のコンボへ遷移する接続設定。
+
+	/// </summary>
 
 	struct GlobalConnection {
 		std::string lightAttack = "";
@@ -376,6 +412,9 @@ namespace Combo {
 	};
 
 	// 保存項目用コンボデータ
+	/// <summary>
+	/// 1つのコンボノードを構成する攻撃、移動、演出、条件、接続の総合設定。
+	/// </summary>
 	struct GlobalData {
 		// 攻撃、ヒット、終了タイミングで使用する音声設定
 		GlobalAudio audio{};

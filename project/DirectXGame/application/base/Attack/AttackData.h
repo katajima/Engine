@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 
@@ -244,4 +244,8 @@ struct HitReactionData {
 	DamageDataHandle damageData{};
 	// エフェクト
 	std::vector<HitEffectEntry> hitEffectNames;
+	// レンダーテクスチャに描画するエフェクトの有効化
+	bool isRenderTargetEffect = false;
+	
+
 };

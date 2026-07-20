@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
@@ -44,7 +44,7 @@ namespace Combo {
 
     public:
         /// <summary>
-        /// 入力に応じて次のコンボステートを解決します。
+        /// 入力受付時間と遷移条件を評価し、入力に応じた次のコンボステートを解決します。
         /// </summary>
         /// <param name="owner">入力を処理するキャラクターです。</param>
         /// <param name="input">評価する攻撃入力です。</param>
@@ -52,7 +52,7 @@ namespace Combo {
         virtual std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) = 0;
 
         /// <summary>
-        /// 現在時刻が入力受付ウィンドウ内か確認します。
+        /// 現在のステート経過時間が入力受付ウィンドウ内にあり、入力を受理できる状態か確認します。
         /// </summary>
         /// <returns>入力受付中ならtrue、それ以外はfalseです。</returns>
         virtual bool IsInputAcceptable() = 0;

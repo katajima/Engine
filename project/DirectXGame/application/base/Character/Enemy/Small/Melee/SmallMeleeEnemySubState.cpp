@@ -1,4 +1,4 @@
-#include "SmallMeleeEnemySubState.h"
+﻿#include "SmallMeleeEnemySubState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -136,6 +136,8 @@ namespace Character {
 		data.hitBoxData.dependenceType = HitBox::ParentType::kParent;
 		data.hitBoxData.offset = {  };
 		data.hitBoxData.useContactRecord = true;
+
+		data.reactionData.isRenderTargetEffect = true;
 
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(

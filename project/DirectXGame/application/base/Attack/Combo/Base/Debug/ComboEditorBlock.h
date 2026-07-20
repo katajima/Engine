@@ -17,6 +17,9 @@ namespace Character {
 class EffectSystem;
 
 namespace Combo {
+	/// <summary>
+	/// 1つのコンボノードの設定と編集用UIを管理するエディターブロック。
+	/// </summary>
 	class EditorBlock {
 	public:
 		// 初期化

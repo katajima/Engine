@@ -1,9 +1,11 @@
-﻿#pragma once
+#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
 namespace Combo {
-	// コンボエディター
+	/// <summary>
+	/// コンボデータの編集、ノード管理、デバッグ表示を行うエディター。
+	/// </summary>
 	class Editor {
 	public:
 

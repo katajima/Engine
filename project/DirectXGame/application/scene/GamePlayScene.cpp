@@ -63,8 +63,8 @@ void GamePlayScene::Initialize() {
 	sp->SetStage(stage_.get());
 
 	// UI
-	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
+	gameUI_ = std::make_unique<GameUI>();
+	gameUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
 	poseSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables());
@@ -94,7 +94,7 @@ void GamePlayScene::Finalize() {
 	// カメラ参照を持つUI/進行/ステージを先に破棄する。
 	poseUI_.reset();
 	poseSystem_.reset();
-	gameUI.reset();
+	gameUI_.reset();
 	stage_.reset();
 	gameFlowController_.reset();
 
@@ -141,7 +141,7 @@ void GamePlayScene::UpdateImGui()
 	ImGui::End();
 #endif // _DEBUG
 
-	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+	gameUI_->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 
 }
 
@@ -198,9 +198,9 @@ void GamePlayScene::Update()
 		GetSceneData().playerDie = true;
 	}
 	GetSceneData().score = characterManager->GetScore();
-	gameUI->SetPlayer(characterManager->GetPlayer());
-	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
-	gameUI->Update(GetTime());
+	gameUI_->SetPlayer(characterManager->GetPlayer());
+	gameUI_->SetGamePlayData(gameFlowController_->GetGamePlayData());
+	gameUI_->Update(GetTime());
 	// ポーズシステム更新
 	poseSystem_->Update(GetTime());
 	// ポーズUI更新
@@ -227,7 +227,7 @@ void GamePlayScene::Draw3D(){
 // 2D描画
 void GamePlayScene::Draw2D(){
 	// ゲームUI
-	gameUI->Draw();
+	gameUI_->Draw();
 	// キャラクター
 	gameplaySession_->GetCharacterManager()->Draw2D();
 	// 弾マネージャ

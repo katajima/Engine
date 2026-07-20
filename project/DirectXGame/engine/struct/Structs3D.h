@@ -132,7 +132,9 @@ struct QuaternionTransform
 	}
 };
 
-//AABB
+/// <summary>
+/// 軸に平行な最小境界ボックスを表す構造体。
+/// </summary>
 struct AABB {
 	Vector3 min; //!< 最小点
 	Vector3 max; //!< 最大点
@@ -186,7 +188,9 @@ struct AABB {
 	}
 };
 
-// 球
+/// <summary>
+/// 中心点と半径で定義される球体を表す構造体。
+/// </summary>
 struct Sphere {
 	Vector3 center; //!<中心点
 	float radius;   //!<半径 
@@ -219,7 +223,9 @@ struct Sphere {
 	}
 };
 
-//平面
+/// <summary>
+/// 法線と距離で定義される3次元平面を表す構造体。
+/// </summary>
 struct Plane {
 	Vector3 normal;  //!< 法線
 	float distance; //!< 距離 
@@ -317,7 +323,9 @@ struct CornerSegment {
 };
 
 
-//三角形
+/// <summary>
+/// 3つの頂点で定義される三角形を表す構造体。
+/// </summary>
 struct Triangle
 {
 	Vector3 vertices[3]; // !頂点
@@ -416,7 +424,9 @@ struct Triangle
 	}
 };
 
-//ばね
+/// <summary>
+/// アンカー、自然長、剛性、減衰で表すばねの物理パラメータ。
+/// </summary>
 struct Spring
 {
 	Vector3 anchor;      // アンカーの固定された端の位置
@@ -425,7 +435,9 @@ struct Spring
 	float dampingCoefficient; // 減衰係数
 };
 
-// ボール
+/// <summary>
+/// 位置、速度、加速度、質量などを持つ物理ボールの状態。
+/// </summary>
 struct Ball {
 	Vector3 position;		//位置
 	Vector3 veloctiy;		//速度
@@ -435,7 +447,9 @@ struct Ball {
 	unsigned int color;		//色
 };
 
-// 振り子
+/// <summary>
+/// 固定点から吊り下げられた単純振り子の状態。
+/// </summary>
 struct Pendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -444,7 +458,9 @@ struct Pendulum {
 	float angularAcceleration;	// 角加速度
 };
 
-// 円錐振り子
+/// <summary>
+/// 固定点を中心に円錐運動する振り子の状態。
+/// </summary>
 struct ConicalPendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -454,7 +470,9 @@ struct ConicalPendulum {
 
 };
 
-// カプセル
+/// <summary>
+/// 線分を半径方向に膨らませたカプセル形状を表す構造体。
+/// </summary>
 struct Capsule
 {
 	Segment segment;
@@ -487,7 +505,9 @@ struct Capsule
 	// 終点球
 	Sphere GetEndSphere()   const { return Sphere{ segment.end, radius }; }
 };
-// OBB
+/// <summary>
+/// 任意の向きと大きさを持つ有向境界ボックスを表す構造体。
+/// </summary>
 struct OBB {
 	Vector3 center;
 	Vector3 orientations[3];
