@@ -25,9 +25,6 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	// 操作
 	controller = std::make_unique<CameraController>();
 	controller->Initialize(uniqueCamera_.get(), inputSystem);
-
-	baseOffset.y = 10.0f;
-	baseOffset.z = -25;
 }
 
 void FollowCamera::Update() {

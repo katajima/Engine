@@ -1,4 +1,4 @@
-#include "BaseEnemy.h"
+﻿#include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -130,7 +130,7 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this, effect);
+		hitMotionSystem_->Initialize(this, effect,nullptr);
 
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;

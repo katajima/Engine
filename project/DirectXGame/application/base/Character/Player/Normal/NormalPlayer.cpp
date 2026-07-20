@@ -1,4 +1,4 @@
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -21,7 +21,7 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		this->entityManager = entityManager;	// エンティティ
 		this->globalVariables = globalVariables;	// 保存項目
-		this->camera = camera;					// カメラ
+		this->camera = followCamera->GetUniqueCamera();					// カメラ
 		this->inputSystem = inputSystem;						// 入力
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
@@ -37,7 +37,7 @@ namespace Character {
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
 		parameterComponent_->Initialize();
-
+		parameterComponent_->characterType_ = Character::Type::Player;	// キャラクタータイプをプレイヤーに設定
 		// HP設定
 		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
 		// スタミナ設定
@@ -100,15 +100,15 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this,effect);
+		hitMotionSystem_->Initialize(this, effect, followCamera->GetUniqueCamera());
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
-		bulletSpawn_->Initialize(this, entityManager, globalVariables, camera, effect);
+		bulletSpawn_->Initialize(this, entityManager, globalVariables, followCamera->GetUniqueCamera(), effect);
 
 		// スペシャル攻撃
 		special_ = std::make_unique<RangeBombingSpecial>();
-		special_->Initialize(entityManager, camera);
+		special_->Initialize(entityManager, followCamera->GetUniqueCamera());
 		special_->SetOwner(this);
 		special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 		special_->SetInputSystem(inputSystem);

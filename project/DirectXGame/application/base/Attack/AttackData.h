@@ -246,6 +246,6 @@ struct HitReactionData {
 	std::vector<HitEffectEntry> hitEffectNames;
 	// レンダーテクスチャに描画するエフェクトの有効化
 	bool isRenderTargetEffect = false;
-	
-
+	// レンダーテクスチャの効果時間
+	float renderTargetEffectTime = 0.0f;
 };

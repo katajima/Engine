@@ -1,4 +1,4 @@
-#include "PostEffect.h"
+﻿#include "PostEffect.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -35,6 +35,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 		cbVignette_->SetResourceName(L"PostEffect Vignette CB");
 		cbVignette_->Data()->scale = 16.0f;
 		cbVignette_->Data()->squared = 0.8f;
+		cbVignette_->Data()->color = { 1,1,1,1 };
 		break;
 	case PostEffectType::kSmoothing:
 		cbSmoothig_ = std::make_unique<Engine::ConstantBuffer<SmoothigGPU>>();

@@ -1,4 +1,4 @@
-#include "Fullscreen.hlsli"
+ï»¿#include "Fullscreen.hlsli"
 
 
 Texture2D<float4> gTexture : register(t0);
@@ -12,6 +12,7 @@ struct PixelShaderOutput
 
 struct Vignette
 {
+    float4 color;
     float scale;
     float squared;
 };
@@ -24,15 +25,15 @@ PixelShaderOutput main(VertexShaderOutput input)
     PixelShaderOutput output;
     output.color = gTexture.Sample(gSampler, input.texcoord);
     
-    // üˆÍ‚ğ0‚ÉA’†S‚É‚È‚é‚Ù‚Ç–¾‚é‚­‚È‚é‚æ‚¤‚ÉŒvZ‚Å’²®
+    // å‘¨å›²ã‚’0ã«ã€ä¸­å¿ƒã«ãªã‚‹ã»ã©æ˜ã‚‹ããªã‚‹ã‚ˆã†ã«è¨ˆç®—ã§èª¿æ•´
     float2 correct = input.texcoord * (1.0f - input.texcoord.yx);
     
-    // correct‚¾‚¯‚ÅŒvZ‚·‚é‚Æ’†S‚ÌÅ‘å’l‚ª0.0625‚Å–¾‚é‚·‚¬‚é‚Ì‚ÅScale‚Å’²®B
+    // correctã ã‘ã§è¨ˆç®—ã™ã‚‹ã¨ä¸­å¿ƒã®æœ€å¤§å€¤ãŒ0.0625ã§æ˜ã‚‹ã™ãã‚‹ã®ã§Scaleã§èª¿æ•´ã€‚
     float vignette = correct.x * correct.y * gVignette.scale;
    // gVignette.scale;
-    // ‚Æ‚è‚ ‚¦‚¸0.8æ‚Å‚»‚ê‚Á‚Û‚­
+    // ã¨ã‚Šã‚ãˆãš0.8ä¹—ã§ãã‚Œã£ã½ã
     vignette = saturate(pow(vignette, gVignette.squared));
-    // ŒW”‚Æ‚µ‚Ä
+    // ä¿‚æ•°ã¨ã—ã¦
     output.color.rgb *= vignette;
     return output;
 }

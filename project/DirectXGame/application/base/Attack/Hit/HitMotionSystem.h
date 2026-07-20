@@ -6,6 +6,9 @@ namespace Character {
 	class BaseCharacter;
 	class ParameterComponent;
 }
+namespace Engine {
+	class PostEffectPass;
+}
 class MoveRequestSystem;
 class EffectSystem;
 
@@ -28,18 +31,19 @@ public:
 	};
 
 public:
+	~HitMotionSystem();
 
 	/// <summary>キャラクターの被弾リアクション管理を初期化する。</summary>
 	/// <param name="owner">リアクションを適用するキャラクター。非所有ポインターで、利用中は有効であること。</param>
 	/// <param name="effectSystem">命中エフェクトの出力先。演出不要の場合はnullptrを許容する。</param>
-	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem);
+	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem, Engine::Camera*  camera);
 	/// <summary>ヒットストップ、ノックバック、スタン、ダウンなどの残り時間と移動を更新する。</summary>
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
 
 	// ヒットエフェクト
 	void EmitHitEffect();
-	
+
 	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
 	/// <param name="data">リアクション種別、時間、移動量、演出を含む設定。</param>
 	void SetReactionData(const HitReactionData& data);
@@ -90,6 +94,11 @@ private:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	/// <param name="parameter">ダメージを反映するパラメータ。nullptrの場合は反映しない。</param>
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
+
+	// ビネットのパラメータを調整する
+	void ConfigureVignette();
+
+
 	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
 	/// <summary>算出したリアクション速度を移動システムへ要求する。</summary>
@@ -125,12 +134,14 @@ private:
 	float hitStopTime_ = 0.0f;
 	// セルフヒットストップ時間
 	float selfHitStopTime_ = 0.0f;
-
+	// レンダーテクスチャエフェクト時間
+	float renderTargetEffectTime_ = 0.0f;
 	// アクション中か
 	bool isAction_ = false;
 
 	// エフェクト発生位置
 	Engine::WorldTransform worldEffect_;
+	
 private:
 	// 所有者
 	Character::BaseCharacter* owner = nullptr;
@@ -138,4 +149,12 @@ private:
 	MoveRequestSystem* moveRequestSystem = nullptr;
 	// エフェクト
 	EffectSystem* effectSystem = nullptr;
+	// カメラ
+	Engine::Camera* camera = nullptr;
+
+private:
+	static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";			// ビネット登録名
+	static constexpr const char* kVignettePassName_ = "Vignette_DodgeSuccessVignette";	// ビネットパス検索名
+	// 被弾時のビネットパス
+	Engine::PostEffectPass* vignettePass_ = nullptr;
 };

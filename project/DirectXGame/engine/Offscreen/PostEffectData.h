@@ -9,6 +9,7 @@
 namespace Engine {
 	// ビネット
 	struct VignetteGPU {
+		Vector4 color;
 		float scale;
 		float squared;
 		float padding[2];

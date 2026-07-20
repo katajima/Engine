@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace Engine {
 	class Camera;
@@ -26,9 +26,6 @@ namespace Character {
 		void Stop();
 
 	private:
-		// 回避成功用ビネットのパラメータを調整する
-		void ConfigureVignette();
-
 		// 回避成功用ラジアルブラーのパラメータを調整する
 		void ConfigureRadialBlur();
 
@@ -38,14 +35,11 @@ namespace Character {
 	private:
 		static constexpr const char* kGrayEffectName_ = "DodgeSuccessGray";					// グレースケール登録名
 		static constexpr const char* kGrayPassName_ = "GrayScale_DodgeSuccessGray";			// グレースケールパス検索名
-		static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";			// ビネット登録名
-		static constexpr const char* kVignettePassName_ = "Vignette_DodgeSuccessVignette";	// ビネットパス検索名
 		static constexpr const char* kRadialBlurEffectName_ = "DodgeSuccessRadialBlur";		// ラジアルブラー登録名
 		static constexpr const char* kRadialBlurPassName_ = "RadialBlur_DodgeSuccessRadialBlur";	// ラジアルブラーパス検索名
 
 		Engine::Camera* camera_ = nullptr;					// 演出を追加するカメラ
 		Engine::PostEffectPass* grayPass_ = nullptr;		// 回避成功中に使用するグレースケールパス
-		Engine::PostEffectPass* vignettePass_ = nullptr;	// 回避成功中に使用するビネットパス
 		Engine::PostEffectPass* radialBlurPass_ = nullptr;	// 回避成功中に使用するラジアルブラーパス
 		bool isActive_ = false;								// 演出再生中か
 		float timer_ = 0.0f;								// 演出の経過時間

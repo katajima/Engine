@@ -1,18 +1,27 @@
-#include "HitMotionSystem.h"
+﻿#include "HitMotionSystem.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/engine/Offscreen/PostEffect.h"
+#include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
 
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem) {
+HitMotionSystem::~HitMotionSystem(){
+	// カメラエフェクト
+	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
+		vignettePass_->SetUse(false);
+	}
+}
+
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem, Engine::Camera* camera) {
 	this->owner = owner;
 	this->effectSystem = effectSystem;
-	moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
-
+	this->camera = camera;
+	moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem(); 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
@@ -25,13 +34,31 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 	worldEffect_.parent_ = &owner->GetWorldTransform();
 	worldEffect_.translate_ = { 0,1,0 };
 
+	// ビネットエフェクト初期化
+	if (owner->GetCharacterType() == Character::Type::Player) {
+		ConfigureVignette();
+	}
 }
 
 void HitMotionSystem::Update(float dt) {
+	// ダメージ処理
 	DamageProcess(dt, owner->GetCharacterParameterComponent());
+
 
 	// セルフヒットストップ時間カウントダウン
 	GetIsTime(dt, selfHitStopTime_);
+
+	// カメラエフェクト
+	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
+		// レンダーテクスチャエフェクト時間カウントダウン
+		if (GetIsTime(dt, renderTargetEffectTime_)) {
+			vignettePass_->SetUse(true);
+		}
+		else {
+			vignettePass_->SetUse(false);
+		}
+		
+	}
 
 	if (!isAction_) {
 		return;
@@ -110,6 +137,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	launchFloatTime_ = data_.launchFloatTime;	// 打ち上げ時間　
 	launchStartHeight_ = owner->GetWorldTransform().GetWorldPosition().y;
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
+	renderTargetEffectTime_ = data_.renderTargetEffectTime; // レンダーテクスチャエフェクト時間
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -144,52 +172,32 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 }
 
 // 終了したか
-bool HitMotionSystem::IsFinished() const {
-	return !IsHitMotion();
-}
+bool HitMotionSystem::IsFinished() const { return !IsHitMotion(); }
 
 // デバッグ用に現在のリアクションを即終了する
-void HitMotionSystem::ForceFinishReaction() {
-	FinishReaction();
-}
+void HitMotionSystem::ForceFinishReaction() { FinishReaction(); }
 
 // ヒットモーション中か
-bool HitMotionSystem::IsHitMotion() const {
-	return isAction_;
-}
+bool HitMotionSystem::IsHitMotion() const { return isAction_; }
 
 // スタン中か
-bool HitMotionSystem::IsHitStun() const {
-	return hitStunTimer_ > 0.0f;
-}
+bool HitMotionSystem::IsHitStun() const { return hitStunTimer_ > 0.0f; }
 
 // ダウン中か
-bool HitMotionSystem::IsDown() const {
-	return hitMotionState_ == HitMotionState::Down;
-}
+bool HitMotionSystem::IsDown() const { return hitMotionState_ == HitMotionState::Down; }
 
-bool HitMotionSystem::IsLaunch() const {
-	return launchFloatTime_ > 0.0f;
-}
+bool HitMotionSystem::IsLaunch() const { return launchFloatTime_ > 0.0f; }
 
 // ヒットストップ中か
-bool HitMotionSystem::IsHitStop() const {
-	return hitStopTime_ > 0.0f;
-}
+bool HitMotionSystem::IsHitStop() const { return hitStopTime_ > 0.0f; }
 
-bool HitMotionSystem::IsSelfHitStop() const {
-	return selfHitStopTime_ > 0.0f;
-}
+bool HitMotionSystem::IsSelfHitStop() const { return selfHitStopTime_ > 0.0f; }
 
 // 重力は有効化
-bool HitMotionSystem::IsGravityEnabled() const {
-	return data_.gravityEnabled;
-}
+bool HitMotionSystem::IsGravityEnabled() const { return data_.gravityEnabled; }
 
 // 重力強度
-float HitMotionSystem::GetGravityScale() const {
-	return data_.gravityScale;
-}
+float HitMotionSystem::GetGravityScale() const { return data_.gravityScale; }
 
 // 速度
 Vector3 HitMotionSystem::BuildMoveVelocity() const {
@@ -328,5 +336,32 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 	}
 	return false;
 		});
+}
+
+void HitMotionSystem::ConfigureVignette() {
+	if (!camera) return;
+
+	Engine::PostEffectPipeline* pipeline = camera->GetPostEffectPipeline();
+	if (!pipeline) {
+		return;
+	}
+
+	// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
+	vignettePass_ = pipeline->FindPass(kVignettePassName_);
+	if (!vignettePass_) {
+		camera->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
+		vignettePass_ = pipeline->FindPass(kVignettePassName_);
+	}
+
+	if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
+		!vignettePass_->GetPostEffectData()->GetVignette()) {
+		return;
+	}
+
+	// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
+	auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
+	vignetteData->scale = 9.5f;
+	vignetteData->squared = 0.55f;
+	vignetteData->color = { 1,1,1,1 };
 }
 #pragma endregion

@@ -20,7 +20,8 @@ namespace Character {
 	/// プレイヤクラス
 	/// </summary>
 	class BasePlayer : public BaseCharacter {
-	public:
+	public:		
+		BasePlayer();
 		virtual ~BasePlayer();
 
 		// 初期化

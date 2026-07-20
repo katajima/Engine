@@ -1,6 +1,10 @@
-#include "BasePlayer.h"
+﻿#include "BasePlayer.h"
 #include <DirectXGame/application/base/Special/Base/BaseSpecial.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+
+Character::BasePlayer::BasePlayer(){
+	
+}
 
 Character::BasePlayer::~BasePlayer() = default;
 

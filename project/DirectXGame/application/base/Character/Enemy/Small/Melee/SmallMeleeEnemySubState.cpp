@@ -138,6 +138,7 @@ namespace Character {
 		data.hitBoxData.useContactRecord = true;
 
 		data.reactionData.isRenderTargetEffect = true;
+		data.reactionData.renderTargetEffectTime = 1.0f;
 
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(

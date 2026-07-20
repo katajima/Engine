@@ -24,20 +24,6 @@ namespace Character {
 			return;
 		}
 
-		//// 既に登録済みなら再利用し、未登録なら今回の演出用パスを追加する
-		//grayPass_ = pipeline->FindPass(kGrayPassName_);
-		//if (!grayPass_) {
-		//	camera_->AddEffectBlock(kGrayEffectName_, Engine::PostEffectBlockType::kGrayScale, false);
-		//	grayPass_ = pipeline->FindPass(kGrayPassName_);
-		//}
-
-		//// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
-		//vignettePass_ = pipeline->FindPass(kVignettePassName_);
-		//if (!vignettePass_) {
-		//	camera_->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
-		//	vignettePass_ = pipeline->FindPass(kVignettePassName_);
-		//}
-
 		// スロー中の速度感を出すため、画面中心へ向かうラジアルブラーを追加する
 		radialBlurPass_ = pipeline->FindPass(kRadialBlurPassName_);
 		if (!radialBlurPass_) {
@@ -45,7 +31,6 @@ namespace Character {
 			radialBlurPass_ = pipeline->FindPass(kRadialBlurPassName_);
 		}
 
-		//ConfigureVignette();		// 回避成功用のビネット強度を設定する
 		ConfigureRadialBlur();		// 回避成功用のラジアルブラー強度を設定する
 		SetPostEffectUse(false);	// 初期状態では演出を非表示にしておく
 	}
@@ -78,19 +63,6 @@ namespace Character {
 		SetPostEffectUse(false);
 	}
 
-	void DodgeSuccessEffect::ConfigureVignette()
-	{
-		if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
-			!vignettePass_->GetPostEffectData()->GetVignette()) {
-			return;
-		}
-
-		// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
-		auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
-		vignetteData->scale = 9.5f;
-		vignetteData->squared = 0.55f;
-	}
-
 	void DodgeSuccessEffect::ConfigureRadialBlur()
 	{
 		if (!radialBlurPass_ || !radialBlurPass_->GetPostEffectData() ||
@@ -110,9 +82,7 @@ namespace Character {
 		if (grayPass_) {
 			grayPass_->SetUse(use);
 		}
-		if (vignettePass_) {
-			vignettePass_->SetUse(use);
-		}
+		
 		if (radialBlurPass_) {
 			radialBlurPass_->SetUse(use);
 		}
