@@ -2482,8 +2482,8 @@ struct HitReactionData {
 	std::vector<HitEffectEntry> hitEffectNames;
 	// レンダーテクスチャに描画するエフェクトの有効化
 	bool isRenderTargetEffect = false;
-	
-
+	// レンダーテクスチャの効果時間
+	float renderTargetEffectTime = 0.0f;
 };
 
 
@@ -11265,21 +11265,30 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 ============================================================
-#include "HitMotionSystem.h"
+﻿#include "HitMotionSystem.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/engine/Offscreen/PostEffect.h"
+#include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
 
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem) {
+HitMotionSystem::~HitMotionSystem(){
+	// カメラエフェクト
+	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
+		vignettePass_->SetUse(false);
+	}
+}
+
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem, Engine::Camera* camera) {
 	this->owner = owner;
 	this->effectSystem = effectSystem;
-	moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
-
+	this->camera = camera;
+	moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem(); 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
@@ -11292,13 +11301,31 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 	worldEffect_.parent_ = &owner->GetWorldTransform();
 	worldEffect_.translate_ = { 0,1,0 };
 
+	// ビネットエフェクト初期化
+	if (owner->GetCharacterType() == Character::Type::Player) {
+		ConfigureVignette();
+	}
 }
 
 void HitMotionSystem::Update(float dt) {
+	// ダメージ処理
 	DamageProcess(dt, owner->GetCharacterParameterComponent());
+
 
 	// セルフヒットストップ時間カウントダウン
 	GetIsTime(dt, selfHitStopTime_);
+
+	// カメラエフェクト
+	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
+		// レンダーテクスチャエフェクト時間カウントダウン
+		if (GetIsTime(dt, renderTargetEffectTime_)) {
+			vignettePass_->SetUse(true);
+		}
+		else {
+			vignettePass_->SetUse(false);
+		}
+		
+	}
 
 	if (!isAction_) {
 		return;
@@ -11377,6 +11404,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	launchFloatTime_ = data_.launchFloatTime;	// 打ち上げ時間　
 	launchStartHeight_ = owner->GetWorldTransform().GetWorldPosition().y;
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
+	renderTargetEffectTime_ = data_.renderTargetEffectTime; // レンダーテクスチャエフェクト時間
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -11411,52 +11439,32 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 }
 
 // 終了したか
-bool HitMotionSystem::IsFinished() const {
-	return !IsHitMotion();
-}
+bool HitMotionSystem::IsFinished() const { return !IsHitMotion(); }
 
 // デバッグ用に現在のリアクションを即終了する
-void HitMotionSystem::ForceFinishReaction() {
-	FinishReaction();
-}
+void HitMotionSystem::ForceFinishReaction() { FinishReaction(); }
 
 // ヒットモーション中か
-bool HitMotionSystem::IsHitMotion() const {
-	return isAction_;
-}
+bool HitMotionSystem::IsHitMotion() const { return isAction_; }
 
 // スタン中か
-bool HitMotionSystem::IsHitStun() const {
-	return hitStunTimer_ > 0.0f;
-}
+bool HitMotionSystem::IsHitStun() const { return hitStunTimer_ > 0.0f; }
 
 // ダウン中か
-bool HitMotionSystem::IsDown() const {
-	return hitMotionState_ == HitMotionState::Down;
-}
+bool HitMotionSystem::IsDown() const { return hitMotionState_ == HitMotionState::Down; }
 
-bool HitMotionSystem::IsLaunch() const {
-	return launchFloatTime_ > 0.0f;
-}
+bool HitMotionSystem::IsLaunch() const { return launchFloatTime_ > 0.0f; }
 
 // ヒットストップ中か
-bool HitMotionSystem::IsHitStop() const {
-	return hitStopTime_ > 0.0f;
-}
+bool HitMotionSystem::IsHitStop() const { return hitStopTime_ > 0.0f; }
 
-bool HitMotionSystem::IsSelfHitStop() const {
-	return selfHitStopTime_ > 0.0f;
-}
+bool HitMotionSystem::IsSelfHitStop() const { return selfHitStopTime_ > 0.0f; }
 
 // 重力は有効化
-bool HitMotionSystem::IsGravityEnabled() const {
-	return data_.gravityEnabled;
-}
+bool HitMotionSystem::IsGravityEnabled() const { return data_.gravityEnabled; }
 
 // 重力強度
-float HitMotionSystem::GetGravityScale() const {
-	return data_.gravityScale;
-}
+float HitMotionSystem::GetGravityScale() const { return data_.gravityScale; }
 
 // 速度
 Vector3 HitMotionSystem::BuildMoveVelocity() const {
@@ -11596,6 +11604,33 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 	return false;
 		});
 }
+
+void HitMotionSystem::ConfigureVignette() {
+	if (!camera) return;
+
+	Engine::PostEffectPipeline* pipeline = camera->GetPostEffectPipeline();
+	if (!pipeline) {
+		return;
+	}
+
+	// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
+	vignettePass_ = pipeline->FindPass(kVignettePassName_);
+	if (!vignettePass_) {
+		camera->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
+		vignettePass_ = pipeline->FindPass(kVignettePassName_);
+	}
+
+	if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
+		!vignettePass_->GetPostEffectData()->GetVignette()) {
+		return;
+	}
+
+	// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
+	auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
+	vignetteData->scale = 9.5f;
+	vignetteData->squared = 0.55f;
+	vignetteData->color = { 1,1,1,1 };
+}
 #pragma endregion
 
 
@@ -11609,6 +11644,9 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
 namespace Character {
 	class BaseCharacter;
 	class ParameterComponent;
+}
+namespace Engine {
+	class PostEffectPass;
 }
 class MoveRequestSystem;
 class EffectSystem;
@@ -11632,18 +11670,19 @@ public:
 	};
 
 public:
+	~HitMotionSystem();
 
 	/// <summary>キャラクターの被弾リアクション管理を初期化する。</summary>
 	/// <param name="owner">リアクションを適用するキャラクター。非所有ポインターで、利用中は有効であること。</param>
 	/// <param name="effectSystem">命中エフェクトの出力先。演出不要の場合はnullptrを許容する。</param>
-	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem);
+	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem, Engine::Camera*  camera);
 	/// <summary>ヒットストップ、ノックバック、スタン、ダウンなどの残り時間と移動を更新する。</summary>
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
 
 	// ヒットエフェクト
 	void EmitHitEffect();
-	
+
 	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
 	/// <param name="data">リアクション種別、時間、移動量、演出を含む設定。</param>
 	void SetReactionData(const HitReactionData& data);
@@ -11694,6 +11733,11 @@ private:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	/// <param name="parameter">ダメージを反映するパラメータ。nullptrの場合は反映しない。</param>
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
+
+	// ビネットのパラメータを調整する
+	void ConfigureVignette();
+
+
 	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
 	/// <summary>算出したリアクション速度を移動システムへ要求する。</summary>
@@ -11729,12 +11773,14 @@ private:
 	float hitStopTime_ = 0.0f;
 	// セルフヒットストップ時間
 	float selfHitStopTime_ = 0.0f;
-
+	// レンダーテクスチャエフェクト時間
+	float renderTargetEffectTime_ = 0.0f;
 	// アクション中か
 	bool isAction_ = false;
 
 	// エフェクト発生位置
 	Engine::WorldTransform worldEffect_;
+	
 private:
 	// 所有者
 	Character::BaseCharacter* owner = nullptr;
@@ -11742,6 +11788,14 @@ private:
 	MoveRequestSystem* moveRequestSystem = nullptr;
 	// エフェクト
 	EffectSystem* effectSystem = nullptr;
+	// カメラ
+	Engine::Camera* camera = nullptr;
+
+private:
+	static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";			// ビネット登録名
+	static constexpr const char* kVignettePassName_ = "Vignette_DodgeSuccessVignette";	// ビネットパス検索名
+	// 被弾時のビネットパス
+	Engine::PostEffectPass* vignettePass_ = nullptr;
 };
 
 
@@ -17478,9 +17532,6 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	// 操作
 	controller = std::make_unique<CameraController>();
 	controller->Initialize(uniqueCamera_.get(), inputSystem);
-
-	baseOffset.y = 10.0f;
-	baseOffset.z = -25;
 }
 
 void FollowCamera::Update() {
@@ -23221,7 +23272,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.cpp
 ============================================================
-#include "BaseEnemy.h"
+﻿#include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -23353,7 +23404,7 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this, effect);
+		hitMotionSystem_->Initialize(this, effect,nullptr);
 
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
@@ -25570,6 +25621,7 @@ namespace Character {
 		data.hitBoxData.useContactRecord = true;
 
 		data.reactionData.isRenderTargetEffect = true;
+		data.reactionData.renderTargetEffectTime = 1.0f;
 
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
@@ -27260,9 +27312,13 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Base/BasePlayer.cpp
 ============================================================
-#include "BasePlayer.h"
+﻿#include "BasePlayer.h"
 #include <DirectXGame/application/base/Special/Base/BaseSpecial.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+
+Character::BasePlayer::BasePlayer(){
+	
+}
 
 Character::BasePlayer::~BasePlayer() = default;
 
@@ -27328,7 +27384,8 @@ namespace Character {
 	/// プレイヤクラス
 	/// </summary>
 	class BasePlayer : public BaseCharacter {
-	public:
+	public:		
+		BasePlayer();
 		virtual ~BasePlayer();
 
 		// 初期化
@@ -27434,20 +27491,6 @@ namespace Character {
 			return;
 		}
 
-		//// 既に登録済みなら再利用し、未登録なら今回の演出用パスを追加する
-		//grayPass_ = pipeline->FindPass(kGrayPassName_);
-		//if (!grayPass_) {
-		//	camera_->AddEffectBlock(kGrayEffectName_, Engine::PostEffectBlockType::kGrayScale, false);
-		//	grayPass_ = pipeline->FindPass(kGrayPassName_);
-		//}
-
-		//// 画面端を締めるビネットを追加し、回避成功の瞬間を強調する
-		//vignettePass_ = pipeline->FindPass(kVignettePassName_);
-		//if (!vignettePass_) {
-		//	camera_->AddEffectBlock(kVignetteEffectName_, Engine::PostEffectBlockType::kVignette, false);
-		//	vignettePass_ = pipeline->FindPass(kVignettePassName_);
-		//}
-
 		// スロー中の速度感を出すため、画面中心へ向かうラジアルブラーを追加する
 		radialBlurPass_ = pipeline->FindPass(kRadialBlurPassName_);
 		if (!radialBlurPass_) {
@@ -27455,7 +27498,6 @@ namespace Character {
 			radialBlurPass_ = pipeline->FindPass(kRadialBlurPassName_);
 		}
 
-		//ConfigureVignette();		// 回避成功用のビネット強度を設定する
 		ConfigureRadialBlur();		// 回避成功用のラジアルブラー強度を設定する
 		SetPostEffectUse(false);	// 初期状態では演出を非表示にしておく
 	}
@@ -27488,19 +27530,6 @@ namespace Character {
 		SetPostEffectUse(false);
 	}
 
-	void DodgeSuccessEffect::ConfigureVignette()
-	{
-		if (!vignettePass_ || !vignettePass_->GetPostEffectData() ||
-			!vignettePass_->GetPostEffectData()->GetVignette()) {
-			return;
-		}
-
-		// scaleは端の暗さの広がり、squaredは落ち方の鋭さとして扱う
-		auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
-		vignetteData->scale = 9.5f;
-		vignetteData->squared = 0.55f;
-	}
-
 	void DodgeSuccessEffect::ConfigureRadialBlur()
 	{
 		if (!radialBlurPass_ || !radialBlurPass_->GetPostEffectData() ||
@@ -27520,9 +27549,7 @@ namespace Character {
 		if (grayPass_) {
 			grayPass_->SetUse(use);
 		}
-		if (vignettePass_) {
-			vignettePass_->SetUse(use);
-		}
+		
 		if (radialBlurPass_) {
 			radialBlurPass_->SetUse(use);
 		}
@@ -27533,7 +27560,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuccessEffect.h
 ============================================================
-#pragma once
+﻿#pragma once
 
 namespace Engine {
 	class Camera;
@@ -27561,9 +27588,6 @@ namespace Character {
 		void Stop();
 
 	private:
-		// 回避成功用ビネットのパラメータを調整する
-		void ConfigureVignette();
-
 		// 回避成功用ラジアルブラーのパラメータを調整する
 		void ConfigureRadialBlur();
 
@@ -27573,14 +27597,11 @@ namespace Character {
 	private:
 		static constexpr const char* kGrayEffectName_ = "DodgeSuccessGray";					// グレースケール登録名
 		static constexpr const char* kGrayPassName_ = "GrayScale_DodgeSuccessGray";			// グレースケールパス検索名
-		static constexpr const char* kVignetteEffectName_ = "DodgeSuccessVignette";			// ビネット登録名
-		static constexpr const char* kVignettePassName_ = "Vignette_DodgeSuccessVignette";	// ビネットパス検索名
 		static constexpr const char* kRadialBlurEffectName_ = "DodgeSuccessRadialBlur";		// ラジアルブラー登録名
 		static constexpr const char* kRadialBlurPassName_ = "RadialBlur_DodgeSuccessRadialBlur";	// ラジアルブラーパス検索名
 
 		Engine::Camera* camera_ = nullptr;					// 演出を追加するカメラ
 		Engine::PostEffectPass* grayPass_ = nullptr;		// 回避成功中に使用するグレースケールパス
-		Engine::PostEffectPass* vignettePass_ = nullptr;	// 回避成功中に使用するビネットパス
 		Engine::PostEffectPass* radialBlurPass_ = nullptr;	// 回避成功中に使用するラジアルブラーパス
 		bool isActive_ = false;								// 演出再生中か
 		float timer_ = 0.0f;								// 演出の経過時間
@@ -27592,7 +27613,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -27615,7 +27636,7 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		this->entityManager = entityManager;	// エンティティ
 		this->globalVariables = globalVariables;	// 保存項目
-		this->camera = camera;					// カメラ
+		this->camera = followCamera->GetUniqueCamera();					// カメラ
 		this->inputSystem = inputSystem;						// 入力
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
@@ -27631,7 +27652,7 @@ namespace Character {
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
 		parameterComponent_->Initialize();
-
+		parameterComponent_->characterType_ = Character::Type::Player;	// キャラクタータイプをプレイヤーに設定
 		// HP設定
 		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
 		// スタミナ設定
@@ -27694,15 +27715,15 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this,effect);
+		hitMotionSystem_->Initialize(this, effect, followCamera->GetUniqueCamera());
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
-		bulletSpawn_->Initialize(this, entityManager, globalVariables, camera, effect);
+		bulletSpawn_->Initialize(this, entityManager, globalVariables, followCamera->GetUniqueCamera(), effect);
 
 		// スペシャル攻撃
 		special_ = std::make_unique<RangeBombingSpecial>();
-		special_->Initialize(entityManager, camera);
+		special_->Initialize(entityManager, followCamera->GetUniqueCamera());
 		special_->SetOwner(this);
 		special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 		special_->SetInputSystem(inputSystem);
@@ -79675,7 +79696,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Offscreen/PostEffect.cpp
 ============================================================
-#include "PostEffect.h"
+﻿#include "PostEffect.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -79712,6 +79733,7 @@ void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType 
 		cbVignette_->SetResourceName(L"PostEffect Vignette CB");
 		cbVignette_->Data()->scale = 16.0f;
 		cbVignette_->Data()->squared = 0.8f;
+		cbVignette_->Data()->color = { 1,1,1,1 };
 		break;
 	case PostEffectType::kSmoothing:
 		cbSmoothig_ = std::make_unique<Engine::ConstantBuffer<SmoothigGPU>>();
@@ -80951,6 +80973,7 @@ File Path: project/DirectXGame/engine/Offscreen/PostEffectData.h
 namespace Engine {
 	// ビネット
 	struct VignetteGPU {
+		Vector4 color;
 		float scale;
 		float squared;
 		float padding[2];
