@@ -1963,36 +1963,82 @@ namespace Engine {
 /// </summary>
 class AttackController {
 public:
-	// 攻撃に必要な各サブシステムを初期化する
+	/// <summary>
+	/// 攻撃に必要なヒットカウンター、コンボ、ロックオンなどのサブシステムを初期化します。
+	/// </summary>
+	/// <param name="entity3DManager">攻撃対象などのエンティティを管理するマネージャーです。</param>
+	/// <param name="globalVariables">攻撃設定やデバッグ設定を取得するグローバル変数管理です。</param>
+	/// <param name="base">攻撃パラメーター補正に使用するキャラクターパラメーターです。</param>
+	/// <param name="owner">この攻撃コントローラーを所有するキャラクターです。</param>
+
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
 		Character::ParameterComponent* base, Character::BaseCharacter* owner);
-	// 攻撃状態に応じてヒットカウンターとコンボを更新する
+	/// <summary>
+	/// キャラクターの攻撃状態に応じて、ヒットカウンター、コンボ、ロックオン関連の処理を更新します。
+	/// </summary>
+    /// <param name="ctx">更新対象キャラクターと周辺システムへの参照をまとめたコンテキストです。</param>
+
 	void Update(const Character::CharacterContext& ctx);
 
 
 public:
-	// 攻撃ヒットカウンタークラス取得
+	/// <summary>
+	/// 攻撃ヒットカウンターへの参照を取得します。
+	/// </summary>
+	/// <returns>内部で管理しているヒットカウンターへの参照です.</returns>
+
 	HitCounter& GetHitCounter() { return hitCounter_; }
-	// 攻撃パラメーター補正クラス取得
+	/// <summary>
+	/// 攻撃パラメーター補正オブジェクトを取得します。
+	/// </summary>
+	/// <returns>攻撃パラメーター補正オブジェクトへのポインタです.</returns>
+
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
-	// コンボシステムクラス取得
+	/// <summary>
+	/// コンボシステムを取得します。
+	/// </summary>
+	/// <returns>内部で管理しているコンボシステムへのポインタです.</returns>
+
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
-	// ロックオンシステム取得
+	/// <summary>
+	/// ロックオンシステムを取得します。
+	/// </summary>
+	/// <returns>内部で管理しているロックオンシステムへのポインタです。</returns>
 	LockOnSystem* GetLockOnSystem() { return lockOnSystem_.get(); }
 
-	// 攻撃中か取得
+	/// <summary>
+	/// キャラクターが現在攻撃中か取得します。
+	/// </summary>
+	/// <returns>攻撃中ならtrue、それ以外はfalseです.</returns>
+
 	bool IsAttack() const { return isAttack_; }
-	// 攻撃中か設定
+	/// <summary>
+	/// 攻撃中フラグを設定します。
+	/// </summary>
+    /// <param name="is">対象の状態を有効にする場合はtrueです。</param>
+
 	void SetIsAttack(bool is) { isAttack_ = is; };
 
-	// ヒットカウンターの時間更新を止めるか設定
+	/// <summary>
+	/// ヒットカウンターの経過時間更新を停止するか設定します。
+	/// </summary>
+    /// <param name="is">対象の状態を有効にする場合はtrueです。</param>
+
 	void IsStopHitTimer(bool is) { isStopHitTimer_ = is; };
 
 public:
-	// デバッグ中か設定
+	/// <summary>
+	/// デバッグ用の挙動を有効にするか設定します。
+	/// </summary>
+    /// <param name="isDebug">デバッグ中として扱う場合はtrueです。</param>
+
 	void SetIsDebug(bool isDebug) { isDebugEditor_ = isDebug; };
 
-	// デバッグ中か取得
+	/// <summary>
+	/// デバッグ用の挙動が有効か取得します。
+	/// </summary>
+	/// <returns>デバッグ中ならtrue、それ以外はfalseです.</returns>
+
 	bool IsDebug() const { return isDebugEditor_; };
 
 private:
@@ -2188,7 +2234,7 @@ float Continuous::GetDamage() const
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/AttackData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 
@@ -2434,6 +2480,10 @@ struct HitReactionData {
 	DamageDataHandle damageData{};
 	// エフェクト
 	std::vector<HitEffectEntry> hitEffectNames;
+	// レンダーテクスチャに描画するエフェクトの有効化
+	bool isRenderTargetEffect = false;
+	
+
 };
 
 
@@ -2536,7 +2586,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Receiver/ComboCondition.h"
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
@@ -2549,44 +2599,116 @@ namespace Combo {
 	class ComboData {
 	public:
 
-		// 開始
+		/// <summary>
+		/// コンボデータを開始し、条件、モーション、判定、演出を初期化します。
+		/// </summary>
+		/// <param name="owner">コンボを実行するキャラクターです。</param>
+		/// <param name="ctx">キャラクターと周辺システムへの参照をまとめた実行コンテキストです。</param>
+
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 
-		// 更新
+		/// <summary>
+		/// コンボの経過時間に応じて移動、判定、演出、遠距離攻撃を更新します。
+		/// </summary>
+        /// <param name="ctx">更新対象キャラクターと周辺システムへの参照をまとめた実行コンテキストです。</param>
+
 		void Update(const Character::CharacterContext& ctx);
 
-		// 終了
+		/// <summary>
+		/// コンボを終了し、一時的に有効化した判定や演出を解除します。
+		/// </summary>
+        /// <param name="owner">コンボを終了するキャラクターです。</param>
+
 		void Exit(Character::BaseCharacter* owner);
 	public:
-		// コンボ条件クラス取得
+		/// <summary>
+		/// コンボ条件データへの参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理しているコンボ条件への参照です.</returns>
+
 		ComboCondition& GetComboCondition() { return comboCondition; }
-		// コンボモーションクラス取得
+		/// <summary>
+		/// コンボモーションへの参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理しているモーションへの参照です.</returns>
+
 		ComboMotion& GetComboMotion() { return motion; }
-		// コンボカメラクラス取得
+		/// <summary>
+		/// コンボカメラ演出への参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理しているカメラ演出への参照です.</returns>
+
 		ComboCamera& GetComboCamera() { return camera; }
-		// コンボヒットボックスクラス取得
+		/// <summary>
+		/// コンボのヒットボックス設定への参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理しているヒットボックスへの参照です.</returns>
+
 		ComboHitBox& GetComboHitBox() { return hitBox; }
-		// コンボエフェクトクラス取得
+		/// <summary>
+		/// コンボエフェクトへの参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理しているエフェクトへの参照です.</returns>
+
 		ComboEffect& GetComboEffect() { return effect; }
-		// コンボオーディオクラス取得
+		/// <summary>
+		/// コンボオーディオへの参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理しているオーディオへの参照です.</returns>
+
 		ComboAudio& GetComboAudio() { return audio; }
-		// コンボ遠距離クラス取得
+		/// <summary>
+		/// コンボの遠距離攻撃処理への参照を取得します。
+		/// </summary>
+		/// <returns>内部で管理している遠距離攻撃処理への参照です.</returns>
+
 		ComboRange& GetComboRange() { return range; }
-		// コンボタイプ取得
+		/// <summary>
+		/// コンボの攻撃タイプを取得します。
+		/// </summary>
+		/// <returns>近距離、遠距離などのコンボタイプです.</returns>
+
 		Type GetType() const { return type; }
-		// 攻撃ノード単位の調整データ取得
+		/// <summary>
+		/// 攻撃ノード単位の調整データを編集可能な参照で取得します。
+		/// </summary>
+		/// <returns>攻撃ノード調整データへの参照です.</returns>
+
 		GlobalAction& GetActionData() { return action; }
+		/// <summary>
+		/// 攻撃ノード単位の調整データを読み取り専用参照で取得します。
+		/// </summary>
+		/// <returns>攻撃ノード調整データへの読み取り専用参照です。</returns>
 		const GlobalAction& GetActionData() const { return action; }
 	public:	// 時間
-		// 経過時間取得
+		/// <summary>
+		/// コンボ開始からの経過時間を取得します。
+		/// </summary>
+		/// <returns>経過時間を秒単位で返します.</returns>
+
 		float GetTimer() const { return timer_; }
-		// 経過時間リセット
+		/// <summary>
+		/// コンボの経過時間を0秒へリセットします。
+		/// </summary>
+
 		void ResetTimer() { timer_ = 0.0f; }
-		// 経過時間設定
+		/// <summary>
+		/// コンボの経過時間を設定します。
+		/// </summary>
+        /// <param name="time">設定する経過時間です。単位は秒です。</param>
+
 		void SetTimer(float time) { timer_ = time; } 
-		// デバック中か
+		/// <summary>
+		/// デバッグ用の挙動を有効にするか設定します。
+		/// </summary>
+        /// <param name="is">デバッグ中として扱う場合はtrueです。</param>
+
 		void SetIsDebug(bool is) { isDebug = is; }
-		// 攻撃タイプ設定
+		/// <summary>
+		/// コンボの攻撃タイプを設定します。
+		/// </summary>
+        /// <param name="type">設定するコンボタイプです。</param>
+
 		void SetType(Type type) { this->type = type; }
 	private:
 		ComboCondition comboCondition{};		// コンボ条件クラス
@@ -2716,6 +2838,9 @@ namespace Combo {
 	};
 
 	// 保存項目用遠距離攻撃データ
+	/// <summary>
+	/// コンボ中に生成・制御する遠距離攻撃の設定を保持するデータ。
+	/// </summary>
 	struct GlobalRange {
 		RangeType rangeType = RangeType::kBullet;	// 遠距離処理で使用する攻撃物
 		RangeLockOnType lockOnType = RangeLockOnType::kTarget;	// 投擲や弾の狙い方
@@ -2785,6 +2910,9 @@ namespace Combo {
 		float finishVolume = 1.0f;         // 終了音の音量。
 	};
 	// 時間
+	/// <summary>
+	/// 入力受付や各種ステートの有効時間範囲を表すデータ。
+	/// </summary>
 	struct StateTime {
 		// 入力受付時間
 		float startTime = 0.1f;
@@ -2793,6 +2921,9 @@ namespace Combo {
 	};
 
 	// 保存項目移動データ
+	/// <summary>
+	/// コンボ中のキャラクター移動、慣性、重力、追尾などの設定。
+	/// </summary>
 	struct GlobalMoveTargetParameters {
 		bool enabled = false;							// ターゲット有無別の移動設定を使うか
 		Vector3 moveSpeed = { 0.0f, 0.0f, 0.0f };		// 条件一致時の移動速度
@@ -2801,6 +2932,12 @@ namespace Combo {
 		TargetMoveType targetMoveType = TargetMoveType::kMove;	// ターゲットあり時の接近処理
 		float moveTargetRadius = 1.0f;					// ターゲットあり時の接近停止半径
 	};
+
+	/// <summary>
+
+	/// コンボ中のキャラクター移動、慣性、重力、追尾などの設定。
+
+	/// </summary>
 
 	struct GlobalMove {
 		// 攻撃開始直前の通常移動速度をコンボ中も維持するか
@@ -2876,6 +3013,9 @@ namespace Combo {
 	};
 
 	// 保存項目アニメーション
+	/// <summary>
+	/// コンボノードで再生する攻撃アニメーションと補助アニメーションの設定。
+	/// </summary>
 	struct GlobalAnimation {
 		// アニメーション名
 		std::string animationName = "";
@@ -2923,6 +3063,9 @@ namespace Combo {
 	};
 
 	// 保存項目条件データ
+	/// <summary>
+	/// 入力受付、キャンセル、終了、次のステートへの遷移条件を保持するデータ。
+	/// </summary>
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
@@ -2949,6 +3092,9 @@ namespace Combo {
 	};
 
 	// コンボ中に指定時間で発生させるエフェクト
+	/// <summary>
+	/// コンボ中に指定された時間や条件で発生させる単一のエフェクト設定。
+	/// </summary>
 	struct ComboEffectEntry {
 		std::string effectName = "";					// 発生させるエフェクト名
 		std::string parentName = "Player";				// 発生位置の追従先
@@ -2960,6 +3106,9 @@ namespace Combo {
 	};
 
 	// 保存項目エフェクトデータ
+	/// <summary>
+	/// コンボ中に使用するトレイル、武器表示、追加エフェクトの設定。
+	/// </summary>
 	struct GloblEffectData {
 		// トレイル発生時間
 		float trailEffectStartTime = 0.1f;
@@ -2972,6 +3121,9 @@ namespace Combo {
 	};
 
 	// 保存項目用コンボ接続データ
+	/// <summary>
+	/// 地上・空中やヒット結果などの条件別に接続先コンボを保持するデータ。
+	/// </summary>
 	struct GlobalConditionalConnection {
 		std::string groundMiss = "";
 		std::string groundHit = "";
@@ -2980,6 +3132,12 @@ namespace Combo {
 		std::string lockOn = "";
 		std::string noLockOn = "";
 	};
+
+	/// <summary>
+
+	/// 通常攻撃、強攻撃、スキルから次のコンボへ遷移する接続設定。
+
+	/// </summary>
 
 	struct GlobalConnection {
 		std::string lightAttack = "";
@@ -2991,6 +3149,9 @@ namespace Combo {
 	};
 
 	// 保存項目用コンボデータ
+	/// <summary>
+	/// 1つのコンボノードを構成する攻撃、移動、演出、条件、接続の総合設定。
+	/// </summary>
 	struct GlobalData {
 		// 攻撃、ヒット、終了タイミングで使用する音声設定
 		GlobalAudio audio{};
@@ -3293,7 +3454,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
@@ -3339,7 +3500,7 @@ namespace Combo {
 
     public:
         /// <summary>
-        /// 入力に応じて次のコンボステートを解決します。
+        /// 入力受付時間と遷移条件を評価し、入力に応じた次のコンボステートを解決します。
         /// </summary>
         /// <param name="owner">入力を処理するキャラクターです。</param>
         /// <param name="input">評価する攻撃入力です。</param>
@@ -3347,7 +3508,7 @@ namespace Combo {
         virtual std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) = 0;
 
         /// <summary>
-        /// 現在時刻が入力受付ウィンドウ内か確認します。
+        /// 現在のステート経過時間が入力受付ウィンドウ内にあり、入力を受理できる状態か確認します。
         /// </summary>
         /// <returns>入力受付中ならtrue、それ以外はfalseです。</returns>
         virtual bool IsInputAcceptable() = 0;
@@ -6168,12 +6329,14 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
 namespace Combo {
-	// コンボエディター
+	/// <summary>
+	/// コンボデータの編集、ノード管理、デバッグ表示を行うエディター。
+	/// </summary>
 	class Editor {
 	public:
 
@@ -7263,6 +7426,9 @@ namespace Character {
 class EffectSystem;
 
 namespace Combo {
+	/// <summary>
+	/// 1つのコンボノードの設定と編集用UIを管理するエディターブロック。
+	/// </summary>
 	class EditorBlock {
 	public:
 		// 初期化
@@ -25264,7 +25430,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemySubState.cpp
 ============================================================
-#include "SmallMeleeEnemySubState.h"
+﻿#include "SmallMeleeEnemySubState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -25402,6 +25568,8 @@ namespace Character {
 		data.hitBoxData.dependenceType = HitBox::ParentType::kParent;
 		data.hitBoxData.offset = {  };
 		data.hitBoxData.useContactRecord = true;
+
+		data.reactionData.isRenderTargetEffect = true;
 
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
@@ -43022,8 +43190,8 @@ void GamePlayScene::Initialize() {
 	sp->SetStage(stage_.get());
 
 	// UI
-	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
+	gameUI_ = std::make_unique<GameUI>();
+	gameUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
 	
 	poseSystem_ = std::make_unique<PoseSystem>();
 	poseSystem_->Initialize(GetSceneManager(), inputSystem, GetEntityManager(), GetGlobalVariables());
@@ -43053,7 +43221,7 @@ void GamePlayScene::Finalize() {
 	// カメラ参照を持つUI/進行/ステージを先に破棄する。
 	poseUI_.reset();
 	poseSystem_.reset();
-	gameUI.reset();
+	gameUI_.reset();
 	stage_.reset();
 	gameFlowController_.reset();
 
@@ -43100,7 +43268,7 @@ void GamePlayScene::UpdateImGui()
 	ImGui::End();
 #endif // _DEBUG
 
-	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+	gameUI_->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 
 }
 
@@ -43157,9 +43325,9 @@ void GamePlayScene::Update()
 		GetSceneData().playerDie = true;
 	}
 	GetSceneData().score = characterManager->GetScore();
-	gameUI->SetPlayer(characterManager->GetPlayer());
-	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
-	gameUI->Update(GetTime());
+	gameUI_->SetPlayer(characterManager->GetPlayer());
+	gameUI_->SetGamePlayData(gameFlowController_->GetGamePlayData());
+	gameUI_->Update(GetTime());
 	// ポーズシステム更新
 	poseSystem_->Update(GetTime());
 	// ポーズUI更新
@@ -43186,7 +43354,7 @@ void GamePlayScene::Draw3D(){
 // 2D描画
 void GamePlayScene::Draw2D(){
 	// ゲームUI
-	gameUI->Draw();
+	gameUI_->Draw();
 	// キャラクター
 	gameplaySession_->GetCharacterManager()->Draw2D();
 	// 弾マネージャ
@@ -43277,6 +43445,8 @@ private:
 	std::unique_ptr<PoseSystem> poseSystem_;
 	// ポーズUI
 	std::unique_ptr<PoseUI> poseUI_;
+	// ゲームUI
+	std::unique_ptr<GameUI> gameUI_ = nullptr;
 private:
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_ = nullptr;
@@ -43287,9 +43457,6 @@ private:
 
 	// ステージ
 	std::unique_ptr<MainStage> stage_ = nullptr;
-private:
-	// ゲームUI
-	std::unique_ptr<GameUI> gameUI = nullptr;
 };
 
 
@@ -88358,7 +88525,9 @@ struct QuaternionTransform
 	}
 };
 
-//AABB
+/// <summary>
+/// 軸に平行な最小境界ボックスを表す構造体。
+/// </summary>
 struct AABB {
 	Vector3 min; //!< 最小点
 	Vector3 max; //!< 最大点
@@ -88412,7 +88581,9 @@ struct AABB {
 	}
 };
 
-// 球
+/// <summary>
+/// 中心点と半径で定義される球体を表す構造体。
+/// </summary>
 struct Sphere {
 	Vector3 center; //!<中心点
 	float radius;   //!<半径 
@@ -88445,7 +88616,9 @@ struct Sphere {
 	}
 };
 
-//平面
+/// <summary>
+/// 法線と距離で定義される3次元平面を表す構造体。
+/// </summary>
 struct Plane {
 	Vector3 normal;  //!< 法線
 	float distance; //!< 距離 
@@ -88543,7 +88716,9 @@ struct CornerSegment {
 };
 
 
-//三角形
+/// <summary>
+/// 3つの頂点で定義される三角形を表す構造体。
+/// </summary>
 struct Triangle
 {
 	Vector3 vertices[3]; // !頂点
@@ -88642,7 +88817,9 @@ struct Triangle
 	}
 };
 
-//ばね
+/// <summary>
+/// アンカー、自然長、剛性、減衰で表すばねの物理パラメータ。
+/// </summary>
 struct Spring
 {
 	Vector3 anchor;      // アンカーの固定された端の位置
@@ -88651,7 +88828,9 @@ struct Spring
 	float dampingCoefficient; // 減衰係数
 };
 
-// ボール
+/// <summary>
+/// 位置、速度、加速度、質量などを持つ物理ボールの状態。
+/// </summary>
 struct Ball {
 	Vector3 position;		//位置
 	Vector3 veloctiy;		//速度
@@ -88661,7 +88840,9 @@ struct Ball {
 	unsigned int color;		//色
 };
 
-// 振り子
+/// <summary>
+/// 固定点から吊り下げられた単純振り子の状態。
+/// </summary>
 struct Pendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -88670,7 +88851,9 @@ struct Pendulum {
 	float angularAcceleration;	// 角加速度
 };
 
-// 円錐振り子
+/// <summary>
+/// 固定点を中心に円錐運動する振り子の状態。
+/// </summary>
 struct ConicalPendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -88680,7 +88863,9 @@ struct ConicalPendulum {
 
 };
 
-// カプセル
+/// <summary>
+/// 線分を半径方向に膨らませたカプセル形状を表す構造体。
+/// </summary>
 struct Capsule
 {
 	Segment segment;
@@ -88713,7 +88898,9 @@ struct Capsule
 	// 終点球
 	Sphere GetEndSphere()   const { return Sphere{ segment.end, radius }; }
 };
-// OBB
+/// <summary>
+/// 任意の向きと大きさを持つ有向境界ボックスを表す構造体。
+/// </summary>
 struct OBB {
 	Vector3 center;
 	Vector3 orientations[3];
