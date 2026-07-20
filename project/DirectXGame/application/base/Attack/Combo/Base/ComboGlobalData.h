@@ -185,7 +185,7 @@ namespace Combo {
 
 	// 保存項目移動データ
 	/// <summary>
-	/// コンボ中のキャラクター移動、慣性、重力、追尾などの設定。
+	/// ターゲットの有無に応じて上書きする攻撃移動パラメータ。
 	/// </summary>
 	struct GlobalMoveTargetParameters {
 		bool enabled = false;							// ターゲット有無別の移動設定を使うか
@@ -197,11 +197,8 @@ namespace Combo {
 	};
 
 	/// <summary>
-
 	/// コンボ中のキャラクター移動、慣性、重力、追尾などの設定。
-
 	/// </summary>
-
 	struct GlobalMove {
 		// 攻撃開始直前の通常移動速度をコンボ中も維持するか
 		bool inheritMoveInertia = false;
@@ -397,11 +394,8 @@ namespace Combo {
 	};
 
 	/// <summary>
-
 	/// 通常攻撃、強攻撃、スキルから次のコンボへ遷移する接続設定。
-
 	/// </summary>
-
 	struct GlobalConnection {
 		std::string lightAttack = "";
 		std::string heavyAttack = "";

@@ -102,7 +102,6 @@ namespace Combo {
 		/// <summary>
 		/// コンボの経過時間を0秒へリセットします。
 		/// </summary>
-
 		void ResetTimer() { timer_ = 0.0f; }
 		/// <summary>
 		/// コンボの経過時間を設定します。
