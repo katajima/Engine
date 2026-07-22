@@ -15,23 +15,6 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 	// ステージコライダーシステム初期化
 	InitializeStageColliderSystem(entityManager);
 
-	// ミサイル発射台追加
-	for(int i = 0; i < provisionalData_.missileNumX; ++i)
-	{
-		for(int j = 0; j < provisionalData_.missileNumY; ++j)
-		{
-			auto object = entityManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i), Engine::ObjectModelType::kNormal,
-				{ provisionalData_.missileTranslate.x + static_cast<float>(j) * provisionalData_.missileInterval.x ,
-				  provisionalData_.missileTranslate.y,
-				  provisionalData_.missileTranslate.z + static_cast<float>(i) * provisionalData_.missileInterval.y },camera);
-			object->SetModel("Missile.gltf");
-			object->GetWorldTransform().rotate_ = provisionalData_.missileRotate;
-			
-			object->GetWorldTransform().scale_ = { provisionalData_.missileSize,provisionalData_.missileSize,provisionalData_.missileSize };
-			missiles_.push_back(object);
-		}	
-	}
-
 	std::unique_ptr<Engine::CylinderPrimitive> cylinderPrimitive = std::make_unique<Engine::CylinderPrimitive>();
 	cylinderPrimitive->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.png", { 1,0,0,0.5f }, "StageLimit");
 	cylinderPrimitive->Data().segments = 4;

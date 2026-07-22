@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
@@ -40,15 +40,9 @@ public:
 	void SetReticleParent(Engine::WorldTransform* parent);
 
 public:
-
-
 	// 描画するか
 	void SetIsDraw(bool is);
-	// ステージ設定
-	void SetStage(MainStage* stage) { this->stage = stage;};
-
-
-
+	
 	// 半径設定
 	void SetRadius(float rad);
 
@@ -68,6 +62,9 @@ private:
 	BulletSpawn* spawn = nullptr;
 	MainStage* stage = nullptr;
 private:
+	// ミサイルオブジェクト
+	std::vector<Engine::Object3d*> missiles_;
+
 	Engine::Object3d* objectReticle_ = nullptr;				// オブジェクトレティクル
 	std::unique_ptr<Engine::CylinderPrimitive> cylinder_ = nullptr;
 private:
@@ -105,6 +102,18 @@ private: // 一旦
 		float cylinderHeight = 5.0f;
 
 		float shotTimer = 0.5f;
+
+		/// <summary>
+		/// ミサイルの配置データ
+		/// </summary>
+
+		int missileNumX = 5;
+		int missileNumY = 2;
+
+		Vector3 missileTranslate = { 3500,106,3000 };
+		Vector2 missileInterval = { 120.0f,100.0f };
+		Vector3 missileRotate = { 0 ,Math::DegreesToRadians(-90),0 };
+		float  missileSize = 10.0f;
 	};
 	ProvisionalData provisionalData_;
 };

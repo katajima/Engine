@@ -59,9 +59,6 @@ void GamePlayScene::Initialize() {
 	stage_ = std::make_unique<MainStage>();
 	stage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager);
 	
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(gameplaySession_->GetCharacterManager()->GetPlayer()->GetSpecial());
-	sp->SetStage(stage_.get());
-
 	// UI
 	gameUI_ = std::make_unique<GameUI>();
 	gameUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());

@@ -1,4 +1,4 @@
-#include "RangeBombingSpecial.h"
+﻿#include "RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -44,6 +44,25 @@ void RangeBombingSpecial::Initialize(Engine::EntityManager* entityManager, Engin
 	objectReticle_->GetWorldTransform().scale_ = { 1.0f,1.0f ,1.0f };
 	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.scale.x = 2.0f;
 	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().color = { 1,0,0,1 };
+
+
+	// ミサイル発射台追加
+	for (int i = 0; i < provisionalData_.missileNumX; ++i)
+	{
+		for (int j = 0; j < provisionalData_.missileNumY; ++j)
+		{
+			auto object = entityManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i), Engine::ObjectModelType::kNormal,
+				{ provisionalData_.missileTranslate.x + static_cast<float>(j) * provisionalData_.missileInterval.x ,
+				  provisionalData_.missileTranslate.y,
+				  provisionalData_.missileTranslate.z + static_cast<float>(i) * provisionalData_.missileInterval.y }, camera);
+			object->SetModel("Missile.gltf");
+			object->GetWorldTransform().rotate_ = provisionalData_.missileRotate;
+
+			object->GetWorldTransform().scale_ = { provisionalData_.missileSize,provisionalData_.missileSize,provisionalData_.missileSize };
+			missiles_.push_back(object);
+		}
+	}
+
 }
 
 
@@ -117,11 +136,11 @@ void RangeBombingSpecial::InAction()
 			time_ += GetTime();
 
 			// インターバルごとに1つのミサイルから発射
-			if (dataRange_.currentMissileIndex < stage->missiles_.size()) {
+			if (dataRange_.currentMissileIndex < missiles_.size()) {
 				if (time_ >= fireInterval) {
 					spawn->GenerateBulletRange(
 						BulletType::kRangeBombingSpecial,
-						stage->missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
+						missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
 						dataRange_.rangeBombingPos,
 						dataRange_.reticleRad_
 					);
@@ -131,7 +150,7 @@ void RangeBombingSpecial::InAction()
 					dataRange_.bulletNum++;            // 発射数カウント
 				}
 
-				if (dataRange_.currentMissileIndex >= stage->missiles_.size()) {
+				if (dataRange_.currentMissileIndex >= missiles_.size()) {
 					dataRange_.currentMissileIndex = 0; // インデックスをリセット
 				}
 			}
