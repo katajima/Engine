@@ -11308,17 +11308,8 @@ void HitMotionSystem::Update(float dt) {
 	// セルフヒットストップ時間カウントダウン
 	GetIsTime(dt, selfHitStopTime_);
 
-	// カメラエフェクト
-	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
-		// レンダーテクスチャエフェクト時間カウントダウン
-		if (GetIsTime(dt, renderTargetEffectTime_)) {
-			vignettePass_->SetUse(true);
-		}
-		else {
-			vignettePass_->SetUse(false);
-		}
-		
-	}
+	// レンダーテクスチャエフェクト処理
+	RenderTargetEffectProcess(dt);
 
 	if (!isAction_) {
 		return;
@@ -11398,6 +11389,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	launchStartHeight_ = owner->GetWorldTransform().GetWorldPosition().y;
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	renderTargetEffectTime_ = data_.renderTargetEffectTime; // レンダーテクスチャエフェクト時間
+	timerForVignette_ = data_.renderTargetEffectTime;		// ビネットエフェクト時間
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -11598,6 +11590,24 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 		});
 }
 
+void HitMotionSystem::RenderTargetEffectProcess(float dt){
+	// カメラエフェクト
+	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
+		// レンダーテクスチャエフェクト時間カウントダウン
+		if (GetIsTime(dt, renderTargetEffectTime_)) {
+			vignettePass_->SetUse(true);
+			auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
+			vignetteData->scale = 9.5f * (timerForVignette_ / renderTargetEffectTime_);
+			vignetteData->squared = 0.55f;
+			vignetteData->color = { 1,0,0,renderTargetEffectTime_ / timerForVignette_ };
+		}
+		else {
+			vignettePass_->SetUse(false);
+		}
+
+	}
+}
+
 void HitMotionSystem::ConfigureVignette() {
 	if (!camera) return;
 
@@ -11622,7 +11632,7 @@ void HitMotionSystem::ConfigureVignette() {
 	auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
 	vignetteData->scale = 9.5f;
 	vignetteData->squared = 0.55f;
-	vignetteData->color = { 1,1,1,1 };
+	vignetteData->color = { 1,0,0,1 };
 }
 #pragma endregion
 
@@ -11727,6 +11737,12 @@ private:
 	/// <param name="parameter">ダメージを反映するパラメータ。nullptrの場合は反映しない。</param>
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 
+	/// <summary>
+	/// レンダーテクスチャエフェクトの処理を行う。
+	/// </summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
+	void RenderTargetEffectProcess(float dt);
+
 	// ビネットのパラメータを調整する
 	void ConfigureVignette();
 
@@ -11768,6 +11784,8 @@ private:
 	float selfHitStopTime_ = 0.0f;
 	// レンダーテクスチャエフェクト時間
 	float renderTargetEffectTime_ = 0.0f;
+	// ビネットエフェクト時間
+	float timerForVignette_ = 0.0f;
 	// アクション中か
 	bool isAction_ = false;
 
@@ -15518,7 +15536,7 @@ private: // 一旦
 	struct ProvisionalData {
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
-		const float trailWidth = 0.5f; // トレイルの幅
+		const float trailWidth = 1.0f; // トレイルの幅
 		const float trailMinEmitDistance = 0.05f; // トレイル頂点を追加する最小移動距離
 		const size_t trailMaxSegmentCount = 96; // トレイルが保持する最大分割数
 		const Color trailColor = { 0.35f,0.85f,1.0f,0.85f }; // トレイルの色
@@ -25237,7 +25255,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemyState.cpp
 ============================================================
-#include "SmallMeleeEnemyState.h"
+﻿#include "SmallMeleeEnemyState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -79852,6 +79870,7 @@ void Engine::PostEffectData::UpdateImgui()
 	case PostEffectType::kVignette:
 		ImGui::DragFloat("scale", &cbVignette_->Data()->scale, 0.01f);
 		ImGui::DragFloat("squared", &cbVignette_->Data()->squared, 0.01f);
+		ImGui::ColorEdit3("color", &cbVignette_->Data()->color.x);
 		break;
 	case PostEffectType::kSmoothing:
 		if (ImGui::Button("Filter3x3")) {
