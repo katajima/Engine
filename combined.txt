@@ -37539,7 +37539,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Special/RangeBombingSpecial.cpp
 ============================================================
-#include "RangeBombingSpecial.h"
+﻿#include "RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -37585,6 +37585,25 @@ void RangeBombingSpecial::Initialize(Engine::EntityManager* entityManager, Engin
 	objectReticle_->GetWorldTransform().scale_ = { 1.0f,1.0f ,1.0f };
 	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.scale.x = 2.0f;
 	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().color = { 1,0,0,1 };
+
+
+	// ミサイル発射台追加
+	for (int i = 0; i < provisionalData_.missileNumX; ++i)
+	{
+		for (int j = 0; j < provisionalData_.missileNumY; ++j)
+		{
+			auto object = entityManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i), Engine::ObjectModelType::kNormal,
+				{ provisionalData_.missileTranslate.x + static_cast<float>(j) * provisionalData_.missileInterval.x ,
+				  provisionalData_.missileTranslate.y,
+				  provisionalData_.missileTranslate.z + static_cast<float>(i) * provisionalData_.missileInterval.y }, camera);
+			object->SetModel("Missile.gltf");
+			object->GetWorldTransform().rotate_ = provisionalData_.missileRotate;
+
+			object->GetWorldTransform().scale_ = { provisionalData_.missileSize,provisionalData_.missileSize,provisionalData_.missileSize };
+			missiles_.push_back(object);
+		}
+	}
+
 }
 
 
@@ -37658,11 +37677,11 @@ void RangeBombingSpecial::InAction()
 			time_ += GetTime();
 
 			// インターバルごとに1つのミサイルから発射
-			if (dataRange_.currentMissileIndex < stage->missiles_.size()) {
+			if (dataRange_.currentMissileIndex < missiles_.size()) {
 				if (time_ >= fireInterval) {
 					spawn->GenerateBulletRange(
 						BulletType::kRangeBombingSpecial,
-						stage->missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
+						missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
 						dataRange_.rangeBombingPos,
 						dataRange_.reticleRad_
 					);
@@ -37672,7 +37691,7 @@ void RangeBombingSpecial::InAction()
 					dataRange_.bulletNum++;            // 発射数カウント
 				}
 
-				if (dataRange_.currentMissileIndex >= stage->missiles_.size()) {
+				if (dataRange_.currentMissileIndex >= missiles_.size()) {
 					dataRange_.currentMissileIndex = 0; // インデックスをリセット
 				}
 			}
@@ -37703,7 +37722,7 @@ void RangeBombingSpecial::SetIsDraw(bool is) { objectReticle_->GetRenderComponen
 ============================================================
 File Path: project/DirectXGame/application/base/Special/RangeBombingSpecial.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
@@ -37745,15 +37764,9 @@ public:
 	void SetReticleParent(Engine::WorldTransform* parent);
 
 public:
-
-
 	// 描画するか
 	void SetIsDraw(bool is);
-	// ステージ設定
-	void SetStage(MainStage* stage) { this->stage = stage;};
-
-
-
+	
 	// 半径設定
 	void SetRadius(float rad);
 
@@ -37773,6 +37786,9 @@ private:
 	BulletSpawn* spawn = nullptr;
 	MainStage* stage = nullptr;
 private:
+	// ミサイルオブジェクト
+	std::vector<Engine::Object3d*> missiles_;
+
 	Engine::Object3d* objectReticle_ = nullptr;				// オブジェクトレティクル
 	std::unique_ptr<Engine::CylinderPrimitive> cylinder_ = nullptr;
 private:
@@ -37810,6 +37826,18 @@ private: // 一旦
 		float cylinderHeight = 5.0f;
 
 		float shotTimer = 0.5f;
+
+		/// <summary>
+		/// ミサイルの配置データ
+		/// </summary>
+
+		int missileNumX = 5;
+		int missileNumY = 2;
+
+		Vector3 missileTranslate = { 3500,106,3000 };
+		Vector2 missileInterval = { 120.0f,100.0f };
+		Vector3 missileRotate = { 0 ,Math::DegreesToRadians(-90),0 };
+		float  missileSize = 10.0f;
 	};
 	ProvisionalData provisionalData_;
 };
@@ -38135,23 +38163,6 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioMa
 	// ステージコライダーシステム初期化
 	InitializeStageColliderSystem(entityManager);
 
-	// ミサイル発射台追加
-	for(int i = 0; i < provisionalData_.missileNumX; ++i)
-	{
-		for(int j = 0; j < provisionalData_.missileNumY; ++j)
-		{
-			auto object = entityManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i), Engine::ObjectModelType::kNormal,
-				{ provisionalData_.missileTranslate.x + static_cast<float>(j) * provisionalData_.missileInterval.x ,
-				  provisionalData_.missileTranslate.y,
-				  provisionalData_.missileTranslate.z + static_cast<float>(i) * provisionalData_.missileInterval.y },camera);
-			object->SetModel("Missile.gltf");
-			object->GetWorldTransform().rotate_ = provisionalData_.missileRotate;
-			
-			object->GetWorldTransform().scale_ = { provisionalData_.missileSize,provisionalData_.missileSize,provisionalData_.missileSize };
-			missiles_.push_back(object);
-		}	
-	}
-
 	std::unique_ptr<Engine::CylinderPrimitive> cylinderPrimitive = std::make_unique<Engine::CylinderPrimitive>();
 	cylinderPrimitive->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.png", { 1,0,0,0.5f }, "StageLimit");
 	cylinderPrimitive->Data().segments = 4;
@@ -38212,27 +38223,13 @@ private:
 	void EmitUpdate() {};
 
 public:
-	std::vector<Engine::Object3d*> missiles_;
 	//上限範囲
 	Engine::Object3d* stageLimit_ = nullptr;
-
-
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
 	// 位置
 	Vector3 playerCarPos_ = { 120.0f,-3.00f,0.0f };
-private: // 一旦
-	struct ProvisionalData {
-		int missileNumX = 5;
-		int missileNumY = 2;
-
-		Vector3 missileTranslate = { 3500,106,3000 };
-		Vector2 missileInterval = { 120.0f,100.0f };
-		Vector3 missileRotate = { 0 ,Math::DegreesToRadians(-90),0 };
-		float  missileSize = 10.0f;
-	};
-	ProvisionalData provisionalData_;
 };
 
 
@@ -42183,10 +42180,6 @@ void CharacterDebugScene::InitializeCharacter(){
 	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 	// スモール敵生成
 	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kSmallMelee, "smallMelee", 0, { {1,1,1},{},{0,0,10} });
-	
-	// 必殺技
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetCharacter(tagNumber)->GetSpecial());
-	sp->SetStage(stage_.get());
 }
 // カメラ関係初期化
 void CharacterDebugScene::InitializeCamera(){
@@ -43218,9 +43211,6 @@ void GamePlayScene::Initialize() {
 	stage_ = std::make_unique<MainStage>();
 	stage_->Initialize(GetEntityManager(), GetAudioManager(), cameraManager);
 	
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(gameplaySession_->GetCharacterManager()->GetPlayer()->GetSpecial());
-	sp->SetStage(stage_.get());
-
 	// UI
 	gameUI_ = std::make_unique<GameUI>();
 	gameUI_->Initialize(inputSystem, GetEntityManager(), GetGlobalVariables());
