@@ -22,18 +22,20 @@ ConstantBuffer<Vignette> gVignette : register(b0);
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
+    // 元画像を取得し、中心部に色が適用されないように保持する。
     PixelShaderOutput output;
-    output.color = gTexture.Sample(gSampler, input.texcoord);
+    float4 sourceColor = gTexture.Sample(gSampler, input.texcoord);
     
     // 周囲を0に、中心になるほど明るくなるように計算で調整
     float2 correct = input.texcoord * (1.0f - input.texcoord.yx);
     
-    // correctだけで計算すると中心の最大値が0.0625で明るすぎるのでScaleで調整。
+    // 画面中心が1、画面端が0になるVignetteの強度を求める。
     float vignette = correct.x * correct.y * gVignette.scale;
-   // gVignette.scale;
-    // とりあえず0.8乗でそれっぽく
     vignette = saturate(pow(vignette, gVignette.squared));
-    // 係数として
-    output.color.rgb *= vignette;
+
+    // Vignetteの強度を反転し、周辺部だけに色を適用するマスクにする。
+    // 中心部は元画像、周辺部は指定色へブレンドする。
+    output.color.rgb = lerp(sourceColor.rgb, gVignette.color.rgb, 1.0f - vignette);
+    output.color.a = sourceColor.a;
     return output;
 }

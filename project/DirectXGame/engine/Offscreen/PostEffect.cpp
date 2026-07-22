@@ -161,6 +161,7 @@ void Engine::PostEffectData::UpdateImgui()
 	case PostEffectType::kVignette:
 		ImGui::DragFloat("scale", &cbVignette_->Data()->scale, 0.01f);
 		ImGui::DragFloat("squared", &cbVignette_->Data()->squared, 0.01f);
+		ImGui::ColorEdit3("color", &cbVignette_->Data()->color.x);
 		break;
 	case PostEffectType::kSmoothing:
 		if (ImGui::Button("Filter3x3")) {

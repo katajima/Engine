@@ -95,6 +95,12 @@ private:
 	/// <param name="parameter">ダメージを反映するパラメータ。nullptrの場合は反映しない。</param>
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 
+	/// <summary>
+	/// レンダーテクスチャエフェクトの処理を行う。
+	/// </summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
+	void RenderTargetEffectProcess(float dt);
+
 	// ビネットのパラメータを調整する
 	void ConfigureVignette();
 
@@ -136,6 +142,8 @@ private:
 	float selfHitStopTime_ = 0.0f;
 	// レンダーテクスチャエフェクト時間
 	float renderTargetEffectTime_ = 0.0f;
+	// ビネットエフェクト時間
+	float timerForVignette_ = 0.0f;
 	// アクション中か
 	bool isAction_ = false;
 

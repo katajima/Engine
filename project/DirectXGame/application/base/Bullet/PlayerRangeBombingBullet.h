@@ -80,7 +80,7 @@ private: // 一旦
 	struct ProvisionalData {
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
-		const float trailWidth = 0.5f; // トレイルの幅
+		const float trailWidth = 1.0f; // トレイルの幅
 		const float trailMinEmitDistance = 0.05f; // トレイル頂点を追加する最小移動距離
 		const size_t trailMaxSegmentCount = 96; // トレイルが保持する最大分割数
 		const Color trailColor = { 0.35f,0.85f,1.0f,0.85f }; // トレイルの色

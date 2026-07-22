@@ -48,17 +48,8 @@ void HitMotionSystem::Update(float dt) {
 	// セルフヒットストップ時間カウントダウン
 	GetIsTime(dt, selfHitStopTime_);
 
-	// カメラエフェクト
-	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
-		// レンダーテクスチャエフェクト時間カウントダウン
-		if (GetIsTime(dt, renderTargetEffectTime_)) {
-			vignettePass_->SetUse(true);
-		}
-		else {
-			vignettePass_->SetUse(false);
-		}
-		
-	}
+	// レンダーテクスチャエフェクト処理
+	RenderTargetEffectProcess(dt);
 
 	if (!isAction_) {
 		return;
@@ -138,6 +129,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	launchStartHeight_ = owner->GetWorldTransform().GetWorldPosition().y;
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	renderTargetEffectTime_ = data_.renderTargetEffectTime; // レンダーテクスチャエフェクト時間
+	timerForVignette_ = data_.renderTargetEffectTime;		// ビネットエフェクト時間
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -338,6 +330,24 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 		});
 }
 
+void HitMotionSystem::RenderTargetEffectProcess(float dt){
+	// カメラエフェクト
+	if (vignettePass_ && owner->GetCharacterType() == Character::Type::Player) {
+		// レンダーテクスチャエフェクト時間カウントダウン
+		if (GetIsTime(dt, renderTargetEffectTime_)) {
+			vignettePass_->SetUse(true);
+			auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
+			vignetteData->scale = 9.5f * (timerForVignette_ / renderTargetEffectTime_);
+			vignetteData->squared = 0.55f;
+			vignetteData->color = { 1,0,0,renderTargetEffectTime_ / timerForVignette_ };
+		}
+		else {
+			vignettePass_->SetUse(false);
+		}
+
+	}
+}
+
 void HitMotionSystem::ConfigureVignette() {
 	if (!camera) return;
 
@@ -362,6 +372,6 @@ void HitMotionSystem::ConfigureVignette() {
 	auto* vignetteData = vignettePass_->GetPostEffectData()->GetVignette()->Data();
 	vignetteData->scale = 9.5f;
 	vignetteData->squared = 0.55f;
-	vignetteData->color = { 1,1,1,1 };
+	vignetteData->color = { 1,0,0,1 };
 }
 #pragma endregion
