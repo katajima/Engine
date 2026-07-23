@@ -133,6 +133,9 @@ static float ExpectedValue(const std::vector<float>& probabilities, int totalRol
 }
 
 
+/// <summary>
+/// Sequenceを管理・実装するクラス。
+/// </summary>
 class Sequence
 {
 public:

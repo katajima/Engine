@@ -5,6 +5,9 @@
 
 namespace Engine {
 	// 点エミッター
+/// <summary>
+/// PointParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class PointParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -17,6 +20,9 @@ namespace Engine {
 	};
 
 	// AABBエミッター
+/// <summary>
+/// AABBParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class AABBParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -38,6 +44,9 @@ namespace Engine {
 	};
 
 	// 球エミッター
+/// <summary>
+/// SphereParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class SphereParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -60,6 +69,9 @@ namespace Engine {
 	};
 
 	// 円エミッター
+/// <summary>
+/// CornerParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class CornerParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -85,6 +97,9 @@ namespace Engine {
 	};
 
 	//	ラインエミッター
+/// <summary>
+/// LineParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class LineParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -108,6 +123,9 @@ namespace Engine {
 	};
 
 	// スプライン
+/// <summary>
+/// SplineParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class SplineParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -134,6 +152,9 @@ namespace Engine {
 	};
 
 	// 三角
+/// <summary>
+/// TriangleParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class TriangleParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -155,6 +176,9 @@ namespace Engine {
 	};
 
 	// メッシュ
+/// <summary>
+/// MeshParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class MeshParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化

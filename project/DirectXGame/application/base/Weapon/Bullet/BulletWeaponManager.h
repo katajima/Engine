@@ -7,6 +7,9 @@
 // 前方宣言
 
 
+/// <summary>
+/// BulletWeaponManagerを管理・実装するクラス。
+/// </summary>
 class BulletWeaponManager
 {
 public:

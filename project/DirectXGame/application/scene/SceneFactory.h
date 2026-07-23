@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/scene/AbstractSceneFactory.h"
 
 
@@ -15,6 +15,9 @@ class EffectScene;
 class BaseScene;
 
 // このゲーム用のシーン工場
+/// <summary>
+/// SceneFactoryを管理・実装するクラス。
+/// </summary>
 class SceneFactory : public Engine::AbstractSceneFactory
 {
 public:

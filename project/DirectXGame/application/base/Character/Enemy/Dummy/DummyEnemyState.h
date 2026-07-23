@@ -8,6 +8,9 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
+/// <summary>
+/// DummyEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class DummyEnemyMoveState : public MoveState
 	{
 	public:

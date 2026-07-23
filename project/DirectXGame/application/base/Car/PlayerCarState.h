@@ -64,6 +64,9 @@ private:
 
 };
 
+/// <summary>
+/// CarTitleMoveStateを管理・実装するクラス。
+/// </summary>
 class CarTitleMoveState : public PlayerCarState {
 public:
 	CarTitleMoveState(const CarMainState& state, PlayerCar* car) :
@@ -88,6 +91,9 @@ private:
 };
 
 
+/// <summary>
+/// CarPreparationMoveStateを管理・実装するクラス。
+/// </summary>
 class CarPreparationMoveState : public PlayerCarState {
 public:
 	CarPreparationMoveState(const CarMainState& state, PlayerCar* car) :
@@ -112,6 +118,9 @@ private:
 };
 
 
+/// <summary>
+/// CarSelectMoveを管理・実装するクラス。
+/// </summary>
 class CarSelectMove : public PlayerCarState {
 public:
 	CarSelectMove(const CarMainState& state, PlayerCar* car) :
@@ -138,6 +147,9 @@ private:
 };
 
 
+/// <summary>
+/// ResultCashExchangeStateを管理・実装するクラス。
+/// </summary>
 class ResultCashExchangeState : public PlayerCarState {
 public:
 	ResultCashExchangeState(const CarMainState& state, PlayerCar* car) :

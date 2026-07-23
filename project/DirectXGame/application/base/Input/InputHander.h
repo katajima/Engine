@@ -16,6 +16,9 @@ namespace Character {
 
 
 	// コマンド
+/// <summary>
+/// ICommandを管理・実装するクラス。
+/// </summary>
 	class ICommand
 	{
 	public:
@@ -25,24 +28,36 @@ namespace Character {
 	};
 
 	// 移動コマンド
+/// <summary>
+/// MoveCommandを管理・実装するクラス。
+/// </summary>
 	class MoveCommand :public ICommand
 	{
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
 	// ジャンプコマンド
+/// <summary>
+/// JampCommandを管理・実装するクラス。
+/// </summary>
 	class JampCommand : public ICommand
 	{
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
 	// 回避コマンド
+/// <summary>
+/// DodgeCommandを管理・実装するクラス。
+/// </summary>
 	class DodgeCommand : public ICommand
 	{
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
 	// 攻撃コマンド
+/// <summary>
+/// AttackCommandを管理・実装するクラス。
+/// </summary>
 	class AttackCommand : public ICommand
 	{
 	public:
@@ -50,6 +65,9 @@ namespace Character {
 	};
 
 	// 攻撃コマンド
+/// <summary>
+/// HeavyAttackCommandを管理・実装するクラス。
+/// </summary>
 	class HeavyAttackCommand : public ICommand
 	{
 	public:
@@ -58,6 +76,9 @@ namespace Character {
 
 
 	// 攻撃コマンド
+/// <summary>
+/// SkillAttackCommandを管理・実装するクラス。
+/// </summary>
 	class SkillAttackCommand : public ICommand
 	{
 	public:
@@ -65,6 +86,9 @@ namespace Character {
 	};
 
 	// インプットハンドラー
+/// <summary>
+/// InputHanderを管理・実装するクラス。
+/// </summary>
 	class InputHander
 	{
 	public:

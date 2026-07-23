@@ -6,6 +6,9 @@
 
 // ベクター
 template <typename T>
+/// <summary>
+/// VectorContainerを管理・実装するクラス。
+/// </summary>
 class VectorContainer {
 public:
     std::vector<T> data;

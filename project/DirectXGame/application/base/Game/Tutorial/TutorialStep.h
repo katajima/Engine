@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 namespace Engine {
 	class DirectXCommon;
@@ -58,6 +58,9 @@ protected:
 };
 
 // 移動チュートリアル
+/// <summary>
+/// TutorialMoveStepを管理・実装するクラス。
+/// </summary>
 class TutorialMoveStep : public TutorialStep {
 public:
     void Enter() override {
@@ -79,6 +82,9 @@ public:
 };
 
 // カメラ操作チュートリアル
+/// <summary>
+/// TutorialCameraStepを管理・実装するクラス。
+/// </summary>
 class TutorialCameraStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -98,6 +104,9 @@ public:
 };
 
 // ジャンプチュートリアル
+/// <summary>
+/// TutorialJumpStepを管理・実装するクラス。
+/// </summary>
 class TutorialJumpStep : public TutorialStep {
 public:
     void Enter() override {
@@ -117,6 +126,9 @@ public:
 };
 
 // 回避
+/// <summary>
+/// TutorialDodgeStepを管理・実装するクラス。
+/// </summary>
 class TutorialDodgeStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -137,6 +149,9 @@ public:
 
 
 // 攻撃
+/// <summary>
+/// TutorialAttackStepを管理・実装するクラス。
+/// </summary>
 class TutorialAttackStep : public TutorialStep {
 public:
 
@@ -157,6 +172,9 @@ public:
 };
 
 // コンボ
+/// <summary>
+/// TutorialComboStepを管理・実装するクラス。
+/// </summary>
 class TutorialComboStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -176,6 +194,9 @@ public:
 };
 
 // スキル
+/// <summary>
+/// TutorialSkillStepを管理・実装するクラス。
+/// </summary>
 class TutorialSkillStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -196,6 +217,9 @@ public:
 };
 
 // 特殊技
+/// <summary>
+/// TutorialSpecialStepを管理・実装するクラス。
+/// </summary>
 class TutorialSpecialStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -219,6 +243,9 @@ private:
 };
 
 // 敵撃破
+/// <summary>
+/// TutorialEnemyDefeatedStepを管理・実装するクラス。
+/// </summary>
 class TutorialEnemyDefeatedStep : public TutorialStep {
 public:
 
@@ -240,6 +267,9 @@ public:
 };
 
 // ロックオン
+/// <summary>
+/// TutorialLockOnStepを管理・実装するクラス。
+/// </summary>
 class TutorialLockOnStep : public TutorialStep {
 public:
 
@@ -261,6 +291,9 @@ public:
 };
 
 // メニューを開く
+/// <summary>
+/// TutorialOpenMenuStepを管理・実装するクラス。
+/// </summary>
 class TutorialOpenMenuStep : public TutorialStep {
 
 	void Enter() override {

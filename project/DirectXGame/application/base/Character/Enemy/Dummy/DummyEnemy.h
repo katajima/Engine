@@ -1,9 +1,12 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include "DummyEnemyState.h"
 
 namespace Character {
+/// <summary>
+/// DummyEnemyを管理・実装するクラス。
+/// </summary>
 	class DummyEnemy : public BaseEnemy {
 	public:
 		// ダミーを地上扱いにするか空中扱いにするか

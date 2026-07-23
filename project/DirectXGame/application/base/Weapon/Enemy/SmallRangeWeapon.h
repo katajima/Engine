@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
+/// <summary>
+/// SmallRangeWeaponを管理・実装するクラス。
+/// </summary>
 class SmallRangeWeapon : public RangedWeapon
 {
 public:

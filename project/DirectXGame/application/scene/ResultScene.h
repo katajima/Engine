@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -24,6 +24,9 @@
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
+/// <summary>
+/// ResultSceneを管理・実装するクラス。
+/// </summary>
 class ResultScene : public Engine::BaseScene {
 public:
 

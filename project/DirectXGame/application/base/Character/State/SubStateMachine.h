@@ -12,6 +12,9 @@ namespace Character {
     /// <typeparam name="SubStateEnum"></typeparam>
     /// <typeparam name="BaseSubStateType"></typeparam>
     template<class SubStateEnum, class BaseSubStateType>
+/// <summary>
+/// SubStateMachineを管理・実装するクラス。
+/// </summary>
     class SubStateMachine
     {
     public:

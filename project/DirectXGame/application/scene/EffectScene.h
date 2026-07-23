@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -23,6 +23,9 @@
 #include <string>
 #include <vector>
 
+/// <summary>
+/// EffectSceneを管理・実装するクラス。
+/// </summary>
 class EffectScene : public Engine::BaseScene {
 public:
 

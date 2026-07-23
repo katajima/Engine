@@ -10,6 +10,9 @@ namespace Character {
 namespace Character {
 
 	// スロー演出リクエストを受け取り、対象キャラクターの時間倍率を管理するクラス
+/// <summary>
+/// SlowMotionManagerを管理・実装するクラス。
+/// </summary>
 	class SlowMotionManager {
 	public:
 		// 破棄時に内部状態を停止する

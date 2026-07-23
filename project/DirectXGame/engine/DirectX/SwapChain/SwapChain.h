@@ -26,6 +26,9 @@ namespace Engine {
 	class Fence;
 
 	// スワップチェーン
+/// <summary>
+/// SwapChainを管理・実装するクラス。
+/// </summary>
 	class SwapChain
 	{
 	public:

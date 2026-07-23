@@ -15,6 +15,9 @@ namespace Engine {
 	class EntityManager;
 
 	// スプライト基底クラス
+/// <summary>
+/// BaseSpriteを管理・実装するクラス。
+/// </summary>
 	class BaseSprite {
 	public:
 		// 初期化

@@ -9,6 +9,9 @@ namespace Engine {
 	class Model;
 
 	// アニメーションコンポーネント
+/// <summary>
+/// AnimationComponentを管理・実装するクラス。
+/// </summary>
 	class AnimationComponent
 	{
 	public:

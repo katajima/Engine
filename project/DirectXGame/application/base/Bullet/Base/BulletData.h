@@ -38,6 +38,9 @@ struct BulletInfo {
 };
 
 // 弾データ
+/// <summary>
+/// BulletDataを管理・実装するクラス。
+/// </summary>
 class BulletData {
 public:
 	// 初期化

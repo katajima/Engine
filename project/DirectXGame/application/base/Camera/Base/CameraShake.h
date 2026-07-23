@@ -6,6 +6,9 @@ namespace Engine {
 }
 
 // カメラシェイク
+/// <summary>
+/// CameraShakeを管理・実装するクラス。
+/// </summary>
 class CameraShake {
 public:
 

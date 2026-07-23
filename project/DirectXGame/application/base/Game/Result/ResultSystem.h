@@ -34,6 +34,9 @@ enum class ResultPhase {
 	kMenuWait,
 };
 
+/// <summary>
+/// ResultSystemを管理・実装するクラス。
+/// </summary>
 class ResultSystem {
 public:
 	/// <summary>

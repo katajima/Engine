@@ -1,9 +1,12 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallCartEnemyState.h"
 
 namespace Character {
 
+/// <summary>
+/// SmallCartEnemyを管理・実装するクラス。
+/// </summary>
 	class SmallCartEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ

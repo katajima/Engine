@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
@@ -12,6 +12,9 @@
 class InputSystem;
 
 // カメラ統括クラス
+/// <summary>
+/// CameraControllerを管理・実装するクラス。
+/// </summary>
 class CameraController {
 public:
 

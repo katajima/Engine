@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 
@@ -12,6 +12,9 @@ enum class SpecialPointState {
 class SpecialPoint;
 
 // 基底ステート
+/// <summary>
+/// BaseSpecialPointStateを管理・実装するクラス。
+/// </summary>
 class BaseSpecialPointState {
 public:
 
@@ -34,6 +37,9 @@ protected:
 };
 
 // 出現時のステート
+/// <summary>
+/// SpecialPointPopStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointPopState : public BaseSpecialPointState {
 public:
 	SpecialPointPopState(SpecialPoint* object)
@@ -57,6 +63,9 @@ private:
 };
 
 // 通常時のステート
+/// <summary>
+/// SpecialPointIdleStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointIdleState : public BaseSpecialPointState {
 public:
 	SpecialPointIdleState(SpecialPoint* object)
@@ -81,6 +90,9 @@ private:
 };
 
 // 移動時のステート
+/// <summary>
+/// SpecialPointMoveStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointMoveState : public BaseSpecialPointState {
 public:
 	SpecialPointMoveState(SpecialPoint* object)
@@ -100,6 +112,9 @@ private:
 };
 
 // 終了時のステート
+/// <summary>
+/// SpecialPointEndStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointEndState : public BaseSpecialPointState {
 public:
 	SpecialPointEndState(SpecialPoint* object)

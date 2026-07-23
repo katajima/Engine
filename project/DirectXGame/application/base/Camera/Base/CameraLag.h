@@ -2,6 +2,9 @@
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 
+/// <summary>
+/// CameraLagを管理・実装するクラス。
+/// </summary>
 class CameraLag {
 public:
 

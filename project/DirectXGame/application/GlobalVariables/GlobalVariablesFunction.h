@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include <iostream>
 #include <fstream>
@@ -13,6 +13,9 @@ struct EnumEntry {
 	int64_t value;      // EnumItem.value に入る値
 };
 
+/// <summary>
+/// EnumRegistryを管理・実装するクラス。
+/// </summary>
 class EnumRegistry {
 public:
 	static EnumRegistry& Instance() {

@@ -7,6 +7,9 @@
 /// リジットボディー
 /// </summary>
 namespace Engine {
+/// <summary>
+/// RigidBodyComponentを管理・実装するクラス。
+/// </summary>
 	class RigidBodyComponent
 	{
 	public:

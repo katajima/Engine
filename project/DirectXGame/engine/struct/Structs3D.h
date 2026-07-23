@@ -16,10 +16,9 @@ enum class Dire {
 	mY,		// -Y軸
 	mZ		// -Z軸
 };
-
-
-
-//速度や加速度を管理する構造体
+/// <summary>
+/// 物体の速度と加速度を管理する運動学データ。
+/// </summary>
 struct Kinematics {
 	Vector3 velocity{ 0.0f, 0.0f, 0.0f };
 	Vector3 acceleration{ 0.0f, 0.0f, 0.0f };
@@ -42,8 +41,9 @@ struct Kinematics {
 		velocity *= damping; // 0.0f〜1.0fの範囲
 	}
 };
-
-//Transform
+/// <summary>
+/// 3次元空間における拡大縮小、回転、位置を表す変換データ。
+/// </summary>
 struct Transform {
 	Vector3 scale = { 1.0f,1.0f,1.0f };
 	Vector3 rotate{};
@@ -82,7 +82,7 @@ struct Transform {
 };
 
 /// <summary>
-/// Quaternionトランスフォーム情報(Quaternion回転)
+/// クォータニオン回転を用いた3次元トランスフォーム情報。
 /// </summary>
 struct QuaternionTransform
 {
@@ -314,7 +314,7 @@ struct Plane {
 };
 
 /// <summary>
-/// こーな
+/// 角部の中心、線分番号、半径をまとめた補助的な線分データ。
 /// </summary>
 struct CornerSegment {
 	Vector3 center;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // 前方宣言
 namespace Engine {
@@ -10,6 +10,9 @@ namespace Engine {
 class EffectSystem;
 class InputSystem;
 
+/// <summary>
+/// CustomSystemを管理・実装するクラス。
+/// </summary>
 class CustomSystem {
 public:
 	/// <summary>

@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 
+/// <summary>
+/// MoveRequestSystemを管理・実装するクラス。
+/// </summary>
 class MoveRequestSystem {
 public:
 	// 更新

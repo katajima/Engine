@@ -56,6 +56,9 @@ namespace Engine {
     // Collider 用 Octree
     // =========================
     class Collider;
+/// <summary>
+/// OctreeColliderを管理・実装するクラス。
+/// </summary>
     class OctreeCollider {
     public:
         // コンストラクタ

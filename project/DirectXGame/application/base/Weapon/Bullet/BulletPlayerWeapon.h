@@ -10,6 +10,9 @@ namespace Character {
 
 
 
+/// <summary>
+/// BulletPlayerWeaponを管理・実装するクラス。
+/// </summary>
 class BulletPlayerWeapon : public RangedWeapon {
 public:
 

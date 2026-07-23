@@ -140,7 +140,12 @@ namespace Combo {
 
     public:
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 入力受付時間と遷移条件を評価し、入力に対応する次のステートを解決します。
+        /// </summary>
+        /// <param name="owner">入力を処理するキャラクターです。</param>
+        /// <param name="input">評価する攻撃入力です。</param>
+        /// <returns>遷移先ステートがあれば共有ポインタ、なければnullptrです。</returns>
         std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override;
 
         /// <summary>
@@ -199,7 +204,10 @@ namespace Combo {
         /// <returns>指定入力に次ノード候補があればtrue、それ以外はfalseです。</returns>
         bool HasNextState(ActionInput input) const;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 現在のステート経過時間が入力受付ウィンドウ内か確認します。
+        /// </summary>
+        /// <returns>入力を受け付けられる時間ならtrue、それ以外はfalseです。</returns>
         bool IsInputAcceptable() override {
             return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
         }

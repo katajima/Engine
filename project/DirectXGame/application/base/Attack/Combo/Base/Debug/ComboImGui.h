@@ -5,6 +5,9 @@
 #include "DirectXGame/engine/Animation/Animation.h"
 
 namespace Combo {
+/// <summary>
+/// ComboImGuiを管理・実装するクラス。
+/// </summary>
 	class ComboImGui {
 	public:
 		// 現在の時間

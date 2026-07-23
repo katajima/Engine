@@ -13,6 +13,9 @@ using namespace Microsoft::WRL;
 /// <typeparam name="Type"></typeparam>
 namespace Engine {
 	template<class Type>
+/// <summary>
+/// ConstantBufferを管理・実装するクラス。
+/// </summary>
 	class ConstantBuffer {
 	public:
 

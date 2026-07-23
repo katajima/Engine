@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <list>
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -29,6 +29,9 @@ class EffectSystem;
 class InputSystem;
 
 
+/// <summary>
+/// TutorialSystemを管理・実装するクラス。
+/// </summary>
 class TutorialSystem {
 public:
     TutorialSystem() {}

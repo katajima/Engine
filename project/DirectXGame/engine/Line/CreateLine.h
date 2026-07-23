@@ -13,6 +13,9 @@ namespace Engine {
 
 
 	// ラインメッシュデータ
+/// <summary>
+/// LineMeshDataを管理・実装するクラス。
+/// </summary>
 	class LineMeshData
 	{
 	public:

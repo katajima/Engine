@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 
@@ -7,6 +7,9 @@
 #include <memory>
 
 /// ダメージ処理の共通インターフェース
+/// <summary>
+/// DamageDataを管理・実装するクラス。
+/// </summary>
 class DamageData {
 public:
 	// ダメージタイプ
@@ -39,6 +42,9 @@ public:
 };
 
 /// 一回だけダメージを発生させるデータ
+/// <summary>
+/// Oneを管理・実装するクラス。
+/// </summary>
 class One final : public DamageData {
 public:
 	// 一回ダメージの状態を更新する
@@ -63,6 +69,9 @@ private:
 };
 
 /// 一回の攻撃中に複数回ダメージを発生させるデータ
+/// <summary>
+/// Continuousを管理・実装するクラス。
+/// </summary>
 class Continuous final : public DamageData {
 public:
 	// 連撃ダメージの状態を更新する
@@ -95,6 +104,9 @@ private:
 };
 
 /// 時間経過で継続的にダメージを発生させるデータ
+/// <summary>
+/// Durationを管理・実装するクラス。
+/// </summary>
 class Duration final : public DamageData {
 public:
 	// 持続ダメージの状態を更新する
@@ -126,6 +138,9 @@ private:
 };
 
 /// 派生DamageDataの所有と値コピーを担当するハンドル
+/// <summary>
+/// DamageDataHandleを管理・実装するクラス。
+/// </summary>
 class DamageDataHandle {
 public:
 	// 既定では一回ダメージを保持する

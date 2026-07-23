@@ -11,6 +11,9 @@ class BaseCharacter;
 
 
 // 必殺技用のエディター
+/// <summary>
+/// SpecialEditorを管理・実装するクラス。
+/// </summary>
 class SpecialEditor {
 public:
 

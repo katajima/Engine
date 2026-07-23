@@ -77,6 +77,9 @@ namespace Engine {
 	};
 
 	// 球エミッター
+/// <summary>
+/// GpuParticleEmitterSphereを管理・実装するクラス。
+/// </summary>
 	class GpuParticleEmitterSphere : public BaseGpuParticleEmitter
 	{
 	public:
@@ -93,6 +96,9 @@ namespace Engine {
 	};
 
 	// 点エミッター
+/// <summary>
+/// GpuParticleEmitterPointを管理・実装するクラス。
+/// </summary>
 	class GpuParticleEmitterPoint : public BaseGpuParticleEmitter
 	{
 	public:
@@ -109,6 +115,9 @@ namespace Engine {
 	};
 
 	// AABBエミッター
+/// <summary>
+/// GpuParticleEmitterAABBを管理・実装するクラス。
+/// </summary>
 	class GpuParticleEmitterAABB : public BaseGpuParticleEmitter
 	{
 	public:

@@ -2,6 +2,9 @@
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // カメラズーム
+/// <summary>
+/// CameraZoomを管理・実装するクラス。
+/// </summary>
 class CameraZoom {
 public:
 

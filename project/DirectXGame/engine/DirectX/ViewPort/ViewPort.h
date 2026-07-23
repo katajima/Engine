@@ -6,6 +6,9 @@ namespace Engine {
 	class Command;
 
 	// ビューポート
+/// <summary>
+/// ViewPortを管理・実装するクラス。
+/// </summary>
 	class ViewPort
 	{
 	public:

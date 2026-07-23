@@ -95,6 +95,9 @@ namespace Engine {
 
 
 	// 平面
+/// <summary>
+/// PlanePrimitiveを管理・実装するクラス。
+/// </summary>
 	class PlanePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -113,6 +116,9 @@ namespace Engine {
 	};
 
 	// 三角面
+/// <summary>
+/// TrianglePrimitiveを管理・実装するクラス。
+/// </summary>
 	class TrianglePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -128,6 +134,9 @@ namespace Engine {
 	};
 
 	// 円
+/// <summary>
+/// CirclePrimitiveを管理・実装するクラス。
+/// </summary>
 	class CirclePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -143,6 +152,9 @@ namespace Engine {
 	};
 
 	// 立方体
+/// <summary>
+/// CubePrimitiveを管理・実装するクラス。
+/// </summary>
 	class CubePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -158,6 +170,9 @@ namespace Engine {
 	};
 
 	// 星
+/// <summary>
+/// StarPrimitiveを管理・実装するクラス。
+/// </summary>
 	class StarPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -173,6 +188,9 @@ namespace Engine {
 	};
 
 	// 三日月
+/// <summary>
+/// CrescentPrimitiveを管理・実装するクラス。
+/// </summary>
 	class CrescentPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -188,6 +206,9 @@ namespace Engine {
 	};
 
 	// リング
+/// <summary>
+/// RingPrimitiveを管理・実装するクラス。
+/// </summary>
 	class RingPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -203,6 +224,9 @@ namespace Engine {
 	};
 
 	// 十字
+/// <summary>
+/// CrossPrimitiveを管理・実装するクラス。
+/// </summary>
 	class CrossPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -218,6 +242,9 @@ namespace Engine {
 	};
 
 	// 円柱
+/// <summary>
+/// CylinderPrimitiveを管理・実装するクラス。
+/// </summary>
 	class CylinderPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -233,6 +260,9 @@ namespace Engine {
 	};
 
 	// 球
+/// <summary>
+/// SpherePrimitiveを管理・実装するクラス。
+/// </summary>
 	class SpherePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -248,6 +278,9 @@ namespace Engine {
 	};
 
 	// 矢印
+/// <summary>
+/// ArrowPrimitiveを管理・実装するクラス。
+/// </summary>
 	class ArrowPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -263,6 +296,9 @@ namespace Engine {
 	};
 
 	// 筒
+/// <summary>
+/// TubePrimitiveを管理・実装するクラス。
+/// </summary>
 	class TubePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -278,6 +314,9 @@ namespace Engine {
 	};
 
 	// 角錐
+/// <summary>
+/// PyramidPrimitiveを管理・実装するクラス。
+/// </summary>
 	class PyramidPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -293,6 +332,9 @@ namespace Engine {
 	};
 
 	// トーラス
+/// <summary>
+/// TorusPrimitiveを管理・実装するクラス。
+/// </summary>
 	class TorusPrimitive :public BasePrimitive {
 	public:
 		// データ取得

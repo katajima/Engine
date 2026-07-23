@@ -23,6 +23,9 @@ namespace Engine {
 	class DXGIDevice;
 	class SrvManager;
 	// テクスチャマネージャー
+/// <summary>
+/// TextureManagerを管理・実装するクラス。
+/// </summary>
 	class TextureManager {
 	public:
 		TextureManager() = default;

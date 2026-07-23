@@ -11,6 +11,9 @@ struct AttackEvent {
 };
 
 //  攻撃シーケンス
+/// <summary>
+/// AttackSequenceを管理・実装するクラス。
+/// </summary>
 class AttackSequence : public ImSequencer::SequenceInterface {
 public:
 	

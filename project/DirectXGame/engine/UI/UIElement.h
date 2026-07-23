@@ -9,6 +9,9 @@ namespace Engine {
 	class EntityManager;
 
 	// UI要素基底クラス
+/// <summary>
+/// UIElementを管理・実装するクラス。
+/// </summary>
 	class UIElement
 	{
 	public:
@@ -63,6 +66,9 @@ namespace Engine {
 	};
 
 	// 通常
+/// <summary>
+/// UINormalを管理・実装するクラス。
+/// </summary>
 	class UINormal : public UIElement {
 	public:
 		// 更新
@@ -77,6 +83,9 @@ namespace Engine {
 
 
 	// ボタン
+/// <summary>
+/// UIButtonを管理・実装するクラス。
+/// </summary>
 	class UIButton : public UIElement {
 	public:
 		// 更新
@@ -91,6 +100,9 @@ namespace Engine {
 	};
 
 	// チェックボックス
+/// <summary>
+/// UICheckBoxを管理・実装するクラス。
+/// </summary>
 	class UICheckBox : public UIElement {
 	public:
 		// 更新
@@ -111,6 +123,9 @@ namespace Engine {
 	};
 
 	// スライダー
+/// <summary>
+/// UISliderを管理・実装するクラス。
+/// </summary>
 	class UISlider : public UIElement {
 	public:
 		// 更新
@@ -144,6 +159,9 @@ namespace Engine {
 
 
 	// メーター
+/// <summary>
+/// UIMeterを管理・実装するクラス。
+/// </summary>
 	class UIMeter : public UIElement {
 	public:
 		// 更新
@@ -191,6 +209,9 @@ namespace Engine {
 	};
 
 	//  ペア
+/// <summary>
+/// UIPairを管理・実装するクラス。
+/// </summary>
 	class UIPair : public UIElement {
 	public:
 		// 更新
@@ -216,6 +237,9 @@ namespace Engine {
 	};
 
 	// カウンターUI
+/// <summary>
+/// UICountを管理・実装するクラス。
+/// </summary>
 	class UICount : public UIElement {
 	public:
 		// 更新

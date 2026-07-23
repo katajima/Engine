@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 namespace Engine {
 	class DirectXCommon;
@@ -13,6 +13,9 @@ namespace Character {
 }
 class InputSystem;
 
+/// <summary>
+/// PoseSystemを管理・実装するクラス。
+/// </summary>
 class PoseSystem {
 public:
 	PoseSystem() {}

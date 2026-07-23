@@ -7,6 +7,9 @@
 /// 接触記録
 /// </summary>
 namespace Engine {
+/// <summary>
+/// ContactRecordを管理・実装するクラス。
+/// </summary>
 	class ContactRecord {
 	public:
 		// 登録 or 上書き

@@ -3,6 +3,9 @@
 
 
 // ロックオン
+/// <summary>
+/// CameraLockOnを管理・実装するクラス。
+/// </summary>
 class CameraLockOn {
 public:
 	// 更新

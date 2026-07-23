@@ -15,6 +15,9 @@ namespace Engine {
 	/// </summary>
 	/// <typeparam name="Type"></typeparam>
 	template<class Type>
+/// <summary>
+/// IndexBufferを管理・実装するクラス。
+/// </summary>
 	class IndexBuffer {
 	public:
 		// 生成

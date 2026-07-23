@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
@@ -14,6 +14,9 @@ namespace Character {
 	///< summary>
 	/// 自キャラ
 	///</summary>
+/// <summary>
+/// NormalPlayerを管理・実装するクラス。
+/// </summary>
 	class NormalPlayer : public BasePlayer {
 	public:
 

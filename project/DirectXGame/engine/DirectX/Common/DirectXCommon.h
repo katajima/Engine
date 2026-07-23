@@ -54,6 +54,9 @@ namespace Engine {
 	/// DirectXの共通クラス
 	/// </summary>
 	/// 
+/// <summary>
+/// DirectXCommonを管理・実装するクラス。
+/// </summary>
 	class DirectXCommon
 	{
 	public: // メンバ関数

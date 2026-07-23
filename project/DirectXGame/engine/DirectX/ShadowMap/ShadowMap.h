@@ -20,6 +20,9 @@ namespace Engine {
 	class DirectXCommon;
 	class EntityManager;
 
+/// <summary>
+/// ShadowMapを管理・実装するクラス。
+/// </summary>
 	class ShadowMap {
 	public:
 		struct ShadowData {

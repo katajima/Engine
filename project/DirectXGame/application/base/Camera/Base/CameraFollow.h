@@ -1,7 +1,10 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // カメラ追従
+/// <summary>
+/// CameraFollowを管理・実装するクラス。
+/// </summary>
 class CameraFollow {
 public:
 

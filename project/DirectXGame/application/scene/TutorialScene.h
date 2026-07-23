@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -35,6 +35,9 @@
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
 #include "DirectXGame/application/base/Game/GameplaySession.h"
 
+/// <summary>
+/// TutorialSceneを管理・実装するクラス。
+/// </summary>
 class TutorialScene : public Engine::BaseScene {
 public:
 

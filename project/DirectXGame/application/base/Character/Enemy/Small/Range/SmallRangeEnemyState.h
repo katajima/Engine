@@ -6,6 +6,9 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
+/// <summary>
+/// SmallRangeEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class SmallRangeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ

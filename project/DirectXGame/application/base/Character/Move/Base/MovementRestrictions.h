@@ -2,6 +2,9 @@
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 
 // 移動制限クラス
+/// <summary>
+/// MovementRestrictionsを管理・実装するクラス。
+/// </summary>
 class MovementRestrictions {
 public:
 	// 初期化

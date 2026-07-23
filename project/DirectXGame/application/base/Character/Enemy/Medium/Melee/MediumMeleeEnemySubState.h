@@ -33,6 +33,9 @@ namespace Character {
     };
 
     // 攻撃本体
+/// <summary>
+/// MediumMeleeEnemyAttackSwingSubStateを管理・実装するクラス。
+/// </summary>
     class MediumMeleeEnemyAttackSwingSubState : public BaseAttackSubState {
     public:
         MediumMeleeEnemyAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
@@ -57,6 +60,9 @@ namespace Character {
 
 
     // 終了状態（後隙）
+/// <summary>
+/// MediumMeleeEnemyAttackEndSubStateを管理・実装するクラス。
+/// </summary>
     class MediumMeleeEnemyAttackEndSubState : public BaseAttackSubState {
     public:
         MediumMeleeEnemyAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)

@@ -11,6 +11,9 @@
 /// コライダコンポーネント
 /// </summary>
 namespace Engine {
+/// <summary>
+/// ColliderComponentを管理・実装するクラス。
+/// </summary>
     class ColliderComponent {
     public:
         // Colliderを保持

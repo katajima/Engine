@@ -39,6 +39,9 @@ namespace Engine {
 	class ShadowMap;
 
 	// オブジェクトインスタンシングクラス(大量描画用)
+/// <summary>
+/// Object3dInstanceManagerを管理・実装するクラス。
+/// </summary>
 	class Object3dInstanceManager
 	{
 	public:

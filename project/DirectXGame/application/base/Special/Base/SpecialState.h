@@ -9,6 +9,9 @@
 class BaseCharacter;
 
 // スペシャルステート
+/// <summary>
+/// BaseSpecialStateを管理・実装するクラス。
+/// </summary>
 class BaseSpecialState {
 public:
 	virtual ~BaseSpecialState() = default;
@@ -26,6 +29,9 @@ private:
 };
 
 // スペシャルステート
+/// <summary>
+/// SpecialNodeStateを管理・実装するクラス。
+/// </summary>
 class SpecialNodeState : public BaseSpecialState {
 public:
 	// 開始
@@ -44,6 +50,9 @@ private:
 
 
 // スペシャルステートマシーン
+/// <summary>
+/// SpecialStateMachineを管理・実装するクラス。
+/// </summary>
 class SpecialStateMachine {
 
 

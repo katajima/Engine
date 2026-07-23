@@ -1,9 +1,12 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 
 namespace Character {
 	// 移動
+/// <summary>
+/// PlayerStateIdleを管理・実装するクラス。
+/// </summary>
 	class PlayerStateIdle : public IdleState
 	{
 	public:
@@ -23,6 +26,9 @@ namespace Character {
 	};
 
 	// 移動
+/// <summary>
+/// PlayerStateMoveを管理・実装するクラス。
+/// </summary>
 	class PlayerStateMove : public MoveState
 	{
 	public:
@@ -42,6 +48,9 @@ namespace Character {
 	};
 
 	// ジャンプ
+/// <summary>
+/// PlayerStateJumpを管理・実装するクラス。
+/// </summary>
 	class PlayerStateJump : public JumpState {
 	public:
 		// コンストラクタ
@@ -63,6 +72,9 @@ namespace Character {
 	};
 
 	// 回避
+/// <summary>
+/// PlayerStateAvoidanceを管理・実装するクラス。
+/// </summary>
 	class PlayerStateAvoidance : public AvoidanceState {
 	public:
 		// コンストラクタ
@@ -88,6 +100,9 @@ namespace Character {
 	};
 
 	// 攻撃
+/// <summary>
+/// PlayerStateAttackを管理・実装するクラス。
+/// </summary>
 	class PlayerStateAttack :public AttackState
 	{
 	public:
@@ -105,6 +120,9 @@ namespace Character {
 	};
 
 	// 必殺
+/// <summary>
+/// PlayerStateSpecialを管理・実装するクラス。
+/// </summary>
 	class PlayerStateSpecial :public SpecialState
 	{
 	public:
@@ -122,6 +140,9 @@ namespace Character {
 	};
 
 	// 気絶
+/// <summary>
+/// PlayerStateFaintingを管理・実装するクラス。
+/// </summary>
 	class PlayerStateFainting : public FaintingState {
 	public:
 		PlayerStateFainting(BaseCharacter* player)
@@ -142,6 +163,9 @@ namespace Character {
 	};
 
 	// 死亡
+/// <summary>
+/// PlayerStateDieを管理・実装するクラス。
+/// </summary>
 	class PlayerStateDie : public DieState {
 	public:
 		PlayerStateDie(BaseCharacter* player)
@@ -160,6 +184,9 @@ namespace Character {
 	};
 
 	// 被弾
+/// <summary>
+/// PlayerStateDamageを管理・実装するクラス。
+/// </summary>
 	class PlayerStateDamage : public DamageState {
 	public:
 		PlayerStateDamage(BaseCharacter* player)

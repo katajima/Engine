@@ -3,6 +3,9 @@
 
 using PlayerCarStateFactory = std::function<std::unique_ptr<PlayerCarState>(PlayerCar*)>;
 
+/// <summary>
+/// PlayerCarStateMachineを管理・実装するクラス。
+/// </summary>
 class PlayerCarStateMachine {
 public:
 

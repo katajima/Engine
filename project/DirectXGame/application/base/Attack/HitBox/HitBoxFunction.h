@@ -7,6 +7,9 @@ namespace Character {
 }
 namespace HitBox {
 
+/// <summary>
+/// HitBoxFunctionを管理・実装するクラス。
+/// </summary>
 	class HitBoxFunction {
 	public:
 

@@ -23,6 +23,9 @@ namespace Engine {
 	class Input;
 	class CameraCommon;
 	// カメラ
+/// <summary>
+/// Cameraを管理・実装するクラス。
+/// </summary>
 	class Camera {
 	public: // メンバ関数
 		// カメラ共通の既定Farクリップ距離

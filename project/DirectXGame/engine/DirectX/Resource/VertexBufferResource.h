@@ -14,6 +14,9 @@ namespace Engine {
 	/// </summary>
 	/// <typeparam name="Type"></typeparam>
 	template<class Type>
+/// <summary>
+/// VertexBufferを管理・実装するクラス。
+/// </summary>
 	class VertexBuffer {
 	public:
 		// 生成

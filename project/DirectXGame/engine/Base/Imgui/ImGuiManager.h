@@ -33,6 +33,9 @@ namespace Engine {
 	class SrvManager;
 
 	// ImGuiの管理
+/// <summary>
+/// ImGuiManagerを管理・実装するクラス。
+/// </summary>
 	class ImGuiManager
 	{
 	public:

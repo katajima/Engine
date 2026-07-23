@@ -1,9 +1,12 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallMeleeEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
 namespace Character {
+/// <summary>
+/// SmallMeleeEnemyを管理・実装するクラス。
+/// </summary>
 	class SmallMeleeEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ

@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
+/// <summary>
+/// FpsUIを管理・実装するクラス。
+/// </summary>
 class FpsUI : public BaseUI {
 public:
 

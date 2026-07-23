@@ -3,6 +3,9 @@
 
 
 
+/// <summary>
+/// SmallMeleeWeaponを管理・実装するクラス。
+/// </summary>
 class SmallMeleeWeapon : public MeleeWeapon
 {
 public:

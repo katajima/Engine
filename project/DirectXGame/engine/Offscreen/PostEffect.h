@@ -113,6 +113,9 @@ namespace Engine {
 
 
 	// コピー
+/// <summary>
+/// PostEffectCopyを管理・実装するクラス。
+/// </summary>
 	class PostEffectCopy : public IPostEffect {
 	public:
 		// 描画
@@ -122,6 +125,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// グレースケール
+/// <summary>
+/// PostEffectGrayScaleを管理・実装するクラス。
+/// </summary>
 	class PostEffectGrayScale : public IPostEffect {
 	public:
 		// 描画
@@ -131,6 +137,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// セピア
+/// <summary>
+/// PostEffectSepiaを管理・実装するクラス。
+/// </summary>
 	class PostEffectSepia : public IPostEffect {
 	public:
 		// 描画
@@ -140,6 +149,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ビネット
+/// <summary>
+/// PostEffectVignetteを管理・実装するクラス。
+/// </summary>
 	class PostEffectVignette : public IPostEffect {
 	public:
 		// 描画
@@ -149,6 +161,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// スムージング
+/// <summary>
+/// PostEffectSmoothingを管理・実装するクラス。
+/// </summary>
 	class PostEffectSmoothing : public IPostEffect {
 	public:
 		// 描画
@@ -158,6 +173,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ガウシアン
+/// <summary>
+/// PostEffectGaussianを管理・実装するクラス。
+/// </summary>
 	class PostEffectGaussian : public IPostEffect {
 	public:
 		// 描画
@@ -167,6 +185,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// アウトライン
+/// <summary>
+/// PostEffectOutlineを管理・実装するクラス。
+/// </summary>
 	class PostEffectOutline : public IPostEffect {
 	public:
 		// 描画
@@ -176,6 +197,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ラジアルブラー
+/// <summary>
+/// PostEffectRadialBlurを管理・実装するクラス。
+/// </summary>
 	class PostEffectRadialBlur : public IPostEffect {
 	public:
 		// 描画
@@ -185,6 +209,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ディゾルブ
+/// <summary>
+/// PostEffectDissolveを管理・実装するクラス。
+/// </summary>
 	class PostEffectDissolve : public IPostEffect {
 	public:
 		// 描画
@@ -197,6 +224,9 @@ namespace Engine {
 	};
 
 	// ランダム
+/// <summary>
+/// PostEffectRandomを管理・実装するクラス。
+/// </summary>
 	class PostEffectRandom : public IPostEffect {
 	public:
 		// 描画
@@ -206,6 +236,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ブルーム
+/// <summary>
+/// PostEffectBloomを管理・実装するクラス。
+/// </summary>
 	class PostEffectBloom : public IPostEffect {
 	public:
 		// 描画
@@ -216,6 +249,9 @@ namespace Engine {
 	};
 
 	// 合成
+/// <summary>
+/// PostEffectCombineを管理・実装するクラス。
+/// </summary>
 	class PostEffectCombine : public IPostEffect {
 	public:
 		// 描画

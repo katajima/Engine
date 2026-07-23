@@ -9,6 +9,9 @@ namespace Engine {
 class BaseCharacter;
 class BasePlayer;
 
+/// <summary>
+/// ScrapItemを管理・実装するクラス。
+/// </summary>
 class ScrapItem : public IHitReceiver {
 public:
 

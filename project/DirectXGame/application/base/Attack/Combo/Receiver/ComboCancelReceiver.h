@@ -5,6 +5,9 @@
 namespace Combo {
 
 	// キャンセル受付
+/// <summary>
+/// CancelReceiverを管理・実装するクラス。
+/// </summary>
 	class CancelReceiver {
 	public:
 		// 開始

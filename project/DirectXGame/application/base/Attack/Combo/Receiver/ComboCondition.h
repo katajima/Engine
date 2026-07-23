@@ -7,6 +7,9 @@
 namespace Combo {
 
 	// コンボ受付条件クラス
+/// <summary>
+/// ComboConditionを管理・実装するクラス。
+/// </summary>
 	class ComboCondition {
 	public:
 		// 開始

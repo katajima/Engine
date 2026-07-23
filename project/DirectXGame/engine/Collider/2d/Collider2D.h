@@ -10,6 +10,9 @@
 
 namespace Engine {
 	// コライダー2D基底クラス
+/// <summary>
+/// Collider2Dを管理・実装するクラス。
+/// </summary>
 	class Collider2D
 	{
 	public:
@@ -40,6 +43,9 @@ namespace Engine {
 	};
 
 	// 球コライダークラス
+/// <summary>
+/// SphereCollider2Dを管理・実装するクラス。
+/// </summary>
 	class SphereCollider2D : public Collider2D
 	{
 	public:
@@ -58,6 +64,9 @@ namespace Engine {
 	};
 
 	// AABBコライダークラス
+/// <summary>
+/// AABBCollider2Dを管理・実装するクラス。
+/// </summary>
 	class AABBCollider2D : public Collider2D
 	{
 	public:

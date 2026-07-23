@@ -18,6 +18,9 @@
 
 namespace Engine {
 	// ゲーム全体
+/// <summary>
+/// Frameworkを管理・実装するクラス。
+/// </summary>
 	class Framework
 	{
 	public:

@@ -1,6 +1,9 @@
-﻿#pragma once
+#pragma once
 #include "BaseStage.h"
 
+/// <summary>
+/// CustomStageを管理・実装するクラス。
+/// </summary>
 class CustomStage : public BaseStage {
 public:
 	// 初期化

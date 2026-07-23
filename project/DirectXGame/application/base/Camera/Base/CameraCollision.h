@@ -1,7 +1,10 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // 
+/// <summary>
+/// CameraCollisionを管理・実装するクラス。
+/// </summary>
 class CameraCollision {
 public:
 

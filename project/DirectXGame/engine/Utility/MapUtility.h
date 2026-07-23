@@ -9,6 +9,9 @@
 
 // ハッシュマップ
 template <typename K, typename V>
+/// <summary>
+/// MapContainerを管理・実装するクラス。
+/// </summary>
 class MapContainer {
 public:
     std::map<K, V> data;
@@ -61,6 +64,9 @@ public:
 
 // ハッシュアンオーダードマップ
 template <typename K, typename V>
+/// <summary>
+/// UnorderedMapContainerを管理・実装するクラス。
+/// </summary>
 class UnorderedMapContainer {
 public:
     std::unordered_map<K, V> data;

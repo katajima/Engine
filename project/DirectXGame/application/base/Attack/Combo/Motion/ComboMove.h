@@ -24,6 +24,9 @@ struct MoveRequest;			// 移動リクエスト
 
 namespace Combo {
 
+/// <summary>
+/// ComboMoveを管理・実装するクラス。
+/// </summary>
 	class ComboMove {
 	public:
 		/// <summary>

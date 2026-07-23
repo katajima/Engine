@@ -4,6 +4,9 @@
 
 namespace Character {
 	// 移動
+/// <summary>
+/// MediumMeleeEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class MediumMeleeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ

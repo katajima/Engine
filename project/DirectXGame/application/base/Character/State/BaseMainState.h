@@ -35,6 +35,9 @@ namespace Character {
 
 
 	// 待機
+/// <summary>
+/// IdleStateを管理・実装するクラス。
+/// </summary>
 	class IdleState : public BaseCharacterState {
 	public:
 		IdleState(BaseCharacter* character)
@@ -49,6 +52,9 @@ namespace Character {
 	};
 
 	// 移動
+/// <summary>
+/// MoveStateを管理・実装するクラス。
+/// </summary>
 	class MoveState : public BaseCharacterState {
 	public:
 		MoveState(BaseCharacter* character)
@@ -64,6 +70,9 @@ namespace Character {
 	};
 
 	// ジャンプ
+/// <summary>
+/// JumpStateを管理・実装するクラス。
+/// </summary>
 	class JumpState : public BaseCharacterState {
 	public:
 		JumpState(BaseCharacter* character)
@@ -79,6 +88,9 @@ namespace Character {
 	};
 
 	// 回避
+/// <summary>
+/// AvoidanceStateを管理・実装するクラス。
+/// </summary>
 	class AvoidanceState : public BaseCharacterState {
 	public:
 		AvoidanceState(BaseCharacter* character)
@@ -94,6 +106,9 @@ namespace Character {
 	};
 
 	// 防御
+/// <summary>
+/// DefenseStateを管理・実装するクラス。
+/// </summary>
 	class DefenseState : public BaseCharacterState {
 	public:
 		DefenseState(BaseCharacter* character)
@@ -109,6 +124,9 @@ namespace Character {
 	};
 
 	// 攻撃
+/// <summary>
+/// AttackStateを管理・実装するクラス。
+/// </summary>
 	class AttackState : public BaseCharacterState {
 	public:
 		AttackState(BaseCharacter* character)
@@ -130,6 +148,9 @@ namespace Character {
 	};
 
 	// 死亡
+/// <summary>
+/// DieStateを管理・実装するクラス。
+/// </summary>
 	class DieState : public BaseCharacterState {
 	public:
 		DieState(BaseCharacter* character)
@@ -145,6 +166,9 @@ namespace Character {
 	};
 
 	// 被弾
+/// <summary>
+/// DamageStateを管理・実装するクラス。
+/// </summary>
 	class DamageState : public BaseCharacterState {
 	public:
 		DamageState(BaseCharacter* character)
@@ -160,6 +184,9 @@ namespace Character {
 	};
 
 	// ダッシュ
+/// <summary>
+/// DashStateを管理・実装するクラス。
+/// </summary>
 	class DashState : public BaseCharacterState {
 	public:
 		DashState(BaseCharacter* character)
@@ -175,6 +202,9 @@ namespace Character {
 	};
 
 	// 気絶
+/// <summary>
+/// FaintingStateを管理・実装するクラス。
+/// </summary>
 	class FaintingState : public BaseCharacterState {
 	public:
 		FaintingState(BaseCharacter* character)
@@ -195,6 +225,9 @@ namespace Character {
 	};
 
 	// スキル
+/// <summary>
+/// SkillStateを管理・実装するクラス。
+/// </summary>
 	class SkillState : public BaseCharacterState {
 	public:
 		enum class SkillPhase {
@@ -223,6 +256,9 @@ namespace Character {
 	};
 
 	// 必殺技
+/// <summary>
+/// SpecialStateを管理・実装するクラス。
+/// </summary>
 	class SpecialState : public BaseCharacterState {
 	public:
 		enum class Phase {

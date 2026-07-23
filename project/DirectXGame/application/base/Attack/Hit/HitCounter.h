@@ -7,6 +7,9 @@ namespace Character{
 	class ParameterComponent;
 }
 // 戦闘中の倍率・軽減率を扱う
+/// <summary>
+/// CombatStatを管理・実装するクラス。
+/// </summary>
 class CombatStat
 {
 public:
@@ -40,6 +43,9 @@ private:
 };
 
 // ダメージ計算
+/// <summary>
+/// DamageCalculatorを管理・実装するクラス。
+/// </summary>
 class DamageCalculator {
 public:
 	// キャラクターとキャラクターによるダメージ計算

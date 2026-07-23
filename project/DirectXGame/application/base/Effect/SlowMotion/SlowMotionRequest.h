@@ -3,6 +3,9 @@
 namespace Character {
 
 	// 対象スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
+/// <summary>
+/// SlowMotionRequestを管理・実装するクラス。
+/// </summary>
 	class SlowMotionRequest {
 	public:
 		// 回避成功用の対象スロー演出リクエストを生成する

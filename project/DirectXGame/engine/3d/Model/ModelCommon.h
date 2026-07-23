@@ -9,6 +9,9 @@ namespace Engine {
 	class SrvManager;
 
 	// 3Dモデル共通部分
+/// <summary>
+/// ModelCommonを管理・実装するクラス。
+/// </summary>
 	class ModelCommon
 	{
 	public:

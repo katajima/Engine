@@ -12,6 +12,9 @@
 /// </summary>  
 /// 
 namespace Engine {
+/// <summary>
+/// LineCommonを管理・実装するクラス。
+/// </summary>
     class LineCommon
     {
     public:

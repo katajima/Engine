@@ -3,6 +3,9 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 // 回転制御
+/// <summary>
+/// CameraRotationを管理・実装するクラス。
+/// </summary>
 class CameraRotation {
 public:
 

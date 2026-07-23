@@ -2,6 +2,9 @@
 #include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
 
+/// <summary>
+/// SelectCameraを管理・実装するクラス。
+/// </summary>
 class SelectCamera : public BaseFixedCamera {
 public:
 	///< summary>

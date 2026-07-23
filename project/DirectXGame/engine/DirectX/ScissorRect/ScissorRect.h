@@ -5,6 +5,9 @@ namespace Engine {
 	class Command;
 
 	// シザーレクトクラス
+/// <summary>
+/// ScissorRectを管理・実装するクラス。
+/// </summary>
 	class ScissorRect
 	{
 	public:

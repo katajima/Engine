@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "WeaponData.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/engine/struct/Vector3.h>
@@ -29,6 +29,9 @@ namespace HitBox {
 }
 
 // 武器のベースクラス
+/// <summary>
+/// BaseWeaponを管理・実装するクラス。
+/// </summary>
 class BaseWeapon : public IHitReceiver
 {
 public:
@@ -95,6 +98,9 @@ protected:
 };
 
 // 近距離の武器クラス
+/// <summary>
+/// MeleeWeaponを管理・実装するクラス。
+/// </summary>
 class MeleeWeapon : public BaseWeapon
 {
 public:
@@ -118,6 +124,9 @@ protected:
 };
 
 // 遠距離の武器クラス
+/// <summary>
+/// RangedWeaponを管理・実装するクラス。
+/// </summary>
 class RangedWeapon : public BaseWeapon
 {
 public:

@@ -8,6 +8,9 @@ namespace Engine {
 	class DirectXCommon;
 
 	// カメラ共通クラス
+/// <summary>
+/// CameraCommonを管理・実装するクラス。
+/// </summary>
 	class CameraCommon
 	{
 	public:

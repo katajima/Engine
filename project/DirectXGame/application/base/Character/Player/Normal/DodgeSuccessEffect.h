@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 namespace Engine {
 	class Camera;
@@ -8,6 +8,9 @@ namespace Engine {
 namespace Character {
 
 	// 回避成功時のポストエフェクトを管理するクラス
+/// <summary>
+/// DodgeSuccessEffectを管理・実装するクラス。
+/// </summary>
 	class DodgeSuccessEffect {
 	public:
 		// 破棄時にポストエフェクトが残らないよう停止する

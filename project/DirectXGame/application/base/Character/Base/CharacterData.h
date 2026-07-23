@@ -80,6 +80,9 @@ namespace Character {
 
 
 	// キャラクターパラメータコンポーネント
+/// <summary>
+/// ParameterComponentを管理・実装するクラス。
+/// </summary>
 	class ParameterComponent
 	{
 	public:

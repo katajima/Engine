@@ -10,6 +10,9 @@ namespace Engine {
 	/// プリミティブ用Entity。形状Tを内部で生成してObject3dへ渡す。
 	/// </summary>
 	template<typename T>
+/// <summary>
+/// PrimitiveEntityを管理・実装するクラス。
+/// </summary>
 	class PrimitiveEntity : public Object3d {
 	public:
 		void Initialize(EntityManager* entityManager, PrimitiveCommon* primitiveCommon, const std::string& texturePath,

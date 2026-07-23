@@ -15,6 +15,9 @@ namespace Character {
 
 
 
+/// <summary>
+/// EditorBlockを管理・実装するクラス。
+/// </summary>
 	class EditorBlock {
 	public:
 

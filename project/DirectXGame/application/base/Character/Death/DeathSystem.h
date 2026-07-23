@@ -9,6 +9,9 @@ class EffectSystem;
 class ObjectComponent;
 
 // 死亡システム
+/// <summary>
+/// DeathSystemを管理・実装するクラス。
+/// </summary>
 class DeathSystem {
 public:
 

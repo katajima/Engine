@@ -16,6 +16,9 @@ namespace Engine {
 		Vector3 pushDir{}; // 押し出し軸（world space）
 	};
 	// コライダー基底クラス
+/// <summary>
+/// Colliderを管理・実装するクラス。
+/// </summary>
 	class Collider
 	{
 	public:
@@ -87,6 +90,9 @@ namespace Engine {
 	};
 
 	// 球コライダークラス
+/// <summary>
+/// SphereColliderを管理・実装するクラス。
+/// </summary>
 	class SphereCollider : public Collider
 	{
 	public:
@@ -111,6 +117,9 @@ namespace Engine {
 	};
 
 	// 三角形コライダークラス
+/// <summary>
+/// TriangleColliderを管理・実装するクラス。
+/// </summary>
 	class TriangleCollider : public Collider {
 	public:
 		Vector3 triangle01{};
@@ -142,6 +151,9 @@ namespace Engine {
 	};
 
 	// AABBコライダークラス
+/// <summary>
+/// AABBColliderを管理・実装するクラス。
+/// </summary>
 	class AABBCollider : public Collider
 	{
 	public:
@@ -166,6 +178,9 @@ namespace Engine {
 	};
 
 	// カプセルコライダークラス
+/// <summary>
+/// CapsuleColliderを管理・実装するクラス。
+/// </summary>
 	class CapsuleCollider : public Collider
 	{
 	public:
@@ -191,6 +206,9 @@ namespace Engine {
 	};
 
 	// OBBコライダークラス
+/// <summary>
+/// OBBColliderを管理・実装するクラス。
+/// </summary>
 	class OBBCollider : public Collider
 	{
 	public:
@@ -232,6 +250,9 @@ namespace Engine {
 
 
 	// Rayコライダークラス
+/// <summary>
+/// RayColliderを管理・実装するクラス。
+/// </summary>
 	class RayCollider : public Collider
 	{
 	public:

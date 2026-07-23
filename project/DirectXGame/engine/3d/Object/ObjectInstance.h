@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<fstream>
 #include<sstream>
 #include<vector>
@@ -24,6 +24,9 @@ namespace Engine {
 	
 
 	// オブジェクトのインスタスクラス
+/// <summary>
+/// ObjectInstanceを管理・実装するクラス。
+/// </summary>
 	class ObjectInstance {
 	public:
 		ObjectInstance();

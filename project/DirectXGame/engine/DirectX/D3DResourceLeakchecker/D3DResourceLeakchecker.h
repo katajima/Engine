@@ -2,6 +2,9 @@
 
 // リソースのリークチェッククラス
 namespace Engine {
+/// <summary>
+/// D3DResourceLeakcheckerを管理・実装するクラス。
+/// </summary>
 	class D3DResourceLeakchecker
 	{
 	public:

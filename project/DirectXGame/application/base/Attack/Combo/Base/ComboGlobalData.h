@@ -134,9 +134,10 @@ namespace Combo {
 		bool subWeaponUseSpin = true;						// 投擲中に回転させるか
 		Vector3 subWeaponRotateOffset = { 1.5708f, 0.0f, 3.1416f };	// サブ武器の回転オフセット
 	};
-
-	// 攻撃ノード単位のゲームプレイ調整項目。
-	struct GlobalAction {
+/// <summary>
+/// 攻撃ノード単位で適用するゲームプレイ調整値を保持するデータ。
+/// </summary>
+struct GlobalAction {
 		// このコンボノードの命中でヒットカウントを増やすか
 		bool incrementHitCount = true;
 		// このコンボノード中のヒットカウント加算を最初の一回だけにするか
@@ -161,9 +162,10 @@ namespace Combo {
 		float hitPauseScale = 1.0f;
 		float cameraShakePower = 0.0f;
 	};
-
-	// コンボノード内で再生する音を一か所にまとめた保存用データ。
-	struct GlobalAudio {
+/// <summary>
+/// コンボノードで再生する攻撃、ヒット、終了音の設定を保持するデータ。
+/// </summary>
+struct GlobalAudio {
 		std::string attackSoundName = ""; // 攻撃動作中に指定時刻で再生する音ID。
 		std::string hitSoundName = "";    // 攻撃が相手へ命中した瞬間に再生する音ID。
 		std::string finishSoundName = ""; // コンボノードが終了した瞬間に再生する音ID。

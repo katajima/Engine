@@ -20,6 +20,9 @@ namespace Engine {
 
 	// 1回のポストエフェクト描画を表す単位。
 	// 入力RenderTextureを読み込み、自分のRenderTextureへ書き出す。
+/// <summary>
+/// PostEffectPassを管理・実装するクラス。
+/// </summary>
 	class PostEffectPass {
 	public:
 		void Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,
@@ -68,6 +71,9 @@ namespace Engine {
 
 	// カメラごとのポストエフェクト列。
 	// Passを順番に実行し、最後の出力を次の描画先へ渡す。
+/// <summary>
+/// PostEffectPipelineを管理・実装するクラス。
+/// </summary>
 	class PostEffectPipeline {
 	public:
 		void Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,

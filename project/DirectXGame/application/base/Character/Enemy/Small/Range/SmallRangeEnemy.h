@@ -4,6 +4,9 @@
 #include <DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h>
 
 namespace Character {
+/// <summary>
+/// SmallRangeEnemyを管理・実装するクラス。
+/// </summary>
 	class SmallRangeEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ

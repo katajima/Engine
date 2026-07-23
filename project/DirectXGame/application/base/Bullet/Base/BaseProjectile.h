@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "ProjectileData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -12,6 +12,9 @@ namespace Character {
 namespace Projectile {
 
 	// 発射物の基底クラス
+/// <summary>
+/// BaseProjectileを管理・実装するクラス。
+/// </summary>
 	class BaseProjectile : public IHitReceiver{
 	public:
 		// 派生発射物を基底ポインターから安全に破棄する

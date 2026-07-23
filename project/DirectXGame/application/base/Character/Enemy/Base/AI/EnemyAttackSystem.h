@@ -10,6 +10,9 @@ namespace Character {
 	class CharacterStateMachine;
 
 	// 敵の攻撃システム(攻撃順番など)
+/// <summary>
+/// EnemyAttackSystemを管理・実装するクラス。
+/// </summary>
 	class EnemyAttackSystem {
 	public:
 

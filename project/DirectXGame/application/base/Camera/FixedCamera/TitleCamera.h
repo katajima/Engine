@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
+/// <summary>
+/// TitleCameraを管理・実装するクラス。
+/// </summary>
 class TitleCamera : public BaseFixedCamera {
 public:
 	///< summary>
