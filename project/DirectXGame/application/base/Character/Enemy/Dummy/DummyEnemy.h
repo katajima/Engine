@@ -25,33 +25,59 @@ namespace Character {
 		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		void Update() override;
 
-		// エフェクト描画
+		/// <summary>
+		/// エフェクト描画
+		/// </summary>
 		void DrawEffect() override {};
-		// 描画2d
+		/// <summary>
+		/// 描画2d
+		/// </summary>
 		void Draw2D() override {};
-		// 移動
+		/// <summary>
+		/// 移動
+		/// </summary>
 		void Move() override {};
-		// ジャンプ
+		/// <summary>
+		/// ジャンプ
+		/// </summary>
 		void Jump() override {};
 	private:
-		// ステートマシーン初期化
+		/// <summary>
+		/// ステートマシーン初期化
+		/// </summary>
 		void InitStateMachine() override;
-		// デバッグ用の表示と操作をまとめて更新
+		/// <summary>
+		/// デバッグ用の表示と操作をまとめて更新
+		/// </summary>
 		void UpdateDebugImGui();
-		// Damage状態へ入った瞬間に有効なデバッグ挙動を実行
+		/// <summary>
+		/// Damage状態へ入った瞬間に有効なデバッグ挙動を実行
+		/// </summary>
 		void ApplyDebugBehaviorOnHit();
-		// 指定された地上/空中タイプに合わせて座標と物理速度を固定
+		/// <summary>
+		/// 指定された地上/空中タイプに合わせて座標と物理速度を固定
+		/// </summary>
 		void ApplyDummyTypeLock();
-		// ヒットリアクションやステートに合わせてダミーの色を更新
+		/// <summary>
+		/// ヒットリアクションやステートに合わせてダミーの色を更新
+		/// </summary>
 		void ApplyDebugStateColor();
-		// ダミーを指定位置へ戻し、物理速度もリセット
+		/// <summary>
+		/// ダミーを指定位置へ戻し、物理速度もリセット
+		/// </summary>
 		void ResetToDebugReturnPosition();
-		// 現在のメインステートをデバッグ表示用の文字列へ変換
+		/// <summary>
+		/// 現在のメインステートをデバッグ表示用の文字列へ変換
+		/// </summary>
 		const char* GetMainStateName(CharacterMainState state) const;
-		// 現在のヒットリアクション状態をデバッグ表示用の文字列へ変換
+		/// <summary>
+		/// 現在のヒットリアクション状態をデバッグ表示用の文字列へ変換
+		/// </summary>
 		const char* GetHitMotionStateName(HitMotionSystem::HitMotionState state) const;
 
 	private:

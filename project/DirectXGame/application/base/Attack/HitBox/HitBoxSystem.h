@@ -23,14 +23,20 @@ namespace HitBox {
 			int32_t id = 0;
 			float lifeTime = 0.0f;
 			float timer = 0.0f;
-			// 生存時間を過ぎたら削除
+			/// <summary>
+			/// 生存時間を過ぎたら削除
+			/// </summary>
 			bool IsDelete() const { return timer > lifeTime; }
 		};
 
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Engine::EntityManager* entityManager);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float dt);
 
 
@@ -41,20 +47,32 @@ namespace HitBox {
 		// ヒットボックス追加（無期限）
 		void AddHitBox(int32_t& id,Character::BaseCharacter* character,const CollData& datas,
 			Engine::WorldTransform* parent = nullptr);
-		// 全体データ取得(期限付きヒットボックス)
+		/// <summary>
+		/// 全体データ取得(期限付きヒットボックス)
+		/// </summary>
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
-		// 全体データ取得(無期限ヒットボックス)
+		/// <summary>
+		/// 全体データ取得(無期限ヒットボックス)
+		/// </summary>
 		std::vector<Data>& GetHitBoxData() { return hitBoxDatas_; }
-		// ヒットボックスインスタンス取得
+		/// <summary>
+		/// ヒットボックスインスタンス取得
+		/// </summary>
 		HitBoxInstance* GetHitBoxInstance(int32_t id);
-		// クリア
+		/// <summary>
+		/// クリア
+		/// </summary>
 		void Clear();
 
 	private:
-		// 親子付け生成処理
+		/// <summary>
+		/// 親子付け生成処理
+		/// </summary>
 		void CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent);
 
-		// コライダーの生成処理
+		/// <summary>
+		/// コライダーの生成処理
+		/// </summary>
 		void CreateHitBoxCollider(Data& d,const CollData& datas);
 		// コライダー生成
 		template <typename T>
@@ -74,14 +92,18 @@ namespace HitBox {
 	{
 		std::unique_ptr<T> coll = std::make_unique<T>();
 
-		// 有効化
+		/// <summary>
+		/// 有効化
+		/// </summary>
 		if (isEneble) {
 			coll->Enable();
 		}
 		else {
 			coll->Disable();
 		}
-		// デバック用表示
+		/// <summary>
+		/// デバック用表示
+		/// </summary>
 		if (isLine) {
 			coll->SetIsDebugLine(true);
 		}

@@ -14,14 +14,20 @@ namespace Character {
 	/// </summary>
 	class EnemyAttackRequestSystem {
 	public:
-		// 攻撃要求管理を初期化する
+		/// <summary>
+		/// 攻撃要求管理を初期化する
+		/// </summary>
 		void Initialize();
 
-		// 敵一覧の攻撃要求を更新し、攻撃リングを割り当てる
+		/// <summary>
+		/// 敵一覧の攻撃要求を更新し、攻撃リングを割り当てる
+		/// </summary>
 		void Update(const std::vector<BaseEnemy*>& enemies, float dt);
 
 	private:
-		// インターバルタイマーを進める。攻撃許可を出した後、次の許可まで少し間隔を空けるために使う
+		/// <summary>
+		/// インターバルタイマーを進める。攻撃許可を出した後、次の許可まで少し間隔を空けるために使う
+		/// </summary>
 		void UpdateIntervalTimer(float dt);
 
 	private:

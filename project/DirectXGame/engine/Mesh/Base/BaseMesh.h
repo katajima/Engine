@@ -26,54 +26,98 @@ namespace Engine {
 	/// </summary>
 	class BaseMesh {
 	public:
-		// 通常用
+		/// <summary>
+		/// 通常用
+		/// </summary>
 		virtual void Initialize(DirectXCommon* dxcommon) = 0;
 	public:
-		// 最小位置
+		/// <summary>
+		/// 最小位置
+		/// </summary>
 		Vector3 GetMin() const { return min_; }
 
-		// 最大位置
+		/// <summary>
+		/// 最大位置
+		/// </summary>
 		Vector3 GetMax() const { return max_; }
 
-		// 中心位置
+		/// <summary>
+		/// 中心位置
+		/// </summary>
 		Vector3 GetMiddle() const { return Vector3{ (max_.x + min_.x) / 2, (max_.y + min_.y) / 2, (max_.z + min_.z) / 2 }; }
 
-		// 最小位置設定
+		/// <summary>
+		/// 最小位置設定
+		/// </summary>
 		void SetMin(const Vector3& min) { min_ = min; }
 
-		// 最大位置設定
+		/// <summary>
+		/// 最大位置設定
+		/// </summary>
 		void SetMax(const Vector3& max) { max_ = max; }
-		// 三角面たち取得
+		/// <summary>
+		/// 三角面たち取得
+		/// </summary>
 		const std::vector<Triangle>& GetTriangles() { return triangles; }
-		// 三角面取得
+		/// <summary>
+		/// 三角面取得
+		/// </summary>
 		const Triangle& GetTriangle(int num) { return triangles[num]; }
-		// インデックス取得
+		/// <summary>
+		/// インデックス取得
+		/// </summary>
 		const std::vector<uint32_t>& GetIndices() { return indices; }
-		// 頂点時間取得
+		/// <summary>
+		/// 頂点時間取得
+		/// </summary>
 		const std::vector<float>& GetVerticesTimer() { return verticesTimer; }
-		// インデックス時間取得
+		/// <summary>
+		/// インデックス時間取得
+		/// </summary>
 		const std::vector<float>& GetIndicesTimer() { return indicesTimer; }
-		// 三角面追加
+		/// <summary>
+		/// 三角面追加
+		/// </summary>
 		void SetTriangle(const Triangle& triangle) { triangles.push_back(triangle); }
-		// インデックス追加
+		/// <summary>
+		/// インデックス追加
+		/// </summary>
 		void SetIndex(uint32_t index) { indices.push_back(index); }
-		// インデックスクリア
+		/// <summary>
+		/// インデックスクリア
+		/// </summary>
 		void ClearIndices() { indices.clear(); }
-		// 頂点時間設定
+		/// <summary>
+		/// 頂点時間設定
+		/// </summary>
 		void SetVerticesTimer(float time) { verticesTimer.push_back(time); };
-		// 時間を進める
+		/// <summary>
+		/// 時間を進める
+		/// </summary>
 		void AddVertexTimer(int num, float time) { verticesTimer[num] += time; }
-		// 頂点時間削除
+		/// <summary>
+		/// 頂点時間削除
+		/// </summary>
 		void EraseVertexTimer() { verticesTimer.erase(verticesTimer.begin()); };
-		// インデックス時間設定
+		/// <summary>
+		/// インデックス時間設定
+		/// </summary>
 		void SetIndicesTimer(float time) { indicesTimer.push_back(time); }
-		// メッシュインデックス取得
+		/// <summary>
+		/// メッシュインデックス取得
+		/// </summary>
 		uint32_t GetMeshIndex() const { return meshIndex; }
-		// メッシュインデックス設定
+		/// <summary>
+		/// メッシュインデックス設定
+		/// </summary>
 		void SetMeshIndex(uint32_t index) { meshIndex = index; }
-		// 最大時間設定
+		/// <summary>
+		/// 最大時間設定
+		/// </summary>
 		void SetMaxTime(float time) { maxTime = time; }
-		// 最大時間取得
+		/// <summary>
+		/// 最大時間取得
+		/// </summary>
 		float GetMaxTime() const { return maxTime; }
 	protected:
 		DirectXCommon* dxCommon = nullptr;

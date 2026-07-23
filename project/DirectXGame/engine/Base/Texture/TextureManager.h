@@ -33,45 +33,69 @@ namespace Engine {
 		TextureManager(TextureManager&) = delete;
 		TextureManager& operator=(TextureManager&) = delete;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command, DXGIDevice* dxgiDevice, SrvManager* srvManager);
 
 
-		//DirectTexを使ってTextureを読むためのLoadTextur関数
+		/// <summary>
+		/// DirectTexを使ってTextureを読むためのLoadTextur関数
+		/// </summary>
 		void LoadTexture(const std::string& filePath);
 
-		// 指定したディレクトリ内の全テクスチャを読み込む
+		/// <summary>
+		/// 指定したディレクトリ内の全テクスチャを読み込む
+		/// </summary>
 		void LoadAllTexturesInDirectory(const std::string& directoryPath);
 
-		// テクスチャ番号取得
+		/// <summary>
+		/// テクスチャ番号取得
+		/// </summary>
 		uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
-		// 指定パスのテクスチャがロード済みかを確認
+		/// <summary>
+		/// 指定パスのテクスチャがロード済みかを確認
+		/// </summary>
 		bool HasTexture(const std::string& filePath) const;
 
-		// ImGuiの選択UIで使うロード済みテクスチャ一覧を取得
+		/// <summary>
+		/// ImGuiの選択UIで使うロード済みテクスチャ一覧を取得
+		/// </summary>
 		std::vector<std::string> GetTextureFilePaths() const;
 
-		// テクスチャ番号からGPUハンドルを取得
+		/// <summary>
+		/// テクスチャ番号からGPUハンドルを取得
+		/// </summary>
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePach);
 
-		// メタデータを取得
+		/// <summary>
+		/// メタデータを取得
+		/// </summary>
 		const DirectX::TexMetadata& GetMataData(const std::string& filePach);
 
-		// SRVマネージャー取得
+		/// <summary>
+		/// SRVマネージャー取得
+		/// </summary>
 		SrvManager* GetSrvManager() { return srvManager; }
 
-		// ルートパラメーター設定
+		/// <summary>
+		/// ルートパラメーター設定
+		/// </summary>
 		static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange);
 
-		// テクスチャリソース生成
+		/// <summary>
+		/// テクスチャリソース生成
+		/// </summary>
 		Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 
 		//データを転送するUploadTextureData関数を作る
 		[[nodiscard]]
 		Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
-		// GPU転送完了後に不要になるアップロード用中間リソースを解放
+		/// <summary>
+		/// GPU転送完了後に不要になるアップロード用中間リソースを解放
+		/// </summary>
 		void ReleaseIntermediateResources();
 
 	private:

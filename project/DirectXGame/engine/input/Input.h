@@ -52,9 +52,13 @@ namespace Engine {
 		};
 
 	public: //メンバ関数
-		//初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(WinApp* winApp);
-		//更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
 
 		/// <summary>
@@ -129,38 +133,58 @@ namespace Engine {
 		/// <returns></returns>
 		bool IsGamePadReleased(GamePadButton button) const;
 
-		// パッドの左スティックの値を取得
+		/// <summary>
+		/// パッドの左スティックの値を取得
+		/// </summary>
 		Vector2 GetGamePadLeftStick() const;
-		// パッドの右スティックの値を取得
+		/// <summary>
+		/// パッドの右スティックの値を取得
+		/// </summary>
 		Vector2 GetGamePadRightStick() const;
 
-		// LTトリガーの値を取得
+		/// <summary>
+		/// LTトリガーの値を取得
+		/// </summary>
 		float GetGamePadLeftTrigger() const;
-		// RTトリガーの値を取得
+		/// <summary>
+		/// RTトリガーの値を取得
+		/// </summary>
 		float GetGamePadRightTrigger() const;
 
 
 
 
-		// “押している”判定（閾値つき）
+		/// <summary>
+		/// “押している”判定（閾値つき）
+		/// </summary>
 		bool IsLeftTriggerPressed(float threshold = 0.5f) const;
 		bool IsRightTriggerPressed(float threshold = 0.5f) const;
 
-		// “押した瞬間”
+		/// <summary>
+		/// “押した瞬間”
+		/// </summary>
 		bool IsLeftTriggerTriggered(float threshold = 0.5f) const;
 		bool IsRightTriggerTriggered(float threshold = 0.5f) const;
 
-		// “離した瞬間”
+		/// <summary>
+		/// “離した瞬間”
+		/// </summary>
 		bool IsLeftTriggerReleased(float threshold = 0.5f) const;
 		bool IsRightTriggerReleased(float threshold = 0.5f) const;
 
 		
-		// コントローラ操作
+		/// <summary>
+		/// コントローラ操作
+		/// </summary>
 		bool IsControllerConnected() {
 			XINPUT_STATE state; ZeroMemory(&state, sizeof(XINPUT_STATE));
-			// コントローラの状態を取得
+			/// <summary>
+			/// コントローラの状態を取得
+			/// </summary>
 			DWORD result = XInputGetState(0, &state);
-			// コントローラが接続されている場合は true を返す
+			/// <summary>
+			/// コントローラが接続されている場合は true を返す
+			/// </summary>
 			return (result == ERROR_SUCCESS);
 		}
 

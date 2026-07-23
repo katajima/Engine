@@ -30,96 +30,174 @@ namespace Engine {
 	public: // メンバ関数
 		// カメラ共通の既定Farクリップ距離
 		static constexpr float kDefaultFarClip = 10000.0f;
-		// ウィンドウ既定サイズから求める投影用アスペクト比
+		/// <summary>
+		/// ウィンドウ既定サイズから求める投影用アスペクト比
+		/// </summary>
 		static constexpr float kDefaultAspectRatio = static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight);
 
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		Camera();
-		// デストラクタ
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
 		~Camera();
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(CameraCommon* cameraCommon);
-		// 終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
 
-		// コマンドバインド設定
+		/// <summary>
+		/// コマンドバインド設定
+		/// </summary>
 		void GetCommandList(int index);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateMatrix();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateMatrix(const Vector3& targetPosition);
-		// トランスファー更新
+		/// <summary>
+		/// トランスファー更新
+		/// </summary>
 		void TransferMatrix();
 
-		// 向いている方向
+		/// <summary>
+		/// 向いている方向
+		/// </summary>
 		void LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector);
 
 
 	public: // 取得　設定
-		// Fov設定
+		/// <summary>
+		/// Fov設定
+		/// </summary>
 		void SetFovY(const float fovY) { fovY_ = fovY; }
-		// アスペクト比設定
+		/// <summary>
+		/// アスペクト比設定
+		/// </summary>
 		void SetAspectRatio(const float aspect) { aspect_ = aspect; }
-		// Nearクリップ設定
+		/// <summary>
+		/// Nearクリップ設定
+		/// </summary>
 		void SetNearClip(const float nearC) { nearClip_ = nearC; }
-		// Farクリップ設定
+		/// <summary>
+		/// Farクリップ設定
+		/// </summary>
 		void SetFarClip(const float farC) { farClip_ = farC; }
 		// getter
-		// ワールド行列取得
+		/// <summary>
+		/// ワールド行列取得
+		/// </summary>
 		const Matrix4x4& GetWorldMatrix() const { return worldMatrix_; }
-		// ビュー行列取得
+		/// <summary>
+		/// ビュー行列取得
+		/// </summary>
 		const Matrix4x4& GetViewMatrix() const { return viewMatrix_; }
-		// プロジェクション行列取得
+		/// <summary>
+		/// プロジェクション行列取得
+		/// </summary>
 		const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }
-		// ビュープロジェクション行列取得
+		/// <summary>
+		/// ビュープロジェクション行列取得
+		/// </summary>
 		const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix_; }
-		// 回転取得
+		/// <summary>
+		/// 回転取得
+		/// </summary>
 		const Vector3& GetRotate() const { return transform_.rotate; }
-		// 位置取得
+		/// <summary>
+		/// 位置取得
+		/// </summary>
 		const Vector3& GetTranslate() const { return transform_.translate; }
-		// 位置取得
+		/// <summary>
+		/// 位置取得
+		/// </summary>
 		const Vector3& GetScale() const { return transform_.scale; }
-		// トランスフォーム取得
+		/// <summary>
+		/// トランスフォーム取得
+		/// </summary>
 		const Transform& GetTransform() const { return transform_; }
-		// トランスフォーム設定
+		/// <summary>
+		/// トランスフォーム設定
+		/// </summary>
 		void SetTransform(const Transform& transform) { transform_ = transform; }
-		// 位置設定
+		/// <summary>
+		/// 位置設定
+		/// </summary>
 		void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
-		// 回転設定
+		/// <summary>
+		/// 回転設定
+		/// </summary>
 		void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
-		// スケール設定
+		/// <summary>
+		/// スケール設定
+		/// </summary>
 		void SetScale(const Vector3& scale) { transform_.scale = scale; }
-		// Nearクリップ取得
+		/// <summary>
+		/// Nearクリップ取得
+		/// </summary>
 		const float& GetNearZ() const { return nearClip_; }
-		// Farクリップ取得
+		/// <summary>
+		/// Farクリップ取得
+		/// </summary>
 		const float& GetFarZ() const { return farClip_; }
-		// FovY取得
+		/// <summary>
+		/// FovY取得
+		/// </summary>
 		const float& GetFovY() const { return fovY_; }
-		// aspect取得
+		/// <summary>
+		/// aspect取得
+		/// </summary>
 		const float& GetAspect() const { return aspect_; }
 
 
-		// 向いている方向取得
+		/// <summary>
+		/// 向いている方向取得
+		/// </summary>
 		Vector3 GetForward() const;
-		// プロジェクションしているか取得
+		/// <summary>
+		/// プロジェクションしているか取得
+		/// </summary>
 		bool GetIsProjection() const { return isProjection_; }
-		// プロジェクション設定
+		/// <summary>
+		/// プロジェクション設定
+		/// </summary>
 		void SetIsProjection(bool isProjection) { isProjection_ = isProjection; }
 	public: // ポストエフェクト
-		// レンダーテクスチャ追加
+		/// <summary>
+		/// レンダーテクスチャ追加
+		/// </summary>
 		void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
-		// ポストエフェクトをクリア
+		/// <summary>
+		/// ポストエフェクトをクリア
+		/// </summary>
 		void Clear();
-		// ポストエフェクトのパス取得
+		/// <summary>
+		/// ポストエフェクトのパス取得
+		/// </summary>
 		PostEffectPass* GetPostEffectPass(size_t index);
-		// ポストエフェクトパイプライン取得
+		/// <summary>
+		/// ポストエフェクトパイプライン取得
+		/// </summary>
 		PostEffectPipeline* GetPostEffectPipeline() { return postEffectPipeline_.get(); }
-		// ポストエフェクトマネージャー取得
+		/// <summary>
+		/// ポストエフェクトマネージャー取得
+		/// </summary>
 		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
 	private: // デバッグ
-		// ImGui更新
+		/// <summary>
+		/// ImGui更新
+		/// </summary>
 		void UpdateImGui();
 	private:
 		bool isProjection_ = true;

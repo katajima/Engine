@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/UI/UIBoard.h"
 
 
@@ -26,7 +26,9 @@ public:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	virtual void Update(float dt) = 0;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	virtual void Draw() = 0;
 
 	/// <summary>オフスクリーン画像の表示領域に合わせてUI座標変換を設定する。</summary>
@@ -45,35 +47,55 @@ protected:
 	/// <param name="pos">ピクセル単位の初期座標。</param>
 	/// <param name="size">ピクセル単位の表示サイズ。</param>
 	void InitSprite(Engine::Sprite* sprite,const std::string& texFile,Vector2 pos,Vector2 size);
-	// チェックボックス初期化
+	/// <summary>
+	/// チェックボックス初期化
+	/// </summary>
 	void InitUICheckBox(std::string name,Vector2 pos);
-	// スライダー初期化
+	/// <summary>
+	/// スライダー初期化
+	/// </summary>
 	void InitUISlider(std::string name, Vector2 pos);
-	// メーター初期化
+	/// <summary>
+	/// メーター初期化
+	/// </summary>
 	void InitUIMeter(std::string name, Vector2 pos, bool useSprite = false);
-	// ペア初期化
+	/// <summary>
+	/// ペア初期化
+	/// </summary>
 	void InitUIPair(std::string name, Vector2 pos);
-	// カウンター初期化
+	/// <summary>
+	/// カウンター初期化
+	/// </summary>
 	void InitUICount(std::string name, Vector2 pos,int instance = 1,bool useSprite = false);
 
 
 	/// <summary>登録済みの全UI要素を更新する。</summary>
 	/// <param name="deltaTime">秒単位のフレーム時間。</param>
 	void UpdateUIElement(float deltaTime);
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void DrawUIElement();
 	
 	/// <summary>名前からチェックボックスを検索する。</summary>
 	/// <param name="name">初期化時に登録した名前。</param>
 	/// <returns>BaseUIが所有する非所有ポインター。未登録の場合はnullptr。</returns>
 	Engine::UICheckBox* GetUICheckBox(const std::string& name);
-	// スライダー取得
+	/// <summary>
+	/// スライダー取得
+	/// </summary>
 	Engine::UISlider* GetUISlider(const std::string& name);
-	// メータ取得
+	/// <summary>
+	/// メータ取得
+	/// </summary>
 	Engine::UIMeter* GetUIMeter(const std::string& name);
-	// ペア取得
+	/// <summary>
+	/// ペア取得
+	/// </summary>
 	Engine::UIPair* GetUIPair(const std::string& name);
-	// カウンター取得
+	/// <summary>
+	/// カウンター取得
+	/// </summary>
 	Engine::UICount* GetUICount(const std::string& name);
 
 protected:

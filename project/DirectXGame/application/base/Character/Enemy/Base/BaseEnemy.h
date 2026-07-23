@@ -34,19 +34,33 @@ namespace Character {
 		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f,float shadowSize = 1.0f);
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		virtual void Update();
-		// 基盤の更新
+		/// <summary>
+		/// 基盤の更新
+		/// </summary>
 		void BaseUpdate();
-		// 描画エフェクト
+		/// <summary>
+		/// 描画エフェクト
+		/// </summary>
 		virtual void DrawEffect(){};
-		// 描画2d
+		/// <summary>
+		/// 描画2d
+		/// </summary>
 		virtual void Draw2D(){};
-		// 移動
+		/// <summary>
+		/// 移動
+		/// </summary>
 		virtual void Move();
-		// ジャンプ
+		/// <summary>
+		/// ジャンプ
+		/// </summary>
 		virtual void Jump(){};
-		// リロード
+		/// <summary>
+		/// リロード
+		/// </summary>
 		virtual void Reload() {};
 		/// <summary>現在の攻撃・移動対象を取得する。</summary>
 		/// <returns>非所有ポインター。対象が設定されていない場合はnullptr。</returns>
@@ -69,9 +83,13 @@ namespace Character {
 		// ウェーブ終了による自然退場を開始する
 		/// <param name="duration">自然退場に使用する秒数。</param>
 		void BeginWaveExit(float duration = 1.2f);
-		// 退場中の敵は攻撃・ロックオン・撃破得点の対象から外す
+		/// <summary>
+		/// 退場中の敵は攻撃・ロックオン・撃破得点の対象から外す
+		/// </summary>
 		bool IsWaveExiting() const;
-		// 退場完了後に削除されても撃破と判定しないための識別
+		/// <summary>
+		/// 退場完了後に削除されても撃破と判定しないための識別
+		/// </summary>
 		bool IsWaveExitRemoval() const;
 		/// <summary>死亡時のSPポイントを、必殺技キルでなければ生成する。</summary>
 		/// <param name="position">SPポイントを出すワールド座標。</param>
@@ -79,21 +97,37 @@ namespace Character {
 		void DropSpecialPointOnDeath(const Vector3& position, int point);
 
 	public:
-		// ID設定
+		/// <summary>
+		/// ID設定
+		/// </summary>
 		void SetID(uint32_t id) { id_ = id; }
-		// 敵タイプ取得
+		/// <summary>
+		/// 敵タイプ取得
+		/// </summary>
 		EnemyType GetType() const { return type_; };
-		// 敵タイプ設定
+		/// <summary>
+		/// 敵タイプ設定
+		/// </summary>
 		void SetType(EnemyType type) { type_ = type; };
-		// 群衆グループ設定
+		/// <summary>
+		/// 群衆グループ設定
+		/// </summary>
 		void SetCrowdGroupId(int groupId) { crowdGroupId_ = groupId; }
-		// 群衆グループ取得
+		/// <summary>
+		/// 群衆グループ取得
+		/// </summary>
 		int GetCrowdGroupId() const { return crowdGroupId_; }
-		// 群衆内番号設定
+		/// <summary>
+		/// 群衆内番号設定
+		/// </summary>
 		void SetCrowdMemberIndex(uint32_t memberIndex) { crowdMemberIndex_ = memberIndex; }
-		// 群衆内番号取得
+		/// <summary>
+		/// 群衆内番号取得
+		/// </summary>
 		uint32_t GetCrowdMemberIndex() const { return crowdMemberIndex_; }
-		// この敵が所属する群衆グループの行動設定
+		/// <summary>
+		/// この敵が所属する群衆グループの行動設定
+		/// </summary>
 		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
 		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
@@ -114,7 +148,9 @@ namespace Character {
 		// 武器初期化
 		template<typename T>
 		void InitializeWeapon(const Vector3& pos) {
-			// 武器
+			/// <summary>
+			/// 武器
+			/// </summary>
 			weapon_ = std::make_unique<T>();
 			InitializeBaseWeapon(pos);
 		};
@@ -123,7 +159,9 @@ namespace Character {
 	private:
 
 		void InitializeBaseEnemyAddItem();
-		// 更新保存項目
+		/// <summary>
+		/// 更新保存項目
+		/// </summary>
 		void UpdateBaseEnemyGetValue();
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
@@ -41,19 +41,33 @@ namespace Engine {
 
 	// PSO設定関数
 	namespace PSOFunction {
-		// 標準的なアルファブレンド設定を生成する
+		/// <summary>
+		/// 標準的なアルファブレンド設定を生成する
+		/// </summary>
 		D3D12_BLEND_DESC CreateAlphaBlendDesc();
-		// 深度テストを有効にした標準的な深度ステンシル設定を生成する
+		/// <summary>
+		/// 深度テストを有効にした標準的な深度ステンシル設定を生成する
+		/// </summary>
 		D3D12_DEPTH_STENCIL_DESC CreateDepthStencilDesc();
-		// ルートパラメータ設定
+		/// <summary>
+		/// ルートパラメータ設定
+		/// </summary>
 		void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister, D3D12_SHADER_VISIBILITY shaderType, D3D12_ROOT_PARAMETER_TYPE rootType);
-		// ルートパラメータ設定
+		/// <summary>
+		/// ルートパラメータ設定
+		/// </summary>
 		void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange, D3D12_SHADER_VISIBILITY shaderType);
-		// ディスクリプタレンジ設定
+		/// <summary>
+		/// ディスクリプタレンジ設定
+		/// </summary>
 		void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rangeType);
-		// 　サンプラー設定
+		/// <summary>
+		/// サンプラー設定
+		/// </summary>
 		void SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shaderRegister, D3D12_FILTER filter, D3D12_SHADER_VISIBILITY shaderType, TextureAddressMode mode = TextureAddressMode::kWRAP);
-		// バルブ設定
+		/// <summary>
+		/// バルブ設定
+		/// </summary>
 		void Blob(DXGIDevice* DXGIDevice, D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
 	};
 }

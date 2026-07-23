@@ -13,6 +13,8 @@ public:
 		EffectSystem* effectSystem, const Projectile::ProjectileSpawnInfo& spawnInfo, const BulletInfo& info);
 
 protected:
-	// 回避成功と旧敵弾のダメージ処理を維持する
+	/// <summary>
+	/// 回避成功と旧敵弾のダメージ処理を維持する
+	/// </summary>
 	void OnHitPlayer(Character::BasePlayer* player) override;
 };

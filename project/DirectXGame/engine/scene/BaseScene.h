@@ -22,66 +22,118 @@ namespace Engine {
 	public:
 		virtual ~BaseScene() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		virtual void Initialize() = 0;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Finalize() = 0;
 
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		virtual void Update() = 0;
 
 		// 
 		void AllUpdate();
 
-		// 3D描画
+		/// <summary>
+		/// 3D描画
+		/// </summary>
 		virtual void Draw3D() = 0;
-		// 2D描画
+		/// <summary>
+		/// 2D描画
+		/// </summary>
 		virtual void Draw2D() = 0;
-		// 2D前景描画
+		/// <summary>
+		/// 2D前景描画
+		/// </summary>
 		virtual void DrawForeground2D() {};
-		// 2D全体描画
+		/// <summary>
+		/// 2D全体描画
+		/// </summary>
 		void AllDraw2D();
-		// シーンマネージャー設定
+		/// <summary>
+		/// シーンマネージャー設定
+		/// </summary>
 		virtual void SetSceneManader(Engine::SceneManager* sceneManager) { this->sceneManager = sceneManager; }
-		// DirectX共通クラス設定
+		/// <summary>
+		/// DirectX共通クラス設定
+		/// </summary>
 		virtual void SetDirectXCommon(Engine::DirectXCommon* dxCommon) { this->dxCommon = dxCommon; }
-		// エンティティマネージャー設定
+		/// <summary>
+		/// エンティティマネージャー設定
+		/// </summary>
 		void SetEntityManager(Engine::EntityManager* entityManager) { this->entityManager = entityManager; }
-		// グローバルバリアブル設定
+		/// <summary>
+		/// グローバルバリアブル設定
+		/// </summary>
 		void SetGlobalVariables(Engine::GlobalVariables* globalVariables) { this->globalVariables = globalVariables; }
-		// Input設定
+		/// <summary>
+		/// Input設定
+		/// </summary>
 		void SetInput(Engine::Input* input) { this->input = input; }
-		// winApp設定
+		/// <summary>
+		/// winApp設定
+		/// </summary>
 		void SetWinApp(Engine::WinApp* winApp) { this->winApp = winApp; }
-		// オーディオマネージャー設定
+		/// <summary>
+		/// オーディオマネージャー設定
+		/// </summary>
 		void SetAudioManager(Engine::AudioManager* audioManager) { this->audioManager = audioManager; }
-		// DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		virtual Engine::DirectXCommon* GetDxCommon() { return dxCommon; }
-		// エンティティマネージャー取得
+		/// <summary>
+		/// エンティティマネージャー取得
+		/// </summary>
 		Engine::EntityManager* GetEntityManager() { return entityManager; }
-		// シーンマネージャー取得
+		/// <summary>
+		/// シーンマネージャー取得
+		/// </summary>
 		Engine::SceneManager* GetSceneManager() { return sceneManager; }
-		// グローバルバリアブル取得
+		/// <summary>
+		/// グローバルバリアブル取得
+		/// </summary>
 		GlobalVariables* GetGlobalVariables() { return globalVariables; }
-		// Input取得
+		/// <summary>
+		/// Input取得
+		/// </summary>
 		Engine::Input* GetInput() { return input; }
 		//
 		Engine::WinApp* GetWinApp() { return winApp; }
-		// オーディオマネージャー取得
+		/// <summary>
+		/// オーディオマネージャー取得
+		/// </summary>
 		Engine::AudioManager* GetAudioManager() { return audioManager; }
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Engine::Camera* camera) { this->camera = camera; };
-		// カメラ取得
+		/// <summary>
+		/// カメラ取得
+		/// </summary>
 		Engine::Camera* GetCamara() { return camera; }
-		// 終了したか
+		/// <summary>
+		/// 終了したか
+		/// </summary>
 		bool IsInitialized() const { return initialized_; }
-		// 初期化状態設定
+		/// <summary>
+		/// 初期化状態設定
+		/// </summary>
 		void SetInitialized(bool initialized) { initialized_ = initialized; }
-		// シーンデータ取得
+		/// <summary>
+		/// シーンデータ取得
+		/// </summary>
 		SceneData& GetSceneData();
 
-		// 時間取得
+		/// <summary>
+		/// 時間取得
+		/// </summary>
 		float GetTime() const;
 
 

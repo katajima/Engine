@@ -95,25 +95,37 @@ namespace Engine {
 	class DirectXCommon;
 	namespace ParticleFunction {
 
-		// ビルボード
+		/// <summary>
+		/// ビルボード
+		/// </summary>
 		Matrix4x4 Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera);
 
-		// パーティクル影響
+		/// <summary>
+		/// パーティクル影響
+		/// </summary>
 		void Effect(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, float deltaTime);
 
-		// パーティクル影響
+		/// <summary>
+		/// パーティクル影響
+		/// </summary>
 		void Effect(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, float deltaTime);
 
 
 
-		// パーティクルデータをGPUに送る
+		/// <summary>
+		/// パーティクルデータをGPUに送る
+		/// </summary>
 		void WorldDataForGPU(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera);
 
-		// パーティクルデータをGPUに送る
+		/// <summary>
+		/// パーティクルデータをGPUに送る
+		/// </summary>
 		void WorldDataForGPU(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, Camera* camera);
 
 
-		// マテリアルのエフェクト処理
+		/// <summary>
+		/// マテリアルのエフェクト処理
+		/// </summary>
 		void MaterialEffect(ParticleGroup& group);
 
 		// パーティクル3dグループ生成

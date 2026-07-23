@@ -23,7 +23,9 @@ public:
 	// 初期化
 	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables);
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
 private:

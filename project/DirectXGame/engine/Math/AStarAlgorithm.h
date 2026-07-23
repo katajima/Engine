@@ -30,7 +30,9 @@ public:
         }
     };
 
-    // マップチップ設定
+    /// <summary>
+    /// マップチップ設定
+    /// </summary>
     void SetMap(const MapChip& map) {
         m_map = &map;
     }
@@ -39,17 +41,25 @@ public:
         const Vector2& endWorld,
         std::vector<Vector2>& path);
 
-    // 進行方向を計算する関数
+    /// <summary>
+    /// 進行方向を計算する関数
+    /// </summary>
     Vector2 GetDirectionToNextNode();
-    // 描画
+    /// <summary>
+    /// 描画
+    /// </summary>
     void DrawPath(Engine::LineCommon* line,float yPos) const;
 
 private:
     const MapChip* m_map;
     std::vector<Vector2> m_path;  // 最短経路を格納する
-    //ヒューリスティック
+    /// <summary>
+    /// ヒューリスティック
+    /// </summary>
     float Heuristic(int x1, int z1, int x2, int z2);
-    // 近所
+    /// <summary>
+    /// 近所
+    /// </summary>
     std::vector<std::pair<int, int>> GetNeighbors(int x, int z);
 };
 

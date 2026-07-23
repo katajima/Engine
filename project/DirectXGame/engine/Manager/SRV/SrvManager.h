@@ -24,42 +24,70 @@ namespace Engine {
 	/// </summary>
 	class SrvManager {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DXGIDevice* DXGI, Command* Command);
-		// アロケート
+		/// <summary>
+		/// アロケート
+		/// </summary>
 		uint32_t Allocate();
 
-		// デスクリプタハンドル計算
+		/// <summary>
+		/// デスクリプタハンドル計算
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
-		// デスクリプタハンドル計算
+		/// <summary>
+		/// デスクリプタハンドル計算
+		/// </summary>
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
-		// デスクリプタハンドル計算最初
+		/// <summary>
+		/// デスクリプタハンドル計算最初
+		/// </summary>
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() { return descriptorHeap->GetGPUDescriptorHandleForHeapStart(); }
-		// ディスクプリタヒープ取得
+		/// <summary>
+		/// ディスクプリタヒープ取得
+		/// </summary>
 		ID3D12DescriptorHeap* GetDescriptorHeap() { return descriptorHeap.Get(); }
 
 		// SRV生成関数(テクスチャ用)
-		// SRV生成(テクスチャ用)
+		/// <summary>
+		/// SRV生成(テクスチャ用)
+		/// </summary>
 		void CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata metadata);
-		// SRV生成(Structured Buffer用)
+		/// <summary>
+		/// SRV生成(Structured Buffer用)
+		/// </summary>
 		void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 		//
 
 
 		// UAV生成関数
-		// UAV生成(Structured Buffer用)
+		/// <summary>
+		/// UAV生成(Structured Buffer用)
+		/// </summary>
 		void CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
-		// UAV生成(テクスチャ用)
+		/// <summary>
+		/// UAV生成(テクスチャ用)
+		/// </summary>
 		void CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format);
-		// 描画前処理
+		/// <summary>
+		/// 描画前処理
+		/// </summary>
 		void PreDraw();
 
-		// SRVセットコマンド
+		/// <summary>
+		/// SRVセットコマンド
+		/// </summary>
 		void SetGraphicsRootdescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
-		// 最大量に達したか
+		/// <summary>
+		/// 最大量に達したか
+		/// </summary>
 		bool IsMaxTexture();
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Finalize();
 
 	public:

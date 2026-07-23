@@ -24,39 +24,59 @@ public:
         return data.at(key); // const版はatで例外を投げるようにするのも可
     }
 
-    // 開始
+    /// <summary>
+    /// 開始
+    /// </summary>
     auto begin() { return data.begin(); }
-    // 最後
+    /// <summary>
+    /// 最後
+    /// </summary>
     auto end() { return data.end(); }
-    // 空
+    /// <summary>
+    /// 空
+    /// </summary>
     auto empty() { return data.empty(); }
-    // 開始
+    /// <summary>
+    /// 開始
+    /// </summary>
     auto begin() const { return data.begin(); }
-    // 最後
+    /// <summary>
+    /// 最後
+    /// </summary>
     auto end() const { return data.end(); }
-    // 空
+    /// <summary>
+    /// 空
+    /// </summary>
     auto empty() const { return data.empty(); }
 
-   // 追加
+   /// <summary>
+   /// 追加
+   /// </summary>
     void Insert(const K& key, V&& value) {
         data.insert(std::make_pair(key, std::move(value)));
         //data[key] = std::move(value);
     }
 
 
-    // ポインタ参照を返す版（unique_ptr対応）
+    /// <summary>
+    /// ポインタ参照を返す版（unique_ptr対応）
+    /// </summary>
     const V* GetPtr(const K& key) const {
         auto it = data.find(key);
         if (it != data.end()) return &(it->second);
         return nullptr;
     }
 
-	// 削除
+	/// <summary>
+	/// 削除
+	/// </summary>
     bool Remove(const K& key) {
         return data.erase(key) > 0;
     }
 
-	// キーの存在チェック
+	/// <summary>
+	/// キーの存在チェック
+	/// </summary>
     bool Contains(const K& key) const {
         return data.find(key) != data.end();
     }
@@ -79,32 +99,50 @@ public:
         return data.at(key);
     }
 
-    // 開始
+    /// <summary>
+    /// 開始
+    /// </summary>
     auto begin() { return data.begin(); }
-    // 最後
+    /// <summary>
+    /// 最後
+    /// </summary>
     auto end() { return data.end(); }
-    // 空
+    /// <summary>
+    /// 空
+    /// </summary>
     auto empty() { return data.empty(); }
-    // 開始
+    /// <summary>
+    /// 開始
+    /// </summary>
     auto begin() const { return data.begin(); }
-    // 最後
+    /// <summary>
+    /// 最後
+    /// </summary>
     auto end() const { return data.end(); }
-    // 空
+    /// <summary>
+    /// 空
+    /// </summary>
     auto empty() const { return data.empty(); }
 
-    // 追加
+    /// <summary>
+    /// 追加
+    /// </summary>
     void Add(const K& key, const V& value) {
         data[key] = value;
     }
 
-    // 取得（
+    /// <summary>
+    /// 取得（
+    /// </summary>
     std::optional<V> Get(const K& key) const {
         auto it = data.find(key);
         if (it != data.end()) return it->second;
         return std::nullopt;
     }
 
-    // キーの存在チェック
+    /// <summary>
+    /// キーの存在チェック
+    /// </summary>
     bool Contains(const K& key) const {
         return data.find(key) != data.end();
     }

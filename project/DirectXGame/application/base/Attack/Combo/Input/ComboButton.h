@@ -45,7 +45,9 @@ namespace Combo {
 		GAMEPAD_Max       // 最大ボタン数
 	};
 
-	// コンボ用ボタン種別を入力システム用ボタン種別へ変換する
+	/// <summary>
+	/// コンボ用ボタン種別を入力システム用ボタン種別へ変換する
+	/// </summary>
 	GamePadButton ConvertGamePadButton(ComboGamePadButton button);
 
 	/// <summary>
@@ -53,23 +55,35 @@ namespace Combo {
 	/// </summary>
 	class ComboButton {
 	public:
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		ComboButton(ComboGamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
 
-		// 押したら
+		/// <summary>
+		/// 押したら
+		/// </summary>
 		bool IsPressed(const InputSystem& inputSystem) const;
 
-		// 押した瞬間
+		/// <summary>
+		/// 押した瞬間
+		/// </summary>
 		bool IsTriggered(const InputSystem& inputSystem) const;
 
-		// 離した瞬間
+		/// <summary>
+		/// 離した瞬間
+		/// </summary>
 		bool IsReleased(const InputSystem& inputSystem) const;
 
 
-			// 押して反応する条件
+			/// <summary>
+			/// 押して反応する条件
+			/// </summary>
 			bool IsInput(const InputSystem& inputSystem) const;
 
-		// どのボタンに反応するかを設定する
+		/// <summary>
+		/// どのボタンに反応するかを設定する
+		/// </summary>
 		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
 
 	private:

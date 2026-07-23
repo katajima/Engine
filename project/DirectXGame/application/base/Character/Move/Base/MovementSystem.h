@@ -26,22 +26,36 @@ public:
 	void Update(const Character::CharacterContext& ctx,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
 public:
-	// 着地状態か？
+	/// <summary>
+	/// 着地状態か？
+	/// </summary>
 	bool IsOnGround() const{ return isLinding_; }
-	// 現在キャラクターが向いている移動方向を取得
+	/// <summary>
+	/// 現在キャラクターが向いている移動方向を取得
+	/// </summary>
 	Vector3 GetDirection() const { return direction_;}
-	// 重力処理を使うか設定
+	/// <summary>
+	/// 重力処理を使うか設定
+	/// </summary>
 	void SetUseGravity(bool isUse) { useGravity = isUse; }
-	// 重力速度をリセットする。外部から着地や演出で速度を消す時に使う
+	/// <summary>
+	/// 重力速度をリセットする。外部から着地や演出で速度を消す時に使う
+	/// </summary>
 	void ResetGravityVelocity();
 private:
-	// 地面判定、重力ON/OFF、剛体積分をまとめて処理する
+	/// <summary>
+	/// 地面判定、重力ON/OFF、剛体積分をまとめて処理する
+	/// </summary>
 	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
-	// ステートによって重力スケールを切り替える
+	/// <summary>
+	/// ステートによって重力スケールを切り替える
+	/// </summary>
 	void StateGravityProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
 	
-	// 現在の移動方向へ向くようにY軸回転を補間する
+	/// <summary>
+	/// 現在の移動方向へ向くようにY軸回転を補間する
+	/// </summary>
 	void RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world);
 private:
 	// 着地判定に使う地面の高さ

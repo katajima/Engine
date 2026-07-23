@@ -31,7 +31,9 @@ namespace Engine {
 	public:
 		ObjectInstance();
 		~ObjectInstance();
-		// ムーブ許可
+		/// <summary>
+		/// ムーブ許可
+		/// </summary>
 		ObjectInstance(ObjectInstance&&) noexcept;
 		ObjectInstance& operator=(ObjectInstance&&) noexcept;
 		
@@ -41,26 +43,42 @@ namespace Engine {
 			kNo,
 		};
 		
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(EntityManager* entity3DManager, bool useCollider = false, bool rigidUpdate = true, Transform transform = { {1,1,1},{},{} });
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
 
-		// Object3d内でコライダーコンポーネントを更新するか
+		/// <summary>
+		/// Object3d内でコライダーコンポーネントを更新するか
+		/// </summary>
 		void SetIsUpdateColliderComponent(bool is);
 
-		// コライダーコンポーネントを取得
+		/// <summary>
+		/// コライダーコンポーネントを取得
+		/// </summary>
 		ColliderComponent* GetColliderComponent();
-		// コライダーコンポーネントの接触情報を取得
+		/// <summary>
+		/// コライダーコンポーネントの接触情報を取得
+		/// </summary>
 		ContactRecord& GetContactRecord();
-		// リジットボディー取得
+		/// <summary>
+		/// リジットボディー取得
+		/// </summary>
 		RigidBodyComponent* GetRigidBodyComponent();
 
 
-		// 削除する
+		/// <summary>
+		/// 削除する
+		/// </summary>
 		void IsDelete() { isDelete_ = true; }
 
-		// 削除されているか取得
+		/// <summary>
+		/// 削除されているか取得
+		/// </summary>
 		bool GetIsDelete() const { return isDelete_; }
 	private:
 		// コライダーコンポーネント

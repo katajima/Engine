@@ -9,7 +9,9 @@ namespace Character {
 /// </summary>
 	class SmallMeleeEnemy : public BaseEnemy {
 	public:
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		SmallMeleeEnemy() {}
 
 		// 初期化
@@ -20,10 +22,14 @@ namespace Character {
 		void Reload() override { ReloadComboData(); };
 
 	private:
-		// ステートマシーン初期化
+		/// <summary>
+		/// ステートマシーン初期化
+		/// </summary>
 		void InitStateMachine() override;
 
-		// リロード
+		/// <summary>
+		/// リロード
+		/// </summary>
 		void ReloadComboData();
 
 	};

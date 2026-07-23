@@ -14,33 +14,59 @@ namespace Engine {
 	public:
 		virtual ~Entity() = default;
 
-		// 物理や入力など、描画用更新の前に進めたい処理。
+		/// <summary>
+		/// 物理や入力など、描画用更新の前に進めたい処理。
+		/// </summary>
 		virtual void RigidBodyUpdate() {}
-		// 毎フレーム更新。
+		/// <summary>
+		/// 毎フレーム更新。
+		/// </summary>
 		virtual void Update() {}
-		// 通常描画。
+		/// <summary>
+		/// 通常描画。
+		/// </summary>
 		virtual void Draw() {}
-		// シャドウマップ用の深度描画。不要なEntityは何もしない。
+		/// <summary>
+		/// シャドウマップ用の深度描画。不要なEntityは何もしない。
+		/// </summary>
 		virtual void DrawShadowMap(ShadowMap*) {}
-		// Entity固有のデバッグUI。必要な派生クラスだけ実装する。
+		/// <summary>
+		/// Entity固有のデバッグUI。必要な派生クラスだけ実装する。
+		/// </summary>
 		virtual void UpdateImgui() {}
 	public:
-		// 削除フラグ取得
+		/// <summary>
+		/// 削除フラグ取得
+		/// </summary>
 		virtual bool GetIsDelete() const { return isDelete_; }
-		// 削除フラグ設定
+		/// <summary>
+		/// 削除フラグ設定
+		/// </summary>
 		virtual void IsDelete() { isDelete_ = true; }
 
-		// 名前取得
+		/// <summary>
+		/// 名前取得
+		/// </summary>
 		virtual const std::string& GetName() const { return name_; }
-		// 名前設定
+		/// <summary>
+		/// 名前設定
+		/// </summary>
 		virtual void SetName(const std::string& name) { name_ = name; }
-		// タグ取得
+		/// <summary>
+		/// タグ取得
+		/// </summary>
 		virtual const std::string& GetNameTag() const { return nameTag_; }
-		// タグ設定
+		/// <summary>
+		/// タグ設定
+		/// </summary>
 		virtual void SetNameTag(const std::string& name) { nameTag_ = name; }
-		// ワールド変換のポインタ取得。必要なEntityはオーバーライドして返す。
+		/// <summary>
+		/// ワールド変換のポインタ取得。必要なEntityはオーバーライドして返す。
+		/// </summary>
 		virtual WorldTransform* GetWorldTransformPtr() { return nullptr; }
-		// ワールド変換のポインタ取得(定数)。必要なEntityはオーバーライドして返す。
+		/// <summary>
+		/// ワールド変換のポインタ取得(定数)。必要なEntityはオーバーライドして返す。
+		/// </summary>
 		virtual const WorldTransform* GetWorldTransformPtr() const { return nullptr; }
 
 	protected:

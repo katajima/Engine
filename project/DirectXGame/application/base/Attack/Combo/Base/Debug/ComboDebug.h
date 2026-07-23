@@ -18,10 +18,14 @@ namespace Combo {
 	/// </summary>
 	class ComboDebug {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float dt);
 
 	private:

@@ -107,11 +107,17 @@ namespace Combo {
 		/// <returns>コンボ開始または遷移要求を受理した場合はtrue。</returns>
 		bool RequestAttack(ActionInput input);
 		// 現在のコンボ攻撃が命中したことを通知
-		// 命中を通知し、コンボ設定に応じてヒットカウントを加算したか返す
+		/// <summary>
+		/// 命中を通知し、コンボ設定に応じてヒットカウントを加算したか返す
+		/// </summary>
 		bool NotifyAttackHit();
-		// クリア
+		/// <summary>
+		/// クリア
+		/// </summary>
 		void ClearNode();
-		// 名前設定
+		/// <summary>
+		/// 名前設定
+		/// </summary>
 		void Create(const std::string name);
 	public: // 保存や適応に関しての関数
 
@@ -130,7 +136,9 @@ namespace Combo {
 		/// <param name="data">保存するコンボデータ。</param>
 		void SetGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
-		// 全保存項目の設定
+		/// <summary>
+		/// 全保存項目の設定
+		/// </summary>
 		void SetGlobalComboDatas();
 	public:
 		/// <summary>エフェクトなどが追従できる親ワールド変換を名前付きで登録する。</summary>
@@ -162,7 +170,9 @@ namespace Combo {
 			return "";
 		}
 
-		//	トランスフォーム取得
+		/// <summary>
+		/// トランスフォーム取得
+		/// </summary>
 		std::map<std::string, Engine::WorldTransform*> GetParentTransforms() { return parentTransforms_; };
 
 
@@ -171,15 +181,25 @@ namespace Combo {
 		/// <returns>Systemが所有する状態機械への非所有ポインター。</returns>
 		StateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 
-		// コンボノードステートマップ取得
+		/// <summary>
+		/// コンボノードステートマップ取得
+		/// </summary>
 		std::map<std::string, std::shared_ptr<NodeState>>  GetComboNodeStates() { return comboNodes_; };
-		// コンボノード名前マップ取得
+		/// <summary>
+		/// コンボノード名前マップ取得
+		/// </summary>
 		std::map<std::string, std::string> GetComboNodeNames() { return comboNodenames_; }
-		// 名前取得
+		/// <summary>
+		/// 名前取得
+		/// </summary>
 		std::string GetName() const { return name; }
-		// 開始コンボ取得
+		/// <summary>
+		/// 開始コンボ取得
+		/// </summary>
 		StartComboRoutes GetStartComboRoutes() const;
-		// 開始コンボ設定
+		/// <summary>
+		/// 開始コンボ設定
+		/// </summary>
 		void SetStartComboRoutes(const StartComboRoutes& routes);
 		/// <summary>名前に対応するコンボノードを取得する。</summary>
 		/// <param name="name">検索するノード名。</param>
@@ -208,24 +228,34 @@ namespace Combo {
 		/// <param name="condition">地上・空中などの追加遷移条件。</param>
 		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to,
 			TransitionCondition condition = TransitionCondition::Default);
-		// コンボ名を参照している接続と開始ルートを更新
+		/// <summary>
+		/// コンボ名を参照している接続と開始ルートを更新
+		/// </summary>
 		void RenameComboReferences(const std::string& oldName, const std::string& newName);
 		/// <summary>指定ノードを先頭としてコンボを開始する。</summary>
 		/// <param name="name">開始するノード名。</param>
 		/// <returns>ノードが存在し、開始できた場合はtrue。</returns>
 		bool StartCombo(const std::string& name);
-		// コンボが終了したか
+		/// <summary>
+		/// コンボが終了したか
+		/// </summary>
 		bool IsComboFinished() const {
 			return comboStateMachine_->IsComboFinished();
 		}
 		void SetIsDebug(bool is) { isDebug = is; }
 	public:
-		// データ設定
+		/// <summary>
+		/// データ設定
+		/// </summary>
 		void SetData(ComboData& data, const GlobalData& gData);
-		// コンボエディタの音一覧とプレビューで使用する音声管理を取得する。
+		/// <summary>
+		/// コンボエディタの音一覧とプレビューで使用する音声管理を取得する。
+		/// </summary>
 		Engine::AudioManager* GetAudioManager() { return audioManager_; }
 
-		// グローバルデータ取得
+		/// <summary>
+		/// グローバルデータ取得
+		/// </summary>
 		GlobalData& GetComboGlobalData(const std::string& comboNodeName) {
 			auto it = comboGlobalDatas_.find(comboNodeName);
 			assert(it != comboGlobalDatas_.end());
@@ -237,14 +267,22 @@ namespace Combo {
 			Combo::EndConditionType type = Combo::EndConditionType::kOnTimer;
 		};
 
-		// コンボ作成
+		/// <summary>
+		/// コンボ作成
+		/// </summary>
 		void CreateCombo(const std::string& comboNodeName);
-		// 指定データを元にコンボ作成
+		/// <summary>
+		/// 指定データを元にコンボ作成
+		/// </summary>
 		void CreateCombo(const std::string& comboNodeName, const GlobalData& sourceData);
 	private:
-		// グローバルデータ作成
+		/// <summary>
+		/// グローバルデータ作成
+		/// </summary>
 		void CreateGlobalData(const std::string& comboNodeName);
-		// 登録と保存で共通のコンボ項目一覧を書き込む
+		/// <summary>
+		/// 登録と保存で共通のコンボ項目一覧を書き込む
+		/// </summary>
 		void WriteGlobalComboData(const std::string& groupName, GlobalData& data, bool overwrite);
 		void ConnectSavedCombos();
 		std::string ResolveStartCombo(ActionInput input, bool isLanding, bool isDodging, bool isDodgeSuccess) const;

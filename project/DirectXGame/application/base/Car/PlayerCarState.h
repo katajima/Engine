@@ -25,17 +25,27 @@ public:
 	virtual ~PlayerCarState() = default;
 	PlayerCarState(const CarMainState& state, PlayerCar* car) :mainState(state), playerCar(car) {};
 	
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	virtual void Enter() {}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	virtual void Update(float dt) {}
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	virtual void Exit() {}
 
-	// キャラクターメインステート取得
+	/// <summary>
+	/// キャラクターメインステート取得
+	/// </summary>
 	CarMainState GetCerMainState() const { return mainState; }
 protected:
-	// 持ち主取得
+	/// <summary>
+	/// 持ち主取得
+	/// </summary>
 	PlayerCar* GetPlayerCar() { return playerCar; }
 private:
 	// ステート
@@ -53,11 +63,17 @@ public:
 		PlayerCarState(state, car) {
 	};
 
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 
 private:
@@ -73,11 +89,17 @@ public:
 		PlayerCarState(state, car) {
 	};
 
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 
 
@@ -100,11 +122,17 @@ public:
 		PlayerCarState(state, car) {
 	};
 
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 
 
@@ -127,11 +155,17 @@ public:
 		PlayerCarState(state, car) {
 	};
 
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 
 
@@ -156,11 +190,17 @@ public:
 		PlayerCarState(state, car) {
 	};
 
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 
 

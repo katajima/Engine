@@ -30,18 +30,28 @@ namespace Engine {
 	class OceanManager
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// 描画設定
+		/// <summary>
+		/// 描画設定
+		/// </summary>
 		void DrawCommonSetting();
 
-		// DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
 
 	private:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
 
 

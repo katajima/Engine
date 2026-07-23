@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<string>
@@ -39,9 +39,13 @@ namespace Engine {
 		ModelManager(ModelManager&) = delete;
 		ModelManager& operator=(ModelManager&) = delete;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// 終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
 
 		/// <summary>
@@ -50,22 +54,34 @@ namespace Engine {
 		/// <param name="filePath"></param>
 		void LoadModel(const std::string& filePath, const std::string& dire = "");
 
-		// 非同期読み込み開始（マルチスレッド）
+		/// <summary>
+		/// 非同期読み込み開始（マルチスレッド）
+		/// </summary>
 		void LoadModelAsync(const std::string& filePath, const std::string& dire = "");
 
-		// 読み込み完了待ち（全て）
+		/// <summary>
+		/// 読み込み完了待ち（全て）
+		/// </summary>
 		void WaitAllLoadFinished();
 
-		// モデル検索
+		/// <summary>
+		/// モデル検索
+		/// </summary>
 		Model* FindModel(const std::string& filePath);
 
-		// 非同期読み込み中、または完了待ちのモデルがあるか
+		/// <summary>
+		/// 非同期読み込み中、または完了待ちのモデルがあるか
+		/// </summary>
 		bool IsLoading() const;
 
-		// モデル全取得
+		/// <summary>
+		/// モデル全取得
+		/// </summary>
 		const std::map<std::string, std::unique_ptr<Model>>& GetModel() const { return models; }
 
-		// モデル共通クラス取得
+		/// <summary>
+		/// モデル共通クラス取得
+		/// </summary>
 		ModelCommon* GetModelCommon() { return modelCommon_.get(); }
 
 	private:

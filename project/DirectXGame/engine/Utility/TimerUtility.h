@@ -9,39 +9,55 @@
 class DebugTimer
 {
 public:
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void StartTimer() {
 		start = std::chrono::steady_clock::now();
 	}
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void EndTimer() {
 		end = std::chrono::steady_clock::now();
 	}
 
-	// ミリ秒取得
+	/// <summary>
+	/// ミリ秒取得
+	/// </summary>
 	float GetTimeMs() const {
 		return std::chrono::duration<float, std::milli>(end - start).count();
 	}
 
-	// 秒取得
+	/// <summary>
+	/// 秒取得
+	/// </summary>
 	float GetTimeSec() const {
 		return GetTimeMs() * 0.001f;
 	}
-	// ログ出力
+	/// <summary>
+	/// ログ出力
+	/// </summary>
 	void LogTimeMs(const std::string& message) const {
 		Logger::Log(message + std::to_string(GetTimeMs()) + " ms" + "\n");
 	}
-	// ログ出力
+	/// <summary>
+	/// ログ出力
+	/// </summary>
 	void LogTimeMs(const std::string& message, const std::string& message2) const {
 		Logger::Log(message + std::to_string(GetTimeMs()) + " ms " + message2 + "\n");
 	}
 
-	// 秒ログ
+	/// <summary>
+	/// 秒ログ
+	/// </summary>
 	void LogTimeSec(const std::string& message) const {
 		Logger::Log(message + std::to_string(GetTimeSec()) + " s\n");
 	}
 
-	// 秒＋追加文字列ログ
+	/// <summary>
+	/// 秒＋追加文字列ログ
+	/// </summary>
 	void LogTimeSec(const std::string& message, const std::string& message2) const {
 		Logger::Log(message + std::to_string(GetTimeSec()) + " s " + message2 + "\n");
 	}

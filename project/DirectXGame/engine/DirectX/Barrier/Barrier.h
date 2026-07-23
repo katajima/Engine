@@ -17,21 +17,31 @@ namespace Engine {
 		Barrier() = default;
 		~Barrier() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command);
 
 	public:
 
-		// トランジション
+		/// <summary>
+		/// トランジション
+		/// </summary>
 		void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
 
-		// トランジション
+		/// <summary>
+		/// トランジション
+		/// </summary>
 		void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState);
 
-		// Uav依存
+		/// <summary>
+		/// Uav依存
+		/// </summary>
 		void UavDependence(ID3D12Resource* res);
 
-		// 初期状態を登録する
+		/// <summary>
+		/// 初期状態を登録する
+		/// </summary>
 		void RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state);
 	private:
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <memory>
 
@@ -21,7 +21,9 @@ public:
 	/// 所有しているゲームプレイ共通リソースを破棄する。
 	/// </summary>
 	~GameplaySession() {
-		// シーン側からFinalizeが呼ばれなかった場合でもGPUリソースを残さない。
+		/// <summary>
+		/// シーン側からFinalizeが呼ばれなかった場合でもGPUリソースを残さない。
+		/// </summary>
 		Finalize();
 	}
 
@@ -42,23 +44,41 @@ public:
 	/// </summary>
 	void Finalize();
 
-	// 物理入力とゲーム入力をまとめる入力管理を取得する。
+	/// <summary>
+	/// 物理入力とゲーム入力をまとめる入力管理を取得する。
+	/// </summary>
 	InputCoordinator* GetInputCoordinator() const { return inputCoordinator_.get(); }
-	// 追従カメラを取得する。
+	/// <summary>
+	/// 追従カメラを取得する。
+	/// </summary>
 	FollowCamera* GetFollowCamera() const { return followCamera_.get(); }
-	// カメラ管理を取得する。
+	/// <summary>
+	/// カメラ管理を取得する。
+	/// </summary>
 	CameraManager* GetCameraManager() const { return cameraManager_.get(); }
-	// エフェクト管理を取得する。
+	/// <summary>
+	/// エフェクト管理を取得する。
+	/// </summary>
 	EffectSystem* GetEffectSystem() const { return effectSystem_.get(); }
-	// 必殺技ポイント管理を取得する。
+	/// <summary>
+	/// 必殺技ポイント管理を取得する。
+	/// </summary>
 	SpecialPointManager* GetSpecialPointManager() const { return specialPointManager_.get(); }
-	// キャラクター管理を取得する。
+	/// <summary>
+	/// キャラクター管理を取得する。
+	/// </summary>
 	Character::CharacterManager* GetCharacterManager() const { return characterManager_.get(); }
-	// 弾管理を取得する。
+	/// <summary>
+	/// 弾管理を取得する。
+	/// </summary>
 	BulletManager* GetBulletManager() const { return bulletManager_.get(); }
-	// ヒットボックス管理を取得する。
+	/// <summary>
+	/// ヒットボックス管理を取得する。
+	/// </summary>
 	HitBox::System* GetHitBoxSystem() const { return hitBoxSystem_.get(); }
-	// 衝突対象登録システムを取得する。
+	/// <summary>
+	/// 衝突対象登録システムを取得する。
+	/// </summary>
 	CollisionRegistrationSystem* GetCollisionRegistrationSystem() const { return collisionRegistrationSystem_.get(); }
 
 private:

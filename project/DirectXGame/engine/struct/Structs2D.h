@@ -17,12 +17,16 @@ struct Box {
 
 	Box(Vector2 min = Vector2(), Vector2 max = Vector2()) : min_(min), max_(max) {}
 
-	// 判定
+	/// <summary>
+	/// 判定
+	/// </summary>
 	bool intersects(const Box& other) const {
 		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
 			min_.y <= other.max_.y && max_.y >= other.min_.y);
 	}
-	// 判定
+	/// <summary>
+	/// 判定
+	/// </summary>
 	bool intersects(const Vector2& other) const {
 		return (min_.x <= other.x && max_.x >= other.x &&
 			min_.y <= other.y && max_.y >= other.y);
@@ -42,9 +46,13 @@ struct BoxOBB {
 		: center_(center), halfSize_(halfSize), rotation_(rotation) {
 	}
 
-	// 角取得
+	/// <summary>
+	/// 角取得
+	/// </summary>
 	std::array<Vector2, 4> GetCorners() const {
-		// 回転行列
+		/// <summary>
+		/// 回転行列
+		/// </summary>
 		float cosA = std::cos(rotation_);
 		float sinA = std::sin(rotation_);
 
@@ -64,16 +72,22 @@ struct BoxOBB {
 		return worldCorners;
 	}
 
-	// 判定
+	/// <summary>
+	/// 判定
+	/// </summary>
 	bool intersects(const Vector2& point) const {
 		auto corners = GetCorners();
 
-		// 三角形2つに分割して点が含まれるか確認
+		/// <summary>
+		/// 三角形2つに分割して点が含まれるか確認
+		/// </summary>
 		return PointInQuad(point, corners);
 	}
 
 
-	// 判定
+	/// <summary>
+	/// 判定
+	/// </summary>
 	bool intersects(const BoxOBB& other) const {
 		auto aCorners = this->GetCorners();
 		auto bCorners = other.GetCorners();
@@ -87,7 +101,9 @@ struct BoxOBB {
 		};
 
 		for (const auto& axis : axes) {
-			// 各矩形を軸に投影してオーバーラップ確認
+			/// <summary>
+			/// 各矩形を軸に投影してオーバーラップ確認
+			/// </summary>
 			auto [minA, maxA] = ProjectOntoAxis(aCorners, axis);
 			auto [minB, maxB] = ProjectOntoAxis(bCorners, axis);
 
@@ -100,13 +116,17 @@ struct BoxOBB {
 	}
 
 
-// 点が内側にあるか
+/// <summary>
+/// 点が内側にあるか
+/// </summary>
 	bool PointInQuad(const Vector2& p, const std::array<Vector2, 4>& quad) const {
 		// 三角形 1: [0, 1, 2], 三角形 2: [2, 3, 0]
 		return PointInTriangle(p, quad[0], quad[1], quad[2]) ||
 			PointInTriangle(p, quad[2], quad[3], quad[0]);
 	}
-	// 点が三角形内にあるか
+	/// <summary>
+	/// 点が三角形内にあるか
+	/// </summary>
 	bool PointInTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c) const {
 		auto sign = [](const Vector2& p1, const Vector2& p2, const Vector2& p3) {
 			return (p1.x - p3.x) * (p2.y - p3.y) -
@@ -120,13 +140,17 @@ struct BoxOBB {
 		return (b1 == b2) && (b2 == b3);
 	}
 
-	// 辺の法線方向
+	/// <summary>
+	/// 辺の法線方向
+	/// </summary>
 	Vector2 GetEdgeNormal(const Vector2& p1, const Vector2& p2) const {
 		Vector2 edge = { p2.x - p1.x, p2.y - p1.y };
 		return { -edge.y, edge.x }; // 法線ベクトル（右手系）
 	}
 
-	// 軸への射影
+	/// <summary>
+	/// 軸への射影
+	/// </summary>
 	std::pair<float, float> ProjectOntoAxis(const std::array<Vector2, 4>& points, const Vector2& axis)const {
 		float min = Dot(points[0], axis);
 		float max = min;
@@ -168,25 +192,35 @@ struct Segment2D
 	Vector2 end;
 
 
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	Segment2D(const Vector2& o, const Vector2& e) : origin(o), end(e) {}
 
-	// 線分のベクトル
+	/// <summary>
+	/// 線分のベクトル
+	/// </summary>
 	Vector2 diff() const {
 		return end - origin;
 	}
 
-	// 線分の長さ
+	/// <summary>
+	/// 線分の長さ
+	/// </summary>
 	float length() const {
 		return diff().Length();
 	}
 
-	// 単位方向ベクトル
+	/// <summary>
+	/// 単位方向ベクトル
+	/// </summary>
 	Vector2 normalizedDirection() const {
 		return diff().Normalize();
 	}
 
-	// 指定された t (0.0 ~ 1.0) の位置の点を取得
+	/// <summary>
+	/// 指定された t (0.0 ~ 1.0) の位置の点を取得
+	/// </summary>
 	Vector2 pointAt(float t) const {
 		return origin + diff() * t;
 	}
@@ -204,7 +238,9 @@ struct Triangle2D
 	Vector2 vertices[3]; // !頂点
 	Box bounds;
 
-	// +=オペレーターのオーバーロード 
+	/// <summary>
+	/// +=オペレーターのオーバーロード
+	/// </summary>
 	Triangle2D& operator+=(const Vector2& offset) {
 		for (auto& vertex : vertices) {
 			vertex += offset;
@@ -212,7 +248,9 @@ struct Triangle2D
 		return *this;
 	}
 
-	// オフセット
+	/// <summary>
+	/// オフセット
+	/// </summary>
 	Triangle2D OffsetVector2(const Vector2& offset) const {
 		Triangle2D result = *this;  // コピーを作成
 		for (auto& vertex : result.vertices) {
@@ -222,7 +260,9 @@ struct Triangle2D
 	}
 
 
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	Triangle2D(Vector2 v0, Vector2 v1, Vector2 v2) : vertices{ v0, v1, v2 } {
 		bounds.min_ = Min(Min(v0, v1), v2);
 		bounds.max_ = Max(Max(v0, v1), v2);
@@ -273,10 +313,14 @@ struct Capsule2D
 	float radius;
 
 
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	Capsule2D(const Vector2& p0, const Vector2& p1, float r) : segment(p0, p1), radius(r) {}
 
-	// カプセルの AABB を取得
+	/// <summary>
+	/// カプセルの AABB を取得
+	/// </summary>
 	Box computeAABB() const {
 		Vector2 minPoint = Min(segment.origin, segment.end) - Vector2(radius, radius);
 		Vector2 maxPoint = Max(segment.origin, segment.end) + Vector2(radius, radius);

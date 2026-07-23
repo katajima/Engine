@@ -15,14 +15,22 @@ namespace Engine {
 	class ModelCommon
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager);
 
-		// コマンド取得
+		/// <summary>
+		/// コマンド取得
+		/// </summary>
 		Command* GetCommand() { return command; }
-		// デバイス取得
+		/// <summary>
+		/// デバイス取得
+		/// </summary>
 		DXGIDevice* GetDXGIDevice() { return dxgiDevice; };
-		// Srvマネージャー取得
+		/// <summary>
+		/// Srvマネージャー取得
+		/// </summary>
 		SrvManager* GetSrvManager() { return srvManager; };
 	private:
 		Command* command;

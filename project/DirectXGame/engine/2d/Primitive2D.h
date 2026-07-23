@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 //#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Structs2D.h"
 #include"DirectXGame/engine/struct/Material.h"
@@ -40,12 +40,16 @@ namespace ShapeParameter2D {
 		int segments_ = 5;
 
 
-		// == オペレーター
+		/// <summary>
+		/// == オペレーター
+		/// </summary>
 		bool operator==(const Star& other) const {
 			return innerRadius_ == other.innerRadius_ && outerRadius_ == other.outerRadius_ && segments_ == other.segments_;
 		}
 
-		// != オペレーター
+		/// <summary>
+		/// != オペレーター
+		/// </summary>
 		bool operator!=(const Star& other) const {
 			return !(*this == other);
 		}
@@ -56,12 +60,16 @@ namespace ShapeParameter2D {
 		float outerRadius_;
 		int segments_;
 
-		// == オペレーター
+		/// <summary>
+		/// == オペレーター
+		/// </summary>
 		bool operator==(const Ring& other) const {
 			return innerRadius_ == other.innerRadius_ && outerRadius_ == other.outerRadius_ && segments_ == other.segments_;
 		}
 
-		// != オペレーター
+		/// <summary>
+		/// != オペレーター
+		/// </summary>
 		bool operator!=(const Ring& other) const {
 			return !(*this == other);
 		}
@@ -103,41 +111,71 @@ namespace Engine {
 		/// <param name="type">スプライトの形状タイプ。</param>
 		/// <param name="color">スプライトの初期色（デフォルト値は {1, 1, 1, 1} ）。</param>
 		void Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color = { 1,1,1,1 });
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
 
-		// 色取得
+		/// <summary>
+		/// 色取得
+		/// </summary>
 		const Color& GetColor() const { return material->GetMaterialInstance().color; }
-		// 色設定
+		/// <summary>
+		/// 色設定
+		/// </summary>
 		void SetColor(const Color& color) { material->GetMaterialInstance().color = color; }
 
-		// アンカーポイント取得
+		/// <summary>
+		/// アンカーポイント取得
+		/// </summary>
 		const Vector2& GetAnchorPoint() const { return anchorPoint; };
-		// アンカーポイント設定
+		/// <summary>
+		/// アンカーポイント設定
+		/// </summary>
 		void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 
 
-		// パラメーター設定(内半径、外半径、セグメント数)(星やリング)
+		/// <summary>
+		/// パラメーター設定(内半径、外半径、セグメント数)(星やリング)
+		/// </summary>
 		void SetParametar(float innerRadius, float outerRadius, int segments);
-		// パラメーター設定(半径、セグメント数)(円)
+		/// <summary>
+		/// パラメーター設定(半径、セグメント数)(円)
+		/// </summary>
 		void SetParametar(float radius, int segments);
-		// パラメーター設定(サイズ)(四角)
+		/// <summary>
+		/// パラメーター設定(サイズ)(四角)
+		/// </summary>
 		void SetParametar(Vector2 size);
-		// パラメーター設定(各点)(三角)
+		/// <summary>
+		/// パラメーター設定(各点)(三角)
+		/// </summary>
 		void SetParametar(Vector2 p0, Vector2 p1, Vector2 p2);
 	private:
-		// 三角面生成
+		/// <summary>
+		/// 三角面生成
+		/// </summary>
 		void CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2);
-		// 円生成
+		/// <summary>
+		/// 円生成
+		/// </summary>
 		void CreateCircle(float radius, int segments);
-		// リング生成
+		/// <summary>
+		/// リング生成
+		/// </summary>
 		void CreateRing(float innerRadius, float outerRadius, int segments);
-		// 星生成
+		/// <summary>
+		/// 星生成
+		/// </summary>
 		void CreateStar(float innerRadius, float outerRadius, int segments);
-		// 四角生成
+		/// <summary>
+		/// 四角生成
+		/// </summary>
 		void CreateCube(Vector2 size);
 
 

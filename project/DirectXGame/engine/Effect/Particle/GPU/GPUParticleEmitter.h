@@ -18,39 +18,69 @@ namespace Engine {
 	public:
 		virtual ~BaseGpuParticleEmitter() {}
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(DirectXCommon* dxCommon, LineCommon* lineCommon, GpuParticleGroup* group, std::string name);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime);
-		// ImGui更新
+		/// <summary>
+		/// ImGui更新
+		/// </summary>
 		void UpdateImGui();
-		// グループ設定
+		/// <summary>
+		/// グループ設定
+		/// </summary>
 		void SetParticleGroup(GpuParticleGroup* group) { this->group = group; }
-		// エミッターデータ
+		/// <summary>
+		/// エミッターデータ
+		/// </summary>
 		EmitterCommon& GetCommonData() { return cbEmitterCommon_; }
-		// トレイルデータ
+		/// <summary>
+		/// トレイルデータ
+		/// </summary>
 		EmitterTrail& GetTrailData() { return cbEmitterTrail_; }
-		// エミッター形状
+		/// <summary>
+		/// エミッター形状
+		/// </summary>
 		EmitterType GetType() const { return type_; }
-		// トランスフォーム
+		/// <summary>
+		/// トランスフォーム
+		/// </summary>
 		WorldTransform& GetWorldTransform() { return worldTransform_; }
-		// 名前
+		/// <summary>
+		/// 名前
+		/// </summary>
 		std::string GetName() { return name_; }
-		// エミッター時間設定
+		/// <summary>
+		/// エミッター時間設定
+		/// </summary>
 		void SetDeltaTime(float delta) { deltaTime_ = delta; }
-		// エミッター時間取得
+		/// <summary>
+		/// エミッター時間取得
+		/// </summary>
 		float GetDeltaTime() const { return deltaTime_; }
 
 
 	protected:
 
-		// 固有の初期化
+		/// <summary>
+		/// 固有の初期化
+		/// </summary>
 		virtual void InitUnique() = 0;
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		virtual void UpdateUnique(float deltaTime) = 0;
-		// 固有のImGui更新
+		/// <summary>
+		/// 固有のImGui更新
+		/// </summary>
 		virtual void UpdateImGuiUnique() = 0;
-		// ライン描画
+		/// <summary>
+		/// ライン描画
+		/// </summary>
 		virtual void DrawLine() = 0;
 
 	protected:
@@ -83,13 +113,21 @@ namespace Engine {
 	class GpuParticleEmitterSphere : public BaseGpuParticleEmitter
 	{
 	public:
-		// 球エミッターのパラメータ
+		/// <summary>
+		/// 球エミッターのパラメータ
+		/// </summary>
 		void InitUnique() override;
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UpdateUnique(float deltaTime) override;
-		// 固有のImGui更新
+		/// <summary>
+		/// 固有のImGui更新
+		/// </summary>
 		void UpdateImGuiUnique() override;
-		// ライン描画
+		/// <summary>
+		/// ライン描画
+		/// </summary>
 		void DrawLine() override;
 
 	private:
@@ -102,13 +140,21 @@ namespace Engine {
 	class GpuParticleEmitterPoint : public BaseGpuParticleEmitter
 	{
 	public:
-		// 球エミッターのパラメータ
+		/// <summary>
+		/// 球エミッターのパラメータ
+		/// </summary>
 		void InitUnique() override;
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UpdateUnique(float deltaTime) override;
-		// 固有のImGui更新
+		/// <summary>
+		/// 固有のImGui更新
+		/// </summary>
 		void UpdateImGuiUnique() override;
-		// ライン描画
+		/// <summary>
+		/// ライン描画
+		/// </summary>
 		void DrawLine() override;
 
 	private:
@@ -121,13 +167,21 @@ namespace Engine {
 	class GpuParticleEmitterAABB : public BaseGpuParticleEmitter
 	{
 	public:
-		// 球エミッターのパラメータ
+		/// <summary>
+		/// 球エミッターのパラメータ
+		/// </summary>
 		void InitUnique() override;
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UpdateUnique(float deltaTime) override;
-		// 固有のImGui更新
+		/// <summary>
+		/// 固有のImGui更新
+		/// </summary>
 		void UpdateImGuiUnique() override;
-		// ライン描画
+		/// <summary>
+		/// ライン描画
+		/// </summary>
 		void DrawLine() override;
 	private:
 	};

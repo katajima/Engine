@@ -12,20 +12,32 @@ namespace Combo {
 	class ComboHitBox {
 	public:
 		~ComboHitBox() {}
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		void Enter(Character::BaseCharacter* owner , Type type);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx, float timer);
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit();
 	public:
-		// CollData
+		/// <summary>
+		/// CollData
+		/// </summary>
 		HitBox::CollData& GetCollData() { return collData_;}
-		// コライダーデータ追加
+		/// <summary>
+		/// コライダーデータ追加
+		/// </summary>
 		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
-		// 親子設定
+		/// <summary>
+		/// 親子設定
+		/// </summary>
 		void SetPerent(Engine::WorldTransform* perent) { this->perent = perent; };
 		//
 		void SetDirection(Vector3 direction) { this->direction = direction; };

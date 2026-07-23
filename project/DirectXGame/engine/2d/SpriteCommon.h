@@ -19,17 +19,25 @@ namespace Engine {
 	class SpriteCommon
 	{
 	public:// メンバ関数
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
 
-		// DxCommon取得
+		/// <summary>
+		/// DxCommon取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
-		// 描画のうつり方設定
+		/// <summary>
+		/// 描画のうつり方設定
+		/// </summary>
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type); }
 
 	private:// メンバ関数
 
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
 
 	private:// メンバ変数

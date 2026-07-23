@@ -46,11 +46,17 @@ public:
 	/// <param name="camera">武器描画に使用する非所有カメラ。</param>
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	virtual void Update() = 0;
-	// 描画エフェクト
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
 	virtual void DrawEffect() = 0;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	virtual void Draw2D() = 0;
 public:
 	/// <summary>この武器を使用するキャラクターを設定する。</summary>
@@ -116,7 +122,9 @@ public:
 	virtual void Draw2D() = 0;
 	
 public:
-	// ヒットストップ時間を取得
+	/// <summary>
+	/// ヒットストップ時間を取得
+	/// </summary>
 	float GetHitStopTime() const { return mellData_.hitStopTime; } 
 protected:
 	MeleeWeaponData mellData_; // 近距離武器データ

@@ -22,7 +22,9 @@ namespace Combo {
 		static void SequenceSettings(AttackSequence& sequence, int& currentFrame, int& firstFrame, int& maxFrame,
 			bool& expanded, int& selected);
 
-		// シーケンサー適応
+		/// <summary>
+		/// シーケンサー適応
+		/// </summary>
 		static void SequencerApplyToState(AttackSequence& sequence, ComboData& comboData, int& maxFrame);
 	private:
 		// シーケンサー追加

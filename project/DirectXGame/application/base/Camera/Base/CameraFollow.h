@@ -10,7 +10,9 @@ public:
 
 	void Initialize();
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(Transform& transform,float dt);
 
 	// ターゲット設定
@@ -18,19 +20,33 @@ public:
 	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
 	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
 
-	// カメラオフセット位置取得
+	/// <summary>
+	/// カメラオフセット位置取得
+	/// </summary>
 	Vector3 GetOffsetPos() const { return data_.offset; }  
-	// カメラデフォルトオフセット位置取得
+	/// <summary>
+	/// カメラデフォルトオフセット位置取得
+	/// </summary>
 	Vector3 GetDefultOffsetPos() const { return defultOffst; }
-	// カメラオフセット位置設定
+	/// <summary>
+	/// カメラオフセット位置設定
+	/// </summary>
 	void SetOffsetPos(const Vector3& offset) { data_.offset = offset; }
-	// 追従ターゲットに足すワールド座標オフセット設定
+	/// <summary>
+	/// 追従ターゲットに足すワールド座標オフセット設定
+	/// </summary>
 	void SetTargetOffset(const Vector3& offset) { data_.targetOffset = offset; }
-	// 追従ターゲットに足すワールド座標オフセット取得
+	/// <summary>
+	/// 追従ターゲットに足すワールド座標オフセット取得
+	/// </summary>
 	Vector3 GetTargetOffset() const { return data_.targetOffset; }
-	// カメラ位置取得
+	/// <summary>
+	/// カメラ位置取得
+	/// </summary>
 	Vector3 GetPos() const { return currentPos_; }
-	// データ取得
+	/// <summary>
+	/// データ取得
+	/// </summary>
 	CameraFollowData& GetData() { return data_; }
 	const CameraFollowData& GetData() const { return data_; }
 private:

@@ -24,22 +24,36 @@ namespace Engine {
 		DsvManager() = default;
 		~DsvManager() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DXGIDevice* dxgi, Command* command);
-		// アロケート
+		/// <summary>
+		/// アロケート
+		/// </summary>
 		uint32_t Allocate();
 
-		// デスクリプタハンドル計算
+		/// <summary>
+		/// デスクリプタハンドル計算
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
-		// デスクリプタハンドル計算
+		/// <summary>
+		/// デスクリプタハンドル計算
+		/// </summary>
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
-		// DSV生成
+		/// <summary>
+		/// DSV生成
+		/// </summary>
 		void CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource, DXGI_FORMAT format);
 
-		// ディスクリプタヒープを取得
+		/// <summary>
+		/// ディスクリプタヒープを取得
+		/// </summary>
 		ID3D12DescriptorHeap* GetDescriptorHeap() const;
-		// ディスクリプタのサイズを取得
+		/// <summary>
+		/// ディスクリプタのサイズを取得
+		/// </summary>
 		uint32_t GetDescriptorSize() const;
 	public:
 		// 最大RTV数

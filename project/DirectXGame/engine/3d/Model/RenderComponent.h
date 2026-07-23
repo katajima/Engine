@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -48,73 +48,127 @@ namespace Engine {
 		/// <param name="rasterizerType">モデルのうつり方を設定</param>
 		void Init(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// シャドウマップ用の深度描画
+		/// <summary>
+		/// シャドウマップ用の深度描画
+		/// </summary>
 		void DrawShadowMap(ShadowMap* shadowMap);
 
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
-		// トランスフォーム設定
+		/// <summary>
+		/// トランスフォーム設定
+		/// </summary>
 		void SetTransformation(Transformation* transformation) { this->transformation = transformation; }
 
-		// モデル設定
+		/// <summary>
+		/// モデル設定
+		/// </summary>
 		void SetModel(Model* model);
-		// スカイボックス設定
+		/// <summary>
+		/// スカイボックス設定
+		/// </summary>
 		void SetSkyBox(SkyBox* skyBox);
-		// 波セット設定
+		/// <summary>
+		/// 波セット設定
+		/// </summary>
 		void SetOcean(Ocean* ocean);
-		// プリミティブ設定
+		/// <summary>
+		/// プリミティブ設定
+		/// </summary>
 		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive);
 
 		
 
 	public:
-		// モデル取得
+		/// <summary>
+		/// モデル取得
+		/// </summary>
 		Model* GetModel() const;
-		// 波取得
+		/// <summary>
+		/// 波取得
+		/// </summary>
 		Ocean* GetOcean();
-		// スカイボックス取得
+		/// <summary>
+		/// スカイボックス取得
+		/// </summary>
 		SkyBox* GetSkyBox();
-		// プリミティブ形状取得
+		/// <summary>
+		/// プリミティブ形状取得
+		/// </summary>
 		BasePrimitive* GetPrimitive();
 	public:
-		// 何かしらの見た目があるか
+		/// <summary>
+		/// 何かしらの見た目があるか
+		/// </summary>
 		bool GetIsSkin() const { return isSkin_; }
-		// 描画するかの設定
+		/// <summary>
+		/// 描画するかの設定
+		/// </summary>
 		void SetIsDraw(bool is) { isDraw = is; }
-		// オブジェクトタイプ取得
+		/// <summary>
+		/// オブジェクトタイプ取得
+		/// </summary>
 		ObjectModelType GetObjectType() const { return objectType_; }
-		// オブジェクトの描画順取得
+		/// <summary>
+		/// オブジェクトの描画順取得
+		/// </summary>
 		ObjectDrawType GetObjectDrawType() const { return objectDrawType_; }
-		// 描画順の設定
+		/// <summary>
+		/// 描画順の設定
+		/// </summary>
 		void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
-		// 映り方タイプ設定
+		/// <summary>
+		/// 映り方タイプ設定
+		/// </summary>
 		void SetObjectRasterizerType(PSOType type) { rasterizerType_ = type; }
-		// オブジェクト型名前取得
+		/// <summary>
+		/// オブジェクト型名前取得
+		/// </summary>
 		std::string GetObjectTypeName() const { return objectTypeName; }
-		// マテリアルインスタンス
+		/// <summary>
+		/// マテリアルインスタンス
+		/// </summary>
 		std::vector<MaterialInstance>& GetMaterialInstance() { return materialInstances_; }
 
 	public:
-		// 透明度取得
+		/// <summary>
+		/// 透明度取得
+		/// </summary>
 		float GetAlpha();
 
 
 	private:
-		// 通常オブジェクトのうつり方設定
+		/// <summary>
+		/// 通常オブジェクトのうつり方設定
+		/// </summary>
 		void ObjectNormalTypeDiscrimination(PSOType type);
-		// スキニングオブジェクトのうつり方設定
+		/// <summary>
+		/// スキニングオブジェクトのうつり方設定
+		/// </summary>
 		void ObjectSkinningTypeDiscrimination(PSOType type);
 
-		// 描画セッティング(デフォルト)
+		/// <summary>
+		/// 描画セッティング(デフォルト)
+		/// </summary>
 		void DrawSetting();
-		// 描画セッティング(スキニング)
+		/// <summary>
+		/// 描画セッティング(スキニング)
+		/// </summary>
 		void DrawSettingSkin();
-		// 描画セッティング(海)
+		/// <summary>
+		/// 描画セッティング(海)
+		/// </summary>
 		void DrawSettingOcean();
 
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "DirectXGame/application/base/Bullet/Base/BulletSpawn.h"
 
@@ -24,9 +24,13 @@ namespace Projectile {
 		// 試射に必要な生成器とターゲット情報を設定する
 		void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 			EffectSystem* effectSystem, BulletManager* bulletManager, Character::BaseCharacter* target);
-		// ImGui上で発射位置や定義を編集し、任意タイミングで試射する
+		/// <summary>
+		/// ImGui上で発射位置や定義を編集し、任意タイミングで試射する
+		/// </summary>
 		void Update();
-		// ターゲット設定
+		/// <summary>
+		/// ターゲット設定
+		/// </summary>
 		void SetTarget(Character::BaseCharacter* target) { spawnInfo_.target = target; };
 
 	private:

@@ -5,6 +5,8 @@
 #include<format>
 namespace Logger
 {
-	//出力ウィンドウを出す
+	/// <summary>
+	/// 出力ウィンドウを出す
+	/// </summary>
 	void Log(const std::string& message);
 }

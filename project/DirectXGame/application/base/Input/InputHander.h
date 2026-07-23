@@ -92,7 +92,9 @@ namespace Character {
 	class InputHander
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Engine::Input* input) { input_ = input; }
 
 
@@ -102,7 +104,9 @@ namespace Character {
 			bindings_.push_back({ std::move(condition), std::move(cmd) });
 		}
 
-		// ハンドルインプット取得
+		/// <summary>
+		/// ハンドルインプット取得
+		/// </summary>
 		ICommand* HandleInput();
 	private:
 		Engine::Input* input_ = nullptr;

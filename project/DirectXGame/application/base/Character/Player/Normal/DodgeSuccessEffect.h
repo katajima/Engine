@@ -13,26 +13,40 @@ namespace Character {
 /// </summary>
 	class DodgeSuccessEffect {
 	public:
-		// 破棄時にポストエフェクトが残らないよう停止する
+		/// <summary>
+		/// 破棄時にポストエフェクトが残らないよう停止する
+		/// </summary>
 		~DodgeSuccessEffect();
 
-		// 使用するカメラへ回避成功用ポストエフェクトを登録する
+		/// <summary>
+		/// 使用するカメラへ回避成功用ポストエフェクトを登録する
+		/// </summary>
 		void Initialize(Engine::Camera* camera);
 
-		// 回避成功ポストエフェクトを開始する
+		/// <summary>
+		/// 回避成功ポストエフェクトを開始する
+		/// </summary>
 		void Start();
 
-		// ポストエフェクト時間を進め、時間切れで解除する
+		/// <summary>
+		/// ポストエフェクト時間を進め、時間切れで解除する
+		/// </summary>
 		void Update(float deltaTime);
 
-		// ポストエフェクトを即座に停止する
+		/// <summary>
+		/// ポストエフェクトを即座に停止する
+		/// </summary>
 		void Stop();
 
 	private:
-		// 回避成功用ラジアルブラーのパラメータを調整する
+		/// <summary>
+		/// 回避成功用ラジアルブラーのパラメータを調整する
+		/// </summary>
 		void ConfigureRadialBlur();
 
-		// 登録済みポストエフェクトの使用状態をまとめて切り替える
+		/// <summary>
+		/// 登録済みポストエフェクトの使用状態をまとめて切り替える
+		/// </summary>
 		void SetPostEffectUse(bool use);
 
 	private:

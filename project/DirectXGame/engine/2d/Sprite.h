@@ -36,9 +36,13 @@ namespace Engine {
 		/// <param name="textureFilePath">テクスチャファイルのパス。</param>
 		/// <param name="isTexLoad">テクスチャをロードするかどうかを指定するフラグ (デフォルトは true)。</param>
 		void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad = true);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// アニメーション(デルタ時間)
+		/// <summary>
+		/// アニメーション(デルタ時間)
+		/// </summary>
 		void UpdateAmimetion(float time);
 
 		/// <summary>
@@ -50,89 +54,159 @@ namespace Engine {
 
 		// getter
 
-		//位置取得
+		/// <summary>
+		/// 位置取得
+		/// </summary>
 		const Vector2& GetPosition() const { return worldTransform2d.translate_; }
-		// 位置設定
+		/// <summary>
+		/// 位置設定
+		/// </summary>
 		void SetPosition(const Vector2& position) { worldTransform2d.translate_ = position; }
 
-		// 回転取得
+		/// <summary>
+		/// 回転取得
+		/// </summary>
 		float GetRotation() const { return  worldTransform2d.rotate_; }
-		// 回転設定
+		/// <summary>
+		/// 回転設定
+		/// </summary>
 		void SetRotation(float rotation) { worldTransform2d.rotate_ = rotation; }
 
-		// スケール取得
+		/// <summary>
+		/// スケール取得
+		/// </summary>
 		const Vector2& GetScale() const { return worldTransform2d.scale_; }
-		// スケール設定
+		/// <summary>
+		/// スケール設定
+		/// </summary>
 		void SetScale(const Vector2& size) { worldTransform2d.scale_ = size; }
 
-		// サイズ取得
+		/// <summary>
+		/// サイズ取得
+		/// </summary>
 		const Vector2& GetSize() const { return size; }
 
-		// サイズ設定
+		/// <summary>
+		/// サイズ設定
+		/// </summary>
 		void SetSize(const Vector2& size) { this->size = size; }
-		// サイズ設定(size.x * size,size.y * size)
+		/// <summary>
+		/// サイズ設定(size.x * size,size.y * size)
+		/// </summary>
 		void SetSize(const float& size) { this->size = this->size * size; }
 
-		// 色取得
+		/// <summary>
+		/// 色取得
+		/// </summary>
 		const Color& GetColor() const { return material->GetMaterialInstance().color; }
-		// 色設定
+		/// <summary>
+		/// 色設定
+		/// </summary>
 		void SetColor(const Color& color) { material->GetMaterialInstance().color = color; }
 
-		// アンカーポイント取得
+		/// <summary>
+		/// アンカーポイント取得
+		/// </summary>
 		const Vector2& GetAnchorPoint() const { return anchorPoint; };
-		// アンカーポイント設定
+		/// <summary>
+		/// アンカーポイント設定
+		/// </summary>
 		void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 
-		// フリップX取得
+		/// <summary>
+		/// フリップX取得
+		/// </summary>
 		const bool& GetIsFlipX() const { return isFlipX_; };
-		// フリップX設定
+		/// <summary>
+		/// フリップX設定
+		/// </summary>
 		void SetIsFlipX(const bool& isFlipX) { this->isFlipX_ = isFlipX; }
-		// フリップY取得
+		/// <summary>
+		/// フリップY取得
+		/// </summary>
 		const bool& GetIsFlipY() const { return isFlipY_; };
-		// フリップY設定
+		/// <summary>
+		/// フリップY設定
+		/// </summary>
 		void SetIsFlipY(const bool& isFlipY) { this->isFlipY_ = isFlipY; }
 
-		// テクスチャ左上座標取得
+		/// <summary>
+		/// テクスチャ左上座標取得
+		/// </summary>
 		const Vector2& GetextureLeftTop() const { return textureLeftTop; };
-		// テクスチャ左上座標設定
+		/// <summary>
+		/// テクスチャ左上座標設定
+		/// </summary>
 		void SetTextureLeftTop(const Vector2& textureLeftTop) { this->textureLeftTop = textureLeftTop; }
-		// テクスチャ切り出し座標取得
+		/// <summary>
+		/// テクスチャ切り出し座標取得
+		/// </summary>
 		const Vector2& GetTextureSize() const { return textureSize; };
-		// テクスチャ切り出し座標設定
+		/// <summary>
+		/// テクスチャ切り出し座標設定
+		/// </summary>
 		void SetTextureSize(const Vector2& textureSize) { this->textureSize = textureSize; }
 
-		// アニメサイズ設定
+		/// <summary>
+		/// アニメサイズ設定
+		/// </summary>
 		void SetAnimeSize(const Vector2& animeSize) { animeSize_ = animeSize; }
-		// アニメ切り替え数設定
+		/// <summary>
+		/// アニメ切り替え数設定
+		/// </summary>
 		void SetMaxAnimeNum(const Vector2& animeNum) { maxAnimeNum_ = animeNum; }
-		// ピクセル補間設定
+		/// <summary>
+		/// ピクセル補間設定
+		/// </summary>
 		void SetIsPixelInterpolation(bool is) { isPixelInterpolation_ = is; }
 
-		// 描画させるか設定
+		/// <summary>
+		/// 描画させるか設定
+		/// </summary>
 		void SetActive(const bool& isActive) { isActive_ = isActive; }
-		// 描画されているか取得
+		/// <summary>
+		/// 描画されているか取得
+		/// </summary>
 		bool GetActive() const { return isActive_; }
 
-		// フェードイン設定
+		/// <summary>
+		/// フェードイン設定
+		/// </summary>
 		void SetIsFadeIn(const bool& isFadeIn) { isFadeIn_ = isFadeIn; };
-		// フェードアウト設定
+		/// <summary>
+		/// フェードアウト設定
+		/// </summary>
 		void SetIsFadeOut(const bool& isFadeOut) { isFadeOut_ = isFadeOut; };
-		// 名前設定
+		/// <summary>
+		/// 名前設定
+		/// </summary>
 		void SetName(std::string name) { name_ = name; }
-		// 名前取得
+		/// <summary>
+		/// 名前取得
+		/// </summary>
 		std::string GetName() { return name_; }
-		// テクスチャ設定
+		/// <summary>
+		/// テクスチャ設定
+		/// </summary>
 		void SetTexture(const std::string texture) { material->tex_.diffuseFilePath = texture; };
-		// トランスフォーム取得
+		/// <summary>
+		/// トランスフォーム取得
+		/// </summary>
 		WorldTransform2d& GetWorldTransform2d() { return worldTransform2d; }
-		// コマンドリスト(頂点処理)取得
+		/// <summary>
+		/// コマンドリスト(頂点処理)取得
+		/// </summary>
 		void GetCommandList();
 
 	private:
 
-		// テクスチャサイズをイメージに合わせる
+		/// <summary>
+		/// テクスチャサイズをイメージに合わせる
+		/// </summary>
 		void AdjusttextureSize();
-		// スプライトのうつり方処理
+		/// <summary>
+		/// スプライトのうつり方処理
+		/// </summary>
 		void SpriteTypeDiscrimination(PSOType type);
 
 	private:

@@ -23,11 +23,17 @@ namespace Character {
 		) const;
 
 	private:
-		// 近すぎる仲間から離れる方向を求める
+		/// <summary>
+		/// 近すぎる仲間から離れる方向を求める
+		/// </summary>
 		Vector3 CalculateSeparation(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const;
-		// 周囲の仲間の進行方向に合わせる方向を求める
+		/// <summary>
+		/// 周囲の仲間の進行方向に合わせる方向を求める
+		/// </summary>
 		Vector3 CalculateAlignment(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const;
-		// 同じ群れの中心へ寄る方向を求める
+		/// <summary>
+		/// 同じ群れの中心へ寄る方向を求める
+		/// </summary>
 		Vector3 CalculateCohesion(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const;
 		Vector3 NormalizeXZ(const Vector3& value) const;
 

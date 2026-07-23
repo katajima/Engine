@@ -56,10 +56,14 @@ namespace GvData {
 }
 
 namespace GvFunction {
-	// 型を判別して値を保存
+	/// <summary>
+	/// 型を判別して値を保存
+	/// </summary>
 	void Save(const std::string& groupName, GvData::json& root,GvData::Item& item, const std::string& itemName);
 
-	// 値を設定
+	/// <summary>
+	/// 値を設定
+	/// </summary>
 	void SetValue(const std::string& groupName,const std::string& itemName,const std::string& typeStr);
 
 }

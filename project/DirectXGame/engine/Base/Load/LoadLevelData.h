@@ -21,40 +21,64 @@ namespace Engine {
 class LoadLevelData
 {
 public:
-	// デストラクタ
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
 	~LoadLevelData();
 
 	// 初期化
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera, 
 		const std::string extensionName, const std::string fileName = "levelData/");
-	// リロード
+	/// <summary>
+	/// リロード
+	/// </summary>
 	void ReLoad();
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update();
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw3D();
 
-	// カメラマネージャー設定
+	/// <summary>
+	/// カメラマネージャー設定
+	/// </summary>
 	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 
 public:
-	// レベルデータ取得
+	/// <summary>
+	/// レベルデータ取得
+	/// </summary>
 	LevelData* GetLevelData() { return levelData_.get(); };
-	// オブジェクト取得
+	/// <summary>
+	/// オブジェクト取得
+	/// </summary>
 	std::vector<Engine::Object3d*>GetObjects() { return objects_; }
-	// ライト取得
+	/// <summary>
+	/// ライト取得
+	/// </summary>
 	std::vector< std::shared_ptr<Engine::Lights>>GetLights() { return lights_; }
 
-	// データクリア
+	/// <summary>
+	/// データクリア
+	/// </summary>
 	void ClearData();
 private:
-	// オブジェクト3D生成
+	/// <summary>
+	/// オブジェクト3D生成
+	/// </summary>
 	void CreateObject3d(LevelData* levelData);
-	// カメラ生成
+	/// <summary>
+	/// カメラ生成
+	/// </summary>
 	void CreateCamera(LevelData* levelData);
-	// ライト生成
+	/// <summary>
+	/// ライト生成
+	/// </summary>
 	void CreateLight(LevelData* levelData);
 private:
 	Engine::EntityManager* entityManager = nullptr;

@@ -26,32 +26,44 @@ namespace Engine {
 			this->dxCommon = dxCommon;	// DX共通クラス
 			const size_t bufferCount = (std::max)(size_t{ 1 }, num);
 
-			// リソース生成
+			/// <summary>
+			/// リソース生成
+			/// </summary>
 			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * bufferCount);
 
 			// データ
 			data_ = nullptr;
 
-			// リソースを書き込むためのアドレス取得
+			/// <summary>
+			/// リソースを書き込むためのアドレス取得
+			/// </summary>
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 			if (!index.empty()) {
 				std::memcpy(Data(), index.data(), sizeof(Type) * index.size());
 			}
 			resource_->Unmap(0, nullptr);
-			// リソースの先頭のアドレスを作成する
+			/// <summary>
+			/// リソースの先頭のアドレスを作成する
+			/// </summary>
 			bufferView.BufferLocation = resource_->GetGPUVirtualAddress();
 			bufferView.SizeInBytes = UINT(sizeof(Type) * index.size());
 			bufferView.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマット
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateBuffer(std::vector<Type> index) {
 			if (resource_) {
-				// バッファサイズを確認
+				/// <summary>
+				/// バッファサイズを確認
+				/// </summary>
 				size_t requiredSize = sizeof(Type) * (std::max)(size_t{ 1 }, index.size());
 				D3D12_RESOURCE_DESC desc = resource_->GetDesc();
 				if (requiredSize > desc.Width) {
-					// バッファが不足している場合、再割り当て
+					/// <summary>
+					/// バッファが不足している場合、再割り当て
+					/// </summary>
 					resource_.Reset();
 
 					D3D12_HEAP_PROPERTIES heapProps = {};
@@ -65,7 +77,9 @@ namespace Engine {
 						return;
 					}
 
-					// バッファビューの更新
+					/// <summary>
+					/// バッファビューの更新
+					/// </summary>
 					bufferView.BufferLocation = resource_->GetGPUVirtualAddress();
 					bufferView.SizeInBytes = UINT(requiredSize);
 
@@ -80,25 +94,37 @@ namespace Engine {
 			}
 		}
 
-		// 頂点バッファの設定
+		/// <summary>
+		/// 頂点バッファの設定
+		/// </summary>
 		void IASetIndexBuffer() {
-			// 頂点バッファの設定
+			/// <summary>
+			/// 頂点バッファの設定
+			/// </summary>
 			dxCommon->GetCommand()->GetList()->IASetIndexBuffer(&bufferView);
 		};
 
 
 
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		Type* Data() const { return data_; };
-		// リソース取得
+		/// <summary>
+		/// リソース取得
+		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
-		// デバッグレイヤーのLiveObject出力にインデックスバッファ名を表示する
+		/// <summary>
+		/// デバッグレイヤーのLiveObject出力にインデックスバッファ名を表示する
+		/// </summary>
 		void SetResourceName(const std::wstring& name) {
 			if (resource_) {
 				resource_->SetName(name.c_str());
 			}
 		}
-		// バッファビュー取得
+		/// <summary>
+		/// バッファビュー取得
+		/// </summary>
 		D3D12_INDEX_BUFFER_VIEW GetIndexxBufferView() { return bufferView; }
 	private:
 		DirectXCommon* dxCommon = nullptr;

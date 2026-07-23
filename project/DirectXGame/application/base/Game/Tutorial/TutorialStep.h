@@ -67,7 +67,9 @@ public:
         completed_ = false;
     }
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
     void OnEvent(const TutorialEvent& event) override {
@@ -90,7 +92,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -112,7 +116,9 @@ public:
     void Enter() override {
         completed_ = false;
     }
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
     void OnEvent(const TutorialEvent& event) override {
@@ -134,7 +140,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -158,7 +166,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -180,7 +190,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -202,7 +214,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -225,7 +239,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -252,7 +268,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -276,7 +294,9 @@ public:
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {
@@ -299,7 +319,9 @@ class TutorialOpenMenuStep : public TutorialStep {
 	void Enter() override {
 		completed_ = false;
 	}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt, Character::BaseCharacter* character) override;
 
 	void OnEvent(const TutorialEvent& event) override {

@@ -29,41 +29,73 @@
 class EffectScene : public Engine::BaseScene {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D() override;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 private:
-	// エフェクト確認用カメラを生成して描画系へ接続する
+	/// <summary>
+	/// エフェクト確認用カメラを生成して描画系へ接続する
+	/// </summary>
 	void InitializeCamera();
-	// エフェクトを見やすくする空とライトを生成する
+	/// <summary>
+	/// エフェクトを見やすくする空とライトを生成する
+	/// </summary>
 	void InitializeEnvironment();
-	// 試射位置を示すリングなどの補助オブジェクトを生成する
+	/// <summary>
+	/// 試射位置を示すリングなどの補助オブジェクトを生成する
+	/// </summary>
 	void InitializePreviewObjects();
-	// シーン内で自動再生するエフェクト情報を登録する
+	/// <summary>
+	/// シーン内で自動再生するエフェクト情報を登録する
+	/// </summary>
 	void InitializePreviewEffects();
-	// 2Dパーティクルの確認用エミッターを生成する
+	/// <summary>
+	/// 2Dパーティクルの確認用エミッターを生成する
+	/// </summary>
 	void InitializeParticle2D();
-	// 入力による単発発火やシーン移動を更新する
+	/// <summary>
+	/// 入力による単発発火やシーン移動を更新する
+	/// </summary>
 	void UpdateInput();
-	// 登録済みエフェクトをタイマーで順番に発火する
+	/// <summary>
+	/// 登録済みエフェクトをタイマーで順番に発火する
+	/// </summary>
 	void UpdateAutoEmit(float dt);
-	// 補助オブジェクトのアニメーションと表示状態を更新する
+	/// <summary>
+	/// 補助オブジェクトのアニメーションと表示状態を更新する
+	/// </summary>
 	void UpdatePreviewObjects(float dt);
-	// デバッグ用のImGui操作パネルを描画する
+	/// <summary>
+	/// デバッグ用のImGui操作パネルを描画する
+	/// </summary>
 	void UpdateImGui();
-	// 指定された試射スロットのエフェクトを発火する
+	/// <summary>
+	/// 指定された試射スロットのエフェクトを発火する
+	/// </summary>
 	void EmitPreview(size_t index);
-	// 登録済みエフェクトを一括で発火する
+	/// <summary>
+	/// 登録済みエフェクトを一括で発火する
+	/// </summary>
 	void EmitAllPreview();
 
 private:

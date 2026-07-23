@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -47,34 +47,58 @@ class TestScene : public Engine::BaseScene
 {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D() override;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
-	// グローバルバリアブル適応
+	/// <summary>
+	/// グローバルバリアブル適応
+	/// </summary>
 	void AppGlobalVariables();
 
 private: // 各初期化
-	// オブジェクト3D初期化
+	/// <summary>
+	/// オブジェクト3D初期化
+	/// </summary>
 	void InitializeObject3D(); 
-	// オブジェクト2D初期化
+	/// <summary>
+	/// オブジェクト2D初期化
+	/// </summary>
 	void InitializeObject2D(); 
-	// パーティクル初期化
+	/// <summary>
+	/// パーティクル初期化
+	/// </summary>
 	void InitializeParticle(); 
-	// ライト初期化
+	/// <summary>
+	/// ライト初期化
+	/// </summary>
 	void InitializeLight(); 
-	// カメラ初期化
+	/// <summary>
+	/// カメラ初期化
+	/// </summary>
 	void InitializeCamera(); 
-	// その他の初期化
+	/// <summary>
+	/// その他の初期化
+	/// </summary>
 	void InitializeOthers();
 
 private:
@@ -103,7 +127,9 @@ private:
 
 private:
 
-	// 各ルーム初期化
+	/// <summary>
+	/// 各ルーム初期化
+	/// </summary>
 	void InitializeRoom01();
 	void InitializeRoom02();
 	void InitializeRoom03();
@@ -115,7 +141,9 @@ private:
 	void InitializeRoom09();
 	void InitializeRoom10();
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void UpdateRoom01();
 	void UpdateRoom02();
 	void UpdateRoom03();
@@ -125,7 +153,9 @@ private:
 	void UpdateRoom07();
 	void UpdateRoom08();
 
-	// 部屋切り替え
+	/// <summary>
+	/// 部屋切り替え
+	/// </summary>
 	void SwitchRoom();
 
 private:

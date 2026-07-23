@@ -21,17 +21,27 @@ namespace Engine {
 	{
 	public:
 		Fence() = default;
-		// デストラクタ
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
 		~Fence();
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DXGIDevice* dxgi, Command* command);
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Finalize();
-		// GPUを待機
+		/// <summary>
+		/// GPUを待機
+		/// </summary>
 		void WaitGPU();
 	private:
-		// フェンス作成
+		/// <summary>
+		/// フェンス作成
+		/// </summary>
 		void CreateFence();
 
 	private:

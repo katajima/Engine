@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/3d/Object/ObjectInstance.h"
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
@@ -90,7 +90,9 @@ public: // コライダー
 	/// <summary>このオブジェクトへ接続したコライダーを取得する。</summary>
 	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
 	Engine::ColliderComponent* GetColliderComponent();
-	// コライダー衝突履歴削除
+	/// <summary>
+	/// コライダー衝突履歴削除
+	/// </summary>
 	void ColliderHistoryClear();
 	/// <summary>コライダーが保持する接触履歴を取得する。</summary>
 	/// <returns>次回履歴クリアまで有効な接触履歴への参照。</returns>
@@ -100,7 +102,9 @@ public: // コライダー
 	/// <param name="is">描画する場合はtrue。</param>
 	void SetIsDraw(bool is);
 
-	// 削除
+	/// <summary>
+	/// 削除
+	/// </summary>
 	void IsDelete();
 
 public: // 取得
@@ -110,7 +114,9 @@ public: // 取得
 	/// <summary>通常・インスタンシングを問わず、このオブジェクトのワールド変換を取得する。</summary>
 	/// <returns>オブジェクトの生存期間中有効な変更可能参照。</returns>
 	Engine::WorldTransform& GetWorldTransform();
-	// ワールド座標取得
+	/// <summary>
+	/// ワールド座標取得
+	/// </summary>
 	Vector3 GetWorldPosition() { return GetWorldTransform().GetWorldPosition(); };
 	/// <summary>現在のワールド座標を描画カメラのスクリーン座標へ変換する。</summary>
 	/// <returns>ピクセル単位のスクリーン座標。</returns>
@@ -121,29 +127,45 @@ public: // 取得
 	/// <summary>Update内でコライダー・剛体を自動更新するか設定する。</summary>
 	/// <param name="is">ObjectComponent側で更新する場合はtrue。</param>
 	void SetIsUpdateColliderComponent(bool is);
-	// オブジェクト時間取得
+	/// <summary>
+	/// オブジェクト時間取得
+	/// </summary>
 	float GetTime() const;
-	// 名前取得
+	/// <summary>
+	/// 名前取得
+	/// </summary>
 	std::string GetName() const { return name_; }
-	// 削除フラグ取得
+	/// <summary>
+	/// 削除フラグ取得
+	/// </summary>
 	bool  GetDelete() const { return flags_.isDeleted; };
-	// 削除する
+	/// <summary>
+	/// 削除する
+	/// </summary>
 	void Delete() { flags_.isDeleted = true; };
-	// ロックオン状態の取得
+	/// <summary>
+	/// ロックオン状態の取得
+	/// </summary>
 	bool GetLockOn() const { return flags_.isLockonTarget; }
-	// ロックオン状態を設定
+	/// <summary>
+	/// ロックオン状態を設定
+	/// </summary>
 	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
 	
 public: // 設定
 
-	// 名前設定
+	/// <summary>
+	/// 名前設定
+	/// </summary>
 	void SetName(std::string name) { this->name_ = name; };
 
 	/// <summary>このオブジェクト固有の時間倍率を設定する。</summary>
 	/// <param name="speed">時間倍率。1.0で通常、0.0で停止。</param>
 	void SetTimeSpeed(float speed);
 
-	// オブジェクト状態取得(設定可能)
+	/// <summary>
+	/// オブジェクト状態取得(設定可能)
+	/// </summary>
 	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
 	/// <summary>通常オブジェクトのスケール・回転・移動をまとめて設定する。</summary>
 	/// <param name="s">各軸のスケール。</param>

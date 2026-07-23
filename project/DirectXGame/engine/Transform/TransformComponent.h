@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/Transform/Transformation/Transformation.h"
@@ -12,19 +12,27 @@ namespace Engine {
 	{
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init() {
 			worldTransform_.Initialize();
 			worldTransform_.translate_.x = { 0.00000001f };
 		}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update() {
 			worldTransform_.Update();
 		}
-		// ワールドトランスフォーム取得
+		/// <summary>
+		/// ワールドトランスフォーム取得
+		/// </summary>
 		WorldTransform& GetWorldTransform() { return worldTransform_; }
 
-		// ワールド座標
+		/// <summary>
+		/// ワールド座標
+		/// </summary>
 		Vector3 GetWorldPosition() const {
 			// ワールド座標を入れる
 			Vector3 worldPos;
@@ -34,7 +42,9 @@ namespace Engine {
 			return worldPos;
 		};
 
-		// ワールド座標
+		/// <summary>
+		/// ワールド座標
+		/// </summary>
 		Vector3 GetPreWorldPosition() const {
 			// ワールド座標を入れる
 			Vector3 worldPos;

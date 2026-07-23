@@ -21,49 +21,89 @@ namespace Engine {
 	class SceneManager
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 2d描画
+		/// <summary>
+		/// 2d描画
+		/// </summary>
 		void Draw2D();
-		// 3d描画
+		/// <summary>
+		/// 3d描画
+		/// </summary>
 		void Draw3D();
 
-		// 背面2d描画
+		/// <summary>
+		/// 背面2d描画
+		/// </summary>
 		void DrawForeground2D();
 
-		// デストラクタ
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
 		~SceneManager();
-		// 終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
 
 		void SetSceneFactory(AbstractSceneFactory* sceneFactory) { this->sceneFactory = sceneFactory; };
-		// DirectX共通クラス設定
+		/// <summary>
+		/// DirectX共通クラス設定
+		/// </summary>
 		void SetDirectXCommon(DirectXCommon* directXCommon) { dxCommon = directXCommon; }
-		// DirectX共通クラス設定
+		/// <summary>
+		/// DirectX共通クラス設定
+		/// </summary>
 		void SetWinApp(WinApp* winApp) { this->winApp = winApp; }
-		// エンティティマネージャー設定
+		/// <summary>
+		/// エンティティマネージャー設定
+		/// </summary>
 		void SetEntityManager(EntityManager* entity3DManager) { this->entityManager = entity3DManager; }
-		// グローバルバリアブル設定
+		/// <summary>
+		/// グローバルバリアブル設定
+		/// </summary>
 		void SetGlobalVariables(GlobalVariables* globalVariables) { this->globalVariables = globalVariables; }
-		// DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		DirectXCommon* GetDirectXCommon() { return dxCommon; };
-		// エンティティ3dマネージャー取得
+		/// <summary>
+		/// エンティティ3dマネージャー取得
+		/// </summary>
 		EntityManager* GetEntityManager() { return entityManager; }
-		// グローバルバリアブル取得
+		/// <summary>
+		/// グローバルバリアブル取得
+		/// </summary>
 		GlobalVariables* GetGlobalVariables() { return globalVariables; }
-		// Input設定
+		/// <summary>
+		/// Input設定
+		/// </summary>
 		void SetInput(Input* input) { this->input = input; }
-		// オーディオマネージャー設定
+		/// <summary>
+		/// オーディオマネージャー設定
+		/// </summary>
 		void SetAudioManager(AudioManager* audioManager) { this->audioManager = audioManager; }
-		// Input取得
+		/// <summary>
+		/// Input取得
+		/// </summary>
 		Input* GetInput() { return input; }
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; };
-		// カメラ取得
+		/// <summary>
+		/// カメラ取得
+		/// </summary>
 		Camera* GetCamara() { return camera; }
-		// シーンデータ取得
+		/// <summary>
+		/// シーンデータ取得
+		/// </summary>
 		SceneData& GetSceneData() { return sceneData_; }
 
 		/// <summary>
@@ -72,7 +112,9 @@ namespace Engine {
 		/// <param name="sceneName"></param>
 		void ChangeScene(const std::string& sceneName, const float duration = 1.0f);
 
-		// 現在のシーンが何か
+		/// <summary>
+		/// 現在のシーンが何か
+		/// </summary>
 		bool IsNowScene(std::string name) const {
 			if (sceneName == name) {
 				return true;
@@ -80,7 +122,9 @@ namespace Engine {
 			return false;
 		};
 
-		// 終了したか
+		/// <summary>
+		/// 終了したか
+		/// </summary>
 		bool IsFinished() const { return finished_; }
 
 

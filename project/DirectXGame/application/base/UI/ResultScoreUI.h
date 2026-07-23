@@ -16,13 +16,19 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables) override;
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
 
-	// スコア設定
+	/// <summary>
+	/// スコア設定
+	/// </summary>
 	void SetScore(float score) { this->score = score; };
 
 private:

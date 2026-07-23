@@ -16,7 +16,9 @@ namespace Character {
 	/// </summary>
 	class EnemyCrowdSystem {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
 
 		// 敵一覧からグループごとの隊形スロットを作成する
@@ -27,9 +29,13 @@ namespace Character {
 			float dt
 		);
 
-		// 指定した敵に割り当てられた隊形スロットを取得
+		/// <summary>
+		/// 指定した敵に割り当てられた隊形スロットを取得
+		/// </summary>
 		const CrowdSlot* FindSlot(BaseEnemy* enemy) const;
-		// 指定した敵のフロッキング計算済み移動目標を取得
+		/// <summary>
+		/// 指定した敵のフロッキング計算済み移動目標を取得
+		/// </summary>
 		const EnemyFlockingSteering* FindSteering(BaseEnemy* enemy) const;
 
 	private:
@@ -50,10 +56,14 @@ namespace Character {
 			float dt
 		);
 
-		// 目標が細かく変わり続ける時に、一定時間は前回目標を保持して移動の震えを抑える
+		/// <summary>
+		/// 目標が細かく変わり続ける時に、一定時間は前回目標を保持して移動の震えを抑える
+		/// </summary>
 		EnemyFlockingSteering ApplyTargetHold(BaseEnemy* enemy, EnemyFlockingSteering steering, float dt);
 
-		// 今フレーム存在しない敵の保持情報を削除する
+		/// <summary>
+		/// 今フレーム存在しない敵の保持情報を削除する
+		/// </summary>
 		void CleanupTargetHolds(const std::vector<BaseEnemy*>& enemies);
 
 	private:

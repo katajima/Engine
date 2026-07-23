@@ -26,35 +26,59 @@ namespace Engine {
 class MapChip {
 public:
     MapChip(int width, int height, float cellSize);
-    // クリア
+    /// <summary>
+    /// クリア
+    /// </summary>
     void Clear(MapCellType value = MapCellType::Empty);
 
-    // AABBに当たる範囲をObstacleに変換
+    /// <summary>
+    /// AABBに当たる範囲をObstacleに変換
+    /// </summary>
     void AddObstacleFromBox(const Box& box, MapCellType type = MapCellType::Obstacle);
-    // OBBに当たる範囲をObstacleに変換
+    /// <summary>
+    /// OBBに当たる範囲をObstacleに変換
+    /// </summary>
     void AddObstacleFromOBB2D(const OBB2D& obb, MapCellType type = MapCellType::Obstacle);
-    // SATベースのOBB vs AABB
+    /// <summary>
+    /// SATベースのOBB vs AABB
+    /// </summary>
     bool CheckOBBvsAABB2D(const OBB2D& obb, const Vector2& aabbCenter, float halfExtent) const;
 
-    // マップチップの種類取得
+    /// <summary>
+    /// マップチップの種類取得
+    /// </summary>
     MapCellType GetCell(int x, int z) const;
-    // マップチップの種類設定
+    /// <summary>
+    /// マップチップの種類設定
+    /// </summary>
     void SetCell(int x, int z, MapCellType type);
 
-    // マップチップ1マスの大きさ
+    /// <summary>
+    /// マップチップ1マスの大きさ
+    /// </summary>
     float GetCellSize() const { return m_cellSize; }
 
-    // ワールド座標→マップ座標変換
+    /// <summary>
+    /// ワールド座標→マップ座標変換
+    /// </summary>
     bool WorldToMap(float worldX, float worldZ, int& mapX, int& mapZ) const;
 
-    // 横幅取得
+    /// <summary>
+    /// 横幅取得
+    /// </summary>
     int GetWidth() const { return m_width; }
-    // 縦幅取得
+    /// <summary>
+    /// 縦幅取得
+    /// </summary>
     int GetHeight() const { return m_height; }
-    // 描画
+    /// <summary>
+    /// 描画
+    /// </summary>
     void DrawMapChip(Engine::LineCommon* line,float yPos) const;
 
-    // セルが障害物かどうかを返す
+    /// <summary>
+    /// セルが障害物かどうかを返す
+    /// </summary>
     bool IsBlocked(int x, int z) const {
         if (x < 0 || z < 0 || x >= m_width || z >= m_height) {
             return true;  // 範囲外は障害物とみなす

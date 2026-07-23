@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
 
@@ -18,7 +18,9 @@ public:
 	///</summary>
 	void Update() override;
 private:
-	// 入力に応じてエフェクト確認用の自由移動カメラを更新する
+	/// <summary>
+	/// 入力に応じてエフェクト確認用の自由移動カメラを更新する
+	/// </summary>
 	void UpdateEffectCameraControl(float dt);
 
 private: // 一旦

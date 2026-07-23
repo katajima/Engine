@@ -16,12 +16,18 @@ namespace Character {
             : BaseAttackSubState(AttackSubState::Ready, c, fsm) {
         }
 
-        // 開始
+        /// <summary>
+        /// 開始
+        /// </summary>
         void Enter() override;
-        // 更新
+        /// <summary>
+        /// 更新
+        /// </summary>
         void Update(float deltaTime) override;
 
-        // 終了
+        /// <summary>
+        /// 終了
+        /// </summary>
         void Exit() override {}
 
     private:
@@ -41,11 +47,17 @@ namespace Character {
         MediumMeleeEnemyAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
             : BaseAttackSubState(AttackSubState::Swing, c, fsm) {
         }
-        // 開始
+        /// <summary>
+        /// 開始
+        /// </summary>
         void Enter() override;
-        // 更新
+        /// <summary>
+        /// 更新
+        /// </summary>
         void Update(float deltaTime) override;
-        // 終了
+        /// <summary>
+        /// 終了
+        /// </summary>
         void Exit() override;
 
     private:
@@ -68,11 +80,17 @@ namespace Character {
         MediumMeleeEnemyAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
             : BaseAttackSubState(AttackSubState::End, c, fsm) {
         }
-        // 開始
+        /// <summary>
+        /// 開始
+        /// </summary>
         void Enter() override;
-        // 更新
+        /// <summary>
+        /// 更新
+        /// </summary>
         void Update(float deltaTime) override;
-        // 終了
+        /// <summary>
+        /// 終了
+        /// </summary>
         void Exit() override {
             printf("[AttackEnd] Exit\n");
         }

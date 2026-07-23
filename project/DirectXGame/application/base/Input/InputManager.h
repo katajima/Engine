@@ -46,21 +46,31 @@ public:
 		Vector2 value2{};    // 例: Move/Look
 	};
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::Input* input);
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
-	// キャラクターの設定
+	/// <summary>
+	/// キャラクターの設定
+	/// </summary>
 	void SetOwner(Character::BaseCharacter* character) { this->character = character; }
 
 
 
-	// Context
+	/// <summary>
+	/// Context
+	/// </summary>
 	void SetContext(Context c) { context_ = c; }
 	Context GetContext() const { return context_; }
 
-	// Action状態の取得（ゲーム側はこれだけ使う）
+	/// <summary>
+	/// Action状態の取得（ゲーム側はこれだけ使う）
+	/// </summary>
 	bool Pressed(Action a) const { return pressed_[Idx(a)]; }
 	bool Triggered(Action a) const { return triggered_[Idx(a)]; }
 	bool Released(Action a) const { return released_[Idx(a)]; }
@@ -68,7 +78,9 @@ public:
 	Vector2 Value2(Action a) const { return value2_[Idx(a)]; }
 	float   Value1(Action a) const { return value1_[Idx(a)]; }
 
-	// 移動ベクトルは長さ1に制限（斜めが速くならない）
+	/// <summary>
+	/// 移動ベクトルは長さ1に制限（斜めが速くならない）
+	/// </summary>
 	Vector2 MoveVector() const { return value2_[Idx(Action::Move)]; }
 	Vector2 LookVector() const { return value2_[Idx(Action::Look)]; }
 
@@ -77,7 +89,9 @@ public:
 	{
 		const uint32_t oldest = (frameCounter_ > windowFrames) ? (frameCounter_ - windowFrames) : 0;
 
-		// a の Press を起点に、b が近傍にあるか探す
+		/// <summary>
+		/// a の Press を起点に、b が近傍にあるか探す
+		/// </summary>
 		for (uint32_t k = 0; k < kBufferSize; ++k)
 		{
 			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
@@ -92,7 +106,9 @@ public:
 			if (HasPressInWindow(b, from, to))
 			{
 				// 消費（簡易に両方を “古くする” 実装を入れるのがベター）
-				// ここは実装簡略化：ConsumePress を2回呼ぶ方式でもOK（ただし起点がずれる場合あり）
+				/// <summary>
+				/// ここは実装簡略化：ConsumePress を2回呼ぶ方式でもOK（ただし起点がずれる場合あり）
+				/// </summary>
 				ConsumePress(a, windowFrames);
 				ConsumePress(b, windowFrames);
 				return true;
@@ -139,7 +155,9 @@ private:
 	void BuildGameplayActions();
 	void BuildUIActions(); // 必要なら
 
-	// 入力合成ユーティリティ
+	/// <summary>
+	/// 入力合成ユーティリティ
+	/// </summary>
 
 
 	void RecordBufferedEvents();
@@ -174,7 +192,9 @@ private:
 	Context context_ = Context::Gameplay;
 
 
-	// Action 状態（毎フレーム Update で作る）
+	/// <summary>
+	/// Action 状態（毎フレーム Update で作る）
+	/// </summary>
 	bool pressed_[static_cast<int>(Action::Max)] = {};
 	bool triggered_[static_cast<int>(Action::Max)] = {};
 	bool released_[static_cast<int>(Action::Max)] = {};
@@ -192,7 +212,9 @@ private:
 	// 何フレーム有効にするか（例：6f=0.1秒）
 	uint32_t bufferWindowFrames_ = 6;
 
-	// 長押し判定用
+	/// <summary>
+	/// 長押し判定用
+	/// </summary>
 	uint32_t pressFrame_[static_cast<int>(Action::Max)] = {};
 	bool isDown_[static_cast<int>(Action::Max)] = {};
 };

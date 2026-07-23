@@ -21,25 +21,37 @@ namespace Engine {
 		DXGIDevice() = default;
 		~DXGIDevice() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
 
-		// D3D12デバイスが保持している生存オブジェクトを出力
+		/// <summary>
+		/// D3D12デバイスが保持している生存オブジェクトを出力
+		/// </summary>
 		void ReportLiveObjects();
 
-		// DXGIデバイスの取得
+		/// <summary>
+		/// DXGIデバイスの取得
+		/// </summary>
 		ID3D12Device* GetDevice() { return device_.Get(); };
-		// DXGIファクトリーの取得
+		/// <summary>
+		/// DXGIファクトリーの取得
+		/// </summary>
 		IDXGIFactory7* GetFactory() { return dxgiFactory_.Get(); };
 
 		// DescriptorHeapの作成関数
 		Microsoft::WRL::ComPtr < ID3D12DescriptorHeap>CreateDescriptorHeap(
 			D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 
-		// Material用のResource作成関数
+		/// <summary>
+		/// Material用のResource作成関数
+		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
-		// Material用のResource作成関数
+		/// <summary>
+		/// Material用のResource作成関数
+		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> CreateBufferResourceUAV(size_t sizeInBytes);
 
 	private:

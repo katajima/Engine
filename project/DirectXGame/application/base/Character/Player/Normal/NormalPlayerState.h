@@ -15,13 +15,19 @@ namespace Character {
 			: IdleState(player) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit()override;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	};
 
@@ -37,13 +43,19 @@ namespace Character {
 			: MoveState(player) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit()override;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	};
 
@@ -58,13 +70,19 @@ namespace Character {
 			: JumpState(player) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit()override;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	private:
 		float timer = 0.0f;
@@ -82,13 +100,19 @@ namespace Character {
 			: AvoidanceState(player) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;					// 回避経過時間
@@ -110,12 +134,18 @@ namespace Character {
 			: AttackState(player) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	};
 
@@ -130,12 +160,18 @@ namespace Character {
 			: SpecialState(player) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	};
 
@@ -148,12 +184,18 @@ namespace Character {
 		PlayerStateFainting(BaseCharacter* player)
 			: FaintingState(player) {
 		}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 
 	private:
@@ -171,12 +213,18 @@ namespace Character {
 		PlayerStateDie(BaseCharacter* player)
 			: DieState(player) {
 		}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 
 	private:
@@ -192,12 +240,18 @@ namespace Character {
 		PlayerStateDamage(BaseCharacter* player)
 			: DamageState(player) {
 		}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	private:
 		float timer = 0.0f;

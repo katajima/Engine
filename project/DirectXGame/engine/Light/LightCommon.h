@@ -29,29 +29,45 @@ namespace Engine {
 			bool spot;
 		};
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// 終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
-		// ライン描画
+		/// <summary>
+		/// ライン描画
+		/// </summary>
 		void DrawLight(IsLight is = { true,true,true }, int dire = 3, int point = 5, int spot = 6);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// ライト追加
+		/// <summary>
+		/// ライト追加
+		/// </summary>
 		void AddLight(std::shared_ptr<Lights> light) {
 			light->SetNumber(int(m_lights.size()));
 			m_lights.push_back(light);
 			//count++;
 		}
-		// ライト数取得
+		/// <summary>
+		/// ライト数取得
+		/// </summary>
 		int GetLightSize() const { return static_cast<int>(m_lights.size()); }
 
-		// ライト取得
+		/// <summary>
+		/// ライト取得
+		/// </summary>
 		const std::vector<std::shared_ptr<Lights>>& GetLights() const {
 			return m_lights;
 		}
 
-		// ライト開放
+		/// <summary>
+		/// ライト開放
+		/// </summary>
 		void ClearLights() {
 			for (auto& m_light : m_lights) {
 				m_light.reset();
@@ -59,14 +75,18 @@ namespace Engine {
 			m_lights.clear();
 		}
 
-		// ライト開放(インデクスで)
+		/// <summary>
+		/// ライト開放(インデクスで)
+		/// </summary>
 		void ClearLight(int index) {
 			m_lights[index].reset();
 			m_lights.resize(m_lights.size());
 		}
 
 	private:
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariables();
 
 

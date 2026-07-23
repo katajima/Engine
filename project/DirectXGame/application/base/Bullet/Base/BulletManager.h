@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // 
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
@@ -30,16 +30,24 @@ public:
 	void Initialize(Engine::EntityManager* entityManager,Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 	
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update();
 
-	// 描画3D
+	/// <summary>
+	/// 描画3D
+	/// </summary>
 	void Draw();
 	
-	// 描画エフェクト
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
 	void DrawEffect();
 
-	// 描画2D
+	/// <summary>
+	/// 描画2D
+	/// </summary>
 	void Draw2D();
 
 	/// <summary>従来形式の弾を管理対象へ追加する。</summary>

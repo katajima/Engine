@@ -15,22 +15,34 @@ class ObjectComponent;
 class DeathSystem {
 public:
 
-	// 所有者設定
+	/// <summary>
+	/// 所有者設定
+	/// </summary>
 	void SetOwner(Character::BaseCharacter* owner) { this->owner = owner; }
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
-	// 死亡開始
+	/// <summary>
+	/// 死亡開始
+	/// </summary>
 	void StartDeath(DeathType type,const DeathData& deathData);
 
-	// 死亡タイプ処理
+	/// <summary>
+	/// 死亡タイプ処理
+	/// </summary>
 	void TypeProcess();
 
-	// 死亡中か
+	/// <summary>
+	/// 死亡中か
+	/// </summary>
 	bool IsActive() const { return isActive; }
 
-	// 死亡データ取得
+	/// <summary>
+	/// 死亡データ取得
+	/// </summary>
 	DeathData GetData() const { return data; }
 private:
 	// 死亡タイプ

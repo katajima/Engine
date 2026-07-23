@@ -17,7 +17,9 @@ namespace Projectile {
 /// </summary>
 	class BaseProjectile : public IHitReceiver{
 	public:
-		// 派生発射物を基底ポインターから安全に破棄する
+		/// <summary>
+		/// 派生発射物を基底ポインターから安全に破棄する
+		/// </summary>
 		virtual ~BaseProjectile() = default;
 
 		/// <summary>発射物の見た目、移動、衝突、演出を生成情報と定義値から初期化する。</summary>
@@ -30,13 +32,21 @@ namespace Projectile {
 			Engine::GlobalVariables* globalVariables, EffectSystem* effectSystem, const ProjectileSpawnInfo& spawnInfo,
 			const ProjectileParam& param);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// 描画エフェクト
+		/// <summary>
+		/// 描画エフェクト
+		/// </summary>
 		void DrawEffect();
-		// 描画2D
+		/// <summary>
+		/// 描画2D
+		/// </summary>
 		void Draw2D();
 	public:
 		/// <summary>発射物が管理対象として生存しているか取得する。</summary>
@@ -59,14 +69,18 @@ namespace Projectile {
 		/// <returns>発射物の生存期間中有効な定義への読み取り専用参照。</returns>
 		const ProjectileParam& GetParam() const { return param_; }
 	private:
-		// コライダの作成
+		/// <summary>
+		/// コライダの作成
+		/// </summary>
 		void CreateCollision();
 		/// <summary>コライダー通知を解釈し、命中対象に応じた処理へ振り分ける。</summary>
 		/// <param name="otherComponent">衝突相手のコンポーネント。存在しない場合はnullptr。</param>
 		/// <param name="self">自身のコライダー。</param>
 		/// <param name="other">衝突相手のコライダー。</param>
 		void CollisionProcess(Engine::ColliderComponent* otherComponent,Engine::Collider* self, Engine::Collider* other);
-		// 衝突処理
+		/// <summary>
+		/// 衝突処理
+		/// </summary>
 		void ProjectileHit();
 		/// <summary>設定された移動方式に従って座標と速度を更新する。</summary>
 		/// <param name="dt">秒単位のフレーム時間。</param>
@@ -74,10 +88,14 @@ namespace Projectile {
 		/// <summary>移動中エフェクトとトレイルを更新する。</summary>
 		/// <param name="dt">秒単位のフレーム時間。</param>
 		void UpdateEffect(float dt);
-		// 削除(終了)処理
+		/// <summary>
+		/// 削除(終了)処理
+		/// </summary>
 		void DeleteProcess();
 	private:
-		// ワールドトランスフォーム取得
+		/// <summary>
+		/// ワールドトランスフォーム取得
+		/// </summary>
 		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	private:
 		// 基盤の初期化

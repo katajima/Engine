@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "EffectEditor.h"
 // 前方宣言
 namespace Engine {
@@ -38,11 +38,17 @@ private:
 	/// <param name="data">生成に利用する保存済みパラメータ。</param>
 	void CreateEffect(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
 
-	// パーティクル初期化
+	/// <summary>
+	/// パーティクル初期化
+	/// </summary>
 	void InitParticle();
-	// パーティクル初期化(範囲攻撃弾)
+	/// <summary>
+	/// パーティクル初期化(範囲攻撃弾)
+	/// </summary>
 	void InitRangeBombingBullet();
-	// パーティクル初期化(弾)
+	/// <summary>
+	/// パーティクル初期化(弾)
+	/// </summary>
 	void InitBullet();
 private:
 	// エフェクトコンポーネント

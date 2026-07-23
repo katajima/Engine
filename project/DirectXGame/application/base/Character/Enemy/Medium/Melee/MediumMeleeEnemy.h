@@ -9,7 +9,9 @@ namespace Character {
 	/// </summary>
 	class MediumMeleeEnemy : public BaseEnemy {
 	public:
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		MediumMeleeEnemy() {}
 
 		// 初期化
@@ -17,7 +19,9 @@ namespace Character {
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 	private:
-		// ステートマシーン初期化
+		/// <summary>
+		/// ステートマシーン初期化
+		/// </summary>
 		void InitStateMachine() override;
 	};
 }

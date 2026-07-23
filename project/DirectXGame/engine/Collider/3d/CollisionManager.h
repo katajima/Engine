@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "ColliderComponent.h"
 #include"list"
@@ -29,31 +29,51 @@ namespace Engine {
 	/// </summary>
 	class CollisionManager {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds);
-		// ライン描画
+		/// <summary>
+		/// ライン描画
+		/// </summary>
 		void DrawLine(LineCommon* lineCommon);
-		// 静的コライダをオクツリーに入れる
+		/// <summary>
+		/// 静的コライダをオクツリーに入れる
+		/// </summary>
 		void BuildStaticSceneOctree();
-		// 動的コライダ
+		/// <summary>
+		/// 動的コライダ
+		/// </summary>
 		void BuildDynamicSceneOctree();
-		// 動的コライダーコンポーネント追加
+		/// <summary>
+		/// 動的コライダーコンポーネント追加
+		/// </summary>
 		void Register(ColliderComponent* comp);
-		// 静的コライダーコンポーネント追加
+		/// <summary>
+		/// 静的コライダーコンポーネント追加
+		/// </summary>
 		void RegisterStatic(ColliderComponent* comp);
-		// 全削除（次フレームから再登録）
+		/// <summary>
+		/// 全削除（次フレームから再登録）
+		/// </summary>
 		void Clear();
-		// 動的コライダの削除
+		/// <summary>
+		/// 動的コライダの削除
+		/// </summary>
 		void ClearDynamic() {
 			dynamicColliders.clear();
 			registeredDynamic_.clear();
 		}
-		// 静的コライダの削除
+		/// <summary>
+		/// 静的コライダの削除
+		/// </summary>
 		void ClearStatic() {
 			staticColliders.clear();
 			registeredStatic_.clear();
 		}
-		// 衝突チェック：全てのColliderComponentのペアをチェック
+		/// <summary>
+		/// 衝突チェック：全てのColliderComponentのペアをチェック
+		/// </summary>
 		void CheckAllOrld() {
 			size_t n = dynamicColliders.size();
 			debugTimer_.StartTimer();
@@ -65,19 +85,31 @@ namespace Engine {
 			debugTimer_.EndTimer();
 			debugTimer_.LogTimeSec("");
 		}
-		// コライダ全走査
+		/// <summary>
+		/// コライダ全走査
+		/// </summary>
 		void CheckAll();
-		// レイヤーとマスクに基づいて衝突を行う（以前の全当たり用）
+		/// <summary>
+		/// レイヤーとマスクに基づいて衝突を行う（以前の全当たり用）
+		/// </summary>
 		void CheckByLayer(ColliderComponent& a, ColliderComponent& b);
 	private:
-		// 動的コライダー同士の衝突判定
+		/// <summary>
+		/// 動的コライダー同士の衝突判定
+		/// </summary>
 		void CheckDynamicVsDynamicMT();
-		// 動的コライダーと静的コライダーの衝突判定
+		/// <summary>
+		/// 動的コライダーと静的コライダーの衝突判定
+		/// </summary>
 		void CheckDynamicVsStaticMT();
 	private:
-		// マスク処理
+		/// <summary>
+		/// マスク処理
+		/// </summary>
 		bool CheckMask(Collider* a, Collider* b) const;
-		// 処理応答
+		/// <summary>
+		/// 処理応答
+		/// </summary>
 		void NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const;
 
 	private:
@@ -94,7 +126,9 @@ namespace Engine {
 
 		DebugTimer debugTimer_;
 	public:
-		// デストラクタ
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
 		CollisionManager() = default;
 	};
 }

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -47,7 +47,9 @@ namespace Character {
 		/// <param name="dt">秒単位のフレーム時間。</param>
 		/// <param name="isMove">ゲーム進行上キャラクター移動を許可する場合はtrue。</param>
 		void Update(float dt,bool isMove);
-		// 描画2d
+		/// <summary>
+		/// 描画2d
+		/// </summary>
 		void Draw2D();
 	public:
 		/// <summary>キャラクター演出が操作するカメラ管理を設定する。</summary>

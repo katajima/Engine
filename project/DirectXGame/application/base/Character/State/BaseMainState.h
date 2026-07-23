@@ -16,16 +16,24 @@ namespace Character {
 	public:
 		virtual ~BaseCharacterState() = default;
 		BaseCharacterState(const CharacterMainState& state, BaseCharacter* character) :characterMainstate_(state), character(character) {};
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 
 
 	public:
-		// キャラクターメインステート取得
+		/// <summary>
+		/// キャラクターメインステート取得
+		/// </summary>
 		CharacterMainState GetCharacterMainState() const { return characterMainstate_; }
 	protected:
 		CharacterMainState characterMainstate_;
@@ -43,11 +51,17 @@ namespace Character {
 		IdleState(BaseCharacter* character)
 			: BaseCharacterState(CharacterMainState::Idle, character) {
 		}
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -61,11 +75,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Move, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -79,11 +99,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Jump, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -97,11 +123,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Avoidance, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -115,11 +147,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Defense, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -133,11 +171,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Attack, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 
 	private:
@@ -157,11 +201,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Die, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -175,11 +225,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Damage, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -193,11 +249,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Dash, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 	};
 
@@ -211,11 +273,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Fainting, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 
 
@@ -240,11 +308,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Skill, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 
 	private:
@@ -271,11 +345,17 @@ namespace Character {
 			: BaseCharacterState(CharacterMainState::Special, character) {
 		}
 
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		virtual void Enter() {}
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const CharacterContext& ctx) {}
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		virtual void Exit() {}
 
 	private:

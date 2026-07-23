@@ -30,24 +30,38 @@ namespace Engine {
 		EffectManager() = default;
 		~EffectManager() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* directXCommon, LightManager* lightManager, LineCommon* lineCommon);
 
 
 	public: // ゲッター
 
-		// DirectXCommon取得
+		/// <summary>
+		/// DirectXCommon取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() { return dxCommon; }
-		// トレイルエフェクト用取得
+		/// <summary>
+		/// トレイルエフェクト用取得
+		/// </summary>
 		TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
-		// パーティクルマネージャ取得
+		/// <summary>
+		/// パーティクルマネージャ取得
+		/// </summary>
 		ParticleManager* GetParticleManager() { return particleManager_.get(); }
-		// パーティクルマネージャ取得
+		/// <summary>
+		/// パーティクルマネージャ取得
+		/// </summary>
 		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_.get(); }
-		// パーティクル2dマネージャー取得
+		/// <summary>
+		/// パーティクル2dマネージャー取得
+		/// </summary>
 		ParticleManager2d* GetParticleManager2d() { return particleManager2d_.get(); }
 
-		// ライン共通クラス取得
+		/// <summary>
+		/// ライン共通クラス取得
+		/// </summary>
 		LineCommon* GetLineCommon() { return lineCommon; }
 
 	private:

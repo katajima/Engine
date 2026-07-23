@@ -12,21 +12,33 @@ namespace Engine {
 class CameraShake {
 public:
 
-	// リクエスト(時間と、揺れ)
+	/// <summary>
+	/// リクエスト(時間と、揺れ)
+	/// </summary>
 	void Request(const CameraShakeData& data);
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::Camera* camera);
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(Vector3& pos,float dt);
 
-	// シェイクしているか
+	/// <summary>
+	/// シェイクしているか
+	/// </summary>
 	bool IsShake() const { return isShake; }
 
-	// カメラデフォルト位置設定
+	/// <summary>
+	/// カメラデフォルト位置設定
+	/// </summary>
 	void SetDefultPos(const Vector3& pos){defultPos = pos;};
-	// カメラデフォルト位置取得
+	/// <summary>
+	/// カメラデフォルト位置取得
+	/// </summary>
 	Vector3 GetDefultPos(){ return defultPos; }
 
 private:

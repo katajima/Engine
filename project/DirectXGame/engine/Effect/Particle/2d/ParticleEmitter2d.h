@@ -17,56 +17,100 @@ namespace Engine {
 	class ParticleEmitter2d
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager2d* particleManager, std::string emitName, std::string particleName);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 出現
+		/// <summary>
+		/// 出現
+		/// </summary>
 		void Emit();
 
-		// 範囲設定
+		/// <summary>
+		/// 範囲設定
+		/// </summary>
 		void SetRange(Vector2 min, Vector2 max);// 範囲設定
-		// エミッターデータ取得
+		/// <summary>
+		/// エミッターデータ取得
+		/// </summary>
 		EffectEmitData2d& GetEmitData() { return emitData_; };
-		// 発生頻度取得
+		/// <summary>
+		/// 発生頻度取得
+		/// </summary>
 		float& GetFrequency() { return frequency_; };
-		// 出現数取得
+		/// <summary>
+		/// 出現数取得
+		/// </summary>
 		int& GetCount() { return emitData_.count.median; };
-		// 親子付け設定
+		/// <summary>
+		/// 親子付け設定
+		/// </summary>
 		void SetParent(WorldTransform2d& parent) { transform_.parent_ = &parent; };
-		// 位置設定
+		/// <summary>
+		/// 位置設定
+		/// </summary>
 		void SetPos(Vector2 pos) { transform_.translate_ = pos; }
-		// 出現数設定
+		/// <summary>
+		/// 出現数設定
+		/// </summary>
 		void SetCount(int count, int range);
-		// 発生頻度設定
+		/// <summary>
+		/// 発生頻度設定
+		/// </summary>
 		void SetFrequency(float frequency) { frequency_ = frequency_; }
-		// αクリッピング設定
+		/// <summary>
+		/// αクリッピング設定
+		/// </summary>
 		void SetAlphaClipping(float alpha) { alphaClipping_ = alpha; }
 
 	public:
-		// ライティングするか設定
+		/// <summary>
+		/// ライティングするか設定
+		/// </summary>
 		void SetEnableLighting(int lighting) { enableLighting_ = lighting; }
-		// 出現させるか設定
+		/// <summary>
+		/// 出現させるか設定
+		/// </summary>
 		void SetIsEmit(bool is) { isEmit = is; } // 出すか
 	public: //
-		// カラー設定
+		/// <summary>
+		/// カラー設定
+		/// </summary>
 		void SetColorMinMax(Vector4 min, Vector4 max) { emitData_.colorRange.min = min; emitData_.colorRange.max = max; } // カラー
-		// サイズ設定
+		/// <summary>
+		/// サイズ設定
+		/// </summary>
 		void SetSize(Vector2 size, Vector2 range);
-		// 回転設定
+		/// <summary>
+		/// 回転設定
+		/// </summary>
 		void SetRotate(float rotate, float range);
-		// 生存時間設定
+		/// <summary>
+		/// 生存時間設定
+		/// </summary>
 		void SetLifeTime(float life, float range);
-		// 速度設定
+		/// <summary>
+		/// 速度設定
+		/// </summary>
 		void SetVelocity(Vector2 velocity, Vector2 range);
-		// 回転速度設定
+		/// <summary>
+		/// 回転速度設定
+		/// </summary>
 		void SetRotateVelocity(float rotateVelocity, float range);
-		// 加速度設定
+		/// <summary>
+		/// 加速度設定
+		/// </summary>
 		void SetAcceleration(Vector2 acceleration, Vector2 range);
 	private:
 		Range<Vector2> range_;	// 出現範囲
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void EmitUnique();
 
 	private:

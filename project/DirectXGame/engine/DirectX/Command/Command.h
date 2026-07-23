@@ -26,20 +26,32 @@ namespace Engine {
 		Command() = default;
 		~Command() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DXGIDevice* dxgi);
 
-		// コマンドの実行
+		/// <summary>
+		/// コマンドの実行
+		/// </summary>
 		void KickCommand();
 
-		// コマンドのリセット
+		/// <summary>
+		/// コマンドのリセット
+		/// </summary>
 		void ResetCommand();
 
-		// キューの取得
+		/// <summary>
+		/// キューの取得
+		/// </summary>
 		ID3D12CommandQueue* GetQueue();
-		// アロケータの取得
+		/// <summary>
+		/// アロケータの取得
+		/// </summary>
 		ID3D12CommandAllocator* GetAllocator();
-		// リストの取得
+		/// <summary>
+		/// リストの取得
+		/// </summary>
 		ID3D12GraphicsCommandList* GetList();
 
 	private:

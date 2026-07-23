@@ -30,16 +30,24 @@ namespace Character {
             : attackSubstate_(state), character_(character), fsm_(fsm) {
         }
 
-        // 開始
+        /// <summary>
+        /// 開始
+        /// </summary>
         virtual void Enter() {}
-        // 更新
+        /// <summary>
+        /// 更新
+        /// </summary>
         virtual void Update(float deltaTime) {}
-        // 終了
+        /// <summary>
+        /// 終了
+        /// </summary>
         virtual void Exit() {}
 
 
     public:
-        // サブステート取得
+        /// <summary>
+        /// サブステート取得
+        /// </summary>
         AttackSubState GetAttackSubState() const { return attackSubstate_; }
     protected:
         AttackSubState attackSubstate_;

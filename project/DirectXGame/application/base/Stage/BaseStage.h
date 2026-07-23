@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // engine
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
@@ -29,10 +29,14 @@ public:
 		}
 	}
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	virtual void Initialize(Engine::EntityManager* entityManager,Engine::AudioManager* audioManager, CameraManager* cameraManager) = 0;
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	virtual void Update(float dt) = 0;
 
 	///< summary>
@@ -52,9 +56,13 @@ public:
 
 
 public:
-	// レベルデータ取得
+	/// <summary>
+	/// レベルデータ取得
+	/// </summary>
 	LoadLevelData* GetLoadLevelData() { return loadData_.get(); }
-	// ステージコライダーシステム取得
+	/// <summary>
+	/// ステージコライダーシステム取得
+	/// </summary>
 	StageColliderSystem* GetStageColliderSystem() { return stageColliderSystem_.get(); }
 protected:
 
@@ -109,7 +117,9 @@ protected:
 	void BaseUpdate(float dt);
 
 protected:
-	// エンティティ管理クラス取得
+	/// <summary>
+	/// エンティティ管理クラス取得
+	/// </summary>
 	Engine::EntityManager* GetEntityManager() { return entityManager; }
 protected: // 基礎オブジェクト
 	// オーシャンシェーダー

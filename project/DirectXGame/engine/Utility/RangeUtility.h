@@ -1,23 +1,31 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/struct/Vector4.h"
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Structs.h"
 #include <iostream>
 
-// 最小値
+/// <summary>
+/// 最小値
+/// </summary>
 inline float ConversionMin(float a, float b) {
     return (std::min)(a, b);
 }
-// 最小値
+/// <summary>
+/// 最小値
+/// </summary>
 inline int ConversionMin(int a, int b) {
     return (std::min)(a, b);
 }
-// 最大値
+/// <summary>
+/// 最大値
+/// </summary>
 inline float ConversionMax(float a, float b) {
     return (std::max)(a, b);
 }
-// 最大値
+/// <summary>
+/// 最大値
+/// </summary>
 inline int ConversionMax(int a, int b) {
     return (std::max)(a, b);
 }

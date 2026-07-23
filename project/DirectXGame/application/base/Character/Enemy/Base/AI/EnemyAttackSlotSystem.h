@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <vector>
 #include <array>
 #include <unordered_map>
@@ -19,7 +19,9 @@ namespace Character {
 	/// </summary>
 	class EnemyAttackSlotSystem {
 	public:
-		// スロット状態を初期化する
+		/// <summary>
+		/// スロット状態を初期化する
+		/// </summary>
 		void Initialize();
 
 		// ターゲット位置を基準に攻撃スロットを作り、敵へ割り当てる
@@ -30,19 +32,31 @@ namespace Character {
 			float dt
 		);
 
-		// 指定した敵が確保している攻撃スロットを取得する
+		/// <summary>
+		/// 指定した敵が確保している攻撃スロットを取得する
+		/// </summary>
 		const AttackSlot* FindSlot(BaseEnemy* enemy) const;
-		// デバッグ描画など読み取り用途に、全攻撃位置を公開する
+		/// <summary>
+		/// デバッグ描画など読み取り用途に、全攻撃位置を公開する
+		/// </summary>
 		const auto& GetSlots() const { return slots_; }
 
 	private:
-		// ターゲットの周囲に円形の攻撃スロットを作成する
+		/// <summary>
+		/// ターゲットの周囲に円形の攻撃スロットを作成する
+		/// </summary>
 		void CreateSlots(const Vector3& targetPos, float targetRotateY);
-		// 各敵に最も近い未使用スロットを割り当てる
+		/// <summary>
+		/// 各敵に最も近い未使用スロットを割り当てる
+		/// </summary>
 		void AssignSlots(const std::vector<BaseEnemy*>& enemies, float dt);
-		// 今フレームの割り当て情報をリセットする
+		/// <summary>
+		/// 今フレームの割り当て情報をリセットする
+		/// </summary>
 		void ClearOwners();
-		// 消滅した敵の保持情報を削除する
+		/// <summary>
+		/// 消滅した敵の保持情報を削除する
+		/// </summary>
 		void CleanupSlotHolds(const std::vector<BaseEnemy*>& enemies);
 
 	private:

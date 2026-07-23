@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
@@ -36,23 +36,35 @@ public:
 	/// </summary>
 	void InAction();
 
-	// レティクル親子付け
+	/// <summary>
+	/// レティクル親子付け
+	/// </summary>
 	void SetReticleParent(Engine::WorldTransform* parent);
 
 public:
-	// 描画するか
+	/// <summary>
+	/// 描画するか
+	/// </summary>
 	void SetIsDraw(bool is);
 	
-	// 半径設定
+	/// <summary>
+	/// 半径設定
+	/// </summary>
 	void SetRadius(float rad);
 
-	// 半径爆心
+	/// <summary>
+	/// 半径爆心
+	/// </summary>
 	float GetRadius() const { return dataRange_.reticleRad_; };
 
-	// 爆心位置
+	/// <summary>
+	/// 爆心位置
+	/// </summary>
 	Vector3 GetRangeBombingPos() const { return dataRange_.rangeBombingPos; }
 
-	// フォローカメラと弾マネージャー設定
+	/// <summary>
+	/// フォローカメラと弾マネージャー設定
+	/// </summary>
 	void Set(FollowCamera* followCamera, BulletSpawn* bulletSpawn){
 		this->followCamera = followCamera;
 		this->spawn = bulletSpawn;

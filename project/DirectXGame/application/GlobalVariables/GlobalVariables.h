@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"GlobalVariablesFunction.h"
 #include <filesystem>
 
@@ -51,27 +51,45 @@ namespace Engine {
 
 
 
-		// グループが存在するか？
+		/// <summary>
+		/// グループが存在するか？
+		/// </summary>
 		bool HasGroup(const std::string& groupName) const;
 
-		// キーが存在するか？
+		/// <summary>
+		/// キーが存在するか？
+		/// </summary>
 		bool HasKey(const std::string& groupName, const std::string& key) const;
 
-		// グループやキーの一覧取得
+		/// <summary>
+		/// グループやキーの一覧取得
+		/// </summary>
 		std::vector<std::string> GetGroupNames() const;
-		// グループやキーの取得(名前取得)
+		/// <summary>
+		/// グループやキーの取得(名前取得)
+		/// </summary>
 		std::vector<std::string> GetKeys(const std::string& groupName) const;
 
-		// 何の型か？
+		/// <summary>
+		/// 何の型か？
+		/// </summary>
 		std::string GetTypeName(const std::string& groupName, const std::string& key) const;
 
-		// 削除(アイテム)
+		/// <summary>
+		/// 削除(アイテム)
+		/// </summary>
 		void RemoveItem(const std::string& groupName, const std::string& key);
-		// 削除(グループ)
+		/// <summary>
+		/// 削除(グループ)
+		/// </summary>
 		void RemoveGroup(const std::string& groupName);
-		// グループ名変更
+		/// <summary>
+		/// グループ名変更
+		/// </summary>
 		bool RenameGroup(const std::string& oldName, const std::string& newName);
-		// 保存カテゴリを設定
+		/// <summary>
+		/// 保存カテゴリを設定
+		/// </summary>
 		void SetGroupCategory(const std::string& groupName, const std::string& categoryName);
 
 		// 複製
@@ -79,7 +97,9 @@ namespace Engine {
 			const std::string& srcGroupName, const std::string& srcKey,
 			const std::string& dstGroupName, const std::string& dstKey);
 
-		// 固有キー取得
+		/// <summary>
+		/// 固有キー取得
+		/// </summary>
 		std::string MakeUniqueKey(const std::string& baseKey, const GvData::Group& group);
 
 		/// <summary>
@@ -88,7 +108,9 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void SaveFile(const std::string& groupName);
 
-		// 保存ファイル削除
+		/// <summary>
+		/// 保存ファイル削除
+		/// </summary>
 		bool RemoveSavedFile(const std::string& groupName);
 
 		/// <summary>
@@ -102,7 +124,9 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void LoadFile(const std::string& groupName);
 
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		GvData::Group GetGroupData(const std::string& name) { return datas_[name]; }
 
 	public:
@@ -126,13 +150,21 @@ namespace Engine {
 		//グローバル変数の保存先
 		const std::string kDirectoryPath = "resources/GlobalVariables/";
 
-		// 保存カテゴリ名を取得
+		/// <summary>
+		/// 保存カテゴリ名を取得
+		/// </summary>
 		std::string ResolveCategory(const std::string& groupName) const;
-		// 保存カテゴリのフォルダパスを取得
+		/// <summary>
+		/// 保存カテゴリのフォルダパスを取得
+		/// </summary>
 		std::filesystem::path GetCategoryDirectory(const std::string& groupName) const;
-		// グループの保存ファイルパスを取得
+		/// <summary>
+		/// グループの保存ファイルパスを取得
+		/// </summary>
 		std::filesystem::path GetSaveFilePath(const std::string& groupName) const;
-		// 旧形式を含めた既存保存ファイルパスを探す
+		/// <summary>
+		/// 旧形式を含めた既存保存ファイルパスを探す
+		/// </summary>
 		std::filesystem::path FindExistingFilePath(const std::string& groupName) const;
 	};
 
@@ -202,13 +234,17 @@ namespace Engine {
 			"Unsupported type for AddItem"
 			);
 
-		// グループが存在しない場合は作成
+		/// <summary>
+		/// グループが存在しない場合は作成
+		/// </summary>
 		CreateGroup(groupName);
 
 		// グループを取得
 		GvData::Group& group = datas_[groupName];
 
-		// キーが存在しなければ追加
+		/// <summary>
+		/// キーが存在しなければ追加
+		/// </summary>
 		if (group.find(key) == group.end()) {
 			group[key] = value;
 		}
@@ -218,14 +254,20 @@ namespace Engine {
 	template<typename T>
 	T GlobalVariables::GetValue(const std::string& groupName, const std::string& key) const
 	{
-		// グループ存在チェック
+		/// <summary>
+		/// グループ存在チェック
+		/// </summary>
 		assert(datas_.find(groupName) != datas_.end());
 		const GvData::Group& group = datas_.at(groupName);
 
-		// キー存在チェック
+		/// <summary>
+		/// キー存在チェック
+		/// </summary>
 		assert(group.find(key) != group.end());
 
-		// std::variantから型Tを取得。型が違うと例外 std::bad_variant_access が投げられるので注意
+		/// <summary>
+		/// std::variantから型Tを取得。型が違うと例外 std::bad_variant_access が投げられるので注意
+		/// </summary>
 		return std::get<T>(group.at(key));
 	}
 

@@ -11,32 +11,52 @@ namespace Engine {
 	class SkinningCommon
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
 
-		// 描画前準備
+		/// <summary>
+		/// 描画前準備
+		/// </summary>
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type); }
-		// シャドウマップ描画前準備
+		/// <summary>
+		/// シャドウマップ描画前準備
+		/// </summary>
 		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap); }
 
-		// 計算前準備
+		/// <summary>
+		/// 計算前準備
+		/// </summary>
 		void DrawComputeSetting() { csPsoManager_->PreComputePSRS(); }
-		// デフォルトカメラ設定
+		/// <summary>
+		/// デフォルトカメラ設定
+		/// </summary>
 		void SetDefaultCamera(Camera* camera) { this->defaultCamera = camera; }
-		// デフォルトカメラ取得
+		/// <summary>
+		/// デフォルトカメラ取得
+		/// </summary>
 		Camera* GetDefaultCamera() const {
 			defaultCamera;
 			return defaultCamera;
 		}
 
 	private:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
-		// シャドウマップ用パイプラインの作成
+		/// <summary>
+		/// シャドウマップ用パイプラインの作成
+		/// </summary>
 		void CreateShadowMapPipeline();
 
 

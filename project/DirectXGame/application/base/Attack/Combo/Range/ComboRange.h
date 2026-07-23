@@ -17,22 +17,38 @@ namespace Combo {
 	class ComboRange {
 	public:
 		using Data = GlobalRange;
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx, float timer);
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit(Character::BaseCharacter* owner);
-		// 現在のコンボ攻撃がヒットしたことを通知する
+		/// <summary>
+		/// 現在のコンボ攻撃がヒットしたことを通知する
+		/// </summary>
 		void NotifyHit();
-		// データ構造体取得
+		/// <summary>
+		/// データ構造体取得
+		/// </summary>
 		Data& GetData() { return data_; }
 	private:
-		// 遠距離攻撃の狙い方向を取得する
+		/// <summary>
+		/// 遠距離攻撃の狙い方向を取得する
+		/// </summary>
 		Vector3 ResolveAimDirection(const Character::CharacterContext& ctx) const;
-		// 遠距離攻撃の狙い位置を取得する
+		/// <summary>
+		/// 遠距離攻撃の狙い位置を取得する
+		/// </summary>
 		Vector3 ResolveAimTarget(const Character::CharacterContext& ctx) const;
-		// オフセットターゲットの狙い位置を取得する
+		/// <summary>
+		/// オフセットターゲットの狙い位置を取得する
+		/// </summary>
 		Vector3 ResolveOffsetAimTarget(const Character::CharacterContext& ctx) const;
 
 		// コンボ使用者

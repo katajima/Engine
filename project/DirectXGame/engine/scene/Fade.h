@@ -53,19 +53,31 @@ namespace Engine {
 		/// </summary>
 		void DrawCompulsion2D();
 
-		// フェード開始
+		/// <summary>
+		/// フェード開始
+		/// </summary>
 		void Start(Status status, float duration, const Color& color);
 
-		// フェード終了
+		/// <summary>
+		/// フェード終了
+		/// </summary>
 		void Stop() { status_ = Status::None; };;
 
-		// フェード終了判定
+		/// <summary>
+		/// フェード終了判定
+		/// </summary>
 		bool IsFinished() const;
-		// 色設定
+		/// <summary>
+		/// 色設定
+		/// </summary>
 		void SetColor(Color color) { baseColor_ = color; }
-		// 色設定
+		/// <summary>
+		/// 色設定
+		/// </summary>
 		void SetColorUpdate(Color color);
-		// サイズ設定
+		/// <summary>
+		/// サイズ設定
+		/// </summary>
 		void SetSize(Vector2 size);
 
 	private:

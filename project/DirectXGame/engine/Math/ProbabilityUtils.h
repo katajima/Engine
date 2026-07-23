@@ -15,7 +15,9 @@
 static std::random_device seedGenerator;
 
 
-// 階乗（Factorial）の計算関数
+/// <summary>
+/// 階乗（Factorial）の計算関数
+/// </summary>
 static uint32_t Factorial(uint32_t n) {
     if (n > 0) {
         return n * Factorial(n - 1);
@@ -23,19 +25,25 @@ static uint32_t Factorial(uint32_t n) {
     return 1;
 }
 
-// 順列（Permutation）の計算関数
+/// <summary>
+/// 順列（Permutation）の計算関数
+/// </summary>
 static uint32_t Permutation(uint32_t n, uint32_t k) {
     return Factorial(n) / Factorial(n - k);
 }
 
-// 組み合わせ（Combination）の計算関数
+/// <summary>
+/// 組み合わせ（Combination）の計算関数
+/// </summary>
 static uint32_t Combination(uint32_t n, uint32_t k) {
     return Permutation(n, k) / Factorial(k);
 }
 
 // 確率(従属事象)
 // 確率(n), 回数(k)
-// 1/n + k
+/// <summary>
+/// 1/n + k
+/// </summary>
 static float DependentProbability(uint32_t n, uint32_t k) {
 	float num = 0;
 	for (uint32_t i = 1; i <= k; i++) {
@@ -46,7 +54,9 @@ static float DependentProbability(uint32_t n, uint32_t k) {
 
 // 確率(独立事象)
 // 確率(n), 回数(k)
-// 1/n + k
+/// <summary>
+/// 1/n + k
+/// </summary>
 static float IndependentProbability(uint32_t n, uint32_t k) {
 	float num = 0;
 	num = powf(1.0f / static_cast<float>(n), static_cast<float>(k));
@@ -56,31 +66,45 @@ static float IndependentProbability(uint32_t n, uint32_t k) {
 
 
 
-// サイコロ(diceNum面)を振る関数 
+/// <summary>
+/// サイコロ(diceNum面)を振る関数
+/// </summary>
 static int RollDice(uint32_t diceNum) {
     return rand() % diceNum + 1; // 1からdiceNumのランダムな数を返す 
 }
 
 // バーンの期待値を計算する関数
-// diceNum: サイコロの面の数, totalRolls: ロールの回数
+/// <summary>
+/// diceNum: サイコロの面の数, totalRolls: ロールの回数
+/// </summary>
 static float ExpectedValue(uint32_t diceNum, int totalRolls) {
-    // サイコロ1回分の期待値を計算
+    /// <summary>
+    /// サイコロ1回分の期待値を計算
+    /// </summary>
     float singleRollExpectedValue = (static_cast<float>(diceNum) + 1) / 2.0f;
 
-    // 合計ロール数を掛けて全体の期待値を計算
+    /// <summary>
+    /// 合計ロール数を掛けて全体の期待値を計算
+    /// </summary>
     return singleRollExpectedValue * static_cast<float>(totalRolls);
 }
 
 // 出目の確率を持つサイコロを振る関数
 // probabilities: 各目に対応する確率のベクトル（例: {0.1, 0.2, 0.7}）
-// 戻り値: サイコロの出目（1から始まるインデックス）
+/// <summary>
+/// 戻り値: サイコロの出目（1から始まるインデックス）
+/// </summary>
 static int RollBiasedDice(const std::vector<float>& probabilities) {
-	// 確率ベクトルのチェック
+	/// <summary>
+	/// 確率ベクトルのチェック
+	/// </summary>
 	if (probabilities.empty()) {
 		throw std::invalid_argument("The probabilities vector cannot be empty.");
 	}
 
-	// 確率の合計が1かどうかをチェック
+	/// <summary>
+	/// 確率の合計が1かどうかをチェック
+	/// </summary>
 	float sum = std::accumulate(probabilities.begin(), probabilities.end(), 0.0f);
 	if (sum < 0.999f || sum > 1.001f) { // 許容範囲でチェック
 		throw std::invalid_argument("The probabilities must sum to 1.");
@@ -91,7 +115,9 @@ static int RollBiasedDice(const std::vector<float>& probabilities) {
 	static std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-	// 乱数生成
+	/// <summary>
+	/// 乱数生成
+	/// </summary>
 	float randomValue = dist(gen);
 
 	// 確率に基づいて結果を決定
@@ -103,20 +129,28 @@ static int RollBiasedDice(const std::vector<float>& probabilities) {
 		}
 	}
 
-	// 理論上ここに到達することはないが、安全のため
+	/// <summary>
+	/// 理論上ここに到達することはないが、安全のため
+	/// </summary>
 	return static_cast<int>(probabilities.size());
 }
 
 // バーンの期待値を計算する関数
 // probabilities: 各目の確率を格納したベクトル
-// totalRolls: サイコロを振る回数
+/// <summary>
+/// totalRolls: サイコロを振る回数
+/// </summary>
 static float ExpectedValue(const std::vector<float>& probabilities, int totalRolls) {
-	// 確率ベクトルのチェック
+	/// <summary>
+	/// 確率ベクトルのチェック
+	/// </summary>
 	if (probabilities.empty()) {
 		throw std::invalid_argument("The probabilities vector cannot be empty.");
 	}
 
-	// 確率の合計が1かどうかをチェック
+	/// <summary>
+	/// 確率の合計が1かどうかをチェック
+	/// </summary>
 	float sum = std::accumulate(probabilities.begin(), probabilities.end(), 0.0f);
 	if (sum < 0.999f || sum > 1.001f) { // 許容範囲でチェック
 		throw std::invalid_argument("The probabilities must sum to 1.");
@@ -128,7 +162,9 @@ static float ExpectedValue(const std::vector<float>& probabilities, int totalRol
 		singleRollExpectedValue += (i + 1) * probabilities[i]; // i+1は出目に対応
 	}
 
-	// 全体の期待値を計算
+	/// <summary>
+	/// 全体の期待値を計算
+	/// </summary>
 	return singleRollExpectedValue * static_cast<float>(totalRolls);
 }
 
@@ -139,15 +175,21 @@ static float ExpectedValue(const std::vector<float>& probabilities, int totalRol
 class Sequence
 {
 public:
-	// 一般項
+	/// <summary>
+	/// 一般項
+	/// </summary>
 	static int GeneralTerm(int num, int n) {
 		return num * n;
 	}
-	// 等差数列
+	/// <summary>
+	/// 等差数列
+	/// </summary>
 	static int Arithmetic(int firstTerm, int n, int difference) {
 		return firstTerm + (n * difference);
 	}
-	// 項比数列
+	/// <summary>
+	/// 項比数列
+	/// </summary>
 	static int Geometric(int firstTerm, int n, int ratio) {
 		return firstTerm * static_cast<int>(pow(ratio, n - 1));
 	}

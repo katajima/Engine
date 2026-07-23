@@ -13,26 +13,40 @@ namespace Engine {
 	/// </summary>
 	class UIBaseBoard {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(InputSystem* inputSystem, EntityManager* entityManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic = true, std::string textureName = "resources/Texture/Image.png");
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime);
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// 名前取得
+		/// <summary>
+		/// 名前取得
+		/// </summary>
 		std::string GetName() { return name_; };
-		//ボードを使うか
+		/// <summary>
+		/// ボードを使うか
+		/// </summary>
 		void SetUse(bool use) { useBoard_ = use; }
 
-		// UI生成
+		/// <summary>
+		/// UI生成
+		/// </summary>
 		void CreateUIElement(UIType type, std::string name, Vector2 pos, int instance = 1, bool useSprite = false);
 
 		// UI取得
 		template <typename T>
 		T* GetUIElement(UIType type, std::string name)
 		{
-			// type（＝外側のマップ） が存在するか確認
+			/// <summary>
+			/// type（＝外側のマップ） が存在するか確認
+			/// </summary>
 			auto outerIt = uiElement_.find(type);
 			if (outerIt == uiElement_.end()) {
 				return nullptr;
@@ -45,11 +59,15 @@ namespace Engine {
 				return nullptr;
 			}
 
-			// UIElement のポインタを返す（unique_ptr から生ポインタに）
+			/// <summary>
+			/// UIElement のポインタを返す（unique_ptr から生ポインタに）
+			/// </summary>
 			return dynamic_cast<T*>(innerIt->second.get());
 		}
 
-		// 画面比率設定
+		/// <summary>
+		/// 画面比率設定
+		/// </summary>
 		void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) {
 			leftTopPos_ = leftTopPos;
 			ratio_ = ratio;

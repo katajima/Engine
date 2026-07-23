@@ -22,15 +22,25 @@ namespace Engine {
 	class SkyBox
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(EntityManager* entity3DManager, std::string txtueName);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// マテリアル取得
+		/// <summary>
+		/// マテリアル取得
+		/// </summary>
 		Material* GetMaterial() { return material.get(); }
-		// メッシュ取得
+		/// <summary>
+		/// メッシュ取得
+		/// </summary>
 		SkyBoxMesh* GetMesh() { return mesh_.get(); }
 	private:
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "vector"
 #include <map>
 #include <string>
@@ -29,32 +29,56 @@ namespace Engine {
 		EffectComponent() = default;
 		~EffectComponent() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(EntityManager* entityManager, GlobalVariables* globalVariables);
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// 描画エフェクト
+		/// <summary>
+		/// 描画エフェクト
+		/// </summary>
 		void DrawEffect();
-		// GPUパーティクルマネージャー取得
+		/// <summary>
+		/// GPUパーティクルマネージャー取得
+		/// </summary>
 		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager; }
-		// パーティクルマネージャー取得
+		/// <summary>
+		/// パーティクルマネージャー取得
+		/// </summary>
 		ParticleManager* GetParticleManager() { return particleManager; }
-		// ロード済みモデル一覧をエフェクトエディターから参照するためのモデルマネージャー取得
+		/// <summary>
+		/// ロード済みモデル一覧をエフェクトエディターから参照するためのモデルマネージャー取得
+		/// </summary>
 		ModelManager* GetModelManager();
 
 	public: // パーティクルエミッター(CPU)
 
-		// 追加
+		/// <summary>
+		/// 追加
+		/// </summary>
 		void AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype = EmitData::EmitType::kRandom, WorldTransform* parent = nullptr);
-		// 削除
+		/// <summary>
+		/// 削除
+		/// </summary>
 		void RemoveEmitter(const std::string& name) { emitters_.erase(name); };
-		// 削除
+		/// <summary>
+		/// 削除
+		/// </summary>
 		void RemoveEmitterAll() { emitters_.clear(); }
-		// 存在確認
+		/// <summary>
+		/// 存在確認
+		/// </summary>
 		bool HasEmitter(const std::string& name) const { return emitters_.find(name) != emitters_.end(); }
 		// 取得
 		template<typename T>
@@ -65,7 +89,9 @@ namespace Engine {
 			}
 			return nullptr;
 		}
-		// エミッター取得
+		/// <summary>
+		/// エミッター取得
+		/// </summary>
 		BaseParticleEmitter* GetBaseEmitter(const std::string& name) {
 			auto it = emitters_.find(name);
 			if (it != emitters_.end()) {
@@ -76,7 +102,9 @@ namespace Engine {
 
 	public: // パーティクルエミッター(GPU)
 
-		// 追加
+		/// <summary>
+		/// 追加
+		/// </summary>
 		void AddGPUParticleEmitter(const std::string& name, const std::string& particleName, EmitterType type, WorldTransform* parent = nullptr);
 		// 取得
 		template<typename T>
@@ -86,17 +114,29 @@ namespace Engine {
 
 
 	public: // トレイルエフェクト
-		// 追加
+		/// <summary>
+		/// 追加
+		/// </summary>
 		void AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
-		// 合成設定付きで追加
+		/// <summary>
+		/// 合成設定付きで追加
+		/// </summary>
 		void AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, const TrailSettings& settings, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
-		// 削除
+		/// <summary>
+		/// 削除
+		/// </summary>
 		void RemoveTrailEffect(const std::string& name) { trails_.erase(name); };
-		// 削除
+		/// <summary>
+		/// 削除
+		/// </summary>
 		void RemoveTrailEffectAll() { trails_.clear(); };
-		// 存在確認
+		/// <summary>
+		/// 存在確認
+		/// </summary>
 		bool HasTrailEffect(const std::string& name) const { return trails_.find(name) != trails_.end(); }
-		// 取得
+		/// <summary>
+		/// 取得
+		/// </summary>
 		TrailEffect* GetTrailEffect(const std::string& name) {
 			auto it = trails_.find(name);
 			if (it != trails_.end()) {
@@ -106,16 +146,24 @@ namespace Engine {
 		}
 	public: // プリミティブ
 
-		// 追加
+		/// <summary>
+		/// 追加
+		/// </summary>
 		void AddPrimitive(const std::string& name, const std::string tex, ShapeParameter::ShapeType type);
-		// 削除
+		/// <summary>
+		/// 削除
+		/// </summary>
 		void RemovePrimitive(const std::string& name, ShapeParameter::ShapeType type);
-		// 削除
+		/// <summary>
+		/// 削除
+		/// </summary>
 		void RemovePrimitiveAll() { primitives3D_.clear(); };
 		// 取得
 		template<typename T>
 		T* GetPrimitive(const std::string& name, ShapeParameter::ShapeType type) {
-			// typeが存在するかチェック
+			/// <summary>
+			/// typeが存在するかチェック
+			/// </summary>
 			auto typeIt = primitives3D_.find(type);
 			if (typeIt == primitives3D_.end()) {
 				return nullptr;
@@ -128,7 +176,9 @@ namespace Engine {
 				return nullptr;
 			}
 
-			// dynamic_castで安全にキャストして返す
+			/// <summary>
+			/// dynamic_castで安全にキャストして返す
+			/// </summary>
 			return dynamic_cast<T*>(nameIt->second.get());
 		}
 

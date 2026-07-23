@@ -12,55 +12,89 @@ namespace Combo {
 		// 初期化
 		void Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, 
 			Character::CharacterManager* characterManager,Character::BaseCharacter* owner, EffectSystem* effectSystem);
-		// 更新 
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float dt);
 
-		// コンボエディターがアクティブか取得
+		/// <summary>
+		/// コンボエディターがアクティブか取得
+		/// </summary>
 		bool IsActive() const { return isComboEditorActive_; }
-		// コンボエディターがマウスやキーボード入力を使用中か取得
+		/// <summary>
+		/// コンボエディターがマウスやキーボード入力を使用中か取得
+		/// </summary>
 		bool IsInputCaptured() const { return isInputCaptured_; }
 
-		// 所有者設定
+		/// <summary>
+		/// 所有者設定
+		/// </summary>
 		void SetOwner(Character::BaseCharacter* owner);
 
 	private:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateImGui(float dt);
 		
-		// コンボエディターブロックをコンボシステムに適応
+		/// <summary>
+		/// コンボエディターブロックをコンボシステムに適応
+		/// </summary>
 		void ApplyComboEditorToSystem();
 		
-		// グローバルデータ設定
+		/// <summary>
+		/// グローバルデータ設定
+		/// </summary>
 		void SetGlobalData();
 		
-		// コンボノードの管理
+		/// <summary>
+		/// コンボノードの管理
+		/// </summary>
 		void DrawNodeManagement();
 		
-		// コンボ開始設定のデバッグ描画
+		/// <summary>
+		/// コンボ開始設定のデバッグ描画
+		/// </summary>
 		void DrawStartComboSettings();
 		
-		// コンボ全体の流れをノードとして表示、接続を編集
+		/// <summary>
+		/// コンボ全体の流れをノードとして表示、接続を編集
+		/// </summary>
 		void DrawComboNodeGraph();
 		
-		// コンボ追加
+		/// <summary>
+		/// コンボ追加
+		/// </summary>
 		void AddComboNode();
 
-		// コンボ追加時にコピーするか
+		/// <summary>
+		/// コンボ追加時にコピーするか
+		/// </summary>
 		void AddCopiedComboNode();
 
-		// 新しいコンボ名のバリデーション
+		/// <summary>
+		/// 新しいコンボ名のバリデーション
+		/// </summary>
 		bool ValidateNewComboName(const std::string& comboName);
 
-		// コンボ名前変更
+		/// <summary>
+		/// コンボ名前変更
+		/// </summary>
 		void RenameComboNode(const std::string& oldName, const std::string& newName);
 
-		// コンボ削除
+		/// <summary>
+		/// コンボ削除
+		/// </summary>
 		void DeleteComboNode(const std::string& comboName);
 
-		// セーブ
+		/// <summary>
+		/// セーブ
+		/// </summary>
 		void DrawSaveComboNode();
 	private:
-		// コンボエディターブロック作成
+		/// <summary>
+		/// コンボエディターブロック作成
+		/// </summary>
 		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
 	private: // もらいもの
 		// コンボシステム

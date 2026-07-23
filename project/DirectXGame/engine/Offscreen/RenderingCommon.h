@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "PostEffect.h"
 
 
@@ -15,13 +15,21 @@ namespace Engine {
 	private:
 
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(PostEffectType type, int index, int indexB = 0);
-		// DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
 
 	private:

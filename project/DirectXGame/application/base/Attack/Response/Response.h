@@ -17,13 +17,21 @@ class MoveRequestSystem;	// 移動リクエストシステム
 class HitResponse {
 public:
 
-	// 衝突応答(タグごとの)
+	/// <summary>
+	/// 衝突応答(タグごとの)
+	/// </summary>
 	void Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other);
-	// 壁や床
+	/// <summary>
+	/// 壁や床
+	/// </summary>
 	void HitWall(Engine::Collider* self, Engine::Collider* other);
-	// 影響
+	/// <summary>
+	/// 影響
+	/// </summary>
 	void HitEffect(Engine::Collider* self, Engine::Collider* other);
-	// 使っているもののワールドトランスフォームを設定
+	/// <summary>
+	/// 使っているもののワールドトランスフォームを設定
+	/// </summary>
 	void SetOwner(Engine::WorldTransform* owner) { transform = owner; };
 
 	void SetOwner(MoveRequestSystem* owner) { this->moveRequestSystem = owner; };

@@ -64,15 +64,21 @@ namespace Character {
 		virtual void OnDodgeSuccess() {};
 		/// 回避成功後のコンボ受付中か
 		virtual bool IsDodgeSuccessComboWindow() const { return false; };
-		// 攻撃(弱攻撃)
+		/// <summary>
+		/// 攻撃(弱攻撃)
+		/// </summary>
 		void Attack() { RequestAttack(ActionInput::LightAttack); };
 		/// 攻撃(強攻撃)
 		void HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
-		// 攻撃(スキル)
+		/// <summary>
+		/// 攻撃(スキル)
+		/// </summary>
 		void SkillAttack() { RequestAttack(ActionInput::Skill); };
 		/// ステートマシーン初期化
 		virtual void InitStateMachine() {};
-		// リロード
+		/// <summary>
+		/// リロード
+		/// </summary>
 		virtual void Reload() {};
 	public:
 		/// <summary>プレイヤーまたは敵のキャラクター種別を設定する。</summary>
@@ -103,9 +109,13 @@ namespace Character {
 		/// <summary>必殺技で倒されたか取得する。</summary>
 		/// <returns>死亡原因が必殺属性ならtrue。</returns>
 		bool WasKilledBySpecialAttack() const { return fatalAttackAttribute_ == AttackAttribute::Special; }
-		// 削除フラグ
+		/// <summary>
+		/// 削除フラグ
+		/// </summary>
 		bool  GetDelete() const;
-		// 削除する
+		/// <summary>
+		/// 削除する
+		/// </summary>
 		void Delete();
 		/// <summary>キャラクター固有の時間倍率を反映したフレーム時間を取得する。</summary>
 		/// <returns>秒単位のフレーム時間。</returns>
@@ -113,38 +123,66 @@ namespace Character {
 		/// <summary>通常移動処理の許可状態を設定する。</summary>
 		/// <param name="is">移動を許可する場合はtrue。</param>
 		void IsMove(bool is);
-		// 移動可能か
+		/// <summary>
+		/// 移動可能か
+		/// </summary>
 		bool GetIsMove() const;
 		/// <summary>基本能力パラメータを取得する。</summary>
 		/// <returns>ParameterComponentが所有する変更可能ポインター。未初期化時はnullptr。</returns>
 		BasicParameters* GetBasicParameters() const;
-		// 基本パラメータ
+		/// <summary>
+		/// 基本パラメータ
+		/// </summary>
 		BasicParameters* Parameters();
 	public:
-		// タグ番号取得
+		/// <summary>
+		/// タグ番号取得
+		/// </summary>
 		uint32_t GetTagNumber() const { return tagNumber_; }
-		// タグ番号設定
+		/// <summary>
+		/// タグ番号設定
+		/// </summary>
 		void SetTagNumber(uint32_t tag) { tagNumber_ = tag; };
-		// 名前取得
+		/// <summary>
+		/// 名前取得
+		/// </summary>
 		std::string GetName() const;
 	public: // 取得系関数
-		// キャラクターステートマシーン取得
+		/// <summary>
+		/// キャラクターステートマシーン取得
+		/// </summary>
 		CharacterStateMachine* GetCharacterStateMachine();
-		// 現在の状態取得
+		/// <summary>
+		/// 現在の状態取得
+		/// </summary>
 		CharacterMainState GetCurrentMainState() const;
-		// 過去のステート
+		/// <summary>
+		/// 過去のステート
+		/// </summary>
 		CharacterMainState GetPrevState() const;
-		// 必殺技取得
+		/// <summary>
+		/// 必殺技取得
+		/// </summary>
 		BaseSpecial* GetSpecial();
-		// 武器取得
+		/// <summary>
+		/// 武器取得
+		/// </summary>
 		BaseWeapon* GetWeapon();
-		// 弾の出現
+		/// <summary>
+		/// 弾の出現
+		/// </summary>
 		BulletSpawn* GetBulletSpawn();
-		// 死亡システム
+		/// <summary>
+		/// 死亡システム
+		/// </summary>
 		DeathSystem* GetDeathSystem();
-		// コライダーコンポーネント
+		/// <summary>
+		/// コライダーコンポーネント
+		/// </summary>
 		Engine::ColliderComponent* GetColliderComponent();
-		// オブジェクト3d取得
+		/// <summary>
+		/// オブジェクト3d取得
+		/// </summary>
 		ObjectComponent* GetObjectComponent();
 		/// <summary>キャラクター本体のワールド変換を取得する。</summary>
 		/// <returns>キャラクターの生存期間中有効な変更可能参照。</returns>
@@ -156,47 +194,79 @@ namespace Character {
 		/// <returns>ワールド空間の座標。</returns>
 		Vector3 GetWorldPosition() const;
 	public: // 貰いもの
-		// 弾マネージャ取得
+		/// <summary>
+		/// 弾マネージャ取得
+		/// </summary>
 		BulletManager* GetBulletManager() { return this->bulletManager; }
-		// カメラ管理クラス取得
+		/// <summary>
+		/// カメラ管理クラス取得
+		/// </summary>
 		CameraManager* GetCameraManager() { return this->cameraManager; }
-		// ヒットボックス管理取得
+		/// <summary>
+		/// ヒットボックス管理取得
+		/// </summary>
 		HitBox::System* GetHitBoxSystem() { return this->hitBoxSystem; }
-		// スペシャルポイント管理クラス取得
+		/// <summary>
+		/// スペシャルポイント管理クラス取得
+		/// </summary>
 		SpecialPointManager* GetSpecialPointManager() { return this->specialPointManager; }
-		// 入力システム取得
+		/// <summary>
+		/// 入力システム取得
+		/// </summary>
 		InputSystem* GetInputSystem() { return inputSystem; };
 		/// <summary>キャラクター操作に使用する入力を設定する。</summary>
 		/// <param name="inputSystem">非所有ポインター。AI操作へ切り替える場合はnullptrを許容する。</param>
 		void SetInputSystem(InputSystem* inputSystem);
-		// カメラ取得
+		/// <summary>
+		/// カメラ取得
+		/// </summary>
 		Engine::Camera* GetCamera() const { return camera; }
 		/// <summary>キャラクター描画と方向計算に使用するカメラを設定する。</summary>
 		/// <param name="camera">非所有ポインター。キャラクター利用中は有効であること。</param>
 		void SetCamera(Engine::Camera* camera);
-		//エフェクト設定
+		/// <summary>
+		/// エフェクト設定
+		/// </summary>
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		//
 		EffectSystem* GetEffect() { return this->effect; }
-		// 弾マネージャーの設定
+		/// <summary>
+		/// 弾マネージャーの設定
+		/// </summary>
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; };
-		// ヒットボックス管理の設定
+		/// <summary>
+		/// ヒットボックス管理の設定
+		/// </summary>
 		void SetHitBoxSystem(HitBox::System* hitBoxSystem) { this->hitBoxSystem = hitBoxSystem; }
-		// カメラ管理クラスの設定
+		/// <summary>
+		/// カメラ管理クラスの設定
+		/// </summary>
 		void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
-		// スペシャルポイント管理クラス設定
+		/// <summary>
+		/// スペシャルポイント管理クラス設定
+		/// </summary>
 		void SetSpecialPointManager(SpecialPointManager* specialPointManager) { this->specialPointManager = specialPointManager; }
 	public:
-		// 移動コンポーネント取得
+		/// <summary>
+		/// 移動コンポーネント取得
+		/// </summary>
 		MovementComponent* GetMoveComponent() { return moveComponent_.get(); }
-		// キャラクターパラメータコンポーネント取得
+		/// <summary>
+		/// キャラクターパラメータコンポーネント取得
+		/// </summary>
 		ParameterComponent* GetCharacterParameterComponent() { return parameterComponent_.get(); }
-		// ヒットリアクションシステム取得
+		/// <summary>
+		/// ヒットリアクションシステム取得
+		/// </summary>
 		HitMotionSystem* GetHitMotionSystem() { return hitMotionSystem_.get(); }
-		// 攻撃コントローラー取得
+		/// <summary>
+		/// 攻撃コントローラー取得
+		/// </summary>
 		AttackController* GetAttackController() { return attackController_.get(); }
 	protected: // 保存機能
-		// 保存生成
+		/// <summary>
+		/// 保存生成
+		/// </summary>
 		void CreateGroup(const std::string name);
 		// 保存するもの追加
 		template<typename T>
@@ -209,9 +279,13 @@ namespace Character {
 			return globalVariables->GetValue<T>(GetName(), itemName);
 		}
 
-		// ベースの保存項目を追加
+		/// <summary>
+		/// ベースの保存項目を追加
+		/// </summary>
 		void InitializeBaseAddItem();
-		// 更新保存項目
+		/// <summary>
+		/// 更新保存項目
+		/// </summary>
 		void UpdateBaseGetValue();
 
 

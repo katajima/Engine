@@ -9,36 +9,60 @@ namespace Engine {
 	{
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize() override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Finalize() override;
 
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		void Update() override;
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw() override;
 
-		// リソース初期化
+		/// <summary>
+		/// リソース初期化
+		/// </summary>
 		void InitializeResource();
 
-		// パーティクル生成
+		/// <summary>
+		/// パーティクル生成
+		/// </summary>
 		void CreateParticle();
 
-		// モデル読み込み
+		/// <summary>
+		/// モデル読み込み
+		/// </summary>
 		void LoadModel();
 
-		// ゲーム内時間取得
+		/// <summary>
+		/// ゲーム内時間取得
+		/// </summary>
 		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
-		// 時間倍率を掛けていない固定デルタタイム取得
+		/// <summary>
+		/// 時間倍率を掛けていない固定デルタタイム取得
+		/// </summary>
 		static float BaseDeltaTime() { return kDeltaTime_; };
-		// 現在のゲーム内時間倍率取得
+		/// <summary>
+		/// 現在のゲーム内時間倍率取得
+		/// </summary>
 		static float GetTimeScale() { return kTimeSpeed_; };
-		// ゲーム内時間倍率設定
+		/// <summary>
+		/// ゲーム内時間倍率設定
+		/// </summary>
 		static void SetTimeScale(float timeScale);
-		// 現在の時間
+		/// <summary>
+		/// 現在の時間
+		/// </summary>
 		static float NowTime() { return nowTime; };
 
 	private:

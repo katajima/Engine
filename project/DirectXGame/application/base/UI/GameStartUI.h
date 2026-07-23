@@ -13,18 +13,28 @@ namespace Character {
 /// </summary>
 class GameStartUI : public BaseUI {
 public:
-	//初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
 
-	//更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
 
-	// フェード開始
+	/// <summary>
+	/// フェード開始
+	/// </summary>
 	void IsFade() { isfade_ = true; }
-	// フェード
+	/// <summary>
+	/// フェード
+	/// </summary>
 	void IsNofade() { isfade_ = false; }
 
 	void SetNum(float num) { this->num = num; };

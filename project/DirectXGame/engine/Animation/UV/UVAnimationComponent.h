@@ -23,17 +23,25 @@ namespace Engine {
 	class UVAnimationComponent
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(Material* mateirial);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime);
 
 
 
 	public:
-		// UVアニメーションデータ取得
+		/// <summary>
+		/// UVアニメーションデータ取得
+		/// </summary>
 		UVAnimetionData& GetUVAnimetionData() { return uvAnimationData_; }
-		// マテリアルセット
+		/// <summary>
+		/// マテリアルセット
+		/// </summary>
 		void Setmaterial(Material* mateiria) { this->mateirial = mateiria; };
 	private:
 		// 

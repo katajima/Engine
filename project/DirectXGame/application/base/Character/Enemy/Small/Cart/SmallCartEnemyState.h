@@ -19,13 +19,19 @@ namespace Character {
 		}
 
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 	private:
 		float rootTimer_ = 5.0f;
@@ -42,12 +48,18 @@ namespace Character {
 			: DieState(enemy) {
 		}
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const CharacterContext& ctx) override;
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit() override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Enter() override;
 
 	private:

@@ -68,10 +68,14 @@ public:
 	/// </summary>
 	void Shoot();
 
-	// エフェクト設定
+	/// <summary>
+	/// エフェクト設定
+	/// </summary>
 	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 
-	// モードタイプ設定
+	/// <summary>
+	/// モードタイプ設定
+	/// </summary>
 	void SetModeType(ModeType mode) { modeType_ = mode; }
 	
 

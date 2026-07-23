@@ -33,7 +33,9 @@ namespace Engine::ImGuiUtility {
 		int current = static_cast<int>(value);
 		bool changed = false;
 
-		// enum値がラベル範囲外の場合は先頭に戻し、表示クラッシュを避ける。
+		/// <summary>
+		/// enum値がラベル範囲外の場合は先頭に戻し、表示クラッシュを避ける。
+		/// </summary>
 		if (current < 0 || current >= static_cast<int>(N)) {
 			current = 0;
 			value = static_cast<Type>(0);
@@ -64,7 +66,9 @@ namespace Engine::ImGuiUtility {
 		const Container& values, const char* emptyPreview = "None") {
 		std::vector<std::string> names;
 
-		// コンテナのキーだけを共通の文字列選択UIへ渡せる形に変換する。
+		/// <summary>
+		/// コンテナのキーだけを共通の文字列選択UIへ渡せる形に変換する。
+		/// </summary>
 		for (const auto& item : values) {
 			names.push_back(item.first);
 		}
@@ -72,7 +76,9 @@ namespace Engine::ImGuiUtility {
 		return SelectString(label, selectedName, names, emptyPreview);
 	}
 
-	// 直前の項目にヘルプツールチップを付ける。
+	/// <summary>
+	/// 直前の項目にヘルプツールチップを付ける。
+	/// </summary>
 	void HelpMarker(const char* text);
 
 	// 削除やリネームの確認用モーダルを描画する。

@@ -9,13 +9,19 @@
 class CameraRotation {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize();
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(Transform& transform ,const InputSystem* input,float dt);
 
-	// データ取得
+	/// <summary>
+	/// データ取得
+	/// </summary>
 	CameraRotationData& GetData() { return data_; }
 
 private:

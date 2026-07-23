@@ -23,7 +23,9 @@ struct Kinematics {
 	Vector3 velocity{ 0.0f, 0.0f, 0.0f };
 	Vector3 acceleration{ 0.0f, 0.0f, 0.0f };
 
-	// デフォルトコンストラクタ
+	/// <summary>
+	/// デフォルトコンストラクタ
+	/// </summary>
 	Kinematics() = default;
 
 	// 初期値を設定できるコンストラクタ
@@ -31,12 +33,16 @@ struct Kinematics {
 		: velocity(v), acceleration(a) {
 	}
 
-	// 更新処理
+	/// <summary>
+	/// 更新処理
+	/// </summary>
 	void Update(float deltaTime) {
 		velocity += acceleration * deltaTime; // 加速度から速度更新
 	}
 
-	// 減衰などが必要なら追加
+	/// <summary>
+	/// 減衰などが必要なら追加
+	/// </summary>
 	void ApplyDamping(float damping) {
 		velocity *= damping; // 0.0f〜1.0fの範囲
 	}
@@ -49,28 +55,40 @@ struct Transform {
 	Vector3 rotate{};
 	Vector3 translate{};
 
-	// ワールドMatrix取得
+	/// <summary>
+	/// ワールドMatrix取得
+	/// </summary>
 	Matrix4x4 GetWorldMatrix() const {
 		return MakeAffineMatrix(scale, rotate, translate);
 	}
-	// スケールMatrix取得
+	/// <summary>
+	/// スケールMatrix取得
+	/// </summary>
 	Matrix4x4 GetScaleMatrix() const {
 		return MakeScaleMatrix(scale);
 	}
-	// 回転Matrix取得
+	/// <summary>
+	/// 回転Matrix取得
+	/// </summary>
 	Matrix4x4 GetRotateMatrix() const {
 		return MakeRotateXYZ(rotate);
 	}
-	// 移動Matrix取得
+	/// <summary>
+	/// 移動Matrix取得
+	/// </summary>
 	Matrix4x4 GetTranslateMatrix() const {
 		return MakeTranslateMatrix(translate);
 	}
-	// 逆行列取得
+	/// <summary>
+	/// 逆行列取得
+	/// </summary>
 	Matrix4x4 GetInverseWorldMatrix() const {
 		return Inverse(GetWorldMatrix());
 	}
 
-	// トランスフォーム差分の補間
+	/// <summary>
+	/// トランスフォーム差分の補間
+	/// </summary>
 	Transform LerpTransform(const Transform& to, float t) const {
 		Transform result;
 		result.scale = Lerp(scale, to.scale, t);
@@ -90,39 +108,59 @@ struct QuaternionTransform
 	Quaternion rotate = {0.0f, 0.0f, 0.0f, 1.0f};
 	Vector3 translate = { 0.0f, 0.0f, 0.0f };
 
-	// ワールド行列生成
+	/// <summary>
+	/// ワールド行列生成
+	/// </summary>
 	Matrix4x4 GetWorldMatrix() const {
 		Matrix4x4 s = MakeScaleMatrix(scale);
 		Matrix4x4 r = rotate.MakeRotateMatrix(); // クォータニオン → 回転行列
 		Matrix4x4 t = MakeTranslateMatrix(translate);
 		return s * r * t;
 	}
-	// 逆行列
+	/// <summary>
+	/// 逆行列
+	/// </summary>
 	Matrix4x4 GetInverseWorldMatrix() const {
 		return Inverse(GetWorldMatrix());
 	}
 
-	// スケール行列
+	/// <summary>
+	/// スケール行列
+	/// </summary>
 	Matrix4x4 GetScaleMatrix() const { return MakeScaleMatrix(scale); } // スケール行列取得
-	// 回転行列
+	/// <summary>
+	/// 回転行列
+	/// </summary>
 	Matrix4x4 GetRotateMatrix() const { return rotate.MakeRotateMatrix(); } // 回転行列取得
-	// 移動行列
+	/// <summary>
+	/// 移動行列
+	/// </summary>
 	Matrix4x4 GetTranslateMatrix() const { return MakeTranslateMatrix(translate); } // 移動行列取得
 
-	// 点を変換する
+	/// <summary>
+	/// 点を変換する
+	/// </summary>
 	Vector3 TransformPoint(const Vector3& localPos) const {
 		Vector3 scaled = localPos * scale;
 		Vector3 rotated = rotate.RotateVector(scaled);
 		return rotated + translate;
 	}
-	// 右
+	/// <summary>
+	/// 右
+	/// </summary>
 	Vector3 Right() const { return rotate.RotateVector(Vector3(1, 0, 0)); }
-	// 上
+	/// <summary>
+	/// 上
+	/// </summary>
 	Vector3 Up() const { return rotate.RotateVector(Vector3(0, 1, 0)); }
-	// 前
+	/// <summary>
+	/// 前
+	/// </summary>
 	Vector3 Forward() const { return rotate.RotateVector(Vector3(0, 0, 1)); }
 
-	// 補間
+	/// <summary>
+	/// 補間
+	/// </summary>
 	QuaternionTransform Lerp(const QuaternionTransform& to, float t) const {
 		return {
 			Vector3::Lerp(scale, to.scale, t),
@@ -139,41 +177,55 @@ struct AABB {
 	Vector3 min; //!< 最小点
 	Vector3 max; //!< 最大点
 
-	// 判定
+	/// <summary>
+	/// 判定
+	/// </summary>
 	bool intersects(const AABB& other) const {
 		return (min.x <= other.max.x && max.x >= other.min.x &&
 			min.y <= other.max.y && max.y >= other.min.y &&
 			min.z <= other.max.z && max.z >= other.min.z);
 	}
 
-	// 点がAABBを完全に内包しているか判定
+	/// <summary>
+	/// 点がAABBを完全に内包しているか判定
+	/// </summary>
 	bool Contains(const Vector3& point) const {
 		return (point.x >= min.x && point.x <= max.x) &&
 			(point.y >= min.y && point.y <= max.y) &&
 			(point.z >= min.z && point.z <= max.z);
 	}
 
-	// AABBが別のAABBを完全に内包しているか判定
+	/// <summary>
+	/// AABBが別のAABBを完全に内包しているか判定
+	/// </summary>
 	bool Contains(const AABB& other) const {
 		return (other.min.x >= min.x && other.max.x <= max.x) &&
 			(other.min.y >= min.y && other.max.y <= max.y) &&
 			(other.min.z >= min.z && other.max.z <= max.z);
 	}
 
-	// 中心点
+	/// <summary>
+	/// 中心点
+	/// </summary>
 	Vector3 Center() const {
 		return (min + max) * 0.5f;
 	}
 
-	// サイズ取得
+	/// <summary>
+	/// サイズ取得
+	/// </summary>
 	Vector3 Size() const {
 		return max - min;
 	}
-	// 半径
+	/// <summary>
+	/// 半径
+	/// </summary>
 	Vector3 Extents() const {
 		return Size() * 0.5f;
 	}
-	// 最近接点
+	/// <summary>
+	/// 最近接点
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		return {
 			std::clamp(point.x, min.x, max.x),
@@ -182,7 +234,9 @@ struct AABB {
 		};
 	}
 
-	// AABBの有効性チェック
+	/// <summary>
+	/// AABBの有効性チェック
+	/// </summary>
 	bool IsValid() const {
 		return (min.x <= max.x) && (min.y <= max.y) && (min.z <= max.z);
 	}
@@ -195,19 +249,25 @@ struct Sphere {
 	Vector3 center; //!<中心点
 	float radius;   //!<半径 
 
-	// 点との衝突判定
+	/// <summary>
+	/// 点との衝突判定
+	/// </summary>
 	bool Contains(const Vector3& point) const {
 		return (point - center).LengthSq() <= radius * radius;
 	}
 
-	// 球同士の交差判定
+	/// <summary>
+	/// 球同士の交差判定
+	/// </summary>
 	bool Intersects(const Sphere& other) const {
 		float distSq = (center - other.center).LengthSq();
 		float radiiSum = radius + other.radius;
 		return distSq <= radiiSum * radiiSum;
 	}
 
-	// 最近接点
+	/// <summary>
+	/// 最近接点
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		Vector3 dir = point - center;
 		if (dir.LengthSq() <= radius * radius) {
@@ -216,7 +276,9 @@ struct Sphere {
 		return center + dir.Normalize() * radius;
 	}
 
-	// 線分との交差判定（最近点距離）
+	/// <summary>
+	/// 線分との交差判定（最近点距離）
+	/// </summary>
 	bool IntersectsSegment(const Segment& seg) const {
 		Vector3 closest = seg.ClosestPoint(center);
 		return (closest - center).LengthSq() <= radius * radius;
@@ -230,42 +292,56 @@ struct Plane {
 	Vector3 normal;  //!< 法線
 	float distance; //!< 距離 
 
-	// 距離の計算
+	/// <summary>
+	/// 距離の計算
+	/// </summary>
 	float GetSignedDistance(const Vector3& point) const {
 		return normal.Dot(point) + distance;
 	}
 
-	// 点が平面上にあるか
+	/// <summary>
+	/// 点が平面上にあるか
+	/// </summary>
 	bool IsOnPlane(const Vector3& point, float epsilon = 1e-5f) const {
 		return std::abs(GetSignedDistance(point)) < epsilon;
 	}
 
-	// 平面から最も近い点
+	/// <summary>
+	/// 平面から最も近い点
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		float d = GetSignedDistance(point);
 		return point - normal * d;
 	}
 
-	// 平面での反射ベクトル計算
+	/// <summary>
+	/// 平面での反射ベクトル計算
+	/// </summary>
 	Vector3 Reflect(const Vector3& direction) const {
 		return direction - normal * normal.Dot(direction) * 2.0f;
 	}
 
-	// 平面の生成関数
+	/// <summary>
+	/// 平面の生成関数
+	/// </summary>
 	static Plane FromPointNormal(const Vector3& point, const Vector3& normal) {
 		Plane p;
 		p.normal = normal.Normalize();
 		p.distance = -p.normal.Dot(point); // Ax + By + Cz + D = 0
 		return p;
 	}
-	// 三点から平面の生成関数
+	/// <summary>
+	/// 三点から平面の生成関数
+	/// </summary>
 	static Plane FromThreePoints(const Vector3& a, const Vector3& b, const Vector3& c) {
 		Vector3 ab = b - a;
 		Vector3 ac = c - a;
 		Vector3 n = ab.Cross(ac).Normalize();
 		return FromPointNormal(a, n);
 	}
-	// 3 点から平面を求める
+	/// <summary>
+	/// 3 点から平面を求める
+	/// </summary>
 	static Plane PlaneFromPoints(const Vector3& p1, const Vector3& p2, const Vector3& p3) {
 		Plane result{};
 
@@ -273,10 +349,14 @@ struct Plane {
 		Vector3 v1 = p2 - p1;
 		Vector3 v2 = p3 - p1;
 
-		// 法線を計算 (外積)
+		/// <summary>
+		/// 法線を計算 (外積)
+		/// </summary>
 		result.normal = Cross(v1, v2);
 
-		// ゼロベクトルチェック (3点が同一直線上の場合)
+		/// <summary>
+		/// ゼロベクトルチェック (3点が同一直線上の場合)
+		/// </summary>
 		if (Length(result.normal) == 0.0f) {
 			// 法線が求まらない場合のエラーハンドリング
 			result.normal = { 0.0f, 0.0f, 0.0f };
@@ -284,17 +364,23 @@ struct Plane {
 			return result;
 		}
 
-		// 正規化
+		/// <summary>
+		/// 正規化
+		/// </summary>
 		result.normal = result.normal.Normalize();
 
-		// 平面の距離 D の計算 (符号の修正)
+		/// <summary>
+		/// 平面の距離 D の計算 (符号の修正)
+		/// </summary>
 		result.distance = -Dot(result.normal, p1);
 
 		return result;
 	}
 
 
-	// 線分と平面の交点
+	/// <summary>
+	/// 線分と平面の交点
+	/// </summary>
 	bool IntersectSegment(const Segment& seg, Vector3& outPoint) const {
 		Vector3 dir = seg.end - seg.origin;
 		float denom = normal.Dot(dir);
@@ -330,7 +416,9 @@ struct Triangle
 {
 	Vector3 vertices[3]; // !頂点
 	
-	// +=オペレーターのオーバーロード 
+	/// <summary>
+	/// +=オペレーターのオーバーロード
+	/// </summary>
 	Triangle& operator+=(const Vector3& offset) {
 		for (auto& vertex : vertices) {
 			vertex += offset;
@@ -338,7 +426,9 @@ struct Triangle
 		return *this;
 	}
 
-	// ずらす
+	/// <summary>
+	/// ずらす
+	/// </summary>
 	Triangle OffsetVector3(const Vector3& offset) const {
 		Triangle result = *this;  // コピーを作成
 		for (auto& vertex : result.vertices) {
@@ -347,26 +437,34 @@ struct Triangle
 		return result;
 	}
 
-	// 法線方向の取得
+	/// <summary>
+	/// 法線方向の取得
+	/// </summary>
 	Vector3 GetNormal() const {
 		Vector3 edge1 = vertices[1] - vertices[0];
 		Vector3 edge2 = vertices[2] - vertices[0];
 		return Normalize(Cross(edge1, edge2));
 	}
 
-	// 面積の取得
+	/// <summary>
+	/// 面積の取得
+	/// </summary>
 	float GetArea() const {
 		Vector3 edge1 = vertices[1] - vertices[0];
 		Vector3 edge2 = vertices[2] - vertices[0];
 		return 0.5f * Length(Cross(edge1, edge2));
 	}
 
-	// 重心の取得
+	/// <summary>
+	/// 重心の取得
+	/// </summary>
 	Vector3 GetCentroid() const {
 		return (vertices[0] + vertices[1] + vertices[2]) / 3.0f;
 	}
 
-	// 点が三角形の中にあるか判定（バリセン式）
+	/// <summary>
+	/// 点が三角形の中にあるか判定（バリセン式）
+	/// </summary>
 	bool ContainsPoint(const Vector3& point) const {
 		Vector3 v0 = vertices[2] - vertices[0];
 		Vector3 v1 = vertices[1] - vertices[0];
@@ -388,7 +486,9 @@ struct Triangle
 		return (u >= 0.0f) && (v >= 0.0f) && (w >= 0.0f);
 	}
 
-	// Rayとの交差判定（Möller–Trumbore法）
+	/// <summary>
+	/// Rayとの交差判定（Möller–Trumbore法）
+	/// </summary>
 	bool IntersectRay(const Vector3& rayOrigin, const Vector3& rayDir, float& outT) const {
 		const float EPSILON = 1e-6f;
 		Vector3 edge1 = vertices[1] - vertices[0];
@@ -415,7 +515,9 @@ struct Triangle
 		return false;
 	}
 	
-	// AABB 取得
+	/// <summary>
+	/// AABB 取得
+	/// </summary>
 	AABB GetAABB() const {
 		AABB result{};
 		result.min = Min(Min(vertices[0], vertices[1]), vertices[2]);
@@ -479,30 +581,42 @@ struct Capsule
 	float radius;
 
 
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	Capsule(const Vector3& p0, const Vector3& p1, float r) : segment(p0, p1), radius(r) {}
 
-	// カプセルの AABB を取得
+	/// <summary>
+	/// カプセルの AABB を取得
+	/// </summary>
 	AABB computeAABB() const {
 		Vector3 minPoint = Min(segment.origin, segment.end) - Vector3(radius, radius, radius);
 		Vector3 maxPoint = Max(segment.origin, segment.end) + Vector3(radius, radius, radius);
 		return AABB(minPoint, maxPoint);
 	}
 
-	// 最近接点
+	/// <summary>
+	/// 最近接点
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		return segment.ClosestPoint(point);
 	}
 
-	// 点との交差判定
+	/// <summary>
+	/// 点との交差判定
+	/// </summary>
 	bool Contains(const Vector3& point) const {
 		Vector3 closest = segment.ClosestPoint(point);
 		return (point - closest).LengthSq() <= radius * radius;
 	}
 
-	// 始点球
+	/// <summary>
+	/// 始点球
+	/// </summary>
 	Sphere GetStartSphere() const { return Sphere{ segment.origin, radius }; }
-	// 終点球
+	/// <summary>
+	/// 終点球
+	/// </summary>
 	Sphere GetEndSphere()   const { return Sphere{ segment.end, radius }; }
 };
 /// <summary>
@@ -512,7 +626,9 @@ struct OBB {
 	Vector3 center;
 	Vector3 orientations[3];
 	Vector3 size;
-	// OBB生成
+	/// <summary>
+	/// OBB生成
+	/// </summary>
 	static Matrix4x4 MakeOBBMatrix(const OBB& obb) {
 		Matrix4x4 m{};
 
@@ -535,7 +651,9 @@ struct OBB {
 
 		return m;
 	}
-	// 各角
+	/// <summary>
+	/// 各角
+	/// </summary>
 	std::array<Vector3, 8> GetCorners() const {
 		Vector3 axes[3] = {
 			orientations[0] * size.x * 0.5f,
@@ -552,7 +670,9 @@ struct OBB {
 
 		return corners;
 	}
-	// 点との包含チェック
+	/// <summary>
+	/// 点との包含チェック
+	/// </summary>
 	bool Contains(const Vector3& point) const {
 		Vector3 local = point - center;
 		for (int i = 0; i < 3; ++i) {
@@ -562,10 +682,16 @@ struct OBB {
 		return true;
 	}
 
-	// 右
+	/// <summary>
+	/// 右
+	/// </summary>
 	Vector3 Right() const { return orientations[0]; }
-	// 上
+	/// <summary>
+	/// 上
+	/// </summary>
 	Vector3 Up()    const { return orientations[1]; }
-	// 前
+	/// <summary>
+	/// 前
+	/// </summary>
 	Vector3 Forward() const { return orientations[2]; }
 };

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "PlayerCarStateMachine.h"
 #include <DirectXGame/engine/Move/RigidBodyComponent.h>
@@ -39,64 +39,110 @@ public:
 	/// <param name="effect"></param>
 	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 
-	// 動く
+	/// <summary>
+	/// 動く
+	/// </summary>
 	void Action() { isMoving_ = true; }
 
 private:
-	// 影の更新
+	/// <summary>
+	/// 影の更新
+	/// </summary>
 	void ShadowUpdate(float dt);
-	// タイヤの更新
+	/// <summary>
+	/// タイヤの更新
+	/// </summary>
 	void TireUpdate(float dt);
-	// スポットライトの更新
+	/// <summary>
+	/// スポットライトの更新
+	/// </summary>
 	void SpotLightUpdate(float dt);
 public:
-	// 車体ワールド変換を取得
+	/// <summary>
+	/// 車体ワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetBodyWorldTransform() { return objectComponent_->GetWorldTransform(); }
-	// 車体ワールド座標取得
+	/// <summary>
+	/// 車体ワールド座標取得
+	/// </summary>
 	Vector3 GetBodyWorldPosition() const { return objectComponent_->GetWorldPosition(); }
-	// 左前タイヤのワールド変換を取得
+	/// <summary>
+	/// 左前タイヤのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetLFTierWorldTransform() { return objectLFTier_->GetWorldTransform(); }
-	// 左後タイヤのワールド変換を取得
+	/// <summary>
+	/// 左後タイヤのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetLBTierWorldTransform() { return objectLBTire_->GetWorldTransform(); }
-	// 右前タイヤのワールド変換を取得
+	/// <summary>
+	/// 右前タイヤのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetRFTierWorldTransform() { return objectRFTire_->GetWorldTransform(); }
-	// 右後タイヤのワールド変換を取得
+	/// <summary>
+	/// 右後タイヤのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetRBTierWorldTransform() { return objectRBTire_->GetWorldTransform(); }
-	// 左前タイヤのワールド座標取得
+	/// <summary>
+	/// 左前タイヤのワールド座標取得
+	/// </summary>
 	Vector3 GetLFTierWorldPosition() const { return objectLFTier_->GetWorldTransform().GetWorldPosition(); }
-	// 左後タイヤのワールド座標取得
+	/// <summary>
+	/// 左後タイヤのワールド座標取得
+	/// </summary>
 	Vector3 GetLBTierWorldPosition() const { return objectLBTire_->GetWorldTransform().GetWorldPosition(); }
-	// 右前タイヤのワールド座標取得
+	/// <summary>
+	/// 右前タイヤのワールド座標取得
+	/// </summary>
 	Vector3 GetRFTierWorldPosition() const { return objectRFTire_->GetWorldTransform().GetWorldPosition(); }
-	// 右後タイヤのワールド座標取得
+	/// <summary>
+	/// 右後タイヤのワールド座標取得
+	/// </summary>
 	Vector3 GetRBTierWorldPosition() const { return objectRBTire_->GetWorldTransform().GetWorldPosition(); }
 
-	// スクラップボックスのワールド変換を取得
+	/// <summary>
+	/// スクラップボックスのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetScrapBoxWorldTransform() { return objectScrapBox_->GetWorldTransform(); }
-	// スクラップボックスのワールド座標取得
+	/// <summary>
+	/// スクラップボックスのワールド座標取得
+	/// </summary>
 	Vector3 GetScrapBoxWorldPosition() const { return objectScrapBox_->GetWorldTransform().GetWorldPosition(); }
 
-	// 右前スポットライトのワールド変換を取得
+	/// <summary>
+	/// 右前スポットライトのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetRFSpotLightWorldTransform() { return spotLightTransformRF_; }
-	// 左前スポットライトのワールド変換を取得
+	/// <summary>
+	/// 左前スポットライトのワールド変換を取得
+	/// </summary>
 	Engine::WorldTransform& GetLFSpotLightWorldTransform() { return spotLightTransformLF_; }
 
-	// 右前スポットライトを取得
+	/// <summary>
+	/// 右前スポットライトを取得
+	/// </summary>
 	Engine::SpotLight* GetRFSpotLight() { return spotLightRF_.get(); }
-	// 左前スポットライトを取得
+	/// <summary>
+	/// 左前スポットライトを取得
+	/// </summary>
 	Engine::SpotLight* GetLFSpotLight() { return spotLightLF_.get(); }
 
 	
 
 public:
-	// 埃を出す
+	/// <summary>
+	/// 埃を出す
+	/// </summary>
 	void Emit(const Vector3& pos);
-	// 埃を出す(方向付き)
+	/// <summary>
+	/// 埃を出す(方向付き)
+	/// </summary>
 	void Emit(const Vector3& pos, const Vector3& dir, const Vector3& range);
 
 	void EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vector3& range);
 
-	// ステートマシン取得
+	/// <summary>
+	/// ステートマシン取得
+	/// </summary>
 	PlayerCarStateMachine* GetStateMachine() { return stateMachine_.get(); }
 private:
 	// ステートマシン

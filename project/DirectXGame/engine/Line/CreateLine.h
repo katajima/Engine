@@ -19,25 +19,39 @@ namespace Engine {
 	class LineMeshData
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
-		// メッシュ取得
+		/// <summary>
+		/// メッシュ取得
+		/// </summary>
 		LineMesh* GetMesh() { return mesh_.get(); }
 
-		// ライン使用料取得
+		/// <summary>
+		/// ライン使用料取得
+		/// </summary>
 		uint32_t GetCount() const { return lineCount_; }
 
-		// ライン使用料加算
+		/// <summary>
+		/// ライン使用料加算
+		/// </summary>
 		void AddCount(uint32_t count) { lineCount_ += count; }
 
-		// ラインクリア
+		/// <summary>
+		/// ラインクリア
+		/// </summary>
 		void Clear();
 
 		/// <summary>
@@ -136,7 +150,9 @@ namespace Engine {
 		/// <param name="node"></param>
 		void AddOctree(const OctreeColliderNode& node);
 
-		// グリッド線
+		/// <summary>
+		/// グリッド線
+		/// </summary>
 		void AddGrid(float xRange, float zRange, float interval, const Vector4& color);
 
 	private:
@@ -157,7 +173,9 @@ namespace Engine {
 	// ライン生成モジュール
 	namespace CreateLine
 	{
-		// ライン生成
+		/// <summary>
+		/// ライン生成
+		/// </summary>
 		void Line(LineMeshData& meshData, const LineData& lineData);
 
 

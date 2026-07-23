@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -24,31 +24,49 @@ namespace HitBox {
 			colliders_.clear();
 		}
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type, bool useContactRecord);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float dt);
 		uint32_t GetAttackInstanceId() const { return attackInstanceId_; }
 
 	public:
 
-		// コライダー追加
+		/// <summary>
+		/// コライダー追加
+		/// </summary>
 		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const HitReactionData& reaction);
-		// 有効化
+		/// <summary>
+		/// 有効化
+		/// </summary>
 		void Enable(Vector4 color = {1,1,1,1});
-		// 無効化
+		/// <summary>
+		/// 無効化
+		/// </summary>
 		void Disable(Vector4 color = { 1,1,1,1 });
-		// 履歴削除
+		/// <summary>
+		/// 履歴削除
+		/// </summary>
 		void ClearContactRecord() { GetContactRecord().Clear(); }
 		void SetRecordPerCollider(bool enabled);
 	public:
-		// ワールドトランスフォーム取得
+		/// <summary>
+		/// ワールドトランスフォーム取得
+		/// </summary>
 		Engine::WorldTransform& GetWorldTransform() { return worldTransform_; }
-		// コンポーネント取得
+		/// <summary>
+		/// コンポーネント取得
+		/// </summary>
 		Engine::ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
 	private:
-		// 衝突履歴取得
+		/// <summary>
+		/// 衝突履歴取得
+		/// </summary>
 		Engine::ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; }
 	private:
 		// コライダーコンポーネント

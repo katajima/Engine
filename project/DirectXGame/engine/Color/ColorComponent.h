@@ -8,25 +8,43 @@
 /// </summary>
 class ColorComponent {
 public:
-	// カラー設定(RGBA)
+	/// <summary>
+	/// カラー設定(RGBA)
+	/// </summary>
 	void SetBaseColor(const Vector4& color);
-	// カラー設定(RGB)
+	/// <summary>
+	/// カラー設定(RGB)
+	/// </summary>
 	void SetBaseRGB(float r, float g, float b);
-	// カラー設定(RGBA)
+	/// <summary>
+	/// カラー設定(RGBA)
+	/// </summary>
 	void SetBaseRGBA(float r, float g, float b, float a);
 
-	// カラー追加(名前と色)
+	/// <summary>
+	/// カラー追加(名前と色)
+	/// </summary>
 	void AddChangeColor(const std::string& name, const Vector4& color);
-	// カラー設定(名前で検索)
+	/// <summary>
+	/// カラー設定(名前で検索)
+	/// </summary>
 	void SetChangeColor(const std::string& name, const Vector4& color);
-	// カラーあるか(名前検索)
+	/// <summary>
+	/// カラーあるか(名前検索)
+	/// </summary>
 	bool HasChangeColor(const std::string& name) const;
-	// 削除
+	/// <summary>
+	/// 削除
+	/// </summary>
 	bool RemoveChangeColor(const std::string& name);
 
-	// 基本色取得
+	/// <summary>
+	/// 基本色取得
+	/// </summary>
 	const Vector4& GetBaseColor() const;
-	// 色変更
+	/// <summary>
+	/// 色変更
+	/// </summary>
 	const Vector4* GetChangeColor(const std::string& name) const;
 
 private:

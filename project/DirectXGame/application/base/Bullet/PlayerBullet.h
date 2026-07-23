@@ -13,6 +13,8 @@ public:
 		EffectSystem* effectSystem, const Projectile::ProjectileSpawnInfo& spawnInfo, const BulletInfo& info);
 
 protected:
-	// 敵へのダメージに加えて、プレイヤーのヒット数とコンボ命中を通知する
+	/// <summary>
+	/// 敵へのダメージに加えて、プレイヤーのヒット数とコンボ命中を通知する
+	/// </summary>
 	void OnHitEnemy(Character::BaseEnemy* enemy) override;
 };

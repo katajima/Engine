@@ -42,41 +42,63 @@ namespace Character {
 		/// </summary>
 		void Draw2D() override;
 
-		// 移動処理
+		/// <summary>
+		/// 移動処理
+		/// </summary>
 		void Move() override {};
 
-		// ジャンプ
+		/// <summary>
+		/// ジャンプ
+		/// </summary>
 		void Jump() override;
 
-		// 回避
+		/// <summary>
+		/// 回避
+		/// </summary>
 		void Dodge() override;
 
-		// 回避成功通知
+		/// <summary>
+		/// 回避成功通知
+		/// </summary>
 		void OnDodgeSuccess() override;
 
-		// 回避成功後のコンボ受付中か
+		/// <summary>
+		/// 回避成功後のコンボ受付中か
+		/// </summary>
 		bool IsDodgeSuccessComboWindow() const override;
-		// リロード
+		/// <summary>
+		/// リロード
+		/// </summary>
 		void Reload() override;
 
 		void ApplyComboData(Combo::Editor* comboEditor) override {};
 
-		// プレイヤUI取得
+		/// <summary>
+		/// プレイヤUI取得
+		/// </summary>
 		PlayerUI* GetPlayerUI()override { return ui_.get(); };
 
 	private:
 		void InitAttack();
 
-		// ロックオン入力とカメラの対象を同期
+		/// <summary>
+		/// ロックオン入力とカメラの対象を同期
+		/// </summary>
 		void UpdateLockOn();
 	private:
-		// ステートマシーン初期化
+		/// <summary>
+		/// ステートマシーン初期化
+		/// </summary>
 		void InitStateMachine() override;
 
-		// 調整項目の適用
+		/// <summary>
+		/// 調整項目の適用
+		/// </summary>
 		void ApplyGlobalVariables() {};
 	
-		// コンボデータリロード
+		/// <summary>
+		/// コンボデータリロード
+		/// </summary>
 		void ReloadComboData();
 	private:
 		// プレイヤー用UI

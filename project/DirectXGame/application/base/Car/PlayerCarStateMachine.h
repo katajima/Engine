@@ -16,10 +16,14 @@ public:
 	/// <param name="initialState"></param>
 	void Initialize(PlayerCar* car, CarMainState initialState = CarMainState::Idle);
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
-	// 変更
+	/// <summary>
+	/// 変更
+	/// </summary>
 	void ChangeState(const CarMainState& name) {
 		auto it = stateFactoryMap_.find(name);
 		if (it != stateFactoryMap_.end()) {
@@ -34,20 +38,28 @@ public:
 		}
 	}
 
-	// ---- 現在ステートの取得 ----
+	/// <summary>
+	/// ---- 現在ステートの取得 ----
+	/// </summary>
 	PlayerCarState* GetCurrentState() const { return state_.get(); }
 
-	// 現在のステート取得
+	/// <summary>
+	/// 現在のステート取得
+	/// </summary>
 	CarMainState GetCurrentMainState() const {
 		return state_ ? state_->GetCerMainState() : CarMainState::TitleMove;
 	}
 
-	// 登録
+	/// <summary>
+	/// 登録
+	/// </summary>
 	void RegisterState(const CarMainState& name, PlayerCarStateFactory factory) {
 		stateFactoryMap_[name] = factory;
 	}
 private:
-	// ステート変更
+	/// <summary>
+	/// ステート変更
+	/// </summary>
 	void ChangeState(std::unique_ptr<PlayerCarState> newState) {
 		if (state_) {
 			state_->Exit(); // 終了

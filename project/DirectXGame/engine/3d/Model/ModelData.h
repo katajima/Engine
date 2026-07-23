@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // engine
 #include"DirectXGame/engine/math/MathFunctions.h"
@@ -59,19 +59,29 @@ namespace Engine {
 	// モデル読み込みに関する
 	namespace LoadModel {
 
-		// メッシュ読み込み
+		/// <summary>
+		/// メッシュ読み込み
+		/// </summary>
 		void LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, std::mutex* gpuResourceMutex = nullptr);
 
-		// ボーン読み込み
+		/// <summary>
+		/// ボーン読み込み
+		/// </summary>
 		void LoadBone(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon);
 
-		// マテリアル読み込み
+		/// <summary>
+		/// マテリアル読み込み
+		/// </summary>
 		void LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath, std::mutex* gpuResourceMutex = nullptr);
 
-		// アニメーション読み込み
+		/// <summary>
+		/// アニメーション読み込み
+		/// </summary>
 		void LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename);
 
-		// ノード読み込み
+		/// <summary>
+		/// ノード読み込み
+		/// </summary>
 		Node ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap);
 
 	}
@@ -81,25 +91,37 @@ namespace Engine {
 	// モデル生成に関する
 	namespace CreateModel {
 
-		// メッシュ状にライン生成
+		/// <summary>
+		/// メッシュ状にライン生成
+		/// </summary>
 		void CreateMeshLine(ModelData& modelData, const std::vector<uint32_t>& indices);
 
-		// スケルトン生成
+		/// <summary>
+		/// スケルトン生成
+		/// </summary>
 		void CreateSkeleton(ModelData& modelData);
 
-		// スキンクラスター生成
+		/// <summary>
+		/// スキンクラスター生成
+		/// </summary>
 		void CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon, std::mutex* gpuResourceMutex = nullptr);
 
-		// ジョイント生成
+		/// <summary>
+		/// ジョイント生成
+		/// </summary>
 		int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 	}
 
 	// モデルデバッグに関する
 	namespace DebugModel {
 
-		// スキニングデータImguiで表示
+		/// <summary>
+		/// スキニングデータImguiで表示
+		/// </summary>
 		void ImguiSkin(ModelData& modelData);
-		// モデルデータをImGuiで表示
+		/// <summary>
+		/// モデルデータをImGuiで表示
+		/// </summary>
 		void ImguiModel(ModelData& modelData);
 
 	}

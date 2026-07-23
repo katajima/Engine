@@ -13,11 +13,17 @@ namespace Engine {
 	class GpuParticleField
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std::string name);
-		// ImGui更新
+		/// <summary>
+		/// ImGui更新
+		/// </summary>
 		void UpdateImgui();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
 
 	private:

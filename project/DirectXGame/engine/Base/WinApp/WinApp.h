@@ -16,19 +16,29 @@ namespace Engine {
 	public: // 静的メンバ関数
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 	public: // メンバ関数
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Finalize();
 
-		// メッセージの処理
+		/// <summary>
+		/// メッセージの処理
+		/// </summary>
 		bool ProcessMessage();
 
 		/// ウィンドウハンドルの取得
 		static HWND GetHwnd() { return hwnd; }
-		// インスタンス取得
+		/// <summary>
+		/// インスタンス取得
+		/// </summary>
 		static HINSTANCE GetHInstance() { return wc.hInstance; }
-		// 画面サイズ取得(横)
+		/// <summary>
+		/// 画面サイズ取得(横)
+		/// </summary>
 		static int32_t GetClientWidth(bool isFull = true) {
 			if (isFullscreen && isFull) {
 				return fullscreenWidth;
@@ -37,7 +47,9 @@ namespace Engine {
 				return kClientWidth;
 			}
 		}
-		// 画面サイズ取得(縦)
+		/// <summary>
+		/// 画面サイズ取得(縦)
+		/// </summary>
 		static int32_t GetClientHeight(bool isFull = true) {
 			if (isFullscreen && isFull) {
 				return fullscreenHeight;
@@ -46,7 +58,9 @@ namespace Engine {
 				return kClientHeight;
 			}
 		}
-		// 画面のウィンドウからフルスクリーンの比率(横)
+		/// <summary>
+		/// 画面のウィンドウからフルスクリーンの比率(横)
+		/// </summary>
 		static float GetCalculateWindowToFullscreenScaleRatioWidth() {
 			if (isFullscreen) {
 				return static_cast<float>(kClientWidth) / static_cast<float>(fullscreenWidth);
@@ -55,7 +69,9 @@ namespace Engine {
 				return 1.0f;
 			}
 		}
-		// 画面のウィンドウからフルスクリーンの比率(縦)
+		/// <summary>
+		/// 画面のウィンドウからフルスクリーンの比率(縦)
+		/// </summary>
 		static float GetCalculateWindowToFullscreenScaleRatioHeight() {
 			if (isFullscreen) {
 				return static_cast<float>(kClientHeight) / static_cast<float>(fullscreenHeight);
@@ -64,7 +80,9 @@ namespace Engine {
 				return 1.0f;
 			}
 		}
-		// 終了させる
+		/// <summary>
+		/// 終了させる
+		/// </summary>
 		static void IsFinish() { isFinish_ = true; }
 
 		//クライアント領域のサイズ
@@ -80,11 +98,17 @@ namespace Engine {
 
 		inline static bool isFinish_ = false;
 
-		// フルスクリーン設定
+		/// <summary>
+		/// フルスクリーン設定
+		/// </summary>
 		static void ToggleFullscreen();
-		// フルスクリーンか
+		/// <summary>
+		/// フルスクリーンか
+		/// </summary>
 		static bool IsFullscreen() { return isFullscreen; }
-		// スワップチェーン設定
+		/// <summary>
+		/// スワップチェーン設定
+		/// </summary>
 		static void SetSwapChain(SwapChain* sc) { swapChain = sc; }
 	private:
 		inline static HWND hwnd = nullptr; // ウィンドウハンドル

@@ -11,11 +11,17 @@ namespace Engine {
 	/// </summary>
 	class TrailMesh : public BaseMesh {
 	public:
-		// メッシュ生成
+		/// <summary>
+		/// メッシュ生成
+		/// </summary>
 		void CreateMesh(size_t instance);
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxcommon) override;
-		// コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandList();
 
 	public:

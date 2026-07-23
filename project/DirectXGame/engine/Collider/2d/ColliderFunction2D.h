@@ -13,13 +13,17 @@
 
 #pragma region Collision
 
-// Boxと点
+/// <summary>
+/// Boxと点
+/// </summary>
 static bool IsCollision(const Box& aabb, const Vector2& point) {
 	return (point.x >= aabb.min_.x && point.x <= aabb.max_.x) &&
 		(point.y >= aabb.min_.y && point.y <= aabb.max_.y);
 }
 
-// 線分同士の交差判定
+/// <summary>
+/// 線分同士の交差判定
+/// </summary>
 static bool IsSegmentIntersect(const Segment2D& s1, const Segment2D& s2) {
 	auto cross = [](const Vector2& a, const Vector2& b) {
 		return a.x * b.y - a.y * b.x;
@@ -39,9 +43,13 @@ static bool IsSegmentIntersect(const Segment2D& s1, const Segment2D& s2) {
 	return (t >= 0.0f && t <= 1.0f && u >= 0.0f && u <= 1.0f);
 }
 
-// Baxと線
+/// <summary>
+/// Baxと線
+/// </summary>
 static bool IsCollision(const Box& aabb, const Segment2D& segment) {
-	// 1. 線分の端点がAABB内にある
+	/// <summary>
+	/// 1. 線分の端点がAABB内にある
+	/// </summary>
 	if (IsCollision(aabb, segment.origin) || IsCollision(aabb, segment.end)) {
 		return true;
 	}
@@ -99,12 +107,18 @@ static bool IsCollision(const Box& aabb1, const Box& aabb2)
 
 	return false;
 }
-// 三角と円の衝突判定
+/// <summary>
+/// 三角と円の衝突判定
+/// </summary>
 bool IsCollision(const Triangle2D& triangle, const Sphere2D& sphere);
-// 点と三角に判定
+/// <summary>
+/// 点と三角に判定
+/// </summary>
 bool PointInTriangle(const Vector2& pt, const Triangle2D& triangle);
 
-// 点と線分の最短距離
+/// <summary>
+/// 点と線分の最短距離
+/// </summary>
 float DistancePointToSegment(const Vector2& p, const Vector2& a, const Vector2& b);
 
 

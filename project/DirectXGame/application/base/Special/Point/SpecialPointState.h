@@ -20,14 +20,22 @@ public:
 
 	virtual ~BaseSpecialPointState() = default;
 	BaseSpecialPointState(const SpecialPointState& state, SpecialPoint* object) :specialPointState(state),object_(object){};
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	virtual void Enter() {}
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	virtual void Update(float dt) {}
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	virtual void Exit() {}
 public:
-	// キャラクターメインステート取得
+	/// <summary>
+	/// キャラクターメインステート取得
+	/// </summary>
 	SpecialPointState GetSpecialPointState() const { return specialPointState; }
 protected:
 	SpecialPointState specialPointState;
@@ -44,14 +52,22 @@ class SpecialPointPopState : public BaseSpecialPointState {
 public:
 	SpecialPointPopState(SpecialPoint* object)
 	: BaseSpecialPointState(SpecialPointState::kPop,object){}
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 
-	// 時間判定
+	/// <summary>
+	/// 時間判定
+	/// </summary>
 	bool IsNextStateTime() const { return nextStateTimer_ < timer; }
 
 private:
@@ -70,16 +86,24 @@ class SpecialPointIdleState : public BaseSpecialPointState {
 public:
 	SpecialPointIdleState(SpecialPoint* object)
 		:BaseSpecialPointState(SpecialPointState::kIdle, object){}
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 private:
 	// 終了ステート移行時間
 	float endStateTimer_ = 10.0f;
-	// 回転速度
+	/// <summary>
+	/// 回転速度
+	/// </summary>
 	float rotateSpeed_ = Math::DegreesToRadians(360.0f);
 	// 浮遊速度
 	float floatSpeed_ = 0.5f;
@@ -97,11 +121,17 @@ class SpecialPointMoveState : public BaseSpecialPointState {
 public:
 	SpecialPointMoveState(SpecialPoint* object)
 		: BaseSpecialPointState(SpecialPointState::kMove, object){}
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 private:
 	Vector3 upVelocity_ = { 0,50,0 };
@@ -119,11 +149,17 @@ class SpecialPointEndState : public BaseSpecialPointState {
 public:
 	SpecialPointEndState(SpecialPoint* object)
 		: BaseSpecialPointState(SpecialPointState::kEnd, object){}
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter() override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit() override;
 private:
 

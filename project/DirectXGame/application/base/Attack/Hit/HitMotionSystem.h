@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -41,7 +41,9 @@ public:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
 
-	// ヒットエフェクト
+	/// <summary>
+	/// ヒットエフェクト
+	/// </summary>
 	void EmitHitEffect();
 
 	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
@@ -74,19 +76,31 @@ public:
 	/// <summary>現在のリアクションで使用する重力倍率を取得する。</summary>
 	/// <returns>重力加速度へ乗算する倍率。</returns>
 	float GetGravityScale() const;
-	// スタン時間
+	/// <summary>
+	/// スタン時間
+	/// </summary>
 	float GetHitStunTimer() const { return hitStunTimer_; }
-	// ダウン時間
+	/// <summary>
+	/// ダウン時間
+	/// </summary>
 	float GetDownTimer() const { return downTimer_; }
-	// セルフヒットストップ時間
+	/// <summary>
+	/// セルフヒットストップ時間
+	/// </summary>
 	float GetSelfHitStopTimer() const { return selfHitStopTime_; }
-	// 現在のヒットリアクション状態取得
+	/// <summary>
+	/// 現在のヒットリアクション状態取得
+	/// </summary>
 	HitMotionState GetHitMotionState() const { return hitMotionState_; }
 
 
-	// 終了処理
+	/// <summary>
+	/// 終了処理
+	/// </summary>
 	bool IsFinished() const;
-	// デバッグ用に現在のリアクションを即終了する
+	/// <summary>
+	/// デバッグ用に現在のリアクションを即終了する
+	/// </summary>
 	void ForceFinishReaction();
 
 private:
@@ -101,16 +115,22 @@ private:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void RenderTargetEffectProcess(float dt);
 
-	// ビネットのパラメータを調整する
+	/// <summary>
+	/// ビネットのパラメータを調整する
+	/// </summary>
 	void ConfigureVignette();
 
 
-	// 移動速度算出
+	/// <summary>
+	/// 移動速度算出
+	/// </summary>
 	Vector3 BuildMoveVelocity() const;
 	/// <summary>算出したリアクション速度を移動システムへ要求する。</summary>
 	/// <param name="velocity">ワールド空間の速度。</param>
 	void SendReactionMoveRequest(const Vector3& velocity);
-	// リアクション終了
+	/// <summary>
+	/// リアクション終了
+	/// </summary>
 	void FinishReaction();
 
 	/// <summary>残り時間を減算して継続中か判定する。</summary>

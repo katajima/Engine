@@ -13,42 +13,68 @@ namespace Engine {
 	class RigidBodyComponent
 	{
 	public:
-		// 力加算
+		/// <summary>
+		/// 力加算
+		/// </summary>
 		void AddForce(const Vector3& f) {
 			force += f;
 		}
 
-		// トルク加算
+		/// <summary>
+		/// トルク加算
+		/// </summary>
 		void AddTorque(const Vector3& t) {
 			torque += t;
 		}
-		// 統合
+		/// <summary>
+		/// 統合
+		/// </summary>
 		void Integrate(float deltaTime, WorldTransform& transform);
 
-		// 重力倍率設定
+		/// <summary>
+		/// 重力倍率設定
+		/// </summary>
 		void SetGravityScale(float scale) { gravityScale = scale; }
-		// 重力あるか取得
+		/// <summary>
+		/// 重力あるか取得
+		/// </summary>
 		bool IsGravity() const { return useGravity; }
-		//重力あるか設定
+		/// <summary>
+		/// 重力あるか設定
+		/// </summary>
 		void SetIsGravity(bool is) { useGravity = is; }
-		// 速度取得
+		/// <summary>
+		/// 速度取得
+		/// </summary>
 		Vector3 GetVelocity() const { return velocity_; }
-		// 速度取得
+		/// <summary>
+		/// 速度取得
+		/// </summary>
 		Vector3& Velocity() { return velocity_; }
-		// 質量設定
+		/// <summary>
+		/// 質量設定
+		/// </summary>
 		void SetMass(float m) {
 			mass_ = m;
 			inverseMass = (m != 0.0f) ? 1.0f / m : 0.0f;
 		}
-		// 加速度リセット
+		/// <summary>
+		/// 加速度リセット
+		/// </summary>
 		void ResetAcceleration() { acceleration_ = {0.0f,0.0f,0.0f}; }
-		// 速度リセット
+		/// <summary>
+		/// 速度リセット
+		/// </summary>
 		void ResetVelocity() { velocity_ = { 0.0f,0.0f ,0.0f }; };
 	private:
-		// 移動処理
+		/// <summary>
+		/// 移動処理
+		/// </summary>
 		void ProcessTranslation(float deltaTime, WorldTransform& transform);
 
-		// 回転処理
+		/// <summary>
+		/// 回転処理
+		/// </summary>
 		void ProcessRotation(float deltaTime, WorldTransform& transform);
 	private:
 		Vector3 velocity_ = { 0,0,0 };				// 速度

@@ -158,17 +158,27 @@ namespace Engine {
 	/// スキンクラスター
 	/// </summary>
 	struct SkinCluster {
-		// 生成時はGPUリソースを持っていない空の状態にしておく
+		/// <summary>
+		/// 生成時はGPUリソースを持っていない空の状態にしておく
+		/// </summary>
 		SkinCluster() = default;
-		// GPUリソースを二重解放しないようコピーは禁止する
+		/// <summary>
+		/// GPUリソースを二重解放しないようコピーは禁止する
+		/// </summary>
 		SkinCluster(const SkinCluster&) = delete;
 		SkinCluster& operator=(const SkinCluster&) = delete;
-		// LoadBone内の一時オブジェクトから所有権を移せるようムーブは許可する
+		/// <summary>
+		/// LoadBone内の一時オブジェクトから所有権を移せるようムーブは許可する
+		/// </summary>
 		SkinCluster(SkinCluster&&) noexcept = default;
 		SkinCluster& operator=(SkinCluster&&) noexcept = default;
-		// Mapしたリソースを確実にUnmapしてからComPtrを解放する
+		/// <summary>
+		/// Mapしたリソースを確実にUnmapしてからComPtrを解放する
+		/// </summary>
 		~SkinCluster() { Finalize(); }
-		// スキニング用GPUリソースの終了処理
+		/// <summary>
+		/// スキニング用GPUリソースの終了処理
+		/// </summary>
 		void Finalize();
 
 		SkinningSRVUAV srvUavIndices;
@@ -218,28 +228,44 @@ namespace Engine {
 	struct ModelData;
 	namespace AnimationFunction {
 
-		// スケルトンに対してアニメーションを適用させる関数
+		/// <summary>
+		/// スケルトンに対してアニメーションを適用させる関数
+		/// </summary>
 		void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
 
-		// 任意の時刻の値を取得する(Vector3)
+		/// <summary>
+		/// 任意の時刻の値を取得する(Vector3)
+		/// </summary>
 		Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time);
 
-		// 任意の時刻の値を取得する(Quaternion)
+		/// <summary>
+		/// 任意の時刻の値を取得する(Quaternion)
+		/// </summary>
 		Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, float time);
 
-		// スケルトン更新
+		/// <summary>
+		/// スケルトン更新
+		/// </summary>
 		void UpdateSkeleton(Skeleton& skeleton);
 
-		// スケルトンをブレンド
+		/// <summary>
+		/// スケルトンをブレンド
+		/// </summary>
 		void BlendSkeletons(Skeleton& outSkeleton, const Skeleton& from, const Skeleton& to, float t);
 
-		// スキンクラスター更新
+		/// <summary>
+		/// スキンクラスター更新
+		/// </summary>
 		void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices);
 
-		// スケルトンの描画
+		/// <summary>
+		/// スケルトンの描画
+		/// </summary>
 		void DrawSkeleton(LineCommon* lineCommo, const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale, const Matrix4x4& rotationMatrix);
 
-		// アニメーション適応
+		/// <summary>
+		/// アニメーション適応
+		/// </summary>
 		void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
 
 
@@ -248,17 +274,27 @@ namespace Engine {
 		Joint* FindJointByName(Skeleton& skeleton, const std::string& name);
 		/// 名前からJointを取得する（存在しなければnullptr）
 		const Joint* FindJointByNameConst(const Skeleton& skeleton, const std::string& name);
-		// ジョイントの行列取得
+		/// <summary>
+		/// ジョイントの行列取得
+		/// </summary>
 		Matrix4x4 GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix);
 
-		//　スケール調整
+		/// <summary>
+		/// スケール調整
+		/// </summary>
 		void ValidateTransform(Joint& joint);
-		// ジョイントのImGui表示
+		/// <summary>
+		/// ジョイントのImGui表示
+		/// </summary>
 		void ImGuiJoint(const std::vector<Joint>& joints);
-		// ノードのImGui表示
+		/// <summary>
+		/// ノードのImGui表示
+		/// </summary>
 		void ImGuiNode(const std::vector<Node>& nodes);
 
-		// ジョイントの深さを計算する関数
+		/// <summary>
+		/// ジョイントの深さを計算する関数
+		/// </summary>
 		int CalculateDepth(const std::vector<Joint>& joints, int index);
 
 	}

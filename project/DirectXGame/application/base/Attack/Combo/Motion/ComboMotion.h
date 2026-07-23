@@ -9,19 +9,31 @@ namespace Combo {
 	/// </summary>
 	class ComboMotion {
 	public:
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx,float timer, bool isDebug);
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit(Character::BaseCharacter* owner);
 	public:
-		// 終了条件設定
+		/// <summary>
+		/// 終了条件設定
+		/// </summary>
 		void SetEndConditionType(EndConditionType type) { endType = type; }
 
-		// コンボ用アニメーションクラス取得
+		/// <summary>
+		/// コンボ用アニメーションクラス取得
+		/// </summary>
 		ComboAnimation& GetComboAnimation() { return comboAnimation_; }
-		// コンボ用移動クラス取得
+		/// <summary>
+		/// コンボ用移動クラス取得
+		/// </summary>
 		ComboMove& GetComboMove() { return comboMove_; }
 	private:
 		// コンボ用アニメーションクラス

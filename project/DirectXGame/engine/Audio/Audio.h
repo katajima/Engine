@@ -14,51 +14,83 @@ namespace Engine {
 	/// </summary>
 	class AudioManager {
 	public:
-		// デストラクタ
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
 		~AudioManager();
-		// XAudio2を初期化し、音声を再生できる状態にする。
+		/// <summary>
+		/// XAudio2を初期化し、音声を再生できる状態にする。
+		/// </summary>
 		void Initialize(const std::string& directoryPath = "Resources/Sound/");
 
-		// 再生Voiceと読み込み済み音源をすべて解放する。
+		/// <summary>
+		/// 再生Voiceと読み込み済み音源をすべて解放する。
+		/// </summary>
 		void Finalize();
 
-		// 再生終了済みVoiceを検出して解放する。ゲームループから毎フレーム呼び出す。
+		/// <summary>
+		/// 再生終了済みVoiceを検出して解放する。ゲームループから毎フレーム呼び出す。
+		/// </summary>
 		void Update();
 
-		// Soundディレクトリを再走査し、音源一覧を最新状態へ更新する。
+		/// <summary>
+		/// Soundディレクトリを再走査し、音源一覧を最新状態へ更新する。
+		/// </summary>
 		void ReloadSoundFiles();
 
-		// 指定したWAVまたはMP3ファイルを読み込み、利用可能な音源ハンドルを返す。
+		/// <summary>
+		/// 指定したWAVまたはMP3ファイルを読み込み、利用可能な音源ハンドルを返す。
+		/// </summary>
 		SoundHandle LoadWave(const std::string& filename);
 
-		// 指定した音源を解放する。再生中の場合は該当するVoiceも停止する。
+		/// <summary>
+		/// 指定した音源を解放する。再生中の場合は該当するVoiceも停止する。
+		/// </summary>
 		void UnloadWave(SoundHandle soundHandle);
 
-		// 指定音源を再生し、個別停止に使える再生ハンドルを返す。
+		/// <summary>
+		/// 指定音源を再生し、個別停止に使える再生ハンドルを返す。
+		/// </summary>
 		VoiceHandle Play(SoundHandle soundHandle, bool loop = false, float volume = 1.0f);
 
-		// 保存用音IDから音源を検索して再生する。
+		/// <summary>
+		/// 保存用音IDから音源を検索して再生する。
+		/// </summary>
 		VoiceHandle Play(const std::string& soundId, bool loop = false, float volume = 1.0f);
 
-		// 指定した1回の再生を停止してVoiceを解放する。
+		/// <summary>
+		/// 指定した1回の再生を停止してVoiceを解放する。
+		/// </summary>
 		void Stop(VoiceHandle voiceHandle);
 
-		// 指定音源から開始されたすべての再生を停止する。
+		/// <summary>
+		/// 指定音源から開始されたすべての再生を停止する。
+		/// </summary>
 		void StopAll(SoundHandle soundHandle);
 
-		// 現在再生しているすべてのVoiceを停止する。
+		/// <summary>
+		/// 現在再生しているすべてのVoiceを停止する。
+		/// </summary>
 		void StopAll();
 
-		// エディタ表示に使用できる、読み込み済み音源情報の一覧を返す。
+		/// <summary>
+		/// エディタ表示に使用できる、読み込み済み音源情報の一覧を返す。
+		/// </summary>
 		const std::vector<SoundFileInfo>& GetSoundFiles() const { return soundFiles_; }
 
-		// 保存用音IDに対応する音源情報を返す。見つからない場合はnullptrを返す。
+		/// <summary>
+		/// 保存用音IDに対応する音源情報を返す。見つからない場合はnullptrを返す。
+		/// </summary>
 		const SoundFileInfo* FindSound(const std::string& soundId) const;
 
-		// 保存用音IDに対応するハンドルを返す。見つからない場合は0を返す。
+		/// <summary>
+		/// 保存用音IDに対応するハンドルを返す。見つからない場合は0を返す。
+		/// </summary>
 		SoundHandle FindSoundHandle(const std::string& soundId) const;
 
-		// 音源一覧の基準となるSoundディレクトリを返す。
+		/// <summary>
+		/// 音源一覧の基準となるSoundディレクトリを返す。
+		/// </summary>
 		const std::string& GetDirectoryPath() const { return directoryPath_; }
 
 	private:
@@ -68,22 +100,34 @@ namespace Engine {
 			SoundHandle soundHandle = 0;                // Voiceが参照している音源。
 		};
 
-		// 拡張子に応じてWAVまたはMP3をPCMメモリへ読み込む。
+		/// <summary>
+		/// 拡張子に応じてWAVまたはMP3をPCMメモリへ読み込む。
+		/// </summary>
 		bool LoadAudioData(const std::string& filename, SoundData& soundData) const;
 
-		// WAVファイルをメモリへ読み込む。
+		/// <summary>
+		/// WAVファイルをメモリへ読み込む。
+		/// </summary>
 		bool LoadWaveData(const std::string& filename, SoundData& soundData) const;
 
-		// Media FoundationでMP3をPCMへデコードしてメモリへ読み込む。
+		/// <summary>
+		/// Media FoundationでMP3をPCMへデコードしてメモリへ読み込む。
+		/// </summary>
 		bool LoadMp3Data(const std::string& filename, SoundData& soundData) const;
 
-		// SoundDataが所有するPCMバッファを解放する。
+		/// <summary>
+		/// SoundDataが所有するPCMバッファを解放する。
+		/// </summary>
 		void UnloadSoundData(SoundData& soundData) const;
 
-		// Voiceを停止し、安全に破棄する。
+		/// <summary>
+		/// Voiceを停止し、安全に破棄する。
+		/// </summary>
 		void DestroyVoice(IXAudio2SourceVoice*& sourceVoice) const;
 
-		// パス区切りと大文字小文字を統一して検索用音IDを生成する。
+		/// <summary>
+		/// パス区切りと大文字小文字を統一して検索用音IDを生成する。
+		/// </summary>
 		std::string NormalizeSoundId(const std::string& soundId) const;
 
 		Microsoft::WRL::ComPtr<IXAudio2> xAudio2_; // XAudio2エンジン本体。

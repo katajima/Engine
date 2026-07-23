@@ -17,12 +17,16 @@ namespace Character {
 	/// </summary>
 	class EnemyAttackRequest {
 	public:
-		// 攻撃要求を有効化する
+		/// <summary>
+		/// 攻撃要求を有効化する
+		/// </summary>
 		void Activate() {
 			isActive = true;
 		}
 
-		// 攻撃要求を無効化し、許可状態と分類番号をリセットする
+		/// <summary>
+		/// 攻撃要求を無効化し、許可状態と分類番号をリセットする
+		/// </summary>
 		void Deactivate() {
 			isActive = false;
 			isGranted = false;
@@ -30,42 +34,58 @@ namespace Character {
 			ring = EnemyAttackRing::None;
 		}
 
-		// 攻撃許可を与える
+		/// <summary>
+		/// 攻撃許可を与える
+		/// </summary>
 		void Grant() {
 			isGranted = true;
 		}
 
-		// 攻撃許可を取り消す
+		/// <summary>
+		/// 攻撃許可を取り消す
+		/// </summary>
 		void Deny() {
 			isGranted = false;
 		}
 
-		// ターゲットまでの距離を記録する
+		/// <summary>
+		/// ターゲットまでの距離を記録する
+		/// </summary>
 		void SetDistance(float value) {
 			distance = value;
 		}
 
-		// ターゲットまでの距離を取得する
+		/// <summary>
+		/// ターゲットまでの距離を取得する
+		/// </summary>
 		float GetDistance() const {
 			return distance;
 		}
 
-		// 攻撃リングを設定する
+		/// <summary>
+		/// 攻撃リングを設定する
+		/// </summary>
 		void SetRing(EnemyAttackRing value) {
 			ring = value;
 		}
 
-		// 現在の攻撃リングを取得する
+		/// <summary>
+		/// 現在の攻撃リングを取得する
+		/// </summary>
 		EnemyAttackRing GetRing() const {
 			return ring;
 		}
 
-		// 攻撃後の再攻撃クールタイムを開始する
+		/// <summary>
+		/// 攻撃後の再攻撃クールタイムを開始する
+		/// </summary>
 		void StartCooldown(float time) {
 			cooldownTimer = time;
 		}
 
-		// クールタイムを経過時間分だけ進める
+		/// <summary>
+		/// クールタイムを経過時間分だけ進める
+		/// </summary>
 		void UpdateCooldown(float dt) {
 			if (cooldownTimer > 0.0f) {
 				cooldownTimer -= dt;
@@ -75,19 +95,29 @@ namespace Character {
 			}
 		}
 
-		// 再攻撃クールタイム中かを返す
+		/// <summary>
+		/// 再攻撃クールタイム中かを返す
+		/// </summary>
 		bool IsCooldown() const {
 			return cooldownTimer > 0.0f;
 		}
 
-		// 攻撃要求が有効かを返す
+		/// <summary>
+		/// 攻撃要求が有効かを返す
+		/// </summary>
 		bool GetIsActive() const { return isActive; }
-		// 攻撃許可を受けているかを返す
+		/// <summary>
+		/// 攻撃許可を受けているかを返す
+		/// </summary>
 		bool GetIsGranted() const { return isGranted; }
 
-		// 要求順を比較するための連番を取得する
+		/// <summary>
+		/// 要求順を比較するための連番を取得する
+		/// </summary>
 		uint32_t GetNumber() const { return number; }
-		// 要求順を比較するための連番を設定する
+		/// <summary>
+		/// 要求順を比較するための連番を設定する
+		/// </summary>
 		void SetNumber(uint32_t value) { number = value; }
 
 	private:

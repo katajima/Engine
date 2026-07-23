@@ -9,40 +9,56 @@ struct Segment
 	Vector3 end;
 
 
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	Segment(const Vector3& o, const Vector3& e) : origin(o), end(e) {}
 
-	// 線分のベクトル
+	/// <summary>
+	/// 線分のベクトル
+	/// </summary>
 	Vector3 diff() const {
 		return end - origin;
 	}
 
-	// 線分の長さ
+	/// <summary>
+	/// 線分の長さ
+	/// </summary>
 	float length() const {
 		return diff().Length();
 	}
 
-	// 単位方向ベクトル
+	/// <summary>
+	/// 単位方向ベクトル
+	/// </summary>
 	Vector3 normalizedDirection() const {
 		return diff().Normalize();
 	}
 
-	// 中心点
+	/// <summary>
+	/// 中心点
+	/// </summary>
 	Vector3 MidPoint() const {
 		return (origin + end) * 0.5f;
 	}
 
-	// 反転
+	/// <summary>
+	/// 反転
+	/// </summary>
 	void Reverse() {
 		std::swap(origin, end);
 	}
 
-	// 指定された t (0.0 ~ 1.0) の位置の点を取得
+	/// <summary>
+	/// 指定された t (0.0 ~ 1.0) の位置の点を取得
+	/// </summary>
 	Vector3 pointAt(float t) const {
 		return origin + diff() * t;
 	}
 
-	// 最近接点
+	/// <summary>
+	/// 最近接点
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		Vector3 ab = end - origin;
 		float t = (point - origin).Dot(ab) / ab.LengthSq();
@@ -50,12 +66,16 @@ struct Segment
 		return origin + ab * t;
 	}
 
-	// 線分と点の最近接距離
+	/// <summary>
+	/// 線分と点の最近接距離
+	/// </summary>
 	float DistanceToPoint(const Vector3& point) const {
 		return (ClosestPoint(point) - point).Length();
 	}
 
-	// 線分との最近接距離（最近接点）
+	/// <summary>
+	/// 線分との最近接距離（最近接点）
+	/// </summary>
 	float DistanceToSegment(const Segment& other) const {
 		Vector3 u = diff();
 		Vector3 v = other.diff();
@@ -82,7 +102,9 @@ struct Segment
 		return (cp1 - cp2).Length();
 	}
 
-	// 線分と平面の交差
+	/// <summary>
+	/// 線分と平面の交差
+	/// </summary>
 	bool IntersectPlane(const Vector3& normal, float distance, float& outT) const {
 		Vector3 dir = diff();
 		float denom = Dot(normal, dir);
@@ -94,7 +116,9 @@ struct Segment
 		return true;
 	}
 
-	// 軌跡上で最も近い点とその補間tを両方返す関数
+	/// <summary>
+	/// 軌跡上で最も近い点とその補間tを両方返す関数
+	/// </summary>
 	std::pair<Vector3, float> ClosestPointAndT(const Vector3& point) const {
 		Vector3 ab = end - origin;
 		float t = (point - origin).Dot(ab) / ab.LengthSq();
@@ -102,14 +126,18 @@ struct Segment
 		return { origin + ab * t, t };
 	}
 
-	// 線分の最近接端点（始点・終点のどちらが近いか）
+	/// <summary>
+	/// 線分の最近接端点（始点・終点のどちらが近いか）
+	/// </summary>
 	Vector3 NearestEndPoint(const Vector3& point) const {
 		float d0 = (point - origin).LengthSq();
 		float d1 = (point - end).LengthSq();
 		return (d0 < d1) ? origin : end;
 	}
 
-	// 長さが一定未満かどうかチェック
+	/// <summary>
+	/// 長さが一定未満かどうかチェック
+	/// </summary>
 	bool IsShorterThan(float threshold) const {
 		return diff().LengthSq() < threshold * threshold;
 	}
@@ -120,35 +148,47 @@ struct Line
 	Vector3 origin; //!<始点
 	Vector3 diff;   //!<終点への差分ベクトル
 
-	// 指定位置（t）における点取得
+	/// <summary>
+	/// 指定位置（t）における点取得
+	/// </summary>
 	Vector3 PointAt(float t) const {
 		return origin + diff * t;
 	}
 
-	// 正規化された方向ベクトルの取得
+	/// <summary>
+	/// 正規化された方向ベクトルの取得
+	/// </summary>
 	Vector3 Direction() const {
 		return Normalize(diff);
 	}
 
-	// 任意の点との最近接点
+	/// <summary>
+	/// 任意の点との最近接点
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		Vector3 dir = Direction();
 		float t = Dot(point - origin, dir);
 		return origin + dir * t;
 	}
 
-	// 点との距離
+	/// <summary>
+	/// 点との距離
+	/// </summary>
 	float DistanceToPoint(const Vector3& point) const {
 		return (ClosestPoint(point) - point).Length();
 	}
 
-	// Lineの可視化セグメント生成
+	/// <summary>
+	/// Lineの可視化セグメント生成
+	/// </summary>
 	Segment ToDebugSegment(float tMin = -50.0f, float tMax = +50.0f) const {
 		Vector3 dir = Normalize(diff);
 		return Segment(origin + dir * tMin, origin + dir * tMax);
 	}
 
-	// 2直線の最短距離（空間直線 vs 空間直線）
+	/// <summary>
+	/// 2直線の最短距離（空間直線 vs 空間直線）
+	/// </summary>
 	float DistanceToLine(const Line& other) const {
 		Vector3 u = diff;
 		Vector3 v = other.diff;
@@ -182,17 +222,23 @@ struct Ray
 	Vector3 origin; //!<始点
 	Vector3 diff;   //!<終点への差分ベクトル
 
-	// Ray上の点取得
+	/// <summary>
+	/// Ray上の点取得
+	/// </summary>
 	Vector3 PointAt(float t) const {
 		return origin + diff * t;
 	}
 
-	// 方向の取得
+	/// <summary>
+	/// 方向の取得
+	/// </summary>
 	Vector3 Direction() const {
 		return Normalize(diff);
 	}
 
-	// Rayと点の最近接点（t>=0に制限）
+	/// <summary>
+	/// Rayと点の最近接点（t>=0に制限）
+	/// </summary>
 	Vector3 ClosestPoint(const Vector3& point) const {
 		Vector3 dir = Direction();
 		float t = Dot(point - origin, dir);
@@ -200,17 +246,23 @@ struct Ray
 		return origin + dir * t;
 	}
 
-	// Rayの可視化セグメント生成
+	/// <summary>
+	/// Rayの可視化セグメント生成
+	/// </summary>
 	Segment ToDebugSegment(float length = 100.0f) const {
 		return Segment(origin, origin + Direction() * length);
 	}
 
-	// 鏡面反射ベクトル
+	/// <summary>
+	/// 鏡面反射ベクトル
+	/// </summary>
 	Vector3 Reflect(const Vector3& normal) const {
 		return diff - (normal * Dot(diff, normal)) * 2.0f;
 	}
 
-	// 球との交差（中心と半径を渡す）
+	/// <summary>
+	/// 球との交差（中心と半径を渡す）
+	/// </summary>
 	bool IntersectSphere(const Vector3& center, float radius, float& outT) const {
 		Vector3 dir = Direction();
 		Vector3 oc = origin - center;

@@ -23,36 +23,62 @@ namespace Combo {
 	/// </summary>
 	class ComboAnimation {
 	public:
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		void Enter(Character::BaseCharacter* owner);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx,float timer, bool isDebug);
 
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit(Character::BaseCharacter* owner);
 
 	public:
-		// データ構造体取得
+		/// <summary>
+		/// データ構造体取得
+		/// </summary>
 		GlobalAnimation& GetData() { return data_; }
-		// 終了条件設定
+		/// <summary>
+		/// 終了条件設定
+		/// </summary>
 		void SetEndConditionType(EndConditionType type) { endType = type; }
 	private:
-		// 指定時間からTransformアニメーションの補間率を計算する
+		/// <summary>
+		/// 指定時間からTransformアニメーションの補間率を計算する
+		/// </summary>
 		float CalculateTransformAnimationRate(float timer) const;
-		// 攻撃前移動アニメーションを使用できる設定か判定する
+		/// <summary>
+		/// 攻撃前移動アニメーションを使用できる設定か判定する
+		/// </summary>
 		bool CanUsePreMoveAnimation() const;
-		// 攻撃アニメーションの再生時間をコンボ時間から計算する
+		/// <summary>
+		/// 攻撃アニメーションの再生時間をコンボ時間から計算する
+		/// </summary>
 		float CalculateAttackAnimationTime(float timer) const;
-		// 指定名のスケルタルアニメーションを再生状態へ設定する
+		/// <summary>
+		/// 指定名のスケルタルアニメーションを再生状態へ設定する
+		/// </summary>
 		void PlaySkeletalAnimation(const std::string& animationName, float blendTime, bool isLoop, float speed);
-		// 攻撃前移動アニメーションから攻撃アニメーションへの切り替えを更新する
+		/// <summary>
+		/// 攻撃前移動アニメーションから攻撃アニメーションへの切り替えを更新する
+		/// </summary>
 		bool UpdatePreMoveAnimation(float timer, bool isHitStop);
-		// 攻撃アニメーションを開始し、必要なら再生時間を初期化する
+		/// <summary>
+		/// 攻撃アニメーションを開始し、必要なら再生時間を初期化する
+		/// </summary>
 		void StartAttackAnimation(float startTime);
-		// 前フレームとの差分でTransformアニメーションを適用する
+		/// <summary>
+		/// 前フレームとの差分でTransformアニメーションを適用する
+		/// </summary>
 		void ApplyTransformAnimation(float timer);
-		// 現在適用中のTransformオフセットを取り除く
+		/// <summary>
+		/// 現在適用中のTransformオフセットを取り除く
+		/// </summary>
 		void RemoveTransformAnimationOffset();
 
 	private:

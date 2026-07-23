@@ -16,38 +16,64 @@ namespace Engine {
 	{
 	public:
 		virtual ~UIElement() = default;
-		// インスタンス設定
+		/// <summary>
+		/// インスタンス設定
+		/// </summary>
 		void SetInstance(int instance) { instance_ = instance; }
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(EntityManager* entityManager, std::string name);
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(float deltaTime) = 0;
-		// 名前スプライトを使うか設定
+		/// <summary>
+		/// 名前スプライトを使うか設定
+		/// </summary>
 		void SetUseNameSprite(bool use) { useNameSprite_ = use; }
-		// 位置設定
+		/// <summary>
+		/// 位置設定
+		/// </summary>
 		void SetPos(const Vector2& pos) { pos_ = pos; }
-		// Input設定
+		/// <summary>
+		/// Input設定
+		/// </summary>
 		void SetInput(InputSystem* inputSystem) { this->inputSystem = inputSystem; }
-		// スプライト追加
+		/// <summary>
+		/// スプライト追加
+		/// </summary>
 		void AddSprite(std::string name, std::string textureName);
-		// スプライト取得
+		/// <summary>
+		/// スプライト取得
+		/// </summary>
 		BaseSprite* GetSprite(std::string name);
-		// 画面比率設定
+		/// <summary>
+		/// 画面比率設定
+		/// </summary>
 		void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) {
 			leftTopPos_ = leftTopPos;
 			ratio_ = ratio;
 		};
-		// 親子付け
+		/// <summary>
+		/// 親子付け
+		/// </summary>
 		void SetParent(WorldTransform2d* parent) {
 			this->parent = parent;
 		}
 
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		virtual void UniqueDraw() = 0;
-		// スプライト初期化
+		/// <summary>
+		/// スプライト初期化
+		/// </summary>
 		virtual void InitSprite() = 0;
 	protected:
 		InputSystem* inputSystem = nullptr;
@@ -71,12 +97,18 @@ namespace Engine {
 /// </summary>
 	class UINormal : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override {};
-		//初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 	};
@@ -88,12 +120,18 @@ namespace Engine {
 /// </summary>
 	class UIButton : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override {};
-		//初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 		bool isCheck_ = false;
@@ -105,16 +143,26 @@ namespace Engine {
 /// </summary>
 	class UICheckBox : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
-		// クリックスプライト取得
+		/// <summary>
+		/// クリックスプライト取得
+		/// </summary>
 		BaseSprite* GetCheckSprite() { return checkSprite.get(); }
-		// 背景スプライト取得
+		/// <summary>
+		/// 背景スプライト取得
+		/// </summary>
 		BaseSprite* GetBackgroundSprite() { return backgroundSprite.get(); }
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 		std::unique_ptr<BaseSprite> checkSprite;
@@ -128,21 +176,33 @@ namespace Engine {
 /// </summary>
 	class UISlider : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
-		// スライドスプライト取得
+		/// <summary>
+		/// スライドスプライト取得
+		/// </summary>
 		BaseSprite* GetSlidSprite() { return slidSprite.get(); }
-		// 背景スプライト取得
+		/// <summary>
+		/// 背景スプライト取得
+		/// </summary>
 		BaseSprite* GetBackgroundSprite() { return backgroundSprite.get(); }
-		// 最小値最大値設定
+		/// <summary>
+		/// 最小値最大値設定
+		/// </summary>
 		void SetMinMax(float min, float max) {
 			min_ = min;
 			max_ = max;
 		};
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 		std::unique_ptr<BaseSprite> slidSprite;
@@ -164,35 +224,55 @@ namespace Engine {
 /// </summary>
 	class UIMeter : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
-		// メータスプライト取得
+		/// <summary>
+		/// メータスプライト取得
+		/// </summary>
 		BaseSprite* GetMeterSprite() { return meterSprite.get(); }
-		// 背景スプライト取得
+		/// <summary>
+		/// 背景スプライト取得
+		/// </summary>
 		BaseSprite* GetBackgroundSprite() { return backgroundSprite.get(); }
-		// 名前スプライト取得
+		/// <summary>
+		/// 名前スプライト取得
+		/// </summary>
 		BaseSprite* GetNameSprite() { return nameSprite_.get(); }
-		// メータ表示タイプ設定
+		/// <summary>
+		/// メータ表示タイプ設定
+		/// </summary>
 		void SetMeterType(UIMeterType type) { type_ = type; }
 
-		// 背景スプライトのサイズとメーターのサイズ
+		/// <summary>
+		/// 背景スプライトのサイズとメーターのサイズ
+		/// </summary>
 		void SetMaxSize(const Vector2& size, const Vector2& offsetSise) {
 			size_ = size;
 			offsetSize = offsetSise;
 			backgroundSprite->GetSprite()->SetSize(size_);
 			meterSprite->GetSprite()->SetSize(size_);
 		}
-		// メータ設定
+		/// <summary>
+		/// メータ設定
+		/// </summary>
 		void SetMeter(float meter) { meter_ = meter; }
-		// メータ範囲設定
+		/// <summary>
+		/// メータ範囲設定
+		/// </summary>
 		void SetMeterMinMax(float min, float max) {
 			meterMin_ = min;
 			meterMax_ = max;
 		};
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 		Vector2 size_ = {};
@@ -214,20 +294,34 @@ namespace Engine {
 /// </summary>
 	class UIPair : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
-		// 最初スプライト取得
+		/// <summary>
+		/// 最初スプライト取得
+		/// </summary>
 		BaseSprite* GetFirstSprite() { return firstSprite.get(); }
-		// 次スプライト取得
+		/// <summary>
+		/// 次スプライト取得
+		/// </summary>
 		BaseSprite* GetSecondSprite() { return secondSprite.get(); }
-		// 間隔設定
+		/// <summary>
+		/// 間隔設定
+		/// </summary>
 		void SetOffset(float offset) { offset_ = offset; }
-		// ペアの方向設定
+		/// <summary>
+		/// ペアの方向設定
+		/// </summary>
 		void SetUIPairDirectionType(UIPairDirectionType type) { type_ = type; }
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 		float offset_ = 10.0f;
@@ -242,9 +336,13 @@ namespace Engine {
 /// </summary>
 	class UICount : public UIElement {
 	public:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime)override;
-		// カウントのスプライト取得
+		/// <summary>
+		/// カウントのスプライト取得
+		/// </summary>
 		BaseSprite* GetCountSprite(int num) {
 			if (static_cast<int>(countSprite_.size()) <= num) {
 				num = static_cast<int>(countSprite_.size()) - 1;
@@ -259,10 +357,14 @@ namespace Engine {
 			}
 		}
 
-		// 名前スプライト取得
+		/// <summary>
+		/// 名前スプライト取得
+		/// </summary>
 		BaseSprite* GetNameSprite() { return nameSprite_.get(); }
 
-		// 最大カウント設定
+		/// <summary>
+		/// 最大カウント設定
+		/// </summary>
 		void SetMaxSize(const Vector2& size, const Vector2& offsetSise) {
 			size_ = size;
 			offsetSize = offsetSise;
@@ -270,21 +372,31 @@ namespace Engine {
 				count->SetSize(size_);
 			}
 		}
-		// テクスチャサイズ設定
+		/// <summary>
+		/// テクスチャサイズ設定
+		/// </summary>
 		void SetTextureSize(const Vector2& size) {
 			texSize_ = size;
 			for (auto& count : countSprite_) {
 				count->GetSprite()->SetTextureSize(size);
 			}
 		}
-		// カウント設定
+		/// <summary>
+		/// カウント設定
+		/// </summary>
 		void SetCount(float count) { count_ = count; }
-		// 最大カウント設定
+		/// <summary>
+		/// 最大カウント設定
+		/// </summary>
 		void SetCountMax(float max) { countMax_ = max; }
 	protected:
-		// 固有描画
+		/// <summary>
+		/// 固有描画
+		/// </summary>
 		void UniqueDraw()override;
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitSprite()override;
 	private:
 		Vector2 size_{};

@@ -45,28 +45,46 @@ namespace Engine {
 
 		~EntityManager();
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* directXCommon);
-		// 終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
 
-		// ImGui
+		/// <summary>
+		/// ImGui
+		/// </summary>
 		void UpdateImgui();
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
 
-		// オブジェクトクリーン
+		/// <summary>
+		/// オブジェクトクリーン
+		/// </summary>
 		void ObjectClean();
-		// オブジェクト描画
+		/// <summary>
+		/// オブジェクト描画
+		/// </summary>
 		void ObjectDraw();
-		// シャドウマップ用の深度描画
+		/// <summary>
+		/// シャドウマップ用の深度描画
+		/// </summary>
 		void DrawShadowMap(ShadowMap* shadowMap);
 
 	public: //セッター
-		// ゲーム全体で共有するオーディオマネージャーを設定する。
+		/// <summary>
+		/// ゲーム全体で共有するオーディオマネージャーを設定する。
+		/// </summary>
 		void SetAudioManager(AudioManager* audioManager) { audioManager_ = audioManager; }
-		// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
+		/// <summary>
+		/// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
+		/// </summary>
 		Object3d* CreateObject3D(const std::string& name, ObjectModelType type, const Vector3& pos, Engine::Camera* camera) {
 			std::unique_ptr<Object3d> object;
 			switch (type)
@@ -131,7 +149,9 @@ namespace Engine {
 			return raw;
 		}
 
-		// タグでの削除
+		/// <summary>
+		/// タグでの削除
+		/// </summary>
 		void EraseObject3DByTag(const std::string& tag) {
 			std::erase_if(entities_, [&](const std::unique_ptr<Entity>& o) {
 				return  o->GetNameTag() == tag;
@@ -139,30 +159,54 @@ namespace Engine {
 		}
 
 	public: //ゲッター
-		// 海マネージャー取得
+		/// <summary>
+		/// 海マネージャー取得
+		/// </summary>
 		OceanManager* GetOceanManager() { return oceanManager_.get(); };
-		// オブジェクトインスタンスマネージャー取得
+		/// <summary>
+		/// オブジェクトインスタンスマネージャー取得
+		/// </summary>
 		Object3dInstanceManager* GetObject3dInstanceManager() { return object3dInstanceManager_.get(); }
-		// オブジェクト共通クラス取得
+		/// <summary>
+		/// オブジェクト共通クラス取得
+		/// </summary>
 		Object3dCommon* GetObject3dCommon() { return object3dCommon_.get(); }
-		// スカイボックス共通クラス取得
+		/// <summary>
+		/// スカイボックス共通クラス取得
+		/// </summary>
 		SkyBoxCommon* GetSkyBoxCommon() { return skyBoxCommon_.get(); }
-		// ライトマネージャー取得
+		/// <summary>
+		/// ライトマネージャー取得
+		/// </summary>
 		LightManager* GetLightManager() { return lightManager_.get(); }
-		// スキニング共通クラス取得
+		/// <summary>
+		/// スキニング共通クラス取得
+		/// </summary>
 		SkinningCommon* GetSkinningCommon() { return skinningCommon_.get(); }
-		// カメラ共通クラス取得
+		/// <summary>
+		/// カメラ共通クラス取得
+		/// </summary>
 		CameraCommon* GetCameraCommon() { return cameraCommon_.get(); }
-		// ライン共通クラス取得
+		/// <summary>
+		/// ライン共通クラス取得
+		/// </summary>
 		LineCommon* Get3DLineCommon() { return lineCommon_.get(); }
-		// プリミティブ共通クラス取得
+		/// <summary>
+		/// プリミティブ共通クラス取得
+		/// </summary>
 		PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
-		// エフェクトマネージャークラス取得
+		/// <summary>
+		/// エフェクトマネージャークラス取得
+		/// </summary>
 		EffectManager* GetEffectManager() { return effectManager_.get(); }
-		// コンボやゲームオブジェクトから共有音源へアクセスする。
+		/// <summary>
+		/// コンボやゲームオブジェクトから共有音源へアクセスする。
+		/// </summary>
 		AudioManager* GetAudioManager() { return audioManager_; }
 	public:
-		// スプライト共通クラス取得
+		/// <summary>
+		/// スプライト共通クラス取得
+		/// </summary>
 		SpriteCommon* GetSpriteCommon() { return spriteCommon_.get(); }
 
 

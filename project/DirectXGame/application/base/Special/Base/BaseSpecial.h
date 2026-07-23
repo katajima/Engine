@@ -41,34 +41,62 @@ public:
 
 public:
 
-	// フェーズ取得
+	/// <summary>
+	/// フェーズ取得
+	/// </summary>
 	int GetPhese() const { return data_.phase_; }
-	// フェーズセット
+	/// <summary>
+	/// フェーズセット
+	/// </summary>
 	void SetPhese(int phese) { data_.phase_ = phese; }
-	// 最大ゲージ取得
+	/// <summary>
+	/// 最大ゲージ取得
+	/// </summary>
 	void SetMaxGauge(int gauge) { data_.maxGauge_ = gauge; }
-	// ゲージ取得
+	/// <summary>
+	/// ゲージ取得
+	/// </summary>
 	int GetGauge() const { return data_.gauge_; };
-	// ゲージセット
+	/// <summary>
+	/// ゲージセット
+	/// </summary>
 	void SetGauge(int gauge) { data_.gauge_ = gauge; };
-	// ゲージ追加
+	/// <summary>
+	/// ゲージ追加
+	/// </summary>
 	void AddGauge(int gauge) { data_.gauge_ += gauge; };
-	// スペシャル
+	/// <summary>
+	/// スペシャル
+	/// </summary>
 	bool GetIsSpecial() const { return data_.isUse_; }
-	// アクション中か
+	/// <summary>
+	/// アクション中か
+	/// </summary>
 	bool IsAction() const { return data_.isAction_; }
-	// 移動可能か
+	/// <summary>
+	/// 移動可能か
+	/// </summary>
 	bool GetIsMove() const { return data_.isMove_; };
-	// データ取得
+	/// <summary>
+	/// データ取得
+	/// </summary>
 	SpecialData GetData() const { return data_; }
-	// 時間取得
+	/// <summary>
+	/// 時間取得
+	/// </summary>
 	float GetTime();
 public: // 貰いもの
-	//持ち主設定
+	/// <summary>
+	/// 持ち主設定
+	/// </summary>
 	void SetOwner(Character::BaseCharacter* owner) { this->owner = owner; }
-	// 入力をセット
+	/// <summary>
+	/// 入力をセット
+	/// </summary>
 	void SetInputSystem(InputSystem* inputSystem) {this->inputSystem = inputSystem;};
-	// 親子付け
+	/// <summary>
+	/// 親子付け
+	/// </summary>
 	void SetParent(Engine::WorldTransform* parent) {};
 protected:
 	// データ

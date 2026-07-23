@@ -52,17 +52,23 @@ namespace Character {
 		}
 
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float timer) {
 			spawnDelay_ += timer;	//
-			// 出現インターバル
+			/// <summary>
+			/// 出現インターバル
+			/// </summary>
 			if (spawnDelay_ >= data_.spawnInterval_) {
 				spawnDelay_ = 0.0f;
 				isSpawned_ = false;
 			}
 		}
 
-		// 出現処理
+		/// <summary>
+		/// 出現処理
+		/// </summary>
 		void Spawned() {
 			spawnCount_++;
 
@@ -73,19 +79,29 @@ namespace Character {
 			}
 		}
 
-		// 出現終了かどうか
+		/// <summary>
+		/// 出現終了かどうか
+		/// </summary>
 		bool IsEnd() const { return isEnd_; }
 
-		// 出現済みかどうか
+		/// <summary>
+		/// 出現済みかどうか
+		/// </summary>
 		bool IsSpawned() const { return isSpawned_; }
 
-		// 出現可能かどうか
+		/// <summary>
+		/// 出現可能かどうか
+		/// </summary>
 		bool IsSpawn() const { return isSpawn_; }
 
-		// 出現フラグ設定
+		/// <summary>
+		/// 出現フラグ設定
+		/// </summary>
 		void SetIsSpawn(bool isSpawn) { isSpawn_ = isSpawn; }
 
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		Data& GetData() { return data_; }
 
 		const Data& GetData() const { return data_; }
@@ -105,31 +121,51 @@ namespace Character {
 	/// </summary>
 	class CharacterSpawn {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(CharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float time);
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
 	public: // 取得or設定
-		// 名前取得
+		/// <summary>
+		/// 名前取得
+		/// </summary>
 		std::string GetName() const { return spawnInfo_.GetData().name_; }
-		// 出現エリア設定
+		/// <summary>
+		/// 出現エリア設定
+		/// </summary>
 		void SetSizeArea(const Vector3& size) { spawnInfo_.GetData().size_ = size; }
-		// 出現量設定
+		/// <summary>
+		/// 出現量設定
+		/// </summary>
 		void SetSpawnAmount(int amount) { spawnInfo_.GetData().spawnAmount_ = amount; }
-		// 出現情報取得
+		/// <summary>
+		/// 出現情報取得
+		/// </summary>
 		SpawnInfo& GetSpawnInfo() { return spawnInfo_; }
-		// 出現位置取得
+		/// <summary>
+		/// 出現位置取得
+		/// </summary>
 		Engine::WorldTransform& GetSpawnTransform() { return spawnTransform_; }
-		// 最大敵出現量設定
+		/// <summary>
+		/// 最大敵出現量設定
+		/// </summary>
 		void SetMaxEnemyCount(int count) { maxEnemyCount_ = count; }
 
 	public:
-		// 出現処理
+		/// <summary>
+		/// 出現処理
+		/// </summary>
 		void SpawnProcess();
 	private:
 		SpawnInfo spawnInfo_;				// 出現情報

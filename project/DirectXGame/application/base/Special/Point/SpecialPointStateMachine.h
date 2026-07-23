@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "SpecialPointState.h"
 
 // 前方宣言
@@ -11,13 +11,19 @@ using SpecialPointStateFactory = std::function<std::unique_ptr<BaseSpecialPointS
 /// </summary>
 class SpecialPointStateMachine {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(SpecialPoint* object, SpecialPointState initialState = SpecialPointState::kPop);
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
 
-	// 変更
+	/// <summary>
+	/// 変更
+	/// </summary>
 	void ChangeState(const SpecialPointState& name) {
 		auto it = stateFactoryMap_.find(name);
 		if (it != stateFactoryMap_.end()) {
@@ -29,20 +35,28 @@ public:
 		}
 	}
 
-	// ---- 現在ステートの取得 ----
+	/// <summary>
+	/// ---- 現在ステートの取得 ----
+	/// </summary>
 	BaseSpecialPointState* GetCurrentState() const { return state_.get(); }
 
-	// 現在のステート取得
+	/// <summary>
+	/// 現在のステート取得
+	/// </summary>
 	SpecialPointState GetCurrentMainState() const {
 		return state_ ? state_->GetSpecialPointState() : SpecialPointState::kMove;
 	}
 
-	// 登録
+	/// <summary>
+	/// 登録
+	/// </summary>
 	void RegisterState(const SpecialPointState& name, SpecialPointStateFactory factory) {
 		stateFactoryMap_[name] = factory;
 	}
 private:
-	// ステート変更
+	/// <summary>
+	/// ステート変更
+	/// </summary>
 	void ChangeState(std::unique_ptr<BaseSpecialPointState> newState) {
 		if (state_) {
 			state_->Exit(); // 終了

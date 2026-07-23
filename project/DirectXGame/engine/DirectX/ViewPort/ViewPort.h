@@ -15,10 +15,14 @@ namespace Engine {
 		ViewPort() = default;
 		~ViewPort() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command);
 
-		// ビューポートを設定
+		/// <summary>
+		/// ビューポートを設定
+		/// </summary>
 		void SettingViewport();
 	private:
 		// コマンドのインスタンスを受け取る箱

@@ -20,27 +20,47 @@ namespace Engine {
     public:
         ~LineCommon();
 
-        // 初期化  
+        /// <summary>
+        /// 初期化
+        /// </summary>
         void Initialize(DirectXCommon* dxCommon);
-        // 終了処理
+        /// <summary>
+        /// 終了処理
+        /// </summary>
         void Finalize();
-        // 更新  
+        /// <summary>
+        /// 更新
+        /// </summary>
         void Update();
-        // 描画  
+        /// <summary>
+        /// 描画
+        /// </summary>
         void Draw();
-        // 描画前準備  
+        /// <summary>
+        /// 描画前準備
+        /// </summary>
         void DrawCommonSetting();
-        // 描画前準備2  
+        /// <summary>
+        /// 描画前準備2
+        /// </summary>
         void DrawCommonSetting2();
-        // DitectXCommonの取得  
+        /// <summary>
+        /// DitectXCommonの取得
+        /// </summary>
         DirectXCommon* GetDxCommon() const { return dxCommon; }
-        // カメラ設定  
+        /// <summary>
+        /// カメラ設定
+        /// </summary>
         void SetDefaultCamera(Camera* camera) { this->camera = camera; }
 
-        // デバッグラインメッシュデータの取得  
+        /// <summary>
+        /// デバッグラインメッシュデータの取得
+        /// </summary>
         LineMeshData& GetDebugLineMeshData() { return lineDebugMeshData_; }
 
-        // ラインメッシュデータの取得  
+        /// <summary>
+        /// ラインメッシュデータの取得
+        /// </summary>
         LineMeshData& GetLineMeshData() { return lineMeshData_; }
     public:
         void LineClear();
@@ -54,9 +74,13 @@ namespace Engine {
             float pad2;
         };
     private:
-        // ルートシグネチャの作成  
+        /// <summary>
+        /// ルートシグネチャの作成
+        /// </summary>
         void CreateRootSignature();
-        // グラフィックスパイプラインの作成  
+        /// <summary>
+        /// グラフィックスパイプラインの作成
+        /// </summary>
         void CreateGraphicsPipeline();
     private:
         std::unique_ptr<PSOManager> psoManager_ = nullptr;

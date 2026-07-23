@@ -36,24 +36,40 @@ namespace Engine {
 		~SwapChain() = default;
 
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence);
 
-		// GPUに画面交換を通知
+		/// <summary>
+		/// GPUに画面交換を通知
+		/// </summary>
 		void Present();
-		// 現在のバックバッファのリソースを取得
+		/// <summary>
+		/// 現在のバックバッファのリソースを取得
+		/// </summary>
 		ID3D12Resource* GetCurrentBackBufferResource();
-		// 描画先のRTVハンドルを取得
+		/// <summary>
+		/// 描画先のRTVハンドルを取得
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRTVHandle();
 
-		// バッファカウント取得
+		/// <summary>
+		/// バッファカウント取得
+		/// </summary>
 		size_t GetBackBufferCount() const { return backBuffers_.size(); }
 
-		// 描画前
+		/// <summary>
+		/// 描画前
+		/// </summary>
 		void PreDraw();
-		// 描画後
+		/// <summary>
+		/// 描画後
+		/// </summary>
 		void PostDraw();
-		// リサイズ
+		/// <summary>
+		/// リサイズ
+		/// </summary>
 		void Resize(int width, int height);
 
 	private:

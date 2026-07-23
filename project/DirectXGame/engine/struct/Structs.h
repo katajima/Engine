@@ -8,22 +8,32 @@ struct Vector2Int {
 	int x = 0; // 横方向の整数座標
 	int y = 0; // 縦方向の整数座標
 
-	// ゼロ座標を生成するデフォルトコンストラクタ
+	/// <summary>
+	/// ゼロ座標を生成するデフォルトコンストラクタ
+	/// </summary>
 	constexpr Vector2Int() = default;
-	// 指定した横・縦座標から生成するコンストラクタ
+	/// <summary>
+	/// 指定した横・縦座標から生成するコンストラクタ
+	/// </summary>
 	constexpr Vector2Int(int xValue, int yValue) : x(xValue), y(yValue) {}
 
-	// 2つの整数座標が一致するか判定する
+	/// <summary>
+	/// 2つの整数座標が一致するか判定する
+	/// </summary>
 	constexpr bool operator==(const Vector2Int& other) const {
 		return x == other.x && y == other.y;
 	}
 
-	// 整数座標同士を加算する
+	/// <summary>
+	/// 整数座標同士を加算する
+	/// </summary>
 	constexpr Vector2Int operator+(const Vector2Int& other) const {
 		return Vector2Int{ x + other.x, y + other.y };
 	}
 
-	// 整数座標同士を減算する
+	/// <summary>
+	/// 整数座標同士を減算する
+	/// </summary>
 	constexpr Vector2Int operator-(const Vector2Int& other) const {
 		return Vector2Int{ x - other.x, y - other.y };
 	}
@@ -31,7 +41,9 @@ struct Vector2Int {
 
 // Vector2Intをunordered_mapやunordered_setのキーに使うためのハッシュ
 struct Vector2IntHash {
-	// 2つの整数座標を1つのハッシュ値へ結合する
+	/// <summary>
+	/// 2つの整数座標を1つのハッシュ値へ結合する
+	/// </summary>
 	std::size_t operator()(const Vector2Int& value) const noexcept {
 		const std::size_t xHash = std::hash<int>{}(value.x); // 横座標のハッシュ
 		const std::size_t yHash = std::hash<int>{}(value.y); // 縦座標のハッシュ
@@ -62,13 +74,19 @@ struct MedianWithRange {
 	T median; // 中央値
 	T range;  // 範囲（中央値からの許容範囲）
 
-	// 最小値を返す
+	/// <summary>
+	/// 最小値を返す
+	/// </summary>
 	T Min() const { return median - range; }
 
-	// 最大値を返す
+	/// <summary>
+	/// 最大値を返す
+	/// </summary>
 	T Max() const { return median + range; }
 
-	// 幅全体
+	/// <summary>
+	/// 幅全体
+	/// </summary>
 	T Width() const { return range * 2.0; }
 };
 
@@ -83,17 +101,23 @@ struct ValueWithDelta {
 	ValueWithDelta() = default;
 	ValueWithDelta(const T& v, const T& d) : value(v), delta(d) {}
 
-	// 値を移動量分だけ更新
+	/// <summary>
+	/// 値を移動量分だけ更新
+	/// </summary>
 	void Update() {
 		value += delta;
 	}
 
-	// 移動量を加算
+	/// <summary>
+	/// 移動量を加算
+	/// </summary>
 	void AddDelta(const T& d) {
 		delta += d;
 	}
 
-	// 移動量リセット
+	/// <summary>
+	/// 移動量リセット
+	/// </summary>
 	void ResetDelta() {
 		delta = T{};
 	}
@@ -109,7 +133,9 @@ struct Gage {
 	bool useRate = false;	// ゲージの変化率を使用するかどうか
 
 
-	// 初期値、最小値、最大値、変化率を設定する関数
+	/// <summary>
+	/// 初期値、最小値、最大値、変化率を設定する関数
+	/// </summary>
 	void Initiaize(float defaultV, float min, float max, float rate) {
 		defaultValue = defaultV;	// 初期値を設定
 		value = defaultValue;		// ゲージの値を初期値に設定
@@ -118,30 +144,40 @@ struct Gage {
 		rateFluctuation = rate;			// 変化率を設定
 	}
 
-	// ゲージも値を加算する関数
+	/// <summary>
+	/// ゲージも値を加算する関数
+	/// </summary>
 	void Add(float addValue) {
 		value += addValue;			// ゲージの値に追加する
 		if (value > maxValue) value = maxValue; // 最大値を超えないように制限
 		if (value < minValue) value = minValue; // 最小値を下回らないように制限
 	}
 
-	// 最大値と現在のゲージの値を比較して、ゲージが満タンかどうかを返す関数
+	/// <summary>
+	/// 最大値と現在のゲージの値を比較して、ゲージが満タンかどうかを返す関数
+	/// </summary>
 	bool IsFull() const {
 		return value >= maxValue; // ゲージの値が最大値以上なら満タン
 	}
 
-	// 最大値と現在のゲージの値を比較して、ゲージが空かどうかを返す関数
+	/// <summary>
+	/// 最大値と現在のゲージの値を比較して、ゲージが空かどうかを返す関数
+	/// </summary>
 	bool IsEmpty() const {
 		return value <= minValue; // ゲージの値が最小値以下なら空
 	}
 
-	// 最大値と現在のゲージの値を比較して、比率を返す関数
+	/// <summary>
+	/// 最大値と現在のゲージの値を比較して、比率を返す関数
+	/// </summary>
 	float GetRate() const {
 		if (maxValue == 0) return 0.0f; // 最大値が0の場合は比率を0にする
 		return std::abs(value / maxValue);
 	}
 
-	// ゲージを更新する関数
+	/// <summary>
+	/// ゲージを更新する関数
+	/// </summary>
 	void Update(float delta) {
 		if (useRate) {
 			if (rateFluctuation != 0.0f)

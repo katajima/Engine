@@ -16,7 +16,9 @@ namespace Character {
 	class EnemyAttackSystem {
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(CharacterStateMachine* characterStateMachine);
 		// 更新
 		void Update(
@@ -30,7 +32,9 @@ namespace Character {
 			float moveSpeed
 		);
 		
-		// 攻撃要求の取得
+		/// <summary>
+		/// 攻撃要求の取得
+		/// </summary>
 		EnemyAttackRequest* GetAttackRequest() const;
 
 	private:

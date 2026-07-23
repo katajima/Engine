@@ -9,11 +9,17 @@ namespace Engine {
 	class WorldTransform2d
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 親子関係
+		/// <summary>
+		/// 親子関係
+		/// </summary>
 		void SetParent(const Matrix3x3& parent) {
 			isPearent = true;
 			parentMatrix_ = parent;
@@ -23,11 +29,17 @@ namespace Engine {
 		{
 			child->parent_ = this;
 		}
-		// ワールド位置取得
+		/// <summary>
+		/// ワールド位置取得
+		/// </summary>
 		Vector2 GetWorldPosition() const { return worldMat_.GetWorldPosition(); }
-		// マトリックス4x4に変換
+		/// <summary>
+		/// マトリックス4x4に変換
+		/// </summary>
 		Matrix4x4 GetConvert2DMatrixTo4x4() const { return Convert2DMatrixTo4x4(worldMat_); }
-		// 回転取得
+		/// <summary>
+		/// 回転取得
+		/// </summary>
 		float GetWorldRotation() const {
 			if (parent_) {
 				return parent_->GetWorldRotation() + rotate_;

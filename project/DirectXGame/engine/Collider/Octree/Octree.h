@@ -26,7 +26,9 @@ namespace Engine {
             : bounds(bounds), depth(depth) {
         }
 
-        // 小分け
+        /// <summary>
+        /// 小分け
+        /// </summary>
         void Subdivide(int divX, int divY, int divZ, int maxDepth) {
             if (depth >= maxDepth) return;
 
@@ -45,7 +47,9 @@ namespace Engine {
             }
         }
 
-        // クリア
+        /// <summary>
+        /// クリア
+        /// </summary>
         void Clear() {
             colliders.clear();
             children.clear();   // unique_ptr の破棄で子孫ノードも全部消える
@@ -71,24 +75,38 @@ namespace Engine {
             Clear();
         }
 
-        // クリア
+        /// <summary>
+        /// クリア
+        /// </summary>
         void Clear() const { root->Clear(); }
 
-        // 追加
+        /// <summary>
+        /// 追加
+        /// </summary>
         void Insert(Collider* collider);
 
-        //　挿入
+        /// <summary>
+        /// 挿入
+        /// </summary>
         void Query(const AABB& area, std::vector<Collider*>& results) { QueryNode(root.get(), area, results); }
 
-        // Octree クラス内で呼び出し用の関数を追加
+        /// <summary>
+        /// Octree クラス内で呼び出し用の関数を追加
+        /// </summary>
         void Draw(LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
 
     private:
-        // オクツリー描画
+        /// <summary>
+        /// オクツリー描画
+        /// </summary>
         void DrawOctree(OctreeColliderNode* node, LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
-        // 挿入
+        /// <summary>
+        /// 挿入
+        /// </summary>
         void InsertCollider(OctreeColliderNode* node, Collider* collider, const AABB& aabb);
-        // 挿入
+        /// <summary>
+        /// 挿入
+        /// </summary>
         void QueryNode(OctreeColliderNode* node, const AABB& area, std::vector<Collider*>& results);
     private:
         std::unique_ptr<OctreeColliderNode> root = nullptr;

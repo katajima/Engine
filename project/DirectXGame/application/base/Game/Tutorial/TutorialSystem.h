@@ -41,10 +41,14 @@ public:
     void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, Engine::EntityManager* entityManager,
         Engine::GlobalVariables* globalVariables, Character::BaseCharacter* character);
     
-    // 更新
+    /// <summary>
+    /// 更新
+    /// </summary>
     void Update(float dt);
 
-	// イベント送信
+	/// <summary>
+	/// イベント送信
+	/// </summary>
     void SendEvent(const TutorialEvent& event);
 
 

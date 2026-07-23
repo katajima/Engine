@@ -8,10 +8,14 @@
 class CameraCollision {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize();
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(Transform& transform, float dt);
 	// ターゲット設定
 	/// <summary>衝突補正の基準となる追従対象を設定する。</summary>

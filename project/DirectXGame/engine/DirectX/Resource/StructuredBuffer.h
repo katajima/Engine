@@ -36,7 +36,9 @@ namespace Engine {
 			barrier_ = std::make_unique<Barrier>();
 			barrier_->Initialize(dxCommon->GetCommand());
 
-			// リソース生成
+			/// <summary>
+			/// リソース生成
+			/// </summary>
 			if (useUav_) {
 				resource_ = dxCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(Type) * num_);
 			}
@@ -46,7 +48,9 @@ namespace Engine {
 				// データ
 				data_ = nullptr;
 
-				// リソースを書き込むためのアドレス取得
+				/// <summary>
+				/// リソースを書き込むためのアドレス取得
+				/// </summary>
 				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 			}
 
@@ -75,14 +79,18 @@ namespace Engine {
 		void SetGraphicsRootDescriptorTable(int index)
 		{
 			if (useUav_) {
-				// UAV → SRV に切り替え
+				/// <summary>
+				/// UAV → SRV に切り替え
+				/// </summary>
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
 
 			dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(index, srvHandleGPU_);
 
 			if (useUav_) {
-				// SRV → UAV に戻す
+				/// <summary>
+				/// SRV → UAV に戻す
+				/// </summary>
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 			}
 		}
@@ -95,19 +103,27 @@ namespace Engine {
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
 			else {
-				// SRV としてバインド（ComputeShader が t# で読み取る場合）
+				/// <summary>
+				/// SRV としてバインド（ComputeShader が t# で読み取る場合）
+				/// </summary>
 				dxCommon->GetCommandList()->SetComputeRootDescriptorTable(index, srvHandleGPU_);
 			}
 		}
-		// UAV依存
+		/// <summary>
+		/// UAV依存
+		/// </summary>
 		void UavDependence() { barrier_->UavDependence(resource_.Get()); };
 
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		Type* Data() const {
 			assert(!useUav_ && "UAVバッファにはCPUからアクセスできません");
 			return data_;
 		};
-		// リソース取得
+		/// <summary>
+		/// リソース取得
+		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetResource() const { return resource_; }
 
 		// StructuredBuffer クラス内に追加するメソッド
@@ -121,14 +137,18 @@ namespace Engine {
 			// CPUアクセス可能なバッファ（useUav_ == false）の場合は既に Map されている data_ に直接コピー
 			if (!useUav_)
 			{
-				// data_ は CreateBuffer の時に Map してある前提
+				/// <summary>
+				/// data_ は CreateBuffer の時に Map してある前提
+				/// </summary>
 				memcpy(data_, srcData, byteSize);
 				// 必要なら Flush/Invalidate を行う（UploadHeap では不要）
 				return;
 			}
 
 			// ---------- UAV (DefaultHeap) 用バッファへのアップロード ----------
-			// Upload 用バッファを作成してから CopyResource / CopyBufferRegion
+			/// <summary>
+			/// Upload 用バッファを作成してから CopyResource / CopyBufferRegion
+			/// </summary>
 			ComPtr<ID3D12Device> device = dxCommon->GetDevice(); // dxCommon に GetDevice() を公開している想定
 			ComPtr<ID3D12GraphicsCommandList> cmd = dxCommon->GetCommandList(); //  コマンドリスト取得
 
@@ -177,16 +197,24 @@ namespace Engine {
 			}
 
 			// resource_ を COPY_DEST に遷移させてからコピー、コピー後に UAV (UNORDERED_ACCESS) に遷移
-			// ※ barrier_ ヘルパーがある前提で使います（あなたの Barrier クラスの実装に合わせて調整して下さい）
+			/// <summary>
+			/// ※ barrier_ ヘルパーがある前提で使います（あなたの Barrier クラスの実装に合わせて調整して下さい）
+			/// </summary>
 			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_COPY_DEST);
 
-			// Copy（サイズが同じならCopyResourceでも良いが CopyBufferRegion を使う）
+			/// <summary>
+			/// Copy（サイズが同じならCopyResourceでも良いが CopyBufferRegion を使う）
+			/// </summary>
 			cmd->CopyBufferRegion(resource_.Get(), 0, uploadBuffer.Get(), 0, (UINT64)byteSize);
 
-			// コピー完了後、UAV状態へ遷移しておく（ComputeShader が UAV として使う前に）
+			/// <summary>
+			/// コピー完了後、UAV状態へ遷移しておく（ComputeShader が UAV として使う前に）
+			/// </summary>
 			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-			// 必要に応じて UAV バリア（読み書きの順序保証）
+			/// <summary>
+			/// 必要に応じて UAV バリア（読み書きの順序保証）
+			/// </summary>
 			barrier_->UavDependence(resource_.Get());
 
 			// uploadBuffer は関数終了で破棄（ComPtr が自動で release）

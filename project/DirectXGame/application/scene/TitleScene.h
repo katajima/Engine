@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
@@ -25,25 +25,39 @@ class TitleScene : public Engine::BaseScene
 {
 public:
 	
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D() override;
 
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 
 private:
-	// リソース初期化
+	/// <summary>
+	/// リソース初期化
+	/// </summary>
 	void InitializeResources();
-	// カメラ初期化
+	/// <summary>
+	/// カメラ初期化
+	/// </summary>
 	void InitializeCamera();
 private:
 	// タイトル画面のコントローラー入力とキーボード入力を統合して管理する。

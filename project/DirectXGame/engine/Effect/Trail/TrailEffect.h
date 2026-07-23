@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -78,17 +78,29 @@ namespace Engine {
 	{
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update() override;
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw() override;
-		// デバッグ表示。保存はせず、実行中の調整と状態確認だけを行う。
+		/// <summary>
+		/// デバッグ表示。保存はせず、実行中の調整と状態確認だけを行う。
+		/// </summary>
 		void UpdateImgui() override;
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { camera_ = camera; };
-		// トレイルのオフセット設定
+		/// <summary>
+		/// トレイルのオフセット設定
+		/// </summary>
 		void SetOffset(Vector3 offsetStr, Vector3 offsetEnd, WorldTransform& world) {
 			worldtransformTstr_.Initialize();
 			worldtransformTstr_.parent_ = &world;
@@ -99,28 +111,46 @@ namespace Engine {
 			worldtransformTend_.translate_ = offsetEnd;
 		}
 
-		// 発生フラグをセット
+		/// <summary>
+		/// 発生フラグをセット
+		/// </summary>
 		void SetIsEmit(bool is) { flag_ = is; }
-		// 発生フラグを取得
+		/// <summary>
+		/// 発生フラグを取得
+		/// </summary>
 		bool GetIsEmit() const { return flag_; }
-		// 時間をセット
+		/// <summary>
+		/// 時間をセット
+		/// </summary>
 		void SetTimer(float t) { timer = t; }
-		// 発生時間を取得
+		/// <summary>
+		/// 発生時間を取得
+		/// </summary>
 		float GetTimer() const { return timer; }
-		// トレイルの品質設定。細かい動きを捨てる距離と、保持する最大セグメント数を指定する。
+		/// <summary>
+		/// トレイルの品質設定。細かい動きを捨てる距離と、保持する最大セグメント数を指定する。
+		/// </summary>
 		void SetQuality(float minEmitDistance, size_t maxSegmentCount);
-		// 複数のトレイル機能をまとめて設定する
+		/// <summary>
+		/// 複数のトレイル機能をまとめて設定する
+		/// </summary>
 		void SetSettings(const TrailSettings& settings);
 		const TrailSettings& GetSettings() const { return settings_; }
-		// 既存トレイルへ機能を足し引きする
+		/// <summary>
+		/// 既存トレイルへ機能を足し引きする
+		/// </summary>
 		void AddFeature(TrailFeature feature);
 		void RemoveFeature(TrailFeature feature);
 		bool HasFeature(TrailFeature feature) const;
 
 
-		// 行列設定
+		/// <summary>
+		/// 行列設定
+		/// </summary>
 		void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
-		// メッシュ取得
+		/// <summary>
+		/// メッシュ取得
+		/// </summary>
 		ModelMesh* GetMesh() const { return mesh.get(); }
 		size_t GetSegmentCount() const { return segments_.size(); }
 

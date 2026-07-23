@@ -16,7 +16,9 @@ namespace Engine {
 	class PSOManager
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
 		// ルートパラメータ設定
@@ -30,18 +32,30 @@ namespace Engine {
 		void GraphicsPipelineState(Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr < ID3D12PipelineState>& graphicsPipelineState
 			, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE  topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-		// Inputエレメントデスク追加
+		/// <summary>
+		/// Inputエレメントデスク追加
+		/// </summary>
 		void AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format, UINT slot = 0);
 
-		// シェーダーファイル設定
+		/// <summary>
+		/// シェーダーファイル設定
+		/// </summary>
 		void SetShaderFileName(ShaderFileName shaderFileName, std::wstring filename);
-		// デプスステンシルデスク設定
+		/// <summary>
+		/// デプスステンシルデスク設定
+		/// </summary>
 		void SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func);
-		// ラスタライザ設定
+		/// <summary>
+		/// ラスタライザ設定
+		/// </summary>
 		void SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill);
-		// RTV/DSV形式設定
+		/// <summary>
+		/// RTV/DSV形式設定
+		/// </summary>
 		void SetRenderTargetFormats(UINT numRenderTargets, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat);
-		// 描画準備
+		/// <summary>
+		/// 描画準備
+		/// </summary>
 		void DrawSetting(PSOType type, D3D12_PRIMITIVE_TOPOLOGY topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// PSO生成
@@ -50,7 +64,9 @@ namespace Engine {
 			D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc,
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE  topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-		// インプットレイアウトを無くす
+		/// <summary>
+		/// インプットレイアウトを無くす
+		/// </summary>
 		void NoInputLayout() { useInputLayout_ = false; };
 
 	private:
@@ -80,7 +96,9 @@ namespace Engine {
 	private:
 		std::map<PSOType, PSRS> psoRoots_;
 	private:
-		// グラフィックパイプライン設定
+		/// <summary>
+		/// グラフィックパイプライン設定
+		/// </summary>
 		void SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline);
 	};
 }

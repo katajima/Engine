@@ -10,17 +10,27 @@ namespace Combo {
 /// </summary>
 	class CancelReceiver {
 	public:
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		void Enter();
-		//　終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx, const GlobalCondition& data, float time);
 
 	public: // 設定
-		// 受付可能か取得
+		/// <summary>
+		/// 受付可能か取得
+		/// </summary>
 		bool GetIsActive() const { return isActive_; }
-		// キャンセルするか
+		/// <summary>
+		/// キャンセルするか
+		/// </summary>
 		bool GetIsCancel() const { return isCancel_; }
 	private:
 		// ボタン条件

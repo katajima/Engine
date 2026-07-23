@@ -94,25 +94,41 @@ namespace Engine {
 		Object3dInstanceManager(Object3dInstanceManager&) = delete;
 		Object3dInstanceManager& operator=(Object3dInstanceManager&) = delete;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// 終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
-		// エンティティ3dの設定
+		/// <summary>
+		/// エンティティ3dの設定
+		/// </summary>
 		void SetEntity3D(EntityManager* entity3DManager) { this->entity3DManager = entity3DManager; };
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawTransparency();
-		// シャドウマップ用の深度描画
+		/// <summary>
+		/// シャドウマップ用の深度描画
+		/// </summary>
 		void DrawShadowMap(ShadowMap* shadowMap);
 
 
-		// 描画準備
+		/// <summary>
+		/// 描画準備
+		/// </summary>
 		void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
 		// オブジェクトグループ作り(モデル)
@@ -122,15 +138,25 @@ namespace Engine {
 		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
 			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstance::TransparencyType transparencyType = ObjectInstance::TransparencyType::kNo);
 
-		// カメラセット
+		/// <summary>
+		/// カメラセット
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera_ = camera; }
-		// オブジェクトの追加
+		/// <summary>
+		/// オブジェクトの追加
+		/// </summary>
 		void AddObject(const std::string& name, const std::string& texName, ObjectInstance&& object, int& id, MeshType type = MeshType::kModel, ObjectInstance::TransparencyType transparencyType = ObjectInstance::TransparencyType::kNo);
-		// オブジェクトのグループ数取得
+		/// <summary>
+		/// オブジェクトのグループ数取得
+		/// </summary>
 		int GetSize() { return static_cast<int>(objectGroups.size()); };
-		// オブジェクトグループ名前でオブジェクトクリーン
+		/// <summary>
+		/// オブジェクトグループ名前でオブジェクトクリーン
+		/// </summary>
 		void Clear(const std::string& name);
-		// 全てのオブジェクトグループのオブジェクトのクリーン
+		/// <summary>
+		/// 全てのオブジェクトグループのオブジェクトのクリーン
+		/// </summary>
 		void ClearObject() {
 			for (auto& obj : objectGroups) {
 				obj.second.object.clear();
@@ -141,7 +167,9 @@ namespace Engine {
 			}
 
 		}
-		// 全てクリーン
+		/// <summary>
+		/// 全てクリーン
+		/// </summary>
 		void AllClear() {
 			for (auto& obj : objectGroups) {
 				ReleaseGroupResource(obj.second);
@@ -155,31 +183,51 @@ namespace Engine {
 
 
 	public: //取得
-		// オブジェクトインスタンスをIDで取得
+		/// <summary>
+		/// オブジェクトインスタンスをIDで取得
+		/// </summary>
 		ObjectInstance* GetObjectById(const std::string& groupName, int id, ObjectInstance::TransparencyType transparencyType);
-		// 全てのオブジェクトインスタンス取得
+		/// <summary>
+		/// 全てのオブジェクトインスタンス取得
+		/// </summary>
 		std::deque<ObjectInstance>& GetObjects(const std::string& groupName, ObjectInstance::TransparencyType transparencyType);
-		// オブジェクトグループ取得
+		/// <summary>
+		/// オブジェクトグループ取得
+		/// </summary>
 		ObjectGroup& GetObjectGroup(const std::string& groupName, ObjectInstance::TransparencyType transparencyType);
 
 	private:
 
 		ObjectGroup& GroupContains(const std::string& groupName, ObjectInstance::TransparencyType transparencyType, bool& isReturn);
-		// インスタンシング用GPUリソースを解放する
+		/// <summary>
+		/// インスタンシング用GPUリソースを解放する
+		/// </summary>
 		void ReleaseGroupResource(ObjectGroup& group);
 
 	private:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
-		// シャドウマップ用パイプラインの作成
+		/// <summary>
+		/// シャドウマップ用パイプラインの作成
+		/// </summary>
 		void CreateShadowMapPipeline();
-		// ブレンドモード設定(加算)
+		/// <summary>
+		/// ブレンドモード設定(加算)
+		/// </summary>
 		void BlendAdd();
-		// ブレンドモード設定(減算)
+		/// <summary>
+		/// ブレンドモード設定(減算)
+		/// </summary>
 		void BlendSubtract();
-		// ブレンドモード設定(乗算)
+		/// <summary>
+		/// ブレンドモード設定(乗算)
+		/// </summary>
 		void BlendMuliply();
 
 

@@ -8,7 +8,9 @@ namespace Character {
 /// </summary>
 	class SlowMotionRequest {
 	public:
-		// 回避成功用の対象スロー演出リクエストを生成する
+		/// <summary>
+		/// 回避成功用の対象スロー演出リクエストを生成する
+		/// </summary>
 		static SlowMotionRequest CreateDodgeSuccess() {
 			SlowMotionRequest request;	// 回避成功時に使うスロー設定
 			request.timeScale_ = 0.10f;
@@ -17,7 +19,9 @@ namespace Character {
 			return request;
 		}
 
-		// 範囲爆撃必殺技中に敵の時間を停止するリクエストを生成する
+		/// <summary>
+		/// 範囲爆撃必殺技中に敵の時間を停止するリクエストを生成する
+		/// </summary>
 		static SlowMotionRequest CreateRangeBombingTimeStop() {
 			SlowMotionRequest request;		// 必殺技のphase0〜1が続く間、毎フレーム更新して停止を維持する
 			request.timeScale_ = 0.0f;
@@ -26,13 +30,19 @@ namespace Character {
 			return request;
 		}
 
-		// 対象へ適用したい時間倍率を取得する
+		/// <summary>
+		/// 対象へ適用したい時間倍率を取得する
+		/// </summary>
 		float GetTimeScale() const { return timeScale_; }
 
-		// スロー演出を維持する時間を取得する
+		/// <summary>
+		/// スロー演出を維持する時間を取得する
+		/// </summary>
 		float GetDuration() const { return duration_; }
 
-		// 同時に複数リクエストが来た時の優先度を取得する
+		/// <summary>
+		/// 同時に複数リクエストが来た時の優先度を取得する
+		/// </summary>
 		int GetPriority() const { return priority_; }
 
 	private:

@@ -8,12 +8,18 @@
 class CameraZoom {
 public:
 
-    // 更新
+    /// <summary>
+    /// 更新
+    /// </summary>
     void Update(float& posZ,float dt);
-    // デフォルトZ設定
+    /// <summary>
+    /// デフォルトZ設定
+    /// </summary>
     void SetDefultZ(float z){ defultPosZ = z; }
 
-    // リクエスト(ズーム位置、速度、時間)
+    /// <summary>
+    /// リクエスト(ズーム位置、速度、時間)
+    /// </summary>
     void Request(const CameraZoomData& data);
 
 private:

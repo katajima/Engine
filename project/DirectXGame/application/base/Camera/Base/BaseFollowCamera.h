@@ -17,7 +17,9 @@ public:
 	///</summary>
 	virtual void Update() = 0;
 
-	//追従対象をポインタで持つ
+	/// <summary>
+	/// 追従対象をポインタで持つ
+	/// </summary>
 	void SetTarget(Engine::WorldTransform* target) { target_ = target; };
 	
 protected:

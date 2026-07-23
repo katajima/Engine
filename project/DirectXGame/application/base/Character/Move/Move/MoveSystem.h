@@ -16,35 +16,59 @@ public:
 		kRun,		// 走り
 	};
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize();
-	// 更新(操作用)
+	/// <summary>
+	/// 更新(操作用)
+	/// </summary>
 	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
-	// 更新(敵用)
+	/// <summary>
+	/// 更新(敵用)
+	/// </summary>
 	void UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 private:
-	// 速度処理
+	/// <summary>
+	/// 速度処理
+	/// </summary>
 	void SpeedProcess(const Character::CharacterContext& ctx);
-	// 状態処理
+	/// <summary>
+	/// 状態処理
+	/// </summary>
 	void StateProcess();
-	// アニメーション速度設定
+	/// <summary>
+	/// アニメーション速度設定
+	/// </summary>
 	void AnimationSpeedProcess();
 public: // 取得
-	// 移動データの取得
+	/// <summary>
+	/// 移動データの取得
+	/// </summary>
 	MoveData& Data() { return data_; }
 	//
 	MoveData GetData() const { return data_; }
-	// 速度の取得
+	/// <summary>
+	/// 速度の取得
+	/// </summary>
 	Vector3 GetVelocity() const { return velocity_; }
-	// 状態の取得
+	/// <summary>
+	/// 状態の取得
+	/// </summary>
 	State GetState() const { return state_;}
-	// アニメーション速度の取得
+	/// <summary>
+	/// アニメーション速度の取得
+	/// </summary>
 	float GetAnimationSpeed() const { return animationSpeed_; }
 public: //設定
-	// データ設定
+	/// <summary>
+	/// データ設定
+	/// </summary>
 	void SetData(const MoveData& data) { data_ = data; };
-	// スピード設定
+	/// <summary>
+	/// スピード設定
+	/// </summary>
 	void SetSpeed(float min, float max) {
 		data_.minSpeed = min;
 		data_.maxSpeed = max;

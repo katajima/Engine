@@ -61,75 +61,135 @@ namespace Engine {
 	{
 	public: // メンバ関数
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(WinApp* winApp);
 
-		//終了処理
+		/// <summary>
+		/// 終了処理
+		/// </summary>
 		void Finalize();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(SceneManager* sceneManager, EntityManager* entity3DManager);
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw(SceneManager* sceneManager, EntityManager* entity3DManager);
-		// シャドウマップのデバッグ表示
+		/// <summary>
+		/// シャドウマップのデバッグ表示
+		/// </summary>
 		void RenderShadowMapDebugImGui();
 
 	private:
-		// シーンの画面を書き出す
+		/// <summary>
+		/// シーンの画面を書き出す
+		/// </summary>
 		void SceneDraw(SceneManager* sceneManager, EntityManager* entity3DManager);
 	private:
-		// スワップチェーンにレンダーターゲットを渡す
+		/// <summary>
+		/// スワップチェーンにレンダーターゲットを渡す
+		/// </summary>
 		void PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture);
 	private:
-		// 3D2D描画
+		/// <summary>
+		/// 3D2D描画
+		/// </summary>
 		void Draw3D2D(SceneManager* sceneManager, EntityManager* entity3DManager);
 
-		//FPS固定初期化
+		/// <summary>
+		/// FPS固定初期化
+		/// </summary>
 		void InitializeFixFPS();
-		//FPS固定更新
+		/// <summary>
+		/// FPS固定更新
+		/// </summary>
 		void UpdateFixFPS();
 
 	public:
 
-		// バックバッファの数を取得
+		/// <summary>
+		/// バックバッファの数を取得
+		/// </summary>
 		size_t GetBackBufferCount() const { return swapChain_->GetBackBufferCount(); }
 
-		// デバイス取得
+		/// <summary>
+		/// デバイス取得
+		/// </summary>
 		Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return DXGIDevice_->GetDevice(); }
-		// コマンドリスト取得
+		/// <summary>
+		/// コマンドリスト取得
+		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> GetCommandList() { return command_->GetList(); }
-		// SRVマネージャー取得
+		/// <summary>
+		/// SRVマネージャー取得
+		/// </summary>
 		SrvManager* GetSrvManager() { return  srvManager_.get(); }
-		// RTVマネージャー取得
+		/// <summary>
+		/// RTVマネージャー取得
+		/// </summary>
 		RtvManager* GetRtvManager() { return  rtvManager_.get(); }
-		// テクスチャマネージャー取得
+		/// <summary>
+		/// テクスチャマネージャー取得
+		/// </summary>
 		TextureManager* GetTextureManager() { return textureManager_.get(); }
-		// モデルマネージャー取得
+		/// <summary>
+		/// モデルマネージャー取得
+		/// </summary>
 		ModelManager* GetModelManager() { return modelManager_.get(); }
-		// DXGIデバイス取得
+		/// <summary>
+		/// DXGIデバイス取得
+		/// </summary>
 		DXGIDevice* GetDXGIDevice() { return DXGIDevice_.get(); }
-		// コマンド取得
+		/// <summary>
+		/// コマンド取得
+		/// </summary>
 		Command* GetCommand() { return command_.get(); }
-		// DXコンパイラ取得
+		/// <summary>
+		/// DXコンパイラ取得
+		/// </summary>
 		DXCCompiler* GetDXCCompiler() { return dxcCompiler_.get(); }
-		// ImGuiマネージャー取得
+		/// <summary>
+		/// ImGuiマネージャー取得
+		/// </summary>
 		ImGuiManager* GetImGuiManager() { return imguiManager_.get(); }
-		// レンダリング共通クラス取得
+		/// <summary>
+		/// レンダリング共通クラス取得
+		/// </summary>
 		RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
-		// デプスステンシル取得
+		/// <summary>
+		/// デプスステンシル取得
+		/// </summary>
 		DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
-		// シャドウマップ取得
+		/// <summary>
+		/// シャドウマップ取得
+		/// </summary>
 		ShadowMap* GetShadowMap() { return shadowMap_.get(); }
-		// バリア取得
+		/// <summary>
+		/// バリア取得
+		/// </summary>
 		Barrier* GetBarrier() { return barrier_.get(); }
-		// ポストエフェクトマネージャー取得
+		/// <summary>
+		/// ポストエフェクトマネージャー取得
+		/// </summary>
 		PostEffectManager* GetPostEffectManager() { return postEffectManager_.get(); }
-		// スワップチェーン取得
+		/// <summary>
+		/// スワップチェーン取得
+		/// </summary>
 		SwapChain* GetSwapChain() { return swapChain_.get(); }
-		// フェンス取得
+		/// <summary>
+		/// フェンス取得
+		/// </summary>
 		Fence* GetFence() { return fence_.get(); }
-		// シザーレクト取得
+		/// <summary>
+		/// シザーレクト取得
+		/// </summary>
 		ScissorRect* GetScissorRect() { return scissorRect_.get(); };
-		// ビューポート取得
+		/// <summary>
+		/// ビューポート取得
+		/// </summary>
 		ViewPort* GetViewPort() { return viewPort_.get(); }
 	private:
 		std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
@@ -151,7 +211,9 @@ namespace Engine {
 
 		std::unique_ptr<PostEffectManager> postEffectManager_ = std::make_unique<PostEffectManager>(); // ポストエフェクト
 
-		// ImGuiマネージャー
+		/// <summary>
+		/// ImGuiマネージャー
+		/// </summary>
 		std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();
 
 		// 記録時間(FPS固定用)

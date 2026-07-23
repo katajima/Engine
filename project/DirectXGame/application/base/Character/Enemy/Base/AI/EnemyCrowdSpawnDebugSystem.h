@@ -11,20 +11,32 @@ namespace Character {
 	/// </summary>
 	class EnemyCrowdSpawnDebugSystem {
 	public:
-		// デバッグウィンドウを更新し、生成ボタンが押されたときだけ敵を追加する
+		/// <summary>
+		/// デバッグウィンドウを更新し、生成ボタンが押されたときだけ敵を追加する
+		/// </summary>
 		void Update(CharacterManager* characterManager);
 
 	private:
 #ifdef _DEBUG
-		// 画面に入力された値を、既存の群衆AIが利用する設定へまとめる
+		/// <summary>
+		/// 画面に入力された値を、既存の群衆AIが利用する設定へまとめる
+		/// </summary>
 		CrowdBehaviorSettings BuildBehaviorSettings() const;
-		// 選択中の敵構成をひとつの群衆グループとして生成する
+		/// <summary>
+		/// 選択中の敵構成をひとつの群衆グループとして生成する
+		/// </summary>
 		void SpawnConfiguredCrowd(CharacterManager* characterManager);
-		// 選択中の群衆タイプで実際に使う行動パラメータだけを表示する
+		/// <summary>
+		/// 選択中の群衆タイプで実際に使う行動パラメータだけを表示する
+		/// </summary>
 		void DrawBehaviorParameters();
-		// 群衆タイプに依存しないAI制御パラメータを表示する
+		/// <summary>
+		/// 群衆タイプに依存しないAI制御パラメータを表示する
+		/// </summary>
 		void DrawCommonAiParameters();
-		// 現在活動中の群衆を一覧表示し、指定された群衆の退場要求を受け取る
+		/// <summary>
+		/// 現在活動中の群衆を一覧表示し、指定された群衆の退場要求を受け取る
+		/// </summary>
 		void DrawActiveCrowds(CharacterManager* characterManager);
 #endif
 

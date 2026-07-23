@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
 
@@ -10,28 +10,50 @@ namespace Engine {
 	class Object3dCommon
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// DirectXの共通クラス
+		/// <summary>
+		/// DirectXの共通クラス
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
-		// 描画設定
+		/// <summary>
+		/// 描画設定
+		/// </summary>
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
-		// シャドウマップ描画設定
+		/// <summary>
+		/// シャドウマップ描画設定
+		/// </summary>
 		void DrawShadowMapSetting() { psoManager_->DrawSetting(PSOType::ShadowMap, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
-		// デフォルトカメラ設定
+		/// <summary>
+		/// デフォルトカメラ設定
+		/// </summary>
 		void SetDefaultCamera(Camera* camera) { this->defaultCamera = camera; }
-		// デフォルトカメラ取得
+		/// <summary>
+		/// デフォルトカメラ取得
+		/// </summary>
 		Camera* GetDefaultCamera() const { return defaultCamera; }
-		// オブジェクトカウント取得
+		/// <summary>
+		/// オブジェクトカウント取得
+		/// </summary>
 		int32_t GetObjectCount() const { return objectCount; }
-		// オブジェクトカウント加算
+		/// <summary>
+		/// オブジェクトカウント加算
+		/// </summary>
 		void AddObjectCount() { objectCount++; }
-		// オブジェクトカウントクリア
+		/// <summary>
+		/// オブジェクトカウントクリア
+		/// </summary>
 		void ClearObjectCount() { objectCount = 0; }
 	private:
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
-		// シャドウマップ用パイプラインの作成
+		/// <summary>
+		/// シャドウマップ用パイプラインの作成
+		/// </summary>
 		void CreateShadowMapPipeline();
 	private:// メンバ変数
 		DirectXCommon* dxCommon = nullptr;

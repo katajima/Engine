@@ -109,7 +109,9 @@ namespace Game {
 		// 開始
 		void Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
 			, InputSystem* input);
-		// 終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit();
 
 		/// <summary>
@@ -119,11 +121,15 @@ namespace Game {
 		void Update(float dt);
 
 	public:
-		// 次のステート
+		/// <summary>
+		/// 次のステート
+		/// </summary>
 		void SetNextState(std::shared_ptr<GameEventState> next) {
 			nextStates[GetNextStateName()] = next;
 		}
-		// 次のステートがあったら
+		/// <summary>
+		/// 次のステートがあったら
+		/// </summary>
 		std::shared_ptr<GameEventState> HandleInput() {
 			auto it = nextStates.find(GetNextStateName());
 			if (it != nextStates.end()) {
@@ -131,33 +137,59 @@ namespace Game {
 			}
 			return nullptr;
 		}
-		// 次のステートの名前取得
+		/// <summary>
+		/// 次のステートの名前取得
+		/// </summary>
 		std::string GetNextStateName() const;
-		// 次のステートは存在するか
+		/// <summary>
+		/// 次のステートは存在するか
+		/// </summary>
 		bool HasNextState() const {	return !nextStates.empty();}
-		// データ設定
+		/// <summary>
+		/// データ設定
+		/// </summary>
 		void SetData(const GameEventData& data) { data_ = data; };
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		GameEventData GetData() const { return data_; };
-		// コンボ名取得
+		/// <summary>
+		/// コンボ名取得
+		/// </summary>
 		std::string GetName() const { return name; }
-		// コンボ名設定
+		/// <summary>
+		/// コンボ名設定
+		/// </summary>
 		void SetName(const std::string& comboName) { name = comboName; }
-		// スポーン追加
+		/// <summary>
+		/// スポーン追加
+		/// </summary>
 		void AddSpawns(std::vector<Character::SpawnInfo>&& spawns);
-		// 現在の経過時間
+		/// <summary>
+		/// 現在の経過時間
+		/// </summary>
 		float GetCurrentTimer() const;
-		// 残り時間
+		/// <summary>
+		/// 残り時間
+		/// </summary>
 		float RemainingTime() const;
 	public:
-		// 終了したか
+		/// <summary>
+		/// 終了したか
+		/// </summary>
 		bool IsFinish() const { return isFinish_; };
-		// ゲームイベントの変更するタイプ取得
+		/// <summary>
+		/// ゲームイベントの変更するタイプ取得
+		/// </summary>
 		GameEventChangeType GetChangeType() const { return data_.changeType_; }
 	private:
-		// 終了条件処理
+		/// <summary>
+		/// 終了条件処理
+		/// </summary>
 		bool FinishProcess();
-		// 出現処理
+		/// <summary>
+		/// 出現処理
+		/// </summary>
 		void SpawnProcess();
 
 	private:
@@ -193,17 +225,27 @@ namespace Game {
 			, InputSystem* input);
 
 
-		// ステート設定
+		/// <summary>
+		/// ステート設定
+		/// </summary>
 		void SetState(std::shared_ptr<GameEventState> state);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float dt);
 
 
-		// リセット
+		/// <summary>
+		/// リセット
+		/// </summary>
 		void Reset() { SetState(rootState); }
-		// 設定
+		/// <summary>
+		/// 設定
+		/// </summary>
 		void SetRoot(std::shared_ptr<GameEventState> state);
-		// コンボが終了したか
+		/// <summary>
+		/// コンボが終了したか
+		/// </summary>
 		bool IsEventFinished() const {
 			auto node = std::dynamic_pointer_cast<GameEventState>(currentState);
 			if (!node) return true;

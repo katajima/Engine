@@ -14,13 +14,21 @@ namespace Engine {
 	class CameraCommon
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
-		// DxCommon取得
+		/// <summary>
+		/// DxCommon取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
-		// インプット設定
+		/// <summary>
+		/// インプット設定
+		/// </summary>
 		void SetInput(Input* input) { this->input = input; };
-		// インプット取得
+		/// <summary>
+		/// インプット取得
+		/// </summary>
 		Input* GetInput() { return input; };
 
 	private:

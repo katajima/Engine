@@ -14,7 +14,9 @@ namespace Character {
 	class EnemyAiSystem {
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
 
 		// 群衆移動と攻撃スロットを更新し、各敵の移動目標を決める
@@ -25,12 +27,18 @@ namespace Character {
 			float dt
 		);
 
-		// 攻撃したい敵の要求を整理し、攻撃許可を割り当てる
+		/// <summary>
+		/// 攻撃したい敵の要求を整理し、攻撃許可を割り当てる
+		/// </summary>
 		void UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt);
 
-		// 攻撃スロット情報を外部システムから参照する
+		/// <summary>
+		/// 攻撃スロット情報を外部システムから参照する
+		/// </summary>
 		EnemyAttackSlotSystem* GetAttackSlotSystem() const { return attackSlotSystem_.get(); }
-		// 群衆移動情報を外部システムから参照する
+		/// <summary>
+		/// 群衆移動情報を外部システムから参照する
+		/// </summary>
 		EnemyCrowdSystem* GetCrowdSystem() const { return crowdSystem_.get(); }
 
 	private:

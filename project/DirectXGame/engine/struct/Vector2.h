@@ -12,44 +12,62 @@ struct Vector2 final {
 	const float& operator[](size_t i) const { return i == 0 ? x : y; }
 
 
-	// == 演算子のオーバーロード
+	/// <summary>
+	/// == 演算子のオーバーロード
+	/// </summary>
 	bool operator==(const Vector2& other) const {
 		return x == other.x && y == other.y;
 	}
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector2 operator+(const Vector2& other) const {
 		return Vector2{ x + other.x, y + other.y };
 	}
-	// - 演算子のオーバーロード
+	/// <summary>
+	/// - 演算子のオーバーロード
+	/// </summary>
 	Vector2 operator+(float other) const {
 		return Vector2{ x + other, y + other };
 	}
 
-	// - 演算子のオーバーロード
+	/// <summary>
+	/// - 演算子のオーバーロード
+	/// </summary>
 	Vector2 operator-(const Vector2& other) const {
 		return Vector2{ x - other.x, y - other.y };
 	}
-	// - 演算子のオーバーロード
+	/// <summary>
+	/// - 演算子のオーバーロード
+	/// </summary>
 	Vector2 operator-(float other) const {
 		return Vector2{ x - other, y - other };
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector2 operator*(const Vector2& other) const {
 		return Vector2{ x * other.x, y * other.y };
 	}
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector2 operator*(float other) const {
 		return Vector2{ x * other, y * other };
 	}
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector2& operator+=(const Vector2& other) {
 
 		x += other.x;
 		y += other.y;
 		return *this;
 	}
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector2& operator-=(const Vector2& other) {
 
 		x -= other.x;
@@ -58,7 +76,9 @@ struct Vector2 final {
 	}
 
 
-	// 正規化
+	/// <summary>
+	/// 正規化
+	/// </summary>
 	Vector2 Normalize() const {
 		Vector2 result{};
 		float length;
@@ -73,7 +93,9 @@ struct Vector2 final {
 
 		return result;
 	};
-	// 長さ
+	/// <summary>
+	/// 長さ
+	/// </summary>
 	float Length() const{
 		float result;
 
@@ -86,7 +108,9 @@ struct Vector2 final {
 		return x * x + y * y;
 	}
 
-	// 内積
+	/// <summary>
+	/// 内積
+	/// </summary>
 	float Dot(const Vector2& other) const {
 		float result;
 
@@ -100,7 +124,9 @@ struct Vector2 final {
 
 };
 
-// 補間
+/// <summary>
+/// 補間
+/// </summary>
 static Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
 	Vector2 temp;
 	t = std::clamp(t, 0.0f, 1.0f);
@@ -110,7 +136,9 @@ static Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
 	return temp;
 }
 
-// 最大値
+/// <summary>
+/// 最大値
+/// </summary>
 static Vector2 Max(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -121,7 +149,9 @@ static Vector2 Max(const Vector2& v1, const Vector2& v2) {
 	return result;
 }
 
-// 最小値
+/// <summary>
+/// 最小値
+/// </summary>
 static Vector2 Min(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -132,7 +162,9 @@ static Vector2 Min(const Vector2& v1, const Vector2& v2) {
 	return result;
 }
 
-// 正規化
+/// <summary>
+/// 正規化
+/// </summary>
 static Vector2 Normalize(const Vector2& v) {
 	Vector2 result{};
 	float length;
@@ -147,7 +179,9 @@ static Vector2 Normalize(const Vector2& v) {
 	return result;
 };
 
-// 加算
+/// <summary>
+/// 加算
+/// </summary>
 static Vector2 Add(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -156,7 +190,9 @@ static Vector2 Add(const Vector2& v1, const Vector2& v2) {
 
 	return result;
 };
-// 減算
+/// <summary>
+/// 減算
+/// </summary>
 static Vector2 Subtract(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -165,7 +201,9 @@ static Vector2 Subtract(const Vector2& v1, const Vector2& v2) {
 	
 	return result;
 }
-//大きさ
+/// <summary>
+/// 大きさ
+/// </summary>
 static float Length(Vector2 a) {
 	float length;
 
@@ -173,11 +211,15 @@ static float Length(Vector2 a) {
 
 	return length;
 }
-// 内積
+/// <summary>
+/// 内積
+/// </summary>
 static float Dot(const Vector2& a, const Vector2& b) {
 	return a.x * b.x + a.y * b.y;
 }
-// 回転
+/// <summary>
+/// 回転
+/// </summary>
 static Vector2 Rotate(const Vector2& v, float angle) {
 	float cosA = std::cos(angle);
 	float sinA = std::sin(angle);

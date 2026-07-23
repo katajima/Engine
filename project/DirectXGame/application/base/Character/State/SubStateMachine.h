@@ -25,11 +25,15 @@ namespace Character {
             : character_(character) {
         }
 
-        // 登録
+        /// <summary>
+        /// 登録
+        /// </summary>
         void RegisterState(SubStateEnum type, FactoryType factory) {
             factories_[type] = factory;
         }
-        // 変更
+        /// <summary>
+        /// 変更
+        /// </summary>
         void ChangeState(const AttackSubState& name) {
             auto it = factories_.find(name);
             if (it != factories_.end()) {
@@ -41,11 +45,15 @@ namespace Character {
             }
         }
 
-        // 更新
+        /// <summary>
+        /// 更新
+        /// </summary>
         void Update(float deltaTime = ConvertUtility::kDefaultDeltaTime) {
             if (state_) state_->Update(deltaTime);
         }
-        // 現在のステート取得
+        /// <summary>
+        /// 現在のステート取得
+        /// </summary>
         AttackSubState GetAttackSubState() const {
             if (state_) {
                 return state_->GetAttackSubState();
@@ -53,12 +61,18 @@ namespace Character {
             // 状態が無い場合は無効値を返す
             return SubStateEnum::Invalid;
         }
-        // 終了したか取得
+        /// <summary>
+        /// 終了したか取得
+        /// </summary>
         bool IsFinished() const { return isFinished_; }
-        // 終了したか設定
+        /// <summary>
+        /// 終了したか設定
+        /// </summary>
         void SetFinished(bool flag) { isFinished_ = flag; }
     private:
-        // ステート変更
+        /// <summary>
+        /// ステート変更
+        /// </summary>
         void ChangeState(std::unique_ptr<BaseAttackSubState> newState) {
             if (state_) {
                 state_->Exit(); // 終了

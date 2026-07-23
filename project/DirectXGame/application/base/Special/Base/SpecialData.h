@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 
@@ -39,9 +39,13 @@ struct SpecialData{
 	bool isMove_ = true;
 	// 時間を止めるか
 	bool isStopTimer_ = false;
-	// 最大値まで行ったか
+	/// <summary>
+	/// 最大値まで行ったか
+	/// </summary>
 	bool IsMax() const { return gauge_ >= maxGauge_; }
-	// フェーズ移行
+	/// <summary>
+	/// フェーズ移行
+	/// </summary>
 	void AddPhase() { phase_++;}
 };
 

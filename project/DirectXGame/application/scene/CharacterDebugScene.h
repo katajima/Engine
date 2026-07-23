@@ -35,46 +35,82 @@
 class CharacterDebugScene : public Engine::BaseScene {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D() override;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 private:
-	// 入力関係初期化
+	/// <summary>
+	/// 入力関係初期化
+	/// </summary>
 	void InitializeInput();
-	// キャラクター関係初期化
+	/// <summary>
+	/// キャラクター関係初期化
+	/// </summary>
 	void InitializeCharacter();
-	// カメラ関係初期化
+	/// <summary>
+	/// カメラ関係初期化
+	/// </summary>
 	void InitializeCamera();
-	// エフェクト関係初期化
+	/// <summary>
+	/// エフェクト関係初期化
+	/// </summary>
 	void InitializeEffect();
-	// 基本的な初期化
+	/// <summary>
+	/// 基本的な初期化
+	/// </summary>
 	void InitializeBase();
-	// デバック関係初期化
+	/// <summary>
+	/// デバック関係初期化
+	/// </summary>
 	void InitializeDebug();
 private:
-	// 入力関係
+	/// <summary>
+	/// 入力関係
+	/// </summary>
 	void UpdateInput(float dt);
-	// キャラクター関係更新
+	/// <summary>
+	/// キャラクター関係更新
+	/// </summary>
 	void UpdateCharacter(float dt);
-	// 基本的は更新
+	/// <summary>
+	/// 基本的は更新
+	/// </summary>
 	void UpdateBase(float dt);
-	// デバッグ関係更新
+	/// <summary>
+	/// デバッグ関係更新
+	/// </summary>
 	void UpdateDebug(float dt);
-	// ImGui更新
+	/// <summary>
+	/// ImGui更新
+	/// </summary>
 	void UpdateImGui();
-	// グローバルバリアブル適応
+	/// <summary>
+	/// グローバルバリアブル適応
+	/// </summary>
 	void ApplyGlobalVariables() {};
-	// デバッグ対象設定
+	/// <summary>
+	/// デバッグ対象設定
+	/// </summary>
 	void SetDebugTarget(uint32_t tag);
 
 private:

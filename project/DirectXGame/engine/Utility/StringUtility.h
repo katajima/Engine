@@ -6,9 +6,13 @@
 namespace StringUtility 
 {
 	//std::wstringからstd::stringへ変換する関数
-	//string->wstring
+	/// <summary>
+	/// string->wstring
+	/// </summary>
 	std::wstring ConvertString(const std::string& str);
-	//wstring->string
+	/// <summary>
+	/// wstring->string
+	/// </summary>
 	std::string ConvertString(const std::wstring& str);
 
 

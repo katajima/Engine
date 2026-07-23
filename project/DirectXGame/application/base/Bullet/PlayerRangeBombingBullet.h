@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <cstddef>
@@ -15,14 +15,22 @@ public:
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		Vector3 position, Engine::Camera* camera) override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
-	//　描画エフェクト
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
 	void DrawEffect() override;
-	// 描画2D
+	/// <summary>
+	/// 描画2D
+	/// </summary>
 	void Draw2D() override;
 
 private:

@@ -43,7 +43,9 @@ struct BulletInfo {
 /// </summary>
 class BulletData {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(HitBox::UseType useType, ProjectileType projectileType ,const HitBox::CollData& hitBoxData);
 
 

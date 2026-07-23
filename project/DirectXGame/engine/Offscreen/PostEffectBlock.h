@@ -43,7 +43,9 @@ namespace Engine {
 		uint32_t GetIndex() const { return index_; }
 		void SetIndex(uint32_t index) { index_ = index; }
 
-		// BloomCombineなど、通常の直前入力とは別に参照したいパス。
+		/// <summary>
+		/// BloomCombineなど、通常の直前入力とは別に参照したいパス。
+		/// </summary>
 		PostEffectPass* GetOtherInputPass() const { return otherInputPass_; }
 		void SetOtherInputPass(PostEffectPass* pass) { otherInputPass_ = pass; }
 

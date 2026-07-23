@@ -13,13 +13,19 @@ namespace Character {
         CharacterStateMachine() {}
 
 
-        // 初期化
+        /// <summary>
+        /// 初期化
+        /// </summary>
         void Init(BaseCharacter* character, CharacterMainState initialState = CharacterMainState::Move);
 
-        // 更新
+        /// <summary>
+        /// 更新
+        /// </summary>
         void Update(const CharacterContext& ctx);
 
-        // 変更
+        /// <summary>
+        /// 変更
+        /// </summary>
         void ChangeState(const CharacterMainState& name) {
             auto it = stateFactoryMap_.find(name);
             if (it != stateFactoryMap_.end()) {
@@ -32,21 +38,29 @@ namespace Character {
             }
         }
 
-        // ---- 現在ステートの取得 ----
+        /// <summary>
+        /// ---- 現在ステートの取得 ----
+        /// </summary>
         BaseCharacterState* GetCurrentState() const { return state_.get(); }
 
-        // 現在のステート取得
+        /// <summary>
+        /// 現在のステート取得
+        /// </summary>
         CharacterMainState GetCurrentMainState() const {
             return nowState_;
         }
         CharacterMainState GetPrevState() const { return prevState_; }
 
-        // 登録
+        /// <summary>
+        /// 登録
+        /// </summary>
         void RegisterState(const CharacterMainState& name, CharacterMainStateFactory factory) {
             stateFactoryMap_[name] = factory;
         }
     private:
-        // ステート変更
+        /// <summary>
+        /// ステート変更
+        /// </summary>
         void ChangeState(std::unique_ptr<BaseCharacterState> newState) {
             if (!isOneFrameOneState_)
                 if (state_) {

@@ -35,12 +35,18 @@ namespace Character {
 	/// </summary>
 	class Editor {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Engine::GlobalVariables* globalVariables);
-		// 更新 
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float dt);
 	private:
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateImGui(float dt);
 
 	private:

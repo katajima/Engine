@@ -7,9 +7,13 @@
 /// </summary>
 class MovementRestrictions {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Vector3 min,Vector3 max);
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(Engine::WorldTransform& world);
 
 private:

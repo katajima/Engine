@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -18,17 +18,25 @@ namespace Engine {
 	class Transformation
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon);
 		//// 更新
 		void Update(void* entity, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(Camera* camera, Matrix4x4& mat);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateSprite(Matrix4x4& mat);
 
-		// データ
+		/// <summary>
+		/// データ
+		/// </summary>
 		void GetCommandList(int index);
 
 		// トランスフォーム行列

@@ -35,7 +35,9 @@ namespace Engine {
 	/// </summary>
 	class BasePrimitive {
 	public:
-		// 派生プリミティブをBasePrimitive経由で破棄しても、派生側まで正しく解放する。
+		/// <summary>
+		/// 派生プリミティブをBasePrimitive経由で破棄しても、派生側まで正しく解放する。
+		/// </summary>
 		virtual ~BasePrimitive() = default;
 
 		enum class PsoType {
@@ -46,38 +48,60 @@ namespace Engine {
 			kNoCullWireFrame,
 
 		};
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(PrimitiveCommon* primitiveCommon, const std::string& tex, const Color color = { 1,1,1,1 }, const std::string& name = "no", bool isLine = false);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(float deltaTime);
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 	public:
 
 	public:
-		// マテリアル取得
+		/// <summary>
+		/// マテリアル取得
+		/// </summary>
 		Material* GetMaterial() { return  mesh->material.get(); }
-		// メッシュ取得
+		/// <summary>
+		/// メッシュ取得
+		/// </summary>
 		ModelMesh* GetModelMesh() { return mesh.get(); }
-		// 描画方法取得
+		/// <summary>
+		/// 描画方法取得
+		/// </summary>
 		PsoType GetPsoType() const { return psoType_; }
-		// 描画方法設定
+		/// <summary>
+		/// 描画方法設定
+		/// </summary>
 		void SetPsoType(PsoType type) { psoType_ = type; }
-		// 名前設定
+		/// <summary>
+		/// 名前設定
+		/// </summary>
 		void SetName(const std::string str) { name_ = str; };
-		// 描画準備
+		/// <summary>
+		/// 描画準備
+		/// </summary>
 		void DrawSetting(PsoType type = PsoType::kDefault);
 
 	private:
 
 
 
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		virtual void UniqueUpdate() = 0;
 
 	public:
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		virtual void MeshInitialize() = 0;
 	protected:
 		bool isLine_ = false;
@@ -100,15 +124,23 @@ namespace Engine {
 /// </summary>
 	class PlanePrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::ShapePlane& Data() { return plane; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { plane.Create(mesh.get()); };
-		// 逆法線
+		/// <summary>
+		/// 逆法線
+		/// </summary>
 		void InvNormal();
 
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapePlane plane;
@@ -121,12 +153,18 @@ namespace Engine {
 /// </summary>
 	class TrianglePrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::ShapeTriangle& Data() { return triangle; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { triangle.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeTriangle triangle;
@@ -139,12 +177,18 @@ namespace Engine {
 /// </summary>
 	class CirclePrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Circle& Data() { return circle; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { circle.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Circle circle;
@@ -157,12 +201,18 @@ namespace Engine {
 /// </summary>
 	class CubePrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::ShapeCube& Data() { return cube; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { cube.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeCube cube;
@@ -175,12 +225,18 @@ namespace Engine {
 /// </summary>
 	class StarPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Star& Data() { return star; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { star.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Star star;
@@ -193,12 +249,18 @@ namespace Engine {
 /// </summary>
 	class CrescentPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Crescent& Data() { return crescent; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { crescent.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Crescent crescent;
@@ -211,12 +273,18 @@ namespace Engine {
 /// </summary>
 	class RingPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Ring& Data() { return ring; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { ring.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Ring ring;
@@ -229,12 +297,18 @@ namespace Engine {
 /// </summary>
 	class CrossPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::ShapeCross& Data() { return cross; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { cross.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeCross cross;
@@ -247,12 +321,18 @@ namespace Engine {
 /// </summary>
 	class CylinderPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Cylinder& Data() { return cylinder; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { cylinder.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Cylinder cylinder;
@@ -265,12 +345,18 @@ namespace Engine {
 /// </summary>
 	class SpherePrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::ShapeSphere& Data() { return sphere; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { sphere.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeSphere sphere;
@@ -283,12 +369,18 @@ namespace Engine {
 /// </summary>
 	class ArrowPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::ShapeArrow& Data() { return arrow; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { arrow.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::ShapeArrow arrow;
@@ -301,12 +393,18 @@ namespace Engine {
 /// </summary>
 	class TubePrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Tube& Data() { return tube; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { tube.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Tube tube;
@@ -319,12 +417,18 @@ namespace Engine {
 /// </summary>
 	class PyramidPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Pyramid& Data() { return pyramid; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { pyramid.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Pyramid pyramid;
@@ -337,12 +441,18 @@ namespace Engine {
 /// </summary>
 	class TorusPrimitive :public BasePrimitive {
 	public:
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		ShapeParameter::Torus& Data() { return torus; };
-		// メッシュ初期化
+		/// <summary>
+		/// メッシュ初期化
+		/// </summary>
 		void MeshInitialize() override { torus.Create(mesh.get()); };
 	private:
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		void UniqueUpdate() override;
 	private:
 		ShapeParameter::Torus torus;

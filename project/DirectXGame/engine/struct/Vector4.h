@@ -12,30 +12,42 @@ struct Vector4 final {
 	float& operator[](size_t i) { return i == 0 ? x : (i == 1 ? y : (i == 2 ? z : w)); }
 	const float& operator[](size_t i) const { return i == 0 ? x : (i == 1 ? y : (i == 2 ? z : w)); }
 
-	// vector3に
+	/// <summary>
+	/// vector3に
+	/// </summary>
 	Vector3 xyz() { return Vector3{ x,y,z }; }
 
 
-	// == 演算子のオーバーロード
+	/// <summary>
+	/// == 演算子のオーバーロード
+	/// </summary>
 	bool operator==(const Vector4& other) const {
 		return x == other.x && y == other.y && z == other.z && w == other.w;
 	}
 
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector4 operator+(const Vector4& other) const {
 		return Vector4{ x + other.x, y + other.y, z + other.z,w + other.w };
 	}
 
-	// - 演算子のオーバーロード
+	/// <summary>
+	/// - 演算子のオーバーロード
+	/// </summary>
 	Vector4 operator-(const Vector4& other) const {
 		return Vector4{ x - other.x, y - other.y, z - other.z,w - other.w };
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector4 operator*(const Vector4& other) const {
 		return Vector4{ x * other.x, y * other.y, z * other.z,w * other.w };
 	}
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector4 operator*(const float& other) const {
 		return Vector4{ x * other, y * other, z * other,w * 1 };
 	}

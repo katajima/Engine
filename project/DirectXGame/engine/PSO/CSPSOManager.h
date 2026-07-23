@@ -14,16 +14,26 @@ namespace Engine {
 	class CSPSOManager
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
-		// ルートパラメータ設定
+		/// <summary>
+		/// ルートパラメータ設定
+		/// </summary>
 		void SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters);
-		// コンピュートパイプライン生成
+		/// <summary>
+		/// コンピュートパイプライン生成
+		/// </summary>
 		void ComputePipelineState();
-		// コンピュートパイプライン設定
+		/// <summary>
+		/// コンピュートパイプライン設定
+		/// </summary>
 		void PreComputePSRS();
-		// シェーダーファイル設定
+		/// <summary>
+		/// シェーダーファイル設定
+		/// </summary>
 		void SetShaderFileName(std::wstring filename);
 
 	private:

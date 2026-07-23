@@ -21,17 +21,27 @@ namespace Engine {
 
         virtual ~Lights() {}
 
-        // ライト種類取得
+        /// <summary>
+        /// ライト種類取得
+        /// </summary>
         Type GetType() const { return m_type; }
-        // ライト番号取得
+        /// <summary>
+        /// ライト番号取得
+        /// </summary>
         int GetNumber() const { return num; }
-        // ライト番号設定
+        /// <summary>
+        /// ライト番号設定
+        /// </summary>
         void SetNumber(int num) { this->num = num; }
 
-        // ライトデータをシェーダに送る
+        /// <summary>
+        /// ライトデータをシェーダに送る
+        /// </summary>
         virtual void SetLightData(void* data) const = 0;
 
-        // GPU バッファから取得したデータを反映する
+        /// <summary>
+        /// GPU バッファから取得したデータを反映する
+        /// </summary>
         virtual void UpdateFromData(const void* data) = 0;
 
         bool isLine = true;
@@ -52,12 +62,16 @@ namespace Engine {
             : Lights(Type::Point), point() {
         }
 
-        // データ設定
+        /// <summary>
+        /// データ設定
+        /// </summary>
         void SetLightData(void* data) const override {
             *static_cast<PointLightData*>(data) = point;
         }
 
-        // データ更新
+        /// <summary>
+        /// データ更新
+        /// </summary>
         void UpdateFromData(const void* data) override {
             point = *static_cast<const PointLightData*>(data);
         }
@@ -72,11 +86,15 @@ namespace Engine {
         DirectionalLight()
             : Lights(Type::Directional), directional() {
         }
-        // データ設定
+        /// <summary>
+        /// データ設定
+        /// </summary>
         void SetLightData(void* data) const override {
             *static_cast<DirectionalLightData*>(data) = directional;
         }
-        // データ更新
+        /// <summary>
+        /// データ更新
+        /// </summary>
         void UpdateFromData(const void* data) override {
             directional = *static_cast<const DirectionalLightData*>(data);
         }
@@ -92,11 +110,15 @@ namespace Engine {
         SpotLight()
             : Lights(Type::Spot), spot() {
         }
-        // データ設定
+        /// <summary>
+        /// データ設定
+        /// </summary>
         void SetLightData(void* data) const override {
             *static_cast<SpotLightData*>(data) = spot;
         }
-        // データ更新
+        /// <summary>
+        /// データ更新
+        /// </summary>
         void UpdateFromData(const void* data) override {
             spot = *static_cast<const SpotLightData*>(data);
         }

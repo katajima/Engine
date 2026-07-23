@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "BulletData.h"
@@ -38,16 +38,26 @@ public:
 	// 初期化
 	virtual void Initialize(Engine::EntityManager* entity3DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	virtual void Update() = 0;
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	virtual void Draw() = 0;
-	// 描画エフェクト
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
 	virtual void DrawEffect() = 0;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	virtual void Draw2D() = 0;
 	
-	// 消すか
+	/// <summary>
+	/// 消すか
+	/// </summary>
 	virtual bool IsExpired() const {
 		return !GetAlive() && !GetIsEffectPlay(); // ← 演出含めて完全終了
 	}
@@ -58,23 +68,39 @@ protected:
 		const std::string name,const std::string modelName);
 
 public:
-	// 持ち主の設定
+	/// <summary>
+	/// 持ち主の設定
+	/// </summary>
 	void SetOwner(Character::BaseCharacter* owner) { this->owner = owner; };
-	// ターゲット設定
+	/// <summary>
+	/// ターゲット設定
+	/// </summary>
 	void SetTarget(Character::BaseCharacter* target) { this->target = target; }
-	// エフェクト設定
+	/// <summary>
+	/// エフェクト設定
+	/// </summary>
 	void SetEffect(EffectSystem* effect) { this->effect = effect; };
-	// ターゲットの位置取得
+	/// <summary>
+	/// ターゲットの位置取得
+	/// </summary>
 	void SetInfo(const BulletInfo& info) { info_ = info; }
-	// 範囲設定
+	/// <summary>
+	/// 範囲設定
+	/// </summary>
 	void SetTargetRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
 public:
-	// 生存判定
+	/// <summary>
+	/// 生存判定
+	/// </summary>
 	bool GetAlive() const { return isAlive_; }
-	// 演出再生中か
+	/// <summary>
+	/// 演出再生中か
+	/// </summary>
 	bool GetIsEffectPlay() const { return isEffectPlay_; }
 
-	// ダメージ
+	/// <summary>
+	/// ダメージ
+	/// </summary>
 	void AddDamage(float damage) {
 		parameter_.HP -= damage;
 		if (parameter_.HP <= 0) {
@@ -82,18 +108,28 @@ public:
 			isAlive_ = false; // 敵が死亡
 		}
 	}
-	// 時間
+	/// <summary>
+	/// 時間
+	/// </summary>
 	float GetTimer() const;
 
-	// オブジェクト
+	/// <summary>
+	/// オブジェクト
+	/// </summary>
 	Engine::Object3d* GetObject3D() { return object_; }
-	// コライダコンポーネント取得
+	/// <summary>
+	/// コライダコンポーネント取得
+	/// </summary>
 	Engine::ColliderComponent* GetColliderComponent();
-	// オブジェクトコンポーネント取得
+	/// <summary>
+	/// オブジェクトコンポーネント取得
+	/// </summary>
 	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
 
 protected:
-	// 当たり判定をするか
+	/// <summary>
+	/// 当たり判定をするか
+	/// </summary>
 	void SetIsCollision(bool is) { isCollision = is; }
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;

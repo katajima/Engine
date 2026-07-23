@@ -27,7 +27,9 @@ namespace Engine {
         // 所有オブジェクト（通知用）
         void* owner = nullptr;
 
-        // 衝突時に呼ばれる関数（任意）
+        /// <summary>
+        /// 衝突時に呼ばれる関数（任意）
+        /// </summary>
         std::function<void(Collider* self, Collider* other)> onHitCallback;
 
         // 衝突時に受け取るインターフェース（任意）
@@ -43,28 +45,40 @@ namespace Engine {
         LineCommon* lineCommon = nullptr; // ライン描画用の共通オブジェクト
     public: // 更新or判定
 
-        // ワールド変換に基づいて各Colliderの座標を更新
+        /// <summary>
+        /// ワールド変換に基づいて各Colliderの座標を更新
+        /// </summary>
         void UpdateAll(const WorldTransform& worldTransform);
-        // 特定のタグだけ更新
+        /// <summary>
+        /// 特定のタグだけ更新
+        /// </summary>
         void UpdateByTag(const WorldTransform& worldTransform, CollisionTag tag);
 
-        // 特定のIDのコライダーだけ更新
+        /// <summary>
+        /// 特定のIDのコライダーだけ更新
+        /// </summary>
         void UpdateByID(const WorldTransform& worldTransform, uint32_t id);
 
 
-        // 衝突チェック＋コールバック通知（このComponent vs 他のComponent）
+        /// <summary>
+        /// 衝突チェック＋コールバック通知（このComponent vs 他のComponent）
+        /// </summary>
         void CheckAndNotify(ColliderComponent& other);
 
 
 
     public: // 削除
 
-        // すべてのコライダーを削除
+        /// <summary>
+        /// すべてのコライダーを削除
+        /// </summary>
         void ClearColliders() {
             colliders.clear();
         }
 
-        // 指定したコライダーを削除
+        /// <summary>
+        /// 指定したコライダーを削除
+        /// </summary>
         void RemoveCollider(Collider* target) {
             auto it = std::remove_if(colliders.begin(), colliders.end(),
                 [target](const ColliderEntry& entry) {
@@ -73,7 +87,9 @@ namespace Engine {
             colliders.erase(it, colliders.end());
         }
 
-        // IDでのコライダー削除
+        /// <summary>
+        /// IDでのコライダー削除
+        /// </summary>
         void RemoveColliderById(uint32_t id) {
             auto it = std::remove_if(colliders.begin(), colliders.end(),
                 [id](const ColliderEntry& entry) {
@@ -83,43 +99,65 @@ namespace Engine {
         }
 
     public: // 設定or追加
-        // ライン共通クラス設定
+        /// <summary>
+        /// ライン共通クラス設定
+        /// </summary>
         void SetLineCommon(LineCommon* line) { lineCommon = line; };
 
-        // コライダー追加
+        /// <summary>
+        /// コライダー追加
+        /// </summary>
         uint32_t AddCollider(std::unique_ptr<Collider> collider);
 
-        // コライダー再設定
+        /// <summary>
+        /// コライダー再設定
+        /// </summary>
         void SetOwner(ColliderComponent* newOwner);
 
-        // 衝突インターフェースをセット(※IHitReceiverを継承必須)
+        /// <summary>
+        /// 衝突インターフェースをセット(※IHitReceiverを継承必須)
+        /// </summary>
         void SetHitReceiver(IHitReceiver* receiver) {
             hitReceiver = receiver;
         }
 
-        // タグでの有効or無効設定
+        /// <summary>
+        /// タグでの有効or無効設定
+        /// </summary>
         void SetEnableByTag(CollisionTag tag, bool enable);
 
-        // IDでの有効or無効設定
+        /// <summary>
+        /// IDでの有効or無効設定
+        /// </summary>
         void SetEnableById(uint32_t id, bool enable);
 
-        // 初期化時に必ずセット
+        /// <summary>
+        /// 初期化時に必ずセット
+        /// </summary>
         void SetUniqueId(uint32_t id) { uniqueId_ = id; }
 
     public: // 取得
 
-        // インターフェース取得
+        /// <summary>
+        /// インターフェース取得
+        /// </summary>
         IHitReceiver* GetHitReceiver() const { return hitReceiver; }
 
-        // コライダーコンポーネントID取得
+        /// <summary>
+        /// コライダーコンポーネントID取得
+        /// </summary>
         uint32_t GetUniqueId() const { return uniqueId_; }
 
-        // コライダーID取得
+        /// <summary>
+        /// コライダーID取得
+        /// </summary>
         uint32_t GetNextId() const {
             return nextId_;
         }
 
-        // ID検索でコライダー取得
+        /// <summary>
+        /// ID検索でコライダー取得
+        /// </summary>
         Collider* FindColliderById(uint32_t id) {
             for (auto& entry : colliders) {
                 if (entry.id == id) {
@@ -142,12 +180,16 @@ namespace Engine {
         }
 
 
-        // コライダ数取得
+        /// <summary>
+        /// コライダ数取得
+        /// </summary>
         size_t GetColliderCount() const {
             return colliders.size();
         }
 
-        // 全コライダー取得
+        /// <summary>
+        /// 全コライダー取得
+        /// </summary>
         std::vector<Collider*> GetAllColliders() const {
             std::vector<Collider*> results;
             for (const auto& entry : colliders) {
@@ -156,7 +198,9 @@ namespace Engine {
             return results;
         }
 
-        // 指定タグのコライダーを取得
+        /// <summary>
+        /// 指定タグのコライダーを取得
+        /// </summary>
         std::vector<Collider*> FindByTag(CollisionTag tag) const {
             std::vector<Collider*> results;
             for (const auto& entry : colliders) {

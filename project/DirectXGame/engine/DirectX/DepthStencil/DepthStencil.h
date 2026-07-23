@@ -24,26 +24,42 @@ namespace Engine {
 		DepthStencil() = default;
 		~DepthStencil() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager);
-		// デプスをクリア
+		/// <summary>
+		/// デプスをクリア
+		/// </summary>
 		void ClearDepthView();
-		// デプスステンシルリソースのCPUハンドルの取得
+		/// <summary>
+		/// デプスステンシルリソースのCPUハンドルの取得
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResource();
 
-		// デプスSRVハンドル取得
+		/// <summary>
+		/// デプスSRVハンドル取得
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();
 
-		// デプスSRVインデックス取得
+		/// <summary>
+		/// デプスSRVインデックス取得
+		/// </summary>
 		uint32_t GetDepthSrvIndex() const;
 
-		// リソースを取得
+		/// <summary>
+		/// リソースを取得
+		/// </summary>
 		ID3D12Resource* GetResource();
-		// SRVGPUハンドル取得
+		/// <summary>
+		/// SRVGPUハンドル取得
+		/// </summary>
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
 
 	private:
-		// デプスステンシルリソースの作成
+		/// <summary>
+		/// デプスステンシルリソースの作成
+		/// </summary>
 		void CreateDepthStencilView();
 	private:
 		// デプスステンシル用リソース

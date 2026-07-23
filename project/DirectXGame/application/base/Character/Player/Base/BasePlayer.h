@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/UI/PlayerUI.h"
 
@@ -28,48 +28,80 @@ namespace Character {
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		virtual void Update() = 0;
-		// 描画エフェクト
+		/// <summary>
+		/// 描画エフェクト
+		/// </summary>
 		virtual void DrawEffect() = 0;
-		// 描画2d
+		/// <summary>
+		/// 描画2d
+		/// </summary>
 		virtual void Draw2D() = 0;
-		// 移動
+		/// <summary>
+		/// 移動
+		/// </summary>
 		virtual void Move() = 0;
-		// ジャンプ
+		/// <summary>
+		/// ジャンプ
+		/// </summary>
 		virtual void Jump() = 0;
-		// 回避
+		/// <summary>
+		/// 回避
+		/// </summary>
 		virtual void Dodge() = 0;
-		// 回避成功通知
+		/// <summary>
+		/// 回避成功通知
+		/// </summary>
 		virtual void OnDodgeSuccess() override {};
-		// 回避成功後のコンボ受付中か
+		/// <summary>
+		/// 回避成功後のコンボ受付中か
+		/// </summary>
 		virtual bool IsDodgeSuccessComboWindow() const override { return false; };
 
-		// ターゲットキャラクターを設定
+		/// <summary>
+		/// ターゲットキャラクターを設定
+		/// </summary>
 		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
 
 		void SetTargetCharacter(const BaseCharacter* targetCharacters) { this->targetCharacters.push_back(targetCharacters); }
 
 
-		// リロード
+		/// <summary>
+		/// リロード
+		/// </summary>
 		virtual void Reload() {};
-		// コンボデータをシーケンサー適応
+		/// <summary>
+		/// コンボデータをシーケンサー適応
+		/// </summary>
 		virtual void ApplyComboData(Combo::Editor* comboEditor) {};
 
 
 	public:
-		// フォローカメラの設定
+		/// <summary>
+		/// フォローカメラの設定
+		/// </summary>
 		void SetFollowCamera(FollowCamera* followCamera) { this->followCamera = followCamera; }
 
-		// プレイヤUI取得
+		/// <summary>
+		/// プレイヤUI取得
+		/// </summary>
 		virtual PlayerUI* GetPlayerUI() = 0;
 
-		// サブ武器取得
+		/// <summary>
+		/// サブ武器取得
+		/// </summary>
 		BaseWeapon* GetSubWeapon() { return subWeapon_.get(); }
 
-		// SPゲージ加算
+		/// <summary>
+		/// SPゲージ加算
+		/// </summary>
 		void AddSpGauge(int d);
-		// SP発動可能？
+		/// <summary>
+		/// SP発動可能？
+		/// </summary>
 		bool GetIsSpecial() const;
 		/// <summary>被弾後の無敵時間を毎フレーム減らす。</summary>
 		/// <param name="dt">秒単位のフレーム時間。</param>

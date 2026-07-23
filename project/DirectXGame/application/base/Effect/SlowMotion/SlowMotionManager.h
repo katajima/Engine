@@ -15,20 +15,30 @@ namespace Character {
 /// </summary>
 	class SlowMotionManager {
 	public:
-		// 破棄時に内部状態を停止する
+		/// <summary>
+		/// 破棄時に内部状態を停止する
+		/// </summary>
 		~SlowMotionManager();
 
-		// スロー演出リクエストを受け付ける
+		/// <summary>
+		/// スロー演出リクエストを受け付ける
+		/// </summary>
 		void Request(const SlowMotionRequest& request);
 
-		// スロー演出の時間を進め、対象キャラクターへ時間倍率を反映する
+		/// <summary>
+		/// スロー演出の時間を進め、対象キャラクターへ時間倍率を反映する
+		/// </summary>
 		void Update(const std::vector<const BaseCharacter*>& targets);
 
-		// 現在のスロー演出を即座に解除する
+		/// <summary>
+		/// 現在のスロー演出を即座に解除する
+		/// </summary>
 		void Stop();
 
 	private:
-		// 対象キャラクターへ現在の時間倍率を反映する
+		/// <summary>
+		/// 対象キャラクターへ現在の時間倍率を反映する
+		/// </summary>
 		void ApplyTargets(const std::vector<const BaseCharacter*>& targets, float timeScale);
 
 	private:

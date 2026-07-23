@@ -35,39 +35,63 @@ namespace Engine {
 			Barrier* barrier, ScissorRect* scissorRect,
 			ViewPort* viewPort);
 
-		// 最初
+		/// <summary>
+		/// 最初
+		/// </summary>
 		void PreDrawOffscreen();
 
-		// 最初
+		/// <summary>
+		/// 最初
+		/// </summary>
 		void PostDrawOffscreen();
 
-		// 2D
+		/// <summary>
+		/// 2D
+		/// </summary>
 		void PreDraw2dOffscreen();
 
-		// 2D
+		/// <summary>
+		/// 2D
+		/// </summary>
 		void PostDraw2dOffscreen();
 
-		// 全ポストエフェクト処理
+		/// <summary>
+		/// 全ポストエフェクト処理
+		/// </summary>
 		void AllPostEffect(SceneManager* sceneManager);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(Camera* camera);
 
 
-		// ポストエフェクトパイプライン追加
+		/// <summary>
+		/// ポストエフェクトパイプライン追加
+		/// </summary>
 		void AddPipeline(PostEffectPipeline* pipeline);
 
-		// 最終レンダーテクスチャ取得
+		/// <summary>
+		/// 最終レンダーテクスチャ取得
+		/// </summary>
 		RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get(); };
 
-		// ポストエフェクトパイプラインクリア
+		/// <summary>
+		/// ポストエフェクトパイプラインクリア
+		/// </summary>
 		void ClearPostEffectBlock();
-		// ImGui使用時の計算処理
+		/// <summary>
+		/// ImGui使用時の計算処理
+		/// </summary>
 		void RenderImGui();
-		// サイズ更新
+		/// <summary>
+		/// サイズ更新
+		/// </summary>
 		void RenderUpdate();
 
-		// ImGui画像左上座標取得
+		/// <summary>
+		/// ImGui画像左上座標取得
+		/// </summary>
 		Vector2 GetImageleftTopPos() const {
 #ifdef _DEBUG
 			return imageleftTopPos_;
@@ -76,7 +100,9 @@ namespace Engine {
 #endif
 		}
 
-		// ImGui画像サイズ取得
+		/// <summary>
+		/// ImGui画像サイズ取得
+		/// </summary>
 		Vector2 GetImageSize() const {
 #ifdef _DEBUG
 			return imageSize_;
@@ -89,13 +115,19 @@ namespace Engine {
 #endif
 		}
 
-		// ImGui画像画面比率取得
+		/// <summary>
+		/// ImGui画像画面比率取得
+		/// </summary>
 		Vector2 GetImageRatio() const { return imageRatio_; }
 
 	private:
-		// 前レンダーテクスチャ
+		/// <summary>
+		/// 前レンダーテクスチャ
+		/// </summary>
 		void PreEnd(RenderTexture* renderTexture);
-		// 後レンダーテクスチャ
+		/// <summary>
+		/// 後レンダーテクスチャ
+		/// </summary>
 		void PostEnd(RenderTexture* renderTexture);
 
 	private:

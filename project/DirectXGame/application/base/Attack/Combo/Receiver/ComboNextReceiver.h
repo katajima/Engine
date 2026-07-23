@@ -10,19 +10,31 @@ namespace Combo {
 	/// </summary>
 	class NextReceiver {
 	public:
-		// 開始
+		/// <summary>
+		/// 開始
+		/// </summary>
 		void Enter(const GlobalCondition& data);
-		//　終了
+		/// <summary>
+		/// 終了
+		/// </summary>
 		void Exit();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx,const GlobalCondition& data, float time);
 
 	public: // 取得
-		// 受付可能か取得
+		/// <summary>
+		/// 受付可能か取得
+		/// </summary>
 		bool GetIsActive() const { return isActive_; }
-		// 次のコンボに移行するか
+		/// <summary>
+		/// 次のコンボに移行するか
+		/// </summary>
 		bool GetIsNext() const { return isNext_; }
-		// ボタン設定
+		/// <summary>
+		/// ボタン設定
+		/// </summary>
 		void SetButton(const std::vector<ComboButton>& button);
 	private:
 		ComboSequence comboSequence_;			// ボタン条件

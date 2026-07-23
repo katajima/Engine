@@ -13,7 +13,9 @@ struct CameraInfo {
 class CameraManager
 {
 public:
-	// デストラクタ
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
 	~CameraManager();
 
 	/// <summary>シーン共通の出力カメラを生成し、描画システムへ設定する。</summary>

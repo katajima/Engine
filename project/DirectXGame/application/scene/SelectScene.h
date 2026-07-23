@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -30,18 +30,28 @@
 class SelectScene : public Engine::BaseScene
 {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update()   override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D()   override;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D()   override;
 
 private:

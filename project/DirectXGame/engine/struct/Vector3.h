@@ -17,7 +17,9 @@ struct Vector3 final {
 	float& operator[](size_t i) { return i == 0 ? x : (i == 1 ? y : z); }
 	const float& operator[](size_t i) const { return i == 0 ? x : (i == 1 ? y : z); }
 
-	// 配列のようにアクセスできるオーバーロード
+	/// <summary>
+	/// 配列のようにアクセスできるオーバーロード
+	/// </summary>
 	float& operator[](int index) {
 		return (&x)[index]; // x のアドレスを使って配列のようにアクセス
 	}
@@ -25,31 +27,43 @@ struct Vector3 final {
 	const float& operator[](int index) const {
 		return (&x)[index]; // const バージョン
 	}
-	// xy
+	/// <summary>
+	/// xy
+	/// </summary>
 	Vector2 xy() { return Vector2{ x,y }; }
-	// xz
+	/// <summary>
+	/// xz
+	/// </summary>
 	Vector2 xz() { return Vector2{ x,z }; }
 
 
 
 
-	// == 演算子のオーバーロード
+	/// <summary>
+	/// == 演算子のオーバーロード
+	/// </summary>
 	bool operator==(const Vector3& other) const {
 		const float epsilon = 1e-6f;
 		return fabs(x - other.x) < epsilon &&
 			fabs(y - other.y) < epsilon &&
 			fabs(z - other.z) < epsilon;
 	}
-	// >= 演算子オーバーロード
+	/// <summary>
+	/// >= 演算子オーバーロード
+	/// </summary>
 	bool operator>=(const Vector3& other) const {
 		return (x >= other.x) && (y >= other.y) && (z >= other.z);
 	}
-	// <= 演算子オーバーロード
+	/// <summary>
+	/// <= 演算子オーバーロード
+	/// </summary>
 	bool operator<=(const Vector3& other) const {
 		return (x <= other.x) && (y <= other.y) && (z <= other.z);
 	}
 
-	// = 演算子のオーバーロード
+	/// <summary>
+	/// = 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator=(float other) {
 		x = other;
 		y = other;
@@ -57,15 +71,21 @@ struct Vector3 final {
 		return *this;
 	}
 
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector3 operator+(const Vector3& other) const {
 		return Vector3{ x + other.x, y + other.y, z + other.z };
 	}
-	// + 演算子のオーバーロード (スカラーとベクトル) 
+	/// <summary>
+	/// + 演算子のオーバーロード (スカラーとベクトル)
+	/// </summary>
 	Vector3 operator+(float other) const {
 		return Vector3{ x + other, y + other, z + other };;
 	}
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator+=(const Vector3& other) {
 
 		x += other.x;
@@ -73,7 +93,9 @@ struct Vector3 final {
 		z += other.z;
 		return *this;
 	}
-	// + 演算子のオーバーロード
+	/// <summary>
+	/// + 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator-=(const Vector3& other) {
 
 		x -= other.x;
@@ -82,7 +104,9 @@ struct Vector3 final {
 		return *this;
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator*=(const Vector3& other) {
 
 		x *= other.x;
@@ -91,7 +115,9 @@ struct Vector3 final {
 		return *this;
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator*=(const float other) {
 
 		x *= other;
@@ -100,7 +126,9 @@ struct Vector3 final {
 		return *this;
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator/=(const Vector3& other) {
 
 		x /= other.x;
@@ -109,7 +137,9 @@ struct Vector3 final {
 		return *this;
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector3& operator/=(const float other) {
 
 		x /= other;
@@ -118,21 +148,29 @@ struct Vector3 final {
 		return *this;
 	}
 
-	// - 演算子のオーバーロード
+	/// <summary>
+	/// - 演算子のオーバーロード
+	/// </summary>
 	Vector3 operator-(const Vector3& other) const {
 		return Vector3{ x - other.x, y - other.y, z - other.z };
 	}
-	// - 演算子のオーバーロード
+	/// <summary>
+	/// - 演算子のオーバーロード
+	/// </summary>
 	Vector3 operator-(float other) const {
 		return Vector3{ x - other, y - other, z - other };
 	}
 
-	// * 演算子のオーバーロード
+	/// <summary>
+	/// * 演算子のオーバーロード
+	/// </summary>
 	Vector3 operator*(const Vector3& other) const {
 		return Vector3{ x * other.x, y * other.y, z * other.z };
 	}
 
-	// * 演算子のオーバーロード (スカラーとベクトル) 
+	/// <summary>
+	/// * 演算子のオーバーロード (スカラーとベクトル)
+	/// </summary>
 	Vector3 operator*(float other) const {
 		return Vector3{ x * other, y * other, z * other };;
 	}
@@ -145,7 +183,9 @@ struct Vector3 final {
 
 
 
-	// / 演算子のオーバーロード (スカラー除算) 
+	/// <summary>
+	/// / 演算子のオーバーロード (スカラー除算)
+	/// </summary>
 	Vector3 operator/(float s) const {
 		return Vector3{ (x / s), (y / s), (z / s) };
 	}
@@ -153,7 +193,9 @@ struct Vector3 final {
 		return Vector3{ (x / s.x), (y / s.y), (z / s.z) };
 	}
 
-	// 正規化
+	/// <summary>
+	/// 正規化
+	/// </summary>
 	Vector3 Normalize() const {
 		Vector3 result{};
 		float length;
@@ -168,7 +210,9 @@ struct Vector3 final {
 
 		return result;
 	};
-	// 内積
+	/// <summary>
+	/// 内積
+	/// </summary>
 	float Dot(const Vector3& other) const {
 		float result;
 
@@ -177,7 +221,9 @@ struct Vector3 final {
 
 		return result;
 	};
-	// 長さ
+	/// <summary>
+	/// 長さ
+	/// </summary>
 	float Length() const {
 		float result;
 
@@ -185,16 +231,22 @@ struct Vector3 final {
 
 		return result;
 	};
-	// 長さ
+	/// <summary>
+	/// 長さ
+	/// </summary>
 	float LengthSq() const {
 		return x * x + y * y + z * z;
 	}
-	// ベクトルの要素ごとの絶対値
+	/// <summary>
+	/// ベクトルの要素ごとの絶対値
+	/// </summary>
 	Vector3 Abs() const {
 		return { std::abs(x), std::abs(y), std::abs(z) };
 	}
 
-	// ベクトルのクロス積（外積）
+	/// <summary>
+	/// ベクトルのクロス積（外積）
+	/// </summary>
 	Vector3 Cross(const Vector3& other) const {
 		return {
 			y * other.z - z * other.y,
@@ -202,14 +254,18 @@ struct Vector3 final {
 			x * other.y - y * other.x
 		};
 	}
-	// 距離
+	/// <summary>
+	/// 距離
+	/// </summary>
 	float Distance(const Vector3& other) const {
 		float dx = x - other.x;
 		float dy = y - other.y;
 		float dz = z - other.z;
 		return std::sqrt(dx * dx + dy * dy + dz * dz);
 	}
-	//　距離XZ
+	/// <summary>
+	/// 距離XZ
+	/// </summary>
 	float DistanceXZ(const Vector3& other) const {
 		float dx = x - other.x;
 		float dz = z - other.z;
@@ -225,7 +281,9 @@ struct Vector3 final {
 		return result;
 	}
 
-	// 補間
+	/// <summary>
+	/// 補間
+	/// </summary>
 	static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 		Vector3 temp;
 		t = std::clamp(t, 0.0f, 1.0f);
@@ -236,7 +294,9 @@ struct Vector3 final {
 		return temp;
 	}
 
-	// 値設定
+	/// <summary>
+	/// 値設定
+	/// </summary>
 	static Vector3 Set(float v) {
 		return { v,v,v };
 	}
@@ -244,7 +304,9 @@ struct Vector3 final {
 };
 
 
-// 補間
+/// <summary>
+/// 補間
+/// </summary>
 static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 	Vector3 temp;
 	t = std::clamp(t, 0.0f, 1.0f);
@@ -254,7 +316,9 @@ static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 
 	return temp;
 }
-// 正規化
+/// <summary>
+/// 正規化
+/// </summary>
 static Vector3 Normalize(const Vector3& v) {
 	Vector3 result{};
 	float length;
@@ -269,7 +333,9 @@ static Vector3 Normalize(const Vector3& v) {
 
 	return result;
 };
-// 外積
+/// <summary>
+/// 外積
+/// </summary>
 static Vector3 Cross(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -279,7 +345,9 @@ static Vector3 Cross(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 };
-// 内積
+/// <summary>
+/// 内積
+/// </summary>
 static float Dot(const Vector3& v1, const Vector3& v2) {
 	float result;
 
@@ -288,7 +356,9 @@ static float Dot(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 };
-// 最大
+/// <summary>
+/// 最大
+/// </summary>
 static Vector3 Max(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -299,7 +369,9 @@ static Vector3 Max(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 }
-// 最小
+/// <summary>
+/// 最小
+/// </summary>
 static Vector3 Min(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -310,7 +382,9 @@ static Vector3 Min(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 }
-// 加算
+/// <summary>
+/// 加算
+/// </summary>
 static Vector3 Add(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -321,7 +395,9 @@ static Vector3 Add(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 };
-// 減算
+/// <summary>
+/// 減算
+/// </summary>
 static Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -333,7 +409,9 @@ static Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
 	return result;
 }
 
-// Vector3同士
+/// <summary>
+/// Vector3同士
+/// </summary>
 static Vector3 Multiply(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -343,7 +421,9 @@ static Vector3 Multiply(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 }
-// floatとVector3
+/// <summary>
+/// floatとVector3
+/// </summary>
 static Vector3 Multiply(const float& v, const Vector3& v1) {
 	Vector3 result{};
 
@@ -366,7 +446,9 @@ static Vector3 Multiply(const Vector3& v1, const float& v2)
 	return result;
 }
 
-// 長さ
+/// <summary>
+/// 長さ
+/// </summary>
 static float Length(const Vector3& v) {
 	float result;
 
@@ -388,7 +470,9 @@ static float Distance(const Vector3& point1, const Vector3& point2)
 	return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-// 2つの点間の距離を計算する関数
+/// <summary>
+/// 2つの点間の距離を計算する関数
+/// </summary>
 static float DistanceXZ(const Vector3& point1, const Vector3& point2) {
 	float dx = point1.x - point2.x;
 	float dz = point1.z - point2.z;
@@ -412,7 +496,9 @@ static Vector3 Project(const Vector3& v1, const Vector3& v2)
 	return result;
 }
 
-// 垂直
+/// <summary>
+/// 垂直
+/// </summary>
 static Vector3 Perpendicular(const Vector3& vector) {
 	if (vector.x != 0.0f || vector.y != 0.0f) {
 		return { -vector.y,vector.x,0.0f };
@@ -420,7 +506,9 @@ static Vector3 Perpendicular(const Vector3& vector) {
 	return { 0.0f,-vector.z,vector.y };
 }
 
-// absDot
+/// <summary>
+/// absDot
+/// </summary>
 static float AbsDot(const Vector3& a, const Vector3& b) {
 	return std::abs(Dot(a, b));
 }

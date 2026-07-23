@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -30,16 +30,26 @@ namespace Engine {
 			kNoCullRingClamp,
 			kNoCullWireFrame,
 		};
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxcommon);
-		// 描画準備
+		/// <summary>
+		/// 描画準備
+		/// </summary>
 		void DrawCommonSetting(PsoType type = PsoType::kDefault);
-		// DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon; }
 	private:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
 
 	private:

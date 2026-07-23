@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "SpecialPointStateMachine.h"
 
@@ -17,29 +17,51 @@ namespace Character {
 class SpecialPoint : public IHitReceiver {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point,int id);
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() {};
 
 public:
-	// 生きているか
+	/// <summary>
+	/// 生きているか
+	/// </summary>
 	bool GetAlive() const { return isAlive_; };
-	// 死亡
+	/// <summary>
+	/// 死亡
+	/// </summary>
 	void Die() { isAlive_ = false; }
-	// ターゲット位置設定
+	/// <summary>
+	/// ターゲット位置設定
+	/// </summary>
 	void SetTargetPos(const Vector3& target) { targetPos_ = target; };
-	// オブジェクトコンポーネント取得
+	/// <summary>
+	/// オブジェクトコンポーネント取得
+	/// </summary>
 	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
-	// コライダーコンポーネント取得
+	/// <summary>
+	/// コライダーコンポーネント取得
+	/// </summary>
 	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); }
-	// ステートマシーン取得
+	/// <summary>
+	/// ステートマシーン取得
+	/// </summary>
 	SpecialPointStateMachine* GetStateMachine() { return specialPointStateMachine_.get(); }
-	// ターゲット位置取得
+	/// <summary>
+	/// ターゲット位置取得
+	/// </summary>
 	Vector3 GetTargetPos() const { return targetPos_; }
-	// 移動範囲内か
+	/// <summary>
+	/// 移動範囲内か
+	/// </summary>
 	bool IsMove();
 private:
 
@@ -68,16 +90,26 @@ private:
 /// </summary>
 class SpecialPointManager {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
-	// ポイント出現
+	/// <summary>
+	/// ポイント出現
+	/// </summary>
 	void AddPoint(const Vector3& pos, int point);
-	// ターゲット設定
+	/// <summary>
+	/// ターゲット設定
+	/// </summary>
 	void SetTarget(Character::BaseCharacter* target) { this->target = target; };
 
-	// SPポイントたち取得
+	/// <summary>
+	/// SPポイントたち取得
+	/// </summary>
 	std::vector<SpecialPoint*> GetSpecialPoints() {
 		std::vector<SpecialPoint*> result;
 		for (auto& point : points) {

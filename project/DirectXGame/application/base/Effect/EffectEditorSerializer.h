@@ -12,27 +12,45 @@ namespace Engine {
 /// </summary>
 class EffectEditorSerializer {
 public:
-	// 保存先のグローバル変数を設定する
+	/// <summary>
+	/// 保存先のグローバル変数を設定する
+	/// </summary>
 	void Initialize(Engine::GlobalVariables* globalVariables) { globalVariables_ = globalVariables; }
 
-	// エフェクト設定の未登録項目を追加する
+	/// <summary>
+	/// エフェクト設定の未登録項目を追加する
+	/// </summary>
 	void RegisterEffectData(const std::string& name, const EffectGlobalData& data);
-	// エフェクト設定を読み込む
+	/// <summary>
+	/// エフェクト設定を読み込む
+	/// </summary>
 	void LoadEffectData(const std::string& name, EffectGlobalData& data) const;
-	// エフェクト設定を現在値で保存する
+	/// <summary>
+	/// エフェクト設定を現在値で保存する
+	/// </summary>
 	void SaveEffectData(const std::string& name, const EffectGlobalData& data);
 
-	// パーティクル群設定の未登録項目を追加する
+	/// <summary>
+	/// パーティクル群設定の未登録項目を追加する
+	/// </summary>
 	void RegisterParticleGroupData(const std::string& name, const Engine::ParticleGroupEditorData& data);
-	// パーティクル群設定を読み込む
+	/// <summary>
+	/// パーティクル群設定を読み込む
+	/// </summary>
 	void LoadParticleGroupData(const std::string& name, Engine::ParticleGroupEditorData& data) const;
-	// パーティクル群設定を現在値で保存する
+	/// <summary>
+	/// パーティクル群設定を現在値で保存する
+	/// </summary>
 	void SaveParticleGroupData(const std::string& name, const Engine::ParticleGroupEditorData& data);
 
 private:
-	// 登録と保存で共通のエフェクト項目一覧を書き込む
+	/// <summary>
+	/// 登録と保存で共通のエフェクト項目一覧を書き込む
+	/// </summary>
 	void WriteEffectData(const std::string& name, const EffectGlobalData& data, bool overwrite);
-	// 登録と保存で共通のパーティクル群項目一覧を書き込む
+	/// <summary>
+	/// 登録と保存で共通のパーティクル群項目一覧を書き込む
+	/// </summary>
 	void WriteParticleGroupData(const std::string& name, const Engine::ParticleGroupEditorData& data, bool overwrite);
 
 private:

@@ -16,63 +16,113 @@ namespace Engine {
 	{
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(LineCommon* lineCommon);
 
-		// アニメーションするモデルを設定
+		/// <summary>
+		/// アニメーションするモデルを設定
+		/// </summary>
 		void SetModel(Model* mod) { model = mod; }
 
-		// スキニング更新
+		/// <summary>
+		/// スキニング更新
+		/// </summary>
 		void UpdateSkin(float deltatime, WorldTransform worldTransform);
 
-		// アニメーション更新
+		/// <summary>
+		/// アニメーション更新
+		/// </summary>
 		void Update(float deltatime, WorldTransform worldTransform);
 
 
 	public:
-		// 再生するか
+		/// <summary>
+		/// 再生するか
+		/// </summary>
 		void SetIsPlaying(bool is) { isPlaying = is; }
-		// 逆再生
+		/// <summary>
+		/// 逆再生
+		/// </summary>
 		void SetIsReversePlayback(bool is) { isReversePlayback = is; };
-		// アニメーションスピード
+		/// <summary>
+		/// アニメーションスピード
+		/// </summary>
 		void SetAnimationSpeed(float speed) { animationSpeed = speed; }
-		// ループ再生するか
+		/// <summary>
+		/// ループ再生するか
+		/// </summary>
 		void SetIsLoop(bool is) { isLoop = is; };
-		// ローカル行列取得
+		/// <summary>
+		/// ローカル行列取得
+		/// </summary>
 		Matrix4x4 GetLocalMatrix() const { return localMatrix_; }
-		// アニメーション変更
+		/// <summary>
+		/// アニメーション変更
+		/// </summary>
 		void SetAnimation(const std::string& name, float time);
-		// アニメーションが終了しているか
+		/// <summary>
+		/// アニメーションが終了しているか
+		/// </summary>
 		bool IsAnimationFinished();
-		// 初期時間に戻す
+		/// <summary>
+		/// 初期時間に戻す
+		/// </summary>
 		void SetStratAnimeTime() { animationTime = 0.0f; }
-		// アニメーション時間設定
+		/// <summary>
+		/// アニメーション時間設定
+		/// </summary>
 		void SetAnimationTime(float time) { animationTime = time; }
-		// アニメーション時間取得
+		/// <summary>
+		/// アニメーション時間取得
+		/// </summary>
 		float GetAnimationTime() const { return animationTime; }
-		// 終了時間に合わせる
+		/// <summary>
+		/// 終了時間に合わせる
+		/// </summary>
 		void SetEndAnimeTime();
-		// 終了時間取得
+		/// <summary>
+		/// 終了時間取得
+		/// </summary>
 		float GetEndAnimeTime(std::string name) const;
 
 	private:
-		// アニメーション時間を再生状態に合わせて進める
+		/// <summary>
+		/// アニメーション時間を再生状態に合わせて進める
+		/// </summary>
 		void AdvanceAnimationTime(const Animation& currentAnimation, float deltaTime);
-		// 前アニメーションのブレンド用時間を再生方向に合わせて進める
+		/// <summary>
+		/// 前アニメーションのブレンド用時間を再生方向に合わせて進める
+		/// </summary>
 		void AdvancePreviousAnimationTime(const Animation& previousAnimation, float deltaTime);
-		// アニメーション時間を尺内に丸める
+		/// <summary>
+		/// アニメーション時間を尺内に丸める
+		/// </summary>
 		float WrapAnimationTime(float time, float duration) const;
-		// ブレンド率を更新して0.0f～1.0fの補間値を返す
+		/// <summary>
+		/// ブレンド率を更新して0.0f～1.0fの補間値を返す
+		/// </summary>
 		float UpdateBlendRate(ModelData& modelData, float deltaTime);
-		// スキニング用のアニメーション姿勢を反映する
+		/// <summary>
+		/// スキニング用のアニメーション姿勢を反映する
+		/// </summary>
 		void ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
-		// 通常ノード用のアニメーション姿勢を反映する
+		/// <summary>
+		/// 通常ノード用のアニメーション姿勢を反映する
+		/// </summary>
 		void ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
-		// ノードアニメーションからローカル行列を作成する
+		/// <summary>
+		/// ノードアニメーションからローカル行列を作成する
+		/// </summary>
 		Matrix4x4 CalculateNodeLocalMatrix(const NodeAnimation& nodeAnimation, float animationTime) const;
-		// スキンクラスターのパレットを安全に更新する
+		/// <summary>
+		/// スキンクラスターのパレットを安全に更新する
+		/// </summary>
 		void UpdateSkinClusters(ModelData& modelData);
-		// マテリアルのGPU転送を安全に更新する
+		/// <summary>
+		/// マテリアルのGPU転送を安全に更新する
+		/// </summary>
 		void UpdateMaterialGPUData(ModelData& modelData);
 
 	private:

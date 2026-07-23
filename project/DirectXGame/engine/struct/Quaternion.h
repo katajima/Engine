@@ -18,18 +18,26 @@ struct Quaternion final {
 
     static Quaternion IdentityQuaternion(){return Quaternion(0.0f, 0.0f, 0.0f, 1.0f);}
 
-    //共役
+    /// <summary>
+    /// 共役
+    /// </summary>
     Quaternion Conjugate() {return Quaternion(-x, -y, -z, w);}
 
-    // ノルム
+    /// <summary>
+    /// ノルム
+    /// </summary>
     float Norm() { return std::sqrt(x * x + y * y + z * z + w * w); }
 
-    // クォータニオンの正規化関数
+    /// <summary>
+    /// クォータニオンの正規化関数
+    /// </summary>
     Quaternion Normalize() const{
         float length = std::sqrt((w * w) + (x * x) + (y * y) + (z * z));
         return {x / length, y / length, z / length,w / length };
     }
-    // ノーマライズ
+    /// <summary>
+    /// ノーマライズ
+    /// </summary>
     void Normalize2() { 
         float magnitude = std::sqrt(w * w + x * x + y * y + z * z); 
         if (magnitude > FLT_EPSILON) { 
@@ -37,14 +45,18 @@ struct Quaternion final {
             w *= invMagnitude; x *= invMagnitude; y *= invMagnitude; z *= invMagnitude; 
         } 
     }
-    // 内積
+    /// <summary>
+    /// 内積
+    /// </summary>
     float Dot(const Quaternion& q) const {
 
         return q.w * w + q.x *x + q.y * y + q.z * z;
     };
 
 
-    // 軸と角度からクォータニオンを生成する関数
+    /// <summary>
+    /// 軸と角度からクォータニオンを生成する関数
+    /// </summary>
     Quaternion MakeQuaternion(const Vector3& axis, float angle) {
         Vector3 norAxis = axis.Normalize();
 
@@ -56,7 +68,9 @@ struct Quaternion final {
     }
    
     
-    // 回転行列
+    /// <summary>
+    /// 回転行列
+    /// </summary>
     Matrix4x4 MakeRotateMatrix() const {
         Matrix4x4 m{};
         m.Identity();
@@ -73,7 +87,9 @@ struct Quaternion final {
         return m;
     }
 
-    // クォータニオンを使用してベクトルを回転させる関数
+    /// <summary>
+    /// クォータニオンを使用してベクトルを回転させる関数
+    /// </summary>
     Vector3 RotateVector(const Vector3& v) const {
         Quaternion qv = {v.x, v.y, v.z ,0};
         Quaternion qConjugate = {-x, -y, -z ,w};
@@ -92,27 +108,41 @@ struct Quaternion final {
 
         return { result.x, result.y, result.z };
     }
-    // ベクトル回転
+    /// <summary>
+    /// ベクトル回転
+    /// </summary>
     Vector3 RotateVectorFast(const Vector3& v) const {
-        // クォータニオンをベクトル v に適用
+        /// <summary>
+        /// クォータニオンをベクトル v に適用
+        /// </summary>
         Vector3 qv(x, y, z);
         Vector3 t = Cross(qv, v) * 2.0f;
         return v + t * w + Cross(qv, t);
     }
 
-    // Quaternion から Euler 角に変換
+    /// <summary>
+    /// Quaternion から Euler 角に変換
+    /// </summary>
     Vector3 ToEulerAngles() const {
         Vector3 angles;
-        // Yaw (Z軸まわり)
+        /// <summary>
+        /// Yaw (Z軸まわり)
+        /// </summary>
         angles.y = std::atan2(2.0f * (w * y + x * z), 1.0f - 2.0f * (y * y + z * z));
-        // Pitch (X軸まわり)
+        /// <summary>
+        /// Pitch (X軸まわり)
+        /// </summary>
         angles.x = std::asin(std::clamp(2.0f * (w * x - y * z), -1.0f, 1.0f));
-        // Roll (Y軸まわり)
+        /// <summary>
+        /// Roll (Y軸まわり)
+        /// </summary>
         angles.z = std::atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (x * x + z * z));
         return angles;
     }
 
-    //軸角度から
+    /// <summary>
+    /// 軸角度から
+    /// </summary>
     static Quaternion FromAxisAngle(const Vector3& axis, float angle) {
         Vector3 n = axis.Normalize();
         float halfAngle = angle * 0.5f;
@@ -120,13 +150,19 @@ struct Quaternion final {
         return Quaternion(n.x * sinHalf, n.y * sinHalf, n.z * sinHalf, cosf(halfAngle));
     }
 
-    // + 演算子のオーバーロード
+    /// <summary>
+    /// + 演算子のオーバーロード
+    /// </summary>
     Quaternion operator+(const Quaternion& other) const;
 
-    // - 演算子のオーバーロード
+    /// <summary>
+    /// - 演算子のオーバーロード
+    /// </summary>
     Quaternion operator-(const Quaternion& other) const;
 
-    // * 演算子のオーバーロード
+    /// <summary>
+    /// * 演算子のオーバーロード
+    /// </summary>
     Quaternion operator*(const Quaternion& other) const;
 
     Quaternion operator*(const float& other) const;
@@ -135,7 +171,9 @@ struct Quaternion final {
 
 };
 
-// 内積の計算
+/// <summary>
+/// 内積の計算
+/// </summary>
 static float Dot(const Quaternion& q1, const Quaternion& q2) {
     return q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
 }
@@ -152,16 +190,22 @@ static Quaternion Lerp(const Quaternion& q0, const Quaternion& q1, float _t)
 {
     return Quaternion(Lerp(q0.x, q1.x, _t), Lerp(q0.y, q1.y, _t), Lerp(q0.z, q1.z, _t), Lerp(q0.w, q1.w, _t));
 }
-// 球面補間
+/// <summary>
+/// 球面補間
+/// </summary>
 static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
     Quaternion q0_t = q0, q1_t = q1;
 
-    // 内積を計算
+    /// <summary>
+    /// 内積を計算
+    /// </summary>
     float dot = Dot(q0_t, q1_t);
 
     
 
-    // 負の内積の場合、片方の符号を反転して最短経路に補間
+    /// <summary>
+    /// 負の内積の場合、片方の符号を反転して最短経路に補間
+    /// </summary>
     if (dot < 0.0f) {
         q1_t = -q1_t; // クォータニオン全体を反転
         dot = -dot;
@@ -176,11 +220,15 @@ static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
         return result;
     }
 
-    // なす角を計算
+    /// <summary>
+    /// なす角を計算
+    /// </summary>
     float theta = std::acos(dot);
     float sinTheta = std::sin(theta);
 
-    // sinThetaが小さい場合（数値的に不安定な場合）の処理
+    /// <summary>
+    /// sinThetaが小さい場合（数値的に不安定な場合）の処理
+    /// </summary>
     if (sinTheta < FLT_EPSILON) {
         Quaternion result{};
         result = Lerp(q0_t, q1_t, t);
@@ -188,7 +236,9 @@ static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
         return result;
     }
 
-    // 補間係数を計算
+    /// <summary>
+    /// 補間係数を計算
+    /// </summary>
     float scale0 = std::sin((1.0f - t) * theta) / sinTheta;
     float scale1 = std::sin(t * theta) / sinTheta;
 
@@ -201,7 +251,9 @@ static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
     };
     return result.Normalize();
 }
-// 球面補間
+/// <summary>
+/// 球面補間
+/// </summary>
 static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {
     Quaternion q0_t = q0, q1_t = q1;
 
@@ -221,9 +273,13 @@ static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {
          ((scale0 * q0_t.z) + (scale1 * q1_t.z)), ((scale0 * q0_t.w) + (scale1 * q1_t.w)) };
 
 }
-// アフィン変換
+/// <summary>
+/// アフィン変換
+/// </summary>
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
-// オイラーをQuaternion
+/// <summary>
+/// オイラーをQuaternion
+/// </summary>
 static Quaternion MakeQuaternionFromEuler(const Vector3& euler) {
     float cy = std::cos(euler.y * 0.5f); // yaw
     float sy = std::sin(euler.y * 0.5f);
@@ -240,26 +296,36 @@ static Quaternion MakeQuaternionFromEuler(const Vector3& euler) {
 
     return q;
 }
-// Quaternionをオイラーに変換
+/// <summary>
+/// Quaternionをオイラーに変換
+/// </summary>
 static Vector3 QuaternionToEuler(const Quaternion& q) {
     Vector3 euler;
 
-    // roll (Z軸回転)
+    /// <summary>
+    /// roll (Z軸回転)
+    /// </summary>
     float sinr_cosp = 2.0f * (q.w * q.x + q.y * q.z);
     float cosr_cosp = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
     euler.z = std::atan2(sinr_cosp, cosr_cosp);
 
-    // pitch (X軸回転)
+    /// <summary>
+    /// pitch (X軸回転)
+    /// </summary>
     float sinp = 2.0f * (q.w * q.y - q.z * q.x);
     if (std::abs(sinp) >= 1.0f) {
-        // 90度に張り付く場合（Gimbal Lock）
+        /// <summary>
+        /// 90度に張り付く場合（Gimbal Lock）
+        /// </summary>
         euler.x = std::copysign(float(M_PI) / 2.0f, sinp);
     }
     else {
         euler.x = std::asin(sinp);
     }
 
-    // yaw (Y軸回転)
+    /// <summary>
+    /// yaw (Y軸回転)
+    /// </summary>
     float siny_cosp = 2.0f * (q.w * q.z + q.x * q.y);
     float cosy_cosp = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
     euler.y = std::atan2(siny_cosp, cosy_cosp);

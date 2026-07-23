@@ -13,25 +13,39 @@ namespace Character {
 class TitleUI : public BaseUI {
 public:
 
-	//初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
 
-	//更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
 
-	// ゲームデータ取得
+	/// <summary>
+	/// ゲームデータ取得
+	/// </summary>
 	void SetGamePlayData(const Game::GameData data) { data_ = data; };
 
-	// 動く
+	/// <summary>
+	/// 動く
+	/// </summary>
 	void Action() { isAction_ = true; }
 
 private:
-	// ボタンUI処理
+	/// <summary>
+	/// ボタンUI処理
+	/// </summary>
 	void ButtonUiProcess(float dt);
-	// タイトルUI
+	/// <summary>
+	/// タイトルUI
+	/// </summary>
 	void TitleUiProcess(float dt);
 
 private:

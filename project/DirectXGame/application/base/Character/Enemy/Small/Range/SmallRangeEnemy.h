@@ -9,18 +9,24 @@ namespace Character {
 /// </summary>
 	class SmallRangeEnemy : public BaseEnemy {
 	public:
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		SmallRangeEnemy() {}
 
 		// 初期化
 		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		void Update() override;
 
 	private:
-		// ステートマシーン初期化
+		/// <summary>
+		/// ステートマシーン初期化
+		/// </summary>
 		void InitStateMachine() override;
 
 	private:

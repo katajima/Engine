@@ -25,19 +25,33 @@ namespace Engine {
 		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 		uint32_t id = 0; // コライダーID（ユニーク）
 
-		// 判定有効
+		/// <summary>
+		/// 判定有効
+		/// </summary>
 		void Enable() { enabled = true; }
-		// 判定無効
+		/// <summary>
+		/// 判定無効
+		/// </summary>
 		void Disable() { enabled = false; }
-		// 判定効力取得
+		/// <summary>
+		/// 判定効力取得
+		/// </summary>
 		bool IsEnabled() const { return enabled; }
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const WorldTransform2d& worldTransform) = 0;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		virtual bool CheckHit(const Collider2D& other) const = 0;
-		// 押し戻し
+		/// <summary>
+		/// 押し戻し
+		/// </summary>
 		virtual bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const = 0;
-		// コライダータイプ取得
+		/// <summary>
+		/// コライダータイプ取得
+		/// </summary>
 		virtual ColliderShapeType GetType() const = 0;
 		virtual ~Collider2D() = default;
 	};
@@ -50,13 +64,21 @@ namespace Engine {
 	{
 	public:
 		float radius = 1.0f;
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform2d& worldTransform) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider2D& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::Sphere;
 		}
@@ -74,13 +96,21 @@ namespace Engine {
 		Vector2 minWorld;
 		Vector2 maxWorld;
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform2d& worldTransform) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider2D& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::AABB;
 		}

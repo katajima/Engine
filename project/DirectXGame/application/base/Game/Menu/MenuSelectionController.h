@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <algorithm>
 #include <string>
@@ -48,7 +48,9 @@ public:
 		sceneManager_ = sceneManager;
 		input_ = input;
 		config_ = config;
-		// 不正な項目数でも選択範囲が成立するよう最低値を保証する。
+		/// <summary>
+		/// 不正な項目数でも選択範囲が成立するよう最低値を保証する。
+		/// </summary>
 		config_.itemCount = (std::max)(config_.itemCount, 1);
 		selectedIndex_ = 0;
 		moveTimer_ = 0.0f;
@@ -63,7 +65,9 @@ public:
 		moveTimer_ += dt;
 		decisionTimer_ += dt;
 
-		// 設定された軸の値だけを選択操作へ利用する。
+		/// <summary>
+		/// 設定された軸の値だけを選択操作へ利用する。
+		/// </summary>
 		const Vector2 moveStick = input_->GetGameInputData().moveShick;
 		const float axisValue = config_.axis == MenuSelectionAxis::kHorizontal ? moveStick.x : moveStick.y;
 		if (moveTimer_ >= config_.moveInterval) {
@@ -75,7 +79,9 @@ public:
 				moveTimer_ = 0.0f;
 			}
 		}
-		// 選択位置が項目範囲を超えないよう補正する。
+		/// <summary>
+		/// 選択位置が項目範囲を超えないよう補正する。
+		/// </summary>
 		selectedIndex_ = std::clamp(selectedIndex_, 0, config_.itemCount - 1);
 
 		// 誤決定防止時間の経過後だけ、設定された遷移先へ移動する。
@@ -88,7 +94,9 @@ public:
 		}
 	}
 
-	// 現在選択されている項目インデックスを取得する。
+	/// <summary>
+	/// 現在選択されている項目インデックスを取得する。
+	/// </summary>
 	int GetSelectedIndex() const { return selectedIndex_; }
 
 private:

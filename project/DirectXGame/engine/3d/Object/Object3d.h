@@ -40,57 +40,105 @@ namespace Engine {
 		Object3d();
 		~Object3d();
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(EntityManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update() override;
 
-		// 物理更新
+		/// <summary>
+		/// 物理更新
+		/// </summary>
 		void RigidBodyUpdate() override;
 
-		// 描画通常
+		/// <summary>
+		/// 描画通常
+		/// </summary>
 		void Draw() override;
-		// シャドウマップ用の深度描画
+		/// <summary>
+		/// シャドウマップ用の深度描画
+		/// </summary>
 		void DrawShadowMap(ShadowMap* shadowMap) override;
 	public:// セッター
-		// モデル設定(モデル)
+		/// <summary>
+		/// モデル設定(モデル)
+		/// </summary>
 		void SetModel(Model* model);
-		// モデル設定(モデル名での)
+		/// <summary>
+		/// モデル設定(モデル名での)
+		/// </summary>
 		void SetModel(const std::string& filePath);
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera);
-		// プリミティブ形状
+		/// <summary>
+		/// プリミティブ形状
+		/// </summary>
 		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive);
-		// スカイボックス
+		/// <summary>
+		/// スカイボックス
+		/// </summary>
 		void SetSkyBox(SkyBox* skyBox);
-		// 波セット
+		/// <summary>
+		/// 波セット
+		/// </summary>
 		void SetOcean(Ocean* ocean);
-		// オブジェクト固有に映すカメラを使用するか設定
+		/// <summary>
+		/// オブジェクト固有に映すカメラを使用するか設定
+		/// </summary>
 		void SetIsIndividualCamera(bool isIndividualCamera);
-		// メッシュ取得
+		/// <summary>
+		/// メッシュ取得
+		/// </summary>
 		ModelMesh* GetMesh(int index);
-		// マテリアル取得
+		/// <summary>
+		/// マテリアル取得
+		/// </summary>
 		Material* GetMaterial(int index);
-		// モデル取得
+		/// <summary>
+		/// モデル取得
+		/// </summary>
 		Model* GetModel() const;
-		// プリミティブ取得
+		/// <summary>
+		/// プリミティブ取得
+		/// </summary>
 		BasePrimitive* GetPrimitive() const;
-		// 波取得
+		/// <summary>
+		/// 波取得
+		/// </summary>
 		Ocean* GetOcean() const;
-		// スカイボックス取得
+		/// <summary>
+		/// スカイボックス取得
+		/// </summary>
 		SkyBox* GetSkyBox() const;
-		// マテリアルインスタンス取得
+		/// <summary>
+		/// マテリアルインスタンス取得
+		/// </summary>
 		std::vector<MaterialInstance>& GetMaterialInstance();
 
-		// 描画するか設定
+		/// <summary>
+		/// 描画するか設定
+		/// </summary>
 		void SetIsDraw(bool is);
-		// モデルのデバッグ用ImGui
+		/// <summary>
+		/// モデルのデバッグ用ImGui
+		/// </summary>
 		void DebugImguiModel();
-		// スキンモデルのデバッグ用
+		/// <summary>
+		/// スキンモデルのデバッグ用
+		/// </summary>
 		void DebugImguiSkin();
-		// オブジェクトに使われているモデルの透明度取得
+		/// <summary>
+		/// オブジェクトに使われているモデルの透明度取得
+		/// </summary>
 		float GetAlpha();
-		// 描画順自動ソート用に、使用中カメラの前方向へ投影した奥行きを取得
+		/// <summary>
+		/// 描画順自動ソート用に、使用中カメラの前方向へ投影した奥行きを取得
+		/// </summary>
 		float GetCameraSortDepth() const;
 
 	private:
@@ -146,39 +194,65 @@ namespace Engine {
 		std::unique_ptr<RenderComponent> renderComponent_ = nullptr;
 
 	public:
-		// コライダーコンポーネントを初期化
+		/// <summary>
+		/// コライダーコンポーネントを初期化
+		/// </summary>
 		void InitColliderComponent();
-		// Object3d内でコライダーコンポーネントを更新するか
+		/// <summary>
+		/// Object3d内でコライダーコンポーネントを更新するか
+		/// </summary>
 		void SetIsUpdateColliderComponent(bool is);
-		// コライダーコンポーネントを取得
+		/// <summary>
+		/// コライダーコンポーネントを取得
+		/// </summary>
 		ColliderComponent* GetColliderComponent();
-		// コライダーコンポーネントの接触情報を取得
+		/// <summary>
+		/// コライダーコンポーネントの接触情報を取得
+		/// </summary>
 		ContactRecord& GetContactRecord();
 
-		// トランスフォームコンポーネント
+		/// <summary>
+		/// トランスフォームコンポーネント
+		/// </summary>
 		TransformComponent* GetTransformComponent();
-		// ワールド座標
+		/// <summary>
+		/// ワールド座標
+		/// </summary>
 		Vector3 GetWorldPosition() const;
-		// １フレーム前のワールド座標
+		/// <summary>
+		/// １フレーム前のワールド座標
+		/// </summary>
 		Vector3 GetPreWorldPosition() const;
-		// ワールド座標
+		/// <summary>
+		/// ワールド座標
+		/// </summary>
 		WorldTransform& GetWorldTransform();
 		WorldTransform* GetWorldTransformPtr() override;
 		const WorldTransform* GetWorldTransformPtr() const override;
-		// 座標更新
+		/// <summary>
+		/// 座標更新
+		/// </summary>
 		void UpdateWorldTransform();
-		// 向いている方向
+		/// <summary>
+		/// 向いている方向
+		/// </summary>
 		Vector3 ObjectDirection() const;
-		// スクリーン位置取得
+		/// <summary>
+		/// スクリーン位置取得
+		/// </summary>
 		Vector2 GetScreenPosition();
 
 		/// <summary>
 		/// 物理
 		/// </summary>
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void InitRigidBodyComponent();
-		// 物理取得
+		/// <summary>
+		/// 物理取得
+		/// </summary>
 		RigidBodyComponent* GetRigidBodyComponent();
 		//
 		void SetIsRigidUpdate(bool isRigidUpdate);
@@ -187,17 +261,23 @@ namespace Engine {
 		/// アニメーション
 		/// </summary>
 
-		// アニメーションコンポーネント初期化
+		/// <summary>
+		/// アニメーションコンポーネント初期化
+		/// </summary>
 
 		void InitAnimationComponent();
-		// アニメーションコンポーネント取得
+		/// <summary>
+		/// アニメーションコンポーネント取得
+		/// </summary>
 		AnimationComponent* GetAnimationComponent();
 
 		/// <summary>
 		/// 描画
 		/// </summary>
 		/// <returns></returns>
-		// レンダーコンポーネント取得
+		/// <summary>
+		/// レンダーコンポーネント取得
+		/// </summary>
 		RenderComponent* GetRenderComponent();
 
 	private:
@@ -210,7 +290,9 @@ namespace Engine {
 		OceanManager *		oceanManager = nullptr;
 	};
 
-	// スクリーン座標計算取得
+	/// <summary>
+	/// スクリーン座標計算取得
+	/// </summary>
 	Vector2 ScreenPosition(const Engine::WorldTransform world, Engine::Camera* camera);
 }
 

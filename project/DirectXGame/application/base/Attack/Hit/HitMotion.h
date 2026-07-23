@@ -9,16 +9,24 @@ class ObjectComponent; // 前方宣言
 class DamageMotion {
 public:
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
-	// ダメージデータ設定
+	/// <summary>
+	/// ダメージデータ設定
+	/// </summary>
 	void SetData(const DamageDataHandle& data) {
 		damageData_ = data;
 		isPlaying_ = true;
 	}
-	// ダメージデータ取得
+	/// <summary>
+	/// ダメージデータ取得
+	/// </summary>
 	const DamageDataHandle& GetDamageData() const { return damageData_; }
-	// 再生中か取得
+	/// <summary>
+	/// 再生中か取得
+	/// </summary>
 	bool IsPlaying() const { return isPlaying_; }
 
 private:

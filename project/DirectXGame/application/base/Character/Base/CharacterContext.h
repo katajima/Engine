@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
 #include "DirectXGame/application/base/Character/State/MainState.h"
@@ -117,26 +117,40 @@ namespace Character {
 	class CharacterContextSystem {
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(BaseCharacter* owner, const InputSystem* input);
 
-		// 入力システム設定
+		/// <summary>
+		/// 入力システム設定
+		/// </summary>
 		void SetInputSystem(const InputSystem* input) { this->input = input; }
 
-		// コンテキスト生成
+		/// <summary>
+		/// コンテキスト生成
+		/// </summary>
 		CharacterContext CreateContext(BaseCharacter* owner, float dt);
 	private:
 
-		// キャラクターの状態コンテキストを作成
+		/// <summary>
+		/// キャラクターの状態コンテキストを作成
+		/// </summary>
 		void CreateContextState(BaseCharacter* owner, CharacterContext& ctx);
 
-		// キャラクターの重力コンテキストを作成
+		/// <summary>
+		/// キャラクターの重力コンテキストを作成
+		/// </summary>
 		void CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx);
 
-		// キャラクターの移動コンテキストを作成
+		/// <summary>
+		/// キャラクターの移動コンテキストを作成
+		/// </summary>
 		void CreateContextMovement(BaseCharacter* owner, CharacterContext& ctx);
 
-		// キャラクターの入力コンテキストを作成
+		/// <summary>
+		/// キャラクターの入力コンテキストを作成
+		/// </summary>
 		void CreateContextInput(BaseCharacter* owner, CharacterContext& ctx);
 
 	private:

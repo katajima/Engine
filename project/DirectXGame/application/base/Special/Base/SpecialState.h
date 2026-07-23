@@ -15,11 +15,17 @@ class BaseCharacter;
 class BaseSpecialState {
 public:
 	virtual ~BaseSpecialState() = default;
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	virtual void Enter(BaseCharacter* owner) = 0;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	virtual void Update(BaseCharacter* owner, float deltaTime) = 0;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	virtual void Exit(BaseCharacter* owner) = 0;
 private:
 	// ステート名
@@ -34,11 +40,17 @@ private:
 /// </summary>
 class SpecialNodeState : public BaseSpecialState {
 public:
-	// 開始
+	/// <summary>
+	/// 開始
+	/// </summary>
 	void Enter(BaseCharacter* owner) override;
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(BaseCharacter* owner, float dt) override;
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Exit(BaseCharacter* owner) override;
 
 

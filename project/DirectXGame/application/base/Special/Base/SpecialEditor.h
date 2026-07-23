@@ -17,10 +17,14 @@ class BaseCharacter;
 class SpecialEditor {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::GlobalVariables* globalVariable,BaseCharacter* owner);
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
 private:

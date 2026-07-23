@@ -73,7 +73,9 @@ public:
 		/// </summary>
 		void Penetration();
 
-	// エフェクト設定
+	/// <summary>
+	/// エフェクト設定
+	/// </summary>
 	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 private:
 	// 銃コンテナ

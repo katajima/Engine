@@ -49,62 +49,88 @@ namespace ConvertUtility
 		);
 	}
 
-	// uint to int
+	/// <summary>
+	/// uint to int
+	/// </summary>
 	static int ToInt(const uint32_t& v) {
 		return static_cast<int>(v);
 	}
-	// size_t to int
+	/// <summary>
+	/// size_t to int
+	/// </summary>
 	static int ToInt(const size_t& v) {
 		return static_cast<int>(v);
 	}
-	// float to int
+	/// <summary>
+	/// float to int
+	/// </summary>
 	static int ToInt(const float& v) {
 		return static_cast<int>(v);
 	}
-	// bool to int
+	/// <summary>
+	/// bool to int
+	/// </summary>
 	static int ToInt(const bool& v) {
 		return v ? 1 : 0;
 	}
 
-	// int to uint
+	/// <summary>
+	/// int to uint
+	/// </summary>
 	static uint32_t ToUint32(const int& v) {
 		return static_cast<uint32_t>(v);
 	}
-	// float to uint
+	/// <summary>
+	/// float to uint
+	/// </summary>
 	static uint32_t ToUint32(const float& v) {
 		return static_cast<uint32_t>(v);
 	}
-	// bool to uint
+	/// <summary>
+	/// bool to uint
+	/// </summary>
 	static uint32_t ToUint32(const bool& v) {
 		return v ? 1 : 0;
 	}
 
 
-	// float to int
+	/// <summary>
+	/// float to int
+	/// </summary>
 	static float ToFloat(const int& v) {
 		return static_cast<float>(v);
 	}
-	// uint to float
+	/// <summary>
+	/// uint to float
+	/// </summary>
 	static float ToFloat(const uint32_t& v) {
 		return static_cast<float>(v);
 	}
 
-	// int to bool
+	/// <summary>
+	/// int to bool
+	/// </summary>
 	static bool ToBool(const int& v) {
 		return v != 0;
 	}
-	// uint to bool
+	/// <summary>
+	/// uint to bool
+	/// </summary>
 	static bool ToBool(const uint32_t& v) {
 		return v != 0;
 	}
 
 
 
-	// 時間
+	/// <summary>
+	/// 時間
+	/// </summary>
 	static float TimeToSeconds(int timeInMilliseconds) {
 		return static_cast<float>(timeInMilliseconds) / 1000.0f;
 	}
-	// フレームから秒数に変換
+	/// <summary>
+	/// フレームから秒数に変換
+	/// </summary>
 	static float FramesToSeconds(int frameCount, float fps = kDefaultFps) {
 		return static_cast<float>(frameCount) / fps;
 	}

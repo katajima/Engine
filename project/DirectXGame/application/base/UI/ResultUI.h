@@ -15,14 +15,20 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables) override;
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
 
 
-	// 選択されているインデックスの設定
+	/// <summary>
+	/// 選択されているインデックスの設定
+	/// </summary>
 	void SetSelectedIndex(int index) { selectedIndex = index; };
 
 

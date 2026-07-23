@@ -15,26 +15,46 @@ namespace Engine {
 	/// </summary>
 	class ModelMesh : public BaseMesh {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxcommon) override;
-		// 更新頂点バッファ
+		/// <summary>
+		/// 更新頂点バッファ
+		/// </summary>
 		void UpdateVertexBuffer();
-		// 更新インデクスバッファ
+		/// <summary>
+		/// 更新インデクスバッファ
+		/// </summary>
 		void UpdateIndexBuffer();
-		// クリア
+		/// <summary>
+		/// クリア
+		/// </summary>
 		void Clear();
 
-		// コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandList();
-		//コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& vbv);
-		//コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv);
-		//コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2);
-		// 頂点リソース取得
+		/// <summary>
+		/// 頂点リソース取得
+		/// </summary>
 		Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vbvResource_.GetVertexResource(); };
-		// 頂点バッファビュー取得
+		/// <summary>
+		/// 頂点バッファビュー取得
+		/// </summary>
 		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vbvResource_.GetVertexBufferView(); }
 
 

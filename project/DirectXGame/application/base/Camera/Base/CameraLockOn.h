@@ -8,7 +8,9 @@
 /// </summary>
 class CameraLockOn {
 public:
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	Vector3 Update(const Transform& transform, float dt);
 
 	CameraLockOnData& GetData() { return data; }

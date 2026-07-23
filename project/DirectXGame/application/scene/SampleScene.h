@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -31,25 +31,39 @@
 class SampleScene : public Engine::BaseScene
 {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D() override;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 
 
-	// ImGui更新
+	/// <summary>
+	/// ImGui更新
+	/// </summary>
 	void UpdateImGui();
 
-	// グローバルバリアブル適応
+	/// <summary>
+	/// グローバルバリアブル適応
+	/// </summary>
 	void ApplyGlobalVariables();
 
 	/// <summary>
@@ -58,15 +72,25 @@ public:
 	void CheckAllCollisions();
 
 private:
-	// カメラ初期化
+	/// <summary>
+	/// カメラ初期化
+	/// </summary>
 	void InitCamera();
-	// ライト初期化
+	/// <summary>
+	/// ライト初期化
+	/// </summary>
 	void InitLight();
-	// パーティクル初期化
+	/// <summary>
+	/// パーティクル初期化
+	/// </summary>
 	void InitParticle();
-	// オブジェクト初期化
+	/// <summary>
+	/// オブジェクト初期化
+	/// </summary>
 	void InitObject();
-	// スプライト初期化
+	/// <summary>
+	/// スプライト初期化
+	/// </summary>
 	void InitSprite();
 
 

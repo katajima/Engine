@@ -164,7 +164,9 @@ namespace Combo {
             hasHit_ = true;
             comboData.GetComboRange().NotifyHit();
             comboData.GetComboCamera().OnHit();
-			// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
+			/// <summary>
+			/// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
+			/// </summary>
 			comboData.GetComboAudio().OnHit();
         }
 		/// <summary>

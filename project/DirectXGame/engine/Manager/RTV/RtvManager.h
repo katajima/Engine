@@ -21,26 +21,42 @@ namespace Engine {
     /// </summary>
     class RtvManager {
     public:
-        // 初期化
+        /// <summary>
+        /// 初期化
+        /// </summary>
         void Initialize(DXGIDevice* DXGI, Command* Command);
 
-        // アロケート
+        /// <summary>
+        /// アロケート
+        /// </summary>
         uint32_t Allocate();
 
-        // デクリメント
+        /// <summary>
+        /// デクリメント
+        /// </summary>
         void DecAllocate();
 
-        // デスクリプタハンドル計算
+        /// <summary>
+        /// デスクリプタハンドル計算
+        /// </summary>
         D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
-        // デスクリプタハンドル計算
+        /// <summary>
+        /// デスクリプタハンドル計算
+        /// </summary>
         D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
-        // RTV生成関数
+        /// <summary>
+        /// RTV生成関数
+        /// </summary>
         void CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource);
-        // レンダーテクスチャリソース生成
+        /// <summary>
+        /// レンダーテクスチャリソース生成
+        /// </summary>
         Microsoft::WRL::ComPtr < ID3D12Resource> CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color);
 
-        // 終了
+        /// <summary>
+        /// 終了
+        /// </summary>
         void Finalize();
 
     public:

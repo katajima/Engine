@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "CameraController.h"
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -19,7 +19,9 @@ class BaseCamera
 public:
 	virtual ~BaseCamera()
 	{
-		// 派生カメラが所有する描画カメラのD3Dリソースを、シーン破棄時に確実に解放する
+		/// <summary>
+		/// 派生カメラが所有する描画カメラのD3Dリソースを、シーン破棄時に確実に解放する
+		/// </summary>
 		if (uniqueCamera_) {
 			uniqueCamera_->Finalize();
 		}
@@ -69,13 +71,21 @@ public:
 	/// <returns>シーンのタイムスケールを反映したフレーム時間。</returns>
 	float GetTime() const;
 
-	//名前設定
+	/// <summary>
+	/// 名前設定
+	/// </summary>
 	void SetName(const std::string& name) { name_ = name; };
-	// 名前取得
+	/// <summary>
+	/// 名前取得
+	/// </summary>
 	std::string GetName() const { return name_; }
-	// カメラ使用フラグ
+	/// <summary>
+	/// カメラ使用フラグ
+	/// </summary>
 	bool GetUseCamera() const { return useCamera; }
-	// カメラ使用フラグ設定
+	/// <summary>
+	/// カメラ使用フラグ設定
+	/// </summary>
 	void SetUseCamera(bool is) { useCamera = is; }
 
 protected:

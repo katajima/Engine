@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "LevelData.h"
 #include <json.hpp>
 #include <vector>
@@ -7,15 +7,25 @@
 
 namespace LoadDataFanc
 {
-	// ファイル読みこみ
+	/// <summary>
+	/// ファイル読みこみ
+	/// </summary>
 	nlohmann::json FileData(const std::string fullpath);
-	// モデル位置の設定
+	/// <summary>
+	/// モデル位置の設定
+	/// </summary>
 	void ModelTransfom(nlohmann::json& object, LevelData* levelData);
-	// 出現位置設定
+	/// <summary>
+	/// 出現位置設定
+	/// </summary>
 	void SpawwnPoint(nlohmann::json& object, LevelData* levelData);
-	// カメラ位置
+	/// <summary>
+	/// カメラ位置
+	/// </summary>
 	void CameraTransform(nlohmann::json& object, LevelData* levelData);
-	// ライト位置
+	/// <summary>
+	/// ライト位置
+	/// </summary>
 	void LightTransform(nlohmann::json& object, LevelData* levelData);
 }
 

@@ -9,26 +9,38 @@ namespace Engine {
 	class WorldTransform
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 親子関係
+		/// <summary>
+		/// 親子関係
+		/// </summary>
 		void SetParent(const Matrix4x4& parent) {
 			isParent = true;
 			parentMatrix_ = parent;
 		};
 
-		// ワールド座標取得
+		/// <summary>
+		/// ワールド座標取得
+		/// </summary>
 		Vector3 GetWorldPosition() const {
 			return worldMat_.GetWorldPosition();
 		}
-		// 1フレーム前ワールド座標取得
+		/// <summary>
+		/// 1フレーム前ワールド座標取得
+		/// </summary>
 		Vector3 GetPreWorldPosition() const {
 			return worldPreMat_.GetWorldPosition();
 		}
 
-		// 向いている方向取得
+		/// <summary>
+		/// 向いている方向取得
+		/// </summary>
 		Vector3 GetForward() const {
 			Matrix4x4 rotMat = MakeRotateXYZ(rotate_);
 

@@ -20,58 +20,100 @@ namespace Engine {
 /// </summary>
 	class BaseSprite {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Init(EntityManager* entityManager, std::string name, std::string texturName);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update() {
-			// コライダーあるか
+			/// <summary>
+			/// コライダーあるか
+			/// </summary>
 			if (useColl) {
 				BoxUpdate();
 			}
-			// 更新
+			/// <summary>
+			/// 更新
+			/// </summary>
 			sprite_->Update();
 		};
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw() {
-			// スプライトが生きているなら描画
+			/// <summary>
+			/// スプライトが生きているなら描画
+			/// </summary>
 			if (sprite_->GetActive()) {
 				sprite_->Draw();
 			}
 		}
 
-		// Box取得
+		/// <summary>
+		/// Box取得
+		/// </summary>
 		Box GetBox() const { return box; }
-		// スプライト取得
+		/// <summary>
+		/// スプライト取得
+		/// </summary>
 		Sprite* GetSprite() { return sprite_.get(); }
-		// サイズ取得
+		/// <summary>
+		/// サイズ取得
+		/// </summary>
 		Vector2 GetSize() { return sprite_->GetSize(); }
-		// 位置取得
+		/// <summary>
+		/// 位置取得
+		/// </summary>
 		Vector2 GetPos() { return sprite_->GetPosition(); }
-		// アンカーポイント取得
+		/// <summary>
+		/// アンカーポイント取得
+		/// </summary>
 		Vector2 GetAnchorPoint() { return sprite_->GetAnchorPoint(); }
-		// 色コンポーネント取得
+		/// <summary>
+		/// 色コンポーネント取得
+		/// </summary>
 		ColorComponent* GetColorComponent() { return colorComponent_.get(); }
 
-		// サイズ設定
+		/// <summary>
+		/// サイズ設定
+		/// </summary>
 		void SetSize(const Vector2& size) { sprite_->SetSize(size); }
-		// 位置設定
+		/// <summary>
+		/// 位置設定
+		/// </summary>
 		void SetPos(const Vector2& pos) { sprite_->SetPosition(pos); }
-		// アンカーポイント設定
+		/// <summary>
+		/// アンカーポイント設定
+		/// </summary>
 		void SetAnchorPoint(const Vector2& anchor) { sprite_->SetAnchorPoint(anchor); }
-		// テクスチャ名設定
+		/// <summary>
+		/// テクスチャ名設定
+		/// </summary>
 		void SetTextureName(const std::string& name) { sprite_->SetTexture(name); };
-		// 色設定
+		/// <summary>
+		/// 色設定
+		/// </summary>
 		void SetColor(Color color) { sprite_->SetColor(color); }
-		// コライダ判定を取るか設定
+		/// <summary>
+		/// コライダ判定を取るか設定
+		/// </summary>
 		void SetUseColl(bool is) { useColl = is; }
-		// 比率設定
+		/// <summary>
+		/// 比率設定
+		/// </summary>
 		void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) {
 			leftTopPos_ = leftTopPos;
 			ratio_ = ratio;
 		};
-		// 比率
+		/// <summary>
+		/// 比率
+		/// </summary>
 		Vector2 GetRatio() const { return ratio_; }
-		// 半分のサイズ取得
+		/// <summary>
+		/// 半分のサイズ取得
+		/// </summary>
 		Vector2 GetHalfSise(SpriteSize type) {
 			Vector2 size = sprite_->GetSize();
 			Vector2 anchor = sprite_->GetAnchorPoint();
@@ -99,7 +141,9 @@ namespace Engine {
 			return result;
 		}
 	private:
-		// Box更新
+		/// <summary>
+		/// Box更新
+		/// </summary>
 		void BoxUpdate() {
 			Vector2 position = sprite_->GetWorldTransform2d().GetWorldPosition();
 			Vector2 size = sprite_->GetSize();

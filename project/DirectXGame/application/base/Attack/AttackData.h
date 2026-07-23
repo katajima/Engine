@@ -25,19 +25,33 @@ public:
 		kCustom,	// 1つ1つで変える
 	};
 
-	// 基底クラス経由で安全に破棄するための仮想デストラクタ
+	/// <summary>
+	/// 基底クラス経由で安全に破棄するための仮想デストラクタ
+	/// </summary>
 	virtual ~DamageData() = default;
-	// ダメージ状態を更新する
+	/// <summary>
+	/// ダメージ状態を更新する
+	/// </summary>
 	virtual void Update(float dt) = 0;
-	// 現在発生させるダメージを取得する
+	/// <summary>
+	/// 現在発生させるダメージを取得する
+	/// </summary>
 	virtual float GetDamage() const = 0;
-	// ダメージ処理が終了したか取得する
+	/// <summary>
+	/// ダメージ処理が終了したか取得する
+	/// </summary>
 	virtual bool IsFinish() const = 0;
-	// 現在ダメージを発生させるか取得する
+	/// <summary>
+	/// 現在ダメージを発生させるか取得する
+	/// </summary>
 	virtual bool IsAttack() const = 0;
-	// 派生クラスの種別を取得する
+	/// <summary>
+	/// 派生クラスの種別を取得する
+	/// </summary>
 	virtual Type GetType() const = 0;
-	// 値コピー時に派生型を維持した複製を作る
+	/// <summary>
+	/// 値コピー時に派生型を維持した複製を作る
+	/// </summary>
 	virtual std::unique_ptr<DamageData> Clone() const = 0;
 };
 
@@ -47,19 +61,33 @@ public:
 /// </summary>
 class One final : public DamageData {
 public:
-	// 一回ダメージの状態を更新する
+	/// <summary>
+	/// 一回ダメージの状態を更新する
+	/// </summary>
 	void Update(float dt) override;
-	// 設定されたダメージを取得する
+	/// <summary>
+	/// 設定されたダメージを取得する
+	/// </summary>
 	float GetDamage() const override;
-	// 一回ダメージが終了したか取得する
+	/// <summary>
+	/// 一回ダメージが終了したか取得する
+	/// </summary>
 	bool IsFinish() const override { return isFinish; }
-	// ダメージを発生させるか取得する
+	/// <summary>
+	/// ダメージを発生させるか取得する
+	/// </summary>
 	bool IsAttack() const override { return isDamage; }
-	// 一回ダメージ種別を返す
+	/// <summary>
+	/// 一回ダメージ種別を返す
+	/// </summary>
 	Type GetType() const override { return Type::kOne; }
-	// 現在の状態を含めて複製する
+	/// <summary>
+	/// 現在の状態を含めて複製する
+	/// </summary>
 	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<One>(*this); }
-	// ダメージ値を設定する
+	/// <summary>
+	/// ダメージ値を設定する
+	/// </summary>
 	void SetDamage(float value) { damage = value; }
 
 private:
@@ -74,21 +102,37 @@ private:
 /// </summary>
 class Continuous final : public DamageData {
 public:
-	// 連撃ダメージの状態を更新する
+	/// <summary>
+	/// 連撃ダメージの状態を更新する
+	/// </summary>
 	void Update(float dt) override;
-	// 現在のヒットに対応するダメージを取得する
+	/// <summary>
+	/// 現在のヒットに対応するダメージを取得する
+	/// </summary>
 	float GetDamage() const override;
-	// 連撃ダメージが終了したか取得する
+	/// <summary>
+	/// 連撃ダメージが終了したか取得する
+	/// </summary>
 	bool IsFinish() const override { return isFinish; }
-	// 現在ダメージを発生させるか取得する
+	/// <summary>
+	/// 現在ダメージを発生させるか取得する
+	/// </summary>
 	bool IsAttack() const override { return isDamage; }
-	// 連撃ダメージ種別を返す
+	/// <summary>
+	/// 連撃ダメージ種別を返す
+	/// </summary>
 	Type GetType() const override { return Type::kContinuous; }
-	// 現在の状態を含めて複製する
+	/// <summary>
+	/// 現在の状態を含めて複製する
+	/// </summary>
 	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<Continuous>(*this); }
-	// 連撃の実行状態を初期化する
+	/// <summary>
+	/// 連撃の実行状態を初期化する
+	/// </summary>
 	void Reset();
-	// 連撃内のダメージ変更方式を取得する
+	/// <summary>
+	/// 連撃内のダメージ変更方式を取得する
+	/// </summary>
 	OneHitDamageType GetOneHitDamageType() const { return oneHitDamageType; }
 
 private:
@@ -109,21 +153,37 @@ private:
 /// </summary>
 class Duration final : public DamageData {
 public:
-	// 持続ダメージの状態を更新する
+	/// <summary>
+	/// 持続ダメージの状態を更新する
+	/// </summary>
 	void Update(float dt) override;
-	// 設定された持続ダメージを取得する
+	/// <summary>
+	/// 設定された持続ダメージを取得する
+	/// </summary>
 	float GetDamage() const override;
-	// 持続ダメージが終了したか取得する
+	/// <summary>
+	/// 持続ダメージが終了したか取得する
+	/// </summary>
 	bool IsFinish() const override { return isFinish; }
-	// 現在ダメージを発生させるか取得する
+	/// <summary>
+	/// 現在ダメージを発生させるか取得する
+	/// </summary>
 	bool IsAttack() const override { return isDamage; }
-	// 持続ダメージ種別を返す
+	/// <summary>
+	/// 持続ダメージ種別を返す
+	/// </summary>
 	Type GetType() const override { return Type::kDuration; }
-	// 現在の状態を含めて複製する
+	/// <summary>
+	/// 現在の状態を含めて複製する
+	/// </summary>
 	std::unique_ptr<DamageData> Clone() const override { return std::make_unique<Duration>(*this); }
-	// 持続ダメージの実行状態を初期化する
+	/// <summary>
+	/// 持続ダメージの実行状態を初期化する
+	/// </summary>
 	void Reset();
-	// ダメージ値を設定する
+	/// <summary>
+	/// ダメージ値を設定する
+	/// </summary>
 	void SetDamage(float value) { damage = value; }
 
 private:
@@ -143,40 +203,70 @@ private:
 /// </summary>
 class DamageDataHandle {
 public:
-	// 既定では一回ダメージを保持する
+	/// <summary>
+	/// 既定では一回ダメージを保持する
+	/// </summary>
 	DamageDataHandle();
-	// 派生型を維持してコピーする
+	/// <summary>
+	/// 派生型を維持してコピーする
+	/// </summary>
 	DamageDataHandle(const DamageDataHandle& other);
-	// 派生型を維持して代入する
+	/// <summary>
+	/// 派生型を維持して代入する
+	/// </summary>
 	DamageDataHandle& operator=(const DamageDataHandle& other);
-	// 所有権のムーブを許可する
+	/// <summary>
+	/// 所有権のムーブを許可する
+	/// </summary>
 	DamageDataHandle(DamageDataHandle&&) noexcept = default;
 	DamageDataHandle& operator=(DamageDataHandle&&) noexcept = default;
-	// 任意の派生ダメージデータから複製する
+	/// <summary>
+	/// 任意の派生ダメージデータから複製する
+	/// </summary>
 	explicit DamageDataHandle(const DamageData& data);
 
-	// 保持中の派生ダメージデータを更新する
+	/// <summary>
+	/// 保持中の派生ダメージデータを更新する
+	/// </summary>
 	void Update(float dt) { data_->Update(dt); }
-	// 保持中の派生ダメージ値を取得する
+	/// <summary>
+	/// 保持中の派生ダメージ値を取得する
+	/// </summary>
 	float GetDamage() const { return data_->GetDamage(); }
-	// 保持中の処理が終了したか取得する
+	/// <summary>
+	/// 保持中の処理が終了したか取得する
+	/// </summary>
 	bool IsFinish() const { return data_->IsFinish(); }
-	// 現在ダメージを発生させるか取得する
+	/// <summary>
+	/// 現在ダメージを発生させるか取得する
+	/// </summary>
 	bool IsAttack() const { return data_->IsAttack(); }
-	// 保持中のダメージ種別を取得する
+	/// <summary>
+	/// 保持中のダメージ種別を取得する
+	/// </summary>
 	DamageData::Type GetType() const { return data_->GetType(); }
-	// 指定種別の派生データへ切り替える
+	/// <summary>
+	/// 指定種別の派生データへ切り替える
+	/// </summary>
 	void SetType(DamageData::Type type);
-	// 基底クラス参照を取得する
+	/// <summary>
+	/// 基底クラス参照を取得する
+	/// </summary>
 	DamageData& Get() { return *data_; }
 	const DamageData& Get() const { return *data_; }
-	// 既存の編集処理向けに一回ダメージを取得する
+	/// <summary>
+	/// 既存の編集処理向けに一回ダメージを取得する
+	/// </summary>
 	One& GetOne();
 	const One& GetOne() const;
-	// 連撃ダメージを取得する
+	/// <summary>
+	/// 連撃ダメージを取得する
+	/// </summary>
 	Continuous& GetContinuous();
 	const Continuous& GetContinuous() const;
-	// 持続ダメージを取得する
+	/// <summary>
+	/// 持続ダメージを取得する
+	/// </summary>
 	Duration& GetDuration();
 	const Duration& GetDuration() const;
 

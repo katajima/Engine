@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
@@ -14,24 +14,36 @@ namespace Engine {
 /// </summary>
 class PlayerUI : public BaseUI{
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
 
 private:
 
-	// 操作UI
+	/// <summary>
+	/// 操作UI
+	/// </summary>
 	void InitializeOperationUI();
 
-	// プレイヤーUI
+	/// <summary>
+	/// プレイヤーUI
+	/// </summary>
 	void InitializePlayerUI();
 
-	// SP満タン時の見た目更新
+	/// <summary>
+	/// SP満タン時の見た目更新
+	/// </summary>
 	void UpdateSpecialReadyVisual(float dt, Engine::UIMeter* specialBar);
 
 	void UpdatePlayerUI(float dt);
@@ -39,12 +51,18 @@ private:
 public:
 
 	void SetCharacterParameter(Character::ParameterComponent* parameter) { parameterComponent = parameter; };
-	// 追従対象と描画カメラ設定
+	/// <summary>
+	/// 追従対象と描画カメラ設定
+	/// </summary>
 	void SetFollowTarget(Engine::WorldTransform* target, Engine::Camera* camera);
 
-	// スペシャルゲージサイズ設定
+	/// <summary>
+	/// スペシャルゲージサイズ設定
+	/// </summary>
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
-	// maxテクスチャ映すか
+	/// <summary>
+	/// maxテクスチャ映すか
+	/// </summary>
 	void SetIsTextmax(bool is) { isTextMax_ = is; }
 private:
 	Character::ParameterComponent* parameterComponent = nullptr;

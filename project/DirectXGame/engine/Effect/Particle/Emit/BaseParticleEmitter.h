@@ -21,130 +21,232 @@ namespace Engine {
 	{
 	public:
 		virtual ~BaseParticleEmitter() {}
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		virtual void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) = 0;
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 発生
+		/// <summary>
+		/// 発生
+		/// </summary>
 		void Emit();
 
 
 	protected:
-		// 共通初期化
+		/// <summary>
+		/// 共通初期化
+		/// </summary>
 		void CommonParticleInit(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName);
-		// 固有の出現処理
+		/// <summary>
+		/// 固有の出現処理
+		/// </summary>
 		virtual void EmitUnique() = 0;
-		// 固有の更新
+		/// <summary>
+		/// 固有の更新
+		/// </summary>
 		virtual void UpdateUnique() {}; //
-		// ImGuiのデバック処理
+		/// <summary>
+		/// ImGuiのデバック処理
+		/// </summary>
 		virtual void DebugImGui() {};
-		// グローバルバリアブル適応(固有)
+		/// <summary>
+		/// グローバルバリアブル適応(固有)
+		/// </summary>
 		virtual void ApplyGlobalVariablesUnique() {}; // グローバル変数適用
-		// グローバルバリアブル適応(共通)
+		/// <summary>
+		/// グローバルバリアブル適応(共通)
+		/// </summary>
 		void ApplyGlobalVariables(); // グローバル変数適用
 
 	public: // Getter Setter
 
-		// エミットデータ取得
+		/// <summary>
+		/// エミットデータ取得
+		/// </summary>
 		EffectEmitData& GetEmitData() { return emitData_; };
-		//発生頻度取得
+		/// <summary>
+		/// 発生頻度取得
+		/// </summary>
 		float& GetFrequency() { return frequency_; };
-		// 出現数取得
+		/// <summary>
+		/// 出現数取得
+		/// </summary>
 		int& GetCount() { return emitData_.count.median; };
-		// 親子付け設定
+		/// <summary>
+		/// 親子付け設定
+		/// </summary>
 		void SetParent(WorldTransform& parent) { transform_.parent_ = &parent; };
-		// 位置設定
+		/// <summary>
+		/// 位置設定
+		/// </summary>
 		void SetPos(Vector3 pos) { transform_.translate_ = pos; }
-		// 出現数設定
+		/// <summary>
+		/// 出現数設定
+		/// </summary>
 		void SetCount(int count, int range);
-		// 頻度設定
+		/// <summary>
+		/// 頻度設定
+		/// </summary>
 		void SetFrequency(float frequency) { frequency_ = frequency; }
-		// αクリッピング設定
+		/// <summary>
+		/// αクリッピング設定
+		/// </summary>
 		void SetAlphaClipping(float alpha) { alphaClipping_ = alpha; }
-		// ワールドトランスフォーム取得
+		/// <summary>
+		/// ワールドトランスフォーム取得
+		/// </summary>
 		WorldTransform& GetWorldTransform() { return transform_; }
-		// 方向によって回転させるか設定
+		/// <summary>
+		/// 方向によって回転させるか設定
+		/// </summary>
 		void SetIsDirectionRotate(const bool& is) { emitData_.isDirectionRotate = is; }
 
 	public:
-		// パーティクル名前設定
+		/// <summary>
+		/// パーティクル名前設定
+		/// </summary>
 		void SetParticleName(std::string name) { particleName_ = name; }
-		// ライティングするか設定
+		/// <summary>
+		/// ライティングするか設定
+		/// </summary>
 		void SetEnableLighting(int lighting) { enableLighting_ = lighting; }
-		// 出現させるか設定
+		/// <summary>
+		/// 出現させるか設定
+		/// </summary>
 		void SetIsEmit(bool is) { isEmit = is; }
 
-		// フラグ設定
+		/// <summary>
+		/// フラグ設定
+		/// </summary>
 		void SetIsFlag(const EmitData::IsFlag& is) { isFlag = is; isLine = is.isLine; }
-		// 線形補間設定
+		/// <summary>
+		/// 線形補間設定
+		/// </summary>
 		void SetIsLineInterpolation(bool is) { isFlag.isLineInterpolation = is; }
-		// 重力設定
+		/// <summary>
+		/// 重力設定
+		/// </summary>
 		void SetIsGravity(bool is) { isFlag.isGravity = is; }
-		// ビルボード設定
+		/// <summary>
+		/// ビルボード設定
+		/// </summary>
 		void SetUsebillboard(bool is) { isFlag.usebillboard = is; }
-		// ビルボードZ設定
+		/// <summary>
+		/// ビルボードZ設定
+		/// </summary>
 		void SetUsebillboardRotZ(bool is) { isFlag.billboardRotZ = is; }
-		// 透明度あるか設定
+		/// <summary>
+		/// 透明度あるか設定
+		/// </summary>
 		void SetIsAlpha(bool is) { isFlag.isAlpha = is; }
-		// 加速させるか設定
+		/// <summary>
+		/// 加速させるか設定
+		/// </summary>
 		void SetIsAcceleration(bool is) { isFlag.isAcceleration = is; } //
-		// スケール変更設定
+		/// <summary>
+		/// スケール変更設定
+		/// </summary>
 		void SetIsLifeTimeScale(bool is) { isFlag.isLifeTimeScale_ = is; }
-		// スケール拡縮法設定
+		/// <summary>
+		/// スケール拡縮法設定
+		/// </summary>
 		void SetLifeTimeScaleTopBottom(EmitData::TopBottom topBottom) { topBottom_ = topBottom; }
-		// 回転速度させるか設定
+		/// <summary>
+		/// 回転速度させるか設定
+		/// </summary>
 		void SetIsRotateVelocity(bool is) { isFlag.isRotateVelocity = is; }
-		// 跳ねるか設定
+		/// <summary>
+		/// 跳ねるか設定
+		/// </summary>
 		void SetIsBounce(bool is) { isFlag.isBounce = is; }
-		// サイズを変化させるか設定
+		/// <summary>
+		/// サイズを変化させるか設定
+		/// </summary>
 		void SetIsScaling(bool is) { isFlag.isScaling_ = is; }
 
 	public: //
-		// カラー設定
+		/// <summary>
+		/// カラー設定
+		/// </summary>
 		void SetColorMinMax(Vector4 min, Vector4 max) { emitData_.colorRange.min = min; emitData_.colorRange.max = max; }
-		// サイズ設定
+		/// <summary>
+		/// サイズ設定
+		/// </summary>
 		void SetSize(Vector3 size, Vector3 range);
-		// 回転設定
+		/// <summary>
+		/// 回転設定
+		/// </summary>
 		void SetRotate(Vector3 rotate, Vector3 range);
-		// 生存時間設定
+		/// <summary>
+		/// 生存時間設定
+		/// </summary>
 		void SetLifeTime(float life, float range);
-		// 速度設定
+		/// <summary>
+		/// 速度設定
+		/// </summary>
 		void SetVelocity(Vector3 velocity, Vector3 range);
-		// 回転速度設定
+		/// <summary>
+		/// 回転速度設定
+		/// </summary>
 		void SetRotateVelocity(Vector3 rotateVelocity, Vector3 range);
-		// 加速度設定
+		/// <summary>
+		/// 加速度設定
+		/// </summary>
 		void SetAcceleration(Vector3 acceleration, Vector3 range);
-		// 増加量設定
+		/// <summary>
+		/// 増加量設定
+		/// </summary>
 		void SetSizeAmount(Vector3 size, Vector3 range);
-		// フィールド名設定
+		/// <summary>
+		/// フィールド名設定
+		/// </summary>
 		void SetUseFieldName(std::vector<std::string> fieldName) {
 			for (auto& name : fieldName) {
 				fieldName.push_back(name);
 			}
 		}
 
-		// 出現方法設定
+		/// <summary>
+		/// 出現方法設定
+		/// </summary>
 		void SetEmitType(EmitData::EmitType emitType) { emitType_ = emitType; };
-		// 出現方向設定
+		/// <summary>
+		/// 出現方向設定
+		/// </summary>
 		void SetEmitDirectionType(EmitData::DirectionType directionType) { directionType_ = directionType; };
 
 
 
 	public:
-		// UVトランスフォーム回転速度設定
+		/// <summary>
+		/// UVトランスフォーム回転速度設定
+		/// </summary>
 		void SetUvRotateVeloctiy(Vector3 rotate) { uvTransformVeloctiy_.rotate = rotate; };
-		// UVトランスフォーム拡縮速度設定
+		/// <summary>
+		/// UVトランスフォーム拡縮速度設定
+		/// </summary>
 		void SetUvScaleVeloctiy(Vector3 scale) { uvTransformVeloctiy_.scale = scale; };
-		// UVトランスフォーム移動速度設定
+		/// <summary>
+		/// UVトランスフォーム移動速度設定
+		/// </summary>
 		void SetUvTranslateVeloctiy(Vector3 translate) { uvTransformVeloctiy_.translate = translate; };
-		// UVトランスフォームトランスフォーム設定
+		/// <summary>
+		/// UVトランスフォームトランスフォーム設定
+		/// </summary>
 		void SetUvTransformVeloctiy(Transform uvTransform) { uvTransformVeloctiy_ = uvTransform; }
 	protected:
 
-		// エミッタ可視化
+		/// <summary>
+		/// エミッタ可視化
+		/// </summary>
 		virtual void DrawEmitterLine() = 0;
 
-		// 最小最大値算出
+		/// <summary>
+		/// 最小最大値算出
+		/// </summary>
 		void EmitMinMax();
 	protected:
 		EmitData::EmitType emitType_ = EmitData::EmitType::kRandom;					// 出現方法

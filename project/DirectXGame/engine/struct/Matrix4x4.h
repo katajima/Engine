@@ -12,11 +12,15 @@ struct Matrix4x4
 {
 public:
 	float m[4][4];
-    // 単位行列
+    /// <summary>
+    /// 単位行列
+    /// </summary>
 	static Matrix4x4 Identity() {
 		return Matrix4x4{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 	}
-	// 行列のポインタを取得する関数
+	/// <summary>
+	/// 行列のポインタを取得する関数
+	/// </summary>
 	const float* GetMatrixPointer() const {
 		return &m[0][0];  // 行列データの最初の要素のポインタを返す
 	}
@@ -34,7 +38,9 @@ public:
         return true;
     }
 
-    // 軸角度を回転させる
+    /// <summary>
+    /// 軸角度を回転させる
+    /// </summary>
     Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
         Matrix4x4 result;
 
@@ -64,7 +70,9 @@ public:
 
         return result;
     }
-    // ワールド位置取得
+    /// <summary>
+    /// ワールド位置取得
+    /// </summary>
 	Vector3 GetWorldPosition() const {
 		// ワールド座標を入れる
 		Vector3 worldPos{};
@@ -73,7 +81,9 @@ public:
 		worldPos.z = m[3][2];
 		return worldPos;
 	};
-    // 変形
+    /// <summary>
+    /// 変形
+    /// </summary>
     Vector3 Transform(Vector3 vec) const {
         return {
             vec.x * m[0][0] + vec.y * m[1][0] + vec.z * m[2][0] + m[3][0], // X成分
@@ -82,13 +92,17 @@ public:
         };
     }
 
-    // 0 = Right 1 = Up 2 = Forward
+    /// <summary>
+    /// 0 = Right 1 = Up 2 = Forward
+    /// </summary>
     Vector3 AxisColumn(int column, bool invert = false) const {
         Vector3 axis = { m[0][column], m[1][column], m[2][column] };
         return invert ? -axis : axis;
     }
 
-    // 0 = Right 1 = Up 2 = Forward
+    /// <summary>
+    /// 0 = Right 1 = Up 2 = Forward
+    /// </summary>
     Vector3 AxisRow(int row, bool invert = false) const {
         Vector3 axis = { m[row][0], m[row][1], m[row][2] };
         return invert ? -axis : axis;
@@ -97,71 +111,125 @@ private:
 
 };
 
-// 3x3から4x4に変換
+/// <summary>
+/// 3x3から4x4に変換
+/// </summary>
 Matrix4x4 Convert2DMatrixTo4x4(Matrix3x3 m);
 
-//  行列ポインタ取得
+/// <summary>
+/// 行列ポインタ取得
+/// </summary>
 float* GetMatrix(Matrix4x4 mat);
-// 行列ポインタ取得
+/// <summary>
+/// 行列ポインタ取得
+/// </summary>
 const float* GetMatrixPointer(const Matrix4x4& mat);
 // 
 Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);
-// 乗算
+/// <summary>
+/// 乗算
+/// </summary>
 Vector4 Multiply(const Matrix4x4& m, const Vector4& v);
-// 加算
+/// <summary>
+/// 加算
+/// </summary>
 Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2);
-// 減算
+/// <summary>
+/// 減算
+/// </summary>
 Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2);
 
-//行列の積
+/// <summary>
+/// 行列の積
+/// </summary>
 Matrix4x4 Multiply(const Matrix4x4& v1, const Matrix4x4& v2);
 
-//単位行列
+/// <summary>
+/// 単位行列
+/// </summary>
 Matrix4x4 MakeIdentity4x4();
 
-// 座標変換Vector3
+/// <summary>
+/// 座標変換Vector3
+/// </summary>
 Vector3 Transforms(const Vector3& vector, const Matrix4x4& matrix);
 
-// 座標変換Vector4
+/// <summary>
+/// 座標変換Vector4
+/// </summary>
 Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat);
 
-// 座標変換
+/// <summary>
+/// 座標変換
+/// </summary>
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
-// 単位行列
+/// <summary>
+/// 単位行列
+/// </summary>
 static Matrix4x4 Identity() {
     return Matrix4x4{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 }
-//移動行列
+/// <summary>
+/// 移動行列
+/// </summary>
 Matrix4x4 MakeTranslateMatrix(const  Vector3& translate);
-//拡大縮小行列
+/// <summary>
+/// 拡大縮小行列
+/// </summary>
 Matrix4x4 MakeScaleMatrix(const  Vector3& scale);
-//回転行列X
+/// <summary>
+/// 回転行列X
+/// </summary>
 Matrix4x4 MakeRotateXMatrix(float rotate);
-//回転行列Y
+/// <summary>
+/// 回転行列Y
+/// </summary>
 Matrix4x4 MakeRotateYMatrix(float rotate);
-//回転行列Z
+/// <summary>
+/// 回転行列Z
+/// </summary>
 Matrix4x4 MakeRotateZMatrix(float rotate);
-//回転行列XYZ
+/// <summary>
+/// 回転行列XYZ
+/// </summary>
 Matrix4x4 MakeRotateXYZ(Vector3 rotate);
-//逆行列
+/// <summary>
+/// 逆行列
+/// </summary>
 Matrix4x4 Inverse(const Matrix4x4& m);
-//転置行列
+/// <summary>
+/// 転置行列
+/// </summary>
 Matrix4x4 Transpose(const Matrix4x4& m);
-//アフィン変換
+/// <summary>
+/// アフィン変換
+/// </summary>
 Matrix4x4 MakeAffineMatrix(const  Vector3& scale, const  Vector3& rotate, const  Vector3& translate);
-//正射影行列
+/// <summary>
+/// 正射影行列
+/// </summary>
 Matrix4x4 MakeOrthographicMatrix2(float left, float right, float bottom, float top, float nearClip, float farClip);
-//正射影行列
+/// <summary>
+/// 正射影行列
+/// </summary>
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
-//透視射影行列
+/// <summary>
+/// 透視射影行列
+/// </summary>
 Matrix4x4 MakePerspectiveFovMatrix(float forY, float aspectRatio, float nearClip, float farClip);
-//ビューポート変換行列
+/// <summary>
+/// ビューポート変換行列
+/// </summary>
 Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, float minDepth, float maxDepth);
 
 
-// アフィン変換
+/// <summary>
+/// アフィン変換
+/// </summary>
 Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
-// Y軸ビルボード
+/// <summary>
+/// Y軸ビルボード
+/// </summary>
 Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix);
 
 

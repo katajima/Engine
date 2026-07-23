@@ -12,19 +12,29 @@ namespace Character {
 /// </summary>
 class GameUI : public BaseUI {
 public:
-	//初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
 
-	//更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) override;
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw() override;
 
-	// プレイヤ設定
+	/// <summary>
+	/// プレイヤ設定
+	/// </summary>
 	void SetPlayer(Character::BasePlayer* player);
 
-	// ゲームデータ取得
+	/// <summary>
+	/// ゲームデータ取得
+	/// </summary>
 	void SetGamePlayData(const Game::GameData data) { data_ = data; };
 
 private:

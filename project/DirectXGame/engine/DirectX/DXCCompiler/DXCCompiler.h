@@ -22,7 +22,9 @@ namespace Engine {
 		DXCCompiler() = default;
 		~DXCCompiler() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize();
 
 		////------CompileShader------////

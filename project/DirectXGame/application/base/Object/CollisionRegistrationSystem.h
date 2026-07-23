@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <memory>
 
 namespace Engine {
@@ -28,10 +28,14 @@ public:
 	void Initialize(Engine::GlobalVariables* globalVariables,Engine::LineCommon* lineCommon, HitBox::System* hitBoxSystem,
 		Character::CharacterManager* characterManager,	SpecialPointManager* specialPointManager,	BulletManager* bulletManager);
 
-	// 衝突登録と判定
+	/// <summary>
+	/// 衝突登録と判定
+	/// </summary>
 	void RegisterAllCollisions();
 
-	// 衝突マネージャ取得
+	/// <summary>
+	/// 衝突マネージャ取得
+	/// </summary>
 	Engine::CollisionManager* GetCollisionManager() { return collisionManager_.get(); }
 
 private:

@@ -20,25 +20,37 @@ class InputSystem;
 class GameFlowController {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, CameraManager* cameraManager, Engine::GlobalVariables* globalVariables, Character::CharacterManager* characterManager);
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt);
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw();
 
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D();
 
-	// ゲームデータ
+	/// <summary>
+	/// ゲームデータ
+	/// </summary>
 	Game::GameData GetGamePlayData() const { return gamePlayData_; }
 
 	bool IsMove() const { return gameEventController_->IsMove(); }
 private:
 
-	// シーン変更
+	/// <summary>
+	/// シーン変更
+	/// </summary>
 	void SceneChange();
 
 private: // 

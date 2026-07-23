@@ -41,7 +41,9 @@ public:
 		inputSystem_->Update(deltaTime);
 		inputManager_->Update(deltaTime);
 		if (isPlayerInputBlocked_) {
-			// エディター操作中は移動やカメラなどが参照するプレイヤー入力だけを止める。
+			/// <summary>
+			/// エディター操作中は移動やカメラなどが参照するプレイヤー入力だけを止める。
+			/// </summary>
 			inputSystem_->ClearPlayerInput();
 		}
 	}

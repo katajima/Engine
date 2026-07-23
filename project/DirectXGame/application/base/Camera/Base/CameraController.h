@@ -59,16 +59,26 @@ public:
 	/// <summary>攻撃演出などで一時的な注視点オフセットを要求する。</summary>
 	/// <param name="data">オフセット量、開始時間、継続時間を含む設定。</param>
 	void RequestActionTargetOffset(const CameraActionOffsetData& data);
-	// 一時カメラ演出の解除
+	/// <summary>
+	/// 一時カメラ演出の解除
+	/// </summary>
 	void ClearActionAssist();
 private:
-	// 追従対象の移動量から速度を推定する
+	/// <summary>
+	/// 追従対象の移動量から速度を推定する
+	/// </summary>
 	void UpdateTargetMotion(float dt);
-	// 先読みと演出オフセットを追従ターゲットへ反映する
+	/// <summary>
+	/// 先読みと演出オフセットを追従ターゲットへ反映する
+	/// </summary>
 	void UpdateFollowAssist(float dt);
-	// 速度から追従距離を補間する
+	/// <summary>
+	/// 速度から追従距離を補間する
+	/// </summary>
 	void UpdateSpeedZoom(float dt);
-	// 一時リクエストの残り時間を更新する
+	/// <summary>
+	/// 一時リクエストの残り時間を更新する
+	/// </summary>
 	void UpdateActionTimers(float dt);
 	/// <summary>現在速度を指定範囲の0.0～1.0へ正規化する。</summary>
 	/// <param name="minSpeed">割合0.0に対応する速度。</param>

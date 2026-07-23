@@ -41,25 +41,39 @@
 class TutorialScene : public Engine::BaseScene {
 public:
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize() override;
 
-	// 終了
+	/// <summary>
+	/// 終了
+	/// </summary>
 	void Finalize() override;
 
-	// 毎フレーム更新
+	/// <summary>
+	/// 毎フレーム更新
+	/// </summary>
 	void Update() override;
 
-	// 描画3d
+	/// <summary>
+	/// 描画3d
+	/// </summary>
 	void Draw3D() override;
-	// 描画2d
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 
 private:
-	// ImGui更新
+	/// <summary>
+	/// ImGui更新
+	/// </summary>
 	void UpdateImGui() {};
 
-	// グローバルバリアブル適応
+	/// <summary>
+	/// グローバルバリアブル適応
+	/// </summary>
 	void ApplyGlobalVariables() {};
 private:
 	Engine::Input* input = nullptr;

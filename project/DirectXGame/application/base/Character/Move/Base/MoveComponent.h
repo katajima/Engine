@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "MovementRestrictions.h"
 #include "MovementSystem.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
@@ -30,58 +30,100 @@ public:
 		Manual,			// 手動
 	};
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Character::BaseCharacter* owner ,InputSystem* input,Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, const Character::CharacterContext& ctx);
 public:
-	// 保存項目の追加
+	/// <summary>
+	/// 保存項目の追加
+	/// </summary>
 	void ApplyGlobalData(const std::string& name);
-	// 保存項目の適応
+	/// <summary>
+	/// 保存項目の適応
+	/// </summary>
 	void SetGlobalData(const std::string& name);
 public:
-	// 操作タイプ取得
+	/// <summary>
+	/// 操作タイプ取得
+	/// </summary>
 	void SetControlType(ControlType type) { controlType_ = type; }
 public: // 移動系統
-	// 速度取得
+	/// <summary>
+	/// 速度取得
+	/// </summary>
 	Vector3 GetVelocity() const { return moveSystem_->GetVelocity(); }
-	// 向いている方向
+	/// <summary>
+	/// 向いている方向
+	/// </summary>
 	Vector3 GetDirection() const { return movementSystem_->GetDirection(); }
 	
 
-	// 速度設定
+	/// <summary>
+	/// 速度設定
+	/// </summary>
 	void SetSpeed(float min, float max) { moveSystem_->SetSpeed(min, max); };
-	// 移動タイプ設定
+	/// <summary>
+	/// 移動タイプ設定
+	/// </summary>
 	void SetMoveType(MoveType type) { moveSystem_->Data().moveType = type;};
-	// スティックによる移動速度固定設定
+	/// <summary>
+	/// スティックによる移動速度固定設定
+	/// </summary>
 	void SetIsStickToSpeed(bool is) { moveSystem_->Data().isStickToSpeed = is; };
-	// 保存項目を使うか
+	/// <summary>
+	/// 保存項目を使うか
+	/// </summary>
 	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統
 
-	// ジャンプ回数現象
+	/// <summary>
+	/// ジャンプ回数現象
+	/// </summary>
 	void DecrementJumpCount() { jumpSystem_->DecrementJumpCount(); }
-	//	ジャンプ出来るか
+	/// <summary>
+	/// ジャンプ出来るか
+	/// </summary>
 	bool GetIsJump() const { return jumpSystem_->GetIsJump(); }
-	// 残りジャンプ回数取得
+	/// <summary>
+	/// 残りジャンプ回数取得
+	/// </summary>
 	int GetJumpCount() const { return jumpSystem_->GetJumpCount(); }
-	// 着地状態か
+	/// <summary>
+	/// 着地状態か
+	/// </summary>
 	bool GetIsLanding() const { return movementSystem_->IsOnGround(); }
-	// 最大ジャンプカウント設定
+	/// <summary>
+	/// 最大ジャンプカウント設定
+	/// </summary>
 	void SetMaxJumpCount(int count) { jumpSystem_->SetMaxJumpCount(count); }
 	// 
 	void SetAttackingGravity(float gravity) { attackingGravity = gravity; }
 public:
-	// 移動システム取得
+	/// <summary>
+	/// 移動システム取得
+	/// </summary>
 	MoveSystem* GetMoveSystem() { return moveSystem_.get(); }
-	// ジャンプシステム取得
+	/// <summary>
+	/// ジャンプシステム取得
+	/// </summary>
 	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
-	// 攻撃移動システム取得
+	/// <summary>
+	/// 攻撃移動システム取得
+	/// </summary>
 	MoveRequestSystem* GetMoveRequestSystem() { return moveRequestSystem_.get(); }
-	// 移動システム取得
+	/// <summary>
+	/// 移動システム取得
+	/// </summary>
 	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
 public:
-	// カメラ設定
+	/// <summary>
+	/// カメラ設定
+	/// </summary>
 	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
 private:
 	// 移動システム

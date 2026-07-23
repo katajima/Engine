@@ -11,20 +11,30 @@ namespace Engine {
 /// </summary>
 class StageColliderSystem : public IHitReceiver {
 public:
-	// デストラクタ
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
 	~StageColliderSystem() {
 		colliderComponent_->ClearColliders();
 	}
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize(Engine::LineCommon* lineCommon);
 
-	// オブジェクト加算
+	/// <summary>
+	/// オブジェクト加算
+	/// </summary>
 	void AddObject(Engine::Object3d* object) { objects.push_back(object); }
 
-	// コライダー生成
+	/// <summary>
+	/// コライダー生成
+	/// </summary>
 	void CreateCollider();
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update();
 
 	Engine::ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }

@@ -9,7 +9,9 @@ namespace Character {
 /// </summary>
 	class SmallCartEnemy : public BaseEnemy {
 	public:
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		SmallCartEnemy() {
 
 		}
@@ -18,19 +20,31 @@ namespace Character {
 		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-		// 毎フレーム更新
+		/// <summary>
+		/// 毎フレーム更新
+		/// </summary>
 		void Update() override;
 
-		// エフェクト描画
+		/// <summary>
+		/// エフェクト描画
+		/// </summary>
 		void DrawEffect() override {};
-		// 描画2d
+		/// <summary>
+		/// 描画2d
+		/// </summary>
 		void Draw2D() override;
-		// 移動
+		/// <summary>
+		/// 移動
+		/// </summary>
 		void Move() override;
-		// ジャンプ
+		/// <summary>
+		/// ジャンプ
+		/// </summary>
 		void Jump() override {};
 	private:
-		// ステートマシーン初期化
+		/// <summary>
+		/// ステートマシーン初期化
+		/// </summary>
 		void InitStateMachine() override;
 
 	private:

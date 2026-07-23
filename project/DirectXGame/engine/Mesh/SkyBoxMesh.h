@@ -11,9 +11,13 @@ namespace Engine {
 	/// </summary>
 	class SkyBoxMesh : public BaseMesh {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxcommon) override;
-		// コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandList();
 
 	public:

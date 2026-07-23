@@ -65,12 +65,18 @@ namespace Engine {
 		/// </summary>
 		void Draw();
 
-		// ギズモの使用例
+		/// <summary>
+		/// ギズモの使用例
+		/// </summary>
 		void RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name);
 
-		// ImGuiスタイル設定
+		/// <summary>
+		/// ImGuiスタイル設定
+		/// </summary>
 		void SetCustomColorScheme();
-		// インプット設定
+		/// <summary>
+		/// インプット設定
+		/// </summary>
 		void SetInput(Input* input) { this->input = input; }
 
 	public:
@@ -90,9 +96,13 @@ namespace Engine {
 
 
 	private:
-		// ImGuiスタイル
+		/// <summary>
+		/// ImGuiスタイル
+		/// </summary>
 		void InitImGuiStyle();
-		// AddFont
+		/// <summary>
+		/// AddFont
+		/// </summary>
 		void AddFont();
 
 
@@ -116,11 +126,15 @@ namespace Engine {
 	/// </summary>
 	class ImGuiWindowScope {
 	public:
-		// コンストラクタ
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		ImGuiWindowScope(const char* name, ImGuiWindowFlags flags = 0) {
 			ImGui::Begin(name, nullptr, flags);
 		}
-		// デストラクタ
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
 		~ImGuiWindowScope() {
 			ImGui::End();
 		}
@@ -132,7 +146,9 @@ namespace Engine {
 	inline void ImGuiManager::Select(const std::string& name, const char* const (&label)[N], Type& type) {
 		int current = static_cast<int>(type);
 
-		// 範囲外アクセス防止
+		/// <summary>
+		/// 範囲外アクセス防止
+		/// </summary>
 		if (current < 0 || current >= static_cast<int>(N)) {
 			current = 0;
 			type = static_cast<Type>(0);
@@ -159,11 +175,15 @@ namespace Engine {
 	template<typename Type>
 	inline void ImGuiManager::Select(const std::string& beginComboName, std::string& animationName, const std::map<std::string, Type>& map) {
 
-		// 初回：未選択なら先頭を選択
+		/// <summary>
+		/// 初回：未選択なら先頭を選択
+		/// </summary>
 		if (animationName.empty()) {
 			animationName = map.begin()->first;
 		}
-		// --- 選択UI（コンボボックス） ---
+		/// <summary>
+		/// --- 選択UI（コンボボックス） ---
+		/// </summary>
 		const char* preview = animationName.c_str();
 		if (ImGui::BeginCombo(beginComboName.c_str(), preview)) {
 
@@ -184,11 +204,15 @@ namespace Engine {
 	}
 	template<typename Type>
 	inline void ImGuiManager::Select(const std::string& beginComboName, std::string& animationName, const std::unordered_map<std::string, Type>& map){
-		// 初回：未選択なら先頭を選択
+		/// <summary>
+		/// 初回：未選択なら先頭を選択
+		/// </summary>
 		if (animationName.empty()) {
 			animationName = map.begin()->first;
 		}
-		// --- 選択UI（コンボボックス） ---
+		/// <summary>
+		/// --- 選択UI（コンボボックス） ---
+		/// </summary>
 		const char* preview = animationName.c_str();
 		if (ImGui::BeginCombo(beginComboName.c_str(), preview)) {
 
@@ -209,11 +233,15 @@ namespace Engine {
 	}
 	template<typename Type>
 	inline void ImGuiManager::Select(const std::string& beginComboName, std::string& animationName, const UnorderedMapContainer<std::string, Type>& map) {
-		// 初回：未選択なら先頭を選択
+		/// <summary>
+		/// 初回：未選択なら先頭を選択
+		/// </summary>
 		if (animationName.empty()) {
 			animationName = map.begin()->first;
 		}
-		// --- 選択UI（コンボボックス） ---
+		/// <summary>
+		/// --- 選択UI（コンボボックス） ---
+		/// </summary>
 		const char* preview = animationName.c_str();
 		if (ImGui::BeginCombo(beginComboName.c_str(), preview)) {
 

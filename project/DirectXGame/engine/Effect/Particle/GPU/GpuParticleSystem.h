@@ -17,44 +17,74 @@ namespace Engine {
 	class GpuParticleGroup
 	{
 	public:
-		// 生成
+		/// <summary>
+		/// 生成
+		/// </summary>
 		void Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName);
 
-		// エミッター更新
+		/// <summary>
+		/// エミッター更新
+		/// </summary>
 		void UpdateEmitte(float deltaTime);
-		// フィールド更新
+		/// <summary>
+		/// フィールド更新
+		/// </summary>
 		void UpdateField();
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
 	public: // トレイル用
-		// トレイルエミッター更新
+		/// <summary>
+		/// トレイルエミッター更新
+		/// </summary>
 		void UpateTrailEmitte(float deltaTime);
-		// トレイル更新
+		/// <summary>
+		/// トレイル更新
+		/// </summary>
 		void UpdateTrail();
-		// トレイル描画
+		/// <summary>
+		/// トレイル描画
+		/// </summary>
 		void DrawTrail();
 
 	public:
 
-		// エミッター追加
+		/// <summary>
+		/// エミッター追加
+		/// </summary>
 		void AddEmitter(BaseGpuParticleEmitter* emit);
-		// メッシュ設定
+		/// <summary>
+		/// メッシュ設定
+		/// </summary>
 		void SetMesh(ModelMesh* mesh) { this->mesh = mesh; }	// メッシュセット
 
-		// カメラセット
+		/// <summary>
+		/// カメラセット
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
 
-		// 名前で取得
+		/// <summary>
+		/// 名前で取得
+		/// </summary>
 		std::string GetName() const { return name_; }
 
-		// テクスチャ名取得
+		/// <summary>
+		/// テクスチャ名取得
+		/// </summary>
 		std::string GetTextureName() const { return textureName_; }
-		// 最大使用量取得
+		/// <summary>
+		/// 最大使用量取得
+		/// </summary>
 		int GetMaxInstance() const { return cbMaxInstance_.Data()->maxInstance; }
-		// リセット
+		/// <summary>
+		/// リセット
+		/// </summary>
 		void Reset() { cbDeleteParticleCS_.Data()->isDelete = true; };
 
 	private:

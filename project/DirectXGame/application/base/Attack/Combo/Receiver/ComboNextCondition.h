@@ -9,14 +9,22 @@ namespace Combo {
 	/// </summary>
 	class NextCondition {
 	public:
-		// 次段条件の初期値をコンボデータから設定する
+		/// <summary>
+		/// 次段条件の初期値をコンボデータから設定する
+		/// </summary>
 		void Enter(const GlobalCondition& data);
-		// 次段条件の状態をリセットする
+		/// <summary>
+		/// 次段条件の状態をリセットする
+		/// </summary>
 		void Exit();
-		// 現在の状態と経過時間から次段受付条件を更新する
+		/// <summary>
+		/// 現在の状態と経過時間から次段受付条件を更新する
+		/// </summary>
 		void Update(const Character::CharacterContext& ctx, const GlobalCondition& data, float time);
 	public:
-		// 次のコンボ移行する時間
+		/// <summary>
+		/// 次のコンボ移行する時間
+		/// </summary>
 		float GetComboNextTime() const { return nextTime_; }
 	private:
 		ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン

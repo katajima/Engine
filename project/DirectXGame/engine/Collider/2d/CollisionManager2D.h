@@ -16,26 +16,34 @@ namespace Engine {
     class CollisionManager2d {
     public:
         // 初期化
-        // 初期化
+        /// <summary>
+        /// 初期化
+        /// </summary>
         void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
             this->globalVariables = globalVariables;
         }
 
-        // 動的コライダーコンポーネント追加
+        /// <summary>
+        /// 動的コライダーコンポーネント追加
+        /// </summary>
         void Register(ColliderComponent2D* comp) {
             if (comp && registeredDynamic_.insert(comp).second) {
                 dynamicColliders.push_back(comp);
             }
         }
 
-        // 静的コライダーコンポーネント追加
+        /// <summary>
+        /// 静的コライダーコンポーネント追加
+        /// </summary>
         void RegisterStatic(ColliderComponent2D* comp) {
             if (comp && registeredStatic_.insert(comp).second) {
                 staticColliders.push_back(comp);
             }
         }
 
-        // 全削除（次フレームから再登録）
+        /// <summary>
+        /// 全削除（次フレームから再登録）
+        /// </summary>
         void Clear() {
             dynamicColliders.clear();
             staticColliders.clear();
@@ -43,7 +51,9 @@ namespace Engine {
             registeredStatic_.clear();
         }
 
-        // 衝突チェック：全てのColliderComponentのペアをチェック
+        /// <summary>
+        /// 衝突チェック：全てのColliderComponentのペアをチェック
+        /// </summary>
         void CheckAll() {
             size_t n = dynamicColliders.size();
             for (size_t i = 0; i < n; ++i) {
@@ -53,7 +63,9 @@ namespace Engine {
             }
         }
 
-        // レイヤーとマスクに基づいて衝突を行う
+        /// <summary>
+        /// レイヤーとマスクに基づいて衝突を行う
+        /// </summary>
         void CheckByLayer(ColliderComponent2D& a, ColliderComponent2D& b) {
             for (auto* colA : a.GetAllColliders()) {
                 for (auto* colB : b.GetAllColliders()) {

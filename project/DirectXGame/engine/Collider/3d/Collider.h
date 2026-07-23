@@ -22,29 +22,43 @@ namespace Engine {
 	class Collider
 	{
 	public:
-		// 判定有効
+		/// <summary>
+		/// 判定有効
+		/// </summary>
 		void Enable() { enabled_ = true; }
-		// 判定無効
+		/// <summary>
+		/// 判定無効
+		/// </summary>
 		void Disable() { enabled_ = false; }
-		// 判定効力取得
+		/// <summary>
+		/// 判定効力取得
+		/// </summary>
 		bool IsEnabled() const { return enabled_; }
 		void SetEnabled(bool enabled) { enabled_ = enabled; }
 
-		// 通知先コンポーネント
+		/// <summary>
+		/// 通知先コンポーネント
+		/// </summary>
 		void SetOwner(ColliderComponent* owner) { owner_ = owner; }
 		ColliderComponent* GetOwner() const { return owner_; }
 
-		// 動かないコライダーか
+		/// <summary>
+		/// 動かないコライダーか
+		/// </summary>
 		void SetIsStatic(bool isStatic) { isStatic_ = isStatic; }
 		bool IsStatic() const { return isStatic_; }
 
-		// デバッグライン
+		/// <summary>
+		/// デバッグライン
+		/// </summary>
 		void SetIsDebugLine(bool isDebugLine) { isDebugLine_ = isDebugLine; }
 		bool IsDebugLine() const { return isDebugLine_; }
 		void SetLineColor(const Vector4& color) { lineColor_ = color; }
 		const Vector4& GetLineColor() const { return lineColor_; }
 
-		// 衝突分類
+		/// <summary>
+		/// 衝突分類
+		/// </summary>
 		void SetLayer(CollisionLayer layer) { layer_ = layer; }
 		CollisionLayer GetLayer() const { return layer_; }
 		void SetTag(CollisionTag tag) { tag_ = tag; }
@@ -52,25 +66,39 @@ namespace Engine {
 		void SetCollisionMask(uint32_t mask) { collisionMask_ = mask; }
 		uint32_t GetCollisionMask() const { return collisionMask_; }
 
-		// ID
+		/// <summary>
+		/// ID
+		/// </summary>
 		void SetId(uint32_t id) { id_ = id; }
 		uint32_t GetId() const { return id_; }
 
-		// ワールド中心
+		/// <summary>
+		/// ワールド中心
+		/// </summary>
 		void SetCenterWorld(const Vector3& centerWorld) { centerWorld_ = centerWorld; }
 		const Vector3& GetCenterWorld() const { return centerWorld_; }
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		virtual void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) = 0;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		virtual bool CheckHit(const Collider& other) const = 0;
-		// 押し戻し
+		/// <summary>
+		/// 押し戻し
+		/// </summary>
 		virtual bool ResolveCollision(const Collider& other, Vector3& outPushVec) const = 0;
-		// コライダータイプ取得
+		/// <summary>
+		/// コライダータイプ取得
+		/// </summary>
 		virtual ColliderShapeType GetType() const = 0;
 		virtual ~Collider() = default;
 
-		// 追加: このコライダーのワールド空間AABBを返す（Broad Phase用）
+		/// <summary>
+		/// 追加: このコライダーのワールド空間AABBを返す（Broad Phase用）
+		/// </summary>
 		virtual AABB GetAABB() const {
 			// 基底は点AABB（派生でオーバーライド推奨）
 			return AABB{ centerWorld_, centerWorld_ };
@@ -98,17 +126,27 @@ namespace Engine {
 	public:
 		float radius = 1.0f;
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::Sphere;
 		}
-		// AABB取得
+		/// <summary>
+		/// AABB取得
+		/// </summary>
 		AABB GetAABB() const override {
 			Vector3 r{ radius, radius, radius };
 			return AABB{ centerWorld_ - r, centerWorld_ + r };
@@ -127,24 +165,36 @@ namespace Engine {
 		Vector3 triangle03{};
 		bool isNormal = false;
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::Triangle;
 		}
 
-		// 三角面取得
+		/// <summary>
+		/// 三角面取得
+		/// </summary>
 		Triangle GetWorldTriangle() const {
 			return Triangle{ triangle01 + centerWorld_,triangle02 + centerWorld_, triangle03 + centerWorld_};
 		}
 
 		AABB GetAABB() const override {
-			// 基底は点AABB（派生でオーバーライド推奨）
+			/// <summary>
+			/// 基底は点AABB（派生でオーバーライド推奨）
+			/// </summary>
 			return GetWorldTriangle().GetAABB();
 		}
 	private:
@@ -161,17 +211,27 @@ namespace Engine {
 		Vector3 minWorld;
 		Vector3 maxWorld;
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::AABB;
 		}
-		// AABB取得
+		/// <summary>
+		/// AABB取得
+		/// </summary>
 		AABB GetAABB() const override {
 			return AABB{ minWorld, maxWorld };
 		}
@@ -188,19 +248,31 @@ namespace Engine {
 		Capsule capWorld_{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f} };
 
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::Capsule;
 		}
-		// AABB取得
+		/// <summary>
+		/// AABB取得
+		/// </summary>
 		AABB GetAABB() const override {
-			// Capsule 型に computeAABB() がある前提
+			/// <summary>
+			/// Capsule 型に computeAABB() がある前提
+			/// </summary>
 			return capWorld_.computeAABB();
 		}
 	};
@@ -215,17 +287,27 @@ namespace Engine {
 		OBB obb{ {0,0,0},{0,0,0},{0.5f,0.5f,0.5f} };
 
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::OBB;
 		}
-		// AABB取得
+		/// <summary>
+		/// AABB取得
+		/// </summary>
 		AABB GetAABB() const override {
 			// OBB の 8 頂点から AABB を作る
 			Vector3 mins{ FLT_MAX, FLT_MAX, FLT_MAX };
@@ -258,17 +340,27 @@ namespace Engine {
 	public:
 		Ray ray_;
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
-		// 判定
+		/// <summary>
+		/// 判定
+		/// </summary>
 		bool CheckHit(const Collider& other) const override;
-		// 押し出し
+		/// <summary>
+		/// 押し出し
+		/// </summary>
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-		// コライダタイプ取得
+		/// <summary>
+		/// コライダタイプ取得
+		/// </summary>
 		ColliderShapeType GetType() const override {
 			return ColliderShapeType::Ray;
 		}
-		// AABB取得
+		/// <summary>
+		/// AABB取得
+		/// </summary>
 		AABB GetAABB() const override {
 			// Ray が origin, direction, length を持っている前提
 			Vector3 p0 = ray_.origin;
@@ -294,7 +386,9 @@ namespace Engine {
 		float R[3][3], AbsR[3][3];
 		constexpr float EPSILON = 1e-6f;
 
-		// 回転行列の生成
+		/// <summary>
+		/// 回転行列の生成
+		/// </summary>
 		for (int i = 0; i < 3; ++i)
 			for (int j = 0; j < 3; ++j) {
 				R[i][j] = A[i].Dot(B[j]);
@@ -308,7 +402,9 @@ namespace Engine {
 		};
 
 		float ra, rb;// , overlap;
-		//Vector3 axis;
+		/// <summary>
+		/// Vector3 axis;
+		/// </summary>
 
 		auto testAxis = [&](const Vector3& testAxis, float ra, float rb, float tProj) {
 			float overlap = ra + rb - std::abs(tProj);
@@ -325,7 +421,9 @@ namespace Engine {
 
 		result.hit = true;
 
-		// 各軸のテスト（A[0~2], B[0~2], A×Bの9軸）
+		/// <summary>
+		/// 各軸のテスト（A[0~2], B[0~2], A×Bの9軸）
+		/// </summary>
 		for (int i = 0; i < 3; ++i) {
 			ra = obb0.size[i] * 0.5f;
 			rb = obb1.size[0] * AbsR[i][0] + obb1.size[1] * AbsR[i][1] + obb1.size[2] * AbsR[i][2];

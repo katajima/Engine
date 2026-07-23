@@ -33,44 +33,76 @@ namespace Engine {
 	public:
 		RenderTexture() = default;
 		~RenderTexture();
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommonm, const std::string name, PostEffectType type);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
-		// 他のSrvインデクス設定
+		/// <summary>
+		/// 他のSrvインデクス設定
+		/// </summary>
 		void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
 
-		// SRVインデクス取得
+		/// <summary>
+		/// SRVインデクス取得
+		/// </summary>
 		uint32_t GetSrvIndex() const { return srvIndex_; }
-		// クリアカラーを取得
+		/// <summary>
+		/// クリアカラーを取得
+		/// </summary>
 		Vector4 GetClearColor()const;
-		// RTVハンドルを取得
+		/// <summary>
+		/// RTVハンドルを取得
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHandle();
-		// リソースを取得
+		/// <summary>
+		/// リソースを取得
+		/// </summary>
 		ID3D12Resource* GetResource();
 
-		// SRVGPUハンドル取得
+		/// <summary>
+		/// SRVGPUハンドル取得
+		/// </summary>
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
-		// SRVCPUハンドル取得
+		/// <summary>
+		/// SRVCPUハンドル取得
+		/// </summary>
 		D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
-		// ポストエフェクトデータ取得
+		/// <summary>
+		/// ポストエフェクトデータ取得
+		/// </summary>
 		PostEffectData* GetPostEffectData();
 
 	private:
-		// レンダーテクスチャのリソースを作成
+		/// <summary>
+		/// レンダーテクスチャのリソースを作成
+		/// </summary>
 		void CreateResource();
 		// 
-		// レンダーテクスチャのリソースを作成
+		/// <summary>
+		/// レンダーテクスチャのリソースを作成
+		/// </summary>
 		void CreateResourcePixel();
 
-		// RTVを作成
+		/// <summary>
+		/// RTVを作成
+		/// </summary>
 		void CreateRTV();
-		// SRVを作成
+		/// <summary>
+		/// SRVを作成
+		/// </summary>
 		void CreateSRV();
 	private:
 		HRESULT hr_ = S_FALSE;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <windows.h>
 #include<cstdint>
 #include<string>
@@ -54,25 +54,41 @@ namespace Engine {
 	public:
 
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(EntityManager* entityManager, Vector2 range);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// ImGui更新
+		/// <summary>
+		/// ImGui更新
+		/// </summary>
 		void UpdateImgui();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
-		// マテリアル取得
+		/// <summary>
+		/// マテリアル取得
+		/// </summary>
 		Material* GetMaterial() { return material.get(); }
-		// モデルメッシュ取得
+		/// <summary>
+		/// モデルメッシュ取得
+		/// </summary>
 		ModelMesh* GetMesh() { return mesh_.get(); }
 
-		// 波パラメーターデータ取得
+		/// <summary>
+		/// 波パラメーターデータ取得
+		/// </summary>
 		WaveParameters* GetWaveParameters() const { return cbWaveResource_.Data(); }
 
 	private:
 
-		// ウェーブ追加
+		/// <summary>
+		/// ウェーブ追加
+		/// </summary>
 		void AddWave();
 
 	private:

@@ -10,9 +10,13 @@ namespace Character {
 	/// </summary>
 	class EnemyWaveExitState {
 	public:
-		// 退場開始時の姿勢を保存する
+		/// <summary>
+		/// 退場開始時の姿勢を保存する
+		/// </summary>
 		void Enter(BaseEnemy* enemy, float duration = 1.2f);
-		// 退場演出を進め、完了時に敵を削除可能な状態へする
+		/// <summary>
+		/// 退場演出を進め、完了時に敵を削除可能な状態へする
+		/// </summary>
 		void Update(BaseEnemy* enemy, float dt);
 
 		bool IsActive() const { return isActive_; }

@@ -9,21 +9,35 @@ namespace Engine {
 	/// </summary>
 	class LineMesh : public BaseMesh {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxcommon) override;
-		// 更新頂点バッファ
+		/// <summary>
+		/// 更新頂点バッファ
+		/// </summary>
 		void UpdateVertexBuffer();
-		// 更新インデクスバッファ
+		/// <summary>
+		/// 更新インデクスバッファ
+		/// </summary>
 		void UpdateIndexBuffer();
-		// クリア
+		/// <summary>
+		/// クリア
+		/// </summary>
 		void Clear();
-		// コマンドリスト設定
+		/// <summary>
+		/// コマンドリスト設定
+		/// </summary>
 		void GetCommandList();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawIndexedInstanced();
 
 
-		// ライン
+		/// <summary>
+		/// ライン
+		/// </summary>
 		static void MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum);
 	public:
 		std::vector<LineVertexData> verticesline;

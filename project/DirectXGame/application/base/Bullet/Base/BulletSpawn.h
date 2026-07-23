@@ -15,10 +15,14 @@ public:
 
 	void Generate();
 
-	// 範囲攻撃する弾を生成(絨毯爆撃)
+	/// <summary>
+	/// 範囲攻撃する弾を生成(絨毯爆撃)
+	/// </summary>
 	void GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad);
 
-	// 弾を生成
+	/// <summary>
+	/// 弾を生成
+	/// </summary>
 	void GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target = nullptr);
 
 	// 発射物を生成

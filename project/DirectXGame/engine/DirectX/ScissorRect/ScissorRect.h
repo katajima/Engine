@@ -14,10 +14,14 @@ namespace Engine {
 		ScissorRect() = default;
 		~ScissorRect() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(Command* command);
 
-		// シザー矩形を設定
+		/// <summary>
+		/// シザー矩形を設定
+		/// </summary>
 		void SettingScissorRect();
 
 

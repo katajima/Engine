@@ -38,20 +38,30 @@ namespace Engine {
 		ParticleManager2d& operator=(ParticleManager2d&) = delete;
 
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon, EffectManager* effectManager);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
 
 
 
-		// カメラセット
+		/// <summary>
+		/// カメラセット
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
 
-		// ランダムエンジン
+		/// <summary>
+		/// ランダムエンジン
+		/// </summary>
 		std::mt19937& GetRandomEngine() { return randomEngine_; }
 
 		// パーティクルグループ取得
@@ -65,24 +75,36 @@ namespace Engine {
 			return particleGroups[name];
 		}
 
-		// パーティクルグループ作り(スプライト)
+		/// <summary>
+		/// パーティクルグループ作り(スプライト)
+		/// </summary>
 		void CreateParticleGroup(const std::string name, const std::string textureFilePath, Sprite* sprite);
 
-		// パーティクルグループ作り(プリミティブ2D)
+		/// <summary>
+		/// パーティクルグループ作り(プリミティブ2D)
+		/// </summary>
 		void CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive2D* primitive2d);
 
-		// パーティクルグループ作り(プリミティブ2D)
+		/// <summary>
+		/// パーティクルグループ作り(プリミティブ2D)
+		/// </summary>
 		void CreateParticleGroup(const std::string name, const std::string textureFilePath, ModelMesh* modelMesh);
 
 
 	private:
-		// 描画準備
+		/// <summary>
+		/// 描画準備
+		/// </summary>
 		void DrawCommonSetting();
 
 	private:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
 
 	private:

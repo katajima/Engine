@@ -22,78 +22,144 @@ namespace Math {
 		return value;
 	}
 
-	// 最短方向で角度を補間する
+	/// <summary>
+	/// 最短方向で角度を補間する
+	/// </summary>
 	float LerpShortAngle(float current, float target, float t);
-	// 長さ
+	/// <summary>
+	/// 長さ
+	/// </summary>
 	float Length(const float& v);
-	// クランプ
+	/// <summary>
+	/// クランプ
+	/// </summary>
 	float Clamp(float t);
-	// クランプ
+	/// <summary>
+	/// クランプ
+	/// </summary>
 	float Clamp(float t, float min, float max);
-	// 正規化クランプ
+	/// <summary>
+	/// 正規化クランプ
+	/// </summary>
 	float NormalizeClamp(float value, float minValue, float maxValue);
-	// 浮動小数点値が許容誤差内で等しいか判定
+	/// <summary>
+	/// 浮動小数点値が許容誤差内で等しいか判定
+	/// </summary>
 	bool NearlyEqual(float left, float right, float epsilon = 0.000001f);
-	// 区間内の値を0から1の補間率へ変換
+	/// <summary>
+	/// 区間内の値を0から1の補間率へ変換
+	/// </summary>
 	float InverseLerp(float start, float end, float value);
-	// 値を元の区間から別の区間へ変換
+	/// <summary>
+	/// 値を元の区間から別の区間へ変換
+	/// </summary>
 	float Remap(float value, float sourceMin, float sourceMax, float destinationMin, float destinationMax, bool clamp = false);
-	// 現在値を最大変化量の範囲で目標値へ近づける
+	/// <summary>
+	/// 現在値を最大変化量の範囲で目標値へ近づける
+	/// </summary>
 	float MoveTowards(float current, float target, float maxDelta);
-	// 現在位置を最大移動量の範囲で目標位置へ近づける
+	/// <summary>
+	/// 現在位置を最大移動量の範囲で目標位置へ近づける
+	/// </summary>
 	Vector3 MoveTowards(const Vector3& current, const Vector3& target, float maxDistanceDelta);
-	// 値を0以上length未満の範囲で繰り返す
+	/// <summary>
+	/// 値を0以上length未満の範囲で繰り返す
+	/// </summary>
 	float Repeat(float value, float length);
-	// 値を0からlengthの間で往復させる
+	/// <summary>
+	/// 値を0からlengthの間で往復させる
+	/// </summary>
 	float PingPong(float value, float length);
-	// 最大長を超えないように2Dベクトルを制限
+	/// <summary>
+	/// 最大長を超えないように2Dベクトルを制限
+	/// </summary>
 	Vector2 ClampLength(const Vector2& value, float maxLength = 1.0f);
-	// ゼロに近い3Dベクトルをフォールバック方向で安全に正規化
+	/// <summary>
+	/// ゼロに近い3Dベクトルをフォールバック方向で安全に正規化
+	/// </summary>
 	Vector3 NormalizeSafe(const Vector3& value, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }, float epsilon = 0.0001f);
-	// XZ平面の前方向から右方向を生成
+	/// <summary>
+	/// XZ平面の前方向から右方向を生成
+	/// </summary>
 	Vector3 MakeRightFromForwardXZ(const Vector3& forward);
-	// 2Dワールド行列を使って座標をローカル空間へ変換
+	/// <summary>
+	/// 2Dワールド行列を使って座標をローカル空間へ変換
+	/// </summary>
 	Vector2 TransformPointToLocal(const Vector2& worldPosition, const Matrix3x3& worldMatrix);
 
-	// 反射関数
+	/// <summary>
+	/// 反射関数
+	/// </summary>
 	Vector3 Reflect(const Vector3& input, const Vector3& normal);
-	// 反射関数(反射率付き)
+	/// <summary>
+	/// 反射関数(反射率付き)
+	/// </summary>
 	Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution);
 
-	// 方向による回転位置計算
+	/// <summary>
+	/// 方向による回転位置計算
+	/// </summary>
 	Vector3 DirectionToRotate(const Vector3& direction, Dire dire);
-	// 方向による回転位置計算Z
+	/// <summary>
+	/// 方向による回転位置計算Z
+	/// </summary>
 	float DirectionToRotateZ(const Vector3& direction);
-	// 角度からラジアン
+	/// <summary>
+	/// 角度からラジアン
+	/// </summary>
 	float DegreesToRadians(float degrees);
-	// ラジアンから角度
+	/// <summary>
+	/// ラジアンから角度
+	/// </summary>
 	float RadiansToDegrees(float radians);
-	// 角度からラジアン
+	/// <summary>
+	/// 角度からラジアン
+	/// </summary>
 	Vector3 DegreesToRadians(Vector3 degrees);
-	// ラジアンから角度
+	/// <summary>
+	/// ラジアンから角度
+	/// </summary>
 	Vector3 RadiansToDegrees(Vector3 radians);
 };
 
 // 最近接点
 namespace ClosestPoint {
 
-	//球と四角形に対する最近接点
+	/// <summary>
+	/// 球と四角形に対する最近接点
+	/// </summary>
 	Vector3 AABBSphere(const Sphere& sphere, const AABB& aabb);
-	// 点と線
+	/// <summary>
+	/// 点と線
+	/// </summary>
 	Vector3 PointSegment(const Segment& segment, const Vector3& point);
-	// 点と面
+	/// <summary>
+	/// 点と面
+	/// </summary>
 	Vector3 PointOnPlane(const Plane& plane, const Vector3& point);
-	// 線と三角
+	/// <summary>
+	/// 線と三角
+	/// </summary>
 	Vector3 SegmentTriangle(const Segment& segment, const Triangle& triangle);
-	// 球と三角
+	/// <summary>
+	/// 球と三角
+	/// </summary>
 	Vector3 SphereTriangle(const Sphere& sphere,const Triangle& triangle);
-	// 線と線の最近接点
+	/// <summary>
+	/// 線と線の最近接点
+	/// </summary>
 	Vector3 SegmentSegment(const Segment& seg1, const Segment& seg2, Vector3 currentClosest);
-	// 線とAABB
+	/// <summary>
+	/// 線とAABB
+	/// </summary>
 	Vector3 SegmentAABB(const Segment& segment, const AABB& box);
-	// 点とOBB
+	/// <summary>
+	/// 点とOBB
+	/// </summary>
 	Vector3 PointOnOBB(const Vector3& point, const OBB& obb);
-	// 線とAABB
+	/// <summary>
+	/// 線とAABB
+	/// </summary>
 	Vector3 SegmentAABB(const Vector3& segStart, const Vector3& segEnd, const AABB& aabb);
 
 }
@@ -104,7 +170,9 @@ namespace ClosestPoint {
 // 衝突速度を計算する
 static std::pair<Vector3, Vector3> ComputeCollisionVelocities(float mass1, const Vector3& velocity1, float mass2, const Vector3& velocity2,
 	float coefficientOfRestitution, const Vector3& normal) {
-	// 衝突面法線方向の速度成分を射影
+	/// <summary>
+	/// 衝突面法線方向の速度成分を射影
+	/// </summary>
 	Vector3 project1 = Project(velocity1, normal); // 質点1の法線方向成分
 	Vector3 project2 = Project(velocity2, normal); // 質点2の法線方向成分
 	Vector3 sub1 = velocity1 - project1;           // 質点1の接線方向成分
@@ -120,25 +188,35 @@ static std::pair<Vector3, Vector3> ComputeCollisionVelocities(float mass1, const
 	Vector3 velocityAfter1 = project1 + impulseVector / mass1;
 	Vector3 velocityAfter2 = project2 - impulseVector / mass2;
 
-	// 接線成分を加算して最終的な速度を計算
+	/// <summary>
+	/// 接線成分を加算して最終的な速度を計算
+	/// </summary>
 	return std::make_pair(velocityAfter1 + sub1, velocityAfter2 + sub2);
 }
 
-//点から平面への距離
+/// <summary>
+/// 点から平面への距離
+/// </summary>
 static float DistancePointToPlane(const Vector3& point, const Vector3& A, const Vector3& B, const Vector3& C) {
 	// 三角形の辺ベクトル
 	Vector3 AB = B - A;
 	Vector3 AC = C - A;
 
-	// 平面の法線
+	/// <summary>
+	/// 平面の法線
+	/// </summary>
 	Vector3 normal = AB.Cross(AC).Normalize();
 
-	// 点と平面の距離
+	/// <summary>
+	/// 点と平面の距離
+	/// </summary>
 	return std::abs((point - A).Dot(normal));
 }
 
 
-// オブジェクトがカメラ内に映っているか
+/// <summary>
+/// オブジェクトがカメラ内に映っているか
+/// </summary>
 bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
 // 前方宣言
@@ -147,5 +225,7 @@ namespace Engine {
 	class WorldTransform;
 }
 
-// スクリーン位置取得
+/// <summary>
+/// スクリーン位置取得
+/// </summary>
 Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* camera);

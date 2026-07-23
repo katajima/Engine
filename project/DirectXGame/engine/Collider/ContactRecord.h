@@ -12,7 +12,9 @@ namespace Engine {
 /// </summary>
 	class ContactRecord {
 	public:
-		// 登録 or 上書き
+		/// <summary>
+		/// 登録 or 上書き
+		/// </summary>
 		void AddHistory(uint32_t id, float nowTime) {
 			for (auto& info : history_) {
 				if (info.id == id) {
@@ -23,13 +25,17 @@ namespace Engine {
 			history_.push_back({ id, nowTime }); // 新規追加
 		}
 
-		// 履歴チェック
+		/// <summary>
+		/// 履歴チェック
+		/// </summary>
 		bool CheckHistory(uint32_t number) {
 			return std::any_of(history_.begin(), history_.end(), [number](const ContactInfo& info) {
 				return info.id == number;
 				});
 		};
-		// クールタイム付きチェック
+		/// <summary>
+		/// クールタイム付きチェック
+		/// </summary>
 		bool CheckHistory(uint32_t id, float nowTime, float coolTimeSec) {
 			Cleanup(nowTime, coolTimeSec);
 			for (const auto& info : history_) {
@@ -42,7 +48,9 @@ namespace Engine {
 			return false; // ヒットしても良い
 		}
 
-		// 履歴抹消
+		/// <summary>
+		/// 履歴抹消
+		/// </summary>
 		void Clear() { history_.clear(); };
 
 	private:
@@ -53,7 +61,9 @@ namespace Engine {
 		// 履歴
 		std::vector<ContactInfo> history_;
 	private:
-		// 有効期限切れの履歴を削除 
+		/// <summary>
+		/// 有効期限切れの履歴を削除
+		/// </summary>
 		void Cleanup(float nowTime, float coolTimeSec) {
 			history_.erase(
 				std::remove_if(history_.begin(), history_.end(),

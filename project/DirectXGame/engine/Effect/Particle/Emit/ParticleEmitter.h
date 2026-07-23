@@ -10,12 +10,18 @@ namespace Engine {
 /// </summary>
 	class PointParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
 	};
 
@@ -25,19 +31,31 @@ namespace Engine {
 /// </summary>
 	class AABBParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
-		// 範囲設定
+		/// <summary>
+		/// 範囲設定
+		/// </summary>
 		void SetRange(Vector3 min, Vector3 max);
 	private:
 		Range<Vector3> range_;	// 出現範囲
@@ -49,20 +67,32 @@ namespace Engine {
 /// </summary>
 	class SphereParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
-		// 半径設定
+		/// <summary>
+		/// 半径設定
+		/// </summary>
 		void SetRadius(float radius) { radius_ = radius; }
 	private:
 		float radius_ = 1.0f; // 半径
@@ -74,23 +104,39 @@ namespace Engine {
 /// </summary>
 	class CornerParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// 固有更新
+		/// <summary>
+		/// 固有更新
+		/// </summary>
 		void UpdateUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
-		// 半径設定
+		/// <summary>
+		/// 半径設定
+		/// </summary>
 		void SetRadius(float radius) { corner.radius = radius; }
-		// セグメント設定
+		/// <summary>
+		/// セグメント設定
+		/// </summary>
 		void SetSegment(int segment) { corner.segment = segment; }
 	private:
 		CornerSegment corner;
@@ -102,19 +148,31 @@ namespace Engine {
 /// </summary>
 	class LineParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
-		// セグメント設定
+		/// <summary>
+		/// セグメント設定
+		/// </summary>
 		void SetSegment(Vector3 origin, Vector3 end);
 
 	private:
@@ -128,23 +186,39 @@ namespace Engine {
 /// </summary>
 	class SplineParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
-		// コントロールポイント追加
+		/// <summary>
+		/// コントロールポイント追加
+		/// </summary>
 		void AddControlPoints(const Vector3& pos) { controlPoints.push_back(pos); }
-		// コントロールポイント削除
+		/// <summary>
+		/// コントロールポイント削除
+		/// </summary>
 		void Clear() { controlPoints.clear(); };
-		// コントロールポイントに位置設定
+		/// <summary>
+		/// コントロールポイントに位置設定
+		/// </summary>
 		void SetControlPos(int index, Vector3 pos);
 
 	private:
@@ -157,19 +231,31 @@ namespace Engine {
 /// </summary>
 	class TriangleParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
-		// 頂点設定
+		/// <summary>
+		/// 頂点設定
+		/// </summary>
 		void SetTriangle(Triangle triangle) { triangle_ = triangle; }
 	private:
 		Triangle triangle_;
@@ -181,19 +267,31 @@ namespace Engine {
 /// </summary>
 	class MeshParticleEmitter : public BaseParticleEmitter {
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
-		// メッシュ設定
+		/// <summary>
+		/// メッシュ設定
+		/// </summary>
 		void SetMesh(ModelMesh* modelMesh) { modelMesh_ = modelMesh; };
 
 	private:
-		// パーティクル発生
+		/// <summary>
+		/// パーティクル発生
+		/// </summary>
 		void EmitUnique() override;
-		// デバックImGui
+		/// <summary>
+		/// デバックImGui
+		/// </summary>
 		void DebugImGui() override;
-		// エミッターライン描画
+		/// <summary>
+		/// エミッターライン描画
+		/// </summary>
 		void DrawEmitterLine() override;
-		// グローバルバリアブル適応
+		/// <summary>
+		/// グローバルバリアブル適応
+		/// </summary>
 		void ApplyGlobalVariablesUnique() override;
 	public:
 

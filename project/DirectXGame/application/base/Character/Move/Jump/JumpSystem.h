@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "JumpData.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 
@@ -11,30 +11,48 @@ namespace Engine {
 /// </summary>
 class JumpSystem {
 public:
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initialize();
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 public:	// ジャンプ開始
 	void StartJump(Engine::RigidBodyComponent& rigid);
-	// ジャンプ回数現象
+	/// <summary>
+	/// ジャンプ回数現象
+	/// </summary>
 	void DecrementJumpCount() { jumpCount_--; }
 public:
-	// ジャンプデータ取得
+	/// <summary>
+	/// ジャンプデータ取得
+	/// </summary>
 	JumpData GetData() const { return data_; }
 	//
 	JumpData& Data() { return data_; }
-	//	ジャンプ出来るか
+	/// <summary>
+	/// ジャンプ出来るか
+	/// </summary>
 	bool GetIsJump() const { return jumpCount_ > 0; }
-	// 残りジャンプ回数取得
+	/// <summary>
+	/// 残りジャンプ回数取得
+	/// </summary>
 	int GetJumpCount() const { return jumpCount_; }
 	//
 	bool GetIsJumping() const { return isJumping_;}
-	// データ設定
+	/// <summary>
+	/// データ設定
+	/// </summary>
 	void SetData(const JumpData& data) { data_ = data; }
-	// 最大ジャンプカウント設定
+	/// <summary>
+	/// 最大ジャンプカウント設定
+	/// </summary>
 	void SetMaxJumpCount(int count) { data_.maxJumpCount = count; }
-	// 入力中か設定
+	/// <summary>
+	/// 入力中か設定
+	/// </summary>
 	void SetInputPressed(bool isPressed) { isInputPressed_ = isPressed; }
 private:
 	// ジャンプデータ

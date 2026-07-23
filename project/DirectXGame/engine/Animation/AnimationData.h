@@ -11,7 +11,9 @@ struct Timer {
 	bool isClock = false;		//クロック機能を使うか
 	int clock = 1;				// クロック
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	float Update(float dt) {
 		if (clock == 1) {
 			t += dt; // タイマーの値を更新する
@@ -38,16 +40,22 @@ struct Timer {
 		return t; // 更新後のタイマーの値を返す
 	}
 
-	// 補間位置取得
+	/// <summary>
+	/// 補間位置取得
+	/// </summary>
 	float LerpT() const {
 		return t / maxT; // タイマーの値を最大値で割って0から1の範囲に変換する
 	}
-	// 反対補間位置取得
+	/// <summary>
+	/// 反対補間位置取得
+	/// </summary>
 	float InvLerpT() const {
 		return 1.0f - LerpT();
 	}
 
-	// タイマーが超えているか判定
+	/// <summary>
+	/// タイマーが超えているか判定
+	/// </summary>
 	bool IsMaxOverT() const {
 		if (t >= maxT) {
 			return true; // タイマーの値が最大値を超えた場合
@@ -57,10 +65,14 @@ struct Timer {
 		}
 	}
 
-	// クロック取得
+	/// <summary>
+	/// クロック取得
+	/// </summary>
 	int GetClock() const { return clock; }
 
-	// デバッグImGui
+	/// <summary>
+	/// デバッグImGui
+	/// </summary>
 	void DebugImGui(const std::string name = "") {
 #ifdef _DEBUG
 		ImGui::Begin(name.c_str());
@@ -76,14 +88,18 @@ struct Timer {
 	}
 
 private:
-	// クロックする
+	/// <summary>
+	/// クロックする
+	/// </summary>
 	void Clock() {
 		if (isClock) {
 			clock *= -1;	// クロック反転
 		}
 	}
 
-	// 時間が来たらクロック関数に
+	/// <summary>
+	/// 時間が来たらクロック関数に
+	/// </summary>
 	void MaxOverSetTimer(float t) {
 		this->t = t;
 		Clock();		// クロック反転
@@ -113,7 +129,9 @@ struct LerpMinMax
 	// 最小値
 	// 最大値
 	// 時間オーバーしたら戻すか
-	// 時間オーバーしたら止めるか
+	/// <summary>
+	/// 時間オーバーしたら止めるか
+	/// </summary>
 	void Initialize(float strP,float endP, float strT,float speed, float min = 0.0f, float max = 1.0f, bool isMinMaxOverStr = false, bool isOver = false) {
 		
 		this->strP = strP;
@@ -127,7 +145,9 @@ struct LerpMinMax
 		this->isOver = isOver;
 	}
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(float dt) {
 
 		if (isOver) {
@@ -158,6 +178,8 @@ struct LerpMinMax
 
 	}
 
-	// Tの位置取得
+	/// <summary>
+	/// Tの位置取得
+	/// </summary>
 	float LerpData() const { return Lerp(strP, endP, currentT); }
 };

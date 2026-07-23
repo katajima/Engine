@@ -26,27 +26,35 @@ namespace Engine {
 			}
 			resource_.Reset(); // 明示的にComPtrも解放
 		}
-		//ConstantBuffer(const ConstantBuffer&) = delete;
+		/// <summary>
+		/// ConstantBuffer(const ConstantBuffer&) = delete;
+		/// </summary>
 		ConstantBuffer& operator=(const ConstantBuffer&) = delete;
 		//生成
 		void CreateBuffer(DirectXCommon* dxCommon, int num = 1)
 		{
 			this->dxCommon = dxCommon;
 
-			// リソース生成
+			/// <summary>
+			/// リソース生成
+			/// </summary>
 			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
 
 			// データ
 			data_ = nullptr;
 
-			// リソースを書き込むためのアドレス取得
+			/// <summary>
+			/// リソースを書き込むためのアドレス取得
+			/// </summary>
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 		}
 		// デバッグ名設定
 		void SetResourceName(const wchar_t* name)
 		{
-			// LiveObject表示で定数バッファの残存元を追えるよう名前を付ける。
+			/// <summary>
+			/// LiveObject表示で定数バッファの残存元を追えるよう名前を付ける。
+			/// </summary>
 			if (resource_ && name) {
 				resource_->SetName(name);
 			}
@@ -63,7 +71,9 @@ namespace Engine {
 			dxCommon->GetCommandList()->SetComputeRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 		}
 
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		Type* Data() const { return data_; };
 
 	private:

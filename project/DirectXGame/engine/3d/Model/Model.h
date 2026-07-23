@@ -41,15 +41,23 @@ namespace Engine {
 		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
 		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, std::mutex* gpuResourceMutex);
 
-		// 通常描画
+		/// <summary>
+		/// 通常描画
+		/// </summary>
 		void Draw();
 
-		// スキニング用描画
+		/// <summary>
+		/// スキニング用描画
+		/// </summary>
 		void DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr);
 
-		// ModelData取得
+		/// <summary>
+		/// ModelData取得
+		/// </summary>
 		ModelData& GetModelData() { return modelData; }
-		// モデルのが透過物しているかを計算して透明度を返す
+		/// <summary>
+		/// モデルのが透過物しているかを計算して透明度を返す
+		/// </summary>
 		float GetMaterialAlpha();
 
 	public:
@@ -69,7 +77,9 @@ namespace Engine {
 	public:
 		// 読み込んだモデルからモデルデータ生成
 		// ディレクトリパス
-		// ファイル名
+		/// <summary>
+		/// ファイル名
+		/// </summary>
 		ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename, std::mutex* gpuResourceMutex = nullptr);
 
 

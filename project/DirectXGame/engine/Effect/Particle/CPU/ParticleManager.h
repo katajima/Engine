@@ -97,16 +97,26 @@ namespace Engine {
 		ParticleManager(ParticleManager&) = delete;
 		ParticleManager& operator=(ParticleManager&) = delete;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager);
-		// エディタ作成パーティクルのプリミティブを生成する共通クラスを設定
+		/// <summary>
+		/// エディタ作成パーティクルのプリミティブを生成する共通クラスを設定
+		/// </summary>
 		void SetPrimitiveCommon(PrimitiveCommon* primitiveCommon) { this->primitiveCommon = primitiveCommon; }
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
-		// 描画準備
+		/// <summary>
+		/// 描画準備
+		/// </summary>
 		void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp);
 
 		// パーティクルグループ取得
@@ -119,7 +129,9 @@ namespace Engine {
 		{
 			return particleGroups[name];
 		}
-		// ライン共通クラス取得
+		/// <summary>
+		/// ライン共通クラス取得
+		/// </summary>
 		LineCommon* GetLineCommon() { return lineCommon; }
 
 
@@ -131,38 +143,64 @@ namespace Engine {
 		void CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive,
 			EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
-		// エディタ用プリミティブを所有してパーティクルグループを作成
+		/// <summary>
+		/// エディタ用プリミティブを所有してパーティクルグループを作成
+		/// </summary>
 		bool CreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data);
-		// エディタ用メタデータに合わせて既存パーティクルグループを作り直す
+		/// <summary>
+		/// エディタ用メタデータに合わせて既存パーティクルグループを作り直す
+		/// </summary>
 		bool RecreateEditorParticleGroup(const std::string& name, const ParticleGroupEditorData& data);
-		// パーティクルグループを削除
+		/// <summary>
+		/// パーティクルグループを削除
+		/// </summary>
 		bool RemoveParticleGroup(const std::string& name);
-		// パーティクルグループ名を変更
+		/// <summary>
+		/// パーティクルグループ名を変更
+		/// </summary>
 		bool RenameParticleGroup(const std::string& oldName, const std::string& newName);
-		// エディタ用メタデータ取得
+		/// <summary>
+		/// エディタ用メタデータ取得
+		/// </summary>
 		ParticleGroupEditorData GetEditorParticleGroupData(const std::string& name) const;
-		// エディタ用メタデータ設定
+		/// <summary>
+		/// エディタ用メタデータ設定
+		/// </summary>
 		void SetEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
-		// エディタ用保存データを実際のパーティクル群へ反映
+		/// <summary>
+		/// エディタ用保存データを実際のパーティクル群へ反映
+		/// </summary>
 		void ApplyEditorParticleGroupData(const std::string& name, const ParticleGroupEditorData& data);
-		// エディタのテクスチャ選択UIから利用するTextureManagerを取得
+		/// <summary>
+		/// エディタのテクスチャ選択UIから利用するTextureManagerを取得
+		/// </summary>
 		TextureManager* GetTextureManager() const;
 
-		// カメラセット
+		/// <summary>
+		/// カメラセット
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
 
-		// フィールドエフェクト追加
+		/// <summary>
+		/// フィールドエフェクト追加
+		/// </summary>
 		void AddFieldEffect(Field::FieldEffect* field) {
 			fieldEffect_.push_back(field);
 		}
 
-		// ランダムエンジン取得
+		/// <summary>
+		/// ランダムエンジン取得
+		/// </summary>
 		std::mt19937& GetRandomEngine() { return randomEngine_; }
 
-		// パーティクルクリア(名前で検索)
+		/// <summary>
+		/// パーティクルクリア(名前で検索)
+		/// </summary>
 		void ClearParticle(std::string name);
 
-		// パーティクルクリア(全て)
+		/// <summary>
+		/// パーティクルクリア(全て)
+		/// </summary>
 		void ClearParticle() {
 			for (auto& group : particleGroups) {
 				group.second.particle.clear();
@@ -170,16 +208,26 @@ namespace Engine {
 		}
 
 	private:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
 
-		// ブレンド設定(加算)
+		/// <summary>
+		/// ブレンド設定(加算)
+		/// </summary>
 		void BlendAdd();
-		// ブレンド設定(減算)
+		/// <summary>
+		/// ブレンド設定(減算)
+		/// </summary>
 		void BlendSubtract();
-		// ブレンド設定(乗算)
+		/// <summary>
+		/// ブレンド設定(乗算)
+		/// </summary>
 		void BlendMuliply();
 
 	private: // もらいもの

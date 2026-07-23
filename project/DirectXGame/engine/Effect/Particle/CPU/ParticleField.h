@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -45,20 +45,32 @@ namespace Engine {
 		/// </summary>
 		class FieldEffect {
 		public:
-			// 初期化
+			/// <summary>
+			/// 初期化
+			/// </summary>
 			void Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon);
-			// 更新
+			/// <summary>
+			/// 更新
+			/// </summary>
 			void Update();
-			// デバック確認ImGui
+			/// <summary>
+			/// デバック確認ImGui
+			/// </summary>
 			void DebugImgui();
-			// パーティクルとの当たり判定
+			/// <summary>
+			/// パーティクルとの当たり判定
+			/// </summary>
 			bool IsCollisionAABB(const Vector3& point);
 
 
 		public:
-			// 名前取得
+			/// <summary>
+			/// 名前取得
+			/// </summary>
 			std::string GetName() const { return name_; }
-			// エフェクトがかかっているか
+			/// <summary>
+			/// エフェクトがかかっているか
+			/// </summary>
 			bool GetIsEffect() const { return isEffect; }
 			// 親子関係設定
 			void SetParent(WorldTransform& parent)
@@ -92,7 +104,9 @@ namespace Engine {
 			LineCommon* lineCommon_;
 		};
 
-		// パーティクルにかかるフィールドエフェクトの処理
+		/// <summary>
+		/// パーティクルにかかるフィールドエフェクトの処理
+		/// </summary>
 		void Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect, float deltaTime);
 
 

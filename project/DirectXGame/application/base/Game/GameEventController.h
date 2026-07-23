@@ -42,14 +42,22 @@ namespace Game {
 		void Draw2D();
 
 	public:
-		// イベント終了通知
+		/// <summary>
+		/// イベント終了通知
+		/// </summary>
 		bool IsEndEvent() const { return isEndEvent_; };
-		// 移動可能か
+		/// <summary>
+		/// 移動可能か
+		/// </summary>
 		bool IsMove() const { return eventStateMachine_->GetCurrentState()->GetData().isMove; }
 
-		// 現在のウェーブ
+		/// <summary>
+		/// 現在のウェーブ
+		/// </summary>
 		int GetCurrentWave() const { return curretWave_; }
-		// 現在の時間
+		/// <summary>
+		/// 現在の時間
+		/// </summary>
 		float GetCurrentWaveTime() const { return time_; }
 		// スポーン生成
 		void CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount,
@@ -57,9 +65,13 @@ namespace Game {
 			const Character::CrowdBehaviorSettings& crowdBehavior = Character::CrowdBehaviorSettings::Flocking());
 	public: // イベント系
 
-		// ノード追加(データから生成)
+		/// <summary>
+		/// ノード追加(データから生成)
+		/// </summary>
 		void AddNode(const std::string& nodeName, const GameEventData& data);
-		// ノード連結
+		/// <summary>
+		/// ノード連結
+		/// </summary>
 		void ConnectNode(const std::string& from, const std::string& name, const std::string& to);
 
 		/// <summary>
@@ -67,7 +79,9 @@ namespace Game {
 		/// </summary>
 		void CreateGameEvent(const std::string& nodeName, const GameEventData& data);
 
-		// コンボノードステート取得
+		/// <summary>
+		/// コンボノードステート取得
+		/// </summary>
 		std::shared_ptr<GameEventState> GetNodeState(const std::string& name) {
 			auto it = eventStateNodes_.find(name);
 			if (it != eventStateNodes_.end()) {

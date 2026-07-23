@@ -20,25 +20,37 @@ namespace Engine {
 	class Material
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxcommon);
 
-		// マテリアルコマンドリスト設定
+		/// <summary>
+		/// マテリアルコマンドリスト設定
+		/// </summary>
 		void GetCommandListMaterial(int index);
 
-		// テクスチャコマンドリスト設定
+		/// <summary>
+		/// テクスチャコマンドリスト設定
+		/// </summary>
 		void GetCommandListTexture(int indexDiffuse, int normalIndex = 0, int specularIndex = 0, int environmentIndex = 0);
 
 
-		// テクスチャ読み込み
+		/// <summary>
+		/// テクスチャ読み込み
+		/// </summary>
 		void LoadTex();
 
 
-		// マテリアルインスタンス取得
+		/// <summary>
+		/// マテリアルインスタンス取得
+		/// </summary>
 		MaterialInstance& GetMaterialInstance() { return materialInstance_; }
 
 
-		// GPUデータ更新
+		/// <summary>
+		/// GPUデータ更新
+		/// </summary>
 		void GPUData();
 	public:
 

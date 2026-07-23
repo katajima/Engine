@@ -26,60 +26,102 @@ namespace Combo {
 		void Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables,
 			Combo::System* comboSystem, const std::string& stateName,
 			Character::BaseCharacter* owner, EffectSystem* effectSystem);
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void UpdateImGui(float dt, bool isActive);
 	public:
-		// エディタ上で選択中か設定
+		/// <summary>
+		/// エディタ上で選択中か設定
+		/// </summary>
 		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
-		// コエディタ上で選択中か取得
+		/// <summary>
+		/// コエディタ上で選択中か取得
+		/// </summary>
 		bool GetNowChoice() const { return nowChoice_; }
 
-		// 接続可能なコンボ名リスト設定
+		/// <summary>
+		/// 接続可能なコンボ名リスト設定
+		/// </summary>
 		void SetConectComboNames(const std::vector<std::string>& names) { conectComboNames_ = names; }
 
 
-		// シーケンサー取得
+		/// <summary>
+		/// シーケンサー取得
+		/// </summary>
 		AttackSequence GetAttackSequence() const { return sequence_; }
 
-		// 最大フレーム取得
+		/// <summary>
+		/// 最大フレーム取得
+		/// </summary>
 		float GetMaxFrame() const { return ConvertUtility::FramesToSeconds(maxFrame); }
 
-		// データ取得
+		/// <summary>
+		/// データ取得
+		/// </summary>
 		GlobalData GetData() const { return data_; }
-		// エディタ上で直接編集するためのデータ参照を取得
+		/// <summary>
+		/// エディタ上で直接編集するためのデータ参照を取得
+		/// </summary>
 		GlobalData& GetMutableData() { return data_; }
 	private:
-		// ヒットボックス設定
+		/// <summary>
+		/// ヒットボックス設定
+		/// </summary>
 		void ImGuiApplyHitBox();
-		// 終了条件
+		/// <summary>
+		/// 終了条件
+		/// </summary>
 		void ImGuiEndConditionType();
-		// 攻撃種別と遠距離設定
+		/// <summary>
+		/// 攻撃種別と遠距離設定
+		/// </summary>
 		void ImGuiAttackType();
-		// 遠距離攻撃設定
+		/// <summary>
+		/// 遠距離攻撃設定
+		/// </summary>
 		void ImGuiRange();
-		// 演出設定
+		/// <summary>
+		/// 演出設定
+		/// </summary>
 		void ImGuiEffect();
-		// 攻撃、命中、終了時の音声設定
+		/// <summary>
+		/// 攻撃、命中、終了時の音声設定
+		/// </summary>
 		void ImGuiAudio();
-		// 移動関係設定
+		/// <summary>
+		/// 移動関係設定
+		/// </summary>
 		void ImGuiMove();
-		// リアクション設定
+		/// <summary>
+		/// リアクション設定
+		/// </summary>
 		void ImGuiReaction();
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void ImGuiCamera();
-		// コンボ接続設定
+		/// <summary>
+		/// コンボ接続設定
+		/// </summary>
 		void ImGuiConnection();
 	private:
-		// シーケンサーの状態をステートに適応
+		/// <summary>
+		/// シーケンサーの状態をステートに適応
+		/// </summary>
 		void SequencerApplyToState();
 
 		void DrawHitEffectEditor(HitReactionData& reaction,
 			const std::map<std::string, EffectGlobalData>& effectDatas);
 		void DrawComboEffectEditor(GloblEffectData& effect,
 			const std::map<std::string, EffectGlobalData>& effectDatas);
-		// コンボエフェクトの設定をシーケンサー表示へ反映する
+		/// <summary>
+		/// コンボエフェクトの設定をシーケンサー表示へ反映する
+		/// </summary>
 		void SyncComboEffectSequenceEvents();
-		// Soundディレクトリの一覧から音源を選択し、試聴できるUIを描画する。
+		/// <summary>
+		/// Soundディレクトリの一覧から音源を選択し、試聴できるUIを描画する。
+		/// </summary>
 		void DrawSoundSelector(const char* label, std::string& soundId, float volume);
 
 	private: // 貰いもの

@@ -45,7 +45,9 @@ const std::unordered_map<ColorName, Color> colorMap = {
 };
 
 
-// ColorNameからColorを取得する関数
+/// <summary>
+/// ColorNameからColorを取得する関数
+/// </summary>
 static Color GetColorSet(ColorName name) {
     auto it = colorMap.find(name);
     if (it != colorMap.end()) {

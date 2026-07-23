@@ -91,7 +91,9 @@ namespace Character {
 		}
 
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update() {
 			parameters->HP.Update(deltaTime_);	// HP更新
 			parameters->MP.Update(deltaTime_);	// MP更新
@@ -100,36 +102,58 @@ namespace Character {
 
 
 	public:
-		// HP取得
+		/// <summary>
+		/// HP取得
+		/// </summary>
 		float GetHP() const { return parameters->HP.value; }
-		// MP取得
+		/// <summary>
+		/// MP取得
+		/// </summary>
 		float GetMP() const { return parameters->MP.value; }
-		// スタミナ取得
+		/// <summary>
+		/// スタミナ取得
+		/// </summary>
 		float GetStamina() const { return parameters->stamina.value; }
-		// パワー取得
+		/// <summary>
+		/// パワー取得
+		/// </summary>
 		float GetStrength() const { return parameters->strength; }
-		// 防御力取得
+		/// <summary>
+		/// 防御力取得
+		/// </summary>
 		float GetDefense() const { return parameters->defense; }
 
-		// スタミナがあるか
+		/// <summary>
+		/// スタミナがあるか
+		/// </summary>
 		bool IsGetStamina() const {
 			return !parameters->stamina.IsEmpty();
 		}
 
 		//
 
-		// HP取得
+		/// <summary>
+		/// HP取得
+		/// </summary>
 		Gage& HP() const { return parameters->HP; };
-		// MP取得
+		/// <summary>
+		/// MP取得
+		/// </summary>
 		Gage& MP() const { return  parameters->MP; };
-		// スタミナ取得
+		/// <summary>
+		/// スタミナ取得
+		/// </summary>
 		Gage& Stamina() const { return parameters->stamina; };
 
 
 
-		// 性格取得
+		/// <summary>
+		/// 性格取得
+		/// </summary>
 		Personality GetPersonality() const { return personality; }
-		// キャラクター種類
+		/// <summary>
+		/// キャラクター種類
+		/// </summary>
 		Type GetCharacterType() const { return characterType_; }
 	public:
 		Personality personality = Personality::kNormal;

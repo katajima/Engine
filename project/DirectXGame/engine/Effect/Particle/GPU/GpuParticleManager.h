@@ -36,43 +36,71 @@ namespace Engine {
 	class GpuParticleManager {
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager);
 
-		// 更新
+		/// <summary>
+		/// 更新
+		/// </summary>
 		void Update();
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void Draw();
 
 
-		// カメラセット
+		/// <summary>
+		/// カメラセット
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
-		// コンピュートシェーダでのPSO設定
+		/// <summary>
+		/// コンピュートシェーダでのPSO設定
+		/// </summary>
 		void PreCsPso();
-		// コンピュートシェーダトレイルのPSO設定
+		/// <summary>
+		/// コンピュートシェーダトレイルのPSO設定
+		/// </summary>
 		void PreCsTrailPso();
-		// グループ生成
+		/// <summary>
+		/// グループ生成
+		/// </summary>
 		void CreateGroup(std::string name, ModelMesh* mesh, std::string textureName, int instance);
 
 
 
-		// エミッターにグループを関連付け
+		/// <summary>
+		/// エミッターにグループを関連付け
+		/// </summary>
 		void SetEmitteToGroup(std::string emitteName, std::string particleGroupName);
-		// フィールド生成
+		/// <summary>
+		/// フィールド生成
+		/// </summary>
 		void CreateField(std::string name);
 
-		// エミッターの解放
+		/// <summary>
+		/// エミッターの解放
+		/// </summary>
 		void ClearEmitter(std::string nume);
-		// 全エミッターの開放
+		/// <summary>
+		/// 全エミッターの開放
+		/// </summary>
 		void ClearEmitterAll();
 
 
-		// パーティクル削除
+		/// <summary>
+		/// パーティクル削除
+		/// </summary>
 		void ClearGroupParticle(std::string name);
-		// パーティクル削除(全て)
+		/// <summary>
+		/// パーティクル削除(全て)
+		/// </summary>
 		void ClearGroupParticleAll();
 
-		// フィールドの解放
+		/// <summary>
+		/// フィールドの解放
+		/// </summary>
 		void ClearField(std::string name);
 
 		// ヘッダにテンプレート関数を定義
@@ -97,7 +125,9 @@ namespace Engine {
 			return dynamic_cast<T*>(it->second.get());
 		}
 
-		// パーティクルグループ取得
+		/// <summary>
+		/// パーティクルグループ取得
+		/// </summary>
 		GpuParticleGroup* GetGpuParticleGroup(const std::string& name) {
 			auto it = gpuParticleGroup_.find(name);
 			if (it == gpuParticleGroup_.end()) {
@@ -108,9 +138,13 @@ namespace Engine {
 
 	private:
 
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		void CreateRootSignature();
-		// グラフィックスパイプラインの作成
+		/// <summary>
+		/// グラフィックスパイプラインの作成
+		/// </summary>
 		void CreateGraphicsPipeline();
 
 	private:

@@ -19,39 +19,65 @@ namespace Engine {
 	class PostEffectData
 	{
 	public:
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon, PostEffectType type);
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender();
 
-		// ImGui
+		/// <summary>
+		/// ImGui
+		/// </summary>
 		void UpdateImgui();
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawColl();
-		// カメラ設定
+		/// <summary>
+		/// カメラ設定
+		/// </summary>
 		void SetCamera(Camera* camera) { this->camera = camera; }
 
 
 
 
 
-		// ビネット取得
+		/// <summary>
+		/// ビネット取得
+		/// </summary>
 		ConstantBuffer<VignetteGPU>* GetVignette() { return cbVignette_.get(); }
-		// スムージング取得
+		/// <summary>
+		/// スムージング取得
+		/// </summary>
 		ConstantBuffer<SmoothigGPU>* GetSmoothig() { return cbSmoothig_.get(); }
-		// ガウス取得
+		/// <summary>
+		/// ガウス取得
+		/// </summary>
 		ConstantBuffer<GaussianGPU>* GetGaussian() { return cbGaussian_.get(); }
-		// アウトライン取得
+		/// <summary>
+		/// アウトライン取得
+		/// </summary>
 		ConstantBuffer<OutlineGPU>* GetOutline() { return cbOutline_.get(); }
-		// ラジアルブラー取得
+		/// <summary>
+		/// ラジアルブラー取得
+		/// </summary>
 		ConstantBuffer<RadialBlurGPU>* GetRadialBlur() { return cbRadialBlur_.get(); }
-		// ディゾルブ取得
+		/// <summary>
+		/// ディゾルブ取得
+		/// </summary>
 		ConstantBuffer<DissolveGPU>* GetDissolve() { return cbDissolve_.get(); }
-		// ランダム取得
+		/// <summary>
+		/// ランダム取得
+		/// </summary>
 		ConstantBuffer<RandomGPU>* GetRandom() { return cbRandom_.get(); }
-		// ブルーム取得
+		/// <summary>
+		/// ブルーム取得
+		/// </summary>
 		ConstantBuffer<BloomGPU>* GetBloom() { return cbBloom_.get(); }
 
 	private:
@@ -84,26 +110,42 @@ namespace Engine {
 	class IPostEffect
 	{
 	public:
-		// 派生ポストエフェクトをIPostEffect経由で破棄しても、派生側まで正しく解放する。
+		/// <summary>
+		/// 派生ポストエフェクトをIPostEffect経由で破棄しても、派生側まで正しく解放する。
+		/// </summary>
 		virtual ~IPostEffect() = default;
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		void Initialize(DirectXCommon* dxCommon, std::string psName);
 
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		virtual void DrawRender(int index, int indexB = 0) = 0;
 	protected:
-		// 共通パイプライン生成
+		/// <summary>
+		/// 共通パイプライン生成
+		/// </summary>
 		void CreateCommonPipeline(std::string psName);
-		// 描画設定
+		/// <summary>
+		/// 描画設定
+		/// </summary>
 		void DrawSetting();
 	public: // 取得or設定
-		//  DirectX共通クラス取得
+		/// <summary>
+		/// DirectX共通クラス取得
+		/// </summary>
 		DirectXCommon* GetDxCommon() const { return dxCommon_; }
-		// グラフィックパイプラインとルートシグネチャ取得
+		/// <summary>
+		/// グラフィックパイプラインとルートシグネチャ取得
+		/// </summary>
 		PSRS& GetRendering() { return posteffect_; };
 	protected:
-		// ルートシグネチャの作成
+		/// <summary>
+		/// ルートシグネチャの作成
+		/// </summary>
 		virtual void CreateRootSignature() = 0;
 	protected:
 		PSRS posteffect_; // ポストエフェクト用ルートシグネチャとPSO
@@ -118,10 +160,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectCopy : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// グレースケール
@@ -130,10 +176,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectGrayScale : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// セピア
@@ -142,10 +192,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectSepia : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// ビネット
@@ -154,10 +208,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectVignette : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// スムージング
@@ -166,10 +224,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectSmoothing : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// ガウシアン
@@ -178,10 +240,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectGaussian : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// アウトライン
@@ -190,10 +256,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectOutline : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// ラジアルブラー
@@ -202,10 +272,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectRadialBlur : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// ディゾルブ
@@ -214,10 +288,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectDissolve : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 		// ノイズテクスチャ
 		uint32_t dissolveIndex = 0;
@@ -229,10 +307,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectRandom : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 	// ブルーム
@@ -241,10 +323,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectBloom : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 
@@ -254,10 +340,14 @@ namespace Engine {
 /// </summary>
 	class PostEffectCombine : public IPostEffect {
 	public:
-		// 描画
+		/// <summary>
+		/// 描画
+		/// </summary>
 		void DrawRender(int index, int indexB) override;
 	protected:
-		// ルートシグネチャ生成
+		/// <summary>
+		/// ルートシグネチャ生成
+		/// </summary>
 		void CreateRootSignature() override;
 	};
 }

@@ -25,17 +25,27 @@ public:
 	/// </summary>
 	/// <param name="dt"></param>
 	void Update(float dt);
-	// プレイヤー操作だけを空にする
+	/// <summary>
+	/// プレイヤー操作だけを空にする
+	/// </summary>
 	void ClearPlayerInput();
 private:
-	// プレイヤー操作の入力データの更新
+	/// <summary>
+	/// プレイヤー操作の入力データの更新
+	/// </summary>
 	void PlayerInputUpdate(float dt);
-	// ゲーム操作の入力データの更新
+	/// <summary>
+	/// ゲーム操作の入力データの更新
+	/// </summary>
 	void GameInputUpdate(float dt);
 public:
-	// 入力データ取得
+	/// <summary>
+	/// 入力データ取得
+	/// </summary>
 	PlayerInputData GetPlayerInputData() const { return playerInputData_; }
-	// ゲーム操作の入力データ取得
+	/// <summary>
+	/// ゲーム操作の入力データ取得
+	/// </summary>
 	GameInputData GetGameInputData() const { return gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
