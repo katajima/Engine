@@ -1833,7 +1833,7 @@ void GvFunction::SetValue(const std::string& groupName, const std::string& itemN
 ============================================================
 File Path: project/DirectXGame/application/GlobalVariables/GlobalVariablesFunction.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include <iostream>
 #include <fstream>
@@ -1848,6 +1848,9 @@ struct EnumEntry {
 	int64_t value;      // EnumItem.value に入る値
 };
 
+/// <summary>
+/// EnumRegistryを管理・実装するクラス。
+/// </summary>
 class EnumRegistry {
 public:
 	static EnumRegistry& Instance() {
@@ -1970,14 +1973,12 @@ public:
 	/// <param name="globalVariables">攻撃設定やデバッグ設定を取得するグローバル変数管理です。</param>
 	/// <param name="base">攻撃パラメーター補正に使用するキャラクターパラメーターです。</param>
 	/// <param name="owner">この攻撃コントローラーを所有するキャラクターです。</param>
-
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
 		Character::ParameterComponent* base, Character::BaseCharacter* owner);
 	/// <summary>
 	/// キャラクターの攻撃状態に応じて、ヒットカウンター、コンボ、ロックオン関連の処理を更新します。
 	/// </summary>
     /// <param name="ctx">更新対象キャラクターと周辺システムへの参照をまとめたコンテキストです。</param>
-
 	void Update(const Character::CharacterContext& ctx);
 
 
@@ -1986,19 +1987,16 @@ public:
 	/// 攻撃ヒットカウンターへの参照を取得します。
 	/// </summary>
 	/// <returns>内部で管理しているヒットカウンターへの参照です.</returns>
-
 	HitCounter& GetHitCounter() { return hitCounter_; }
 	/// <summary>
 	/// 攻撃パラメーター補正オブジェクトを取得します。
 	/// </summary>
 	/// <returns>攻撃パラメーター補正オブジェクトへのポインタです.</returns>
-
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
 	/// <summary>
 	/// コンボシステムを取得します。
 	/// </summary>
 	/// <returns>内部で管理しているコンボシステムへのポインタです.</returns>
-
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
 	/// <summary>
 	/// ロックオンシステムを取得します。
@@ -2010,20 +2008,17 @@ public:
 	/// キャラクターが現在攻撃中か取得します。
 	/// </summary>
 	/// <returns>攻撃中ならtrue、それ以外はfalseです.</returns>
-
 	bool IsAttack() const { return isAttack_; }
 	/// <summary>
 	/// 攻撃中フラグを設定します。
 	/// </summary>
     /// <param name="is">対象の状態を有効にする場合はtrueです。</param>
-
 	void SetIsAttack(bool is) { isAttack_ = is; };
 
 	/// <summary>
 	/// ヒットカウンターの経過時間更新を停止するか設定します。
 	/// </summary>
     /// <param name="is">対象の状態を有効にする場合はtrueです。</param>
-
 	void IsStopHitTimer(bool is) { isStopHitTimer_ = is; };
 
 public:
@@ -2031,14 +2026,12 @@ public:
 	/// デバッグ用の挙動を有効にするか設定します。
 	/// </summary>
     /// <param name="isDebug">デバッグ中として扱う場合はtrueです。</param>
-
 	void SetIsDebug(bool isDebug) { isDebugEditor_ = isDebug; };
 
 	/// <summary>
 	/// デバッグ用の挙動が有効か取得します。
 	/// </summary>
 	/// <returns>デバッグ中ならtrue、それ以外はfalseです.</returns>
-
 	bool IsDebug() const { return isDebugEditor_; };
 
 private:
@@ -2234,7 +2227,7 @@ float Continuous::GetDamage() const
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/AttackData.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 
@@ -2243,6 +2236,9 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.h
 #include <memory>
 
 /// ダメージ処理の共通インターフェース
+/// <summary>
+/// DamageDataを管理・実装するクラス。
+/// </summary>
 class DamageData {
 public:
 	// ダメージタイプ
@@ -2275,6 +2271,9 @@ public:
 };
 
 /// 一回だけダメージを発生させるデータ
+/// <summary>
+/// Oneを管理・実装するクラス。
+/// </summary>
 class One final : public DamageData {
 public:
 	// 一回ダメージの状態を更新する
@@ -2299,6 +2298,9 @@ private:
 };
 
 /// 一回の攻撃中に複数回ダメージを発生させるデータ
+/// <summary>
+/// Continuousを管理・実装するクラス。
+/// </summary>
 class Continuous final : public DamageData {
 public:
 	// 連撃ダメージの状態を更新する
@@ -2331,6 +2333,9 @@ private:
 };
 
 /// 時間経過で継続的にダメージを発生させるデータ
+/// <summary>
+/// Durationを管理・実装するクラス。
+/// </summary>
 class Duration final : public DamageData {
 public:
 	// 持続ダメージの状態を更新する
@@ -2362,6 +2367,9 @@ private:
 };
 
 /// 派生DamageDataの所有と値コピーを担当するハンドル
+/// <summary>
+/// DamageDataHandleを管理・実装するクラス。
+/// </summary>
 class DamageDataHandle {
 public:
 	// 既定では一回ダメージを保持する
@@ -2596,6 +2604,9 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.h
 
 namespace Combo {
 	// コンボデータ
+/// <summary>
+/// ComboDataを管理・実装するクラス。
+/// </summary>
 	class ComboData {
 	public:
 
@@ -2604,76 +2615,64 @@ namespace Combo {
 		/// </summary>
 		/// <param name="owner">コンボを実行するキャラクターです。</param>
 		/// <param name="ctx">キャラクターと周辺システムへの参照をまとめた実行コンテキストです。</param>
-
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 
 		/// <summary>
 		/// コンボの経過時間に応じて移動、判定、演出、遠距離攻撃を更新します。
 		/// </summary>
         /// <param name="ctx">更新対象キャラクターと周辺システムへの参照をまとめた実行コンテキストです。</param>
-
 		void Update(const Character::CharacterContext& ctx);
 
 		/// <summary>
 		/// コンボを終了し、一時的に有効化した判定や演出を解除します。
 		/// </summary>
         /// <param name="owner">コンボを終了するキャラクターです。</param>
-
 		void Exit(Character::BaseCharacter* owner);
 	public:
 		/// <summary>
 		/// コンボ条件データへの参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理しているコンボ条件への参照です.</returns>
-
 		ComboCondition& GetComboCondition() { return comboCondition; }
 		/// <summary>
 		/// コンボモーションへの参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理しているモーションへの参照です.</returns>
-
 		ComboMotion& GetComboMotion() { return motion; }
 		/// <summary>
 		/// コンボカメラ演出への参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理しているカメラ演出への参照です.</returns>
-
 		ComboCamera& GetComboCamera() { return camera; }
 		/// <summary>
 		/// コンボのヒットボックス設定への参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理しているヒットボックスへの参照です.</returns>
-
 		ComboHitBox& GetComboHitBox() { return hitBox; }
 		/// <summary>
 		/// コンボエフェクトへの参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理しているエフェクトへの参照です.</returns>
-
 		ComboEffect& GetComboEffect() { return effect; }
 		/// <summary>
 		/// コンボオーディオへの参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理しているオーディオへの参照です.</returns>
-
 		ComboAudio& GetComboAudio() { return audio; }
 		/// <summary>
 		/// コンボの遠距離攻撃処理への参照を取得します。
 		/// </summary>
 		/// <returns>内部で管理している遠距離攻撃処理への参照です.</returns>
-
 		ComboRange& GetComboRange() { return range; }
 		/// <summary>
 		/// コンボの攻撃タイプを取得します。
 		/// </summary>
 		/// <returns>近距離、遠距離などのコンボタイプです.</returns>
-
 		Type GetType() const { return type; }
 		/// <summary>
 		/// 攻撃ノード単位の調整データを編集可能な参照で取得します。
 		/// </summary>
 		/// <returns>攻撃ノード調整データへの参照です.</returns>
-
 		GlobalAction& GetActionData() { return action; }
 		/// <summary>
 		/// 攻撃ノード単位の調整データを読み取り専用参照で取得します。
@@ -2685,7 +2684,6 @@ namespace Combo {
 		/// コンボ開始からの経過時間を取得します。
 		/// </summary>
 		/// <returns>経過時間を秒単位で返します.</returns>
-
 		float GetTimer() const { return timer_; }
 		/// <summary>
 		/// コンボの経過時間を0秒へリセットします。
@@ -2695,19 +2693,16 @@ namespace Combo {
 		/// コンボの経過時間を設定します。
 		/// </summary>
         /// <param name="time">設定する経過時間です。単位は秒です。</param>
-
 		void SetTimer(float time) { timer_ = time; } 
 		/// <summary>
 		/// デバッグ用の挙動を有効にするか設定します。
 		/// </summary>
         /// <param name="is">デバッグ中として扱う場合はtrueです。</param>
-
 		void SetIsDebug(bool is) { isDebug = is; }
 		/// <summary>
 		/// コンボの攻撃タイプを設定します。
 		/// </summary>
         /// <param name="type">設定するコンボタイプです。</param>
-
 		void SetType(Type type) { this->type = type; }
 	private:
 		ComboCondition comboCondition{};		// コンボ条件クラス
@@ -2870,9 +2865,10 @@ namespace Combo {
 		bool subWeaponUseSpin = true;						// 投擲中に回転させるか
 		Vector3 subWeaponRotateOffset = { 1.5708f, 0.0f, 3.1416f };	// サブ武器の回転オフセット
 	};
-
-	// 攻撃ノード単位のゲームプレイ調整項目。
-	struct GlobalAction {
+/// <summary>
+/// 攻撃ノード単位で適用するゲームプレイ調整値を保持するデータ。
+/// </summary>
+struct GlobalAction {
 		// このコンボノードの命中でヒットカウントを増やすか
 		bool incrementHitCount = true;
 		// このコンボノード中のヒットカウント加算を最初の一回だけにするか
@@ -2897,9 +2893,10 @@ namespace Combo {
 		float hitPauseScale = 1.0f;
 		float cameraShakePower = 0.0f;
 	};
-
-	// コンボノード内で再生する音を一か所にまとめた保存用データ。
-	struct GlobalAudio {
+/// <summary>
+/// コンボノードで再生する攻撃、ヒット、終了音の設定を保持するデータ。
+/// </summary>
+struct GlobalAudio {
 		std::string attackSoundName = ""; // 攻撃動作中に指定時刻で再生する音ID。
 		std::string hitSoundName = "";    // 攻撃が相手へ命中した瞬間に再生する音ID。
 		std::string finishSoundName = ""; // コンボノードが終了した瞬間に再生する音ID。
@@ -3589,7 +3586,12 @@ namespace Combo {
 
     public:
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 入力受付時間と遷移条件を評価し、入力に対応する次のステートを解決します。
+        /// </summary>
+        /// <param name="owner">入力を処理するキャラクターです。</param>
+        /// <param name="input">評価する攻撃入力です。</param>
+        /// <returns>遷移先ステートがあれば共有ポインタ、なければnullptrです。</returns>
         std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override;
 
         /// <summary>
@@ -3648,7 +3650,10 @@ namespace Combo {
         /// <returns>指定入力に次ノード候補があればtrue、それ以外はfalseです。</returns>
         bool HasNextState(ActionInput input) const;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 現在のステート経過時間が入力受付ウィンドウ内か確認します。
+        /// </summary>
+        /// <returns>入力を受け付けられる時間ならtrue、それ以外はfalseです。</returns>
         bool IsInputAcceptable() override {
             return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
         }
@@ -7744,6 +7749,9 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboImG
 #include "DirectXGame/engine/Animation/Animation.h"
 
 namespace Combo {
+/// <summary>
+/// ComboImGuiを管理・実装するクラス。
+/// </summary>
 	class ComboImGui {
 	public:
 		// 現在の時間
@@ -7784,6 +7792,9 @@ struct AttackEvent {
 };
 
 //  攻撃シーケンス
+/// <summary>
+/// AttackSequenceを管理・実装するクラス。
+/// </summary>
 class AttackSequence : public ImSequencer::SequenceInterface {
 public:
 	
@@ -9772,6 +9783,9 @@ struct MoveRequest;			// 移動リクエスト
 
 namespace Combo {
 
+/// <summary>
+/// ComboMoveを管理・実装するクラス。
+/// </summary>
 	class ComboMove {
 	public:
 		/// <summary>
@@ -10552,6 +10566,9 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCance
 namespace Combo {
 
 	// キャンセル受付
+/// <summary>
+/// CancelReceiverを管理・実装するクラス。
+/// </summary>
 	class CancelReceiver {
 	public:
 		// 開始
@@ -10630,6 +10647,9 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCondi
 namespace Combo {
 
 	// コンボ受付条件クラス
+/// <summary>
+/// ComboConditionを管理・実装するクラス。
+/// </summary>
 	class ComboCondition {
 	public:
 		// 開始
@@ -11026,6 +11046,9 @@ namespace Character{
 	class ParameterComponent;
 }
 // 戦闘中の倍率・軽減率を扱う
+/// <summary>
+/// CombatStatを管理・実装するクラス。
+/// </summary>
 class CombatStat
 {
 public:
@@ -11059,6 +11082,9 @@ private:
 };
 
 // ダメージ計算
+/// <summary>
+/// DamageCalculatorを管理・実装するクラス。
+/// </summary>
 class DamageCalculator {
 public:
 	// キャラクターとキャラクターによるダメージ計算
@@ -12200,6 +12226,9 @@ namespace Character {
 }
 namespace HitBox {
 
+/// <summary>
+/// HitBoxFunctionを管理・実装するクラス。
+/// </summary>
 	class HitBoxFunction {
 	public:
 
@@ -13629,7 +13658,7 @@ void Projectile::BaseProjectile::DeleteProcess() {
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BaseProjectile.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "ProjectileData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -13643,6 +13672,9 @@ namespace Character {
 namespace Projectile {
 
 	// 発射物の基底クラス
+/// <summary>
+/// BaseProjectileを管理・実装するクラス。
+/// </summary>
 	class BaseProjectile : public IHitReceiver{
 	public:
 		// 派生発射物を基底ポインターから安全に破棄する
@@ -13795,6 +13827,9 @@ struct BulletInfo {
 };
 
 // 弾データ
+/// <summary>
+/// BulletDataを管理・実装するクラス。
+/// </summary>
 class BulletData {
 public:
 	// 初期化
@@ -15851,10 +15886,13 @@ void CameraCollision::Update(Transform& transform, float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraCollision.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // 
+/// <summary>
+/// CameraCollisionを管理・実装するクラス。
+/// </summary>
 class CameraCollision {
 public:
 
@@ -16110,7 +16148,7 @@ Vector3 CameraController::CalculateLookAheadOffset(const CameraLookAheadData& da
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
@@ -16124,6 +16162,9 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
 class InputSystem;
 
 // カメラ統括クラス
+/// <summary>
+/// CameraControllerを管理・実装するクラス。
+/// </summary>
 class CameraController {
 public:
 
@@ -16424,10 +16465,13 @@ void CameraFollow::Update(Transform& transform,float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // カメラ追従
+/// <summary>
+/// CameraFollowを管理・実装するクラス。
+/// </summary>
 class CameraFollow {
 public:
 
@@ -16477,6 +16521,9 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraLag.h
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 
+/// <summary>
+/// CameraLagを管理・実装するクラス。
+/// </summary>
 class CameraLag {
 public:
 
@@ -16533,6 +16580,9 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.h
 
 
 // ロックオン
+/// <summary>
+/// CameraLockOnを管理・実装するクラス。
+/// </summary>
 class CameraLockOn {
 public:
 	// 更新
@@ -16926,6 +16976,9 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.h
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 // 回転制御
+/// <summary>
+/// CameraRotationを管理・実装するクラス。
+/// </summary>
 class CameraRotation {
 public:
 
@@ -16997,6 +17050,9 @@ namespace Engine {
 }
 
 // カメラシェイク
+/// <summary>
+/// CameraShakeを管理・実装するクラス。
+/// </summary>
 class CameraShake {
 public:
 
@@ -17071,6 +17127,9 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraZoom.h
 #include "DirectXGame/engine/Camera/CameraData.h"
 
 // カメラズーム
+/// <summary>
+/// CameraZoomを管理・実装するクラス。
+/// </summary>
 class CameraZoom {
 public:
 
@@ -17377,6 +17436,9 @@ File Path: project/DirectXGame/application/base/Camera/FixedCamera/SelectCamera.
 #include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
 
+/// <summary>
+/// SelectCameraを管理・実装するクラス。
+/// </summary>
 class SelectCamera : public BaseFixedCamera {
 public:
 	///< summary>
@@ -17446,6 +17508,9 @@ File Path: project/DirectXGame/application/base/Camera/FixedCamera/StageCamera.h
 #pragma once
 #include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
+/// <summary>
+/// StageCameraを管理・実装するクラス。
+/// </summary>
 class StageCamera : public BaseFixedCamera {
 public:
 	///< summary>
@@ -17496,6 +17561,9 @@ File Path: project/DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h
 #pragma once
 #include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
+/// <summary>
+/// TitleCameraを管理・実装するクラス。
+/// </summary>
 class TitleCamera : public BaseFixedCamera {
 public:
 	///< summary>
@@ -18263,6 +18331,9 @@ private:
 
 };
 
+/// <summary>
+/// CarTitleMoveStateを管理・実装するクラス。
+/// </summary>
 class CarTitleMoveState : public PlayerCarState {
 public:
 	CarTitleMoveState(const CarMainState& state, PlayerCar* car) :
@@ -18287,6 +18358,9 @@ private:
 };
 
 
+/// <summary>
+/// CarPreparationMoveStateを管理・実装するクラス。
+/// </summary>
 class CarPreparationMoveState : public PlayerCarState {
 public:
 	CarPreparationMoveState(const CarMainState& state, PlayerCar* car) :
@@ -18311,6 +18385,9 @@ private:
 };
 
 
+/// <summary>
+/// CarSelectMoveを管理・実装するクラス。
+/// </summary>
 class CarSelectMove : public PlayerCarState {
 public:
 	CarSelectMove(const CarMainState& state, PlayerCar* car) :
@@ -18337,6 +18414,9 @@ private:
 };
 
 
+/// <summary>
+/// ResultCashExchangeStateを管理・実装するクラス。
+/// </summary>
 class ResultCashExchangeState : public PlayerCarState {
 public:
 	ResultCashExchangeState(const CarMainState& state, PlayerCar* car) :
@@ -18386,6 +18466,9 @@ File Path: project/DirectXGame/application/base/Car/PlayerCarStateMachine.h
 
 using PlayerCarStateFactory = std::function<std::unique_ptr<PlayerCarState>(PlayerCar*)>;
 
+/// <summary>
+/// PlayerCarStateMachineを管理・実装するクラス。
+/// </summary>
 class PlayerCarStateMachine {
 public:
 
@@ -19353,6 +19436,9 @@ namespace Character {
 
 
 	// キャラクターパラメータコンポーネント
+/// <summary>
+/// ParameterComponentを管理・実装するクラス。
+/// </summary>
 	class ParameterComponent
 	{
 	public:
@@ -19437,6 +19523,9 @@ namespace Character {
 
 
 
+/// <summary>
+/// EditorBlockを管理・実装するクラス。
+/// </summary>
 	class EditorBlock {
 	public:
 
@@ -20110,6 +20199,9 @@ class EffectSystem;
 class ObjectComponent;
 
 // 死亡システム
+/// <summary>
+/// DeathSystemを管理・実装するクラス。
+/// </summary>
 class DeathSystem {
 public:
 
@@ -21193,6 +21285,9 @@ namespace Character {
 	class CharacterStateMachine;
 
 	// 敵の攻撃システム(攻撃順番など)
+/// <summary>
+/// EnemyAttackSystemを管理・実装するクラス。
+/// </summary>
 	class EnemyAttackSystem {
 	public:
 
@@ -24132,12 +24227,15 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include "DummyEnemyState.h"
 
 namespace Character {
+/// <summary>
+/// DummyEnemyを管理・実装するクラス。
+/// </summary>
 	class DummyEnemy : public BaseEnemy {
 	public:
 		// ダミーを地上扱いにするか空中扱いにするか
@@ -24233,6 +24331,9 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
+/// <summary>
+/// DummyEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class DummyEnemyMoveState : public MoveState
 	{
 	public:
@@ -24499,6 +24600,9 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 
 namespace Character {
 	// 移動
+/// <summary>
+/// MediumMeleeEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class MediumMeleeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
@@ -24842,6 +24946,9 @@ namespace Character {
     };
 
     // 攻撃本体
+/// <summary>
+/// MediumMeleeEnemyAttackSwingSubStateを管理・実装するクラス。
+/// </summary>
     class MediumMeleeEnemyAttackSwingSubState : public BaseAttackSubState {
     public:
         MediumMeleeEnemyAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
@@ -24866,6 +24973,9 @@ namespace Character {
 
 
     // 終了状態（後隙）
+/// <summary>
+/// MediumMeleeEnemyAttackEndSubStateを管理・実装するクラス。
+/// </summary>
     class MediumMeleeEnemyAttackEndSubState : public BaseAttackSubState {
     public:
         MediumMeleeEnemyAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
@@ -24973,12 +25083,15 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemy.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallCartEnemyState.h"
 
 namespace Character {
 
+/// <summary>
+/// SmallCartEnemyを管理・実装するクラス。
+/// </summary>
 	class SmallCartEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ
@@ -25108,6 +25221,9 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
+/// <summary>
+/// SmallCartEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class SmallCartEnemyMoveState : public MoveState
 	{
 	public:
@@ -25223,12 +25339,15 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemy.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallMeleeEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
 namespace Character {
+/// <summary>
+/// SmallMeleeEnemyを管理・実装するクラス。
+/// </summary>
 	class SmallMeleeEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ
@@ -25402,6 +25521,9 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
+/// <summary>
+/// SmallMeleeEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class SmallMeleeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
@@ -25755,6 +25877,9 @@ namespace Character {
     };
 
     // 攻撃本体
+/// <summary>
+/// SmallMeleeAttackSwingSubStateを管理・実装するクラス。
+/// </summary>
     class SmallMeleeAttackSwingSubState : public BaseAttackSubState {
     public:
         SmallMeleeAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
@@ -25779,6 +25904,9 @@ namespace Character {
 
 
     // 終了状態（後隙）
+/// <summary>
+/// SmallMeleeAttackEndSubStateを管理・実装するクラス。
+/// </summary>
     class SmallMeleeAttackEndSubState : public BaseAttackSubState {
     public:
         SmallMeleeAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
@@ -25900,6 +26028,9 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/Smal
 #include <DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h>
 
 namespace Character {
+/// <summary>
+/// SmallRangeEnemyを管理・実装するクラス。
+/// </summary>
 	class SmallRangeEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ
@@ -26063,6 +26194,9 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
+/// <summary>
+/// SmallRangeEnemyMoveStateを管理・実装するクラス。
+/// </summary>
 	class SmallRangeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
@@ -26578,6 +26712,9 @@ File Path: project/DirectXGame/application/base/Character/Move/Base/MoveRequestS
 #pragma once
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 
+/// <summary>
+/// MoveRequestSystemを管理・実装するクラス。
+/// </summary>
 class MoveRequestSystem {
 public:
 	// 更新
@@ -26640,6 +26777,9 @@ File Path: project/DirectXGame/application/base/Character/Move/Base/MovementRest
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 
 // 移動制限クラス
+/// <summary>
+/// MovementRestrictionsを管理・実装するクラス。
+/// </summary>
 class MovementRestrictions {
 public:
 	// 初期化
@@ -27571,7 +27711,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/DodgeSuccessEffect.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 namespace Engine {
 	class Camera;
@@ -27581,6 +27721,9 @@ namespace Engine {
 namespace Character {
 
 	// 回避成功時のポストエフェクトを管理するクラス
+/// <summary>
+/// DodgeSuccessEffectを管理・実装するクラス。
+/// </summary>
 	class DodgeSuccessEffect {
 	public:
 		// 破棄時にポストエフェクトが残らないよう停止する
@@ -28030,7 +28173,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
@@ -28046,6 +28189,9 @@ namespace Character {
 	///< summary>
 	/// 自キャラ
 	///</summary>
+/// <summary>
+/// NormalPlayerを管理・実装するクラス。
+/// </summary>
 	class NormalPlayer : public BasePlayer {
 	public:
 
@@ -28515,12 +28661,15 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 
 namespace Character {
 	// 移動
+/// <summary>
+/// PlayerStateIdleを管理・実装するクラス。
+/// </summary>
 	class PlayerStateIdle : public IdleState
 	{
 	public:
@@ -28540,6 +28689,9 @@ namespace Character {
 	};
 
 	// 移動
+/// <summary>
+/// PlayerStateMoveを管理・実装するクラス。
+/// </summary>
 	class PlayerStateMove : public MoveState
 	{
 	public:
@@ -28559,6 +28711,9 @@ namespace Character {
 	};
 
 	// ジャンプ
+/// <summary>
+/// PlayerStateJumpを管理・実装するクラス。
+/// </summary>
 	class PlayerStateJump : public JumpState {
 	public:
 		// コンストラクタ
@@ -28580,6 +28735,9 @@ namespace Character {
 	};
 
 	// 回避
+/// <summary>
+/// PlayerStateAvoidanceを管理・実装するクラス。
+/// </summary>
 	class PlayerStateAvoidance : public AvoidanceState {
 	public:
 		// コンストラクタ
@@ -28605,6 +28763,9 @@ namespace Character {
 	};
 
 	// 攻撃
+/// <summary>
+/// PlayerStateAttackを管理・実装するクラス。
+/// </summary>
 	class PlayerStateAttack :public AttackState
 	{
 	public:
@@ -28622,6 +28783,9 @@ namespace Character {
 	};
 
 	// 必殺
+/// <summary>
+/// PlayerStateSpecialを管理・実装するクラス。
+/// </summary>
 	class PlayerStateSpecial :public SpecialState
 	{
 	public:
@@ -28639,6 +28803,9 @@ namespace Character {
 	};
 
 	// 気絶
+/// <summary>
+/// PlayerStateFaintingを管理・実装するクラス。
+/// </summary>
 	class PlayerStateFainting : public FaintingState {
 	public:
 		PlayerStateFainting(BaseCharacter* player)
@@ -28659,6 +28826,9 @@ namespace Character {
 	};
 
 	// 死亡
+/// <summary>
+/// PlayerStateDieを管理・実装するクラス。
+/// </summary>
 	class PlayerStateDie : public DieState {
 	public:
 		PlayerStateDie(BaseCharacter* player)
@@ -28677,6 +28847,9 @@ namespace Character {
 	};
 
 	// 被弾
+/// <summary>
+/// PlayerStateDamageを管理・実装するクラス。
+/// </summary>
 	class PlayerStateDamage : public DamageState {
 	public:
 		PlayerStateDamage(BaseCharacter* player)
@@ -29094,6 +29267,9 @@ namespace Character {
 
 
 	// 待機
+/// <summary>
+/// IdleStateを管理・実装するクラス。
+/// </summary>
 	class IdleState : public BaseCharacterState {
 	public:
 		IdleState(BaseCharacter* character)
@@ -29108,6 +29284,9 @@ namespace Character {
 	};
 
 	// 移動
+/// <summary>
+/// MoveStateを管理・実装するクラス。
+/// </summary>
 	class MoveState : public BaseCharacterState {
 	public:
 		MoveState(BaseCharacter* character)
@@ -29123,6 +29302,9 @@ namespace Character {
 	};
 
 	// ジャンプ
+/// <summary>
+/// JumpStateを管理・実装するクラス。
+/// </summary>
 	class JumpState : public BaseCharacterState {
 	public:
 		JumpState(BaseCharacter* character)
@@ -29138,6 +29320,9 @@ namespace Character {
 	};
 
 	// 回避
+/// <summary>
+/// AvoidanceStateを管理・実装するクラス。
+/// </summary>
 	class AvoidanceState : public BaseCharacterState {
 	public:
 		AvoidanceState(BaseCharacter* character)
@@ -29153,6 +29338,9 @@ namespace Character {
 	};
 
 	// 防御
+/// <summary>
+/// DefenseStateを管理・実装するクラス。
+/// </summary>
 	class DefenseState : public BaseCharacterState {
 	public:
 		DefenseState(BaseCharacter* character)
@@ -29168,6 +29356,9 @@ namespace Character {
 	};
 
 	// 攻撃
+/// <summary>
+/// AttackStateを管理・実装するクラス。
+/// </summary>
 	class AttackState : public BaseCharacterState {
 	public:
 		AttackState(BaseCharacter* character)
@@ -29189,6 +29380,9 @@ namespace Character {
 	};
 
 	// 死亡
+/// <summary>
+/// DieStateを管理・実装するクラス。
+/// </summary>
 	class DieState : public BaseCharacterState {
 	public:
 		DieState(BaseCharacter* character)
@@ -29204,6 +29398,9 @@ namespace Character {
 	};
 
 	// 被弾
+/// <summary>
+/// DamageStateを管理・実装するクラス。
+/// </summary>
 	class DamageState : public BaseCharacterState {
 	public:
 		DamageState(BaseCharacter* character)
@@ -29219,6 +29416,9 @@ namespace Character {
 	};
 
 	// ダッシュ
+/// <summary>
+/// DashStateを管理・実装するクラス。
+/// </summary>
 	class DashState : public BaseCharacterState {
 	public:
 		DashState(BaseCharacter* character)
@@ -29234,6 +29434,9 @@ namespace Character {
 	};
 
 	// 気絶
+/// <summary>
+/// FaintingStateを管理・実装するクラス。
+/// </summary>
 	class FaintingState : public BaseCharacterState {
 	public:
 		FaintingState(BaseCharacter* character)
@@ -29254,6 +29457,9 @@ namespace Character {
 	};
 
 	// スキル
+/// <summary>
+/// SkillStateを管理・実装するクラス。
+/// </summary>
 	class SkillState : public BaseCharacterState {
 	public:
 		enum class SkillPhase {
@@ -29282,6 +29488,9 @@ namespace Character {
 	};
 
 	// 必殺技
+/// <summary>
+/// SpecialStateを管理・実装するクラス。
+/// </summary>
 	class SpecialState : public BaseCharacterState {
 	public:
 		enum class Phase {
@@ -29505,6 +29714,9 @@ namespace Character {
     /// <typeparam name="SubStateEnum"></typeparam>
     /// <typeparam name="BaseSubStateType"></typeparam>
     template<class SubStateEnum, class BaseSubStateType>
+/// <summary>
+/// SubStateMachineを管理・実装するクラス。
+/// </summary>
     class SubStateMachine
     {
     public:
@@ -32891,6 +33103,9 @@ namespace Character {
 namespace Character {
 
 	// スロー演出リクエストを受け取り、対象キャラクターの時間倍率を管理するクラス
+/// <summary>
+/// SlowMotionManagerを管理・実装するクラス。
+/// </summary>
 	class SlowMotionManager {
 	public:
 		// 破棄時に内部状態を停止する
@@ -32928,6 +33143,9 @@ File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionRequ
 namespace Character {
 
 	// 対象スロー演出管理クラスへ渡す、1回分のスロー演出リクエスト
+/// <summary>
+/// SlowMotionRequestを管理・実装するクラス。
+/// </summary>
 	class SlowMotionRequest {
 	public:
 		// 回避成功用の対象スロー演出リクエストを生成する
@@ -33432,7 +33650,7 @@ void CustomSystem::Update(float dt){
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Custom/CustomSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 // 前方宣言
 namespace Engine {
@@ -33444,6 +33662,9 @@ namespace Engine {
 class EffectSystem;
 class InputSystem;
 
+/// <summary>
+/// CustomSystemを管理・実装するクラス。
+/// </summary>
 class CustomSystem {
 public:
 	/// <summary>
@@ -34296,7 +34517,7 @@ void PoseSystem::Update(float dt) {
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Pose/PoseSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 namespace Engine {
 	class DirectXCommon;
@@ -34311,6 +34532,9 @@ namespace Character {
 }
 class InputSystem;
 
+/// <summary>
+/// PoseSystemを管理・実装するクラス。
+/// </summary>
 class PoseSystem {
 public:
 	PoseSystem() {}
@@ -34443,6 +34667,9 @@ enum class ResultPhase {
 	kMenuWait,
 };
 
+/// <summary>
+/// ResultSystemを管理・実装するクラス。
+/// </summary>
 class ResultSystem {
 public:
 	/// <summary>
@@ -34666,7 +34893,7 @@ void TutorialOpenMenuStep::Update(float dt, Character::BaseCharacter* character)
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialStep.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 namespace Engine {
 	class DirectXCommon;
@@ -34726,6 +34953,9 @@ protected:
 };
 
 // 移動チュートリアル
+/// <summary>
+/// TutorialMoveStepを管理・実装するクラス。
+/// </summary>
 class TutorialMoveStep : public TutorialStep {
 public:
     void Enter() override {
@@ -34747,6 +34977,9 @@ public:
 };
 
 // カメラ操作チュートリアル
+/// <summary>
+/// TutorialCameraStepを管理・実装するクラス。
+/// </summary>
 class TutorialCameraStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -34766,6 +34999,9 @@ public:
 };
 
 // ジャンプチュートリアル
+/// <summary>
+/// TutorialJumpStepを管理・実装するクラス。
+/// </summary>
 class TutorialJumpStep : public TutorialStep {
 public:
     void Enter() override {
@@ -34785,6 +35021,9 @@ public:
 };
 
 // 回避
+/// <summary>
+/// TutorialDodgeStepを管理・実装するクラス。
+/// </summary>
 class TutorialDodgeStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -34805,6 +35044,9 @@ public:
 
 
 // 攻撃
+/// <summary>
+/// TutorialAttackStepを管理・実装するクラス。
+/// </summary>
 class TutorialAttackStep : public TutorialStep {
 public:
 
@@ -34825,6 +35067,9 @@ public:
 };
 
 // コンボ
+/// <summary>
+/// TutorialComboStepを管理・実装するクラス。
+/// </summary>
 class TutorialComboStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -34844,6 +35089,9 @@ public:
 };
 
 // スキル
+/// <summary>
+/// TutorialSkillStepを管理・実装するクラス。
+/// </summary>
 class TutorialSkillStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -34864,6 +35112,9 @@ public:
 };
 
 // 特殊技
+/// <summary>
+/// TutorialSpecialStepを管理・実装するクラス。
+/// </summary>
 class TutorialSpecialStep : public TutorialStep {
 public:
 	void Enter() override {
@@ -34887,6 +35138,9 @@ private:
 };
 
 // 敵撃破
+/// <summary>
+/// TutorialEnemyDefeatedStepを管理・実装するクラス。
+/// </summary>
 class TutorialEnemyDefeatedStep : public TutorialStep {
 public:
 
@@ -34908,6 +35162,9 @@ public:
 };
 
 // ロックオン
+/// <summary>
+/// TutorialLockOnStepを管理・実装するクラス。
+/// </summary>
 class TutorialLockOnStep : public TutorialStep {
 public:
 
@@ -34929,6 +35186,9 @@ public:
 };
 
 // メニューを開く
+/// <summary>
+/// TutorialOpenMenuStepを管理・実装するクラス。
+/// </summary>
 class TutorialOpenMenuStep : public TutorialStep {
 
 	void Enter() override {
@@ -34994,7 +35254,7 @@ void TutorialSystem::Update(float dt){
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Tutorial/TutorialSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <list>
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -35025,6 +35285,9 @@ class EffectSystem;
 class InputSystem;
 
 
+/// <summary>
+/// TutorialSystemを管理・実装するクラス。
+/// </summary>
 class TutorialSystem {
 public:
     TutorialSystem() {}
@@ -35284,6 +35547,9 @@ namespace Character {
 
 
 	// コマンド
+/// <summary>
+/// ICommandを管理・実装するクラス。
+/// </summary>
 	class ICommand
 	{
 	public:
@@ -35293,24 +35559,36 @@ namespace Character {
 	};
 
 	// 移動コマンド
+/// <summary>
+/// MoveCommandを管理・実装するクラス。
+/// </summary>
 	class MoveCommand :public ICommand
 	{
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
 	// ジャンプコマンド
+/// <summary>
+/// JampCommandを管理・実装するクラス。
+/// </summary>
 	class JampCommand : public ICommand
 	{
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
 	// 回避コマンド
+/// <summary>
+/// DodgeCommandを管理・実装するクラス。
+/// </summary>
 	class DodgeCommand : public ICommand
 	{
 	public:
 		void Exec(Character::BaseCharacter& character) override;
 	};
 	// 攻撃コマンド
+/// <summary>
+/// AttackCommandを管理・実装するクラス。
+/// </summary>
 	class AttackCommand : public ICommand
 	{
 	public:
@@ -35318,6 +35596,9 @@ namespace Character {
 	};
 
 	// 攻撃コマンド
+/// <summary>
+/// HeavyAttackCommandを管理・実装するクラス。
+/// </summary>
 	class HeavyAttackCommand : public ICommand
 	{
 	public:
@@ -35326,6 +35607,9 @@ namespace Character {
 
 
 	// 攻撃コマンド
+/// <summary>
+/// SkillAttackCommandを管理・実装するクラス。
+/// </summary>
 	class SkillAttackCommand : public ICommand
 	{
 	public:
@@ -35333,6 +35617,9 @@ namespace Character {
 	};
 
 	// インプットハンドラー
+/// <summary>
+/// InputHanderを管理・実装するクラス。
+/// </summary>
 	class InputHander
 	{
 	public:
@@ -36007,6 +36294,9 @@ namespace Engine {
 class BaseCharacter;
 class BasePlayer;
 
+/// <summary>
+/// ScrapItemを管理・実装するクラス。
+/// </summary>
 class ScrapItem : public IHitReceiver {
 public:
 
@@ -36867,6 +37157,9 @@ class BaseCharacter;
 
 
 // 必殺技用のエディター
+/// <summary>
+/// SpecialEditorを管理・実装するクラス。
+/// </summary>
 class SpecialEditor {
 public:
 
@@ -36912,6 +37205,9 @@ File Path: project/DirectXGame/application/base/Special/Base/SpecialState.h
 class BaseCharacter;
 
 // スペシャルステート
+/// <summary>
+/// BaseSpecialStateを管理・実装するクラス。
+/// </summary>
 class BaseSpecialState {
 public:
 	virtual ~BaseSpecialState() = default;
@@ -36929,6 +37225,9 @@ private:
 };
 
 // スペシャルステート
+/// <summary>
+/// SpecialNodeStateを管理・実装するクラス。
+/// </summary>
 class SpecialNodeState : public BaseSpecialState {
 public:
 	// 開始
@@ -36947,6 +37246,9 @@ private:
 
 
 // スペシャルステートマシーン
+/// <summary>
+/// SpecialStateMachineを管理・実装するクラス。
+/// </summary>
 class SpecialStateMachine {
 
 
@@ -37332,7 +37634,7 @@ void SpecialPointEndState::Exit() {
 ============================================================
 File Path: project/DirectXGame/application/base/Special/Point/SpecialPointState.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 
@@ -37346,6 +37648,9 @@ enum class SpecialPointState {
 class SpecialPoint;
 
 // 基底ステート
+/// <summary>
+/// BaseSpecialPointStateを管理・実装するクラス。
+/// </summary>
 class BaseSpecialPointState {
 public:
 
@@ -37368,6 +37673,9 @@ protected:
 };
 
 // 出現時のステート
+/// <summary>
+/// SpecialPointPopStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointPopState : public BaseSpecialPointState {
 public:
 	SpecialPointPopState(SpecialPoint* object)
@@ -37391,6 +37699,9 @@ private:
 };
 
 // 通常時のステート
+/// <summary>
+/// SpecialPointIdleStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointIdleState : public BaseSpecialPointState {
 public:
 	SpecialPointIdleState(SpecialPoint* object)
@@ -37415,6 +37726,9 @@ private:
 };
 
 // 移動時のステート
+/// <summary>
+/// SpecialPointMoveStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointMoveState : public BaseSpecialPointState {
 public:
 	SpecialPointMoveState(SpecialPoint* object)
@@ -37434,6 +37748,9 @@ private:
 };
 
 // 終了時のステート
+/// <summary>
+/// SpecialPointEndStateを管理・実装するクラス。
+/// </summary>
 class SpecialPointEndState : public BaseSpecialPointState {
 public:
 	SpecialPointEndState(SpecialPoint* object)
@@ -38129,9 +38446,12 @@ void CustomStage::Update(float dt){
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/CustomStage.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "BaseStage.h"
 
+/// <summary>
+/// CustomStageを管理・実装するクラス。
+/// </summary>
 class CustomStage : public BaseStage {
 public:
 	// 初期化
@@ -39137,9 +39457,12 @@ void CustomUI::Draw(){
 ============================================================
 File Path: project/DirectXGame/application/base/UI/CustomUI.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
+/// <summary>
+/// CustomUIを管理・実装するクラス。
+/// </summary>
 class CustomUI : public BaseUI {
 public:
 	// 初期化
@@ -39216,6 +39539,9 @@ File Path: project/DirectXGame/application/base/UI/FpsUI.h
 #pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
+/// <summary>
+/// FpsUIを管理・実装するクラス。
+/// </summary>
 class FpsUI : public BaseUI {
 public:
 
@@ -40705,7 +41031,7 @@ MeleeWeapon::~MeleeWeapon() = default;
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Base/BaseWeapon.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "WeaponData.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
 #include <DirectXGame/engine/struct/Vector3.h>
@@ -40736,6 +41062,9 @@ namespace HitBox {
 }
 
 // 武器のベースクラス
+/// <summary>
+/// BaseWeaponを管理・実装するクラス。
+/// </summary>
 class BaseWeapon : public IHitReceiver
 {
 public:
@@ -40802,6 +41131,9 @@ protected:
 };
 
 // 近距離の武器クラス
+/// <summary>
+/// MeleeWeaponを管理・実装するクラス。
+/// </summary>
 class MeleeWeapon : public BaseWeapon
 {
 public:
@@ -40825,6 +41157,9 @@ protected:
 };
 
 // 遠距離の武器クラス
+/// <summary>
+/// RangedWeaponを管理・実装するクラス。
+/// </summary>
 class RangedWeapon : public BaseWeapon
 {
 public:
@@ -41098,6 +41433,9 @@ namespace Character {
 
 
 
+/// <summary>
+/// BulletPlayerWeaponを管理・実装するクラス。
+/// </summary>
 class BulletPlayerWeapon : public RangedWeapon {
 public:
 
@@ -41327,6 +41665,9 @@ File Path: project/DirectXGame/application/base/Weapon/Bullet/BulletWeaponManage
 // 前方宣言
 
 
+/// <summary>
+/// BulletWeaponManagerを管理・実装するクラス。
+/// </summary>
 class BulletWeaponManager
 {
 public:
@@ -41458,6 +41799,9 @@ File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h
 
 
 
+/// <summary>
+/// SmallMeleeWeaponを管理・実装するクラス。
+/// </summary>
 class SmallMeleeWeapon : public MeleeWeapon
 {
 public:
@@ -41560,6 +41904,9 @@ File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h
 #pragma once
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
+/// <summary>
+/// SmallRangeWeaponを管理・実装するクラス。
+/// </summary>
 class SmallRangeWeapon : public RangedWeapon
 {
 public:
@@ -42334,7 +42681,7 @@ void CharacterDebugScene::SetDebugTarget(uint32_t tag) {
 ============================================================
 File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 ============================================================
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -42365,6 +42712,9 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
 
+/// <summary>
+/// CharacterDebugSceneを管理・実装するクラス。
+/// </summary>
 class CharacterDebugScene : public Engine::BaseScene {
 public:
 
@@ -43025,7 +43375,7 @@ void EffectScene::EmitAllPreview()
 ============================================================
 File Path: project/DirectXGame/application/scene/EffectScene.h
 ============================================================
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -43050,6 +43400,9 @@ File Path: project/DirectXGame/application/scene/EffectScene.h
 #include <string>
 #include <vector>
 
+/// <summary>
+/// EffectSceneを管理・実装するクラス。
+/// </summary>
 class EffectScene : public Engine::BaseScene {
 public:
 
@@ -43627,7 +43980,7 @@ void ResultScene::Draw2D() {
 ============================================================
 File Path: project/DirectXGame/application/scene/ResultScene.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -43653,6 +44006,9 @@ File Path: project/DirectXGame/application/scene/ResultScene.h
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
+/// <summary>
+/// ResultSceneを管理・実装するクラス。
+/// </summary>
 class ResultScene : public Engine::BaseScene {
 public:
 
@@ -44150,7 +44506,7 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
 ============================================================
 File Path: project/DirectXGame/application/scene/SceneFactory.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/engine/scene/AbstractSceneFactory.h"
 
 
@@ -44167,6 +44523,9 @@ class EffectScene;
 class BaseScene;
 
 // このゲーム用のシーン工場
+/// <summary>
+/// SceneFactoryを管理・実装するクラス。
+/// </summary>
 class SceneFactory : public Engine::AbstractSceneFactory
 {
 public:
@@ -45524,7 +45883,7 @@ void TutorialScene::Draw2D() {
 ============================================================
 File Path: project/DirectXGame/application/scene/TutorialScene.h
 ============================================================
-﻿#pragma once
+#pragma once
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
@@ -45561,6 +45920,9 @@ File Path: project/DirectXGame/application/scene/TutorialScene.h
 #include <DirectXGame/application/base/Object/CollisionRegistrationSystem.h>
 #include "DirectXGame/application/base/Game/GameplaySession.h"
 
+/// <summary>
+/// TutorialSceneを管理・実装するクラス。
+/// </summary>
 class TutorialScene : public Engine::BaseScene {
 public:
 
@@ -46961,6 +47323,9 @@ namespace Engine {
 	class SrvManager;
 
 	// 3Dモデル共通部分
+/// <summary>
+/// ModelCommonを管理・実装するクラス。
+/// </summary>
 	class ModelCommon
 	{
 	public:
@@ -50220,6 +50585,9 @@ namespace Engine {
 	class ShadowMap;
 
 	// オブジェクトインスタンシングクラス(大量描画用)
+/// <summary>
+/// Object3dInstanceManagerを管理・実装するクラス。
+/// </summary>
 	class Object3dInstanceManager
 	{
 	public:
@@ -50489,7 +50857,7 @@ Engine::RigidBodyComponent* Engine::ObjectInstance::GetRigidBodyComponent() { re
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/ObjectInstance.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include<fstream>
 #include<sstream>
 #include<vector>
@@ -50515,6 +50883,9 @@ namespace Engine {
 	
 
 	// オブジェクトのインスタスクラス
+/// <summary>
+/// ObjectInstanceを管理・実装するクラス。
+/// </summary>
 	class ObjectInstance {
 	public:
 		ObjectInstance();
@@ -51589,6 +51960,9 @@ namespace Engine {
 	class Model;
 
 	// アニメーションコンポーネント
+/// <summary>
+/// AnimationComponentを管理・実装するクラス。
+/// </summary>
 	class AnimationComponent
 	{
 	public:
@@ -53541,6 +53915,9 @@ namespace Engine {
 	class SrvManager;
 
 	// ImGuiの管理
+/// <summary>
+/// ImGuiManagerを管理・実装するクラス。
+/// </summary>
 	class ImGuiManager
 	{
 	public:
@@ -55083,6 +55460,9 @@ namespace Engine {
 	class DXGIDevice;
 	class SrvManager;
 	// テクスチャマネージャー
+/// <summary>
+/// TextureManagerを管理・実装するクラス。
+/// </summary>
 	class TextureManager {
 	public:
 		TextureManager() = default;
@@ -55736,6 +56116,9 @@ namespace Engine {
 	class Input;
 	class CameraCommon;
 	// カメラ
+/// <summary>
+/// Cameraを管理・実装するクラス。
+/// </summary>
 	class Camera {
 	public: // メンバ関数
 		// カメラ共通の既定Farクリップ距離
@@ -55896,6 +56279,9 @@ namespace Engine {
 	class DirectXCommon;
 
 	// カメラ共通クラス
+/// <summary>
+/// CameraCommonを管理・実装するクラス。
+/// </summary>
 	class CameraCommon
 	{
 	public:
@@ -56143,6 +56529,9 @@ File Path: project/DirectXGame/engine/Collider/2d/Collider2D.h
 
 namespace Engine {
 	// コライダー2D基底クラス
+/// <summary>
+/// Collider2Dを管理・実装するクラス。
+/// </summary>
 	class Collider2D
 	{
 	public:
@@ -56173,6 +56562,9 @@ namespace Engine {
 	};
 
 	// 球コライダークラス
+/// <summary>
+/// SphereCollider2Dを管理・実装するクラス。
+/// </summary>
 	class SphereCollider2D : public Collider2D
 	{
 	public:
@@ -56191,6 +56583,9 @@ namespace Engine {
 	};
 
 	// AABBコライダークラス
+/// <summary>
+/// AABBCollider2Dを管理・実装するクラス。
+/// </summary>
 	class AABBCollider2D : public Collider2D
 	{
 	public:
@@ -57501,6 +57896,9 @@ namespace Engine {
 		Vector3 pushDir{}; // 押し出し軸（world space）
 	};
 	// コライダー基底クラス
+/// <summary>
+/// Colliderを管理・実装するクラス。
+/// </summary>
 	class Collider
 	{
 	public:
@@ -57572,6 +57970,9 @@ namespace Engine {
 	};
 
 	// 球コライダークラス
+/// <summary>
+/// SphereColliderを管理・実装するクラス。
+/// </summary>
 	class SphereCollider : public Collider
 	{
 	public:
@@ -57596,6 +57997,9 @@ namespace Engine {
 	};
 
 	// 三角形コライダークラス
+/// <summary>
+/// TriangleColliderを管理・実装するクラス。
+/// </summary>
 	class TriangleCollider : public Collider {
 	public:
 		Vector3 triangle01{};
@@ -57627,6 +58031,9 @@ namespace Engine {
 	};
 
 	// AABBコライダークラス
+/// <summary>
+/// AABBColliderを管理・実装するクラス。
+/// </summary>
 	class AABBCollider : public Collider
 	{
 	public:
@@ -57651,6 +58058,9 @@ namespace Engine {
 	};
 
 	// カプセルコライダークラス
+/// <summary>
+/// CapsuleColliderを管理・実装するクラス。
+/// </summary>
 	class CapsuleCollider : public Collider
 	{
 	public:
@@ -57676,6 +58086,9 @@ namespace Engine {
 	};
 
 	// OBBコライダークラス
+/// <summary>
+/// OBBColliderを管理・実装するクラス。
+/// </summary>
 	class OBBCollider : public Collider
 	{
 	public:
@@ -57717,6 +58130,9 @@ namespace Engine {
 
 
 	// Rayコライダークラス
+/// <summary>
+/// RayColliderを管理・実装するクラス。
+/// </summary>
 	class RayCollider : public Collider
 	{
 	public:
@@ -57914,6 +58330,9 @@ File Path: project/DirectXGame/engine/Collider/3d/ColliderComponent.h
 /// コライダコンポーネント
 /// </summary>
 namespace Engine {
+/// <summary>
+/// ColliderComponentを管理・実装するクラス。
+/// </summary>
     class ColliderComponent {
     public:
         // Colliderを保持
@@ -59402,6 +59821,9 @@ File Path: project/DirectXGame/engine/Collider/ColliderData.h
 
 
 // 一意なIDを生成するためのユーティリティクラス
+/// <summary>
+/// UniqueIdGeneratorを管理・実装するクラス。
+/// </summary>
 class UniqueIdGenerator {
 public:
     static uint32_t Generate() {
@@ -59411,6 +59833,9 @@ public:
 };
 
 // インターフェースクラス
+/// <summary>
+/// IHitReceiverを管理・実装するクラス。
+/// </summary>
 class IHitReceiver {
 public:
     virtual ~IHitReceiver() = default;
@@ -59475,6 +59900,9 @@ File Path: project/DirectXGame/engine/Collider/ContactRecord.h
 /// 接触記録
 /// </summary>
 namespace Engine {
+/// <summary>
+/// ContactRecordを管理・実装するクラス。
+/// </summary>
 	class ContactRecord {
 	public:
 		// 登録 or 上書き
@@ -59685,6 +60113,9 @@ namespace Engine {
     // Collider 用 Octree
     // =========================
     class Collider;
+/// <summary>
+/// OctreeColliderを管理・実装するクラス。
+/// </summary>
     class OctreeCollider {
     public:
         // コンストラクタ
@@ -60474,6 +60905,9 @@ namespace Engine {
 	/// DirectXの共通クラス
 	/// </summary>
 	/// 
+/// <summary>
+/// DirectXCommonを管理・実装するクラス。
+/// </summary>
 	class DirectXCommon
 	{
 	public: // メンバ関数
@@ -60611,6 +61045,9 @@ File Path: project/DirectXGame/engine/DirectX/D3DResourceLeakchecker/D3DResource
 
 // リソースのリークチェッククラス
 namespace Engine {
+/// <summary>
+/// D3DResourceLeakcheckerを管理・実装するクラス。
+/// </summary>
 	class D3DResourceLeakchecker
 	{
 	public:
@@ -61677,6 +62114,9 @@ using namespace Microsoft::WRL;
 /// <typeparam name="Type"></typeparam>
 namespace Engine {
 	template<class Type>
+/// <summary>
+/// ConstantBufferを管理・実装するクラス。
+/// </summary>
 	class ConstantBuffer {
 	public:
 
@@ -61764,6 +62204,9 @@ namespace Engine {
 	/// </summary>
 	/// <typeparam name="Type"></typeparam>
 	template<class Type>
+/// <summary>
+/// IndexBufferを管理・実装するクラス。
+/// </summary>
 	class IndexBuffer {
 	public:
 		// 生成
@@ -61877,6 +62320,9 @@ namespace Engine {
 	/// </summary>
 	/// <typeparam name="Type"></typeparam>
 	template<class Type>
+/// <summary>
+/// StructuredBufferを管理・実装するクラス。
+/// </summary>
 	class StructuredBuffer {
 	public:
 		~StructuredBuffer() {
@@ -62118,6 +62564,9 @@ namespace Engine {
 	/// </summary>
 	/// <typeparam name="Type"></typeparam>
 	template<class Type>
+/// <summary>
+/// VertexBufferを管理・実装するクラス。
+/// </summary>
 	class VertexBuffer {
 	public:
 		// 生成
@@ -62276,6 +62725,9 @@ namespace Engine {
 	class Command;
 
 	// シザーレクトクラス
+/// <summary>
+/// ScissorRectを管理・実装するクラス。
+/// </summary>
 	class ScissorRect
 	{
 	public:
@@ -62620,6 +63072,9 @@ namespace Engine {
 	class DirectXCommon;
 	class EntityManager;
 
+/// <summary>
+/// ShadowMapを管理・実装するクラス。
+/// </summary>
 	class ShadowMap {
 	public:
 		struct ShadowData {
@@ -62909,6 +63364,9 @@ namespace Engine {
 	class Fence;
 
 	// スワップチェーン
+/// <summary>
+/// SwapChainを管理・実装するクラス。
+/// </summary>
 	class SwapChain
 	{
 	public:
@@ -63024,6 +63482,9 @@ namespace Engine {
 	class Command;
 
 	// ビューポート
+/// <summary>
+/// ViewPortを管理・実装するクラス。
+/// </summary>
 	class ViewPort
 	{
 	public:
@@ -67976,6 +68437,9 @@ File Path: project/DirectXGame/engine/Effect/Particle/Emit/ParticleEmitter.h
 
 namespace Engine {
 	// 点エミッター
+/// <summary>
+/// PointParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class PointParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -67988,6 +68452,9 @@ namespace Engine {
 	};
 
 	// AABBエミッター
+/// <summary>
+/// AABBParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class AABBParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68009,6 +68476,9 @@ namespace Engine {
 	};
 
 	// 球エミッター
+/// <summary>
+/// SphereParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class SphereParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68031,6 +68501,9 @@ namespace Engine {
 	};
 
 	// 円エミッター
+/// <summary>
+/// CornerParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class CornerParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68056,6 +68529,9 @@ namespace Engine {
 	};
 
 	//	ラインエミッター
+/// <summary>
+/// LineParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class LineParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68079,6 +68555,9 @@ namespace Engine {
 	};
 
 	// スプライン
+/// <summary>
+/// SplineParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class SplineParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68105,6 +68584,9 @@ namespace Engine {
 	};
 
 	// 三角
+/// <summary>
+/// TriangleParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class TriangleParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68126,6 +68608,9 @@ namespace Engine {
 	};
 
 	// メッシュ
+/// <summary>
+/// MeshParticleEmitterを管理・実装するクラス。
+/// </summary>
 	class MeshParticleEmitter : public BaseParticleEmitter {
 	public:
 		// 初期化
@@ -68563,6 +69048,9 @@ namespace Engine {
 	};
 
 	// 球エミッター
+/// <summary>
+/// GpuParticleEmitterSphereを管理・実装するクラス。
+/// </summary>
 	class GpuParticleEmitterSphere : public BaseGpuParticleEmitter
 	{
 	public:
@@ -68579,6 +69067,9 @@ namespace Engine {
 	};
 
 	// 点エミッター
+/// <summary>
+/// GpuParticleEmitterPointを管理・実装するクラス。
+/// </summary>
 	class GpuParticleEmitterPoint : public BaseGpuParticleEmitter
 	{
 	public:
@@ -68595,6 +69086,9 @@ namespace Engine {
 	};
 
 	// AABBエミッター
+/// <summary>
+/// GpuParticleEmitterAABBを管理・実装するクラス。
+/// </summary>
 	class GpuParticleEmitterAABB : public BaseGpuParticleEmitter
 	{
 	public:
@@ -70598,6 +71092,9 @@ namespace Engine {
 
 
 	// 平面
+/// <summary>
+/// PlanePrimitiveを管理・実装するクラス。
+/// </summary>
 	class PlanePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70616,6 +71113,9 @@ namespace Engine {
 	};
 
 	// 三角面
+/// <summary>
+/// TrianglePrimitiveを管理・実装するクラス。
+/// </summary>
 	class TrianglePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70631,6 +71131,9 @@ namespace Engine {
 	};
 
 	// 円
+/// <summary>
+/// CirclePrimitiveを管理・実装するクラス。
+/// </summary>
 	class CirclePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70646,6 +71149,9 @@ namespace Engine {
 	};
 
 	// 立方体
+/// <summary>
+/// CubePrimitiveを管理・実装するクラス。
+/// </summary>
 	class CubePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70661,6 +71167,9 @@ namespace Engine {
 	};
 
 	// 星
+/// <summary>
+/// StarPrimitiveを管理・実装するクラス。
+/// </summary>
 	class StarPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70676,6 +71185,9 @@ namespace Engine {
 	};
 
 	// 三日月
+/// <summary>
+/// CrescentPrimitiveを管理・実装するクラス。
+/// </summary>
 	class CrescentPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70691,6 +71203,9 @@ namespace Engine {
 	};
 
 	// リング
+/// <summary>
+/// RingPrimitiveを管理・実装するクラス。
+/// </summary>
 	class RingPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70706,6 +71221,9 @@ namespace Engine {
 	};
 
 	// 十字
+/// <summary>
+/// CrossPrimitiveを管理・実装するクラス。
+/// </summary>
 	class CrossPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70721,6 +71239,9 @@ namespace Engine {
 	};
 
 	// 円柱
+/// <summary>
+/// CylinderPrimitiveを管理・実装するクラス。
+/// </summary>
 	class CylinderPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70736,6 +71257,9 @@ namespace Engine {
 	};
 
 	// 球
+/// <summary>
+/// SpherePrimitiveを管理・実装するクラス。
+/// </summary>
 	class SpherePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70751,6 +71275,9 @@ namespace Engine {
 	};
 
 	// 矢印
+/// <summary>
+/// ArrowPrimitiveを管理・実装するクラス。
+/// </summary>
 	class ArrowPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70766,6 +71293,9 @@ namespace Engine {
 	};
 
 	// 筒
+/// <summary>
+/// TubePrimitiveを管理・実装するクラス。
+/// </summary>
 	class TubePrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70781,6 +71311,9 @@ namespace Engine {
 	};
 
 	// 角錐
+/// <summary>
+/// PyramidPrimitiveを管理・実装するクラス。
+/// </summary>
 	class PyramidPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -70796,6 +71329,9 @@ namespace Engine {
 	};
 
 	// トーラス
+/// <summary>
+/// TorusPrimitiveを管理・実装するクラス。
+/// </summary>
 	class TorusPrimitive :public BasePrimitive {
 	public:
 		// データ取得
@@ -73148,6 +73684,9 @@ namespace Engine {
 	/// プリミティブ用Entity。形状Tを内部で生成してObject3dへ渡す。
 	/// </summary>
 	template<typename T>
+/// <summary>
+/// PrimitiveEntityを管理・実装するクラス。
+/// </summary>
 	class PrimitiveEntity : public Object3d {
 	public:
 		void Initialize(EntityManager* entityManager, PrimitiveCommon* primitiveCommon, const std::string& texturePath,
@@ -74207,6 +74746,9 @@ namespace Engine {
 
 
 	// ラインメッシュデータ
+/// <summary>
+/// LineMeshDataを管理・実装するクラス。
+/// </summary>
 	class LineMeshData
 	{
 	public:
@@ -74600,6 +75142,9 @@ File Path: project/DirectXGame/engine/Line/LineCommon.h
 /// </summary>  
 /// 
 namespace Engine {
+/// <summary>
+/// LineCommonを管理・実装するクラス。
+/// </summary>
     class LineCommon
     {
     public:
@@ -78217,6 +78762,9 @@ static float ExpectedValue(const std::vector<float>& probabilities, int totalRol
 }
 
 
+/// <summary>
+/// Sequenceを管理・実装するクラス。
+/// </summary>
 class Sequence
 {
 public:
@@ -79043,6 +79591,9 @@ File Path: project/DirectXGame/engine/Move/RigidBodyComponent.h
 /// リジットボディー
 /// </summary>
 namespace Engine {
+/// <summary>
+/// RigidBodyComponentを管理・実装するクラス。
+/// </summary>
 	class RigidBodyComponent
 	{
 	public:
@@ -79251,6 +79802,9 @@ File Path: project/DirectXGame/engine/MyGame/Framework.h
 
 namespace Engine {
 	// ゲーム全体
+/// <summary>
+/// Frameworkを管理・実装するクラス。
+/// </summary>
 	class Framework
 	{
 	public:
@@ -80482,6 +81036,9 @@ namespace Engine {
 
 
 	// コピー
+/// <summary>
+/// PostEffectCopyを管理・実装するクラス。
+/// </summary>
 	class PostEffectCopy : public IPostEffect {
 	public:
 		// 描画
@@ -80491,6 +81048,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// グレースケール
+/// <summary>
+/// PostEffectGrayScaleを管理・実装するクラス。
+/// </summary>
 	class PostEffectGrayScale : public IPostEffect {
 	public:
 		// 描画
@@ -80500,6 +81060,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// セピア
+/// <summary>
+/// PostEffectSepiaを管理・実装するクラス。
+/// </summary>
 	class PostEffectSepia : public IPostEffect {
 	public:
 		// 描画
@@ -80509,6 +81072,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ビネット
+/// <summary>
+/// PostEffectVignetteを管理・実装するクラス。
+/// </summary>
 	class PostEffectVignette : public IPostEffect {
 	public:
 		// 描画
@@ -80518,6 +81084,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// スムージング
+/// <summary>
+/// PostEffectSmoothingを管理・実装するクラス。
+/// </summary>
 	class PostEffectSmoothing : public IPostEffect {
 	public:
 		// 描画
@@ -80527,6 +81096,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ガウシアン
+/// <summary>
+/// PostEffectGaussianを管理・実装するクラス。
+/// </summary>
 	class PostEffectGaussian : public IPostEffect {
 	public:
 		// 描画
@@ -80536,6 +81108,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// アウトライン
+/// <summary>
+/// PostEffectOutlineを管理・実装するクラス。
+/// </summary>
 	class PostEffectOutline : public IPostEffect {
 	public:
 		// 描画
@@ -80545,6 +81120,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ラジアルブラー
+/// <summary>
+/// PostEffectRadialBlurを管理・実装するクラス。
+/// </summary>
 	class PostEffectRadialBlur : public IPostEffect {
 	public:
 		// 描画
@@ -80554,6 +81132,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ディゾルブ
+/// <summary>
+/// PostEffectDissolveを管理・実装するクラス。
+/// </summary>
 	class PostEffectDissolve : public IPostEffect {
 	public:
 		// 描画
@@ -80566,6 +81147,9 @@ namespace Engine {
 	};
 
 	// ランダム
+/// <summary>
+/// PostEffectRandomを管理・実装するクラス。
+/// </summary>
 	class PostEffectRandom : public IPostEffect {
 	public:
 		// 描画
@@ -80575,6 +81159,9 @@ namespace Engine {
 		void CreateRootSignature() override;
 	};
 	// ブルーム
+/// <summary>
+/// PostEffectBloomを管理・実装するクラス。
+/// </summary>
 	class PostEffectBloom : public IPostEffect {
 	public:
 		// 描画
@@ -80585,6 +81172,9 @@ namespace Engine {
 	};
 
 	// 合成
+/// <summary>
+/// PostEffectCombineを管理・実装するクラス。
+/// </summary>
 	class PostEffectCombine : public IPostEffect {
 	public:
 		// 描画
@@ -80864,6 +81454,9 @@ namespace Engine {
 
 	// 1回のポストエフェクト描画を表す単位。
 	// 入力RenderTextureを読み込み、自分のRenderTextureへ書き出す。
+/// <summary>
+/// PostEffectPassを管理・実装するクラス。
+/// </summary>
 	class PostEffectPass {
 	public:
 		void Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,
@@ -80912,6 +81505,9 @@ namespace Engine {
 
 	// カメラごとのポストエフェクト列。
 	// Passを順番に実行し、最後の出力を次の描画先へ渡す。
+/// <summary>
+/// PostEffectPipelineを管理・実装するクラス。
+/// </summary>
 	class PostEffectPipeline {
 	public:
 		void Initialize(DXGIDevice* dxgiDevice, Command* command, SrvManager* srvManager,
@@ -83284,6 +83880,9 @@ namespace Engine {
 	class EntityManager;
 
 	// スプライト基底クラス
+/// <summary>
+/// BaseSpriteを管理・実装するクラス。
+/// </summary>
 	class BaseSprite {
 	public:
 		// 初期化
@@ -84240,6 +84839,9 @@ namespace Engine {
 	class EntityManager;
 
 	// UI要素基底クラス
+/// <summary>
+/// UIElementを管理・実装するクラス。
+/// </summary>
 	class UIElement
 	{
 	public:
@@ -84294,6 +84896,9 @@ namespace Engine {
 	};
 
 	// 通常
+/// <summary>
+/// UINormalを管理・実装するクラス。
+/// </summary>
 	class UINormal : public UIElement {
 	public:
 		// 更新
@@ -84308,6 +84913,9 @@ namespace Engine {
 
 
 	// ボタン
+/// <summary>
+/// UIButtonを管理・実装するクラス。
+/// </summary>
 	class UIButton : public UIElement {
 	public:
 		// 更新
@@ -84322,6 +84930,9 @@ namespace Engine {
 	};
 
 	// チェックボックス
+/// <summary>
+/// UICheckBoxを管理・実装するクラス。
+/// </summary>
 	class UICheckBox : public UIElement {
 	public:
 		// 更新
@@ -84342,6 +84953,9 @@ namespace Engine {
 	};
 
 	// スライダー
+/// <summary>
+/// UISliderを管理・実装するクラス。
+/// </summary>
 	class UISlider : public UIElement {
 	public:
 		// 更新
@@ -84375,6 +84989,9 @@ namespace Engine {
 
 
 	// メーター
+/// <summary>
+/// UIMeterを管理・実装するクラス。
+/// </summary>
 	class UIMeter : public UIElement {
 	public:
 		// 更新
@@ -84422,6 +85039,9 @@ namespace Engine {
 	};
 
 	//  ペア
+/// <summary>
+/// UIPairを管理・実装するクラス。
+/// </summary>
 	class UIPair : public UIElement {
 	public:
 		// 更新
@@ -84447,6 +85067,9 @@ namespace Engine {
 	};
 
 	// カウンターUI
+/// <summary>
+/// UICountを管理・実装するクラス。
+/// </summary>
 	class UICount : public UIElement {
 	public:
 		// 更新
@@ -84643,6 +85266,9 @@ File Path: project/DirectXGame/engine/Utility/MapUtility.h
 
 // ハッシュマップ
 template <typename K, typename V>
+/// <summary>
+/// MapContainerを管理・実装するクラス。
+/// </summary>
 class MapContainer {
 public:
     std::map<K, V> data;
@@ -84695,6 +85321,9 @@ public:
 
 // ハッシュアンオーダードマップ
 template <typename K, typename V>
+/// <summary>
+/// UnorderedMapContainerを管理・実装するクラス。
+/// </summary>
 class UnorderedMapContainer {
 public:
     std::unordered_map<K, V> data;
@@ -84943,6 +85572,9 @@ File Path: project/DirectXGame/engine/Utility/VectorUtility.h
 
 // ベクター
 template <typename T>
+/// <summary>
+/// VectorContainerを管理・実装するクラス。
+/// </summary>
 class VectorContainer {
 public:
     std::vector<T> data;
@@ -88434,10 +89066,9 @@ enum class Dire {
 	mY,		// -Y軸
 	mZ		// -Z軸
 };
-
-
-
-//速度や加速度を管理する構造体
+/// <summary>
+/// 物体の速度と加速度を管理する運動学データ。
+/// </summary>
 struct Kinematics {
 	Vector3 velocity{ 0.0f, 0.0f, 0.0f };
 	Vector3 acceleration{ 0.0f, 0.0f, 0.0f };
@@ -88460,8 +89091,9 @@ struct Kinematics {
 		velocity *= damping; // 0.0f〜1.0fの範囲
 	}
 };
-
-//Transform
+/// <summary>
+/// 3次元空間における拡大縮小、回転、位置を表す変換データ。
+/// </summary>
 struct Transform {
 	Vector3 scale = { 1.0f,1.0f,1.0f };
 	Vector3 rotate{};
@@ -88500,7 +89132,7 @@ struct Transform {
 };
 
 /// <summary>
-/// Quaternionトランスフォーム情報(Quaternion回転)
+/// クォータニオン回転を用いた3次元トランスフォーム情報。
 /// </summary>
 struct QuaternionTransform
 {
@@ -88732,7 +89364,7 @@ struct Plane {
 };
 
 /// <summary>
-/// こーな
+/// 角部の中心、線分番号、半径をまとめた補助的な線分データ。
 /// </summary>
 struct CornerSegment {
 	Vector3 center;
