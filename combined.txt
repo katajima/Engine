@@ -2273,7 +2273,7 @@ float Continuous::GetDamage() const
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/AttackData.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 
@@ -2281,7 +2281,7 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.h
 #include "string"
 #include <memory>
 
-/// ダメージ処理の共通インターフェース
+
 /// <summary>
 /// DamageDataを管理・実装するクラス。
 /// </summary>
@@ -5658,7 +5658,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboState.h"
 
@@ -5681,11 +5681,14 @@ namespace Combo {
 		/// <summary>
 		/// 初期化
 		/// </summary>
+		/// <param name="lineCommon">ライン描画共通</param>
+		/// <param name="owner">キャラクター</param>
 		void Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner);
 
 		/// <summary>
 		/// 更新
 		/// </summary>
+		/// <param name="dt"> deltaTime </param>
 		void Update(float dt);
 
 	private:
@@ -5693,6 +5696,7 @@ namespace Combo {
 		Engine::LineCommon* lineCommon = nullptr;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.cpp
@@ -6507,7 +6511,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
@@ -6518,7 +6522,14 @@ namespace Combo {
 	class Editor {
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
+		/// <param name="lineCommon">ライン描画共通</param>
+		/// <param name="globalVariables">外部保存用クラス</param>
+		/// <param name="characterManager">キャラクター管理</param>
+		/// <param name="owner">所有者</param>
+		/// <param name="effectSystem">エフェクトシステム</param>
 		void Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, 
 			Character::CharacterManager* characterManager,Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		/// <summary>
