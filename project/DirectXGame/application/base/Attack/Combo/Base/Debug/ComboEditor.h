@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
@@ -9,7 +9,14 @@ namespace Combo {
 	class Editor {
 	public:
 
-		// 初期化
+		/// <summary>
+		/// 初期化
+		/// </summary>
+		/// <param name="lineCommon">ライン描画共通</param>
+		/// <param name="globalVariables">外部保存用クラス</param>
+		/// <param name="characterManager">キャラクター管理</param>
+		/// <param name="owner">所有者</param>
+		/// <param name="effectSystem">エフェクトシステム</param>
 		void Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, 
 			Character::CharacterManager* characterManager,Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		/// <summary>

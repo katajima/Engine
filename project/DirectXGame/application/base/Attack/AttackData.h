@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
 
@@ -6,7 +6,7 @@
 #include "string"
 #include <memory>
 
-/// ダメージ処理の共通インターフェース
+
 /// <summary>
 /// DamageDataを管理・実装するクラス。
 /// </summary>
