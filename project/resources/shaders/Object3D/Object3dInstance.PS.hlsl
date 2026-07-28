@@ -111,10 +111,10 @@ PixelShaderOutput main(VertexShaderOutput input)
 
 
 
-        output.color.rgb = allDire + allPoint + allSpot;
+        output.color.rgb = (allDire + allPoint + allSpot) * input.color.rgb;
 
 
-        output.color.a = gMaterial.color.a * textureColor.a * gMaterial.alpha;
+        output.color.a = input.color.a *gMaterial.color.a * textureColor.a * gMaterial.alpha;
 
         if (textureColor.a <= gMaterial.alphaClipping)
         {
@@ -128,7 +128,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
     else // Lightingしない場合。前回までと同じ演算
     {
-        output.color = gMaterial.color * textureColor * gMaterial.alpha;
+        output.color = input.color * gMaterial.color * textureColor * gMaterial.alpha;
     }
     return output;
 }
