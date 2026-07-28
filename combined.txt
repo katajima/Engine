@@ -11797,6 +11797,7 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include <DirectXGame/application/base/Object/ObjectComponent.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
@@ -11841,6 +11842,9 @@ void HitMotionSystem::Update(float dt) {
 
 	// レンダーテクスチャエフェクト処理
 	RenderTargetEffectProcess(dt);
+
+	// マテリアルの色を元に戻す時間カウントダウン
+	MaterialColorProcess(dt);
 
 	if (!isAction_) {
 		return;
@@ -11921,6 +11925,8 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	renderTargetEffectTime_ = data_.renderTargetEffectTime; // レンダーテクスチャエフェクト時間
 	timerForVignette_ = data_.renderTargetEffectTime;		// ビネットエフェクト時間
+	materialColorTime_ = 0.25f;
+	materialColorTimeMax_ = 0.25f;
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -12139,6 +12145,15 @@ void HitMotionSystem::RenderTargetEffectProcess(float dt){
 	}
 }
 
+void HitMotionSystem::MaterialColorProcess(float dt){
+	if (GetIsTime(dt, materialColorTime_) && owner->GetCharacterType() == Character::Type::Enemy) {
+		owner->GetObjectComponent()->SetColor({1,0,0,1});
+	}
+	else {
+		owner->GetObjectComponent()->SetColor({1,1,1,1});
+	}
+}
+
 void HitMotionSystem::ConfigureVignette() {
 	if (!camera) return;
 
@@ -12171,7 +12186,7 @@ void HitMotionSystem::ConfigureVignette() {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -12288,6 +12303,14 @@ private:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void RenderTargetEffectProcess(float dt);
 
+
+	/// <summary>
+	/// マテリアルの色を更新する処理を行う。
+	/// </summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
+	void MaterialColorProcess(float dt);
+
+
 	/// <summary>
 	/// ビネットのパラメータを調整する
 	/// </summary>
@@ -12337,6 +12360,10 @@ private:
 	float renderTargetEffectTime_ = 0.0f;
 	// ビネットエフェクト時間
 	float timerForVignette_ = 0.0f;
+	// マテリアルの色を元に戻す時間
+	float materialColorTime_ = 0.0f;
+	// マテリアルの色を元に戻す時間の最大値
+	float materialColorTimeMax_ = 0.0f;
 	// アクション中か
 	bool isAction_ = false;
 
@@ -24576,6 +24603,7 @@ namespace Character {
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
 		parameterComponent_->Initialize();
+		parameterComponent_->characterType_ = Character::Type::Enemy;	// 敵キャラクターとして設定
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
@@ -38557,7 +38585,7 @@ void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const
 // 色の設定
 void ObjectComponent::SetColor(const Color& color) {
     if(useInstancing){
-        objectInstance_->color = color.ToVector4();
+         objectInstance_->color = color.ToVector4();
     }
     else {
         objectBase_->GetMaterial(0)->GetMaterialInstance().color = color;
