@@ -45,7 +45,7 @@ void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const
 // 色の設定
 void ObjectComponent::SetColor(const Color& color) {
     if(useInstancing){
-        objectInstance_->color = color.ToVector4();
+         objectInstance_->color = color.ToVector4();
     }
     else {
         objectBase_->GetMaterial(0)->GetMaterialInstance().color = color;

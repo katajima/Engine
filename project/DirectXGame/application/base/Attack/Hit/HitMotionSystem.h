@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -115,6 +115,14 @@ private:
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void RenderTargetEffectProcess(float dt);
 
+
+	/// <summary>
+	/// マテリアルの色を更新する処理を行う。
+	/// </summary>
+	/// <param name="dt">秒単位のフレーム時間。</param>
+	void MaterialColorProcess(float dt);
+
+
 	/// <summary>
 	/// ビネットのパラメータを調整する
 	/// </summary>
@@ -164,6 +172,10 @@ private:
 	float renderTargetEffectTime_ = 0.0f;
 	// ビネットエフェクト時間
 	float timerForVignette_ = 0.0f;
+	// マテリアルの色を元に戻す時間
+	float materialColorTime_ = 0.0f;
+	// マテリアルの色を元に戻す時間の最大値
+	float materialColorTimeMax_ = 0.0f;
 	// アクション中か
 	bool isAction_ = false;
 

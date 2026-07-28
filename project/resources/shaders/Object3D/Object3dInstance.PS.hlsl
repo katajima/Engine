@@ -1,4 +1,4 @@
-#include"LightInstance.hlsli"
+﻿#include"LightInstance.hlsli"
 
 
 SamplerState sSampler           : register(s0);
@@ -83,8 +83,7 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     float4 transformedUV = mul(float4(input.texcoord.xy, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTextures[int(input.textureIndex)].Sample(sSampler, transformedUV.xy);
-    //float4 textureColor = gTextures[int(input.textureIndex)].Sample(sSampler, input.texcoord);
-
+    
     if (gMaterial.enableLighting != 0) // Lightingする場合
     {
 

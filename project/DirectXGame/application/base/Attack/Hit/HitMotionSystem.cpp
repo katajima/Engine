@@ -6,6 +6,7 @@
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include <DirectXGame/application/base/Object/ObjectComponent.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
@@ -50,6 +51,9 @@ void HitMotionSystem::Update(float dt) {
 
 	// レンダーテクスチャエフェクト処理
 	RenderTargetEffectProcess(dt);
+
+	// マテリアルの色を元に戻す時間カウントダウン
+	MaterialColorProcess(dt);
 
 	if (!isAction_) {
 		return;
@@ -130,6 +134,8 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	renderTargetEffectTime_ = data_.renderTargetEffectTime; // レンダーテクスチャエフェクト時間
 	timerForVignette_ = data_.renderTargetEffectTime;		// ビネットエフェクト時間
+	materialColorTime_ = 0.25f;
+	materialColorTimeMax_ = 0.25f;
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -345,6 +351,15 @@ void HitMotionSystem::RenderTargetEffectProcess(float dt){
 			vignettePass_->SetUse(false);
 		}
 
+	}
+}
+
+void HitMotionSystem::MaterialColorProcess(float dt){
+	if (GetIsTime(dt, materialColorTime_) && owner->GetCharacterType() == Character::Type::Enemy) {
+		owner->GetObjectComponent()->SetColor({1,0,0,1});
+	}
+	else {
+		owner->GetObjectComponent()->SetColor({1,1,1,1});
 	}
 }
 

@@ -83,6 +83,7 @@ namespace Character {
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
 		parameterComponent_->Initialize();
+		parameterComponent_->characterType_ = Character::Type::Enemy;	// 敵キャラクターとして設定
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
