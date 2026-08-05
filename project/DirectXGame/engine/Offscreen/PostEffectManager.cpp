@@ -161,29 +161,50 @@ void Engine::PostEffectManager::ClearPostEffectBlock()
 
 void Engine::PostEffectManager::RenderImGui()
 {
+	// ゲーム画面を表示する専用ウィンドウを開始する。
 	ImGui::Begin("GameScene");
-	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
-	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
 
-	ImTextureID imguiTexture = (ImTextureID)(GetEndRenderTexture()->GetSRVGPUHandle().ptr);
-	ImGui::Image(imguiTexture, ImVec2(width, height));
-	ImVec2 imagePos = ImGui::GetCursorScreenPos();
-	imagePos.y -= height;
+	// 他のドッキングUIを除いた、現在のウィンドウ内で使用できる領域を取得する。
+	const ImVec2 availableSize = ImGui::GetContentRegionAvail();
+	// レンダーテクスチャの基準となるクライアント領域の幅を取得する。
+	const float clientWidth = static_cast<float>(WinApp::GetClientWidth());
+	// レンダーテクスチャの基準となるクライアント領域の高さを取得する。
+	const float clientHeight = static_cast<float>(WinApp::GetClientHeight());
+	// 画面サイズが一時的に0になった場合でも、ゼロ除算を避けるための安全な比率を設定する。
+	const float sourceAspect = clientHeight > 0.0f ? clientWidth / clientHeight : 1.0f;
+	// 使用可能領域いっぱいに合わせた場合の画像幅を初期値にする。
+	float imageWidth = availableSize.x;
+	// 元の画面比率を維持した画像高さを計算する。
+	float imageHeight = sourceAspect > 0.0f ? imageWidth / sourceAspect : availableSize.y;
+	// 高さが領域を超える場合は、高さを基準に画像サイズを再計算する。
+	if (imageHeight > availableSize.y) {
+		imageHeight = availableSize.y;
+		imageWidth = imageHeight * sourceAspect;
+	}
+	// ウィンドウが極端に小さい場合に負のサイズをImGuiへ渡さないようにする。
+	imageWidth = imageWidth > 0.0f ? imageWidth : 0.0f;
+	imageHeight = imageHeight > 0.0f ? imageHeight : 0.0f;
 
-	Vector2 windowSize = Vector2{ static_cast<float> (WinApp::GetClientWidth()),static_cast<float> (WinApp::GetClientHeight()) };
-	Vector2 imageSize = Vector2{ width,height };
+	// 余った横方向の領域を分けて、ゲーム画面を中央に配置する。
+	const float horizontalPadding = (availableSize.x - imageWidth) * 0.5f;
+	if (horizontalPadding > 0.0f) {
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + horizontalPadding);
+	}
+	// 描画前のカーソル位置を保存し、UI座標変換に利用する。
+	const ImVec2 imagePos = ImGui::GetCursorScreenPos();
+	// 最終レンダーテクスチャを、計算した利用可能サイズで表示する。
+	const ImTextureID imguiTexture = (ImTextureID)(GetEndRenderTexture()->GetSRVGPUHandle().ptr);
+	ImGui::Image(imguiTexture, ImVec2(imageWidth, imageHeight));
 
-	ImGui::InputFloat2("GetCursorScreenPos", &imagePos.x);
-	ImGui::InputFloat2("WindowSize", &windowSize.x);
-	ImGui::InputFloat2("ImageSize", &imageSize.x);
-
-
+	// ゲーム画面の左上座標・サイズ・基準画面に対する比率を更新する。
 	imageleftTopPos_ = Vector2(imagePos.x, imagePos.y);
-	imageSize_ = Vector2(width, height);
-	imageRatio_ = Vector2{ width / windowSize.x,height / windowSize.y };
-	ImGui::InputFloat2("ImageleftTopPos", &imageleftTopPos_.x);
-	ImGui::InputFloat2("ImageRatio", &imageRatio_.x);
+	imageSize_ = Vector2(imageWidth, imageHeight);
+	imageRatio_ = Vector2{
+		clientWidth > 0.0f ? imageWidth / clientWidth : 0.0f,
+		clientHeight > 0.0f ? imageHeight / clientHeight : 0.0f
+	};
 
+	// ゲーム画面を表示する専用ウィンドウを終了する。
 	ImGui::End();
 }
 
