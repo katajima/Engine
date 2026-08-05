@@ -1,5 +1,9 @@
 {
     "ComboPlayer": {
+        "A_testAttack": {
+            "type": "string",
+            "value": "A_testAttack"
+        },
         "AirLightAttack1": {
             "type": "string",
             "value": "AirLightAttack1"
