@@ -4670,7 +4670,18 @@ namespace Combo {
 			writer.Value(groupName, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			writer.Value(groupName, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
 			writer.Value(groupName, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
-			writer.Value(groupName, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
+			writer.Value(groupName, "ヒットボックスコライダー半径", data.hitBox.radius);
+			writer.EnumValue(groupName, "ヒットボックス軌道方式", data.hitBox.trajectoryType, "HitBoxTrajectoryType");
+			writer.Value(groupName, "ヒットボックス軌道時間", data.hitBox.trajectoryDuration);
+			writer.Value(groupName, "ヒットボックス軌道点0", data.hitBox.trajectoryPoint0);
+			writer.Value(groupName, "ヒットボックス軌道点1", data.hitBox.trajectoryPoint1);
+			writer.Value(groupName, "ヒットボックス軌道点2", data.hitBox.trajectoryPoint2);
+			writer.Value(groupName, "ヒットボックス軌道点3", data.hitBox.trajectoryPoint3);
+			writer.Value(groupName, "ヒットボックス軌道中心", data.hitBox.trajectoryOrbitCenter);
+			writer.Value(groupName, "ヒットボックス軌道半径", data.hitBox.trajectoryOrbitRadius);
+			writer.Value(groupName, "ヒットボックス軌道高さ", data.hitBox.trajectoryOrbitHeight);
+			writer.Value(groupName, "ヒットボックス軌道開始角", data.hitBox.trajectoryOrbitStartAngle);
+			writer.Value(groupName, "ヒットボックス軌道終了角", data.hitBox.trajectoryOrbitEndAngle);				// new
 
 			writer.EnumValue(groupName, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
 			writer.EnumValue(groupName, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
@@ -5037,6 +5048,20 @@ namespace Combo {
 			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
 			data.hitBox.offset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
 			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
+			// 新しい軌道項目がない旧データは、従来動作のkNoneで補完する。
+			if (globalVariables->HasKey(name, "ヒットボックス軌道方式")) {
+				data.hitBox.trajectoryType = globalVariables->GetEnumValue<HitBox::TrajectoryType>(name, "ヒットボックス軌道方式");
+				data.hitBox.trajectoryDuration = globalVariables->GetValue<float>(name, "ヒットボックス軌道時間");
+				data.hitBox.trajectoryPoint0 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点0");
+				data.hitBox.trajectoryPoint1 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点1");
+				data.hitBox.trajectoryPoint2 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点2");
+				data.hitBox.trajectoryPoint3 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点3");
+				data.hitBox.trajectoryOrbitCenter = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道中心");
+				data.hitBox.trajectoryOrbitRadius = globalVariables->GetValue<float>(name, "ヒットボックス軌道半径");
+				data.hitBox.trajectoryOrbitHeight = globalVariables->GetValue<float>(name, "ヒットボックス軌道高さ");
+				data.hitBox.trajectoryOrbitStartAngle = globalVariables->GetValue<float>(name, "ヒットボックス軌道開始角");
+				data.hitBox.trajectoryOrbitEndAngle = globalVariables->GetValue<float>(name, "ヒットボックス軌道終了角");
+			}
 
 			data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
 			data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
@@ -6673,6 +6698,8 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEdi
 
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Attack/HitBox/HitBox.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -6763,6 +6790,14 @@ namespace Combo {
 		ImGuiReaction();
 		// ヒットボックス設定
 		ImGuiApplyHitBox();
+		// 選択中コンボの軌道を、ヒットボックス生成前でもデバッグ描画する。
+		if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone && lineCommon != nullptr) {
+			Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
+			if (trajectoryAnchor == nullptr && owner != nullptr) {
+				trajectoryAnchor = &owner->GetWorldTransform();
+			}
+			HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
+		}
 		// カメラ設定
 		ImGuiCamera();
 		// コンボ接続設定
@@ -6821,6 +6856,34 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
 
+			// 軌道方式。kNone以外では武器ボーンやキャラクター移動から独立して判定を動かす。
+			static const char* HitBoxTrajectoryTypeLabels[] = {
+				"なし（従来の親追従）",
+				"Bezier",
+				"Catmull-Rom",
+				"Orbit",
+			};
+			Engine::ImGuiManager::Select("ヒットボックス軌道", HitBoxTrajectoryTypeLabels, data_.hitBox.trajectoryType);
+			if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone) {
+				// 軌道の評価時間が0以下の場合は、ヒットボックス生存時間を使用する。
+				ImGui::DragFloat("軌道時間", &data_.hitBox.trajectoryDuration, 0.01f, 0.0f, 30.0f);
+				if (data_.hitBox.trajectoryType == HitBox::TrajectoryType::kBezier ||
+					data_.hitBox.trajectoryType == HitBox::TrajectoryType::kCatmullRom) {
+					// 曲線の制御点は、生成時の親Transformを基準にしたローカル座標で指定する。
+					ImGui::DragFloat3("軌道点0", &data_.hitBox.trajectoryPoint0.x, 0.1f);
+					ImGui::DragFloat3("軌道点1", &data_.hitBox.trajectoryPoint1.x, 0.1f);
+					ImGui::DragFloat3("軌道点2", &data_.hitBox.trajectoryPoint2.x, 0.1f);
+					ImGui::DragFloat3("軌道点3", &data_.hitBox.trajectoryPoint3.x, 0.1f);
+				}
+				if (data_.hitBox.trajectoryType == HitBox::TrajectoryType::kOrbit) {
+					// Orbitは生成時アンカーを中心に、指定半径と角度で周回する。
+					ImGui::DragFloat3("軌道中心", &data_.hitBox.trajectoryOrbitCenter.x, 0.1f);
+					ImGui::DragFloat("軌道半径", &data_.hitBox.trajectoryOrbitRadius, 0.1f, 0.0f, 100.0f);
+					ImGui::DragFloat("軌道高さ", &data_.hitBox.trajectoryOrbitHeight, 0.1f);
+					ImGui::DragFloat("軌道開始角", &data_.hitBox.trajectoryOrbitStartAngle, 0.05f);
+					ImGui::DragFloat("軌道終了角", &data_.hitBox.trajectoryOrbitEndAngle, 0.05f);
+				}
+			}
 			// 影響タイプ
 			static const char* HitBoxHitEffectTypeLabels[] = {
 				"ダメージのみ",
@@ -12399,7 +12462,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -12409,6 +12472,8 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
 
 namespace Engine {
 	class EntityManager; // 前方宣言
+	class LineCommon; // 軌道デバッグライン描画
+class LineMeshData; // デバッグラインメッシュ
 }
 namespace Character {
 	class BaseCharacter;
@@ -12433,7 +12498,12 @@ namespace HitBox {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		// ヒットボックスを更新し、必要なら独立軌道上へ移動させる。
 		void Update(float dt);
+		// 生成時の親Transformを基準に、以後独立して軌道を評価する。
+		void SetTrajectory(const GlobalHitBox& data, Engine::WorldTransform* anchor);
+		// 生成前の軌道設定を、選択中コンボのデバッグ表示用に描画する。
+		static void DrawTrajectoryDebug(const GlobalHitBox& data, Engine::WorldTransform* anchor, Engine::LineCommon* lineCommon);
 		uint32_t GetAttackInstanceId() const { return attackInstanceId_; }
 
 	public:
@@ -12501,6 +12571,34 @@ namespace HitBox {
 		// コライダー数
 		int colliderCount = 0;
 		Character::BaseCharacter* character = nullptr;
+
+		// 軌道を使う場合にだけ保持する、生成時のワールド基準情報。
+		bool trajectoryEnabled_ = false;
+		TrajectoryType trajectoryType_ = TrajectoryType::kNone;
+		float trajectoryElapsed_ = 0.0f;
+		float trajectoryDuration_ = 0.0f;
+		Vector3 trajectoryAnchorPosition_{};
+		Vector3 trajectoryRight_{ 1.0f, 0.0f, 0.0f };
+		Vector3 trajectoryUp_{ 0.0f, 1.0f, 0.0f };
+		Vector3 trajectoryForward_{ 0.0f, 0.0f, 1.0f };
+		Vector3 trajectoryPoint0_{};
+		Vector3 trajectoryPoint1_{};
+		Vector3 trajectoryPoint2_{};
+		Vector3 trajectoryPoint3_{};
+		Vector3 trajectoryOrbitCenter_{};
+		float trajectoryOrbitRadius_ = 0.0f;
+		float trajectoryOrbitHeight_ = 0.0f;
+		float trajectoryOrbitStartAngle_ = 0.0f;
+		float trajectoryOrbitEndAngle_ = 0.0f;
+
+		// 現在の軌道パラメータから、アンカー基準のローカル位置を計算する。
+		Vector3 EvaluateTrajectory(float normalizedTime) const;
+
+		// ローカル軌道座標を生成時アンカー基準のワールド座標へ変換する。
+		Vector3 ToTrajectoryWorldPosition(const Vector3& localPosition) const;
+		// デバッグビルド時だけ、軌道全体を3Dラインとして描画する。
+		void DrawTrajectory() const;
+		void DrawTrajectory(Engine::LineMeshData& lineMeshData) const;
 		Engine::EntityManager* entityManager = nullptr;
 	};
 };
@@ -12539,6 +12637,14 @@ namespace HitBox {
 		kForce,         // ノックバック・引き寄せなど
 		kDamageAndForce // 両方
 	};
+	// ヒットボックスの軌道評価方式。kNoneなら従来の親Transform追従を使用する。
+	enum class TrajectoryType {
+		kNone,
+		kBezier,
+		kCatmullRom,
+		kOrbit,
+	};
+
 	// 形状
 	enum class ShapeType {
 		kOBB,
@@ -12597,6 +12703,21 @@ namespace HitBox {
 		// 球半径
 		float radius = 1.0f;
 
+		// 軌道評価方式
+		TrajectoryType trajectoryType = TrajectoryType::kNone;
+		// 軌道を評価する時間。0以下ならヒットボックスの生存時間を使用する。
+		float trajectoryDuration = 0.0f;
+		// Bezier／Catmull-Romで使用するローカル制御点。生成時の向きを基準にする。
+		Vector3 trajectoryPoint0 = { 0.0f, 0.0f, 0.0f };
+		Vector3 trajectoryPoint1 = { 0.0f, 0.0f, 2.0f };
+		Vector3 trajectoryPoint2 = { 0.0f, 0.0f, 4.0f };
+		Vector3 trajectoryPoint3 = { 0.0f, 0.0f, 6.0f };
+		// Orbitで使用する中心オフセット、半径、高さ、開始角、終了角。
+		Vector3 trajectoryOrbitCenter = { 0.0f, 0.0f, 0.0f };
+		float trajectoryOrbitRadius = 2.0f;
+		float trajectoryOrbitHeight = 0.0f;
+		float trajectoryOrbitStartAngle = 0.0f;
+		float trajectoryOrbitEndAngle = 6.2831853f;
 		// タグ
 		CollisionTag tag = CollisionTag::None;
 		// レイヤー
@@ -12919,6 +13040,7 @@ namespace HitBox {
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
 		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
+		d.hitBox->SetTrajectory(datas.hitBoxData, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
 		d.lifeTime = datas.hitBoxData.lifeTime;							// 生存時間
@@ -12944,6 +13066,7 @@ namespace HitBox {
 
 		// 依存先設定
 		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
+		d.hitBox->SetTrajectory(datas.hitBoxData, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
 		// ヒットボックス(無期限)データに挿入
@@ -13161,7 +13284,9 @@ namespace HitBox {
 File Path: project/DirectXGame/application/base/Attack/HitBox/Hitbox.cpp
 ============================================================
 ﻿#include "Hitbox.h"
+#include <cmath>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
 
 namespace HitBox {
@@ -13216,6 +13341,27 @@ namespace HitBox {
 
 	// 更新
 	void HitBoxInstance::Update(float dt) {
+		// 軌道指定時は親を参照せず、生成時アンカーから現在位置を計算する。
+		if (trajectoryEnabled_) {
+			// 経過時間を軌道の評価時間へ加算する。
+			trajectoryElapsed_ += dt;
+			// 0から1の範囲へ正規化し、軌道の終点を越えないようにする。
+			float normalizedTime = trajectoryDuration_ > 0.0f ? trajectoryElapsed_ / trajectoryDuration_ : 1.0f;
+			if (normalizedTime < 0.0f) {
+				normalizedTime = 0.0f;
+			}
+			if (normalizedTime > 1.0f) {
+				normalizedTime = 1.0f;
+			}
+			// ローカル軌道を生成時のワールド基底へ変換する。
+			const Vector3 localPosition = EvaluateTrajectory(normalizedTime);
+			worldTransform_.parent_ = nullptr;
+			worldTransform_.translate_ = ToTrajectoryWorldPosition(localPosition);
+#ifdef _DEBUG
+			// デバッグ時だけ軌道全体を描画し、現在の判定位置と経路を同時に確認できるようにする。
+			DrawTrajectory();
+#endif
+		}
 		// ワールド変換更新
 		worldTransform_.Update();
 		// 各コライダーのワールド変換更新と当たり判定コンポーネントへの反映
@@ -13224,6 +13370,129 @@ namespace HitBox {
 			colliderComponent_->UpdateByID(colliderData.second.worldTransform, colliderData.second.colliderID);
 		}
 	};
+	// 軌道設定
+	void HitBoxInstance::SetTrajectory(const GlobalHitBox& data, Engine::WorldTransform* anchor) {
+		// kNoneは従来の親子付けを使うため、軌道状態を無効にする。
+		trajectoryEnabled_ = data.trajectoryType != TrajectoryType::kNone;
+		if (!trajectoryEnabled_) {
+			return;
+		}
+		// 軌道設定をインスタンスへコピーし、生成後に参照元が動いても影響されないようにする。
+		trajectoryType_ = data.trajectoryType;
+		trajectoryElapsed_ = 0.0f;
+		trajectoryDuration_ = data.trajectoryDuration > 0.0f ? data.trajectoryDuration : data.lifeTime;
+		if (trajectoryDuration_ <= 0.0f) {
+			trajectoryDuration_ = 1.0f;
+		}
+		trajectoryPoint0_ = data.trajectoryPoint0;
+		trajectoryPoint1_ = data.trajectoryPoint1;
+		trajectoryPoint2_ = data.trajectoryPoint2;
+		trajectoryPoint3_ = data.trajectoryPoint3;
+		trajectoryOrbitCenter_ = data.trajectoryOrbitCenter;
+		trajectoryOrbitRadius_ = data.trajectoryOrbitRadius;
+		trajectoryOrbitHeight_ = data.trajectoryOrbitHeight;
+		trajectoryOrbitStartAngle_ = data.trajectoryOrbitStartAngle;
+		trajectoryOrbitEndAngle_ = data.trajectoryOrbitEndAngle;
+		// CreateParentで設定されたオフセットを含む現在のワールド位置を確定する。
+		worldTransform_.Update();
+		// 親の現在位置と基底軸だけを保存し、以後の親移動から切り離す。
+		trajectoryAnchorPosition_ = worldTransform_.GetWorldPosition();
+		if (anchor != nullptr) {
+			trajectoryRight_ = { anchor->worldMat_.m[0][0], anchor->worldMat_.m[0][1], anchor->worldMat_.m[0][2] };
+			trajectoryUp_ = { anchor->worldMat_.m[1][0], anchor->worldMat_.m[1][1], anchor->worldMat_.m[1][2] };
+			trajectoryForward_ = { anchor->worldMat_.m[2][0], anchor->worldMat_.m[2][1], anchor->worldMat_.m[2][2] };
+		}
+		// 軌道使用時は親ポインターを解除して、キャラクターや武器ボーンから独立させる。
+		worldTransform_.parent_ = nullptr;
+		worldTransform_.translate_ = trajectoryAnchorPosition_;
+		worldTransform_.Update();
+	}
+
+	// 軌道座標変換
+	Vector3 HitBoxInstance::ToTrajectoryWorldPosition(const Vector3& localPosition) const {
+		// 生成時に保存した右・上・前の基底軸でローカル座標をワールド座標へ変換する。
+		return {
+			trajectoryAnchorPosition_.x + trajectoryRight_.x * localPosition.x + trajectoryUp_.x * localPosition.y + trajectoryForward_.x * localPosition.z,
+			trajectoryAnchorPosition_.y + trajectoryRight_.y * localPosition.x + trajectoryUp_.y * localPosition.y + trajectoryForward_.y * localPosition.z,
+			trajectoryAnchorPosition_.z + trajectoryRight_.z * localPosition.x + trajectoryUp_.z * localPosition.y + trajectoryForward_.z * localPosition.z
+		};
+	}
+
+	// 選択中コンボ用の軌道デバッグ描画
+	void HitBoxInstance::DrawTrajectoryDebug(const GlobalHitBox& data, Engine::WorldTransform* anchor, Engine::LineCommon* lineCommon) {
+#ifdef _DEBUG
+		// 軌道未使用または描画先がない場合は何もしない。
+		if (data.trajectoryType == TrajectoryType::kNone || lineCommon == nullptr) {
+			return;
+		}
+		// 実行時と同じ軌道評価処理を使うため、一時インスタンスへ設定をコピーする。
+		HitBoxInstance preview;
+		preview.SetTrajectory(data, anchor);
+		preview.DrawTrajectory(lineCommon->GetDebugLineMeshData());
+#else
+		(void)data;
+		(void)anchor;
+		(void)lineCommon;
+#endif
+	}
+
+	// 軌道デバッグ描画
+	void HitBoxInstance::DrawTrajectory() const {
+		// EntityManagerまたはライン共通クラスがない場合は描画を省略する。
+		if (entityManager == nullptr || entityManager->Get3DLineCommon() == nullptr) {
+			return;
+		}
+		DrawTrajectory(entityManager->Get3DLineCommon()->GetDebugLineMeshData());
+	}
+
+	// 軌道折れ線描画
+	void HitBoxInstance::DrawTrajectory(Engine::LineMeshData& lineMeshData) const {
+		// 軌道を32分割して折れ線として描画する。
+		constexpr int kTrajectorySegmentCount = 32;
+		const Vector4 trajectoryColor = { 1.0f, 0.8f, 0.1f, 1.0f };
+		Vector3 previousPoint = ToTrajectoryWorldPosition(EvaluateTrajectory(0.0f));
+		for (int segment = 1; segment <= kTrajectorySegmentCount; ++segment) {
+			const float normalizedTime = static_cast<float>(segment) / static_cast<float>(kTrajectorySegmentCount);
+			const Vector3 currentPoint = ToTrajectoryWorldPosition(EvaluateTrajectory(normalizedTime));
+			lineMeshData.AddLine(previousPoint, currentPoint, trajectoryColor);
+			previousPoint = currentPoint;
+		}
+	}
+	// 軌道評価
+	Vector3 HitBoxInstance::EvaluateTrajectory(float normalizedTime) const {
+		// 軌道の種類に応じたローカル座標を計算する。
+		if (trajectoryType_ == TrajectoryType::kBezier) {
+			const float inverseTime = 1.0f - normalizedTime;
+			const float a = inverseTime * inverseTime * inverseTime;
+			const float b = 3.0f * inverseTime * inverseTime * normalizedTime;
+			const float c = 3.0f * inverseTime * normalizedTime * normalizedTime;
+			const float d = normalizedTime * normalizedTime * normalizedTime;
+			return {
+				trajectoryPoint0_.x * a + trajectoryPoint1_.x * b + trajectoryPoint2_.x * c + trajectoryPoint3_.x * d,
+				trajectoryPoint0_.y * a + trajectoryPoint1_.y * b + trajectoryPoint2_.y * c + trajectoryPoint3_.y * d,
+				trajectoryPoint0_.z * a + trajectoryPoint1_.z * b + trajectoryPoint2_.z * c + trajectoryPoint3_.z * d
+			};
+		}
+		if (trajectoryType_ == TrajectoryType::kCatmullRom) {
+			const float t2 = normalizedTime * normalizedTime;
+			const float t3 = t2 * normalizedTime;
+			return {
+				0.5f * ((2.0f * trajectoryPoint1_.x) + (-trajectoryPoint0_.x + trajectoryPoint2_.x) * normalizedTime + (2.0f * trajectoryPoint0_.x - 5.0f * trajectoryPoint1_.x + 4.0f * trajectoryPoint2_.x - trajectoryPoint3_.x) * t2 + (-trajectoryPoint0_.x + 3.0f * trajectoryPoint1_.x - 3.0f * trajectoryPoint2_.x + trajectoryPoint3_.x) * t3),
+				0.5f * ((2.0f * trajectoryPoint1_.y) + (-trajectoryPoint0_.y + trajectoryPoint2_.y) * normalizedTime + (2.0f * trajectoryPoint0_.y - 5.0f * trajectoryPoint1_.y + 4.0f * trajectoryPoint2_.y - trajectoryPoint3_.y) * t2 + (-trajectoryPoint0_.y + 3.0f * trajectoryPoint1_.y - 3.0f * trajectoryPoint2_.y + trajectoryPoint3_.y) * t3),
+				0.5f * ((2.0f * trajectoryPoint1_.z) + (-trajectoryPoint0_.z + trajectoryPoint2_.z) * normalizedTime + (2.0f * trajectoryPoint0_.z - 5.0f * trajectoryPoint1_.z + 4.0f * trajectoryPoint2_.z - trajectoryPoint3_.z) * t2 + (-trajectoryPoint0_.z + 3.0f * trajectoryPoint1_.z - 3.0f * trajectoryPoint2_.z + trajectoryPoint3_.z) * t3)
+			};
+		}
+		if (trajectoryType_ == TrajectoryType::kOrbit) {
+			const float angle = trajectoryOrbitStartAngle_ + (trajectoryOrbitEndAngle_ - trajectoryOrbitStartAngle_) * normalizedTime;
+			return {
+				trajectoryOrbitCenter_.x + std::cos(angle) * trajectoryOrbitRadius_,
+				trajectoryOrbitCenter_.y + trajectoryOrbitHeight_,
+				trajectoryOrbitCenter_.z + std::sin(angle) * trajectoryOrbitRadius_
+			};
+		}
+		// 未知の値は安全のため原点に留める。
+		return {};
+	}
 #pragma endregion
 
 #pragma region MyRegion
@@ -26716,6 +26985,8 @@ namespace Character {
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Enemy", &objectComponent_->GetObject3D()->GetWorldTransform());
+		// 軌道の依存先候補。軌道使用時は生成時位置だけをアンカーとして利用する。
+		comboSystem->SetParentTransform("Trajectory", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
 		comboSystem->Create("ComboSmallMeleeEnemy");
@@ -29771,6 +30042,8 @@ namespace Character {
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
+		// 軌道の依存先候補。軌道使用時は生成時位置だけをアンカーとして利用する。
+		comboSystem->SetParentTransform("Trajectory", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
@@ -37332,7 +37605,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputCoordinator.h
 ============================================================
-#pragma once
+﻿#pragma once
 
 #include <memory>
 
@@ -37378,7 +37651,7 @@ public:
 			/// <summary>
 			/// エディター操作中は移動やカメラなどが参照するプレイヤー入力だけを止める。
 			/// </summary>
-			inputSystem_->ClearPlayerInput();
+			inputSystem_->ClearKeyboardMousePlayerInput();
 		}
 	}
 
@@ -38130,6 +38403,27 @@ void InputSystem::ClearPlayerInput() {
 	playerInputData_.isControllerConnected = isControllerConnected;
 }
 
+void InputSystem::ClearKeyboardMousePlayerInput() {
+	// UI操作中でもコントローラ操作を継続できるよう、ゲームパッド由来の値だけを再構成する。
+	PlayerInputData controllerInput{};
+	// コントローラ接続状態を保持する。
+	controllerInput.isControllerConnected = input->IsControllerConnected();
+	// 左スティックを移動入力として保持する。
+	controllerInput.moveShick = Math::ClampLength(input->GetGamePadLeftStick());
+	// 右スティックを視点入力として保持する。
+	controllerInput.lookStick = Math::ClampLength(input->GetGamePadRightStick());
+	// コントローラのボタン入力を保持する。
+	controllerInput.jumpPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
+	controllerInput.jumpTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
+	controllerInput.dodgeTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
+	controllerInput.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+	controllerInput.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+	// トリガー入力を保持する。
+	controllerInput.dashHeld = input->GetGamePadLeftTrigger() > kTriggerDeadZone;
+	controllerInput.lockOnHeld = input->GetGamePadRightTrigger() > kTriggerDeadZone;
+	// 再構成したコントローラ入力へ置き換え、キーボード・マウス入力を除去する。
+	playerInputData_ = controllerInput;
+}
 void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();
@@ -38254,7 +38548,7 @@ bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include "InputData.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -38285,6 +38579,8 @@ public:
 	/// プレイヤー操作だけを空にする
 	/// </summary>
 	void ClearPlayerInput();
+	/// コントローラ入力を残したまま、キーボード・マウス由来のプレイヤー入力だけを抑制する。
+	void ClearKeyboardMousePlayerInput();
 private:
 	/// <summary>
 	/// プレイヤー操作の入力データの更新
@@ -87396,29 +87692,50 @@ void Engine::PostEffectManager::ClearPostEffectBlock()
 
 void Engine::PostEffectManager::RenderImGui()
 {
+	// ゲーム画面を表示する専用ウィンドウを開始する。
 	ImGui::Begin("GameScene");
-	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
-	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
 
-	ImTextureID imguiTexture = (ImTextureID)(GetEndRenderTexture()->GetSRVGPUHandle().ptr);
-	ImGui::Image(imguiTexture, ImVec2(width, height));
-	ImVec2 imagePos = ImGui::GetCursorScreenPos();
-	imagePos.y -= height;
+	// 他のドッキングUIを除いた、現在のウィンドウ内で使用できる領域を取得する。
+	const ImVec2 availableSize = ImGui::GetContentRegionAvail();
+	// レンダーテクスチャの基準となるクライアント領域の幅を取得する。
+	const float clientWidth = static_cast<float>(WinApp::GetClientWidth());
+	// レンダーテクスチャの基準となるクライアント領域の高さを取得する。
+	const float clientHeight = static_cast<float>(WinApp::GetClientHeight());
+	// 画面サイズが一時的に0になった場合でも、ゼロ除算を避けるための安全な比率を設定する。
+	const float sourceAspect = clientHeight > 0.0f ? clientWidth / clientHeight : 1.0f;
+	// 使用可能領域いっぱいに合わせた場合の画像幅を初期値にする。
+	float imageWidth = availableSize.x;
+	// 元の画面比率を維持した画像高さを計算する。
+	float imageHeight = sourceAspect > 0.0f ? imageWidth / sourceAspect : availableSize.y;
+	// 高さが領域を超える場合は、高さを基準に画像サイズを再計算する。
+	if (imageHeight > availableSize.y) {
+		imageHeight = availableSize.y;
+		imageWidth = imageHeight * sourceAspect;
+	}
+	// ウィンドウが極端に小さい場合に負のサイズをImGuiへ渡さないようにする。
+	imageWidth = imageWidth > 0.0f ? imageWidth : 0.0f;
+	imageHeight = imageHeight > 0.0f ? imageHeight : 0.0f;
 
-	Vector2 windowSize = Vector2{ static_cast<float> (WinApp::GetClientWidth()),static_cast<float> (WinApp::GetClientHeight()) };
-	Vector2 imageSize = Vector2{ width,height };
+	// 余った横方向の領域を分けて、ゲーム画面を中央に配置する。
+	const float horizontalPadding = (availableSize.x - imageWidth) * 0.5f;
+	if (horizontalPadding > 0.0f) {
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + horizontalPadding);
+	}
+	// 描画前のカーソル位置を保存し、UI座標変換に利用する。
+	const ImVec2 imagePos = ImGui::GetCursorScreenPos();
+	// 最終レンダーテクスチャを、計算した利用可能サイズで表示する。
+	const ImTextureID imguiTexture = (ImTextureID)(GetEndRenderTexture()->GetSRVGPUHandle().ptr);
+	ImGui::Image(imguiTexture, ImVec2(imageWidth, imageHeight));
 
-	ImGui::InputFloat2("GetCursorScreenPos", &imagePos.x);
-	ImGui::InputFloat2("WindowSize", &windowSize.x);
-	ImGui::InputFloat2("ImageSize", &imageSize.x);
-
-
+	// ゲーム画面の左上座標・サイズ・基準画面に対する比率を更新する。
 	imageleftTopPos_ = Vector2(imagePos.x, imagePos.y);
-	imageSize_ = Vector2(width, height);
-	imageRatio_ = Vector2{ width / windowSize.x,height / windowSize.y };
-	ImGui::InputFloat2("ImageleftTopPos", &imageleftTopPos_.x);
-	ImGui::InputFloat2("ImageRatio", &imageRatio_.x);
+	imageSize_ = Vector2(imageWidth, imageHeight);
+	imageRatio_ = Vector2{
+		clientWidth > 0.0f ? imageWidth / clientWidth : 0.0f,
+		clientHeight > 0.0f ? imageHeight / clientHeight : 0.0f
+	};
 
+	// ゲーム画面を表示する専用ウィンドウを終了する。
 	ImGui::End();
 }
 
