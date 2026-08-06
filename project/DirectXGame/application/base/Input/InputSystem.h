@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "InputData.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -29,6 +29,8 @@ public:
 	/// プレイヤー操作だけを空にする
 	/// </summary>
 	void ClearPlayerInput();
+	/// コントローラ入力を残したまま、キーボード・マウス由来のプレイヤー入力だけを抑制する。
+	void ClearKeyboardMousePlayerInput();
 private:
 	/// <summary>
 	/// プレイヤー操作の入力データの更新

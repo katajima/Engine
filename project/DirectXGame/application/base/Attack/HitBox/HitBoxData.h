@@ -28,6 +28,14 @@ namespace HitBox {
 		kForce,         // ノックバック・引き寄せなど
 		kDamageAndForce // 両方
 	};
+	// ヒットボックスの軌道評価方式。kNoneなら従来の親Transform追従を使用する。
+	enum class TrajectoryType {
+		kNone,
+		kBezier,
+		kCatmullRom,
+		kOrbit,
+	};
+
 	// 形状
 	enum class ShapeType {
 		kOBB,
@@ -86,6 +94,21 @@ namespace HitBox {
 		// 球半径
 		float radius = 1.0f;
 
+		// 軌道評価方式
+		TrajectoryType trajectoryType = TrajectoryType::kNone;
+		// 軌道を評価する時間。0以下ならヒットボックスの生存時間を使用する。
+		float trajectoryDuration = 0.0f;
+		// Bezier／Catmull-Romで使用するローカル制御点。生成時の向きを基準にする。
+		Vector3 trajectoryPoint0 = { 0.0f, 0.0f, 0.0f };
+		Vector3 trajectoryPoint1 = { 0.0f, 0.0f, 2.0f };
+		Vector3 trajectoryPoint2 = { 0.0f, 0.0f, 4.0f };
+		Vector3 trajectoryPoint3 = { 0.0f, 0.0f, 6.0f };
+		// Orbitで使用する中心オフセット、半径、高さ、開始角、終了角。
+		Vector3 trajectoryOrbitCenter = { 0.0f, 0.0f, 0.0f };
+		float trajectoryOrbitRadius = 2.0f;
+		float trajectoryOrbitHeight = 0.0f;
+		float trajectoryOrbitStartAngle = 0.0f;
+		float trajectoryOrbitEndAngle = 6.2831853f;
 		// タグ
 		CollisionTag tag = CollisionTag::None;
 		// レイヤー

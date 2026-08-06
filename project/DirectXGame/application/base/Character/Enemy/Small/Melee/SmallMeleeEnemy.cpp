@@ -52,6 +52,8 @@ namespace Character {
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Enemy", &objectComponent_->GetObject3D()->GetWorldTransform());
+		// 軌道の依存先候補。軌道使用時は生成時位置だけをアンカーとして利用する。
+		comboSystem->SetParentTransform("Trajectory", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
 		comboSystem->Create("ComboSmallMeleeEnemy");

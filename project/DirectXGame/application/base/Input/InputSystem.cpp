@@ -30,6 +30,27 @@ void InputSystem::ClearPlayerInput() {
 	playerInputData_.isControllerConnected = isControllerConnected;
 }
 
+void InputSystem::ClearKeyboardMousePlayerInput() {
+	// UI操作中でもコントローラ操作を継続できるよう、ゲームパッド由来の値だけを再構成する。
+	PlayerInputData controllerInput{};
+	// コントローラ接続状態を保持する。
+	controllerInput.isControllerConnected = input->IsControllerConnected();
+	// 左スティックを移動入力として保持する。
+	controllerInput.moveShick = Math::ClampLength(input->GetGamePadLeftStick());
+	// 右スティックを視点入力として保持する。
+	controllerInput.lookStick = Math::ClampLength(input->GetGamePadRightStick());
+	// コントローラのボタン入力を保持する。
+	controllerInput.jumpPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
+	controllerInput.jumpTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
+	controllerInput.dodgeTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
+	controllerInput.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+	controllerInput.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+	// トリガー入力を保持する。
+	controllerInput.dashHeld = input->GetGamePadLeftTrigger() > kTriggerDeadZone;
+	controllerInput.lockOnHeld = input->GetGamePadRightTrigger() > kTriggerDeadZone;
+	// 再構成したコントローラ入力へ置き換え、キーボード・マウス入力を除去する。
+	playerInputData_ = controllerInput;
+}
 void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();

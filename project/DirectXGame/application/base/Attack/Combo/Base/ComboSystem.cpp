@@ -667,7 +667,18 @@ namespace Combo {
 			writer.Value(groupName, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			writer.Value(groupName, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
 			writer.Value(groupName, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
-			writer.Value(groupName, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
+			writer.Value(groupName, "ヒットボックスコライダー半径", data.hitBox.radius);
+			writer.EnumValue(groupName, "ヒットボックス軌道方式", data.hitBox.trajectoryType, "HitBoxTrajectoryType");
+			writer.Value(groupName, "ヒットボックス軌道時間", data.hitBox.trajectoryDuration);
+			writer.Value(groupName, "ヒットボックス軌道点0", data.hitBox.trajectoryPoint0);
+			writer.Value(groupName, "ヒットボックス軌道点1", data.hitBox.trajectoryPoint1);
+			writer.Value(groupName, "ヒットボックス軌道点2", data.hitBox.trajectoryPoint2);
+			writer.Value(groupName, "ヒットボックス軌道点3", data.hitBox.trajectoryPoint3);
+			writer.Value(groupName, "ヒットボックス軌道中心", data.hitBox.trajectoryOrbitCenter);
+			writer.Value(groupName, "ヒットボックス軌道半径", data.hitBox.trajectoryOrbitRadius);
+			writer.Value(groupName, "ヒットボックス軌道高さ", data.hitBox.trajectoryOrbitHeight);
+			writer.Value(groupName, "ヒットボックス軌道開始角", data.hitBox.trajectoryOrbitStartAngle);
+			writer.Value(groupName, "ヒットボックス軌道終了角", data.hitBox.trajectoryOrbitEndAngle);				// new
 
 			writer.EnumValue(groupName, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
 			writer.EnumValue(groupName, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
@@ -1034,6 +1045,20 @@ namespace Combo {
 			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
 			data.hitBox.offset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
 			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
+			// 新しい軌道項目がない旧データは、従来動作のkNoneで補完する。
+			if (globalVariables->HasKey(name, "ヒットボックス軌道方式")) {
+				data.hitBox.trajectoryType = globalVariables->GetEnumValue<HitBox::TrajectoryType>(name, "ヒットボックス軌道方式");
+				data.hitBox.trajectoryDuration = globalVariables->GetValue<float>(name, "ヒットボックス軌道時間");
+				data.hitBox.trajectoryPoint0 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点0");
+				data.hitBox.trajectoryPoint1 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点1");
+				data.hitBox.trajectoryPoint2 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点2");
+				data.hitBox.trajectoryPoint3 = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道点3");
+				data.hitBox.trajectoryOrbitCenter = globalVariables->GetValue<Vector3>(name, "ヒットボックス軌道中心");
+				data.hitBox.trajectoryOrbitRadius = globalVariables->GetValue<float>(name, "ヒットボックス軌道半径");
+				data.hitBox.trajectoryOrbitHeight = globalVariables->GetValue<float>(name, "ヒットボックス軌道高さ");
+				data.hitBox.trajectoryOrbitStartAngle = globalVariables->GetValue<float>(name, "ヒットボックス軌道開始角");
+				data.hitBox.trajectoryOrbitEndAngle = globalVariables->GetValue<float>(name, "ヒットボックス軌道終了角");
+			}
 
 			data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
 			data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");

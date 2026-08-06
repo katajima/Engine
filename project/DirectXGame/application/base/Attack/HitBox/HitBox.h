@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -8,6 +8,8 @@
 
 namespace Engine {
 	class EntityManager; // 前方宣言
+	class LineCommon; // 軌道デバッグライン描画
+class LineMeshData; // デバッグラインメッシュ
 }
 namespace Character {
 	class BaseCharacter;
@@ -32,7 +34,12 @@ namespace HitBox {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		// ヒットボックスを更新し、必要なら独立軌道上へ移動させる。
 		void Update(float dt);
+		// 生成時の親Transformを基準に、以後独立して軌道を評価する。
+		void SetTrajectory(const GlobalHitBox& data, Engine::WorldTransform* anchor);
+		// 生成前の軌道設定を、選択中コンボのデバッグ表示用に描画する。
+		static void DrawTrajectoryDebug(const GlobalHitBox& data, Engine::WorldTransform* anchor, Engine::LineCommon* lineCommon);
 		uint32_t GetAttackInstanceId() const { return attackInstanceId_; }
 
 	public:
@@ -100,6 +107,34 @@ namespace HitBox {
 		// コライダー数
 		int colliderCount = 0;
 		Character::BaseCharacter* character = nullptr;
+
+		// 軌道を使う場合にだけ保持する、生成時のワールド基準情報。
+		bool trajectoryEnabled_ = false;
+		TrajectoryType trajectoryType_ = TrajectoryType::kNone;
+		float trajectoryElapsed_ = 0.0f;
+		float trajectoryDuration_ = 0.0f;
+		Vector3 trajectoryAnchorPosition_{};
+		Vector3 trajectoryRight_{ 1.0f, 0.0f, 0.0f };
+		Vector3 trajectoryUp_{ 0.0f, 1.0f, 0.0f };
+		Vector3 trajectoryForward_{ 0.0f, 0.0f, 1.0f };
+		Vector3 trajectoryPoint0_{};
+		Vector3 trajectoryPoint1_{};
+		Vector3 trajectoryPoint2_{};
+		Vector3 trajectoryPoint3_{};
+		Vector3 trajectoryOrbitCenter_{};
+		float trajectoryOrbitRadius_ = 0.0f;
+		float trajectoryOrbitHeight_ = 0.0f;
+		float trajectoryOrbitStartAngle_ = 0.0f;
+		float trajectoryOrbitEndAngle_ = 0.0f;
+
+		// 現在の軌道パラメータから、アンカー基準のローカル位置を計算する。
+		Vector3 EvaluateTrajectory(float normalizedTime) const;
+
+		// ローカル軌道座標を生成時アンカー基準のワールド座標へ変換する。
+		Vector3 ToTrajectoryWorldPosition(const Vector3& localPosition) const;
+		// デバッグビルド時だけ、軌道全体を3Dラインとして描画する。
+		void DrawTrajectory() const;
+		void DrawTrajectory(Engine::LineMeshData& lineMeshData) const;
 		Engine::EntityManager* entityManager = nullptr;
 	};
 };

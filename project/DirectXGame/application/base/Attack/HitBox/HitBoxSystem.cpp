@@ -39,6 +39,7 @@ namespace HitBox {
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
 		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
+		d.hitBox->SetTrajectory(datas.hitBoxData, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
 		d.lifeTime = datas.hitBoxData.lifeTime;							// 生存時間
@@ -64,6 +65,7 @@ namespace HitBox {
 
 		// 依存先設定
 		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
+		d.hitBox->SetTrajectory(datas.hitBoxData, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
 		// ヒットボックス(無期限)データに挿入

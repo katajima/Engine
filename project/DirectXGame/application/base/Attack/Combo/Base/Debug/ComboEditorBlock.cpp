@@ -2,6 +2,8 @@
 
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Attack/HitBox/HitBox.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
@@ -92,6 +94,14 @@ namespace Combo {
 		ImGuiReaction();
 		// ヒットボックス設定
 		ImGuiApplyHitBox();
+		// 選択中コンボの軌道を、ヒットボックス生成前でもデバッグ描画する。
+		if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone && lineCommon != nullptr) {
+			Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
+			if (trajectoryAnchor == nullptr && owner != nullptr) {
+				trajectoryAnchor = &owner->GetWorldTransform();
+			}
+			HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
+		}
 		// カメラ設定
 		ImGuiCamera();
 		// コンボ接続設定
@@ -150,6 +160,34 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
 
+			// 軌道方式。kNone以外では武器ボーンやキャラクター移動から独立して判定を動かす。
+			static const char* HitBoxTrajectoryTypeLabels[] = {
+				"なし（従来の親追従）",
+				"Bezier",
+				"Catmull-Rom",
+				"Orbit",
+			};
+			Engine::ImGuiManager::Select("ヒットボックス軌道", HitBoxTrajectoryTypeLabels, data_.hitBox.trajectoryType);
+			if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone) {
+				// 軌道の評価時間が0以下の場合は、ヒットボックス生存時間を使用する。
+				ImGui::DragFloat("軌道時間", &data_.hitBox.trajectoryDuration, 0.01f, 0.0f, 30.0f);
+				if (data_.hitBox.trajectoryType == HitBox::TrajectoryType::kBezier ||
+					data_.hitBox.trajectoryType == HitBox::TrajectoryType::kCatmullRom) {
+					// 曲線の制御点は、生成時の親Transformを基準にしたローカル座標で指定する。
+					ImGui::DragFloat3("軌道点0", &data_.hitBox.trajectoryPoint0.x, 0.1f);
+					ImGui::DragFloat3("軌道点1", &data_.hitBox.trajectoryPoint1.x, 0.1f);
+					ImGui::DragFloat3("軌道点2", &data_.hitBox.trajectoryPoint2.x, 0.1f);
+					ImGui::DragFloat3("軌道点3", &data_.hitBox.trajectoryPoint3.x, 0.1f);
+				}
+				if (data_.hitBox.trajectoryType == HitBox::TrajectoryType::kOrbit) {
+					// Orbitは生成時アンカーを中心に、指定半径と角度で周回する。
+					ImGui::DragFloat3("軌道中心", &data_.hitBox.trajectoryOrbitCenter.x, 0.1f);
+					ImGui::DragFloat("軌道半径", &data_.hitBox.trajectoryOrbitRadius, 0.1f, 0.0f, 100.0f);
+					ImGui::DragFloat("軌道高さ", &data_.hitBox.trajectoryOrbitHeight, 0.1f);
+					ImGui::DragFloat("軌道開始角", &data_.hitBox.trajectoryOrbitStartAngle, 0.05f);
+					ImGui::DragFloat("軌道終了角", &data_.hitBox.trajectoryOrbitEndAngle, 0.05f);
+				}
+			}
 			// 影響タイプ
 			static const char* HitBoxHitEffectTypeLabels[] = {
 				"ダメージのみ",

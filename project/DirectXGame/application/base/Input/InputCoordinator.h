@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <memory>
 
@@ -44,7 +44,7 @@ public:
 			/// <summary>
 			/// エディター操作中は移動やカメラなどが参照するプレイヤー入力だけを止める。
 			/// </summary>
-			inputSystem_->ClearPlayerInput();
+			inputSystem_->ClearKeyboardMousePlayerInput();
 		}
 	}
 
