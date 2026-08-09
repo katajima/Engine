@@ -94,6 +94,8 @@ namespace HitBox {
 		// 球半径
 		float radius = 1.0f;
 
+		/// 軌道系
+
 		// 軌道評価方式
 		TrajectoryType trajectoryType = TrajectoryType::kNone;
 		// 軌道を評価する時間。0以下ならヒットボックスの生存時間を使用する。
@@ -109,6 +111,10 @@ namespace HitBox {
 		float trajectoryOrbitHeight = 0.0f;
 		float trajectoryOrbitStartAngle = 0.0f;
 		float trajectoryOrbitEndAngle = 6.2831853f;
+
+
+		/// 衝突系
+
 		// タグ
 		CollisionTag tag = CollisionTag::None;
 		// レイヤー

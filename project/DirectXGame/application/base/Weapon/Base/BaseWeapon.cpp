@@ -1,4 +1,4 @@
-#include "BaseWeapon.h"
+﻿#include "BaseWeapon.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
