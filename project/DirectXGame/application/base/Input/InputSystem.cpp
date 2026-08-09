@@ -1,4 +1,4 @@
-﻿#include "InputSystem.h"
+#include "InputSystem.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 namespace {

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "InputData.h"
 #include "DirectXGame/engine/input/Input.h"
 

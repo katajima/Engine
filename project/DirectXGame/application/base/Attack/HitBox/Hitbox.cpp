@@ -1,4 +1,4 @@
-﻿#include "Hitbox.h"
+#include "Hitbox.h"
 #include <cmath>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Line/LineCommon.h"

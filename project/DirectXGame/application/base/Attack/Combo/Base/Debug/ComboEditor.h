@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
@@ -37,6 +37,8 @@ namespace Combo {
 		/// 所有者設定
 		/// </summary>
 		void SetOwner(Character::BaseCharacter* owner);
+	/// 選択中コンボの軌道を現在のキャラクター位置へ追従させて描画する。
+	void DrawSelectedTrajectoryDebug();
 
 	private:
 		/// <summary>

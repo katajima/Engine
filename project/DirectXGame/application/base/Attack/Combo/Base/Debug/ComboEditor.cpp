@@ -35,6 +35,16 @@ namespace Combo {
 	}
 
 
+	// 選択中コンボの軌道デバッグ描画
+	void Editor::DrawSelectedTrajectoryDebug() {
+		// 選択中コンボが存在しない場合は描画を省略する。
+		auto selected = comboEditorBlocks_.find(selectedComboEditorBlockName_);
+		if (selected == comboEditorBlocks_.end()) {
+			return;
+		}
+		// 選択中ブロックへ描画を委譲する。
+		selected->second.DrawTrajectoryDebug();
+	}
 	void Editor::Update(float dt) {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");

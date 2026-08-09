@@ -146,7 +146,7 @@
         },
         "カメラズーム量": {
             "type": "float",
-            "value": 1.5
+            "value": 1.2000000476837158
         },
         "カメラズーム開始時間": {
             "type": "float",
@@ -612,6 +612,14 @@
             "type": "int32_t",
             "value": 4
         },
+        "ヒットカウントを一度だけ増やす": {
+            "type": "bool",
+            "value": false
+        },
+        "ヒットカウントを増やす": {
+            "type": "bool",
+            "value": true
+        },
         "ヒットカメラシェイク量": {
             "type": "float",
             "value": 0.0
@@ -702,6 +710,71 @@
             "enumType": "HitBoxSpawnType",
             "type": "enum",
             "value": 0
+        },
+        "ヒットボックス軌道中心": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "ヒットボックス軌道半径": {
+            "type": "float",
+            "value": 2.0
+        },
+        "ヒットボックス軌道方式": {
+            "enumType": "HitBoxTrajectoryType",
+            "type": "enum",
+            "value": 0
+        },
+        "ヒットボックス軌道時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "ヒットボックス軌道点0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "ヒットボックス軌道点1": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                2.0
+            ]
+        },
+        "ヒットボックス軌道点2": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                4.0
+            ]
+        },
+        "ヒットボックス軌道点3": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                6.0
+            ]
+        },
+        "ヒットボックス軌道終了角": {
+            "type": "float",
+            "value": 6.2831854820251465
+        },
+        "ヒットボックス軌道開始角": {
+            "type": "float",
+            "value": 0.0
+        },
+        "ヒットボックス軌道高さ": {
+            "type": "float",
+            "value": 0.0
         },
         "ヒットポーズ倍率": {
             "type": "float",
@@ -915,6 +988,30 @@
         "接続先(強攻撃-空中-未ヒット)": {
             "type": "string",
             "value": ""
+        },
+        "攻撃前移動アニメーションループ": {
+            "type": "bool",
+            "value": true
+        },
+        "攻撃前移動アニメーション使用": {
+            "type": "bool",
+            "value": false
+        },
+        "攻撃前移動アニメーション名前": {
+            "type": "string",
+            "value": ""
+        },
+        "攻撃前移動アニメーション終了時間": {
+            "type": "float",
+            "value": 0.20000000298023224
+        },
+        "攻撃前移動アニメーション速度": {
+            "type": "float",
+            "value": 1.0
+        },
+        "攻撃前移動アニメーション遷移時間": {
+            "type": "float",
+            "value": 0.10000000149011612
         },
         "攻撃属性": {
             "enumType": "AttackAttribute",

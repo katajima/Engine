@@ -1,4 +1,4 @@
-﻿#include "CharacterDebugScene.h"
+#include "CharacterDebugScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -57,6 +57,10 @@ void CharacterDebugScene::Update(){
 	UpdateInput(dt);
 	// キャラクター更新
 	UpdateCharacter(dt);
+	// キャラクター移動後の位置を基準に、選択中コンボの軌道を描画する。
+	if (comboEditor_) {
+		comboEditor_->DrawSelectedTrajectoryDebug();
+	}
 	// 基本的な更新
 	UpdateBase(dt);
 }

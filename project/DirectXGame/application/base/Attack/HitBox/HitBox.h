@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -9,7 +9,7 @@
 namespace Engine {
 	class EntityManager; // 前方宣言
 	class LineCommon; // 軌道デバッグライン描画
-class LineMeshData; // デバッグラインメッシュ
+	class LineMeshData; // デバッグラインメッシュ
 }
 namespace Character {
 	class BaseCharacter;

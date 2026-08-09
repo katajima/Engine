@@ -30,6 +30,8 @@ namespace Combo {
 		/// 更新
 		/// </summary>
 		void UpdateImGui(float dt, bool isActive);
+		/// 選択中コンボの軌道を、キャラクター更新後の位置でデバッグ描画する。
+		void DrawTrajectoryDebug();
 	public:
 		/// <summary>
 		/// エディタ上で選択中か設定

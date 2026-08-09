@@ -48,6 +48,18 @@
             "type": "string",
             "value": "HeavyLaunch2"
         },
+        "HeavyRange": {
+            "type": "string",
+            "value": "HeavyRange"
+        },
+        "HeavyRange2": {
+            "type": "string",
+            "value": "HeavyRange2"
+        },
+        "HeavyRange3": {
+            "type": "string",
+            "value": "HeavyRange3"
+        },
         "HeavyRangeAttack": {
             "type": "string",
             "value": "HeavyRangeAttack"
@@ -194,7 +206,7 @@
         },
         "開始コンボ(地上強攻撃)": {
             "type": "string",
-            "value": "HheavyLaunch"
+            "value": "HeavyRange"
         },
         "開始コンボ(空中スキル)": {
             "type": "string",

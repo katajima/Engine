@@ -94,14 +94,6 @@ namespace Combo {
 		ImGuiReaction();
 		// ヒットボックス設定
 		ImGuiApplyHitBox();
-		// 選択中コンボの軌道を、ヒットボックス生成前でもデバッグ描画する。
-		if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone && lineCommon != nullptr) {
-			Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
-			if (trajectoryAnchor == nullptr && owner != nullptr) {
-				trajectoryAnchor = &owner->GetWorldTransform();
-			}
-			HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
-		}
 		// カメラ設定
 		ImGuiCamera();
 		// コンボ接続設定
@@ -996,6 +988,20 @@ namespace Combo {
 		}
 	}
 
+	// 選択中コンボの軌道デバッグ描画
+	void EditorBlock::DrawTrajectoryDebug() {
+		// 軌道未使用、選択解除、または描画に必要な参照がない場合は何もしない。
+		if (!nowChoice_ || data_.hitBox.trajectoryType == HitBox::TrajectoryType::kNone || lineCommon == nullptr || comboSystem == nullptr) {
+			return;
+		}
+		// 設定された依存先を取得し、未設定ならキャラクター本体をアンカーにする。
+		Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
+		if (trajectoryAnchor == nullptr && owner != nullptr) {
+			trajectoryAnchor = &owner->GetWorldTransform();
+		}
+		// ヒットボックス生成前でも、現在のキャラクター位置を基準に軌道を描画する。
+		HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
+	}
 #pragma endregion // ImGui管理
 
 #pragma endregion // コンボ単位管理
