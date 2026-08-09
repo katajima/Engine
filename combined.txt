@@ -5771,6 +5771,16 @@ namespace Combo {
 	}
 
 
+	// 選択中コンボの軌道デバッグ描画
+	void Editor::DrawSelectedTrajectoryDebug() {
+		// 選択中コンボが存在しない場合は描画を省略する。
+		auto selected = comboEditorBlocks_.find(selectedComboEditorBlockName_);
+		if (selected == comboEditorBlocks_.end()) {
+			return;
+		}
+		// 選択中ブロックへ描画を委譲する。
+		selected->second.DrawTrajectoryDebug();
+	}
 	void Editor::Update(float dt) {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
@@ -6544,7 +6554,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "ComboEditorBlock.h"
 #include <set>
 
@@ -6583,6 +6593,8 @@ namespace Combo {
 		/// 所有者設定
 		/// </summary>
 		void SetOwner(Character::BaseCharacter* owner);
+	/// 選択中コンボの軌道を現在のキャラクター位置へ追従させて描画する。
+	void DrawSelectedTrajectoryDebug();
 
 	private:
 		/// <summary>
@@ -6790,14 +6802,6 @@ namespace Combo {
 		ImGuiReaction();
 		// ヒットボックス設定
 		ImGuiApplyHitBox();
-		// 選択中コンボの軌道を、ヒットボックス生成前でもデバッグ描画する。
-		if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone && lineCommon != nullptr) {
-			Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
-			if (trajectoryAnchor == nullptr && owner != nullptr) {
-				trajectoryAnchor = &owner->GetWorldTransform();
-			}
-			HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
-		}
 		// カメラ設定
 		ImGuiCamera();
 		// コンボ接続設定
@@ -7692,6 +7696,20 @@ namespace Combo {
 		}
 	}
 
+	// 選択中コンボの軌道デバッグ描画
+	void EditorBlock::DrawTrajectoryDebug() {
+		// 軌道未使用、選択解除、または描画に必要な参照がない場合は何もしない。
+		if (!nowChoice_ || data_.hitBox.trajectoryType == HitBox::TrajectoryType::kNone || lineCommon == nullptr || comboSystem == nullptr) {
+			return;
+		}
+		// 設定された依存先を取得し、未設定ならキャラクター本体をアンカーにする。
+		Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
+		if (trajectoryAnchor == nullptr && owner != nullptr) {
+			trajectoryAnchor = &owner->GetWorldTransform();
+		}
+		// ヒットボックス生成前でも、現在のキャラクター位置を基準に軌道を描画する。
+		HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
+	}
 #pragma endregion // ImGui管理
 
 #pragma endregion // コンボ単位管理
@@ -7733,6 +7751,8 @@ namespace Combo {
 		/// 更新
 		/// </summary>
 		void UpdateImGui(float dt, bool isActive);
+		/// 選択中コンボの軌道を、キャラクター更新後の位置でデバッグ描画する。
+		void DrawTrajectoryDebug();
 	public:
 		/// <summary>
 		/// エディタ上で選択中か設定
@@ -12462,7 +12482,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -12473,7 +12493,7 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
 namespace Engine {
 	class EntityManager; // 前方宣言
 	class LineCommon; // 軌道デバッグライン描画
-class LineMeshData; // デバッグラインメッシュ
+	class LineMeshData; // デバッグラインメッシュ
 }
 namespace Character {
 	class BaseCharacter;
@@ -13283,7 +13303,7 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/Hitbox.cpp
 ============================================================
-﻿#include "Hitbox.h"
+#include "Hitbox.h"
 #include <cmath>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
@@ -37605,7 +37625,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputCoordinator.h
 ============================================================
-﻿#pragma once
+#pragma once
 
 #include <memory>
 
@@ -38371,7 +38391,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputSystem.cpp
 ============================================================
-﻿#include "InputSystem.h"
+#include "InputSystem.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 namespace {
@@ -38548,7 +38568,7 @@ bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "InputData.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -45115,7 +45135,7 @@ private: // 一旦
 ============================================================
 File Path: project/DirectXGame/application/scene/CharacterDebugScene.cpp
 ============================================================
-﻿#include "CharacterDebugScene.h"
+#include "CharacterDebugScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -45174,6 +45194,10 @@ void CharacterDebugScene::Update(){
 	UpdateInput(dt);
 	// キャラクター更新
 	UpdateCharacter(dt);
+	// キャラクター移動後の位置を基準に、選択中コンボの軌道を描画する。
+	if (comboEditor_) {
+		comboEditor_->DrawSelectedTrajectoryDebug();
+	}
 	// 基本的な更新
 	UpdateBase(dt);
 }
