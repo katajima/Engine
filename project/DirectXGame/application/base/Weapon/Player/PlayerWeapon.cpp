@@ -13,12 +13,6 @@ void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entityManager, globalVariables, "PlayerWeapon", "Sword.obj", false, false, this);
 	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
-
-	// トレイルはObject3dに所有させず、EntityManager管理の独立Entityとして生成する。
-	SetTrailEffect(entityManager->CreateTrailEffect("PlayerWeaponTrail", "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds", provisionalData_.trailLifeTime,
-		GetObject3D()->GetWorldTransform(), camera, provisionalData_.color,
-		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMin(),
-		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax()));
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
 	// スケール

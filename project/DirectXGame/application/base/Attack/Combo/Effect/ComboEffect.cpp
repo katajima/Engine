@@ -9,7 +9,9 @@
 #include <DirectXGame/engine/3d/Object/Object3d.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/engine/Audio/Audio.h>
+#include <DirectXGame/engine/Effect/Trail/TrailEffect.h>
 #include <algorithm>
+#include <cstdint>
 
 namespace Combo {
 
@@ -166,7 +168,6 @@ namespace Combo {
 
 	// 開始
 	void ComboEffect::Enter(Character::BaseCharacter* owner) {
-		// コンボエフェクト発生に使う所有者とエフェクト管理を保持する
 		this->owner = owner;
 		effectSystem = owner ? owner->GetEffect() : nullptr;
 		nextEmitTimes_.clear();
@@ -176,51 +177,39 @@ namespace Combo {
 			emittedFlags_.push_back(false);
 		}
 		wasOnGround_ = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
-		// 武器情報取得
+		// トレイルの生成はComboEffectが担当し、武器は表示状態の切り替えだけに使用する。
+		if (effectSystem && owner) {
+			effectSystem->SetCamera(owner->GetCamera());
+			CreateTrailEntries();
+		}
 		weapon = owner ? owner->GetWeapon() : nullptr;
-		if (!weapon) {
-			return;
-		}
-		// トレイル終了
-		weapon->SetTrailEmit(false);
-		// コンボ演出として武器表示を切り替える
-		weapon->GetObject3D()->SetIsDraw(data_.weaponDraw);
-	}
-
-	// 更新
-	void ComboEffect::Update(const Character::CharacterContext& ctx, float timer, float dt) {
-		// 指定時間になったコンボエフェクトを発生させる
-		EmitComboEffects(ctx, timer);
-		wasOnGround_ = ctx.onGround;
-
-		if (!weapon) {
-			return;
-		}
-
-		// トレイル使用可能か
-		bool isTrail = false;
-		if (IsEffectTrail(timer)) { isTrail = true; }
-		// トレイルを出すか設定
-		weapon->SetTrailEmit(isTrail);
-	}
-
-	// 終了
-	void ComboEffect::Exit(Character::BaseCharacter* owner) {
 		if (weapon) {
-			// トレイル終了
-			weapon->SetTrailEmit(false);
-			// コンボ終了後は通常表示へ戻す
+			weapon->GetObject3D()->SetIsDraw(data_.weaponDraw);
+		}
+	}
+
+	void ComboEffect::Update(const Character::CharacterContext& ctx, float timer, float dt) {
+		// パーティクルとトレイルは同じ発生時間リストを共有する。
+		EmitComboEffects(ctx, timer);
+		UpdateTrailEntries(timer);
+		wasOnGround_ = ctx.onGround;
+		(void)dt;
+	}
+
+	void ComboEffect::Exit(Character::BaseCharacter* owner) {
+		// このコンボが生成したトレイルを解放する。
+		RemoveTrailEntries();
+		if (weapon) {
 			weapon->GetObject3D()->SetIsDraw(true);
 		}
-		// 次のコンボ開始時に発生状態を作り直す
 		nextEmitTimes_.clear();
 		emittedFlags_.clear();
 		effectSystem = nullptr;
 		this->owner = nullptr;
 		weapon = nullptr;
 		wasOnGround_ = false;
+		(void)owner;
 	}
-
 	void ComboEffect::EmitComboEffects(const Character::CharacterContext& ctx, float timer) {
 		if (!owner || !effectSystem) {
 			return;
@@ -247,14 +236,14 @@ namespace Combo {
 			case ComboEffectTriggerType::kTimer:
 				// 指定時間を過ぎた最初の1回だけ発生させる
 				if (!emittedFlags_[i] && timer >= entry.startTime) {
-					EmitEntry(entry);
+					EmitEntry(entry, timer);
 					emittedFlags_[i] = true;
 				}
 				break;
 			case ComboEffectTriggerType::kLanding:
 				// 受付時間を満たした状態で着地した瞬間に1回だけ発生させる
 				if (!emittedFlags_[i] && landingTriggered && IsTriggerTimeValid(entry, timer)) {
-					EmitEntry(entry);
+					EmitEntry(entry, timer);
 					emittedFlags_[i] = true;
 				}
 				break;
@@ -262,7 +251,7 @@ namespace Combo {
 			default:
 				// 指定時間範囲中は発生頻度ごとに繰り返し発生させる
 				if (IsTriggerTimeValid(entry, timer) && timer >= nextEmitTimes_[i]) {
-					EmitEntry(entry);
+					EmitEntry(entry, timer);
 					nextEmitTimes_[i] += interval;
 				}
 				break;
@@ -280,14 +269,95 @@ namespace Combo {
 		}
 		return timer <= entry.endTime;
 	}
-
-	void ComboEffect::EmitEntry(const ComboEffectEntry& entry) {
-		// 追従先の現在位置にオフセットを足した場所へ発生させる
-		const Vector3 emitPosition = GetEffectBasePosition(entry) + entry.offset;
+	void ComboEffect::EmitEntry(const ComboEffectEntry& entry, float timer) {
+		// トレイルはUpdateTrailEntriesで時間に応じて継続制御する。
+		if (entry.type == ComboEffectType::Trail || !effectSystem) {
+			return;
+		}
+		// トレイルと同じ軌跡上でパーティクルの発生位置を評価する。
+		const float duration = entry.trajectory.duration > 0.0f ? entry.trajectory.duration : (entry.endTime > entry.startTime ? entry.endTime - entry.startTime : 1.0f);
+		const float normalizedTime = (timer - entry.startTime) / (std::max)(duration, 0.001f);
+		const Vector3 emitPosition = GetTrajectoryPosition(entry, normalizedTime);
 		effectSystem->Emit(entry.effectName, emitPosition);
 	}
 
-	Vector3 ComboEffect::GetEffectBasePosition(const ComboEffectEntry& entry) const {
+	void ComboEffect::CreateTrailEntries() {
+		// トレイル種別のエントリごとに実行用トレイルを1つ生成する。
+		trailRuntimeNames_.assign(data_.comboEffects.size(), "");
+		for (size_t i = 0; i < data_.comboEffects.size(); ++i) {
+			const ComboEffectEntry& entry = data_.comboEffects[i];
+			if (entry.type != ComboEffectType::Trail || !effectSystem) {
+				continue;
+			}
+			auto parentIt = parentTransforms_.find(entry.parentName);
+			Engine::WorldTransform* parent = parentIt != parentTransforms_.end() ? parentIt->second : nullptr;
+			if (!parent && owner) {
+				parent = &owner->GetWorldTransform();
+			}
+			if (!parent) {
+				continue;
+			}
+			const std::string runtimeName = "ComboTrail_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) + "_" + std::to_string(i);
+			trailRuntimeNames_[i] = runtimeName;
+			effectSystem->CreateTrailEffect(runtimeName, entry.trailTexture, entry.trailLifeTime, *parent,
+				owner ? owner->GetCamera() : nullptr, entry.trailColor, entry.trailOffsetStart,
+				entry.trailOffsetEnd, entry.trajectory);
+			effectSystem->SetTrailEmit(runtimeName, false);
+		}
+	}
+
+	void ComboEffect::RemoveTrailEntries() {
+		// コンボ終了時に、このコンボが生成したトレイルをすべて削除する。
+		if (effectSystem) {
+			for (const std::string& runtimeName : trailRuntimeNames_) {
+				if (!runtimeName.empty()) {
+					effectSystem->RemoveTrailEffect(runtimeName);
+				}
+			}
+		}
+		trailRuntimeNames_.clear();
+	}
+
+	void ComboEffect::UpdateTrailEntries(float timer) {
+		// 各トレイルを個別に設定された発生時間範囲で切り替える。
+		if (!effectSystem) {
+			return;
+		}
+		for (size_t i = 0; i < data_.comboEffects.size() && i < trailRuntimeNames_.size(); ++i) {
+			const ComboEffectEntry& entry = data_.comboEffects[i];
+			if (entry.type != ComboEffectType::Trail || trailRuntimeNames_[i].empty()) {
+				continue;
+			}
+			float trailEnd = entry.endTime;
+			if (trailEnd <= entry.startTime) {
+				trailEnd = entry.startTime + (std::max)(entry.trailLifeTime, 0.001f);
+			}
+			effectSystem->SetTrailEmit(trailRuntimeNames_[i], timer >= entry.startTime && timer <= trailEnd);
+		}
+	}
+
+	Vector3 ComboEffect::GetTrajectoryPosition(const ComboEffectEntry& entry, float normalizedTime) const {
+		// 共有軌道評価処理を使ってパーティクルの発生位置を計算する。
+		const Vector3 basePosition = GetEffectBasePosition(entry) + entry.offset;
+		if (entry.trajectory.type == Engine::TrailTrajectoryType::kNone) {
+			return basePosition;
+		}
+		const Vector3 localPosition = Engine::EvaluateTrailTrajectory(entry.trajectory, normalizedTime);
+		auto parentIt = parentTransforms_.find(entry.parentName);
+		const Engine::WorldTransform* parent = parentIt != parentTransforms_.end() ? parentIt->second : nullptr;
+		if (!parent && owner) {
+			parent = &owner->GetWorldTransform();
+		}
+		if (!parent) {
+			return basePosition + localPosition;
+		}
+		return {
+			basePosition.x + parent->worldMat_.m[0][0] * localPosition.x + parent->worldMat_.m[0][1] * localPosition.y + parent->worldMat_.m[0][2] * localPosition.z,
+			basePosition.y + parent->worldMat_.m[1][0] * localPosition.x + parent->worldMat_.m[1][1] * localPosition.y + parent->worldMat_.m[1][2] * localPosition.z,
+			basePosition.z + parent->worldMat_.m[2][0] * localPosition.x + parent->worldMat_.m[2][1] * localPosition.y + parent->worldMat_.m[2][2] * localPosition.z
+		};
+	}
+Vector3 ComboEffect::GetEffectBasePosition(const ComboEffectEntry& entry) const {
 		auto it = parentTransforms_.find(entry.parentName);
 		if (it != parentTransforms_.end() && it->second) {
 			return it->second->GetWorldPosition();

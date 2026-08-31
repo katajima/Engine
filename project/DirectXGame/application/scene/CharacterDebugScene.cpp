@@ -1,4 +1,4 @@
-#include "CharacterDebugScene.h"
+﻿#include "CharacterDebugScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -69,6 +69,9 @@ void CharacterDebugScene::Draw3D(){
 	////3Dオブジェクトの描画
 	bulletManager_->Draw();
 	bulletManager_->DrawEffect();
+
+	effect_->Draw();
+
 }
 
 void CharacterDebugScene::Draw2D(){

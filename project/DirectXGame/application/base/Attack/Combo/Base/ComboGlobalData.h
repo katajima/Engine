@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/application/base/Camera/Base/CameraData.h"
@@ -353,11 +354,19 @@ struct GlobalAudio {
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
 
+	// コンボ演出の種別。将来の演出追加時はこの列挙値と対応処理を拡張する。
+	enum class ComboEffectType {
+		Particle,
+		Trail,
+	};
+
 	// コンボ中に指定時間で発生させるエフェクト
 	/// <summary>
 	/// コンボ中に指定された時間や条件で発生させる単一のエフェクト設定。
 	/// </summary>
 	struct ComboEffectEntry {
+		// 共通の種別。将来の演出はこの種別と対応する設定を拡張して追加する。
+		ComboEffectType type = ComboEffectType::Particle;
 		std::string effectName = "";					// 発生させるエフェクト名
 		std::string parentName = "Player";				// 発生位置の追従先
 		ComboEffectTriggerType triggerType = ComboEffectTriggerType::kTimeWindow;	// 発生条件
@@ -365,6 +374,14 @@ struct GlobalAudio {
 		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
 		float interval = 0.1f;							// 発生頻度
 		Vector3 offset = { 0.0f, 0.0f, 0.0f };			// 追従先からの発生オフセット
+		// トレイル専用のテクスチャ、始点・終点レール設定。
+		std::string trailTexture = "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds";
+		Color trailColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		Vector3 trailOffsetStart = { 0.0f, 0.5f, 0.0f };
+		Vector3 trailOffsetEnd = { 0.0f, -0.5f, 0.0f };
+		float trailLifeTime = 1.0f;
+		// パーティクルとトレイルで共有する軌跡設定。
+		Engine::TrailTrajectorySettings trajectory{};
 	};
 
 	// 保存項目エフェクトデータ
@@ -372,10 +389,6 @@ struct GlobalAudio {
 	/// コンボ中に使用するトレイル、武器表示、追加エフェクトの設定。
 	/// </summary>
 	struct GloblEffectData {
-		// トレイル発生時間
-		float trailEffectStartTime = 0.1f;
-		// トレイル生存時間
-		float trailEffectLifeTime = 1.0;
 		// コンボ中に武器を表示するか
 		bool weaponDraw = true;
 		// コンボ中に一度だけ発生させるエフェクト一覧

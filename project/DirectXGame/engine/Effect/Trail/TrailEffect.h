@@ -23,6 +23,25 @@
 
 
 namespace Engine {
+	// トレイル移動で共有する軌道方式。
+	enum class TrailTrajectoryType : uint32_t { kNone, kBezier, kCatmullRom, kOrbit };
+
+	// 実行処理とエディタ保存で共有する軌道設定値。
+	struct TrailTrajectorySettings {
+		TrailTrajectoryType type = TrailTrajectoryType::kNone;
+		float duration = 0.0f;
+		Vector3 point0 = {};
+		Vector3 point1 = { 0.0f, 0.0f, 2.0f };
+		Vector3 point2 = { 0.0f, 0.0f, 4.0f };
+		Vector3 point3 = { 0.0f, 0.0f, 6.0f };
+		Vector3 orbitCenter = {};
+		float orbitRadius = 2.0f;
+		float orbitHeight = 0.0f;
+		float orbitStartAngle = 0.0f;
+		float orbitEndAngle = 6.2831853f;
+	};
+	// すべてのコンボ演出種別で共有する軌道を評価する。
+	Vector3 EvaluateTrailTrajectory(const TrailTrajectorySettings& trajectory, float normalizedTime);
 	// 前方宣言
 	class EffectManager;
 
@@ -136,6 +155,8 @@ namespace Engine {
 		/// </summary>
 		void SetSettings(const TrailSettings& settings);
 		const TrailSettings& GetSettings() const { return settings_; }
+		// 発生時のアンカーを基準に独立した軌道を設定する。
+		void SetTrajectory(const TrailTrajectorySettings& trajectory, WorldTransform* anchor);
 		/// <summary>
 		/// 既存トレイルへ機能を足し引きする
 		/// </summary>
@@ -173,6 +194,9 @@ namespace Engine {
 		void UpdateUvScroll(float deltaTime);
 		void UpdateDissolve(float deltaTime);
 		void UpdateComposableModules(float deltaTime);
+		// 軌道上の位置を評価してワールド座標へ変換する。
+		Vector3 EvaluateTrajectory(float normalizedTime) const;
+		Vector3 ToTrajectoryWorldPosition(const Vector3& localPosition) const;
 
 		// 頂点データ
 		struct VertexData {
@@ -209,6 +233,16 @@ namespace Engine {
 		bool debugDrawRails_ = true;
 		bool debugDrawMesh_ = true;
 		bool debugDrawPoints_ = false;
+		// キャッシュしている独立軌道の実行状態。
+		bool trajectoryEnabled_ = false;
+		TrailTrajectorySettings trajectory_{};
+		float trajectoryElapsed_ = 0.0f;
+		Vector3 trajectoryAnchorPosition_{};
+		Vector3 trajectoryRight_{ 1.0f, 0.0f, 0.0f };
+		Vector3 trajectoryUp_{ 0.0f, 1.0f, 0.0f };
+		Vector3 trajectoryForward_{ 0.0f, 0.0f, 1.0f };
+		Vector3 trajectoryStartOffset_{};
+		Vector3 trajectoryEndOffset_{};
 
 	private:
 		EffectManager* effectManager = nullptr;

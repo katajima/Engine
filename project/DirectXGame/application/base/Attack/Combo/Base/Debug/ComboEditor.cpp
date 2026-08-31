@@ -767,8 +767,6 @@ namespace Combo {
 			data.camera = comboEditorBlocks_[it.first].GetData().camera;
 			// エフェクト
 			data.effect = comboEditorBlocks_[it.first].GetData().effect;
-			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
-			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				AttackEvent effectEvent{};
 				if (combo.TryGetEvent(MakeComboEffectSequenceName(i), effectEvent)) {

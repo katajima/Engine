@@ -174,8 +174,6 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.endTime;
 
 	// トレイルエフェクト
-	float trailStart = comboData.GetComboEffect().GetData().trailEffectStartTime;
-	float trailEnd = trailStart + comboData.GetComboEffect().GetData().trailEffectLifeTime;
 
 	AddSequencerEvent(sequence,inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
 	AddSequencerEvent(sequence,cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");
@@ -183,7 +181,6 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	AddSequencerEvent(sequence,nextComboTime, endComboTime, 0xFFFF0000, "コンボ移行開始時間");
 	AddSequencerEvent(sequence,hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
 	AddSequencerEvent(sequence,moveStart, moveEnd, 0xFF000000, "移動時間");
-	AddSequencerEvent(sequence,trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
 
 	const auto& comboEffects = comboData.GetComboEffect().GetData().comboEffects;
 	for (int i = 0; i < static_cast<int>(comboEffects.size()); ++i) {

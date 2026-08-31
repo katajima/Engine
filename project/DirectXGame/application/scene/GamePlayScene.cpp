@@ -1,4 +1,4 @@
-﻿#include "GamePlayScene.h"
+#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -216,6 +216,7 @@ void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
 	gameplaySession_->GetBulletManager()->Draw();
 	gameplaySession_->GetBulletManager()->DrawEffect();
+	gameplaySession_->GetEffectSystem()->Draw();
 
 	// ゲーム進行
 	gameFlowController_->Draw();

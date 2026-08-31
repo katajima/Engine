@@ -68,6 +68,10 @@ namespace Combo {
 			{ "着地したら", static_cast<int64_t>(ComboEffectTriggerType::kLanding) },
 			});
 
+		EnumRegistry::Instance().Register("ComboEffectType", {
+			{ "パーティクル", static_cast<int64_t>(ComboEffectType::Particle) },
+			{ "トレイル", static_cast<int64_t>(ComboEffectType::Trail) },
+		});
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
 		comboDebug_ = std::make_unique<ComboDebug>();
@@ -528,8 +532,6 @@ namespace Combo {
 
 		// エフェクト
 		{
-			writer.Value(groupName, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
-			writer.Value(groupName, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
 			writer.Value(groupName, "エフェクト(武器表示)", data.effect.weaponDraw);
 			writer.Value(groupName, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
 
@@ -541,6 +543,23 @@ namespace Combo {
 				writer.Value(groupName, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				writer.Value(groupName, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
 				writer.Value(groupName, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+				writer.EnumValue(groupName, MakeComboEffectTypeKey(i), data.effect.comboEffects[i].type, "ComboEffectType");
+				writer.Value(groupName, MakeComboEffectTrailTextureKey(i), data.effect.comboEffects[i].trailTexture);
+				writer.Value(groupName, MakeComboEffectTrailColorKey(i), data.effect.comboEffects[i].trailColor.ToVector4());
+				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(i), data.effect.comboEffects[i].trailOffsetStart);
+				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(i), data.effect.comboEffects[i].trailOffsetEnd);
+				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(i), data.effect.comboEffects[i].trailLifeTime);
+				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(i), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
+				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(i), data.effect.comboEffects[i].trajectory.duration);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(i), data.effect.comboEffects[i].trajectory.point0);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint1Key(i), data.effect.comboEffects[i].trajectory.point1);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint2Key(i), data.effect.comboEffects[i].trajectory.point2);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint3Key(i), data.effect.comboEffects[i].trajectory.point3);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitCenterKey(i), data.effect.comboEffects[i].trajectory.orbitCenter);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitRadiusKey(i), data.effect.comboEffects[i].trajectory.orbitRadius);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitHeightKey(i), data.effect.comboEffects[i].trajectory.orbitHeight);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitStartAngleKey(i), data.effect.comboEffects[i].trajectory.orbitStartAngle);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitEndAngleKey(i), data.effect.comboEffects[i].trajectory.orbitEndAngle);
 			}
 		}
 		// 接続
@@ -839,8 +858,6 @@ namespace Combo {
 
 		// エフェクト
 		{
-			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
-			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
 			data.effect.comboEffects.clear();
 
@@ -850,6 +867,26 @@ namespace Combo {
 				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
 				entry.startTime = globalVariables->GetValue<float>(name, MakeComboEffectStartTimeKey(i));
 				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
+				if (globalVariables->HasKey(name, MakeComboEffectTypeKey(i))) {
+					entry.type = globalVariables->GetEnumValue<ComboEffectType>(name, MakeComboEffectTypeKey(i));
+					entry.trailTexture = globalVariables->GetValue<std::string>(name, MakeComboEffectTrailTextureKey(i));
+					const Vector4 trailColor = globalVariables->GetValue<Vector4>(name, MakeComboEffectTrailColorKey(i));
+			entry.trailColor = { trailColor.x, trailColor.y, trailColor.z, trailColor.w };
+					entry.trailOffsetStart = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrailOffsetStartKey(i));
+					entry.trailOffsetEnd = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrailOffsetEndKey(i));
+					entry.trailLifeTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailLifeTimeKey(i));
+					entry.trajectory.type = globalVariables->GetEnumValue<Engine::TrailTrajectoryType>(name, MakeComboEffectTrajectoryTypeKey(i));
+					entry.trajectory.duration = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryDurationKey(i));
+					entry.trajectory.point0 = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryPoint0Key(i));
+					entry.trajectory.point1 = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryPoint1Key(i));
+					entry.trajectory.point2 = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryPoint2Key(i));
+					entry.trajectory.point3 = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryPoint3Key(i));
+							entry.trajectory.orbitCenter = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryOrbitCenterKey(i));
+							entry.trajectory.orbitRadius = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryOrbitRadiusKey(i));
+							entry.trajectory.orbitHeight = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryOrbitHeightKey(i));
+							entry.trajectory.orbitStartAngle = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryOrbitStartAngleKey(i));
+							entry.trajectory.orbitEndAngle = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryOrbitEndAngleKey(i));
+				}
 				if (globalVariables->HasKey(name, MakeComboEffectParentKey(i))) {
 					entry.parentName = globalVariables->GetValue<std::string>(name, MakeComboEffectParentKey(i));
 				}

@@ -16,6 +16,8 @@ public:
 	/// <summary>生成済みエフェクトとエディター状態を更新する。</summary>
 	/// <param name="dt">秒単位のフレーム時間。</param>
 	void Update(float dt);
+	// コンボ演出が所有するエフェクトをすべて描画する。
+	void Draw();
 	/// <summary>指定位置へエフェクトを生成する。</summary>
 	/// <param name="name">登録済みエフェクト名。</param>
 	/// <param name="pos">ワールド座標。</param>
@@ -26,6 +28,20 @@ public:
 	/// <param name="dir">放出方向。</param>
 	/// <param name="range">各軸の放出範囲。</param>
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
+	// 動的に生成するトレイルで使用するカメラを設定する。
+	void SetCamera(Engine::Camera* camera);
+
+	// コンボ演出エントリ用のトレイルをエフェクトコンポーネント側で生成する。
+	void CreateTrailEffect(const std::string& name, const std::string& texture, float lifeTime,
+		Engine::WorldTransform& parent, Engine::Camera* camera, const Color& color,
+		const Vector3& offsetStart, const Vector3& offsetEnd,
+		const Engine::TrailTrajectorySettings& trajectory);
+
+	// 動的に生成したコンボ用トレイルを停止して削除する。
+	void RemoveTrailEffect(const std::string& name);
+
+	// エフェクトコンポーネントの所有権をComboEffectへ公開せず、発生状態だけ変更する。
+	void SetTrailEmit(const std::string& name, bool isEmit);
 
 public:
 	/// <summary>エディターが管理している全エフェクト定義を取得する。</summary>

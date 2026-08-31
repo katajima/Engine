@@ -901,6 +901,11 @@ namespace Combo {
 			ImGui::PushID(i);
 
 			ComboEffectEntry& entry = effect.comboEffects[i];
+			static const char* ComboEffectTypeLabels[] = {
+				"パーティクル",
+				"トレイル",
+			};
+			Engine::ImGuiManager::Select("演出タイプ", ComboEffectTypeLabels, entry.type);
 			char effectBuffer[128]{};
 			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
 
@@ -909,7 +914,7 @@ namespace Combo {
 
 			Engine::ImGuiManager::Select("追従先", entry.parentName, comboSystem->GetParentTransforms());
 
-			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
+			if (entry.type == ComboEffectType::Particle && ImGui::BeginCombo("パーティクル一覧", entry.effectName.c_str())) {
 				for (const auto& effectPair : effectDatas) {
 					const bool isSelected = (entry.effectName == effectPair.first);
 					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
@@ -937,6 +942,41 @@ namespace Combo {
 				ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
 			}
 			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
+			if (entry.type == ComboEffectType::Trail) {
+				char trailTextureBuffer[256]{};
+				strncpy_s(trailTextureBuffer, entry.trailTexture.c_str(), _TRUNCATE);
+				if (ImGui::InputText("トレイルテクスチャ", trailTextureBuffer, sizeof(trailTextureBuffer))) {
+					entry.trailTexture = trailTextureBuffer;
+				}
+				ImGui::DragFloat("トレイル寿命", &entry.trailLifeTime, 0.01f, 0.01f, 30.0f);
+				ImGui::DragFloat3("トレイル開始レール", &entry.trailOffsetStart.x, 0.01f);
+				ImGui::DragFloat3("トレイル終了レール", &entry.trailOffsetEnd.x, 0.01f);
+				ImGui::ColorEdit4("トレイル色", &entry.trailColor.r);
+			}
+			static const char* EntryTrajectoryTypeLabels[] = {
+				"なし",
+				"Bezier",
+				"Catmull-Rom",
+				"Orbit",
+			};
+			Engine::ImGuiManager::Select("軌跡", EntryTrajectoryTypeLabels, entry.trajectory.type);
+			if (entry.trajectory.type != Engine::TrailTrajectoryType::kNone) {
+				ImGui::DragFloat("軌跡時間", &entry.trajectory.duration, 0.01f, 0.0f, 30.0f);
+				if (entry.trajectory.type == Engine::TrailTrajectoryType::kBezier ||
+					entry.trajectory.type == Engine::TrailTrajectoryType::kCatmullRom) {
+					ImGui::DragFloat3("軌跡点0", &entry.trajectory.point0.x, 0.1f);
+					ImGui::DragFloat3("軌跡点1", &entry.trajectory.point1.x, 0.1f);
+					ImGui::DragFloat3("軌跡点2", &entry.trajectory.point2.x, 0.1f);
+					ImGui::DragFloat3("軌跡点3", &entry.trajectory.point3.x, 0.1f);
+				}
+				if (entry.trajectory.type == Engine::TrailTrajectoryType::kOrbit) {
+					ImGui::DragFloat3("軌跡中心", &entry.trajectory.orbitCenter.x, 0.1f);
+					ImGui::DragFloat("軌跡半径", &entry.trajectory.orbitRadius, 0.1f, 0.0f, 100.0f);
+					ImGui::DragFloat("軌跡高さ", &entry.trajectory.orbitHeight, 0.1f);
+					ImGui::DragFloat("軌跡開始角", &entry.trajectory.orbitStartAngle, 0.05f);
+					ImGui::DragFloat("軌跡終了角", &entry.trajectory.orbitEndAngle, 0.05f);
+				}
+			}
 			if (entry.endTime < entry.startTime) {
 				entry.endTime = entry.startTime;
 			}

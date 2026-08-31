@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 #include <map>
 #include <vector>
@@ -106,16 +106,6 @@ namespace Combo {
 		void SetParentTransforms(const std::map<std::string, Engine::WorldTransform*>& parentTransforms) { parentTransforms_ = parentTransforms; }
 
 		/// <summary>
-		/// 指定時刻がトレイルエフェクトの発生時間内か確認します。
-		/// </summary>
-		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
-		/// <returns>トレイル発生時間内ならtrue、それ以外はfalseです。</returns>
-		bool IsEffectTrail(float timer) const {
-			return data_.trailEffectStartTime <= timer && 
-				timer <= (data_.trailEffectLifeTime + data_.trailEffectStartTime);
-		}
-
-		/// <summary>
 		/// コンボエフェクトの調整データを取得します。
 		/// </summary>
 		/// <returns>編集可能なエフェクトデータ参照を返します。</returns>
@@ -140,7 +130,7 @@ namespace Combo {
 		/// 指定演出を現在の基準位置へ発生させます。
 		/// </summary>
 		/// <param name="entry">発生させるエフェクト設定です。</param>
-		void EmitEntry(const ComboEffectEntry& entry);
+		void EmitEntry(const ComboEffectEntry& entry, float timer);
 
 		/// <summary>
 		/// エフェクトの発生基準位置を取得します。
@@ -148,6 +138,13 @@ namespace Combo {
 		/// <param name="entry">位置タイプや追従先名を含むエフェクト設定です。</param>
 		/// <returns>ワールド座標での発生基準位置を返します。</returns>
 		Vector3 GetEffectBasePosition(const ComboEffectEntry& entry) const;
+		// このコンボ演出が所有するトレイルを生成・削除する。
+		void CreateTrailEntries();
+		void RemoveTrailEntries();
+		// 各トレイルの有効状態を、共通の発生時間範囲で更新する。
+		void UpdateTrailEntries(float timer);
+		// パーティクル発生用に、エントリの軌跡上の位置を求める。
+		Vector3 GetTrajectoryPosition(const ComboEffectEntry& entry, float normalizedTime) const;
 	private:
 		GloblEffectData data_;
 
@@ -158,7 +155,9 @@ namespace Combo {
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;	// 追従先Transform一覧
 		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
 		std::vector<bool> emittedFlags_;				// 一回発生条件が発生済みか
-		bool wasOnGround_ = false;					// 前フレームの接地状態
+		bool wasOnGround_ = false;
+		// 実行名により、複数のコンボインスタンスが別々のトレイルを所有できるようにする。
+		std::vector<std::string> trailRuntimeNames_;					// 前フレームの接地状態
 	};
 
 

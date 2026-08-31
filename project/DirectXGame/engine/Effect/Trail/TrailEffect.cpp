@@ -1,4 +1,4 @@
-﻿#include "TrailEffect.h"
+#include "TrailEffect.h"
 
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -8,6 +8,32 @@
 #include <algorithm>
 #include <cmath>
 
+namespace Engine
+{
+	Vector3 EvaluateTrailTrajectory(const TrailTrajectorySettings& trajectory, float normalizedTime)
+	{
+		// エディタ設定値で軌道の範囲外を評価しないよう正規化時間を制限する。
+		normalizedTime = std::clamp(normalizedTime, 0.0f, 1.0f);
+		if (trajectory.type == TrailTrajectoryType::kBezier) {
+			const float inverse = 1.0f - normalizedTime;
+			const float a = inverse * inverse * inverse;
+			const float b = 3.0f * inverse * inverse * normalizedTime;
+			const float c = 3.0f * inverse * normalizedTime * normalizedTime;
+			const float d = normalizedTime * normalizedTime * normalizedTime;
+			return trajectory.point0 * a + trajectory.point1 * b + trajectory.point2 * c + trajectory.point3 * d;
+		}
+		if (trajectory.type == TrailTrajectoryType::kCatmullRom) {
+			return CatmullRom({ trajectory.point0, trajectory.point1, trajectory.point2, trajectory.point3 }, normalizedTime);
+		}
+		if (trajectory.type == TrailTrajectoryType::kOrbit) {
+			const float angle = trajectory.orbitStartAngle + (trajectory.orbitEndAngle - trajectory.orbitStartAngle) * normalizedTime;
+			return { trajectory.orbitCenter.x + std::cos(angle) * trajectory.orbitRadius,
+				trajectory.orbitCenter.y + trajectory.orbitHeight,
+				trajectory.orbitCenter.z + std::sin(angle) * trajectory.orbitRadius };
+		}
+		return {};
+	}
+}
 namespace {
 	constexpr size_t kVerticesPerSegment = 6;
 
@@ -94,9 +120,19 @@ void Engine::TrailEffect::Update()
 	worldtransformTstr_.Update();
 	worldtransformTend_.Update();
 
-	const Vector3 start = worldtransformTstr_.worldMat_.GetWorldPosition();
-	const Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
+	Vector3 start = worldtransformTstr_.worldMat_.GetWorldPosition();
+	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
 	const float deltaTime = MyGame::GameTime();
+
+	// 独立した軌道を進め、リボンの両レールを同じ量だけ移動させる。
+	if (trajectoryEnabled_) {
+		trajectoryElapsed_ += deltaTime;
+		const float duration = trajectory_.duration > 0.0f ? trajectory_.duration : lifeTime_;
+		const float normalizedTime = std::clamp(trajectoryElapsed_ / (std::max)(duration, 0.001f), 0.0f, 1.0f);
+		const Vector3 pathOffset = ToTrajectoryWorldPosition(EvaluateTrajectory(normalizedTime)) - trajectoryAnchorPosition_;
+		start = trajectoryStartOffset_ + pathOffset;
+		end = trajectoryEndOffset_ + pathOffset;
+	}
 
 	// 発生していない間も最後の座標は追従させ、再発生時に長い帯が一気に伸びるのを防ぐ。
 	if (flag_ && HasFeature(TrailFeature::Ribbon)) {
@@ -280,6 +316,44 @@ void Engine::TrailEffect::SetSettings(const TrailSettings& settings)
 	uvScrollOffset_ = {};
 }
 
+void Engine::TrailEffect::SetTrajectory(const TrailTrajectorySettings& trajectory, WorldTransform* anchor)
+{
+	// エディタで従来の親追従を選択した場合は軌道モードを無効にする。
+	trajectory_ = trajectory;
+	trajectoryEnabled_ = trajectory_.type != TrailTrajectoryType::kNone;
+	trajectoryElapsed_ = 0.0f;
+	if (!trajectoryEnabled_) {
+		return;
+	}
+
+	// 現在のリボンとアンカー基底を保存し、後の親移動で軌道が歪まないようにする。
+	worldtransformTstr_.Update();
+	worldtransformTend_.Update();
+	trajectoryStartOffset_ = worldtransformTstr_.worldMat_.GetWorldPosition();
+	trajectoryEndOffset_ = worldtransformTend_.worldMat_.GetWorldPosition();
+	trajectoryAnchorPosition_ = anchor ? anchor->GetWorldPosition() : Vector3{};
+	if (anchor) {
+		trajectoryRight_ = { anchor->worldMat_.m[0][0], anchor->worldMat_.m[0][1], anchor->worldMat_.m[0][2] };
+		trajectoryUp_ = { anchor->worldMat_.m[1][0], anchor->worldMat_.m[1][1], anchor->worldMat_.m[1][2] };
+		trajectoryForward_ = { anchor->worldMat_.m[2][0], anchor->worldMat_.m[2][1], anchor->worldMat_.m[2][2] };
+	}
+}
+
+Vector3 Engine::TrailEffect::EvaluateTrajectory(float normalizedTime) const
+{
+	// パーティクルでも使用する共有軌道評価処理へ委譲する。
+	return EvaluateTrailTrajectory(trajectory_, normalizedTime);
+}
+
+Vector3 Engine::TrailEffect::ToTrajectoryWorldPosition(const Vector3& localPosition) const
+{
+	// 保存した右・上・前方向のアンカー基底でローカル軌道を変換する。
+	return {
+		trajectoryAnchorPosition_.x + trajectoryRight_.x * localPosition.x + trajectoryUp_.x * localPosition.y + trajectoryForward_.x * localPosition.z,
+		trajectoryAnchorPosition_.y + trajectoryRight_.y * localPosition.x + trajectoryUp_.y * localPosition.y + trajectoryForward_.y * localPosition.z,
+		trajectoryAnchorPosition_.z + trajectoryRight_.z * localPosition.x + trajectoryUp_.z * localPosition.y + trajectoryForward_.z * localPosition.z
+	};
+}
 void Engine::TrailEffect::AddFeature(TrailFeature feature)
 {
 	settings_.features |= feature;

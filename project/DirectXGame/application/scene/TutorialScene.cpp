@@ -127,6 +127,7 @@ void TutorialScene::Draw3D() {
 	////3Dオブジェクトの描画
 	gameplaySession_->GetBulletManager()->Draw();
 	gameplaySession_->GetBulletManager()->DrawEffect();
+	gameplaySession_->GetEffectSystem()->Draw();
 }
 
 void TutorialScene::Draw2D() {

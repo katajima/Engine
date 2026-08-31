@@ -78,15 +78,6 @@ public:
 	/// <summary>遠距離武器が生成する弾の登録先を設定する。</summary>
 	/// <param name="bulletManager">非所有ポインター。弾を生成する間は有効であること。</param>
 	void SetBulletManager(BulletManager* bulletManager);
-	/// <summary>武器軌跡として使用するトレイルを設定する。</summary>
-	/// <param name="trailEffect">EntityManagerなどが所有する非所有ポインター。解除時はnullptr。</param>
-	void SetTrailEffect(Engine::TrailEffect* trailEffect);
-	/// <summary>設定済みの武器トレイルを取得する。</summary>
-	/// <returns>非所有ポインター。未設定の場合はnullptr。</returns>
-	Engine::TrailEffect* GetTrailEffect();
-	/// <summary>武器トレイルの頂点生成を開始または停止する。</summary>
-	/// <param name="isEmit">生成する場合はtrue。</param>
-	void SetTrailEmit(bool isEmit);
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
 	const Character::BaseCharacter* target = nullptr;			// ターゲット
@@ -99,7 +90,6 @@ protected:
 	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
-	Engine::TrailEffect* trailEffect_ = nullptr;			// EntityManagerが所有するトレイルへの参照
 	InputSystem* inputSystem = nullptr;					// 入力(使わないならnullptr)
 };
 

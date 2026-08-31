@@ -295,9 +295,281 @@
             "type": "enum",
             "value": 6
         },
+        "コンボエフェクトオフセット0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクトオフセット1": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクトトレイルテクスチャ0": {
+            "type": "string",
+            "value": "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds"
+        },
+        "コンボエフェクトトレイルテクスチャ1": {
+            "type": "string",
+            "value": "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds"
+        },
+        "コンボエフェクトトレイル寿命0": {
+            "type": "float",
+            "value": 2.559999942779541
+        },
+        "コンボエフェクトトレイル寿命1": {
+            "type": "float",
+            "value": 1.0
+        },
+        "コンボエフェクトトレイル終了レール0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                -0.5,
+                5.03000020980835
+            ]
+        },
+        "コンボエフェクトトレイル終了レール1": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                -0.5,
+                0.0
+            ]
+        },
+        "コンボエフェクトトレイル色0": {
+            "type": "Vector4",
+            "value": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "コンボエフェクトトレイル色1": {
+            "type": "Vector4",
+            "value": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "コンボエフェクトトレイル開始レール0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.5,
+                0.0
+            ]
+        },
+        "コンボエフェクトトレイル開始レール1": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.5,
+                0.0
+            ]
+        },
+        "コンボエフェクト名前0": {
+            "type": "string",
+            "value": ""
+        },
+        "コンボエフェクト名前1": {
+            "type": "string",
+            "value": ""
+        },
         "コンボエフェクト数": {
             "type": "int32_t",
+            "value": 1
+        },
+        "コンボエフェクト発生条件0": {
+            "enumType": "ComboEffectTriggerType",
+            "type": "enum",
             "value": 0
+        },
+        "コンボエフェクト発生条件1": {
+            "enumType": "ComboEffectTriggerType",
+            "type": "enum",
+            "value": 0
+        },
+        "コンボエフェクト種別0": {
+            "enumType": "ComboEffectType",
+            "type": "enum",
+            "value": 1
+        },
+        "コンボエフェクト種別1": {
+            "enumType": "ComboEffectType",
+            "type": "enum",
+            "value": 0
+        },
+        "コンボエフェクト終了時間0": {
+            "type": "float",
+            "value": 1.6166666746139526
+        },
+        "コンボエフェクト終了時間1": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト軌跡中心0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクト軌跡中心1": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクト軌跡半径0": {
+            "type": "float",
+            "value": 2.0
+        },
+        "コンボエフェクト軌跡半径1": {
+            "type": "float",
+            "value": 2.0
+        },
+        "コンボエフェクト軌跡時間0": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト軌跡時間1": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト軌跡点00": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクト軌跡点01": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "コンボエフェクト軌跡点10": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                2.0
+            ]
+        },
+        "コンボエフェクト軌跡点11": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                2.0
+            ]
+        },
+        "コンボエフェクト軌跡点20": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                4.0
+            ]
+        },
+        "コンボエフェクト軌跡点21": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                4.0
+            ]
+        },
+        "コンボエフェクト軌跡点30": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                6.0
+            ]
+        },
+        "コンボエフェクト軌跡点31": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                6.0
+            ]
+        },
+        "コンボエフェクト軌跡種別0": {
+            "enumType": "TrailTrajectoryType",
+            "type": "enum",
+            "value": 0
+        },
+        "コンボエフェクト軌跡種別1": {
+            "enumType": "TrailTrajectoryType",
+            "type": "enum",
+            "value": 0
+        },
+        "コンボエフェクト軌跡終了角0": {
+            "type": "float",
+            "value": 6.2831854820251465
+        },
+        "コンボエフェクト軌跡終了角1": {
+            "type": "float",
+            "value": 6.2831854820251465
+        },
+        "コンボエフェクト軌跡開始角0": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト軌跡開始角1": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト軌跡高さ0": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト軌跡高さ1": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト追従先0": {
+            "type": "string",
+            "value": "Weapon"
+        },
+        "コンボエフェクト追従先1": {
+            "type": "string",
+            "value": "Player"
+        },
+        "コンボエフェクト開始時間0": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト開始時間1": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボエフェクト頻度0": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "コンボエフェクト頻度1": {
+            "type": "float",
+            "value": 0.10000000149011612
         },
         "コンボキャンセル受付終了時間": {
             "type": "float",
@@ -420,7 +692,7 @@
         },
         "コンボ移行時間": {
             "type": "float",
-            "value": 0.6666666865348816
+            "value": 0.38333332538604736
         },
         "コンボ終了時間": {
             "type": "float",

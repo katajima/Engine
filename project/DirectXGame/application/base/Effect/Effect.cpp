@@ -31,6 +31,39 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 }
 
 
+void EffectSystem::SetCamera(Engine::Camera* camera)
+{
+	// カメラの所有権を移さず、コンポーネントへ参照だけ渡す。
+	effectComponent_->SetCamera(camera);
+}
+
+void EffectSystem::CreateTrailEffect(const std::string& name, const std::string& texture, float lifeTime,
+	Engine::WorldTransform& parent, Engine::Camera* camera, const Color& color,
+	const Vector3& offsetStart, const Vector3& offsetEnd,
+	const Engine::TrailTrajectorySettings& trajectory)
+{
+	// 新しいコンボ設定で再生成する前に、既存の実行用エントリを置き換える。
+	effectComponent_->RemoveTrailEffect(name);
+	effectComponent_->SetCamera(camera);
+	effectComponent_->AddTrailEffect(name, texture, lifeTime, parent, color, offsetStart, offsetEnd);
+	if (Engine::TrailEffect* trail = effectComponent_->GetTrailEffect(name)) {
+		trail->SetTrajectory(trajectory, &parent);
+	}
+}
+
+void EffectSystem::RemoveTrailEffect(const std::string& name)
+{
+	// エフェクトコンポーネントが所有するトレイルを停止して解放する。
+	effectComponent_->RemoveTrailEffect(name);
+}
+
+void EffectSystem::SetTrailEmit(const std::string& name, bool isEmit)
+{
+	// トレイルの所有権はEffectSystemに保持したまま、発生フラグだけを渡す。
+	if (Engine::TrailEffect* trail = effectComponent_->GetTrailEffect(name)) {
+		trail->SetIsEmit(isEmit);
+	}
+}
 void EffectSystem::InitParticle() {}
 
 void EffectSystem::InitRangeBombingBullet() {
@@ -237,6 +270,12 @@ void EffectSystem::InitBullet()
 	cartridgeEmit->SetColorMinMax({ 1,1, 0 }, { 1,1, 0 });
 }
 
+
+void EffectSystem::Draw()
+{
+	// コンボ演出コンポーネントが所有するトレイルを描画する。
+	effectComponent_->Draw();
+}
 
 void EffectSystem::Update(float dt) {
 	// エフェクトエディタ更新

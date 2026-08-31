@@ -47,6 +47,23 @@ namespace Combo {
 		return "コンボエフェクトオフセット" + std::to_string(index);
 	}
 
+	static std::string MakeComboEffectTypeKey(int index) { return "コンボエフェクト種別" + std::to_string(index); }
+	static std::string MakeComboEffectTrailTextureKey(int index) { return "コンボエフェクトトレイルテクスチャ" + std::to_string(index); }
+	static std::string MakeComboEffectTrailColorKey(int index) { return "コンボエフェクトトレイル色" + std::to_string(index); }
+	static std::string MakeComboEffectTrailOffsetStartKey(int index) { return "コンボエフェクトトレイル開始レール" + std::to_string(index); }
+	static std::string MakeComboEffectTrailOffsetEndKey(int index) { return "コンボエフェクトトレイル終了レール" + std::to_string(index); }
+	static std::string MakeComboEffectTrailLifeTimeKey(int index) { return "コンボエフェクトトレイル寿命" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryTypeKey(int index) { return "コンボエフェクト軌跡種別" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryDurationKey(int index) { return "コンボエフェクト軌跡時間" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryPoint0Key(int index) { return "コンボエフェクト軌跡点0" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryPoint1Key(int index) { return "コンボエフェクト軌跡点1" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryPoint2Key(int index) { return "コンボエフェクト軌跡点2" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryPoint3Key(int index) { return "コンボエフェクト軌跡点3" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryOrbitCenterKey(int index) { return "コンボエフェクト軌跡中心" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryOrbitRadiusKey(int index) { return "コンボエフェクト軌跡半径" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryOrbitHeightKey(int index) { return "コンボエフェクト軌跡高さ" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryOrbitStartAngleKey(int index) { return "コンボエフェクト軌跡開始角" + std::to_string(index); }
+	static std::string MakeComboEffectTrajectoryOrbitEndAngleKey(int index) { return "コンボエフェクト軌跡終了角" + std::to_string(index); }
 	static std::string MakeComboEffectSequenceName(int index) {
 		return "コンボエフェクト" + std::to_string(index);
 	}
