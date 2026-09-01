@@ -1,4 +1,4 @@
-﻿#include "HitMotionSystem.h"
+#include "HitMotionSystem.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include <DirectXGame/application/base/Object/ObjectComponent.h>
+#include <DirectXGame/engine/Entity/ObjectComponent.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion

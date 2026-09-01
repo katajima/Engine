@@ -1,7 +1,7 @@
 #pragma once
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 

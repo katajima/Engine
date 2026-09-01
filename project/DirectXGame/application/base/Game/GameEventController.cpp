@@ -1,6 +1,6 @@
-﻿#include "GameEventController.h"
+#include "GameEventController.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"

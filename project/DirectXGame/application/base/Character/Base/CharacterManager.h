@@ -2,7 +2,7 @@
 
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 // ベースキャラクター
 #include"BaseCharacter.h"

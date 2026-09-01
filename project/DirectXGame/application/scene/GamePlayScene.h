@@ -7,7 +7,7 @@
 
 // application
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"

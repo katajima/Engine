@@ -1,5 +1,5 @@
-#pragma once
-#include "CameraController.h"
+﻿#pragma once
+#include <DirectXGame/engine/Camera/CameraController.h>
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 // 前方宣言

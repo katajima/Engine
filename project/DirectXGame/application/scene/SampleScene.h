@@ -9,7 +9,7 @@
 #include<DirectXGame/engine/Effect/Particle/2d/ParticleEmitter2d.h>
 
 // application
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"

@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h>

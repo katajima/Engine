@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include"DirectXGame/engine/Animation/AnimationData.h"
 
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 
 //オブジェクトタイプ
 enum class ObjectType

@@ -1,6 +1,6 @@
-﻿#include "PlayerSubWeapon.h"
+#include "PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <algorithm>
 #include <cmath>
 

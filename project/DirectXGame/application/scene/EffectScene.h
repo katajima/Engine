@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 
 

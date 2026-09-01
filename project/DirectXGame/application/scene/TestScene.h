@@ -33,7 +33,7 @@
 #include "DirectXGame/engine/math/Noise.h"
 #include "DirectXGame/engine/Animation/AnimationData.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
-#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include "DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManager.h"

@@ -369,10 +369,10 @@
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp">
+    <ClCompile Include="DirectXGame\engine\GlobalVariables\GlobalVariables.cpp">
       <Filter>ソース ファイル\application\globalVariables</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.cpp">
+    <ClCompile Include="DirectXGame\engine\GlobalVariables\GlobalVariablesFunction.cpp">
       <Filter>ソース ファイル\application\globalVariables</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp">
@@ -588,7 +588,7 @@
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp">
       <Filter>ソース ファイル\engine\3d\animation</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp">
+    <ClCompile Include="DirectXGame\engine\Entity\ObjectComponent.cpp">
       <Filter>ソース ファイル\engine\3d\object</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3d.cpp">
@@ -792,7 +792,7 @@
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp">
+    <ClCompile Include="DirectXGame\engine\input\InputManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp">
@@ -996,7 +996,7 @@
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp">
@@ -1499,10 +1499,10 @@
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.h">
+    <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariablesFunction.h">
       <Filter>ヘッダー ファイル\application\globalVariables</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
+    <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariables.h">
       <Filter>ヘッダー ファイル\application\globalVariables</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h">
@@ -1607,7 +1607,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Ocean\OceanManager.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h">
+    <ClInclude Include="DirectXGame\engine\Entity\ObjectComponent.h">
       <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstanceManager.h">
@@ -2024,7 +2024,7 @@
     <ClInclude Include="DirectXGame\application\scene\ResultScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Input\InputManager.h">
+    <ClInclude Include="DirectXGame\engine\input\InputManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h">
@@ -2276,7 +2276,7 @@
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h">
@@ -2369,7 +2369,6 @@
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h">

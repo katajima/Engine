@@ -1,5 +1,5 @@
 #include "ComboSystem.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>

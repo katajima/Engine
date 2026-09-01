@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
 #include "DirectXGame/application/base/Camera/Base/CameraLag.h"
 #include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"

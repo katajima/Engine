@@ -1,7 +1,7 @@
 #include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 
 namespace Character {

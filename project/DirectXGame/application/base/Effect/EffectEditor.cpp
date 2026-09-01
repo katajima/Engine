@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/Base/Texture/TextureManager.h"
-#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include "DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 #include <algorithm>
 #include <cctype>

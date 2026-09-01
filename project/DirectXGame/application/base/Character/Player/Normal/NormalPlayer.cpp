@@ -1,4 +1,4 @@
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -6,7 +6,7 @@
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>

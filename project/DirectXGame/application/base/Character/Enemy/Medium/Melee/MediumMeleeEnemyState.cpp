@@ -1,7 +1,7 @@
 #include "MediumMeleeEnemyState.h"
 #include "MediumMeleeEnemy.h"
 
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"

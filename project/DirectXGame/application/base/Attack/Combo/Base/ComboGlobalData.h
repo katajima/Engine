@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
-#include "DirectXGame/application/base/Camera/Base/CameraData.h"
+#include "DirectXGame/engine/Camera/CameraData.h"
 #include <string>
 #include <vector>
 

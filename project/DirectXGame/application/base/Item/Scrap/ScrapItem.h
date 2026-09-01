@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 // 前方宣言
 namespace Engine {

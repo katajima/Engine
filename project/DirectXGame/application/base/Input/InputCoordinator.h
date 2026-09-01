@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "DirectXGame/application/base/Input/InputHander.h"
-#include "DirectXGame/application/base/Input/InputManager.h"
+#include "DirectXGame/engine/input/InputManager.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 
 namespace Engine {

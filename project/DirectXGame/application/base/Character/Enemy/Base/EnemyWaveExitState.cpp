@@ -1,6 +1,6 @@
 #include "EnemyWaveExitState.h"
 #include "BaseEnemy.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 #include <algorithm>
 

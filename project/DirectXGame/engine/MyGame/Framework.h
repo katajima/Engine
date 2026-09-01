@@ -10,7 +10,7 @@
 
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 // C++
 #include"memory"

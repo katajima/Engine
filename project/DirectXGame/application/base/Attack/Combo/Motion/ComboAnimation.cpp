@@ -2,7 +2,7 @@
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include <algorithm>
 

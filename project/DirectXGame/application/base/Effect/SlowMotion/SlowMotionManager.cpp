@@ -1,7 +1,7 @@
 #include "SlowMotionManager.h"
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 namespace Character {

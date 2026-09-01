@@ -1,5 +1,5 @@
 #include "BaseWeapon.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 
 BaseWeapon::BaseWeapon() = default;

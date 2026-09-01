@@ -1,5 +1,5 @@
 #include "AttackController.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,

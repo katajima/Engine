@@ -1,5 +1,5 @@
 #include "CollisionManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 
 

@@ -1,5 +1,5 @@
-﻿#include "SmallMeleeWeapon.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "SmallMeleeWeapon.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 
 void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 

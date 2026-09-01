@@ -3,7 +3,7 @@
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
