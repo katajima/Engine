@@ -999,16 +999,16 @@
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraFollow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraRotation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraLockOn.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp">
@@ -1071,10 +1071,10 @@
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraZoom.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraShake.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.cpp">
@@ -2279,22 +2279,22 @@
     <ClInclude Include="DirectXGame\engine\Camera\CameraController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraFollow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraShake.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraRotation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraLockOn.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraLag.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraCollision.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h">
@@ -2371,7 +2371,7 @@
     </ClInclude>
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraZoom.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h">

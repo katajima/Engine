@@ -1,13 +1,13 @@
 #pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
-#include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
-#include "DirectXGame/application/base/Camera/Base/CameraLag.h"
-#include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
-#include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
-#include "DirectXGame/application/base/Camera/Base/CameraShake.h"
-#include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
-#include "DirectXGame/application/base/Camera/Base/CameraZoom.h"
+#include "DirectXGame/engine/Camera/CameraFollow.h"
+#include "DirectXGame/engine/Camera/CameraLag.h"
+#include "DirectXGame/engine/Camera/CameraLockOn.h"
+#include "DirectXGame/engine/Camera/CameraRotation.h"
+#include "DirectXGame/engine/Camera/CameraShake.h"
+#include "DirectXGame/engine/Camera/CameraCollision.h"
+#include "DirectXGame/engine/Camera/CameraZoom.h"
 
 class InputSystem;
 
