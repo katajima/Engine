@@ -10,7 +10,7 @@
 #include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 
 
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 

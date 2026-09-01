@@ -1,10 +1,10 @@
-﻿#include "LoadLevelData.h"
+#include "LoadLevelData.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/manager/entity/EntityManager.h"
 
 #include "LoadDataFunction.h"
 
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
 LoadLevelData::~LoadLevelData()

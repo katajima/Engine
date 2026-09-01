@@ -1,6 +1,6 @@
-﻿#include "BaseStage.h"
+#include "BaseStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 namespace {
 	// ステージ上でプレイヤー車が接地する共通の高さ。

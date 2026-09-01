@@ -16,7 +16,7 @@
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 

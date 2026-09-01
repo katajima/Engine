@@ -7,7 +7,7 @@
 #include"DirectXGame/application/base/Stage/TitleStage.h"
 #include "DirectXGame/application/base/UI/TitleUI.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 

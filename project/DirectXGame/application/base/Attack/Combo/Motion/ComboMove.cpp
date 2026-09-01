@@ -1,6 +1,6 @@
 #include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"

@@ -3,7 +3,7 @@
 #include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 namespace Game {
 

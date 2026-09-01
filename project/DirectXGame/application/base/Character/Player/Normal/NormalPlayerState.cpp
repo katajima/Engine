@@ -6,7 +6,7 @@
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
-#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
+#include <DirectXGame/engine/Camera/CameraManager.h>
 
 namespace Character {
 #pragma region Idle

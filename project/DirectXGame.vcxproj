@@ -150,12 +150,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraFollow.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraLockOn.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraRotation.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraShake.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraZoom.cpp" />
@@ -687,7 +687,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Light\BaseLights.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BasePointLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseSpotLight.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseCamera.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\BaseCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
@@ -770,7 +770,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\WeaponData.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManager.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraManager.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h" />

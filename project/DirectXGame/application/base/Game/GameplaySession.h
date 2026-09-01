@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"

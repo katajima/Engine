@@ -1,6 +1,6 @@
-﻿#include "MainStage.h"
+#include "MainStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
 void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) {

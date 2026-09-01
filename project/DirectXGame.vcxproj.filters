@@ -285,7 +285,7 @@
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraManager.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp">
@@ -336,7 +336,7 @@
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\BaseCamera.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManager.cpp">
@@ -1340,7 +1340,7 @@
     <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h">
       <Filter>ヘッダー ファイル\engine\base\win</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseCamera.h">
+    <ClInclude Include="DirectXGame\engine\Camera\BaseCamera.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h">
@@ -1394,7 +1394,7 @@
     <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManager.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraManager.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\CollisionTypeIdDef.h">

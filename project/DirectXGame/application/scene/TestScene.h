@@ -36,7 +36,7 @@
 #include "DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
 

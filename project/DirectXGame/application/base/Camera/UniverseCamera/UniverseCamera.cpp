@@ -1,6 +1,6 @@
-﻿#include "UniverseCamera.h"
+#include "UniverseCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 
 
 void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 

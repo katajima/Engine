@@ -4,7 +4,7 @@
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
-#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
+#include <DirectXGame/engine/Camera/CameraManager.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/engine/3d/Object/Object3d.h>
