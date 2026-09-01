@@ -3,6 +3,7 @@
 #include"DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include <DirectXGame/application/base/Input/InputSystem.h>
 
 void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position)
@@ -24,7 +25,8 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 
 	// 操作
 	controller = std::make_unique<CameraController>();
-	controller->Initialize(uniqueCamera_.get(), inputSystem);
+	// カメラ制御へはアプリケーションの入力システムではなく、共通入力データだけを渡す。
+	controller->Initialize(uniqueCamera_.get(), inputSystem ? inputSystem->GetPlayerInputDataAddress() : nullptr);
 }
 
 void FollowCamera::Update() {

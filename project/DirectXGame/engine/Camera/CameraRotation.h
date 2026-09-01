@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
+#include "DirectXGame/engine/input/InputData.h"
 
 // 回転制御
 /// <summary>
@@ -17,7 +18,7 @@ public:
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update(Transform& transform ,const InputSystem* input,float dt);
+	void Update(Transform& transform, const PlayerInputData* input, float dt);
 
 	/// <summary>
 	/// データ取得

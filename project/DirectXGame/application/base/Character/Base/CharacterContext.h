@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
+#include "DirectXGame/engine/input/InputData.h"	// エンジン共通入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
 #include "DirectXGame/application/base/Character/State/MainState.h"
 #include "DirectXGame/engine/struct/Vector3.h"				// Vector3

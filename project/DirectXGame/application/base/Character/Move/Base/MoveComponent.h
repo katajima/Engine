@@ -1,5 +1,5 @@
-#pragma once
-#include "MovementRestrictions.h"
+﻿#pragma once
+#include <DirectXGame/engine/Move/MovementRestrictions.h>
 #include "MovementSystem.h"
 #include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 #include "DirectXGame/application/base/Character/Move/Move/MoveSystem.h"

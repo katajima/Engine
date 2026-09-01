@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 #include <DirectXGame/engine/Effect/EffectGlovalData.h>
-#include "DirectXGame/application/base/Effect/EffectEditorSerializer.h"
+#include "DirectXGame/engine/Effect/EffectEditorSerializer.h"
 
 #include <array>
 

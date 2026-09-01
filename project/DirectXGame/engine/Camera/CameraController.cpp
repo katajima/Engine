@@ -1,8 +1,8 @@
-﻿#include "CameraController.h"
+#include "CameraController.h"
 #include <algorithm>
 #include <cmath>
 
-void CameraController::Initialize(Engine::Camera* camera, const InputSystem* input) {
+void CameraController::Initialize(Engine::Camera* camera, const PlayerInputData* input) {
 	this->camera = camera;
 	this->input = input;
 

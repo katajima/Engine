@@ -1,5 +1,9 @@
 #pragma once
 #include "DirectXGame/engine/UI/UIBoard.h"
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 
 

@@ -1,5 +1,6 @@
 #pragma once
-#include "InputData.h"
+#include "DirectXGame/engine/input/InputData.h"
+#include "DirectXGame/application/base/Input/InputData.h"
 #include "DirectXGame/engine/input/Input.h"
 
 enum class InputButton {
@@ -45,6 +46,8 @@ public:
 	/// 入力データ取得
 	/// </summary>
 	PlayerInputData GetPlayerInputData() const { return playerInputData_; }
+	/// <summary>カメラなどが共通入力データを参照するための非所有参照を返す。</summary>
+	const PlayerInputData* GetPlayerInputDataAddress() const { return &playerInputData_; }
 	/// <summary>
 	/// ゲーム操作の入力データ取得
 	/// </summary>

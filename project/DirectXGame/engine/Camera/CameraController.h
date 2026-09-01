@@ -8,8 +8,7 @@
 #include "DirectXGame/engine/Camera/CameraShake.h"
 #include "DirectXGame/engine/Camera/CameraCollision.h"
 #include "DirectXGame/engine/Camera/CameraZoom.h"
-
-class InputSystem;
+#include "DirectXGame/engine/input/InputData.h"
 
 // カメラ統括クラス
 /// <summary>
@@ -21,7 +20,7 @@ public:
 	/// <summary>追従、回転、ロックオン、衝突補正、演出用の各カメラ機能を初期化する。</summary>
 	/// <param name="camera">制御対象のカメラ。CameraControllerは所有せず、利用中は有効であること。</param>
 	/// <param name="input">カメラ操作に使用する入力。自動制御のみの場合はnullptrを許容する。</param>
-	void Initialize(Engine::Camera* camera,const InputSystem* input);
+	void Initialize(Engine::Camera* camera, const PlayerInputData* input);
 
 	/// <summary>設定済みの追従対象と入力に基づいて全カメラ機能を更新する。</summary>
 	/// <param name="dt">秒単位のフレーム時間。0以下の場合、時間依存の補間は進行しない。</param>
@@ -103,7 +102,8 @@ private:
 	// ズーム
 	std::unique_ptr<CameraZoom> zoom = nullptr;
 private:
-	const InputSystem* input = nullptr;
+	// アプリケーションの入力システムを直接参照せず、共通入力データだけを参照する。
+	const PlayerInputData* input = nullptr;
 	Engine::Camera* camera = nullptr;
 	const Engine::WorldTransform* target = nullptr;
 	const Engine::WorldTransform* lockOnTarget = nullptr;

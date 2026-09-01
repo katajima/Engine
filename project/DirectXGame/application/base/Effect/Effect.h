@@ -1,5 +1,5 @@
 #pragma once
-#include "EffectEditor.h"
+#include "DirectXGame/engine/Effect/EffectEditor.h"
 // 前方宣言
 namespace Engine {
 	class EntityManager;

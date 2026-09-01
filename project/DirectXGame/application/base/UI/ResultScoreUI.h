@@ -1,6 +1,6 @@
 #pragma once
 #pragma once
-#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+#include "DirectXGame/engine/UI/BaseUI.h"
 
 // 前方宣言
 namespace Character {

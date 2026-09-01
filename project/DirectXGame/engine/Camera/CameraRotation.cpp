@@ -1,5 +1,4 @@
 #include "CameraRotation.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
 
 void CameraRotation::Initialize() {
     // 初期角度をリセット（必要なら外部から設定してもOK）
@@ -11,15 +10,16 @@ void CameraRotation::Initialize() {
 };
 
 
-void CameraRotation::Update(Transform& transform,const InputSystem* input, float dt) {
+void CameraRotation::Update(Transform& transform, const PlayerInputData* input, float dt) {
     if (!input) {
         return;
     }
     // =========================
     // 入力取得（例：マウスや右スティック）
     // =========================
-    float inputX = input->GetPlayerInputData().lookStick.x;
-    float inputY = input->GetPlayerInputData().lookStick.y; 
+    // エンジン共通の入力データから視点操作量だけを取得する。
+    float inputX = input->lookStick.x;
+    float inputY = input->lookStick.y;
 
 
     // =========================
