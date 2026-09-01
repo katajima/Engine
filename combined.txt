@@ -125,21 +125,8 @@
     └── └── └── └── └── ├── BaseFixedCamera.h
     └── └── └── └── └── ├── BaseFollowCamera.h
     └── └── └── └── └── ├── BaseRailCamera.h
-    └── └── └── └── └── ├── CameraCollision.cpp
-    └── └── └── └── └── ├── CameraCollision.h
-    └── └── └── └── └── ├── CameraFollow.cpp
-    └── └── └── └── └── ├── CameraFollow.h
-    └── └── └── └── └── ├── CameraLag.h
-    └── └── └── └── └── ├── CameraLockOn.cpp
-    └── └── └── └── └── ├── CameraLockOn.h
     └── └── └── └── └── ├── CameraManager.cpp
-    └── └── └── └── └── ├── CameraManager.h
-    └── └── └── └── └── ├── CameraRotation.cpp
-    └── └── └── └── └── ├── CameraRotation.h
-    └── └── └── └── └── ├── CameraShake.cpp
-    └── └── └── └── └── ├── CameraShake.h
-    └── └── └── └── └── ├── CameraZoom.cpp
-    └── └── └── └── └── └── CameraZoom.h
+    └── └── └── └── └── └── CameraManager.h
     └── └── └── └── ├── FixedCamera/
     └── └── └── └── └── ├── EffectCamera.cpp
     └── └── └── └── └── ├── EffectCamera.h
@@ -541,11 +528,24 @@
     └──     ├── Camera/
     └──     └── ├── Camera.cpp
     └──     └── ├── Camera.h
+    └──     └── ├── CameraCollision.cpp
+    └──     └── ├── CameraCollision.h
     └──     └── ├── CameraCommon.cpp
     └──     └── ├── CameraCommon.h
     └──     └── ├── CameraController.cpp
     └──     └── ├── CameraController.h
-    └──     └── └── CameraData.h
+    └──     └── ├── CameraData.h
+    └──     └── ├── CameraFollow.cpp
+    └──     └── ├── CameraFollow.h
+    └──     └── ├── CameraLag.h
+    └──     └── ├── CameraLockOn.cpp
+    └──     └── ├── CameraLockOn.h
+    └──     └── ├── CameraRotation.cpp
+    └──     └── ├── CameraRotation.h
+    └──     └── ├── CameraShake.cpp
+    └──     └── ├── CameraShake.h
+    └──     └── ├── CameraZoom.cpp
+    └──     └── └── CameraZoom.h
     └──     ├── Collider/
     └──     └── ├── 2d/
     └──     └── └── ├── Collider2D.cpp
@@ -16240,299 +16240,6 @@ protected:
 };
 
 ============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraCollision.cpp
-============================================================
-#include "CameraCollision.h"
-
-// 初期化
-void CameraCollision::Initialize() {
-
-}
-
-// 更新
-void CameraCollision::Update(Transform& transform, float dt) {
-	if (!isCollision) return;
-	
-	currentPos_ = transform.translate;
-	Vector3 targetPos{};
-	if (target) {
-		targetPos = target->GetWorldPosition();
-	}
-	// 地面への沈み補正
-	if (currentPos_.y < 1.0f) {
-		float depth = -currentPos_.y;
-
-		float zAdjust = std::clamp(depth * depthScale_, 0.0f, maxZOffset_);
-
-		Vector3 direction = Normalize(Subtract(targetPos, currentPos_));
-		Vector3 zOffset = Multiply(direction, zAdjust);
-
-		currentPos_ = Add(currentPos_, zOffset);
-		currentPos_.y = 1.0f;
-	}
-
-	// 位置設定
-	transform.translate = currentPos_;
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraCollision.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-
-// 
-/// <summary>
-/// CameraCollisionを管理・実装するクラス。
-/// </summary>
-class CameraCollision {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize();
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update(Transform& transform, float dt);
-	// ターゲット設定
-	/// <summary>衝突補正の基準となる追従対象を設定する。</summary>
-	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
-	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
-
-private:
-	CameraCollisionData data_;
-	bool isCollision = true;
-	// 現在のカメラ位置
-	Vector3 currentPos_{};
-
-	float maxZOffset_ = 30.0f;
-	float depthScale_ = 2.0f;
-private:
-	// ターゲット
-	const Engine::WorldTransform* target = nullptr;
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.cpp
-============================================================
-﻿#include "CameraFollow.h"
-#include <algorithm>
-#include "CameraCollision.h"
-
-void CameraFollow::Initialize() {
-	data_.followSpeed = 40.0f;
-	data_.useSmooth = true;
-	data_.offset.y = 4.0f;
-	data_.offset.z =  -20.5;
-	// デフォルト位置設定
-	defultOffst = data_.offset;
-	// 現在位置設定
-	currentPos_ = {};
-	//
-	isInitializedPosition_ = false;
-}
-
-
-void CameraFollow::Update(Transform& transform,float dt) {
-	// 追従対象がいなければ何もしない
-	if (!target) {
-		return;
-	}
-	// 回転適用 → ローカルオフセットをワールド空間へ
-	// カメラ回転に応じて後方・上方オフセットを回す
-	Matrix4x4 rotY = MakeRotateYMatrix(transform.rotate.y);
-	Matrix4x4 rotX = MakeRotateXMatrix(transform.rotate.x);
-
-	// Yaw → Pitch の順で適用
-	Matrix4x4 rotateMatrix = rotX * rotY;
-
-	Vector3 rotatedOffset = TransformNormal(data_.offset, rotateMatrix);
-
-	// 追従先の基準位置に、演出用の注視点オフセットを加える
-	Vector3 targetPosition = Add(target->GetWorldPosition(), data_.targetOffset);
-
-	// 目標カメラ位置
-	Vector3 desiredCameraPos = Add(targetPosition, rotatedOffset);
-
-
-	// 初回は補間せず即座に合わせる
-	if (!isInitializedPosition_) {
-		currentPos_ = desiredCameraPos;
-		isInitializedPosition_ = true;
-	}
-	else if (data_.useSmooth) {
-		const float t = std::clamp(data_.followSpeed * dt, 0.0f, 1.0f);
-		currentPos_ = Lerp(currentPos_, desiredCameraPos, t);
-	}
-	else {
-		currentPos_ = desiredCameraPos;
-	}
-
-	// 最終結果を transform に反映
-	transform.translate = currentPos_;
-}
-
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-
-// カメラ追従
-/// <summary>
-/// CameraFollowを管理・実装するクラス。
-/// </summary>
-class CameraFollow {
-public:
-
-	void Initialize();
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update(Transform& transform,float dt);
-
-	// ターゲット設定
-	/// <summary>追従対象を設定する。</summary>
-	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
-	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
-
-	/// <summary>
-	/// カメラオフセット位置取得
-	/// </summary>
-	Vector3 GetOffsetPos() const { return data_.offset; }  
-	/// <summary>
-	/// カメラデフォルトオフセット位置取得
-	/// </summary>
-	Vector3 GetDefultOffsetPos() const { return defultOffst; }
-	/// <summary>
-	/// カメラオフセット位置設定
-	/// </summary>
-	void SetOffsetPos(const Vector3& offset) { data_.offset = offset; }
-	/// <summary>
-	/// 追従ターゲットに足すワールド座標オフセット設定
-	/// </summary>
-	void SetTargetOffset(const Vector3& offset) { data_.targetOffset = offset; }
-	/// <summary>
-	/// 追従ターゲットに足すワールド座標オフセット取得
-	/// </summary>
-	Vector3 GetTargetOffset() const { return data_.targetOffset; }
-	/// <summary>
-	/// カメラ位置取得
-	/// </summary>
-	Vector3 GetPos() const { return currentPos_; }
-	/// <summary>
-	/// データ取得
-	/// </summary>
-	CameraFollowData& GetData() { return data_; }
-	const CameraFollowData& GetData() const { return data_; }
-private:
-	// データ
-	CameraFollowData data_;
-	// 現在のカメラ位置
-	Vector3 currentPos_{};
-	// デフォルトオフセット位置 
-	Vector3 defultOffst = {};
-	// 初回位置合わせ済みか
-	bool isInitializedPosition_ = false;
-	// ターゲット
-	const Engine::WorldTransform* target = nullptr;
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraLag.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-
-
-/// <summary>
-/// CameraLagを管理・実装するクラス。
-/// </summary>
-class CameraLag {
-public:
-
-	Vector3 Update(float dt);
-
-private:
-	CameraLagData data;
-};
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.cpp
-============================================================
-#include "CameraLockOn.h"
-#include "DirectXGame/engine/Math/MathFunctions.h"
-#include "DirectXGame/engine/Utility/ConvertUtility.h"
-
-#include <algorithm>
-#include <cmath>
-
-Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
-	if (!data.target) {
-		return transform.rotate;
-	}
-
-	Vector3 toTarget = data.target->GetWorldPosition() - transform.translate;
-	if (toTarget.LengthSq() < 1e-6f) {
-		return transform.rotate;
-	}
-
-	const float horizontalLength = std::sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z);
-
-	Vector3 targetRotate{};
-	targetRotate.x = std::atan2(toTarget.y, horizontalLength);
-	targetRotate.y = std::atan2(toTarget.x, toTarget.z);
-	targetRotate.z = 0.0f;
-
-	const float lerpRate = std::clamp(data.rotateSpeed, 0.0f, 1.0f);
-	const float t = 1.0f - std::pow(1.0f - lerpRate, dt * ConvertUtility::kDefaultFps);
-
-	Vector3 result = transform.rotate;
-	result.x = Math::LerpShortAngle(result.x, targetRotate.x, t);
-	result.y = Math::LerpShortAngle(result.y, targetRotate.y, t);
-	result.z = 0.0f;
-
-	return result;
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-
-
-// ロックオン
-/// <summary>
-/// CameraLockOnを管理・実装するクラス。
-/// </summary>
-class CameraLockOn {
-public:
-	/// <summary>
-	/// 更新
-	/// </summary>
-	Vector3 Update(const Transform& transform, float dt);
-
-	CameraLockOnData& GetData() { return data; }
-	const CameraLockOnData& GetData() const { return data; }
-
-	
-private:
-	CameraLockOnData data;
-};
-
-
-============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraManager.cpp
 ============================================================
 #include "CameraManager.h"
@@ -16859,259 +16566,6 @@ private:
 	InputSystem* inputSystem = nullptr;						// 入力
 };
 
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.cpp
-============================================================
-#include "CameraRotation.h"
-#include <DirectXGame/application/base/Input/InputSystem.h>
-
-void CameraRotation::Initialize() {
-    // 初期角度をリセット（必要なら外部から設定してもOK）
-    data_.yaw = 0.0f;
-    data_.pitch = Math::DegreesToRadians(0);
-    data_.maxPitch = Math::DegreesToRadians(20);
-    data_.minPitch = Math::DegreesToRadians(-10);
-
-};
-
-
-void CameraRotation::Update(Transform& transform,const InputSystem* input, float dt) {
-    if (!input) {
-        return;
-    }
-    // =========================
-    // 入力取得（例：マウスや右スティック）
-    // =========================
-    float inputX = input->GetPlayerInputData().lookStick.x;
-    float inputY = input->GetPlayerInputData().lookStick.y; 
-
-
-    // =========================
-   // 回転更新
-   // =========================
-    data_.yaw += inputX * data_.sensitivity;
-    data_.pitch -= inputY * data_.sensitivity;
-
-    // =========================
-    // ピッチ制限
-    // =========================
-    data_.pitch = std::clamp(data_.pitch, data_.minPitch, data_.maxPitch);
-
-    transform.rotate.x = data_.pitch;
-    transform.rotate.y = data_.yaw;
-    transform.rotate.z = {};
-
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-#include "DirectXGame/engine/Entity/ObjectComponent.h"
-
-// 回転制御
-/// <summary>
-/// CameraRotationを管理・実装するクラス。
-/// </summary>
-class CameraRotation {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize();
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update(Transform& transform ,const InputSystem* input,float dt);
-
-	/// <summary>
-	/// データ取得
-	/// </summary>
-	CameraRotationData& GetData() { return data_; }
-
-private:
-	CameraRotationData data_;
-};
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraShake.cpp
-============================================================
-#include "CameraShake.h"
-#include "DirectXGame/engine/Math/Random.h" 
-#include <DirectXGame/engine/Camera/Camera.h>
-
-void CameraShake::Request(const CameraShakeData& data) {
-	this->data = data;
-	isShake = true;
-}
-
-void CameraShake::Initialize(Engine::Camera* camera) {
-	this->camera = camera;
-}
-
-void CameraShake::Update(Vector3& pos, float dt) {
-	pos = defultPos;
-	if (!isShake) return;
-	data.duration -= dt;
-	if (data.duration <= 0.0f) {
-		isShake = false;
-	}
-
-	// ランダム
-	Vector3 shakeOffset = Random::RandomVector3(-data.offset, data.offset);
-
-	if (camera) {
-		// カメラ行列取得
-		Matrix4x4 cameraWorldMatrix = camera->GetWorldMatrix();
-
-		// カメラの向きに基づいて移動方向をワールド座標系に変換
-		Vector3 worldDirection = {
-	   shakeOffset.x * cameraWorldMatrix.m[0][0] + shakeOffset.y * cameraWorldMatrix.m[1][0] + shakeOffset.z * cameraWorldMatrix.m[2][0],
-	   shakeOffset.x * cameraWorldMatrix.m[0][1] + shakeOffset.y * cameraWorldMatrix.m[1][1] + shakeOffset.z * cameraWorldMatrix.m[2][1],
-	   shakeOffset.x * cameraWorldMatrix.m[0][2] + shakeOffset.y * cameraWorldMatrix.m[1][2] + shakeOffset.z * cameraWorldMatrix.m[2][2]
-		};
-		pos += worldDirection;
-	}
-	else {
-		pos += shakeOffset;
-	}
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraShake.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-
-namespace Engine {
-	class Camera;
-}
-
-// カメラシェイク
-/// <summary>
-/// CameraShakeを管理・実装するクラス。
-/// </summary>
-class CameraShake {
-public:
-
-	/// <summary>
-	/// リクエスト(時間と、揺れ)
-	/// </summary>
-	void Request(const CameraShakeData& data);
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize(Engine::Camera* camera);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update(Vector3& pos,float dt);
-
-	/// <summary>
-	/// シェイクしているか
-	/// </summary>
-	bool IsShake() const { return isShake; }
-
-	/// <summary>
-	/// カメラデフォルト位置設定
-	/// </summary>
-	void SetDefultPos(const Vector3& pos){defultPos = pos;};
-	/// <summary>
-	/// カメラデフォルト位置取得
-	/// </summary>
-	Vector3 GetDefultPos(){ return defultPos; }
-
-private:
-	// シェイクデータ
-	CameraShakeData data;
-	// シェイクしているか
-	bool isShake = false;
-	// カメラデフォルト位置
-	Vector3 defultPos = {};
-	// カメラ
-	Engine::Camera* camera = nullptr;
-};
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraZoom.cpp
-============================================================
-#include "CameraZoom.h"
-
-void CameraZoom::Update(float& posZ,float dt) {
-    if(isZoom) {
-        // 加算
-        t += data.zoomSpeed * dt;
-        if(t >= 1.0f){
-            t = 1.0f;
-            data.duration -= dt;
-            if(data.duration <= 0.0f){
-                isZoom = false;
-            } 
-        }
-    } else {
-        // 減算
-        t -= data.zoomSpeed * dt;
-
-        if(t <= 0.0f) {
-            t = 0.0f;
-        }
-    }
-
-    posZ = Lerp(defultPosZ,data.targetDistance,t);
-}
-
-void CameraZoom::Request(const CameraZoomData &data) {
-    // ズームする    
-    isZoom = true;
-    // データ設定
-    this->data = data;
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraZoom.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-
-// カメラズーム
-/// <summary>
-/// CameraZoomを管理・実装するクラス。
-/// </summary>
-class CameraZoom {
-public:
-
-    /// <summary>
-    /// 更新
-    /// </summary>
-    void Update(float& posZ,float dt);
-    /// <summary>
-    /// デフォルトZ設定
-    /// </summary>
-    void SetDefultZ(float z){ defultPosZ = z; }
-
-    /// <summary>
-    /// リクエスト(ズーム位置、速度、時間)
-    /// </summary>
-    void Request(const CameraZoomData& data);
-
-private:
-    // データ
-    CameraZoomData data;
-    // デフォルト位置
-    float defultPosZ = 0.0f; 
-    // 補間
-    float t = 0.0f;
-    // ズーム中か
-    bool isZoom = false;
-};
 
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/FixedCamera/EffectCamera.cpp
@@ -57981,6 +57435,84 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Camera/CameraCollision.cpp
+============================================================
+#include "CameraCollision.h"
+
+// 初期化
+void CameraCollision::Initialize() {
+
+}
+
+// 更新
+void CameraCollision::Update(Transform& transform, float dt) {
+	if (!isCollision) return;
+	
+	currentPos_ = transform.translate;
+	Vector3 targetPos{};
+	if (target) {
+		targetPos = target->GetWorldPosition();
+	}
+	// 地面への沈み補正
+	if (currentPos_.y < 1.0f) {
+		float depth = -currentPos_.y;
+
+		float zAdjust = std::clamp(depth * depthScale_, 0.0f, maxZOffset_);
+
+		Vector3 direction = Normalize(Subtract(targetPos, currentPos_));
+		Vector3 zOffset = Multiply(direction, zAdjust);
+
+		currentPos_ = Add(currentPos_, zOffset);
+		currentPos_.y = 1.0f;
+	}
+
+	// 位置設定
+	transform.translate = currentPos_;
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraCollision.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+// 
+/// <summary>
+/// CameraCollisionを管理・実装するクラス。
+/// </summary>
+class CameraCollision {
+public:
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize();
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update(Transform& transform, float dt);
+	// ターゲット設定
+	/// <summary>衝突補正の基準となる追従対象を設定する。</summary>
+	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
+
+private:
+	CameraCollisionData data_;
+	bool isCollision = true;
+	// 現在のカメラ位置
+	Vector3 currentPos_{};
+
+	float maxZOffset_ = 30.0f;
+	float depthScale_ = 2.0f;
+private:
+	// ターゲット
+	const Engine::WorldTransform* target = nullptr;
+};
+
+
+============================================================
 File Path: project/DirectXGame/engine/Camera/CameraCommon.cpp
 ============================================================
 #include "CameraCommon.h"
@@ -58641,6 +58173,474 @@ struct GlobalCameraData {
 	float hitZoomDuration = 0.1f;
 };
 
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraFollow.cpp
+============================================================
+﻿#include "CameraFollow.h"
+#include <algorithm>
+#include "CameraCollision.h"
+
+void CameraFollow::Initialize() {
+	data_.followSpeed = 40.0f;
+	data_.useSmooth = true;
+	data_.offset.y = 4.0f;
+	data_.offset.z =  -20.5;
+	// デフォルト位置設定
+	defultOffst = data_.offset;
+	// 現在位置設定
+	currentPos_ = {};
+	//
+	isInitializedPosition_ = false;
+}
+
+
+void CameraFollow::Update(Transform& transform,float dt) {
+	// 追従対象がいなければ何もしない
+	if (!target) {
+		return;
+	}
+	// 回転適用 → ローカルオフセットをワールド空間へ
+	// カメラ回転に応じて後方・上方オフセットを回す
+	Matrix4x4 rotY = MakeRotateYMatrix(transform.rotate.y);
+	Matrix4x4 rotX = MakeRotateXMatrix(transform.rotate.x);
+
+	// Yaw → Pitch の順で適用
+	Matrix4x4 rotateMatrix = rotX * rotY;
+
+	Vector3 rotatedOffset = TransformNormal(data_.offset, rotateMatrix);
+
+	// 追従先の基準位置に、演出用の注視点オフセットを加える
+	Vector3 targetPosition = Add(target->GetWorldPosition(), data_.targetOffset);
+
+	// 目標カメラ位置
+	Vector3 desiredCameraPos = Add(targetPosition, rotatedOffset);
+
+
+	// 初回は補間せず即座に合わせる
+	if (!isInitializedPosition_) {
+		currentPos_ = desiredCameraPos;
+		isInitializedPosition_ = true;
+	}
+	else if (data_.useSmooth) {
+		const float t = std::clamp(data_.followSpeed * dt, 0.0f, 1.0f);
+		currentPos_ = Lerp(currentPos_, desiredCameraPos, t);
+	}
+	else {
+		currentPos_ = desiredCameraPos;
+	}
+
+	// 最終結果を transform に反映
+	transform.translate = currentPos_;
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraFollow.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+// カメラ追従
+/// <summary>
+/// CameraFollowを管理・実装するクラス。
+/// </summary>
+class CameraFollow {
+public:
+
+	void Initialize();
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update(Transform& transform,float dt);
+
+	// ターゲット設定
+	/// <summary>追従対象を設定する。</summary>
+	/// <param name="target">追従対象への非所有ポインター。解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target) { this->target = target; };
+
+	/// <summary>
+	/// カメラオフセット位置取得
+	/// </summary>
+	Vector3 GetOffsetPos() const { return data_.offset; }  
+	/// <summary>
+	/// カメラデフォルトオフセット位置取得
+	/// </summary>
+	Vector3 GetDefultOffsetPos() const { return defultOffst; }
+	/// <summary>
+	/// カメラオフセット位置設定
+	/// </summary>
+	void SetOffsetPos(const Vector3& offset) { data_.offset = offset; }
+	/// <summary>
+	/// 追従ターゲットに足すワールド座標オフセット設定
+	/// </summary>
+	void SetTargetOffset(const Vector3& offset) { data_.targetOffset = offset; }
+	/// <summary>
+	/// 追従ターゲットに足すワールド座標オフセット取得
+	/// </summary>
+	Vector3 GetTargetOffset() const { return data_.targetOffset; }
+	/// <summary>
+	/// カメラ位置取得
+	/// </summary>
+	Vector3 GetPos() const { return currentPos_; }
+	/// <summary>
+	/// データ取得
+	/// </summary>
+	CameraFollowData& GetData() { return data_; }
+	const CameraFollowData& GetData() const { return data_; }
+private:
+	// データ
+	CameraFollowData data_;
+	// 現在のカメラ位置
+	Vector3 currentPos_{};
+	// デフォルトオフセット位置 
+	Vector3 defultOffst = {};
+	// 初回位置合わせ済みか
+	bool isInitializedPosition_ = false;
+	// ターゲット
+	const Engine::WorldTransform* target = nullptr;
+};
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraLag.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+
+/// <summary>
+/// CameraLagを管理・実装するクラス。
+/// </summary>
+class CameraLag {
+public:
+
+	Vector3 Update(float dt);
+
+private:
+	CameraLagData data;
+};
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraLockOn.cpp
+============================================================
+#include "CameraLockOn.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
+
+#include <algorithm>
+#include <cmath>
+
+Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
+	if (!data.target) {
+		return transform.rotate;
+	}
+
+	Vector3 toTarget = data.target->GetWorldPosition() - transform.translate;
+	if (toTarget.LengthSq() < 1e-6f) {
+		return transform.rotate;
+	}
+
+	const float horizontalLength = std::sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z);
+
+	Vector3 targetRotate{};
+	targetRotate.x = std::atan2(toTarget.y, horizontalLength);
+	targetRotate.y = std::atan2(toTarget.x, toTarget.z);
+	targetRotate.z = 0.0f;
+
+	const float lerpRate = std::clamp(data.rotateSpeed, 0.0f, 1.0f);
+	const float t = 1.0f - std::pow(1.0f - lerpRate, dt * ConvertUtility::kDefaultFps);
+
+	Vector3 result = transform.rotate;
+	result.x = Math::LerpShortAngle(result.x, targetRotate.x, t);
+	result.y = Math::LerpShortAngle(result.y, targetRotate.y, t);
+	result.z = 0.0f;
+
+	return result;
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraLockOn.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+
+// ロックオン
+/// <summary>
+/// CameraLockOnを管理・実装するクラス。
+/// </summary>
+class CameraLockOn {
+public:
+	/// <summary>
+	/// 更新
+	/// </summary>
+	Vector3 Update(const Transform& transform, float dt);
+
+	CameraLockOnData& GetData() { return data; }
+	const CameraLockOnData& GetData() const { return data; }
+
+	
+private:
+	CameraLockOnData data;
+};
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraRotation.cpp
+============================================================
+#include "CameraRotation.h"
+#include <DirectXGame/application/base/Input/InputSystem.h>
+
+void CameraRotation::Initialize() {
+    // 初期角度をリセット（必要なら外部から設定してもOK）
+    data_.yaw = 0.0f;
+    data_.pitch = Math::DegreesToRadians(0);
+    data_.maxPitch = Math::DegreesToRadians(20);
+    data_.minPitch = Math::DegreesToRadians(-10);
+
+};
+
+
+void CameraRotation::Update(Transform& transform,const InputSystem* input, float dt) {
+    if (!input) {
+        return;
+    }
+    // =========================
+    // 入力取得（例：マウスや右スティック）
+    // =========================
+    float inputX = input->GetPlayerInputData().lookStick.x;
+    float inputY = input->GetPlayerInputData().lookStick.y; 
+
+
+    // =========================
+   // 回転更新
+   // =========================
+    data_.yaw += inputX * data_.sensitivity;
+    data_.pitch -= inputY * data_.sensitivity;
+
+    // =========================
+    // ピッチ制限
+    // =========================
+    data_.pitch = std::clamp(data_.pitch, data_.minPitch, data_.maxPitch);
+
+    transform.rotate.x = data_.pitch;
+    transform.rotate.y = data_.yaw;
+    transform.rotate.z = {};
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraRotation.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
+
+// 回転制御
+/// <summary>
+/// CameraRotationを管理・実装するクラス。
+/// </summary>
+class CameraRotation {
+public:
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize();
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update(Transform& transform ,const InputSystem* input,float dt);
+
+	/// <summary>
+	/// データ取得
+	/// </summary>
+	CameraRotationData& GetData() { return data_; }
+
+private:
+	CameraRotationData data_;
+};
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraShake.cpp
+============================================================
+#include "CameraShake.h"
+#include "DirectXGame/engine/Math/Random.h" 
+#include <DirectXGame/engine/Camera/Camera.h>
+
+void CameraShake::Request(const CameraShakeData& data) {
+	this->data = data;
+	isShake = true;
+}
+
+void CameraShake::Initialize(Engine::Camera* camera) {
+	this->camera = camera;
+}
+
+void CameraShake::Update(Vector3& pos, float dt) {
+	pos = defultPos;
+	if (!isShake) return;
+	data.duration -= dt;
+	if (data.duration <= 0.0f) {
+		isShake = false;
+	}
+
+	// ランダム
+	Vector3 shakeOffset = Random::RandomVector3(-data.offset, data.offset);
+
+	if (camera) {
+		// カメラ行列取得
+		Matrix4x4 cameraWorldMatrix = camera->GetWorldMatrix();
+
+		// カメラの向きに基づいて移動方向をワールド座標系に変換
+		Vector3 worldDirection = {
+	   shakeOffset.x * cameraWorldMatrix.m[0][0] + shakeOffset.y * cameraWorldMatrix.m[1][0] + shakeOffset.z * cameraWorldMatrix.m[2][0],
+	   shakeOffset.x * cameraWorldMatrix.m[0][1] + shakeOffset.y * cameraWorldMatrix.m[1][1] + shakeOffset.z * cameraWorldMatrix.m[2][1],
+	   shakeOffset.x * cameraWorldMatrix.m[0][2] + shakeOffset.y * cameraWorldMatrix.m[1][2] + shakeOffset.z * cameraWorldMatrix.m[2][2]
+		};
+		pos += worldDirection;
+	}
+	else {
+		pos += shakeOffset;
+	}
+}
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraShake.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+namespace Engine {
+	class Camera;
+}
+
+// カメラシェイク
+/// <summary>
+/// CameraShakeを管理・実装するクラス。
+/// </summary>
+class CameraShake {
+public:
+
+	/// <summary>
+	/// リクエスト(時間と、揺れ)
+	/// </summary>
+	void Request(const CameraShakeData& data);
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize(Engine::Camera* camera);
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update(Vector3& pos,float dt);
+
+	/// <summary>
+	/// シェイクしているか
+	/// </summary>
+	bool IsShake() const { return isShake; }
+
+	/// <summary>
+	/// カメラデフォルト位置設定
+	/// </summary>
+	void SetDefultPos(const Vector3& pos){defultPos = pos;};
+	/// <summary>
+	/// カメラデフォルト位置取得
+	/// </summary>
+	Vector3 GetDefultPos(){ return defultPos; }
+
+private:
+	// シェイクデータ
+	CameraShakeData data;
+	// シェイクしているか
+	bool isShake = false;
+	// カメラデフォルト位置
+	Vector3 defultPos = {};
+	// カメラ
+	Engine::Camera* camera = nullptr;
+};
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraZoom.cpp
+============================================================
+#include "CameraZoom.h"
+
+void CameraZoom::Update(float& posZ,float dt) {
+    if(isZoom) {
+        // 加算
+        t += data.zoomSpeed * dt;
+        if(t >= 1.0f){
+            t = 1.0f;
+            data.duration -= dt;
+            if(data.duration <= 0.0f){
+                isZoom = false;
+            } 
+        }
+    } else {
+        // 減算
+        t -= data.zoomSpeed * dt;
+
+        if(t <= 0.0f) {
+            t = 0.0f;
+        }
+    }
+
+    posZ = Lerp(defultPosZ,data.targetDistance,t);
+}
+
+void CameraZoom::Request(const CameraZoomData &data) {
+    // ズームする    
+    isZoom = true;
+    // データ設定
+    this->data = data;
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraZoom.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+// カメラズーム
+/// <summary>
+/// CameraZoomを管理・実装するクラス。
+/// </summary>
+class CameraZoom {
+public:
+
+    /// <summary>
+    /// 更新
+    /// </summary>
+    void Update(float& posZ,float dt);
+    /// <summary>
+    /// デフォルトZ設定
+    /// </summary>
+    void SetDefultZ(float z){ defultPosZ = z; }
+
+    /// <summary>
+    /// リクエスト(ズーム位置、速度、時間)
+    /// </summary>
+    void Request(const CameraZoomData& data);
+
+private:
+    // データ
+    CameraZoomData data;
+    // デフォルト位置
+    float defultPosZ = 0.0f; 
+    // 補間
+    float t = 0.0f;
+    // ズーム中か
+    bool isZoom = false;
+};
 
 ============================================================
 File Path: project/DirectXGame/engine/Collider/2d/Collider2D.cpp
