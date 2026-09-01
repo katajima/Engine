@@ -2970,10 +2970,29 @@ namespace Combo {
 	};
 
 	// コンボ演出の発生条件
+
+	// コンボ演出の発生条件。今後のイベント条件はこの列挙値を拡張して追加する。
 	enum class ComboEffectTriggerType {
-		kTimeWindow,	// 指定時間範囲中に頻度ごと発生
-		kTimer,			// 指定時間経過で一回発生
-		kLanding,		// 着地した瞬間に一回発生
+		kTimeWindow,
+		kTimer,
+		kLanding,
+		kHit,
+		kMiss,
+		kHitCount,
+		kBranch,
+		kCancel,
+		kGround,
+		kAir,
+		kButton,
+	};
+
+	// ボタン入力条件。PlayerInputDataの入力をエフェクト条件へ変換する。
+	enum class ComboEffectInputType {
+		kAny,
+		kJump,
+		kDodge,
+		kSkill,
+		kSpecial,
 	};
 
 	// 保存項目用遠距離攻撃データ
@@ -3249,12 +3268,21 @@ struct GlobalAudio {
 		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
 		float interval = 0.1f;							// 発生頻度
 		Vector3 offset = { 0.0f, 0.0f, 0.0f };			// 追従先からの発生オフセット
+		// パーティクルとトレイルで共有するローカルTransform。
+		Vector3 transformPosition = { 0.0f, 0.0f, 0.0f };
+		Vector3 transformRotation = { 0.0f, 0.0f, 0.0f };
+		Vector3 transformScale = { 1.0f, 1.0f, 1.0f };
+		// イベント条件の追加パラメータ。
+		int requiredHitCount = 1;
+		ComboEffectInputType inputType = ComboEffectInputType::kAny;
 		// トレイル専用のテクスチャ、始点・終点レール設定。
 		std::string trailTexture = "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds";
 		Color trailColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Vector3 trailOffsetStart = { 0.0f, 0.5f, 0.0f };
 		Vector3 trailOffsetEnd = { 0.0f, -0.5f, 0.0f };
 		float trailLifeTime = 1.0f;
+		// トレイルの見た目と履歴制御をまとめた設定。
+		Engine::TrailSettings trailSettings{};
 		// パーティクルとトレイルで共有する軌跡設定。
 		Engine::TrailTrajectorySettings trajectory{};
 	};
@@ -3460,7 +3488,12 @@ namespace Combo {
 		comboData.Update(ctx);
 
 		// 入力受付がないのなら終了する
-		if (GetEndStateTime() || GetIsCansel()) {
+		if (GetIsCansel()) {
+			comboData.GetComboEffect().NotifyCancel();
+			End(owner, ctx);
+			return;
+		}
+		if (GetEndStateTime()) {
 			// 終了処理
 			End(owner, ctx);
 		}
@@ -3478,6 +3511,9 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
+		if (!hasHit_) {
+			comboData.GetComboEffect().NotifyMiss();
+		}
 		if (ctx.inputData.jumpTrigger) {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump);
 		}
@@ -3569,6 +3605,12 @@ namespace Combo {
 				if (next) {
 					transitionedInput_ = transitionInput;
 					SetState(next, ctx);
+				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
+					nextNode->NotifyBranch();
+				}
+					if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
+						nextNode->NotifyBranch();
+					}
 				}
 				bufferedInput.reset();
 				bufferedInputAge_ = 0.0f;
@@ -3581,6 +3623,9 @@ namespace Combo {
 			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
 			if (next) {
 				SetState(next, ctx);
+				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
+					nextNode->NotifyBranch();
+				}
 			}
 		}
 	}
@@ -3766,6 +3811,7 @@ namespace Combo {
             hasHit_ = true;
             comboData.GetComboRange().NotifyHit();
             comboData.GetComboCamera().OnHit();
+            comboData.GetComboEffect().NotifyHit();
 			/// <summary>
 			/// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
 			/// </summary>
@@ -3786,6 +3832,12 @@ namespace Combo {
         /// </summary>
         /// <returns>命中済みならtrue、それ以外はfalseです。</returns>
         bool HasHit() const { return hasHit_; }
+        // コンボ分岐時に、次のノードの演出へ分岐イベントを通知する。
+        void NotifyBranch() { comboData.GetComboEffect().NotifyBranch(); }
+        // コンボキャンセル時に演出へキャンセルイベントを通知する。
+        void NotifyCancel() { comboData.GetComboEffect().NotifyCancel(); }
+        // コンボ終了時に命中しなかった場合、演出へミスイベントを通知する。
+        void NotifyMiss() { comboData.GetComboEffect().NotifyMiss(); }
 
         /// <summary>
         /// 入力と現在条件から実際に遷移する次ノードを解決します。
@@ -4081,11 +4133,31 @@ namespace Combo {
 			{ "時間範囲", static_cast<int64_t>(ComboEffectTriggerType::kTimeWindow) },
 			{ "時間経過", static_cast<int64_t>(ComboEffectTriggerType::kTimer) },
 			{ "着地したら", static_cast<int64_t>(ComboEffectTriggerType::kLanding) },
+			{ "ヒット時", static_cast<int64_t>(ComboEffectTriggerType::kHit) },
+			{ "ミス時", static_cast<int64_t>(ComboEffectTriggerType::kMiss) },
+			{ "ヒット数到達", static_cast<int64_t>(ComboEffectTriggerType::kHitCount) },
+			{ "コンボ分岐時", static_cast<int64_t>(ComboEffectTriggerType::kBranch) },
+			{ "キャンセル時", static_cast<int64_t>(ComboEffectTriggerType::kCancel) },
+			{ "地上", static_cast<int64_t>(ComboEffectTriggerType::kGround) },
+			{ "空中", static_cast<int64_t>(ComboEffectTriggerType::kAir) },
+			{ "ボタン入力時", static_cast<int64_t>(ComboEffectTriggerType::kButton) },
 			});
 
 		EnumRegistry::Instance().Register("ComboEffectType", {
 			{ "パーティクル", static_cast<int64_t>(ComboEffectType::Particle) },
 			{ "トレイル", static_cast<int64_t>(ComboEffectType::Trail) },
+		});
+		EnumRegistry::Instance().Register("ComboEffectInputType", {
+			{ "すべて", static_cast<int64_t>(ComboEffectInputType::kAny) },
+			{ "ジャンプ", static_cast<int64_t>(ComboEffectInputType::kJump) },
+			{ "回避", static_cast<int64_t>(ComboEffectInputType::kDodge) },
+			{ "スキル", static_cast<int64_t>(ComboEffectInputType::kSkill) },
+			{ "必殺技", static_cast<int64_t>(ComboEffectInputType::kSpecial) },
+		});
+		EnumRegistry::Instance().Register("TrailResetMode", {
+			{ "履歴を維持", static_cast<int64_t>(Engine::TrailResetMode::kKeepHistory) },
+			{ "発生開始時に消去", static_cast<int64_t>(Engine::TrailResetMode::kClearOnEmitStart) },
+			{ "親変更時に消去", static_cast<int64_t>(Engine::TrailResetMode::kClearOnParentChange) },
 		});
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
@@ -4108,6 +4180,7 @@ namespace Combo {
 			pendingStaminaCost_ = 0.0f;
 			pendingCooldownNode_.reset();
 		}
+		comboDebug_->SetEnabled(isDebugDraw_);
 		comboDebug_->Update(ctx.dt);
 	}
 
@@ -4202,6 +4275,13 @@ namespace Combo {
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット
+
+        // StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
+        for (auto& [nodeName, node] : comboNodes_) {
+            if (node) {
+                node->Data().GetComboEffect().ClearRuntimeEffects();
+            }
+        }
 		if (comboStateMachine_) {
 			comboStateMachine_.reset();
 			comboStateMachine_ = std::make_unique<StateMachine>(owner);
@@ -4558,12 +4638,30 @@ namespace Combo {
 				writer.Value(groupName, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				writer.Value(groupName, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
 				writer.Value(groupName, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+				writer.Value(groupName, MakeComboEffectPositionKey(i), data.effect.comboEffects[i].transformPosition);
+				writer.Value(groupName, MakeComboEffectRotationKey(i), data.effect.comboEffects[i].transformRotation);
+				writer.Value(groupName, MakeComboEffectScaleKey(i), data.effect.comboEffects[i].transformScale);
+				writer.Value(groupName, MakeComboEffectRequiredHitCountKey(i), data.effect.comboEffects[i].requiredHitCount);
+				writer.EnumValue(groupName, MakeComboEffectInputTypeKey(i), data.effect.comboEffects[i].inputType, "ComboEffectInputType");
 				writer.EnumValue(groupName, MakeComboEffectTypeKey(i), data.effect.comboEffects[i].type, "ComboEffectType");
 				writer.Value(groupName, MakeComboEffectTrailTextureKey(i), data.effect.comboEffects[i].trailTexture);
 				writer.Value(groupName, MakeComboEffectTrailColorKey(i), data.effect.comboEffects[i].trailColor.ToVector4());
 				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(i), data.effect.comboEffects[i].trailOffsetStart);
 				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(i), data.effect.comboEffects[i].trailOffsetEnd);
 				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(i), data.effect.comboEffects[i].trailLifeTime);
+				writer.Value(groupName, MakeComboEffectTrailMinDistanceKey(i), data.effect.comboEffects[i].trailSettings.minEmitDistance);
+                writer.Value(groupName, MakeComboEffectTrailMaxSegmentsKey(i), static_cast<int>(data.effect.comboEffects[i].trailSettings.maxSegmentCount));
+                writer.Value(groupName, MakeComboEffectTrailUseSplineKey(i), data.effect.comboEffects[i].trailSettings.useSpline);
+                writer.Value(groupName, MakeComboEffectTrailSubdivisionKey(i), data.effect.comboEffects[i].trailSettings.splineSubdivision);
+                writer.Value(groupName, MakeComboEffectTrailWidthStartKey(i), data.effect.comboEffects[i].trailSettings.widthStart);
+				writer.Value(groupName, MakeComboEffectTrailWidthEndKey(i), data.effect.comboEffects[i].trailSettings.widthEnd);
+				writer.Value(groupName, MakeComboEffectTrailFadeInKey(i), data.effect.comboEffects[i].trailSettings.fadeInTime);
+				writer.Value(groupName, MakeComboEffectTrailFadeOutKey(i), data.effect.comboEffects[i].trailSettings.fadeOutTime);
+				writer.Value(groupName, MakeComboEffectTrailAlphaCurveKey(i), data.effect.comboEffects[i].trailSettings.alphaCurve);
+				writer.Value(groupName, MakeComboEffectTrailUvSpeedKey(i), data.effect.comboEffects[i].trailSettings.uvScrollSpeed);
+				writer.Value(groupName, MakeComboEffectTrailEmissionKey(i), data.effect.comboEffects[i].trailSettings.emissionStrength);
+				writer.Value(groupName, MakeComboEffectTrailFlipKey(i), data.effect.comboEffects[i].trailSettings.flipTexture);
+				writer.EnumValue(groupName, MakeComboEffectTrailResetKey(i), data.effect.comboEffects[i].trailSettings.resetMode, "TrailResetMode");
 				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(i), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
 				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(i), data.effect.comboEffects[i].trajectory.duration);
 				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(i), data.effect.comboEffects[i].trajectory.point0);
@@ -4882,6 +4980,13 @@ namespace Combo {
 				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
 				entry.startTime = globalVariables->GetValue<float>(name, MakeComboEffectStartTimeKey(i));
 				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
+				if (globalVariables->HasKey(name, MakeComboEffectPositionKey(i))) {
+					entry.transformPosition = globalVariables->GetValue<Vector3>(name, MakeComboEffectPositionKey(i));
+					entry.transformRotation = globalVariables->GetValue<Vector3>(name, MakeComboEffectRotationKey(i));
+					entry.transformScale = globalVariables->GetValue<Vector3>(name, MakeComboEffectScaleKey(i));
+					entry.requiredHitCount = globalVariables->GetValue<int>(name, MakeComboEffectRequiredHitCountKey(i));
+					entry.inputType = globalVariables->GetEnumValue<ComboEffectInputType>(name, MakeComboEffectInputTypeKey(i));
+				}
 				if (globalVariables->HasKey(name, MakeComboEffectTypeKey(i))) {
 					entry.type = globalVariables->GetEnumValue<ComboEffectType>(name, MakeComboEffectTypeKey(i));
 					entry.trailTexture = globalVariables->GetValue<std::string>(name, MakeComboEffectTrailTextureKey(i));
@@ -4890,6 +4995,23 @@ namespace Combo {
 					entry.trailOffsetStart = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrailOffsetStartKey(i));
 					entry.trailOffsetEnd = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrailOffsetEndKey(i));
 					entry.trailLifeTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailLifeTimeKey(i));
+					if (globalVariables->HasKey(name, MakeComboEffectTrailWidthStartKey(i))) {
+                        if (globalVariables->HasKey(name, MakeComboEffectTrailMaxSegmentsKey(i))) {
+                                entry.trailSettings.minEmitDistance = globalVariables->GetValue<float>(name, MakeComboEffectTrailMinDistanceKey(i));
+                                entry.trailSettings.maxSegmentCount = static_cast<size_t>(globalVariables->GetValue<int>(name, MakeComboEffectTrailMaxSegmentsKey(i)));
+                                entry.trailSettings.useSpline = globalVariables->GetValue<bool>(name, MakeComboEffectTrailUseSplineKey(i));
+                                entry.trailSettings.splineSubdivision = globalVariables->GetValue<int>(name, MakeComboEffectTrailSubdivisionKey(i));
+                        }
+						entry.trailSettings.widthStart = globalVariables->GetValue<float>(name, MakeComboEffectTrailWidthStartKey(i));
+						entry.trailSettings.widthEnd = globalVariables->GetValue<float>(name, MakeComboEffectTrailWidthEndKey(i));
+						entry.trailSettings.fadeInTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailFadeInKey(i));
+						entry.trailSettings.fadeOutTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailFadeOutKey(i));
+						entry.trailSettings.alphaCurve = globalVariables->GetValue<Vector4>(name, MakeComboEffectTrailAlphaCurveKey(i));
+						entry.trailSettings.uvScrollSpeed = globalVariables->GetValue<Vector2>(name, MakeComboEffectTrailUvSpeedKey(i));
+						entry.trailSettings.emissionStrength = globalVariables->GetValue<float>(name, MakeComboEffectTrailEmissionKey(i));
+						entry.trailSettings.flipTexture = globalVariables->GetValue<bool>(name, MakeComboEffectTrailFlipKey(i));
+						entry.trailSettings.resetMode = globalVariables->GetEnumValue<Engine::TrailResetMode>(name, MakeComboEffectTrailResetKey(i));
+					}
 					entry.trajectory.type = globalVariables->GetEnumValue<Engine::TrailTrajectoryType>(name, MakeComboEffectTrajectoryTypeKey(i));
 					entry.trajectory.duration = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryDurationKey(i));
 					entry.trajectory.point0 = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryPoint0Key(i));
@@ -5351,7 +5473,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -5399,6 +5521,24 @@ namespace Combo {
 	static std::string MakeComboEffectOffsetKey(int index) {
 		return "コンボエフェクトオフセット" + std::to_string(index);
 	}
+	static std::string MakeComboEffectPositionKey(int index) { return "コンボエフェクト位置" + std::to_string(index); }
+	static std::string MakeComboEffectRotationKey(int index) { return "コンボエフェクト回転" + std::to_string(index); }
+	static std::string MakeComboEffectScaleKey(int index) { return "コンボエフェクトスケール" + std::to_string(index); }
+	static std::string MakeComboEffectRequiredHitCountKey(int index) { return "コンボエフェクト必要ヒット数" + std::to_string(index); }
+	static std::string MakeComboEffectInputTypeKey(int index) { return "コンボエフェクト入力種別" + std::to_string(index); }
+	static std::string MakeComboEffectTrailWidthStartKey(int index) { return "コンボエフェクトトレイル開始幅" + std::to_string(index); }
+    static std::string MakeComboEffectTrailMinDistanceKey(int index) { return "コンボエフェクトトレイル最小発生距離" + std::to_string(index); }
+    static std::string MakeComboEffectTrailMaxSegmentsKey(int index) { return "コンボエフェクトトレイル最大セグメント数" + std::to_string(index); }
+    static std::string MakeComboEffectTrailUseSplineKey(int index) { return "コンボエフェクトトレイルスプライン" + std::to_string(index); }
+    static std::string MakeComboEffectTrailSubdivisionKey(int index) { return "コンボエフェクトトレイル分割数" + std::to_string(index); }
+	static std::string MakeComboEffectTrailWidthEndKey(int index) { return "コンボエフェクトトレイル終了幅" + std::to_string(index); }
+	static std::string MakeComboEffectTrailFadeInKey(int index) { return "コンボエフェクトトレイルフェードイン" + std::to_string(index); }
+	static std::string MakeComboEffectTrailFadeOutKey(int index) { return "コンボエフェクトトレイルフェードアウト" + std::to_string(index); }
+	static std::string MakeComboEffectTrailAlphaCurveKey(int index) { return "コンボエフェクトトレイルアルファカーブ" + std::to_string(index); }
+	static std::string MakeComboEffectTrailUvSpeedKey(int index) { return "コンボエフェクトトレイルUV速度" + std::to_string(index); }
+	static std::string MakeComboEffectTrailEmissionKey(int index) { return "コンボエフェクトトレイル発光強度" + std::to_string(index); }
+	static std::string MakeComboEffectTrailFlipKey(int index) { return "コンボエフェクトトレイルテクスチャ反転" + std::to_string(index); }
+	static std::string MakeComboEffectTrailResetKey(int index) { return "コンボエフェクトトレイル軌跡リセット" + std::to_string(index); }
 
 	static std::string MakeComboEffectTypeKey(int index) { return "コンボエフェクト種別" + std::to_string(index); }
 	static std::string MakeComboEffectTrailTextureKey(int index) { return "コンボエフェクトトレイルテクスチャ" + std::to_string(index); }
@@ -5613,6 +5753,8 @@ namespace Combo {
 			return comboStateMachine_->IsComboFinished();
 		}
 		void SetIsDebug(bool is) { isDebug = is; }
+		// コンボ関連のデバッグ描画だけを切り替える。
+		void SetIsDebugDraw(bool is) { isDebugDraw_ = is; }
 	public:
 		/// <summary>
 		/// データ設定
@@ -5686,6 +5828,7 @@ namespace Combo {
 		Engine::AudioManager* audioManager_ = nullptr;
 
 		bool isDebug = false;
+		bool isDebugDraw_ = true;
 		std::optional<ActionInput> pendingCostInput_;
 		float pendingStaminaCost_ = 0.0f;
 		std::shared_ptr<NodeState> pendingCooldownNode_ = nullptr;
@@ -5727,6 +5870,7 @@ namespace Combo {
 	// 更新
 	void ComboDebug::Update(float dt) {
 #ifdef _DEBUG
+		if (!enabled_) { return; }
 		if (owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()) {
 			ComboData data = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()->Data();
 			Vector3 ownerPos = owner->GetWorldTransform().GetWorldPosition();
@@ -5757,7 +5901,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboState.h"
 
@@ -5789,9 +5933,12 @@ namespace Combo {
 		/// </summary>
 		/// <param name="dt"> deltaTime </param>
 		void Update(float dt);
+		// コンボ欄からデバッグラインの描画可否を設定する。
+		void SetEnabled(bool enabled) { enabled_ = enabled; }
 
 	private:
 		Character::BaseCharacter* owner = nullptr;
+		bool enabled_ = true;
 		Engine::LineCommon* lineCommon = nullptr;
 	};
 }
@@ -5800,7 +5947,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.cpp
 ============================================================
-#include "ComboEditor.h"
+﻿#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManager.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -5839,6 +5986,10 @@ namespace Combo {
 
 	// 選択中コンボの軌道デバッグ描画
 	void Editor::DrawSelectedTrajectoryDebug() {
+        // Combo欄のトグルがオフなら、コンボ関連のデバッグ描画を停止する。
+        if (!showComboDebugDraw_) {
+            return;
+        }
 		// 選択中コンボが存在しない場合は描画を省略する。
 		auto selected = comboEditorBlocks_.find(selectedComboEditorBlockName_);
 		if (selected == comboEditorBlocks_.end()) {
@@ -5851,7 +6002,9 @@ namespace Combo {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
+        ImGui::Checkbox("コンボデバッグ描画", &showComboDebugDraw_);
 		comboSystem->SetIsDebug(isComboEditorActive_);
+        comboSystem->SetIsDebugDraw(showComboDebugDraw_);
 
 		// ノード管理の描画
 		DrawNodeManagement();
@@ -6754,6 +6907,8 @@ namespace Combo {
 		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;
+		// Combo欄からコンボ関連のデバッグ描画を一括で切り替える。
+		bool showComboDebugDraw_ = true;
 		bool showAllNodeLinks_ = false;			// ノードグラフで全接続線を表示するか
 		std::set<int> initializedNodeGraphNodeIds_;	// imnodes上で初期配置済みのノードID
 
@@ -6782,6 +6937,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEdi
 #include "DirectXGame/engine/Audio/Audio.h"
 #include <cctype>
 #include <cstring>
+#include <algorithm>
 
 namespace Combo {
 
@@ -7668,6 +7824,9 @@ namespace Combo {
 
 		int removeIndex = -1;
 		bool shouldSyncSequence = false;
+		int duplicateIndex = -1;
+		int moveUpIndex = -1;
+		int moveDownIndex = -1;
 
 		for (int i = 0; i < static_cast<int>(effect.comboEffects.size()); ++i) {
 			ImGui::PushID(i);
@@ -7697,12 +7856,9 @@ namespace Combo {
 					}
 				}
 				ImGui::EndCombo();
-			}
-
-			static const char* ComboEffectTriggerTypeLabels[] = {
-				"時間範囲",
-				"時間経過",
-				"着地したら",
+			}			static const char* ComboEffectTriggerTypeLabels[] = {
+				"時間範囲", "時間経過", "着地したら", "ヒット時", "ミス時",
+				"ヒット数到達", "コンボ分岐時", "キャンセル時", "地上", "空中", "ボタン入力時",
 			};
 			Engine::ImGuiManager::Select("発生条件", ComboEffectTriggerTypeLabels, entry.triggerType);
 
@@ -7714,6 +7870,16 @@ namespace Combo {
 				ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
 			}
 			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
+			ImGui::DragFloat3("共通位置", &entry.transformPosition.x, 0.01f);
+			ImGui::DragFloat3("共通回転", &entry.transformRotation.x, 0.01f);
+			ImGui::DragFloat3("共通スケール", &entry.transformScale.x, 0.01f);
+			if (entry.triggerType == ComboEffectTriggerType::kHitCount) {
+				ImGui::DragInt("必要ヒット数", &entry.requiredHitCount, 1, 1, 999);
+			}
+			if (entry.triggerType == ComboEffectTriggerType::kButton) {
+				static const char* ComboEffectInputTypeLabels[] = { "すべて", "ジャンプ", "回避", "スキル", "必殺技" };
+				Engine::ImGuiManager::Select("入力ボタン", ComboEffectInputTypeLabels, entry.inputType);
+			}
 			if (entry.type == ComboEffectType::Trail) {
 				char trailTextureBuffer[256]{};
 				strncpy_s(trailTextureBuffer, entry.trailTexture.c_str(), _TRUNCATE);
@@ -7724,6 +7890,21 @@ namespace Combo {
 				ImGui::DragFloat3("トレイル開始レール", &entry.trailOffsetStart.x, 0.01f);
 				ImGui::DragFloat3("トレイル終了レール", &entry.trailOffsetEnd.x, 0.01f);
 				ImGui::ColorEdit4("トレイル色", &entry.trailColor.r);
+                ImGui::DragFloat("最小発生距離", &entry.trailSettings.minEmitDistance, 0.001f, 0.0f, 10.0f);
+                int trailMaxSegments = static_cast<int>(entry.trailSettings.maxSegmentCount);
+                if (ImGui::DragInt("最大セグメント数", &trailMaxSegments, 1.0f, 1, 2048)) { entry.trailSettings.maxSegmentCount = static_cast<size_t>((std::max)(1, trailMaxSegments)); }
+                ImGui::Checkbox("スプライン補間", &entry.trailSettings.useSpline);
+                ImGui::DragInt("スプライン分割数", &entry.trailSettings.splineSubdivision, 1.0f, 1, 16);
+				ImGui::DragFloat("開始幅", &entry.trailSettings.widthStart, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("終了幅", &entry.trailSettings.widthEnd, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("フェードイン時間", &entry.trailSettings.fadeInTime, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("フェードアウト時間", &entry.trailSettings.fadeOutTime, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat4("アルファカーブ", &entry.trailSettings.alphaCurve.x, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat2("UVスクロール速度", &entry.trailSettings.uvScrollSpeed.x, 0.01f);
+				ImGui::DragFloat("発光強度", &entry.trailSettings.emissionStrength, 0.01f, 0.0f, 20.0f);
+				ImGui::Checkbox("テクスチャ反転", &entry.trailSettings.flipTexture);
+				static const char* TrailResetModeLabels[] = { "履歴を維持", "発生開始時に消去", "親変更時に消去" };
+				Engine::ImGuiManager::Select("軌跡リセット", TrailResetModeLabels, entry.trailSettings.resetMode);
 			}
 			static const char* EntryTrajectoryTypeLabels[] = {
 				"なし",
@@ -7756,6 +7937,18 @@ namespace Combo {
 				entry.interval = 0.001f;
 			}
 
+			if (ImGui::Button("複製")) {
+				duplicateIndex = i;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("上へ") && i > 0) {
+				moveUpIndex = i;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("下へ") && i + 1 < static_cast<int>(effect.comboEffects.size())) {
+				moveDownIndex = i;
+			}
+			ImGui::SameLine();
 			if (ImGui::Button("削除")) {
 				removeIndex = i;
 			}
@@ -7764,6 +7957,18 @@ namespace Combo {
 			ImGui::PopID();
 		}
 
+		if (duplicateIndex >= 0) {
+			effect.comboEffects.insert(effect.comboEffects.begin() + duplicateIndex + 1, effect.comboEffects[duplicateIndex]);
+			shouldSyncSequence = true;
+		}
+		if (moveUpIndex > 0) {
+			std::swap(effect.comboEffects[moveUpIndex], effect.comboEffects[moveUpIndex - 1]);
+			shouldSyncSequence = true;
+		}
+		if (moveDownIndex >= 0 && moveDownIndex + 1 < static_cast<int>(effect.comboEffects.size())) {
+			std::swap(effect.comboEffects[moveDownIndex], effect.comboEffects[moveDownIndex + 1]);
+			shouldSyncSequence = true;
+		}
 		if (removeIndex >= 0 && removeIndex < static_cast<int>(effect.comboEffects.size())) {
 			effect.comboEffects.erase(effect.comboEffects.begin() + removeIndex);
 			shouldSyncSequence = true;
@@ -7802,17 +8007,34 @@ namespace Combo {
 
 	// 選択中コンボの軌道デバッグ描画
 	void EditorBlock::DrawTrajectoryDebug() {
-		// 軌道未使用、選択解除、または描画に必要な参照がない場合は何もしない。
-		if (!nowChoice_ || data_.hitBox.trajectoryType == HitBox::TrajectoryType::kNone || lineCommon == nullptr || comboSystem == nullptr) {
-			return;
+		// 選択解除または描画に必要な参照がない場合は何もしない。
+		if (!nowChoice_ || lineCommon == nullptr || comboSystem == nullptr) { return; }
+		if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone) {
+			// ヒットボックスの軌道を既存の共通デバッグ描画へ渡す。
+			Engine::WorldTransform* anchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
+			if (anchor == nullptr && owner != nullptr) { anchor = &owner->GetWorldTransform(); }
+			HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, anchor, lineCommon);
 		}
-		// 設定された依存先を取得し、未設定ならキャラクター本体をアンカーにする。
-		Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
-		if (trajectoryAnchor == nullptr && owner != nullptr) {
-			trajectoryAnchor = &owner->GetWorldTransform();
+		// パーティクルとトレイルの軌道を同じエディタ上へ表示する。
+		Engine::LineMeshData& lines = lineCommon->GetDebugLineMeshData();
+		for (const ComboEffectEntry& entry : data_.effect.comboEffects) {
+			if (entry.trajectory.type == Engine::TrailTrajectoryType::kNone) { continue; }
+			Engine::WorldTransform* effectAnchor = comboSystem->GetParentTransform(entry.parentName);
+			const Vector3 origin = effectAnchor ? effectAnchor->worldMat_.GetWorldPosition() : Vector3{};
+			const Matrix4x4 local = MakeAffineMatrix(entry.transformScale, entry.transformRotation, entry.transformPosition);
+			const Vector4 color = entry.type == ComboEffectType::Trail ? Vector4{ 0.2f, 0.9f, 1.0f, 1.0f } : Vector4{ 0.9f, 0.3f, 1.0f, 1.0f };
+			Vector3 previous = local.Transform(Engine::EvaluateTrailTrajectory(entry.trajectory, 0.0f));
+			for (int segment = 1; segment <= 32; ++segment) {
+				const float t = static_cast<float>(segment) / 32.0f;
+				Vector3 current = local.Transform(Engine::EvaluateTrailTrajectory(entry.trajectory, t));
+				if (effectAnchor) {
+					current = origin + Vector3{ effectAnchor->worldMat_.m[0][0] * current.x + effectAnchor->worldMat_.m[0][1] * current.y + effectAnchor->worldMat_.m[0][2] * current.z, effectAnchor->worldMat_.m[1][0] * current.x + effectAnchor->worldMat_.m[1][1] * current.y + effectAnchor->worldMat_.m[1][2] * current.z, effectAnchor->worldMat_.m[2][0] * current.x + effectAnchor->worldMat_.m[2][1] * current.y + effectAnchor->worldMat_.m[2][2] * current.z };
+				}
+				if (segment == 1 && effectAnchor) { previous = origin + (current - origin); }
+				lines.AddLine(previous, current, color);
+				previous = current;
+			}
 		}
-		// ヒットボックス生成前でも、現在のキャラクター位置を基準に軌道を描画する。
-		HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
 	}
 #pragma endregion // ImGui管理
 
@@ -8424,7 +8646,8 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.cpp
 ============================================================
-﻿#include "ComboEffect.h"
+#include "ComboEffect.h"
+#include "DirectXGame/application/base/Attack/AttackController.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
@@ -8603,6 +8826,11 @@ namespace Combo {
 			emittedFlags_.push_back(false);
 		}
 		wasOnGround_ = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
+		hitEvent_ = false;
+		missEvent_ = false;
+		branchEvent_ = false;
+		cancelEvent_ = false;
+		currentTimer_ = 0.0f;
 		// トレイルの生成はComboEffectが担当し、武器は表示状態の切り替えだけに使用する。
 		if (effectSystem && owner) {
 			effectSystem->SetCamera(owner->GetCamera());
@@ -8616,8 +8844,9 @@ namespace Combo {
 
 	void ComboEffect::Update(const Character::CharacterContext& ctx, float timer, float dt) {
 		// パーティクルとトレイルは同じ発生時間リストを共有する。
+		currentTimer_ = timer;
 		EmitComboEffects(ctx, timer);
-		UpdateTrailEntries(timer);
+		UpdateTrailEntries(ctx, timer);
 		wasOnGround_ = ctx.onGround;
 		(void)dt;
 	}
@@ -8634,8 +8863,25 @@ namespace Combo {
 		this->owner = nullptr;
 		weapon = nullptr;
 		wasOnGround_ = false;
+		hitEvent_ = false;
+		missEvent_ = false;
+		branchEvent_ = false;
+		cancelEvent_ = false;
+		currentTimer_ = 0.0f;
 		(void)owner;
 	}
+	void ComboEffect::NotifyHit() { hitEvent_ = true; }
+	void ComboEffect::NotifyMiss() { missEvent_ = true; }
+	void ComboEffect::NotifyBranch() { branchEvent_ = true; }
+	void ComboEffect::NotifyCancel() { cancelEvent_ = true; }
+
+    void ComboEffect::ClearRuntimeEffects() {
+        // StateMachineを破棄するリロードでも、EffectSystem側に残ったトレイルを削除する。
+        RemoveTrailEntries();
+        if (weapon) {
+            weapon->GetObject3D()->SetIsDraw(true);
+        }
+    }
 	void ComboEffect::EmitComboEffects(const Character::CharacterContext& ctx, float timer) {
 		if (!owner || !effectSystem) {
 			return;
@@ -8653,6 +8899,9 @@ namespace Combo {
 		for (int i = 0; i < static_cast<int>(data_.comboEffects.size()); ++i) {
 			ComboEffectEntry& entry = data_.comboEffects[i];
 			const float interval = (std::max)(entry.interval, 0.001f);
+			if (!IsTriggerSatisfied(entry, ctx)) {
+				continue;
+			}
 			if (entry.effectName.empty()) {
 				continue;
 			}
@@ -8673,7 +8922,20 @@ namespace Combo {
 					emittedFlags_[i] = true;
 				}
 				break;
+			case ComboEffectTriggerType::kHit:
+			case ComboEffectTriggerType::kMiss:
+			case ComboEffectTriggerType::kBranch:
+			case ComboEffectTriggerType::kCancel:
+				if (!emittedFlags_[i]) {
+					EmitEntry(entry, timer);
+					emittedFlags_[i] = true;
+				}
+				break;
 			case ComboEffectTriggerType::kTimeWindow:
+			case ComboEffectTriggerType::kHitCount:
+			case ComboEffectTriggerType::kGround:
+			case ComboEffectTriggerType::kAir:
+			case ComboEffectTriggerType::kButton:
 			default:
 				// 指定時間範囲中は発生頻度ごとに繰り返し発生させる
 				if (IsTriggerTimeValid(entry, timer) && timer >= nextEmitTimes_[i]) {
@@ -8682,6 +8944,27 @@ namespace Combo {
 				}
 				break;
 			}
+		}
+	}
+
+	bool ComboEffect::IsTriggerSatisfied(const ComboEffectEntry& entry, const Character::CharacterContext& ctx) const {
+		switch (entry.triggerType) {
+		case ComboEffectTriggerType::kHit: return hitEvent_;
+		case ComboEffectTriggerType::kMiss: return missEvent_;
+		case ComboEffectTriggerType::kHitCount: return owner && owner->GetAttackController() && owner->GetAttackController()->GetHitCounter().GetHitCount() >= entry.requiredHitCount;
+		case ComboEffectTriggerType::kBranch: return branchEvent_;
+		case ComboEffectTriggerType::kCancel: return cancelEvent_;
+		case ComboEffectTriggerType::kGround: return ctx.onGround;
+		case ComboEffectTriggerType::kAir: return !ctx.onGround;
+		case ComboEffectTriggerType::kButton:
+			switch (entry.inputType) {
+			case ComboEffectInputType::kJump: return ctx.inputData.jumpTrigger;
+			case ComboEffectInputType::kDodge: return ctx.inputData.dodgeTrigger;
+			case ComboEffectInputType::kSkill: return ctx.inputData.skillTrigger;
+			case ComboEffectInputType::kSpecial: return ctx.inputData.specialTrigger;
+			default: return ctx.inputData.jumpTrigger || ctx.inputData.dodgeTrigger || ctx.inputData.skillTrigger || ctx.inputData.specialTrigger;
+			}
+		default: return true;
 		}
 	}
 
@@ -8708,6 +8991,8 @@ namespace Combo {
 	}
 
 	void ComboEffect::CreateTrailEntries() {
+		// コンボ再入場時に前回の実行用トレイルが残らないよう、先に解放する。
+		RemoveTrailEntries();
 		// トレイル種別のエントリごとに実行用トレイルを1つ生成する。
 		trailRuntimeNames_.assign(data_.comboEffects.size(), "");
 		for (size_t i = 0; i < data_.comboEffects.size(); ++i) {
@@ -8725,9 +9010,18 @@ namespace Combo {
 			}
 			const std::string runtimeName = "ComboTrail_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) + "_" + std::to_string(i);
 			trailRuntimeNames_[i] = runtimeName;
+			const Matrix4x4 localTransform = MakeAffineMatrix(entry.transformScale, entry.transformRotation, entry.transformPosition);
+			const Vector3 trailStart = localTransform.Transform(entry.trailOffsetStart);
+			const Vector3 trailEnd = localTransform.Transform(entry.trailOffsetEnd);
+			Engine::TrailTrajectorySettings transformedTrajectory = entry.trajectory;
+			transformedTrajectory.point0 = localTransform.Transform(entry.trajectory.point0);
+			transformedTrajectory.point1 = localTransform.Transform(entry.trajectory.point1);
+			transformedTrajectory.point2 = localTransform.Transform(entry.trajectory.point2);
+			transformedTrajectory.point3 = localTransform.Transform(entry.trajectory.point3);
+			transformedTrajectory.orbitCenter = localTransform.Transform(entry.trajectory.orbitCenter);
 			effectSystem->CreateTrailEffect(runtimeName, entry.trailTexture, entry.trailLifeTime, *parent,
-				owner ? owner->GetCamera() : nullptr, entry.trailColor, entry.trailOffsetStart,
-				entry.trailOffsetEnd, entry.trajectory);
+				owner ? owner->GetCamera() : nullptr, entry.trailColor, trailStart, trailEnd,
+				transformedTrajectory, entry.trailSettings);
 			effectSystem->SetTrailEmit(runtimeName, false);
 		}
 	}
@@ -8744,7 +9038,7 @@ namespace Combo {
 		trailRuntimeNames_.clear();
 	}
 
-	void ComboEffect::UpdateTrailEntries(float timer) {
+	void ComboEffect::UpdateTrailEntries(const Character::CharacterContext& ctx, float timer) {
 		// 各トレイルを個別に設定された発生時間範囲で切り替える。
 		if (!effectSystem) {
 			return;
@@ -8758,17 +9052,19 @@ namespace Combo {
 			if (trailEnd <= entry.startTime) {
 				trailEnd = entry.startTime + (std::max)(entry.trailLifeTime, 0.001f);
 			}
-			effectSystem->SetTrailEmit(trailRuntimeNames_[i], timer >= entry.startTime && timer <= trailEnd);
+			const bool active = IsTriggerSatisfied(entry, ctx) && timer >= entry.startTime && timer <= trailEnd;
+			effectSystem->SetTrailEmit(trailRuntimeNames_[i], active);
 		}
 	}
 
 	Vector3 ComboEffect::GetTrajectoryPosition(const ComboEffectEntry& entry, float normalizedTime) const {
 		// 共有軌道評価処理を使ってパーティクルの発生位置を計算する。
 		const Vector3 basePosition = GetEffectBasePosition(entry) + entry.offset;
+		const Matrix4x4 localTransform = MakeAffineMatrix(entry.transformScale, entry.transformRotation, entry.transformPosition);
 		if (entry.trajectory.type == Engine::TrailTrajectoryType::kNone) {
-			return basePosition;
+			return basePosition + entry.transformPosition;
 		}
-		const Vector3 localPosition = Engine::EvaluateTrailTrajectory(entry.trajectory, normalizedTime);
+		const Vector3 localPosition = localTransform.Transform(Engine::EvaluateTrailTrajectory(entry.trajectory, normalizedTime));
 		auto parentIt = parentTransforms_.find(entry.parentName);
 		const Engine::WorldTransform* parent = parentIt != parentTransforms_.end() ? parentIt->second : nullptr;
 		if (!parent && owner) {
@@ -8942,6 +9238,13 @@ namespace Combo {
 		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer, float dt);
+		// コンボ外部のヒットや分岐イベントを演出条件へ通知する。
+		void NotifyHit();
+		void NotifyMiss();
+		void NotifyBranch();
+		void NotifyCancel();
+        // リロード時に実行中のトレイルを解放する。
+        void ClearRuntimeEffects();
 
 		/// <summary>
 		/// コンボエフェクトを終了し、発生済みフラグなどの一時状態を整理します。
@@ -8975,6 +9278,7 @@ namespace Combo {
 		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		/// <returns>発生可能な時間範囲内ならtrue、それ以外はfalseです。</returns>
 		bool IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const;
+		bool IsTriggerSatisfied(const ComboEffectEntry& entry, const Character::CharacterContext& ctx) const;
 
 		/// <summary>
 		/// 指定演出を現在の基準位置へ発生させます。
@@ -8992,7 +9296,7 @@ namespace Combo {
 		void CreateTrailEntries();
 		void RemoveTrailEntries();
 		// 各トレイルの有効状態を、共通の発生時間範囲で更新する。
-		void UpdateTrailEntries(float timer);
+		void UpdateTrailEntries(const Character::CharacterContext& ctx, float timer);
 		// パーティクル発生用に、エントリの軌跡上の位置を求める。
 		Vector3 GetTrajectoryPosition(const ComboEffectEntry& entry, float normalizedTime) const;
 	private:
@@ -9006,6 +9310,12 @@ namespace Combo {
 		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
 		std::vector<bool> emittedFlags_;				// 一回発生条件が発生済みか
 		bool wasOnGround_ = false;
+		// 各イベント条件の発生済み状態。次回コンボ開始時にリセットする。
+		bool hitEvent_ = false;
+		bool missEvent_ = false;
+		bool branchEvent_ = false;
+		bool cancelEvent_ = false;
+		float currentTimer_ = 0.0f;
 		// 実行名により、複数のコンボインスタンスが別々のトレイルを所有できるようにする。
 		std::vector<std::string> trailRuntimeNames_;					// 前フレームの接地状態
 	};
@@ -9035,6 +9345,7 @@ namespace Combo {
 		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer, float dt);
+		// コンボ外部のヒットや分岐イベントを演出条件へ通知する。
 
 		/// <summary>
 		/// コンボ音声状態を終了します。
@@ -32137,13 +32448,14 @@ void EffectSystem::SetCamera(Engine::Camera* camera)
 
 void EffectSystem::CreateTrailEffect(const std::string& name, const std::string& texture, float lifeTime,
 	Engine::WorldTransform& parent, Engine::Camera* camera, const Color& color,
+
 	const Vector3& offsetStart, const Vector3& offsetEnd,
-	const Engine::TrailTrajectorySettings& trajectory)
+	const Engine::TrailTrajectorySettings& trajectory, const Engine::TrailSettings& settings)
 {
 	// 新しいコンボ設定で再生成する前に、既存の実行用エントリを置き換える。
 	effectComponent_->RemoveTrailEffect(name);
 	effectComponent_->SetCamera(camera);
-	effectComponent_->AddTrailEffect(name, texture, lifeTime, parent, color, offsetStart, offsetEnd);
+	effectComponent_->AddTrailEffect(name, texture, lifeTime, parent, settings, color, offsetStart, offsetEnd);
 	if (Engine::TrailEffect* trail = effectComponent_->GetTrailEffect(name)) {
 		trail->SetTrajectory(trajectory, &parent);
 	}
@@ -32457,8 +32769,9 @@ public:
 	// コンボ演出エントリ用のトレイルをエフェクトコンポーネント側で生成する。
 	void CreateTrailEffect(const std::string& name, const std::string& texture, float lifeTime,
 		Engine::WorldTransform& parent, Engine::Camera* camera, const Color& color,
+
 		const Vector3& offsetStart, const Vector3& offsetEnd,
-		const Engine::TrailTrajectorySettings& trajectory);
+		const Engine::TrailTrajectorySettings& trajectory, const Engine::TrailSettings& settings);
 
 	// 動的に生成したコンボ用トレイルを停止して削除する。
 	void RemoveTrailEffect(const std::string& name);
@@ -78079,14 +78392,26 @@ namespace {
 		return true;
 	}
 
-	void AppendTrailQuad(std::vector<VertexData>& vertices,
-		const Vector3& currentStart,
-		const Vector3& currentEnd,
-		const Vector3& previousStart,
-		const Vector3& previousEnd,
-		float currentU,
-		float previousU)
+	float EvaluateAlphaCurve(const Vector4& curve, float t)
 	{
+		// 4点を三次ベジェ曲線の値として扱い、トレイル全体のアルファを補間する。
+		const float inverse = 1.0f - t;
+		return inverse * inverse * inverse * curve.x + 3.0f * inverse * inverse * t * curve.y +
+			3.0f * inverse * t * t * curve.z + t * t * t * curve.w;
+	}
+
+	void AppendTrailQuad(std::vector<VertexData>& vertices,
+		Vector3 currentStart, Vector3 currentEnd, Vector3 previousStart, Vector3 previousEnd,
+		float currentU, float previousU, float currentWidth, float previousWidth)
+	{
+		// レールの中心から幅倍率を適用し、開始幅から終了幅へ補間する。
+		const Vector3 currentCenter = (currentStart + currentEnd) * 0.5f;
+		const Vector3 previousCenter = (previousStart + previousEnd) * 0.5f;
+		currentStart = currentCenter + (currentStart - currentCenter) * currentWidth;
+		currentEnd = currentCenter + (currentEnd - currentCenter) * currentWidth;
+		previousStart = previousCenter + (previousStart - previousCenter) * previousWidth;
+		previousEnd = previousCenter + (previousEnd - previousCenter) * previousWidth;
+
 		const Vector2 uvCurrentTop = { currentU, 0.0f };
 		const Vector2 uvCurrentBottom = { currentU, 1.0f };
 		const Vector2 uvPreviousTop = { previousU, 0.0f };
@@ -78185,7 +78510,21 @@ void Engine::TrailEffect::Update()
 	parentTransform_ = MakeAffineMatrix({ 1,1,1 }, Vector3{ 0,0,0 }, { 0,0,0 });
 	transformation->Update(camera_, parentTransform_);
 
-	material->GetMaterialInstance().color = baseColor_;
+	// 発生開始からの経過時間を使ってフェードとアルファカーブを反映する。
+	effectElapsed_ += deltaTime;
+	float fade = 1.0f;
+	if (settings_.fadeInTime > 0.0f) {
+		fade = (std::min)(fade, effectElapsed_ / settings_.fadeInTime);
+	}
+	if (settings_.fadeOutTime > 0.0f) {
+		fade = (std::min)(fade, (std::max)(0.0f, (lifeTime_ - effectElapsed_) / settings_.fadeOutTime));
+	}
+	// フェード未使用時は、アルファカーブの初期値によってトレイル全体が透明にならないようにする。
+	const bool hasFadeSetting = settings_.fadeInTime > 0.0f || settings_.fadeOutTime > 0.0f;
+	const float curveAlpha = hasFadeSetting ? std::clamp(EvaluateAlphaCurve(settings_.alphaCurve, std::clamp(fade, 0.0f, 1.0f)), 0.0f, 1.0f) : 1.0f;
+	material->GetMaterialInstance().color = { baseColor_.r * settings_.emissionStrength, baseColor_.g * settings_.emissionStrength,
+		baseColor_.b * settings_.emissionStrength, baseColor_.a * fade * curveAlpha };
+	material->GetMaterialInstance().transform.scale.x = settings_.flipTexture ? -1.0f : 1.0f;
 	UpdateComposableModules(deltaTime);
 	material->GPUData();
 
@@ -78326,6 +78665,18 @@ void Engine::TrailEffect::SetQuality(float minEmitDistance, size_t maxSegmentCou
 	meshDirty_ = true;
 }
 
+void Engine::TrailEffect::SetIsEmit(bool is)
+{
+	// 発生開始時に履歴を消去し、前回の位置から不自然な帯が伸びることを防ぐ。
+	if (is && !flag_ && settings_.resetMode == TrailResetMode::kClearOnEmitStart) {
+		segments_.clear();
+		hasLastSample_ = false;
+		meshDirty_ = true;
+		effectElapsed_ = 0.0f;
+	}
+	flag_ = is;
+}
+
 void Engine::TrailEffect::SetSettings(const TrailSettings& settings)
 {
 	settings_ = settings;
@@ -78448,7 +78799,9 @@ void Engine::TrailEffect::RebuildLinearMesh()
 		const float nextAgeRate = std::clamp(ageRate + (1.0f / static_cast<float>((std::max)(size_t{ 1 }, segments_.size()))), 0.0f, 1.0f);
 
 		// 1セグメントを必ず2三角形単位で生成し、寿命削除で三角形が崩れないようにする。
-		AppendTrailQuad(mesh->vertices, segment.start, segment.end, segment.prevStart, segment.prevEnd, ageRate, nextAgeRate);
+		const float currentWidth = settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * ageRate;
+		const float previousWidth = settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * nextAgeRate;
+		AppendTrailQuad(mesh->vertices, segment.start, segment.end, segment.prevStart, segment.prevEnd, ageRate, nextAgeRate, currentWidth, previousWidth);
 	}
 }
 
@@ -78498,7 +78851,9 @@ void Engine::TrailEffect::RebuildSplineMesh()
 			sampledStart[i - 1],
 			sampledEnd[i - 1],
 			currentU,
-			previousU);
+			previousU,
+			settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * currentU,
+			settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * previousU);
 	}
 }
 
@@ -78668,6 +79023,13 @@ namespace Engine {
 		return lhs;
 	}
 
+	// トレイル履歴を発生開始時にどう扱うか。
+	enum class TrailResetMode : uint32_t {
+		kKeepHistory,
+		kClearOnEmitStart,
+		kClearOnParentChange,
+	};
+
 	struct TrailSettings {
 		TrailFeature features = TrailFeature::Ribbon;
 		float minEmitDistance = 0.03f;
@@ -78683,6 +79045,17 @@ namespace Engine {
 		int afterImageCount = 4;
 		float meshTrailInterval = 0.03f;
 		float particleEmitInterval = 0.02f;
+		// 始点・終点の幅倍率。
+		float widthStart = 1.0f;
+		float widthEnd = 1.0f;
+		// フェードとアルファカーブの設定。
+		float fadeInTime = 0.0f;
+		float fadeOutTime = 0.0f;
+		Vector4 alphaCurve = { 0.0f, 1.0f, 1.0f, 0.0f };
+		// 見た目の追加設定。
+		float emissionStrength = 1.0f;
+		bool flipTexture = false;
+		TrailResetMode resetMode = TrailResetMode::kClearOnEmitStart;
 		float distortionStrength = 0.0f;
 	};
 
@@ -78729,7 +79102,7 @@ namespace Engine {
 		/// <summary>
 		/// 発生フラグをセット
 		/// </summary>
-		void SetIsEmit(bool is) { flag_ = is; }
+		void SetIsEmit(bool is);
 		/// <summary>
 		/// 発生フラグを取得
 		/// </summary>
@@ -78813,6 +79186,7 @@ namespace Engine {
 		Vector3 velocity_; // 速度
 
 		float timer = 0;
+		float effectElapsed_ = 0.0f;
 		float lifeTime_ = 0.2f;
 		float minEmitDistance_ = 0.03f;
 		size_t maxSegmentCount_ = 128;
