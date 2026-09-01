@@ -57800,13 +57800,13 @@ File Path: project/DirectXGame/engine/Camera/CameraController.h
 #pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
-#include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
-#include "DirectXGame/application/base/Camera/Base/CameraLag.h"
-#include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
-#include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
-#include "DirectXGame/application/base/Camera/Base/CameraShake.h"
-#include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
-#include "DirectXGame/application/base/Camera/Base/CameraZoom.h"
+#include "DirectXGame/engine/Camera/CameraFollow.h"
+#include "DirectXGame/engine/Camera/CameraLag.h"
+#include "DirectXGame/engine/Camera/CameraLockOn.h"
+#include "DirectXGame/engine/Camera/CameraRotation.h"
+#include "DirectXGame/engine/Camera/CameraShake.h"
+#include "DirectXGame/engine/Camera/CameraCollision.h"
+#include "DirectXGame/engine/Camera/CameraZoom.h"
 
 class InputSystem;
 
@@ -98245,14 +98245,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraFollow.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraLockOn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraRotation.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraShake.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraZoom.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
@@ -98692,14 +98692,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraCollision.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraFollow.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraLag.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraLockOn.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraRotation.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraShake.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraZoom.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
@@ -100062,16 +100062,16 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraFollow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraRotation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraLockOn.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp">
@@ -100134,10 +100134,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraZoom.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraShake.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.cpp">
@@ -101342,22 +101342,22 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Camera\CameraController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraFollow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraShake.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraRotation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraLockOn.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraLag.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraCollision.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h">
@@ -101434,7 +101434,7 @@ File Path: project/DirectXGame.vcxproj.filters
     </ClInclude>
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraZoom.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h">
