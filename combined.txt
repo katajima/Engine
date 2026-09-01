@@ -4,11 +4,6 @@
 └── project/
     ├── DirectXGame/
     └── ├── application/
-    └── └── ├── GlobalVariables/
-    └── └── └── ├── GlobalVariables.cpp
-    └── └── └── ├── GlobalVariables.h
-    └── └── └── ├── GlobalVariablesFunction.cpp
-    └── └── └── └── GlobalVariablesFunction.h
     └── └── ├── base/
     └── └── └── ├── Attack/
     └── └── └── └── ├── AttackController.cpp
@@ -132,9 +127,6 @@
     └── └── └── └── └── ├── BaseRailCamera.h
     └── └── └── └── └── ├── CameraCollision.cpp
     └── └── └── └── └── ├── CameraCollision.h
-    └── └── └── └── └── ├── CameraController.cpp
-    └── └── └── └── └── ├── CameraController.h
-    └── └── └── └── └── ├── CameraData.h
     └── └── └── └── └── ├── CameraFollow.cpp
     └── └── └── └── └── ├── CameraFollow.h
     └── └── └── └── └── ├── CameraLag.h
@@ -357,8 +349,6 @@
     └── └── └── └── ├── InputData.h
     └── └── └── └── ├── InputHander.cpp
     └── └── └── └── ├── InputHander.h
-    └── └── └── └── ├── InputManager.cpp
-    └── └── └── └── ├── InputManager.h
     └── └── └── └── ├── InputSystem.cpp
     └── └── └── └── └── InputSystem.h
     └── └── └── ├── Item/
@@ -373,9 +363,7 @@
     └── └── └── └── └── BaseSpotLight.h
     └── └── └── ├── Object/
     └── └── └── └── ├── CollisionRegistrationSystem.cpp
-    └── └── └── └── ├── CollisionRegistrationSystem.h
-    └── └── └── └── ├── ObjectComponent.cpp
-    └── └── └── └── └── ObjectComponent.h
+    └── └── └── └── └── CollisionRegistrationSystem.h
     └── └── └── ├── Special/
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── BaseSpecial.cpp
@@ -555,6 +543,8 @@
     └──     └── ├── Camera.h
     └──     └── ├── CameraCommon.cpp
     └──     └── ├── CameraCommon.h
+    └──     └── ├── CameraController.cpp
+    └──     └── ├── CameraController.h
     └──     └── └── CameraData.h
     └──     ├── Collider/
     └──     └── ├── 2d/
@@ -685,7 +675,14 @@
     └──     ├── Entity/
     └──     └── ├── Entity.h
     └──     └── ├── ModelEntity.h
+    └──     └── ├── ObjectComponent.cpp
+    └──     └── ├── ObjectComponent.h
     └──     └── └── PrimitiveEntity.h
+    └──     ├── GlobalVariables/
+    └──     └── ├── GlobalVariables.cpp
+    └──     └── ├── GlobalVariables.h
+    └──     └── ├── GlobalVariablesFunction.cpp
+    └──     └── └── GlobalVariablesFunction.h
     └──     ├── Light/
     └──     └── ├── LightCommon.cpp
     └──     └── ├── LightCommon.h
@@ -805,7 +802,9 @@
     └──     ├── input/
     └──     └── ├── GamePad.h
     └──     └── ├── Input.cpp
-    └──     └── └── Input.h
+    └──     └── ├── Input.h
+    └──     └── ├── InputManager.cpp
+    └──     └── └── InputManager.h
     └──     ├── scene/
     └──     └── ├── AbstractSceneFactory.h
     └──     └── ├── BaseScene.cpp
@@ -844,1120 +843,10 @@ File Path: DirectXGame.vcxproj
 
 
 ============================================================
-File Path: project/DirectXGame/application/GlobalVariables/GlobalVariables.cpp
-============================================================
-﻿#include "GlobalVariables.h"
-#include "Windows.h"
-#include "imgui.h"
-#include <algorithm>
-#include <limits>
-
-
-
-/// -----
-/// 取得、生成、削除、検索
-/// -----
-
-/// <summary>
-/// グループ生成
-/// </summary>
-void Engine::GlobalVariables::CreateGroup(const std::string& groupName) {
-	// 指定名のオブジェクトがなければ追加する
-	datas_[groupName];
-}
-
-/// <summary>
-/// グループ検索
-/// </summary>
-bool Engine::GlobalVariables::HasGroup(const std::string& groupName) const
-{
-	return datas_.find(groupName) != datas_.end();
-}
-
-/// <summary>
-/// キー検索
-/// </summary>
-bool Engine::GlobalVariables::HasKey(const std::string& groupName, const std::string& key) const
-{
-	auto groupIt = datas_.find(groupName);
-	// 無いならfalse
-	if (groupIt == datas_.end()) {
-		return false;
-	}
-	const auto& group = groupIt->second;
-	return group.find(key) != group.end();
-}
-
-/// <summary>
-/// グループ名前取得
-/// </summary>
-std::vector<std::string> Engine::GlobalVariables::GetGroupNames() const
-{
-	std::vector<std::string> groupNames;
-	groupNames.reserve(datas_.size());
-	for (const auto& [groupName, _] : datas_) {
-		groupNames.push_back(groupName);
-	}
-	return groupNames;
-}
-
-/// <summary>
-/// キー名前取得
-/// </summary>
-std::vector<std::string> Engine::GlobalVariables::GetKeys(const std::string& groupName) const
-{
-	std::vector<std::string> keys;
-	auto it = datas_.find(groupName);
-	if (it == datas_.end()) return keys;
-
-	const auto& group = it->second;
-	keys.reserve(group.size());
-	for (const auto& [key, _] : group) {
-		keys.push_back(key);
-	}
-	return keys;
-}
-
-/// <summary>
-/// 型タイプ取得
-/// </summary>
-std::string Engine::GlobalVariables::GetTypeName(const std::string& groupName, const std::string& key) const
-{
-	auto groupIt = datas_.find(groupName);
-	if (groupIt == datas_.end()) {
-		return "UnknownGroup";
-	}
-
-	const auto& group = groupIt->second;
-	auto itemIt = group.find(key);
-	if (itemIt == group.end()) {
-		return "UnknownKey";
-	}
-
-	const auto& item = itemIt->second;
-
-	// 各条件のどれかに当てはまっていたらタイプ設定
-	if (std::holds_alternative<int32_t>(item)) return "int32_t";		// 
-	if (std::holds_alternative<uint32_t>(item)) return "uint32_t";		// 
-	if (std::holds_alternative<float>(item)) return "float";			// 
-	if (std::holds_alternative<Vector2>(item)) return "Vector2";		// 
-	if (std::holds_alternative<Vector3>(item)) return "Vector3";		// 
-	if (std::holds_alternative<Vector4>(item)) return "Vector4";		// 
-	if (std::holds_alternative<bool>(item)) return "bool";				// 
-	if (std::holds_alternative<std::string>(item)) return "string";		// 
-	if (std::holds_alternative<Transform>(item)) return "Transform";	// 
-	if (std::holds_alternative<GvData::EnumItem>(item)) return "enum";
-
-	return "UnknownType";
-}
-
-/// <summary>
-/// アイテム削除
-/// </summary>
-void Engine::GlobalVariables::RemoveItem(const std::string& groupName, const std::string& key)
-{
-	auto groupIt = datas_.find(groupName);
-	if (groupIt != datas_.end()) {
-		groupIt->second.erase(key);
-
-		// キーの順序リストからも削除
-		auto& keys = groupKeys_[groupName];
-		keys.erase(std::remove(keys.begin(), keys.end(), key), keys.end());
-	}
-}
-
-/// <summary>
-/// グループ削除
-/// </summary>
-void Engine::GlobalVariables::RemoveGroup(const std::string& groupName)
-{
-	datas_.erase(groupName);
-	groupKeys_.erase(groupName);
-}
-
-bool Engine::GlobalVariables::RenameGroup(const std::string& oldName, const std::string& newName)
-{
-	if (oldName.empty() || newName.empty() || oldName == newName ||
-		datas_.find(oldName) == datas_.end() || datas_.find(newName) != datas_.end()) {
-		return false;
-	}
-
-	datas_[newName] = std::move(datas_[oldName]);
-	datas_.erase(oldName);
-
-	auto keyIt = groupKeys_.find(oldName);
-	if (keyIt != groupKeys_.end()) {
-		groupKeys_[newName] = std::move(keyIt->second);
-		groupKeys_.erase(keyIt);
-	}
-	auto categoryIt = groupCategories_.find(oldName);
-	if (categoryIt != groupCategories_.end()) {
-		// リネーム後も同じカテゴリへ保存されるよう、カテゴリ設定も移動する。
-		groupCategories_[newName] = std::move(categoryIt->second);
-		groupCategories_.erase(categoryIt);
-	}
-	return true;
-}
-
-void Engine::GlobalVariables::SetGroupCategory(const std::string& groupName, const std::string& categoryName)
-{
-	if (groupName.empty() || categoryName.empty()) {
-		return;
-	}
-
-	// 外部保存時にグループをどのフォルダへ出すか指定する。
-	groupCategories_[groupName] = categoryName;
-}
-
-/// <summary>
-/// 複製
-/// </summary>
-bool Engine::GlobalVariables::DuplicateItem(const std::string& srcGroupName, const std::string& srcKey, const std::string& dstGroupName, const std::string& dstKey)
-{
-	// コピー元グループの存在チェック
-	auto itSrcGroup = datas_.find(srcGroupName);
-	if (itSrcGroup == datas_.end()) return false;
-
-	auto& srcGroup = itSrcGroup->second;
-	// コピー元キーの存在チェック
-	auto itSrcItem = srcGroup.find(srcKey);
-	if (itSrcItem == srcGroup.end()) return false;
-
-	// コピー先グループを作成または取得
-	auto itDstGroup = datas_.find(dstGroupName);
-	if (itDstGroup == datas_.end()) {
-		CreateGroup(dstGroupName);
-		itDstGroup = datas_.find(dstGroupName);
-		if (itDstGroup == datas_.end()) return false; // 失敗した場合
-	}
-	auto& dstGroup = itDstGroup->second;
-
-	// コピー先キーが既にある場合は上書きしない
-	if (dstGroup.find(dstKey) != dstGroup.end()) return false;
-
-	// 複製
-	dstGroup[dstKey] = itSrcItem->second;
-
-	// groupKeys_の管理も忘れずに
-	auto& dstKeys = groupKeys_[dstGroupName];
-	dstKeys.push_back(dstKey);
-
-	return true;
-}
-
-/// <summary>
-/// 複製したときの重複対処
-/// </summary>
-std::string Engine::GlobalVariables::MakeUniqueKey(const std::string& baseKey, const GvData::Group& group)
-{
-	std::string newKey = baseKey;
-	int count = 1;
-	while (group.find(newKey) != group.end()) {
-		newKey = baseKey + "(" + std::to_string(count++) + ")";
-	}
-	return newKey;
-}
-
-std::string Engine::GlobalVariables::ResolveCategory(const std::string& groupName) const
-{
-	auto categoryIt = groupCategories_.find(groupName);
-	if (categoryIt != groupCategories_.end() && !categoryIt->second.empty()) {
-		return categoryIt->second;
-	}
-
-	// よく使うグループ名は自動で分類し、既存のSaveFile呼び出しをそのまま使えるようにする。
-	if (groupName == "EffectEditor" || groupName == "EffectEditorDeleted" ||
-		groupName.rfind("Emitter", 0) == 0) {
-		return "Effect";
-	}
-	if (groupName == "ParticleEditor" || groupName == "ParticleEditorDeleted" ||
-		groupName.rfind("ParticleGroup_", 0) == 0) {
-		return "Effect/Particle";
-	}
-	if (groupName == "ComboPlayer" ||
-		groupName.find("Attack") != std::string::npos ||
-		groupName.find("Combo") != std::string::npos ||
-		groupName.find("Skill") != std::string::npos ||
-		groupName.find("Launch") != std::string::npos) {
-		return "Character/Combo";
-	}
-	if (groupName.rfind("MoveData", 0) == 0 ||
-		groupName == "Player" ||
-		groupName.find("Enemy") != std::string::npos) {
-		return "Character/Parameter";
-	}
-	return "Misc";
-}
-
-std::filesystem::path Engine::GlobalVariables::GetCategoryDirectory(const std::string& groupName) const
-{
-	// カテゴリ名はスラッシュ区切りも許可し、階層フォルダとして扱う。
-	return std::filesystem::path(kDirectoryPath) / std::filesystem::path(ResolveCategory(groupName));
-}
-
-std::filesystem::path Engine::GlobalVariables::GetSaveFilePath(const std::string& groupName) const
-{
-	return GetCategoryDirectory(groupName) / (groupName + ".json");
-}
-
-std::filesystem::path Engine::GlobalVariables::FindExistingFilePath(const std::string& groupName) const
-{
-	const std::filesystem::path categoryPath = GetSaveFilePath(groupName);
-	if (std::filesystem::exists(categoryPath)) {
-		return categoryPath;
-	}
-
-	// 旧形式の直下保存ファイルも読めるように残す。
-	const std::filesystem::path legacyPath = std::filesystem::path(kDirectoryPath) / (groupName + ".json");
-	if (std::filesystem::exists(legacyPath)) {
-		return legacyPath;
-	}
-
-	if (!std::filesystem::exists(kDirectoryPath)) {
-		return categoryPath;
-	}
-
-	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(kDirectoryPath)) {
-		if (!entry.is_regular_file() || entry.path().extension() != ".json") {
-			continue;
-		}
-		if (entry.path().stem().string() == groupName) {
-			return entry.path();
-		}
-	}
-	return categoryPath;
-}
-
-
-
-
-/// ------
-/// セーブ、ロード、更新
-/// ------
-
-/// <summary>
-/// セーブ
-/// </summary>
-void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
-
-	// グループを検索
-	std::map<std::string, GvData::Group>::iterator itGroup = datas_.find(groupName);
-	// 未登録チェック
-	assert(itGroup != datas_.end());
-
-	GvData::json root;
-	root = GvData::json::object();
-
-	// jsonオブジェクト登録
-	root[groupName] = GvData::json::object();
-
-	// 各項目について
-	for (std::map<std::string, GvData::Item>::iterator itItem = itGroup->second.begin(); itItem != itGroup->second.end(); ++itItem) {
-		// 項目名を取得
-		const std::string& itemName = itItem->first;
-		// 項目の参照を取得
-		GvData::Item& item = itItem->second;
-
-		// 各型の値を保存
-		GvFunction::Save(groupName, root, item, itemName);
-
-	}
-	// ディレクトリがなければ作成する
-	// 書き込みはループの外で1回だけ行う
-	std::filesystem::path dir = GetCategoryDirectory(groupName);
-	if (!std::filesystem::exists(dir)) {
-		std::filesystem::create_directories(dir);
-	}
-
-	// 書き込むJSONファイルのフルパスを合成する
-	std::filesystem::path filePath = GetSaveFilePath(groupName);
-
-	// 書き込み用ファイルストリーム
-	std::ofstream ofs;
-	// ファイルを書き込み用に開く
-	ofs.open(filePath);
-	// ファイルオープン失敗
-	if (ofs.fail()) {
-		std::string message = "Failed open data file for write.";
-		MessageBoxA(nullptr, message.c_str(), "GlobalVariables", 0);
-		assert(0);
-		return;
-	}
-
-	// ファイルにjson文字列を書き込む(インデント幅4)
-	ofs << std::setw(4) << root << std::endl;
-	// ファイルを閉じる
-	ofs.close();
-}
-
-bool Engine::GlobalVariables::RemoveSavedFile(const std::string& groupName) {
-	const std::filesystem::path filePath = FindExistingFilePath(groupName);
-	std::error_code error;
-	const bool removed = std::filesystem::remove(filePath, error);
-	return removed && !error;
-}
-
-/// <summary>
-/// 全ロード
-/// </summary>
-void Engine::GlobalVariables::LoadFiles() {
-
-	std::filesystem::path dir(kDirectoryPath);
-	// ディレクトリがなければスキップする
-	if (!std::filesystem::exists(kDirectoryPath)) {
-		return;
-	}
-
-	std::filesystem::recursive_directory_iterator dir_it(kDirectoryPath);
-	for (const std::filesystem::directory_entry& entry : dir_it) {
-		if (!entry.is_regular_file()) {
-			continue;
-		}
-		// ファイルパスを取得
-		const std::filesystem::path& filePath = entry.path();
-
-		// ファイル拡張子を取得
-		std::string extension = filePath.extension().string();
-		// 　.jsonファイル以外はスキップ
-		if (extension.compare(".json") != 0) {
-			continue;
-		}
-
-		std::ifstream ifs(filePath);
-		if (ifs.fail()) {
-			continue;
-		}
-
-		// JSON内のルートキーをグループ名として読み込み、ファイル配置変更後も名前衝突を避ける。
-		GvData::json root;
-		ifs >> root;
-		ifs.close();
-		if (!root.is_object() || root.empty()) {
-			continue;
-		}
-		LoadFile(root.begin().key());
-	}
-}
-
-/// <summary>
-/// グループロード
-/// </summary>
-void Engine::GlobalVariables::LoadFile(const std::string& groupName) {
-	std::filesystem::path filePath = FindExistingFilePath(groupName);
-	std::ifstream ifs(filePath);
-	if (ifs.fail()) {
-		MessageBoxA(nullptr, "Failed open data file for read.", "GlobalVariables", 0);
-		assert(0);
-		return;
-	}
-
-	GvData::json root;
-	ifs >> root;
-	ifs.close();
-
-	auto itGroup = root.find(groupName);
-	assert(itGroup != root.end());
-
-	for (auto itItem = itGroup->begin(); itItem != itGroup->end(); ++itItem) {
-		const std::string& itemName = itItem.key();
-
-		// 型情報があるかチェック
-		if (itItem->is_object() && itItem->contains("type") && itItem->contains("value")) {
-			std::string typeStr = itItem->at("type").get<std::string>();
-			const auto& val = itItem->at("value");
-
-			if (typeStr == "int32_t") {
-				SetValue(groupName, itemName, val.get<int32_t>());
-			}
-			else if (typeStr == "uint32_t") {
-				SetValue(groupName, itemName, val.get<uint32_t>());
-			}
-			else if (typeStr == "float") {
-				SetValue(groupName, itemName, val.get<float>());
-			}
-			else if (typeStr == "Vector2") {
-				Vector2 v = { val.at(0).get<float>(), val.at(1).get<float>() };
-				SetValue(groupName, itemName, v);
-			}
-			else if (typeStr == "Vector3") {
-				Vector3 v = { val.at(0).get<float>(), val.at(1).get<float>(), val.at(2).get<float>() };
-				SetValue(groupName, itemName, v);
-			}
-			else if (typeStr == "Vector4") {
-				Vector4 v = { val.at(0).get<float>(), val.at(1).get<float>(), val.at(2).get<float>(), val.at(3).get<float>() };
-				SetValue(groupName, itemName, v);
-			}
-			else if (typeStr == "bool") {
-				SetValue(groupName, itemName, val.get<bool>());
-			}
-			else if (typeStr == "string") {
-				SetValue(groupName, itemName, val.get<std::string>());
-			}
-			else if (typeStr == "Transform") {
-				const auto& val = (*itItem)["value"];
-				Transform t;
-				if (val.contains("scale") && val["scale"].is_array() && val["scale"].size() == 3) {
-					t.scale = { val["scale"][0], val["scale"][1], val["scale"][2] };
-				}
-				if (val.contains("rotate") && val["rotate"].is_array() && val["rotate"].size() == 3) {
-					t.rotate = { val["rotate"][0], val["rotate"][1], val["rotate"][2] };
-				}
-				if (val.contains("translate") && val["translate"].is_array() && val["translate"].size() == 3) {
-					t.translate = { val["translate"][0], val["translate"][1], val["translate"][2] };
-				}
-				SetValue(groupName, itemName, t);
-			}
-			else if (typeStr == "enum") {
-				GvData::EnumItem e;
-				if (itItem->contains("enumType")) {
-					e.enumType = (*itItem)["enumType"].get<std::string>();
-				}
-				e.value = val.get<int64_t>(); // "value" は int64 で読む
-				// enum は内部表現として EnumItem を SetValue で入れる
-				SetValue(groupName, itemName, e);
-			}
-			else {
-				assert(false && "Unknown type found in JSON");
-			}
-		}
-	}
-}
-
-/// <summary>
-/// 更新
-/// </summary>
-void Engine::GlobalVariables::Update() {
-#ifdef _DEBUG
-
-	//ImGui::BeginMenuBar();
-
-	static std::pair<std::string, std::string> pendingDeleteItem;
-	static bool confirmDelete = false;
-
-	std::vector<std::string> groupsToRemove;
-	std::vector<std::pair<std::string, std::string>> itemsToRemove;
-
-	ImGui::Begin("GlobalVariables");
-
-	for (auto& [groupName, group] : datas_) {
-	
-
-		if (!ImGui::BeginMenu(groupName.c_str()))
-			continue;
-
-		for (auto& [itemName, item] : group) {
-			ImGui::PushID(itemName.c_str());
-
-			// 値表示・編集
-			if (std::holds_alternative<int32_t>(item)) {
-				ImGui::DragInt(itemName.c_str(), std::get_if<int32_t>(&item));
-			}
-			else if (std::holds_alternative<uint32_t>(item)) {
-				uint32_t& value = std::get<uint32_t>(item);
-				int32_t tmp = static_cast<int32_t>(value);
-				if (ImGui::DragInt(itemName.c_str(), &tmp)) {
-					if (tmp < 0) tmp = 0;
-					value = static_cast<uint32_t>(tmp);
-				}
-			}
-			else if (std::holds_alternative<float>(item)) {
-				ImGui::DragFloat(itemName.c_str(), std::get_if<float>(&item), 0.01f);
-			}
-			else if (std::holds_alternative<Vector2>(item)) {
-				ImGui::DragFloat2(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector2>(&item)), 0.1f);
-			}
-			else if (std::holds_alternative<Vector3>(item)) {
-				ImGui::DragFloat3(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector3>(&item)), 0.1f);
-			}
-			else if (std::holds_alternative<Vector4>(item)) {
-				ImGui::DragFloat4(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector4>(&item)), 0.1f);
-			}
-			else if (std::holds_alternative<bool>(item)) {
-				ImGui::Checkbox(itemName.c_str(), std::get_if<bool>(&item));
-			}
-			else if (std::holds_alternative<std::string>(item)) {
-				std::string* ptr = std::get_if<std::string>(&item);
-				char buffer[256];
-				strncpy_s(buffer, ptr->c_str(), sizeof(buffer));
-				buffer[sizeof(buffer) - 1] = '\0';
-				if (ImGui::InputText(itemName.c_str(), buffer, sizeof(buffer))) {
-					*ptr = std::string(buffer);
-				}
-			}
-			else if (std::holds_alternative<Transform>(item)) {
-				Transform* ptr = std::get_if<Transform>(&item);
-				ImGui::DragFloat3(("Scale##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->scale), 0.1f);
-				ImGui::DragFloat3(("Rotate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->rotate), 0.1f);
-				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
-			}
-			else if (std::holds_alternative<GvData::EnumItem>(item)) {
-				auto* e = std::get_if<GvData::EnumItem>(&item);
-
-				// enumType 表示（必要なら編集も可）
-				ImGui::Text("%s", itemName.c_str());
-				ImGui::SameLine();
-				ImGui::TextDisabled("(%s)", e->enumType.c_str());
-
-				// 登録済み候補を探す
-				const auto* entries = EnumRegistry::Instance().Find(e->enumType);
-
-				if (entries && !entries->empty()) {
-					// 現在の value に一致する index を探す
-					int currentIndex = 0;
-					for (int i = 0; i < (int)entries->size(); ++i) {
-						if ((*entries)[i].value == e->value) {
-							currentIndex = i;
-							break;
-						}
-					}
-
-					// Combo 用の表示名配列を作る（毎フレーム作るのが嫌ならキャッシュしてOK）
-					std::vector<const char*> names;
-					names.reserve(entries->size());
-					for (auto& it : *entries) names.push_back(it.name);
-
-					if (ImGui::Combo(itemName.c_str(), &currentIndex, names.data(), (int)names.size())) {
-						e->value = (*entries)[currentIndex].value; // ★名前選択→値更新
-					}
-				}
-				else {
-					// 未登録なら仕方ないので数値編集（保険）
-					int tmp = (int)e->value;
-					if (ImGui::DragInt(itemName.c_str(), &tmp, 1.0f)) {
-						e->value = (int64_t)tmp;
-					}
-					ImGui::SameLine();
-					ImGui::TextDisabled("No enum entries registered.");
-				}
-			}
-
-
-			ImGui::PopID();
-		}
-
-		ImGui::Text("\n");
-
-		if (ImGui::Button("Save")) {
-			SaveFile(groupName);
-			std::string message = std::format("{}.json saved.", groupName);
-			MessageBoxA(nullptr, message.c_str(), "GlobalVariables", 0);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Delete Group")) {
-			groupsToRemove.push_back(groupName);
-		}
-
-		ImGui::EndMenu();
-
-		
-	}
-	ImGui::End();
-
-	//ImGui::EndMenuBar();
-
-
-
-
-	// 削除予約された項目を後で実行（安全）
-	for (const auto& [group, item] : itemsToRemove) {
-		RemoveItem(group, item);
-	}
-
-	// 削除予約されたグループも後で実行
-	for (const std::string& group : groupsToRemove) {
-		RemoveGroup(group);
-	}
-#endif
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/GlobalVariables/GlobalVariables.h
-============================================================
-#pragma once
-#include"GlobalVariablesFunction.h"
-#include <filesystem>
-
-
-namespace Engine {
-	// 設定値を未登録時だけ追加するか、現在値で上書きするかを表す
-	enum class GlobalVariableWriteMode {
-		Register,
-		Save,
-	};
-
-	/// <summary>
-	/// グローバル変数
-	/// </summary>
-	class GlobalVariables {
-	private:
-
-
-	public:
-		/// <summary>
-		/// グループの作成
-		/// </summary>
-		/// <param name="groupName">グループ名</param>
-		void CreateGroup(const std::string& groupName);
-
-		// 値のセット
-		template<typename T>
-		void SetValue(const std::string& groupName, const std::string& key, T value);
-
-		// 値の追加
-		template<typename T>
-		void AddItem(const std::string& groupName, const std::string& key, const T& value);
-
-		// 値の取得
-		template<typename T>
-		T GetValue(const std::string& groupName, const std::string& key) const;
-
-
-		// enum 専用：追加
-		template<typename E>
-		void AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
-
-		// enum 専用：上書き
-		template<typename E>
-		void SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
-
-		// enum 専用：取得
-		template<typename E>
-		E GetEnumValue(const std::string& groupName, const std::string& key) const;
-
-
-
-		/// <summary>
-		/// グループが存在するか？
-		/// </summary>
-		bool HasGroup(const std::string& groupName) const;
-
-		/// <summary>
-		/// キーが存在するか？
-		/// </summary>
-		bool HasKey(const std::string& groupName, const std::string& key) const;
-
-		/// <summary>
-		/// グループやキーの一覧取得
-		/// </summary>
-		std::vector<std::string> GetGroupNames() const;
-		/// <summary>
-		/// グループやキーの取得(名前取得)
-		/// </summary>
-		std::vector<std::string> GetKeys(const std::string& groupName) const;
-
-		/// <summary>
-		/// 何の型か？
-		/// </summary>
-		std::string GetTypeName(const std::string& groupName, const std::string& key) const;
-
-		/// <summary>
-		/// 削除(アイテム)
-		/// </summary>
-		void RemoveItem(const std::string& groupName, const std::string& key);
-		/// <summary>
-		/// 削除(グループ)
-		/// </summary>
-		void RemoveGroup(const std::string& groupName);
-		/// <summary>
-		/// グループ名変更
-		/// </summary>
-		bool RenameGroup(const std::string& oldName, const std::string& newName);
-		/// <summary>
-		/// 保存カテゴリを設定
-		/// </summary>
-		void SetGroupCategory(const std::string& groupName, const std::string& categoryName);
-
-		// 複製
-		bool DuplicateItem(
-			const std::string& srcGroupName, const std::string& srcKey,
-			const std::string& dstGroupName, const std::string& dstKey);
-
-		/// <summary>
-		/// 固有キー取得
-		/// </summary>
-		std::string MakeUniqueKey(const std::string& baseKey, const GvData::Group& group);
-
-		/// <summary>
-		/// ファイルに書き出し
-		/// </summary>
-		/// <param name="groupName"></param>
-		void SaveFile(const std::string& groupName);
-
-		/// <summary>
-		/// 保存ファイル削除
-		/// </summary>
-		bool RemoveSavedFile(const std::string& groupName);
-
-		/// <summary>
-		/// ディレクトリの全ファイル読み込み
-		/// </summary>
-		void LoadFiles();
-
-		/// <summary>
-		/// ファイルから読み込む
-		/// </summary>
-		/// <param name="groupName"></param>
-		void LoadFile(const std::string& groupName);
-
-		/// <summary>
-		/// データ取得
-		/// </summary>
-		GvData::Group GetGroupData(const std::string& name) { return datas_[name]; }
-
-	public:
-		/// <summary>
-		/// 毎フレーム処理
-		/// </summary>
-		void Update();
-
-
-		GlobalVariables() = default;
-		~GlobalVariables() = default;
-		GlobalVariables(const GlobalVariables& global) = default;
-		GlobalVariables& operator=(const GlobalVariables& global) = default;
-	private:
-
-		// 全データ
-		std::map<std::string, GvData::Group> datas_;
-		std::map<std::string, std::vector<std::string>> groupKeys_; // 順序を保持するためのリスト
-		std::map<std::string, std::string> groupCategories_; // グループごとの保存先カテゴリ
-
-		//グローバル変数の保存先
-		const std::string kDirectoryPath = "resources/GlobalVariables/";
-
-		/// <summary>
-		/// 保存カテゴリ名を取得
-		/// </summary>
-		std::string ResolveCategory(const std::string& groupName) const;
-		/// <summary>
-		/// 保存カテゴリのフォルダパスを取得
-		/// </summary>
-		std::filesystem::path GetCategoryDirectory(const std::string& groupName) const;
-		/// <summary>
-		/// グループの保存ファイルパスを取得
-		/// </summary>
-		std::filesystem::path GetSaveFilePath(const std::string& groupName) const;
-		/// <summary>
-		/// 旧形式を含めた既存保存ファイルパスを探す
-		/// </summary>
-		std::filesystem::path FindExistingFilePath(const std::string& groupName) const;
-	};
-
-	/// <summary>
-	/// 設定項目の列挙処理から、登録と保存のAPI差を隠蔽するライター
-	/// </summary>
-	class GlobalVariableWriter {
-	public:
-		// 書き込み先と登録・保存モードを設定する
-		GlobalVariableWriter(GlobalVariables* globalVariables, GlobalVariableWriteMode mode)
-			: globalVariables_(globalVariables), mode_(mode) {
-		}
-
-		// 通常値を新規登録、または現在値で上書きする
-		template<typename T>
-		void Value(const std::string& groupName, const std::string& key, const T& value) {
-			if (mode_ == GlobalVariableWriteMode::Save) {
-				globalVariables_->SetValue(groupName, key, value);
-			}
-			else {
-				globalVariables_->AddItem(groupName, key, value);
-			}
-		}
-
-		// enum値を型情報付きで新規登録、または現在値で上書きする
-		template<typename E>
-		void EnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType) {
-			if (mode_ == GlobalVariableWriteMode::Save) {
-				globalVariables_->SetEnumValue(groupName, key, value, enumType);
-			}
-			else {
-				globalVariables_->AddEnumItem(groupName, key, value, enumType);
-			}
-		}
-
-	private:
-		GlobalVariables* globalVariables_ = nullptr; // 設定値の書き込み先
-		GlobalVariableWriteMode mode_ = GlobalVariableWriteMode::Register; // 登録または保存モード
-	};
-
-
-	template<typename T>
-	void GlobalVariables::SetValue(const std::string& groupName, const std::string& key, T value)
-	{
-		// グループの参照を取得
-		GvData::Group& group = datas_[groupName];
-		// 新しい項目のデータを参照
-		GvData::Item newItem{};
-		newItem = value;
-		// 設定した項目をstd::mapに追加
-		group[key] = newItem;
-	}
-
-	template<typename T>
-	void GlobalVariables::AddItem(const std::string& groupName, const std::string& key, const T& value)
-	{
-		static_assert(
-			std::is_same_v<T, int32_t> ||
-			std::is_same_v<T, uint32_t> ||
-			std::is_same_v<T, float> ||
-			std::is_same_v<T, Vector2> ||
-			std::is_same_v<T, Vector3> ||
-			std::is_same_v<T, Vector4> ||
-			std::is_same_v<T, bool> ||
-			std::is_same_v<T, std::string> ||
-			std::is_same_v<T, Transform>,
-			"Unsupported type for AddItem"
-			);
-
-		/// <summary>
-		/// グループが存在しない場合は作成
-		/// </summary>
-		CreateGroup(groupName);
-
-		// グループを取得
-		GvData::Group& group = datas_[groupName];
-
-		/// <summary>
-		/// キーが存在しなければ追加
-		/// </summary>
-		if (group.find(key) == group.end()) {
-			group[key] = value;
-		}
-	};
-
-
-	template<typename T>
-	T GlobalVariables::GetValue(const std::string& groupName, const std::string& key) const
-	{
-		/// <summary>
-		/// グループ存在チェック
-		/// </summary>
-		assert(datas_.find(groupName) != datas_.end());
-		const GvData::Group& group = datas_.at(groupName);
-
-		/// <summary>
-		/// キー存在チェック
-		/// </summary>
-		assert(group.find(key) != group.end());
-
-		/// <summary>
-		/// std::variantから型Tを取得。型が違うと例外 std::bad_variant_access が投げられるので注意
-		/// </summary>
-		return std::get<T>(group.at(key));
-	}
-
-
-	template<typename E>
-	void GlobalVariables::AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType)
-	{
-		static_assert(std::is_enum_v<E>, "AddEnumItem requires enum type.");
-
-		CreateGroup(groupName);
-
-		GvData::Group& group = datas_[groupName];
-		if (group.find(key) == group.end()) {
-			GvData::EnumItem e;
-			e.enumType = enumType;
-			e.value = static_cast<int64_t>(static_cast<std::underlying_type_t<E>>(value));
-			group[key] = e;
-		}
-	}
-
-	template<typename E>
-	void GlobalVariables::SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType)
-	{
-		static_assert(std::is_enum_v<E>, "SetEnumValue requires enum type.");
-
-		GvData::Group& group = datas_[groupName];
-
-		GvData::EnumItem e;
-		e.enumType = enumType;
-		e.value = static_cast<int64_t>(static_cast<std::underlying_type_t<E>>(value));
-		group[key] = e;
-	}
-
-	template<typename E>
-	E GlobalVariables::GetEnumValue(const std::string& groupName, const std::string& key) const
-	{
-		static_assert(std::is_enum_v<E>, "GetEnumValue requires enum type.");
-
-		assert(datas_.find(groupName) != datas_.end());
-		const GvData::Group& group = datas_.at(groupName);
-
-		assert(group.find(key) != group.end());
-
-		const auto& item = group.at(key);
-		const auto& e = std::get<GvData::EnumItem>(item);
-		return static_cast<E>(static_cast<std::underlying_type_t<E>>(e.value));
-	}
-
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/GlobalVariables/GlobalVariablesFunction.cpp
-============================================================
-﻿#include "GlobalVariablesFunction.h"
-
-void GvFunction::Save(const std::string& groupName, GvData::json& root, GvData::Item& item, const std::string& itemName)
-{
-	if (std::holds_alternative<int32_t>(item)) { // int32_t
-		root[groupName][itemName] = {
-		   {"type", "int32_t"},
-		   {"value", std::get<int32_t>(item)}
-		};
-	}
-	else if (std::holds_alternative<uint32_t>(item)) { // uint32_t
-		root[groupName][itemName] = {
-			{"type", "uint32_t"},
-			{"value", std::get<uint32_t>(item)}
-		};
-	}
-	else if (std::holds_alternative<float>(item)) { // float
-		root[groupName][itemName] = {
-		   {"type", "float"},
-		   {"value", std::get<float>(item)}
-		};
-	}
-	else if (std::holds_alternative<Vector2>(item)) { // Vector2
-		Vector2 v = std::get<Vector2>(item);
-		root[groupName][itemName] = {
-			{"type", "Vector2"},
-			{"value", { v.x, v.y }}
-		};
-	}
-	else if (std::holds_alternative<Vector3>(item)) { // Vector3
-		Vector3 v = std::get<Vector3>(item);
-		root[groupName][itemName] = {
-			{"type", "Vector3"},
-			{"value", { v.x, v.y, v.z }}
-		};
-	}
-	else if (std::holds_alternative<Vector4>(item)) { // Vector4
-		Vector4 v = std::get<Vector4>(item);
-		root[groupName][itemName] = {
-			{"type", "Vector4"},
-			{"value", { v.x, v.y, v.z, v.w }}
-		};
-	}
-	else if (std::holds_alternative<bool>(item)) { // bool
-		root[groupName][itemName] = {
-		  {"type", "bool"},
-		  {"value", std::get<bool>(item)}
-		};
-	}
-	else if (std::holds_alternative<std::string>(item)) { // string
-		root[groupName][itemName] = {
-		  {"type", "string"},
-		  {"value", std::get<std::string>(item)}
-		};
-	}
-	else if (std::holds_alternative<Transform>(item)) { // Transform
-		Transform v = std::get<Transform>(item);
-		root[groupName][itemName] = {
-			{"type", "Transform"},
-			{"value", {
-				{"scale", { v.scale.x, v.scale.y, v.scale.z }},
-				{"rotate", { v.rotate.x, v.rotate.y, v.rotate.z }},
-				{"translate", { v.translate.x, v.translate.y, v.translate.z }}
-			}}
-		};
-	} 
-	else if (std::holds_alternative<GvData::EnumItem>(item)) { // ★ EnumItem
-		const auto& e = std::get<GvData::EnumItem>(item);
-		root[groupName][itemName] = {
-			{"type", "enum"},
-			{"enumType", e.enumType},
-			{"value", e.value}
-		};
-	}
-}
-
-void GvFunction::SetValue(const std::string& groupName, const std::string& itemName, const std::string& typeStr)
-{
-
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/GlobalVariables/GlobalVariablesFunction.h
-============================================================
-#pragma once
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include <iostream>
-#include <fstream>
-#include <variant>
-#include <string>
-#include <map>
-#include<json.hpp>
-
-
-struct EnumEntry {
-	const char* name;   // 表示名
-	int64_t value;      // EnumItem.value に入る値
-};
-
-/// <summary>
-/// EnumRegistryを管理・実装するクラス。
-/// </summary>
-class EnumRegistry {
-public:
-	static EnumRegistry& Instance() {
-		static EnumRegistry inst;
-		return inst;
-	}
-
-	void Register(const std::string& enumType, std::vector<EnumEntry> entries) {
-		table_[enumType] = std::move(entries);
-	}
-
-	const std::vector<EnumEntry>* Find(const std::string& enumType) const {
-		auto it = table_.find(enumType);
-		if (it == table_.end()) return nullptr;
-		return &it->second;
-	}
-
-private:
-	std::unordered_map<std::string, std::vector<EnumEntry>> table_;
-};
-
-namespace GvData {
-
-	// ★ enum保存用：型名 + 値（整数）
-	struct EnumItem {
-		std::string enumType; // 例: "EnemyType"
-		int64_t value = 0;    // underlying をここに格納
-	};
-
-	// 項目
-	using Item = std::variant<int32_t, uint32_t, float, Vector2, Vector3, Vector4, bool, std::string, Transform, EnumItem>;
-
-	// グループ
-	using Group = std::map<std::string, Item>;
-
-	// JSON
-	using json = nlohmann::json;
-}
-
-namespace GvFunction {
-	/// <summary>
-	/// 型を判別して値を保存
-	/// </summary>
-	void Save(const std::string& groupName, GvData::json& root,GvData::Item& item, const std::string& itemName);
-
-	/// <summary>
-	/// 値を設定
-	/// </summary>
-	void SetValue(const std::string& groupName,const std::string& itemName,const std::string& typeStr);
-
-}
-
-============================================================
 File Path: project/DirectXGame/application/base/Attack/AttackController.cpp
 ============================================================
 #include "AttackController.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
@@ -2878,7 +1767,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalDat
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
-#include "DirectXGame/application/base/Camera/Base/CameraData.h"
+#include "DirectXGame/engine/Camera/CameraData.h"
 #include <string>
 #include <vector>
 
@@ -3365,7 +2254,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.cpp
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 namespace Combo {
 
@@ -4066,7 +2955,7 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cpp
 ============================================================
 #include "ComboSystem.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
@@ -6933,7 +5822,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEdi
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/Audio/Audio.h"
 #include <cctype>
 #include <cstring>
@@ -9836,7 +8725,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboAnimati
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include <algorithm>
 
@@ -10267,7 +9156,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cp
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
@@ -12361,7 +11250,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 ============================================================
-﻿#include "HitMotionSystem.h"
+#include "HitMotionSystem.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
@@ -12369,7 +11258,7 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include <DirectXGame/application/base/Object/ObjectComponent.h>
+#include <DirectXGame/engine/Entity/ObjectComponent.h>
 #include "DirectXGame/engine/Math/MathFunctions.h"
 
 #pragma region HitMotion
@@ -14432,8 +13321,8 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Response/Response.cpp
 ============================================================
-﻿#include "Response.h"
-#include <DirectXGame/application/base/Object/ObjectComponent.h>
+#include "Response.h"
+#include <DirectXGame/engine/Entity/ObjectComponent.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
@@ -14629,7 +13518,7 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BaseBullet.h
 ============================================================
 #pragma once
 
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "BulletData.h"
 
 // 前方宣言
@@ -15096,7 +13985,7 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BaseProjectile.h
 ============================================================
 #pragma once
 #include "ProjectileData.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 namespace Character {
 	class BaseCharacter;
@@ -17136,8 +16025,8 @@ void BaseCamera::CreateFixedCamera(Engine::EntityManager* entityManager, const T
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.h
 ============================================================
-#pragma once
-#include "CameraController.h"
+﻿#pragma once
+#include <DirectXGame/engine/Camera/CameraController.h>
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 // 前方宣言
@@ -17426,496 +16315,6 @@ private:
 	// ターゲット
 	const Engine::WorldTransform* target = nullptr;
 };
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraController.cpp
-============================================================
-﻿#include "CameraController.h"
-#include <algorithm>
-#include <cmath>
-
-void CameraController::Initialize(Engine::Camera* camera, const InputSystem* input) {
-	this->camera = camera;
-	this->input = input;
-
-	// 追従
-	follow = std::make_unique<CameraFollow>();
-	follow->Initialize();
-	// 回転
-	rotation = std::make_unique<CameraRotation>();
-	rotation->Initialize();
-	// ロックオン
-	lockOn = std::make_unique<CameraLockOn>();
-	// 判定
-	collision = std::make_unique<CameraCollision>();
-	// シェイク
-	shake = std::make_unique<CameraShake>();
-	shake->Initialize(camera);
-	// ズーム
-	zoom = std::make_unique<CameraZoom>();
-	zoom->SetDefultZ(camera->GetTransform().scale.z);
-
-}
-
-
-void CameraController::Update(float dt) {
-	// カメラトランスフォーム取得
-	Transform transform = camera->GetTransform();
-
-	// 追従対象の移動速度を、先読みや速度ズーム用に推定する
-	UpdateTargetMotion(dt);
-	
-	// ロックオンしているなら
-	if (lockOn->GetData().isLockOn) {
-		transform.rotate = lockOn->Update(transform, dt);
-		if (lockOn->GetData().isLockOnRotate) {
-			rotation->GetData().pitch = transform.rotate.x;
-			rotation->GetData().yaw = transform.rotate.y;
-		}
-	}
-	else { // していないなら回転処理を優先
-		// 回転処理
-		rotation->Update(transform,input,dt);
-	}
-	// アクション用の先読み、速度ズーム、注視点オフセットを更新する
-	UpdateActionTimers(dt);
-	UpdateFollowAssist(dt);
-	UpdateSpeedZoom(dt);
-	// 追従
-	follow->Update(transform,dt);
-	// ズーム
-	zoom->Update(transform.scale.z,dt);
-	// シェイク
-	shake->SetDefultPos(transform.translate);
-	shake->Update(transform.translate,dt);
-	// 判定
-	collision->Update(transform, dt);
-	// カメラ位置決定
-	camera->SetTransform(transform);
-};
-
-void CameraController::SetTarget(const Engine::WorldTransform* target) {
-	this->target = target;
-	follow->SetTarget(target);
-	collision->SetTarget(target);
-	hasPreviousTargetPosition_ = false;
-};
-
-void CameraController::SetLockOnTarget(const Engine::WorldTransform* target) {
-	this->lockOnTarget = target;
-	lockOn->GetData().target = target;
-	lockOn->GetData().isLockOn = target != nullptr;
-}
-
-void CameraController::SetLookAheadData(const CameraLookAheadData& data) {
-	// 通常時に使う先読み設定を保存する
-	lookAheadData_ = data;
-}
-
-void CameraController::SetSpeedZoomData(const CameraSpeedZoomData& data) {
-	// 通常時に使う速度ズーム設定を保存する
-	speedZoomData_ = data;
-}
-
-void CameraController::RequestLookAhead(const CameraLookAheadData& data, float duration) {
-	// 攻撃演出などで一時的に通常設定を上書きする
-	actionLookAheadData_ = data;
-	actionLookAheadTimer_ = duration;
-	isActionLookAheadActive_ = true;
-}
-
-void CameraController::RequestSpeedZoom(const CameraSpeedZoomData& data, float duration) {
-	// 攻撃演出などで一時的に速度ズームを上書きする
-	actionSpeedZoomData_ = data;
-	actionSpeedZoomTimer_ = duration;
-	isActionSpeedZoomActive_ = true;
-}
-
-void CameraController::RequestActionTargetOffset(const CameraActionOffsetData& data) {
-	// 攻撃演出などで追従中心を一時的にずらす
-	actionOffsetData_ = data;
-	actionOffsetTimer_ = data.duration;
-	isActionOffsetActive_ = true;
-}
-
-void CameraController::ClearActionAssist() {
-	// 攻撃終了時に一時カメラ演出を解除する
-	isActionLookAheadActive_ = false;
-	isActionSpeedZoomActive_ = false;
-	isActionOffsetActive_ = false;
-	actionLookAheadTimer_ = 0.0f;
-	actionSpeedZoomTimer_ = 0.0f;
-	actionOffsetTimer_ = 0.0f;
-}
-
-void CameraController::UpdateTargetMotion(float dt) {
-	// 追従対象が無い、または時間が進んでいないなら速度を0にする
-	if (!target || dt <= 0.0f) {
-		targetVelocity_ = {};
-		hasPreviousTargetPosition_ = false;
-		return;
-	}
-
-	// ワールド座標の差分から疑似速度を求める
-	const Vector3 currentPosition = target->GetWorldPosition();
-	if (hasPreviousTargetPosition_) {
-		targetVelocity_ = (currentPosition - previousTargetPosition_) / dt;
-	}
-	else {
-		targetVelocity_ = {};
-		hasPreviousTargetPosition_ = true;
-	}
-	previousTargetPosition_ = currentPosition;
-}
-
-void CameraController::UpdateFollowAssist(float dt) {
-	// 一時設定が有効ならそちらを優先し、無ければ通常設定を使う
-	const CameraLookAheadData& lookAheadData =
-		isActionLookAheadActive_ ? actionLookAheadData_ : lookAheadData_;
-
-	// 速度方向の先読み位置を滑らかに補間する
-	const Vector3 targetLookAheadOffset = CalculateLookAheadOffset(lookAheadData);
-	const float lookAheadT = std::clamp(lookAheadData.smoothSpeed * dt, 0.0f, 1.0f);
-	currentLookAheadOffset_ = Lerp(currentLookAheadOffset_, targetLookAheadOffset, lookAheadT);
-
-	// 攻撃中の注視点オフセットを滑らかに出し入れする
-	const Vector3 targetActionOffset = isActionOffsetActive_ ? actionOffsetData_.targetOffset : Vector3{};
-	const float actionOffsetT = std::clamp(actionOffsetData_.blendSpeed * dt, 0.0f, 1.0f);
-	currentActionTargetOffset_ = Lerp(currentActionTargetOffset_, targetActionOffset, actionOffsetT);
-
-	// 追従カメラへ、先読みと攻撃オフセットを合成した注視点を渡す
-	follow->SetTargetOffset(currentLookAheadOffset_ + currentActionTargetOffset_);
-}
-
-void CameraController::UpdateSpeedZoom(float dt) {
-	// 一時設定が有効ならそちらを優先し、無ければ通常設定を使う
-	const CameraSpeedZoomData& data =
-		isActionSpeedZoomActive_ ? actionSpeedZoomData_ : speedZoomData_;
-	const Vector3 defaultOffset = follow->GetDefultOffsetPos();
-
-	// ターゲット速度から、後ろへ引く距離を計算して補間する
-	float targetOffsetZ = 0.0f;
-	if (data.enable) {
-		const float speedRate = CalculateSpeedRate(data.minSpeed, data.maxSpeed);
-		targetOffsetZ = Lerp(data.nearOffsetZ, data.farOffsetZ, speedRate);
-	}
-	const float zoomT = std::clamp(data.smoothSpeed * dt, 0.0f, 1.0f);
-	currentSpeedZoomOffsetZ_ = Lerp(currentSpeedZoomOffsetZ_, targetOffsetZ, zoomT);
-
-	// 通常の追従距離に速度ズーム分を足す
-	Vector3 offset = follow->GetOffsetPos();
-	offset.z = defaultOffset.z + currentSpeedZoomOffsetZ_;
-	follow->SetOffsetPos(offset);
-}
-
-void CameraController::UpdateActionTimers(float dt) {
-	// 0以下の時間は、外部から解除されるまで継続する設定として扱う
-	if (isActionLookAheadActive_ && actionLookAheadTimer_ > 0.0f) {
-		actionLookAheadTimer_ -= dt;
-		if (actionLookAheadTimer_ <= 0.0f) {
-			isActionLookAheadActive_ = false;
-		}
-	}
-	if (isActionSpeedZoomActive_ && actionSpeedZoomTimer_ > 0.0f) {
-		actionSpeedZoomTimer_ -= dt;
-		if (actionSpeedZoomTimer_ <= 0.0f) {
-			isActionSpeedZoomActive_ = false;
-		}
-	}
-	if (isActionOffsetActive_ && actionOffsetTimer_ > 0.0f) {
-		actionOffsetTimer_ -= dt;
-		if (actionOffsetTimer_ <= 0.0f) {
-			isActionOffsetActive_ = false;
-		}
-	}
-}
-
-float CameraController::CalculateSpeedRate(float minSpeed, float maxSpeed) const {
-	// 速度レンジが不正なら急な挙動を避けるため0にする
-	if (maxSpeed <= minSpeed) {
-		return 0.0f;
-	}
-	const float speed = Length(targetVelocity_);
-	return std::clamp((speed - minSpeed) / (maxSpeed - minSpeed), 0.0f, 1.0f);
-}
-
-Vector3 CameraController::CalculateLookAheadOffset(const CameraLookAheadData& data) const {
-	// 無効時や速度がほぼ無い時は先読みしない
-	if (!data.enable || targetVelocity_.LengthSq() < 1e-6f) {
-		return {};
-	}
-
-	// 速度方向に、速度割合に応じた距離だけ注視点を先へ送る
-	const float speedRate = CalculateSpeedRate(data.minSpeed, data.maxSpeed);
-	const Vector3 direction = Normalize(targetVelocity_);
-	return direction * (data.distance * speedRate);
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/Camera/CameraData.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
-#include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
-#include "DirectXGame/application/base/Camera/Base/CameraLag.h"
-#include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
-#include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
-#include "DirectXGame/application/base/Camera/Base/CameraShake.h"
-#include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
-#include "DirectXGame/application/base/Camera/Base/CameraZoom.h"
-
-class InputSystem;
-
-// カメラ統括クラス
-/// <summary>
-/// CameraControllerを管理・実装するクラス。
-/// </summary>
-class CameraController {
-public:
-
-	/// <summary>追従、回転、ロックオン、衝突補正、演出用の各カメラ機能を初期化する。</summary>
-	/// <param name="camera">制御対象のカメラ。CameraControllerは所有せず、利用中は有効であること。</param>
-	/// <param name="input">カメラ操作に使用する入力。自動制御のみの場合はnullptrを許容する。</param>
-	void Initialize(Engine::Camera* camera,const InputSystem* input);
-
-	/// <summary>設定済みの追従対象と入力に基づいて全カメラ機能を更新する。</summary>
-	/// <param name="dt">秒単位のフレーム時間。0以下の場合、時間依存の補間は進行しない。</param>
-	void Update(float dt);
-
-	/// <summary>カメラが注視するロックオン対象を設定する。</summary>
-	/// <param name="target">対象への非所有ポインター。ロックオン解除時はnullptr。</param>
-	void SetLockOnTarget(const Engine::WorldTransform* target);
-	/// <summary>カメラの通常追従対象を設定する。</summary>
-	/// <param name="target">対象への非所有ポインター。追従解除時はnullptr。</param>
-	void SetTarget(const Engine::WorldTransform* target);
-	/// <summary>カメラシェイク機能を取得する。</summary>
-	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
-	CameraShake* GetShake(){ return shake.get(); }
-	/// <summary>カメラズーム機能を取得する。</summary>
-	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
-	CameraZoom* GetZoom(){ return zoom.get(); }
-	/// <summary>ロックオン機能を取得する。</summary>
-	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
-	CameraLockOn* GetCameraLockOn() { return lockOn.get(); }
-	/// <summary>通常追従時の先読み設定を置き換える。</summary>
-	/// <param name="data">速度方向の先読み量と補間設定。</param>
-	void SetLookAheadData(const CameraLookAheadData& data);
-	/// <summary>通常追従時の速度ズーム設定を置き換える。</summary>
-	/// <param name="data">速度範囲、ズーム距離、補間設定。</param>
-	void SetSpeedZoomData(const CameraSpeedZoomData& data);
-	/// <summary>攻撃演出などで一時的な先読みを要求する。</summary>
-	/// <param name="data">一時適用する先読み設定。</param>
-	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
-	void RequestLookAhead(const CameraLookAheadData& data, float duration);
-	/// <summary>攻撃演出などで一時的な速度ズームを要求する。</summary>
-	/// <param name="data">一時適用する速度ズーム設定。</param>
-	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
-	void RequestSpeedZoom(const CameraSpeedZoomData& data, float duration);
-	/// <summary>攻撃演出などで一時的な注視点オフセットを要求する。</summary>
-	/// <param name="data">オフセット量、開始時間、継続時間を含む設定。</param>
-	void RequestActionTargetOffset(const CameraActionOffsetData& data);
-	/// <summary>
-	/// 一時カメラ演出の解除
-	/// </summary>
-	void ClearActionAssist();
-private:
-	/// <summary>
-	/// 追従対象の移動量から速度を推定する
-	/// </summary>
-	void UpdateTargetMotion(float dt);
-	/// <summary>
-	/// 先読みと演出オフセットを追従ターゲットへ反映する
-	/// </summary>
-	void UpdateFollowAssist(float dt);
-	/// <summary>
-	/// 速度から追従距離を補間する
-	/// </summary>
-	void UpdateSpeedZoom(float dt);
-	/// <summary>
-	/// 一時リクエストの残り時間を更新する
-	/// </summary>
-	void UpdateActionTimers(float dt);
-	/// <summary>現在速度を指定範囲の0.0～1.0へ正規化する。</summary>
-	/// <param name="minSpeed">割合0.0に対応する速度。</param>
-	/// <param name="maxSpeed">割合1.0に対応する速度。</param>
-	/// <returns>範囲内へ制限した速度割合。範囲が無効な場合は0.0。</returns>
-	float CalculateSpeedRate(float minSpeed, float maxSpeed) const;
-	/// <summary>現在の推定速度から追従先読みオフセットを計算する。</summary>
-	/// <param name="data">計算に使用する先読み設定。</param>
-	/// <returns>ワールド空間の先読みオフセット。</returns>
-	Vector3 CalculateLookAheadOffset(const CameraLookAheadData& data) const;
-private:
-	// 追従
-	std::unique_ptr<CameraFollow> follow = nullptr;
-	// 回転
-	std::unique_ptr<CameraRotation> rotation = nullptr;
-	// ロックオン
-	std::unique_ptr<CameraLockOn> lockOn = nullptr;
-	// 判定
-	std::unique_ptr<CameraCollision> collision = nullptr;
-	// シェイク
-	std::unique_ptr<CameraShake> shake = nullptr;
-	// ズーム
-	std::unique_ptr<CameraZoom> zoom = nullptr;
-private:
-	const InputSystem* input = nullptr;
-	Engine::Camera* camera = nullptr;
-	const Engine::WorldTransform* target = nullptr;
-	const Engine::WorldTransform* lockOnTarget = nullptr;
-	// 追従対象の前フレーム位置
-	Vector3 previousTargetPosition_ = {};
-	// 追従対象の推定速度
-	Vector3 targetVelocity_ = {};
-	// 追従対象の前フレーム位置が有効か
-	bool hasPreviousTargetPosition_ = false;
-	// 通常時の先読み設定
-	CameraLookAheadData lookAheadData_{};
-	// 攻撃中などに一時的に使う先読み設定
-	CameraLookAheadData actionLookAheadData_{};
-	// 通常時の速度ズーム設定
-	CameraSpeedZoomData speedZoomData_{};
-	// 攻撃中などに一時的に使う速度ズーム設定
-	CameraSpeedZoomData actionSpeedZoomData_{};
-	// 攻撃中などに一時的に使う注視点オフセット設定
-	CameraActionOffsetData actionOffsetData_{};
-	// 補間済みの先読みオフセット
-	Vector3 currentLookAheadOffset_ = {};
-	// 補間済みの注視点オフセット
-	Vector3 currentActionTargetOffset_ = {};
-	// 補間済みの速度ズーム距離
-	float currentSpeedZoomOffsetZ_ = 0.0f;
-	// 一時先読みの残り時間
-	float actionLookAheadTimer_ = 0.0f;
-	// 一時速度ズームの残り時間
-	float actionSpeedZoomTimer_ = 0.0f;
-	// 一時注視点オフセットの残り時間
-	float actionOffsetTimer_ = 0.0f;
-	// 一時先読みを使用中か
-	bool isActionLookAheadActive_ = false;
-	// 一時速度ズームを使用中か
-	bool isActionSpeedZoomActive_ = false;
-	// 一時注視点オフセットを使用中か
-	bool isActionOffsetActive_ = false;
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraData.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/struct/Structs3D.h"
-#include <string>
-
-// カメラ保存データ
-struct GlobalCameraData {
-    // 使用カメラ
-	std::string cameraName = "no";
-	// カメラを変更するか
-	bool isChangeCamera = false;
-	// 移動補間
-	float interpolation = 0.0f;
-	// カメラ切り替え開始時間
-	float changeCameraStartTime = 0.0f;
-	// カメラをシェイクするか
-	bool isShake = false;
-	// シェイク量
-	float shakeCameraPower = 0.0f;
-	// シェイク開始時間
-	float shakeStartTime = 0.0f;
-	// シェイク継続時間
-	float shakeDuration = 0.0f;
-	// カメラ基準のシェイク幅
-	Vector3 shakeOffset = { 0.0f, 0.0f, 0.0f };
-
-	// 攻撃中に注視点をずらすか
-	bool isActionTargetOffset = false;
-	// 注視点オフセット開始時間
-	float actionTargetOffsetStartTime = 0.0f;
-	// 注視点オフセット継続時間
-	float actionTargetOffsetDuration = 0.0f;
-	// 注視点オフセット補間速度
-	float actionTargetOffsetBlendSpeed = 8.0f;
-	// 追従ターゲットに加えるワールド座標オフセット
-	Vector3 actionTargetOffset = { 0.0f, 0.0f, 0.0f };
-
-	// 攻撃中に速度方向の先読みを使うか
-	bool isLookAhead = false;
-	// 先読み開始時間
-	float lookAheadStartTime = 0.0f;
-	// 先読み継続時間
-	float lookAheadDuration = 0.0f;
-	// 先読み最大距離
-	float lookAheadDistance = 0.0f;
-	// 先読みを始める速度
-	float lookAheadMinSpeed = 0.0f;
-	// 最大先読みになる速度
-	float lookAheadMaxSpeed = 30.0f;
-	// 先読み補間速度
-	float lookAheadSmoothSpeed = 8.0f;
-
-	// 攻撃中に速度でカメラ距離を変えるか
-	bool isSpeedZoom = false;
-	// 速度ズーム開始時間
-	float speedZoomStartTime = 0.0f;
-	// 速度ズーム継続時間
-	float speedZoomDuration = 0.0f;
-	// 速度ズームを始める速度
-	float speedZoomMinSpeed = 0.0f;
-	// 最大速度ズームになる速度
-	float speedZoomMaxSpeed = 30.0f;
-	// 低速時に足すカメラ距離
-	float speedZoomNearOffsetZ = 0.0f;
-	// 高速時に足すカメラ距離
-	float speedZoomFarOffsetZ = -8.0f;
-	// 速度ズーム補間速度
-	float speedZoomSmoothSpeed = 8.0f;
-	
-	// カメラをズームするか
-	bool isZoom = false;
-	// ロックオンされていたらズームするか
-	bool isLockOnZoom = false;
-	// カメラズーム量
-	float zoomTargetDistance = 0.0f;
-	// カメラズーム開始時間
-	float zoomStartTime = 0.0f;
-	// カメラズーム時間
-	float zoomDuration = 0.0f;
-	// カメラズーム距離補間速度
-	float zoomSpeed = 0.0f;
-
-	// ロックオンするか
-	bool isLockOn = false;
-	// ロックオン後の回転を解除されても引き継ぐか
-	bool isLockOnRotate = true;
-	// ロックオン補間速度
-	float lockOnInterpolation = 0.5f;
-	// ロックオン解除時間(0以下なら解除しない)
-	float lockOnEndTime = 0.0f;
-
-	// 攻撃がヒットした瞬間に専用のカメラ演出を再生するか
-	bool isHitCameraEffect = false;
-	// ヒット時にカメラをシェイクするか
-	bool isHitShake = true;
-	// ヒット時シェイクの継続時間
-	float hitShakeDuration = 0.1f;
-	// ヒット時のカメラ基準シェイク幅
-	Vector3 hitShakeOffset = { 0.2f, 0.2f, 0.2f };
-	// ヒット時にカメラをズームするか
-	bool isHitZoom = false;
-	// ヒット時ズームの距離
-	float hitZoomTargetDistance = 0.0f;
-	// ヒット時ズームの補間速度
-	float hitZoomSpeed = 8.0f;
-	// ヒット時ズームの継続時間
-	float hitZoomDuration = 0.1f;
-};
-
-
-
-
 
 
 ============================================================
@@ -18511,7 +16910,7 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.h
 ============================================================
 #pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 // 回転制御
 /// <summary>
@@ -19611,7 +18010,7 @@ void PlayerCar::EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vecto
 File Path: project/DirectXGame/application/base/Car/PlayerCar.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "PlayerCarStateMachine.h"
 #include <DirectXGame/engine/Move/RigidBodyComponent.h>
 #include <DirectXGame/engine/Light/Lights.h>
@@ -20277,9 +18676,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.cpp
 ============================================================
-﻿#include "BaseCharacter.h"
+#include "BaseCharacter.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
@@ -20429,7 +18828,7 @@ File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.h
 #pragma once
 #include "CharacterContext.h"
 #include <DirectXGame/engine/Collider/ColliderData.h>
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
 
@@ -20795,7 +19194,7 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h>
@@ -21747,7 +20146,7 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManager.
 
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 // ベースキャラクター
 #include"BaseCharacter.h"
@@ -22002,7 +20401,7 @@ File Path: project/DirectXGame/application/base/Character/Death/DeathSystem.cpp
 ============================================================
 #include "DeathSystem.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 void DeathSystem::Update(float dt){
 	if (!isActive) return;
@@ -25383,7 +23782,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.cpp
 ============================================================
-﻿#include "BaseEnemy.h"
+#include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -25391,7 +23790,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.c
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
@@ -25926,7 +24325,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyWaveEx
 ============================================================
 #include "EnemyWaveExitState.h"
 #include "BaseEnemy.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 #include <algorithm>
 
@@ -26014,10 +24413,10 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.cpp
 ============================================================
-﻿#include "DummyEnemy.h"
+#include "DummyEnemy.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "imgui.h"
@@ -26500,7 +24899,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 #include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 
 namespace Character {
@@ -26573,7 +24972,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 #include "MediumMeleeEnemyState.h"
 #include "MediumMeleeEnemy.h"
 
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
@@ -26814,7 +25213,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 #include "MediumMeleeEnemySubState.h"
 #include "MediumMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
 
@@ -27144,7 +25543,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/Small
 #include "SmallCartEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 
 namespace Character {
@@ -27286,7 +25685,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/Small
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "SmallCartEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
@@ -27438,10 +25837,10 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemy.cpp
 ============================================================
-﻿#include "SmallMeleeEnemy.h"
+#include "SmallMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 
@@ -27546,10 +25945,10 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemyState.cpp
 ============================================================
-﻿#include "SmallMeleeEnemyState.h"
+#include "SmallMeleeEnemyState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
@@ -27810,10 +26209,10 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemySubState.cpp
 ============================================================
-﻿#include "SmallMeleeEnemySubState.h"
+#include "SmallMeleeEnemySubState.h"
 #include "SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
@@ -28148,10 +26547,10 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/SmallRangeEnemy.cpp
 ============================================================
-﻿#include "SmallRangeEnemy.h"
+#include "SmallRangeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 
@@ -28278,7 +26677,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/Smal
 #include "SmallRangeEnemyState.h"
 #include "SmallRangeEnemy.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
@@ -30161,7 +28560,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -30169,7 +28568,7 @@ File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPl
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
@@ -32825,7 +31224,7 @@ File Path: project/DirectXGame/application/base/Effect/EffectEditor.cpp
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/Base/Texture/TextureManager.h"
-#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include "DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 #include <algorithm>
 #include <cctype>
@@ -35713,7 +34112,7 @@ File Path: project/DirectXGame/application/base/Effect/SlowMotion/SlowMotionMana
 #include "SlowMotionManager.h"
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 namespace Character {
@@ -36458,9 +34857,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Game/GameEventController.cpp
 ============================================================
-﻿#include "GameEventController.h"
+#include "GameEventController.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManager.h"
@@ -38173,7 +36572,7 @@ File Path: project/DirectXGame/application/base/Input/InputCoordinator.h
 #include <memory>
 
 #include "DirectXGame/application/base/Input/InputHander.h"
-#include "DirectXGame/application/base/Input/InputManager.h"
+#include "DirectXGame/engine/input/InputManager.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 
 namespace Engine {
@@ -38504,434 +36903,6 @@ namespace Character {
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Input/InputManager.cpp
-============================================================
-#include "InputManager.h"
-#include "DirectXGame/engine/Math/MathFunctions.h"
-
-
-
-void InputManager::Initialize(Engine::Input* input){
-	input_ = input;
-}
-
-void InputManager::Update(float dt) {
-    frameCounter_++;
-    ClearFrame();
-    
-    if (!input_) return;
-
-    switch (context_)
-    {
-    case Context::Gameplay:
-        BuildGameplayActions();
-        break;
-    case Context::UI:
-        BuildUIActions();
-        break;
-    case Context::Pause:
-        // 必要なら
-        BuildUIActions();
-        break;
-    }
-    RecordBufferedEvents();
-}
-
-void InputManager::ClearFrame(){
-    for (int i = 0; i < Idx(Action::Max); ++i)
-    {
-        pressed_[i] = triggered_[i] = released_[i] = false;
-        value2_[i] = Vector2{ 0,0 };
-        value1_[i] = 0.0f;
-    }
-}
-
-void InputManager::BuildGameplayActions(){
-    // ---- Move（WASD + LeftStick 合成）----
-    Vector2 move{ 0,0 };
-
-    if (input_->IsPushKey(DIK_A)) move.x -= 1.0f;
-    if (input_->IsPushKey(DIK_D)) move.x += 1.0f;
-    if (input_->IsPushKey(DIK_W)) move.y += 1.0f;
-    if (input_->IsPushKey(DIK_S)) move.y -= 1.0f;
-
-    const Vector2 ls = input_->GetGamePadLeftStick();
-    move.x += ls.x;
-    move.y += ls.y;
-
-    move = Math::ClampLength(move);
-    value2_[Idx(Action::Move)] = move;
-    pressed_[Idx(Action::Move)] = move.x != 0.0f || move.y != 0.0f;
-    triggered_[Idx(Action::Move)] = pressed_[Idx(Action::Move)] && !isDown_[Idx(Action::Move)];
-    released_[Idx(Action::Move)] = !pressed_[Idx(Action::Move)] && isDown_[Idx(Action::Move)];
-
-    // ---- Look（RightStick + 矢印キー + 右クリック中のマウス移動）----
-    Vector2 look = input_->GetGamePadRightStick();
-    if (input_->IsPushKey(DIK_LEFT)) look.x -= 1.0f;
-    if (input_->IsPushKey(DIK_RIGHT)) look.x += 1.0f;
-    if (input_->IsPushKey(DIK_UP)) look.y += 1.0f;
-    if (input_->IsPushKey(DIK_DOWN)) look.y -= 1.0f;
-    if (input_->IsMousePressed(1)) {
-        const Vector2 mouseDelta = input_->GetMouseMoveDelta();
-        look.x += mouseDelta.x * 0.05f;
-        look.y -= mouseDelta.y * 0.05f;
-    }
-    look = Math::ClampLength(look);
-    value2_[Idx(Action::Look)] = look;
-    pressed_[Idx(Action::Look)] = look.x != 0.0f || look.y != 0.0f;
-    triggered_[Idx(Action::Look)] = pressed_[Idx(Action::Look)] && !isDown_[Idx(Action::Look)];
-    released_[Idx(Action::Look)] = !pressed_[Idx(Action::Look)] && isDown_[Idx(Action::Look)];
-
-    // ---- Attack（Pad X / 左クリック / J）----
-    triggered_[Idx(Action::LightAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X) ||
-        input_->IsMouseTriggered(0) ||
-        input_->IsTriggerKey(DIK_J);
-
-    pressed_[Idx(Action::LightAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_X) ||
-        input_->IsMousePressed(0) ||
-        input_->IsPushKey(DIK_J);
-
-    released_[Idx(Action::LightAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_X) ||
-        input_->IsMouseReleased(0) ||
-        input_->IsKeyReleased(DIK_J);
-
-    // ---- Attack（Pad Y / K）----
-    triggered_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y) ||
-        input_->IsTriggerKey(DIK_K);
-
-    pressed_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y) ||
-        input_->IsPushKey(DIK_K);
-
-    released_[Idx(Action::HeavyAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y) ||
-        input_->IsKeyReleased(DIK_K);
-
-    // ---- Jump（Pad A / Space）----
-    triggered_[Idx(Action::Jump)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A) ||
-        input_->IsTriggerKey(DIK_SPACE);
-
-    pressed_[Idx(Action::Jump)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_A) ||
-        input_->IsPushKey(DIK_SPACE);
-
-    released_[Idx(Action::Jump)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_A) ||
-        input_->IsKeyReleased(DIK_SPACE);
-
-    // ---- Special（Pad RB / R）----
-    triggered_[Idx(Action::Special)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
-        input_->IsTriggerKey(DIK_R);
-
-    pressed_[Idx(Action::Special)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_RB) ||
-        input_->IsPushKey(DIK_R);
-
-    released_[Idx(Action::Special)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB) ||
-        input_->IsKeyReleased(DIK_R);
-
-    // ---- Skill（Pad B / E）----
-    triggered_[Idx(Action::Skill)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
-        input_->IsTriggerKey(DIK_E);
-
-    pressed_[Idx(Action::Skill)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B) ||
-        input_->IsPushKey(DIK_E);
-
-    released_[Idx(Action::Skill)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B) ||
-        input_->IsKeyReleased(DIK_E);
-
-    // ---- Dodge（Pad LB / LeftShift）----
-    triggered_[Idx(Action::Dodge)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB) ||
-        input_->IsTriggerKey(DIK_LSHIFT);
-
-    pressed_[Idx(Action::Dodge)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB) ||
-        input_->IsPushKey(DIK_LSHIFT);
-
-    released_[Idx(Action::Dodge)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB) ||
-        input_->IsKeyReleased(DIK_LSHIFT);
-
-    // ---- Dash（LT / LeftShift）----
-    triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_LSHIFT);
-    pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f) || input_->IsPushKey(DIK_LSHIFT);
-    released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_LSHIFT);
-    value1_[Idx(Action::Dash)] = input_->GetGamePadLeftTrigger(); // アナログ値も欲しい場合
-
-    // ---- LockOn（RT / Q）----
-    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_Q);
-    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f) || input_->IsPushKey(DIK_Q);
-    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_Q);
-    value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
-
-   
-    // ---- Pause（Esc or Start）----
-    triggered_[Idx(Action::Pause)] =
-        input_->IsTriggerKey(DIK_ESCAPE) ||
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Start);
-}
-
-void InputManager::BuildUIActions(){
-}
-
-void InputManager::RecordBufferedEvents(){
-    for (int i = 0; i < Idx(Action::Max); ++i)
-    {
-        const Action a = static_cast<Action>(i);
-
-        if (Triggered(a))
-        {
-            isDown_[i] = true;
-            pressFrame_[i] = frameCounter_;
-
-            PushEvent(a, InputEvent::Type::Press, Value1(a), Value2(a));
-        }
-        if (Released(a))
-        {
-            isDown_[i] = false;
-            PushEvent(a, InputEvent::Type::Release, Value1(a), Value2(a));
-        }
-    }
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Input/InputManager.h
-============================================================
-#pragma once
-#include <DirectXGame/engine/input/Input.h>
-#include <limits>
-
-namespace Character {
-	class BaseCharacter; // 前方宣言
-}
-
-
-/// <summary>
-/// 入力管理クラス(action層)
-/// </summary>
-class InputManager {
-public:
-	enum class Context : uint8_t
-	{
-		Gameplay,
-		UI,
-		Pause,
-	};
-
-	enum class Action : uint8_t
-	{
-		Move,       // Vector2
-		Look,       // Vector2
-		LightAttack,// bool
-		HeavyAttack,// bool 
-		Dodge,      // bool
-		Dash,       // bool (LT)
-		LockOn,     // bool
-		Pause,      // bool
-		Skill,		// bool	
-		Jump,		// bool
-		Special,	// bool
-		Max
-	};
-
-	// 入力イベント構造体
-	struct InputEvent
-	{
-		Action action;
-		enum class Type : uint8_t { Press, Release } type;
-
-		uint32_t frame;      // 発生フレーム
-		float value1 = 0.0f; // 例: LTの押し込み量
-		Vector2 value2{};    // 例: Move/Look
-	};
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize(Engine::Input* input);
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update(float dt);
-
-	/// <summary>
-	/// キャラクターの設定
-	/// </summary>
-	void SetOwner(Character::BaseCharacter* character) { this->character = character; }
-
-
-
-	/// <summary>
-	/// Context
-	/// </summary>
-	void SetContext(Context c) { context_ = c; }
-	Context GetContext() const { return context_; }
-
-	/// <summary>
-	/// Action状態の取得（ゲーム側はこれだけ使う）
-	/// </summary>
-	bool Pressed(Action a) const { return pressed_[Idx(a)]; }
-	bool Triggered(Action a) const { return triggered_[Idx(a)]; }
-	bool Released(Action a) const { return released_[Idx(a)]; }
-
-	Vector2 Value2(Action a) const { return value2_[Idx(a)]; }
-	float   Value1(Action a) const { return value1_[Idx(a)]; }
-
-	/// <summary>
-	/// 移動ベクトルは長さ1に制限（斜めが速くならない）
-	/// </summary>
-	Vector2 MoveVector() const { return value2_[Idx(Action::Move)]; }
-	Vector2 LookVector() const { return value2_[Idx(Action::Look)]; }
-
-	// 同時押し
-	bool ConsumeChord(Action a, Action b, uint32_t toleranceFrames = 2, uint32_t windowFrames = 8)
-	{
-		const uint32_t oldest = (frameCounter_ > windowFrames) ? (frameCounter_ - windowFrames) : 0;
-
-		/// <summary>
-		/// a の Press を起点に、b が近傍にあるか探す
-		/// </summary>
-		for (uint32_t k = 0; k < kBufferSize; ++k)
-		{
-			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
-			const InputEvent& e = buffer_[idx];
-
-			if (e.frame < oldest) break;
-			if (e.action != a || e.type != InputEvent::Type::Press) continue;
-
-			const uint32_t from = (e.frame > toleranceFrames) ? (e.frame - toleranceFrames) : 0;
-			const uint32_t to = e.frame + toleranceFrames;
-
-			if (HasPressInWindow(b, from, to))
-			{
-				// 消費（簡易に両方を “古くする” 実装を入れるのがベター）
-				/// <summary>
-				/// ここは実装簡略化：ConsumePress を2回呼ぶ方式でもOK（ただし起点がずれる場合あり）
-				/// </summary>
-				ConsumePress(a, windowFrames);
-				ConsumePress(b, windowFrames);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// 指定フレーム内に押されたか？（消費可能）
-	bool ConsumePress(Action a, uint32_t windowFrames = 0)
-	{
-		if (windowFrames == 0) windowFrames = bufferWindowFrames_;
-		const uint32_t oldest = (frameCounter_ > windowFrames) ? (frameCounter_ - windowFrames) : 0;
-
-		for (uint32_t k = 0; k < kBufferSize; ++k)
-		{
-			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
-			const InputEvent& e = buffer_[idx];
-
-			if (e.frame < oldest) break;
-			if (e.action == a && e.type == InputEvent::Type::Press)
-			{
-				// “消費”しても探索の break 条件を壊さないように無効化
-				buffer_[idx].action = Action::Max;
-				buffer_[idx].frame = (std::numeric_limits<uint32_t>::max)();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// 指定フレーム内に長押しされたか？
-	bool IsHeld(Action a, uint32_t holdFrames) const
-	{
-		const int i = Idx(a);
-		if (!isDown_[i]) return false;
-		return (frameCounter_ - pressFrame_[i]) >= holdFrames;
-	}
-
-private:
-	static constexpr int Idx(Action a) { return static_cast<int>(a); }
-
-	void ClearFrame();
-	void BuildGameplayActions();
-	void BuildUIActions(); // 必要なら
-
-	/// <summary>
-	/// 入力合成ユーティリティ
-	/// </summary>
-
-
-	void RecordBufferedEvents();
-
-	void PushEvent(Action a, InputEvent::Type t, float v1 = 0.0f, Vector2 v2 = {})
-	{
-		buffer_[bufferHead_] = InputEvent{ a, t, frameCounter_, v1, v2 };
-		bufferHead_ = (bufferHead_ + 1) % kBufferSize;
-	}
-
-
-
-	// 同時押し
-	bool HasPressInWindow(Action a, uint32_t fromFrame, uint32_t toFrame) const
-	{
-		for (uint32_t k = 0; k < kBufferSize; ++k)
-		{
-			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
-			const InputEvent& e = buffer_[idx];
-			if (e.frame < fromFrame) break;
-			if (e.frame <= toFrame && e.action == a && e.type == InputEvent::Type::Press)
-				return true;
-		}
-		return false;
-	}
-private:
-	// 入力クラスのポインタ
-	Engine::Input* input_ = nullptr;
-	Character::BaseCharacter* character = nullptr; // キャラクターのポインタ
-
-private:
-	Context context_ = Context::Gameplay;
-
-
-	/// <summary>
-	/// Action 状態（毎フレーム Update で作る）
-	/// </summary>
-	bool pressed_[static_cast<int>(Action::Max)] = {};
-	bool triggered_[static_cast<int>(Action::Max)] = {};
-	bool released_[static_cast<int>(Action::Max)] = {};
-	Vector2 value2_[static_cast<int>(Action::Max)] = {};
-	float value1_[static_cast<int>(Action::Max)] = {};
-
-private:
-	uint32_t frameCounter_ = 0;
-
-	// バッファ（固定長リング）
-	static constexpr uint32_t kBufferSize = 128;
-	InputEvent buffer_[kBufferSize]{};
-	uint32_t bufferHead_ = 0;
-
-	// 何フレーム有効にするか（例：6f=0.1秒）
-	uint32_t bufferWindowFrames_ = 6;
-
-	/// <summary>
-	/// 長押し判定用
-	/// </summary>
-	uint32_t pressFrame_[static_cast<int>(Action::Max)] = {};
-	bool isDown_[static_cast<int>(Action::Max)] = {};
-};
-
-
-============================================================
 File Path: project/DirectXGame/application/base/Input/InputSystem.cpp
 ============================================================
 #include "InputSystem.h"
@@ -39193,7 +37164,7 @@ struct ScrapData {
 File Path: project/DirectXGame/application/base/Item/Scrap/ScrapItem.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 // 前方宣言
 namespace Engine {
@@ -39480,433 +37451,6 @@ private:
 	BulletManager* bulletManager = nullptr;
 
 
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Object/ObjectComponent.cpp
-============================================================
-﻿#include "ObjectComponent.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include <DirectXGame/engine/3d/Object/Object3dInstanceManager.h>
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/collider/3d/ColliderComponent.h"
-
-/// <summary>
-/// オブジェクトの時間取得
-/// </summary>
-/// <returns></returns>
-float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
-
-/// <summary>
-/// オブジェクトの時間設定
-/// </summary>
-/// <param name="spped"></param>
-void ObjectComponent::SetTimeSpeed(float speed) { timeSpeed_ = speed; }
-
-
-/// <summary>
-/// SRT設定
-/// </summary>
-/// <param name="s"></param>
-/// <param name="r"></param>
-/// <param name="t"></param>
-void ObjectComponent::SetSRT(const Vector3& s, const Vector3& r, const Vector3& t)
-{
-    // オブジェクトが存在するなら
-    if (objectBase_) {
-        objectBase_->GetWorldTransform().scale_ = s;    // スケール
-        objectBase_->GetWorldTransform().rotate_ = r;   // 回転
-        objectBase_->GetWorldTransform().translate_ = t;// 位置
-    }
-}
-
-void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const Vector3& t)
-{
-    
-    objectInstance_->transform.scale_ = s;    // スケール
-    objectInstance_->transform.rotate_ = r;   // 回転
-    objectInstance_->transform.translate_ = t;// 位置
-}
-
-// 色の設定
-void ObjectComponent::SetColor(const Color& color) {
-    if(useInstancing){
-         objectInstance_->color = color.ToVector4();
-    }
-    else {
-        objectBase_->GetMaterial(0)->GetMaterialInstance().color = color;
-	}
-};
-
-
-// ワールド変換取得
-Engine::WorldTransform& ObjectComponent::GetWorldTransform() {
-    
-    // インスタンシング描画なら
-    if (useInstancing) {
-        return objectInstance_->transform;
-    }
-    else {
-        return objectBase_->GetWorldTransform();
-    }
-}
-
-Engine::RigidBodyComponent* ObjectComponent::GetRigidBodyComponent() {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        return objectInstance_->GetRigidBodyComponent();
-    }
-    else {
-        return objectBase_->GetRigidBodyComponent();
-    }
-};
-
-
-void ObjectComponent::SetIsDraw(bool is) {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        objectInstance_->isDraw_ = is;
-    }
-    else {
-        objectBase_->SetIsDraw(is);
-    }
-}
-
-void ObjectComponent::IsDelete() {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        objectInstance_->IsDelete();
-    }
-    else {
-        objectBase_->IsDelete();
-    }
-};
-
-
-// コライダーコンポーネント取得
-Engine::ColliderComponent* ObjectComponent::GetColliderComponent() {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        return objectInstance_->GetColliderComponent();
-    }
-    else {
-        return objectBase_->GetColliderComponent();
-    }
-}
-// コライダー衝突履歴削除
-void ObjectComponent::ColliderHistoryClear() {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        objectInstance_->GetColliderComponent()->contactRecord_.Clear();
-    }
-    else {
-        objectBase_->GetColliderComponent()->contactRecord_.Clear();
-    }
-}
-// 衝突履歴取得
-Engine::ContactRecord& ObjectComponent::GetContactRecord() {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        return objectInstance_->GetColliderComponent()->contactRecord_;
-    }
-    else {
-        return objectBase_->GetColliderComponent()->contactRecord_;
-    }
-}
-
-// スクリーン座標取得
-Vector2 ObjectComponent::GetScreenPosition() {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        return ScreenPosition(objectInstance_->transform, entityManager->GetObject3dCommon()->GetDefaultCamera());
-    }
-    else {
-        return objectBase_->GetScreenPosition();
-    }
-}
-
-void ObjectComponent::SetIsUpdateColliderComponent(bool is) {
-    // インスタンシング描画なら
-    if (useInstancing) {
-        return objectInstance_->SetIsUpdateColliderComponent(is);
-    }
-    else {
-        return objectBase_->SetIsUpdateColliderComponent(is);
-    }
-};
-
-
-/// <summary>
-/// 初期化
-/// </summary>
-/// <param name="entity3DManager"></param>
-/// <param name="globalVariables"></param>
-void ObjectComponent::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
-    const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,
-    IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType,bool rigidUpdate) {
-
-    this->entityManager = entityManager;   // エンティティ3d
-    this->globalVariables = globalVariables;   // 保存項目
-    timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
-    useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
-    rigidUpdate_ = rigidUpdate;
-    name_ = objectName;
-
-    // オブジェクト生成
-    objectBase_ = entityManager->CreateObject3D(name_, modelType, {}, nullptr);
-    objectBase_->SetModel(modelName);                           // モデル指定
-    SetSRT({1,1,1},{0,0,0},{0,0,0});
-    // コライダ使うか
-    if (useCollider) {
-        objectBase_->InitColliderComponent();                   // コライダコンポーネント初期化
-        GetColliderComponent()->SetHitReceiver(iHitReceiver);   // 対象設定
-       
-    }
-    if (useRigidBody) {
-        objectBase_->InitRigidBodyComponent();                  // 
-        objectBase_->SetIsRigidUpdate(rigidUpdate); 
-    }
-}
-
-void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
-    const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
-    IHitReceiver* iHitReceiver, Engine::ObjectInstance::TransparencyType transparencyType, bool rigidUpdate)
-{
-    this->entityManager = entityManager;   // エンティティ3d
-    this->globalVariables = globalVariables;   // 保存項目
-    timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
-    useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
-    useRigidBody_ = useRigidBody;
-    rigidUpdate_ = rigidUpdate;
-    name_ = objectName;                         // 名前
-    modelName_ = modelName;                     // モデル名
-    useInstancing = true;                       // インスタンシング描画にする
-    // インスタンス初期化
-    Engine::ObjectInstance object;
-    object.Initialize(entityManager, useCollider_, rigidUpdate_);
-    // オブジェクト追加
-    entityManager->GetObject3dInstanceManager()->AddObject(modelName, texName, std::move(object), instanceId_,
-        Engine::Object3dInstanceManager::MeshType::kModel,transparencyType);
-
-    // インスタンス
-    objectInstance_ = entityManager->GetObject3dInstanceManager()->GetObjectById(modelName_, instanceId_, transparencyType);
-}
-
-/// <summary>
-/// 更新
-/// </summary>
-void ObjectComponent::Update() {
-    // インスタンシング描画なら
-    if (useInstancing)
-        objectInstance_->Update();
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Object/ObjectComponent.h
-============================================================
-#pragma once
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/3d/Object/ObjectInstance.h"
-#include "DirectXGame/engine/3d/Model/RenderComponent.h"
-#include"DirectXGame/engine/Animation/AnimationData.h"
-
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
-
-//オブジェクトタイプ
-enum class ObjectType
-{
-	None = -1,	// なし
-	Character,	// キャラクター
-	Weapon,		// 武器
-	Bullet,		// 弾
-	Item,		// アイテム
-	Gimmick,	// ギミック
-	Environment,// 環境オブジェクト
-	Effect,		// エフェクト
-	Camera,		// カメラ
-	Light,		// ライト
-	Event,		// イベント
-	Other,		// その他
-};
-
-// オブジェクトステートクラス
-struct ObjectStateFlags
-{
-	bool isActive = true;		// アクティブ状態(デフォルトはtrue、falseで非アクティブ)
-	bool isVisible = true;		// 可視状態(デフォルトはtrue、falseで非表示)
-	bool isAlive = true;		// 生存状態(デフォルトはtrue、falseで死亡)
-	bool isDeleted = false;		// 削除状態(デフォルトはfalse、trueで削除済み)
-	bool isLockonTarget = false;// ロックオンターゲット状態(デフォルトはfalse、trueでロックオン対象)
-};
-
-
-// 前方宣言
-namespace Engine {
-	class EntityManager;
-	class Object3dInstanceManager;
-	class Camera;
-	class ColliderComponent;
-	class RigidBodyComponent;
-}
-/// <summary>
-/// オブジェクトコンポーネントくクラス
-/// </summary>
-class ObjectComponent {
-public:
-
-	/// <summary>通常描画オブジェクトと任意の物理コンポーネントを初期化する。</summary>
-	/// <param name="entityManager">オブジェクトと各コンポーネントの生成元。</param>
-	/// <param name="globalVariables">オブジェクト調整値の登録・保存先。不要な場合はnullptr。</param>
-	/// <param name="objectName">EntityManager上の一意なオブジェクト名。</param>
-	/// <param name="modelName">使用するモデルの登録名またはファイル名。</param>
-	/// <param name="useCollider">コライダーを生成する場合はtrue。</param>
-	/// <param name="useRigidBody">剛体を生成する場合はtrue。</param>
-	/// <param name="iHitReceiver">衝突通知先。コライダー未使用時または通知不要時はnullptr。</param>
-	/// <param name="modelType">通常、スキニングなどの描画モデル種別。</param>
-	/// <param name="rigidUpdate">Update内で剛体を自動更新する場合はtrue。</param>
-	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
-		const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, 
-		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal,bool rigidUpdate = true);
-
-	/// <summary>
-	/// インスタンシング用初期化
-	/// </summary>
-	/// <param name="entityManager">インスタンスと各コンポーネントの生成元。</param>
-	/// <param name="globalVariables">調整値の登録・保存先。不要な場合はnullptr。</param>
-	/// <param name="objectName">インスタンス識別名。</param>
-	/// <param name="modelName">使用するモデル名。</param>
-	/// <param name="texName">上書きテクスチャ名。モデル既定を使う場合は空文字。</param>
-	/// <param name="useCollider">コライダーを生成する場合はtrue。</param>
-	/// <param name="useRigidBody">剛体を生成する場合はtrue。</param>
-	/// <param name="iHitReceiver">衝突通知先。通知不要時はnullptr。</param>
-	/// <param name="transparencyType">不透明または半透明の描画区分。</param>
-	/// <param name="rigidUpdate">Update内で剛体を自動更新する場合はtrue。</param>
-	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
-		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
-		bool useRigidBody, IHitReceiver* iHitReceiver,
-		Engine::ObjectInstance::TransparencyType transparencyType, bool rigidUpdate = true);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update();
-
-
-public: // コライダー
-	/// <summary>このオブジェクトへ接続したコライダーを取得する。</summary>
-	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
-	Engine::ColliderComponent* GetColliderComponent();
-	/// <summary>
-	/// コライダー衝突履歴削除
-	/// </summary>
-	void ColliderHistoryClear();
-	/// <summary>コライダーが保持する接触履歴を取得する。</summary>
-	/// <returns>次回履歴クリアまで有効な接触履歴への参照。</returns>
-	Engine::ContactRecord& GetContactRecord();
-
-	/// <summary>オブジェクトの描画可否を設定する。</summary>
-	/// <param name="is">描画する場合はtrue。</param>
-	void SetIsDraw(bool is);
-
-	/// <summary>
-	/// 削除
-	/// </summary>
-	void IsDelete();
-
-public: // 取得
-	/// <summary>通常描画オブジェクトを取得する。</summary>
-	/// <returns>EntityManagerが所有する非所有ポインター。インスタンシング利用時はnullptrの場合がある。</returns>
-	Engine::Object3d* GetObject3D() { return objectBase_; }
-	/// <summary>通常・インスタンシングを問わず、このオブジェクトのワールド変換を取得する。</summary>
-	/// <returns>オブジェクトの生存期間中有効な変更可能参照。</returns>
-	Engine::WorldTransform& GetWorldTransform();
-	/// <summary>
-	/// ワールド座標取得
-	/// </summary>
-	Vector3 GetWorldPosition() { return GetWorldTransform().GetWorldPosition(); };
-	/// <summary>現在のワールド座標を描画カメラのスクリーン座標へ変換する。</summary>
-	/// <returns>ピクセル単位のスクリーン座標。</returns>
-	Vector2 GetScreenPosition();
-	/// <summary>接続した剛体コンポーネントを取得する。</summary>
-	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
-	Engine::RigidBodyComponent* GetRigidBodyComponent();
-	/// <summary>Update内でコライダー・剛体を自動更新するか設定する。</summary>
-	/// <param name="is">ObjectComponent側で更新する場合はtrue。</param>
-	void SetIsUpdateColliderComponent(bool is);
-	/// <summary>
-	/// オブジェクト時間取得
-	/// </summary>
-	float GetTime() const;
-	/// <summary>
-	/// 名前取得
-	/// </summary>
-	std::string GetName() const { return name_; }
-	/// <summary>
-	/// 削除フラグ取得
-	/// </summary>
-	bool  GetDelete() const { return flags_.isDeleted; };
-	/// <summary>
-	/// 削除する
-	/// </summary>
-	void Delete() { flags_.isDeleted = true; };
-	/// <summary>
-	/// ロックオン状態の取得
-	/// </summary>
-	bool GetLockOn() const { return flags_.isLockonTarget; }
-	/// <summary>
-	/// ロックオン状態を設定
-	/// </summary>
-	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
-	
-public: // 設定
-
-	/// <summary>
-	/// 名前設定
-	/// </summary>
-	void SetName(std::string name) { this->name_ = name; };
-
-	/// <summary>このオブジェクト固有の時間倍率を設定する。</summary>
-	/// <param name="speed">時間倍率。1.0で通常、0.0で停止。</param>
-	void SetTimeSpeed(float speed);
-
-	/// <summary>
-	/// オブジェクト状態取得(設定可能)
-	/// </summary>
-	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
-	/// <summary>通常オブジェクトのスケール・回転・移動をまとめて設定する。</summary>
-	/// <param name="s">各軸のスケール。</param>
-	/// <param name="r">ラジアン単位のXYZ回転。</param>
-	/// <param name="t">ワールドまたは親基準の移動量。</param>
-	void SetSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
-	/// <summary>インスタンシングオブジェクトのスケール・回転・移動をまとめて設定する。</summary>
-	/// <param name="s">各軸のスケール。</param>
-	/// <param name="r">ラジアン単位のXYZ回転。</param>
-	/// <param name="t">ワールドまたは親基準の移動量。</param>
-	void SetInstancingSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
-	/// <summary>描画マテリアルまたはインスタンスの色を設定する。</summary>
-	/// <param name="color">RGBA色。各成分は通常0.0～1.0。</param>
-	void SetColor(const Color& color);
-private:
-	Engine::Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
-	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類(キャラクター、武器など)
-	std::string name_ = "";		// オブジェクト名
-	std::string modelName_ = "";		// オブジェクト名
-	ObjectStateFlags flags_;	// オブジェクトの状態
-	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
-	bool useCollider_ = false;	// コライダーコンポーネントを使うか
-	bool useRigidBody_ = false;	// リジッドボディーコンポーネントを使うか
-	bool useInstancing = false;	// インスタンシング描画にするか
-	bool rigidUpdate_ = true;
-
-	Engine::ObjectInstance* objectInstance_ = nullptr;
-	int instanceId_ = 0;
-
-protected: // 貰ってくるもの
-	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 };
 
 
@@ -40368,7 +37912,7 @@ bool SpecialPoint::IsMove()
 File Path: project/DirectXGame/application/base/Special/Point/SpecialPoint.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "SpecialPointStateMachine.h"
 
 // 前方宣言
@@ -40650,7 +38194,7 @@ void SpecialPointEndState::Exit() {
 File Path: project/DirectXGame/application/base/Special/Point/SpecialPointState.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 
 
 // キャラクター行動(一段階)
@@ -44231,7 +41775,7 @@ private:
 File Path: project/DirectXGame/application/base/Weapon/Base/BaseWeapon.cpp
 ============================================================
 #include "BaseWeapon.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 
 BaseWeapon::BaseWeapon() = default;
@@ -44984,8 +42528,8 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.cpp
 ============================================================
-﻿#include "SmallMeleeWeapon.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "SmallMeleeWeapon.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 
 void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
@@ -45207,9 +42751,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.cpp
 ============================================================
-﻿#include "PlayerSubWeapon.h"
+#include "PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <algorithm>
 #include <cmath>
 
@@ -45558,7 +43102,7 @@ private:
 File Path: project/DirectXGame/application/base/Weapon/Player/PlayerWeapon.cpp
 ============================================================
 #include "PlayerWeapon.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
@@ -45922,7 +43466,7 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 
 // application
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
@@ -46188,7 +43732,7 @@ File Path: project/DirectXGame/application/scene/CustomScene.h
 
 // application
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
@@ -46661,7 +44205,7 @@ File Path: project/DirectXGame/application/scene/EffectScene.h
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 
 
@@ -47065,7 +44609,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 
 // application
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
@@ -47645,7 +45189,7 @@ File Path: project/DirectXGame/application/scene/SampleScene.h
 #include<DirectXGame/engine/Effect/Particle/2d/ParticleEmitter2d.h>
 
 // application
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
@@ -48015,7 +45559,7 @@ File Path: project/DirectXGame/application/scene/SelectScene.h
 
 // application
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
@@ -48661,7 +46205,7 @@ File Path: project/DirectXGame/application/scene/TestScene.h
 #include "DirectXGame/engine/math/Noise.h"
 #include "DirectXGame/engine/Animation/AnimationData.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
-#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include "DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManager.h"
@@ -49306,7 +46850,7 @@ File Path: project/DirectXGame/application/scene/TutorialScene.h
 
 // application
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
@@ -60494,10 +58038,385 @@ namespace Engine {
 }
 
 ============================================================
-File Path: project/DirectXGame/engine/Camera/CameraData.h
+File Path: project/DirectXGame/engine/Camera/CameraController.cpp
+============================================================
+﻿#include "CameraController.h"
+#include <algorithm>
+#include <cmath>
+
+void CameraController::Initialize(Engine::Camera* camera, const InputSystem* input) {
+	this->camera = camera;
+	this->input = input;
+
+	// 追従
+	follow = std::make_unique<CameraFollow>();
+	follow->Initialize();
+	// 回転
+	rotation = std::make_unique<CameraRotation>();
+	rotation->Initialize();
+	// ロックオン
+	lockOn = std::make_unique<CameraLockOn>();
+	// 判定
+	collision = std::make_unique<CameraCollision>();
+	// シェイク
+	shake = std::make_unique<CameraShake>();
+	shake->Initialize(camera);
+	// ズーム
+	zoom = std::make_unique<CameraZoom>();
+	zoom->SetDefultZ(camera->GetTransform().scale.z);
+
+}
+
+
+void CameraController::Update(float dt) {
+	// カメラトランスフォーム取得
+	Transform transform = camera->GetTransform();
+
+	// 追従対象の移動速度を、先読みや速度ズーム用に推定する
+	UpdateTargetMotion(dt);
+	
+	// ロックオンしているなら
+	if (lockOn->GetData().isLockOn) {
+		transform.rotate = lockOn->Update(transform, dt);
+		if (lockOn->GetData().isLockOnRotate) {
+			rotation->GetData().pitch = transform.rotate.x;
+			rotation->GetData().yaw = transform.rotate.y;
+		}
+	}
+	else { // していないなら回転処理を優先
+		// 回転処理
+		rotation->Update(transform,input,dt);
+	}
+	// アクション用の先読み、速度ズーム、注視点オフセットを更新する
+	UpdateActionTimers(dt);
+	UpdateFollowAssist(dt);
+	UpdateSpeedZoom(dt);
+	// 追従
+	follow->Update(transform,dt);
+	// ズーム
+	zoom->Update(transform.scale.z,dt);
+	// シェイク
+	shake->SetDefultPos(transform.translate);
+	shake->Update(transform.translate,dt);
+	// 判定
+	collision->Update(transform, dt);
+	// カメラ位置決定
+	camera->SetTransform(transform);
+};
+
+void CameraController::SetTarget(const Engine::WorldTransform* target) {
+	this->target = target;
+	follow->SetTarget(target);
+	collision->SetTarget(target);
+	hasPreviousTargetPosition_ = false;
+};
+
+void CameraController::SetLockOnTarget(const Engine::WorldTransform* target) {
+	this->lockOnTarget = target;
+	lockOn->GetData().target = target;
+	lockOn->GetData().isLockOn = target != nullptr;
+}
+
+void CameraController::SetLookAheadData(const CameraLookAheadData& data) {
+	// 通常時に使う先読み設定を保存する
+	lookAheadData_ = data;
+}
+
+void CameraController::SetSpeedZoomData(const CameraSpeedZoomData& data) {
+	// 通常時に使う速度ズーム設定を保存する
+	speedZoomData_ = data;
+}
+
+void CameraController::RequestLookAhead(const CameraLookAheadData& data, float duration) {
+	// 攻撃演出などで一時的に通常設定を上書きする
+	actionLookAheadData_ = data;
+	actionLookAheadTimer_ = duration;
+	isActionLookAheadActive_ = true;
+}
+
+void CameraController::RequestSpeedZoom(const CameraSpeedZoomData& data, float duration) {
+	// 攻撃演出などで一時的に速度ズームを上書きする
+	actionSpeedZoomData_ = data;
+	actionSpeedZoomTimer_ = duration;
+	isActionSpeedZoomActive_ = true;
+}
+
+void CameraController::RequestActionTargetOffset(const CameraActionOffsetData& data) {
+	// 攻撃演出などで追従中心を一時的にずらす
+	actionOffsetData_ = data;
+	actionOffsetTimer_ = data.duration;
+	isActionOffsetActive_ = true;
+}
+
+void CameraController::ClearActionAssist() {
+	// 攻撃終了時に一時カメラ演出を解除する
+	isActionLookAheadActive_ = false;
+	isActionSpeedZoomActive_ = false;
+	isActionOffsetActive_ = false;
+	actionLookAheadTimer_ = 0.0f;
+	actionSpeedZoomTimer_ = 0.0f;
+	actionOffsetTimer_ = 0.0f;
+}
+
+void CameraController::UpdateTargetMotion(float dt) {
+	// 追従対象が無い、または時間が進んでいないなら速度を0にする
+	if (!target || dt <= 0.0f) {
+		targetVelocity_ = {};
+		hasPreviousTargetPosition_ = false;
+		return;
+	}
+
+	// ワールド座標の差分から疑似速度を求める
+	const Vector3 currentPosition = target->GetWorldPosition();
+	if (hasPreviousTargetPosition_) {
+		targetVelocity_ = (currentPosition - previousTargetPosition_) / dt;
+	}
+	else {
+		targetVelocity_ = {};
+		hasPreviousTargetPosition_ = true;
+	}
+	previousTargetPosition_ = currentPosition;
+}
+
+void CameraController::UpdateFollowAssist(float dt) {
+	// 一時設定が有効ならそちらを優先し、無ければ通常設定を使う
+	const CameraLookAheadData& lookAheadData =
+		isActionLookAheadActive_ ? actionLookAheadData_ : lookAheadData_;
+
+	// 速度方向の先読み位置を滑らかに補間する
+	const Vector3 targetLookAheadOffset = CalculateLookAheadOffset(lookAheadData);
+	const float lookAheadT = std::clamp(lookAheadData.smoothSpeed * dt, 0.0f, 1.0f);
+	currentLookAheadOffset_ = Lerp(currentLookAheadOffset_, targetLookAheadOffset, lookAheadT);
+
+	// 攻撃中の注視点オフセットを滑らかに出し入れする
+	const Vector3 targetActionOffset = isActionOffsetActive_ ? actionOffsetData_.targetOffset : Vector3{};
+	const float actionOffsetT = std::clamp(actionOffsetData_.blendSpeed * dt, 0.0f, 1.0f);
+	currentActionTargetOffset_ = Lerp(currentActionTargetOffset_, targetActionOffset, actionOffsetT);
+
+	// 追従カメラへ、先読みと攻撃オフセットを合成した注視点を渡す
+	follow->SetTargetOffset(currentLookAheadOffset_ + currentActionTargetOffset_);
+}
+
+void CameraController::UpdateSpeedZoom(float dt) {
+	// 一時設定が有効ならそちらを優先し、無ければ通常設定を使う
+	const CameraSpeedZoomData& data =
+		isActionSpeedZoomActive_ ? actionSpeedZoomData_ : speedZoomData_;
+	const Vector3 defaultOffset = follow->GetDefultOffsetPos();
+
+	// ターゲット速度から、後ろへ引く距離を計算して補間する
+	float targetOffsetZ = 0.0f;
+	if (data.enable) {
+		const float speedRate = CalculateSpeedRate(data.minSpeed, data.maxSpeed);
+		targetOffsetZ = Lerp(data.nearOffsetZ, data.farOffsetZ, speedRate);
+	}
+	const float zoomT = std::clamp(data.smoothSpeed * dt, 0.0f, 1.0f);
+	currentSpeedZoomOffsetZ_ = Lerp(currentSpeedZoomOffsetZ_, targetOffsetZ, zoomT);
+
+	// 通常の追従距離に速度ズーム分を足す
+	Vector3 offset = follow->GetOffsetPos();
+	offset.z = defaultOffset.z + currentSpeedZoomOffsetZ_;
+	follow->SetOffsetPos(offset);
+}
+
+void CameraController::UpdateActionTimers(float dt) {
+	// 0以下の時間は、外部から解除されるまで継続する設定として扱う
+	if (isActionLookAheadActive_ && actionLookAheadTimer_ > 0.0f) {
+		actionLookAheadTimer_ -= dt;
+		if (actionLookAheadTimer_ <= 0.0f) {
+			isActionLookAheadActive_ = false;
+		}
+	}
+	if (isActionSpeedZoomActive_ && actionSpeedZoomTimer_ > 0.0f) {
+		actionSpeedZoomTimer_ -= dt;
+		if (actionSpeedZoomTimer_ <= 0.0f) {
+			isActionSpeedZoomActive_ = false;
+		}
+	}
+	if (isActionOffsetActive_ && actionOffsetTimer_ > 0.0f) {
+		actionOffsetTimer_ -= dt;
+		if (actionOffsetTimer_ <= 0.0f) {
+			isActionOffsetActive_ = false;
+		}
+	}
+}
+
+float CameraController::CalculateSpeedRate(float minSpeed, float maxSpeed) const {
+	// 速度レンジが不正なら急な挙動を避けるため0にする
+	if (maxSpeed <= minSpeed) {
+		return 0.0f;
+	}
+	const float speed = Length(targetVelocity_);
+	return std::clamp((speed - minSpeed) / (maxSpeed - minSpeed), 0.0f, 1.0f);
+}
+
+Vector3 CameraController::CalculateLookAheadOffset(const CameraLookAheadData& data) const {
+	// 無効時や速度がほぼ無い時は先読みしない
+	if (!data.enable || targetVelocity_.LengthSq() < 1e-6f) {
+		return {};
+	}
+
+	// 速度方向に、速度割合に応じた距離だけ注視点を先へ送る
+	const float speedRate = CalculateSpeedRate(data.minSpeed, data.maxSpeed);
+	const Vector3 direction = Normalize(targetVelocity_);
+	return direction * (data.distance * speedRate);
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraController.h
 ============================================================
 #pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+#include "DirectXGame/engine/Entity/ObjectComponent.h"
+#include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
+#include "DirectXGame/application/base/Camera/Base/CameraLag.h"
+#include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
+#include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
+#include "DirectXGame/application/base/Camera/Base/CameraShake.h"
+#include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
+#include "DirectXGame/application/base/Camera/Base/CameraZoom.h"
+
+class InputSystem;
+
+// カメラ統括クラス
+/// <summary>
+/// CameraControllerを管理・実装するクラス。
+/// </summary>
+class CameraController {
+public:
+
+	/// <summary>追従、回転、ロックオン、衝突補正、演出用の各カメラ機能を初期化する。</summary>
+	/// <param name="camera">制御対象のカメラ。CameraControllerは所有せず、利用中は有効であること。</param>
+	/// <param name="input">カメラ操作に使用する入力。自動制御のみの場合はnullptrを許容する。</param>
+	void Initialize(Engine::Camera* camera,const InputSystem* input);
+
+	/// <summary>設定済みの追従対象と入力に基づいて全カメラ機能を更新する。</summary>
+	/// <param name="dt">秒単位のフレーム時間。0以下の場合、時間依存の補間は進行しない。</param>
+	void Update(float dt);
+
+	/// <summary>カメラが注視するロックオン対象を設定する。</summary>
+	/// <param name="target">対象への非所有ポインター。ロックオン解除時はnullptr。</param>
+	void SetLockOnTarget(const Engine::WorldTransform* target);
+	/// <summary>カメラの通常追従対象を設定する。</summary>
+	/// <param name="target">対象への非所有ポインター。追従解除時はnullptr。</param>
+	void SetTarget(const Engine::WorldTransform* target);
+	/// <summary>カメラシェイク機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
+	CameraShake* GetShake(){ return shake.get(); }
+	/// <summary>カメラズーム機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
+	CameraZoom* GetZoom(){ return zoom.get(); }
+	/// <summary>ロックオン機能を取得する。</summary>
+	/// <returns>CameraControllerが所有する機能への非所有ポインター。</returns>
+	CameraLockOn* GetCameraLockOn() { return lockOn.get(); }
+	/// <summary>通常追従時の先読み設定を置き換える。</summary>
+	/// <param name="data">速度方向の先読み量と補間設定。</param>
+	void SetLookAheadData(const CameraLookAheadData& data);
+	/// <summary>通常追従時の速度ズーム設定を置き換える。</summary>
+	/// <param name="data">速度範囲、ズーム距離、補間設定。</param>
+	void SetSpeedZoomData(const CameraSpeedZoomData& data);
+	/// <summary>攻撃演出などで一時的な先読みを要求する。</summary>
+	/// <param name="data">一時適用する先読み設定。</param>
+	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
+	void RequestLookAhead(const CameraLookAheadData& data, float duration);
+	/// <summary>攻撃演出などで一時的な速度ズームを要求する。</summary>
+	/// <param name="data">一時適用する速度ズーム設定。</param>
+	/// <param name="duration">適用時間（秒）。0以下の場合は適用しない。</param>
+	void RequestSpeedZoom(const CameraSpeedZoomData& data, float duration);
+	/// <summary>攻撃演出などで一時的な注視点オフセットを要求する。</summary>
+	/// <param name="data">オフセット量、開始時間、継続時間を含む設定。</param>
+	void RequestActionTargetOffset(const CameraActionOffsetData& data);
+	/// <summary>
+	/// 一時カメラ演出の解除
+	/// </summary>
+	void ClearActionAssist();
+private:
+	/// <summary>
+	/// 追従対象の移動量から速度を推定する
+	/// </summary>
+	void UpdateTargetMotion(float dt);
+	/// <summary>
+	/// 先読みと演出オフセットを追従ターゲットへ反映する
+	/// </summary>
+	void UpdateFollowAssist(float dt);
+	/// <summary>
+	/// 速度から追従距離を補間する
+	/// </summary>
+	void UpdateSpeedZoom(float dt);
+	/// <summary>
+	/// 一時リクエストの残り時間を更新する
+	/// </summary>
+	void UpdateActionTimers(float dt);
+	/// <summary>現在速度を指定範囲の0.0～1.0へ正規化する。</summary>
+	/// <param name="minSpeed">割合0.0に対応する速度。</param>
+	/// <param name="maxSpeed">割合1.0に対応する速度。</param>
+	/// <returns>範囲内へ制限した速度割合。範囲が無効な場合は0.0。</returns>
+	float CalculateSpeedRate(float minSpeed, float maxSpeed) const;
+	/// <summary>現在の推定速度から追従先読みオフセットを計算する。</summary>
+	/// <param name="data">計算に使用する先読み設定。</param>
+	/// <returns>ワールド空間の先読みオフセット。</returns>
+	Vector3 CalculateLookAheadOffset(const CameraLookAheadData& data) const;
+private:
+	// 追従
+	std::unique_ptr<CameraFollow> follow = nullptr;
+	// 回転
+	std::unique_ptr<CameraRotation> rotation = nullptr;
+	// ロックオン
+	std::unique_ptr<CameraLockOn> lockOn = nullptr;
+	// 判定
+	std::unique_ptr<CameraCollision> collision = nullptr;
+	// シェイク
+	std::unique_ptr<CameraShake> shake = nullptr;
+	// ズーム
+	std::unique_ptr<CameraZoom> zoom = nullptr;
+private:
+	const InputSystem* input = nullptr;
+	Engine::Camera* camera = nullptr;
+	const Engine::WorldTransform* target = nullptr;
+	const Engine::WorldTransform* lockOnTarget = nullptr;
+	// 追従対象の前フレーム位置
+	Vector3 previousTargetPosition_ = {};
+	// 追従対象の推定速度
+	Vector3 targetVelocity_ = {};
+	// 追従対象の前フレーム位置が有効か
+	bool hasPreviousTargetPosition_ = false;
+	// 通常時の先読み設定
+	CameraLookAheadData lookAheadData_{};
+	// 攻撃中などに一時的に使う先読み設定
+	CameraLookAheadData actionLookAheadData_{};
+	// 通常時の速度ズーム設定
+	CameraSpeedZoomData speedZoomData_{};
+	// 攻撃中などに一時的に使う速度ズーム設定
+	CameraSpeedZoomData actionSpeedZoomData_{};
+	// 攻撃中などに一時的に使う注視点オフセット設定
+	CameraActionOffsetData actionOffsetData_{};
+	// 補間済みの先読みオフセット
+	Vector3 currentLookAheadOffset_ = {};
+	// 補間済みの注視点オフセット
+	Vector3 currentActionTargetOffset_ = {};
+	// 補間済みの速度ズーム距離
+	float currentSpeedZoomOffsetZ_ = 0.0f;
+	// 一時先読みの残り時間
+	float actionLookAheadTimer_ = 0.0f;
+	// 一時速度ズームの残り時間
+	float actionSpeedZoomTimer_ = 0.0f;
+	// 一時注視点オフセットの残り時間
+	float actionOffsetTimer_ = 0.0f;
+	// 一時先読みを使用中か
+	bool isActionLookAheadActive_ = false;
+	// 一時速度ズームを使用中か
+	bool isActionSpeedZoomActive_ = false;
+	// 一時注視点オフセットを使用中か
+	bool isActionOffsetActive_ = false;
+};
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraData.h
+============================================================
+﻿#pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
+#include <string>
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Collider/CollisionTypeIdDef.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -60619,6 +58538,108 @@ struct CameraActionOffsetData {
 	float duration = 0.0f;
 };
 
+struct GlobalCameraData {
+    // 使用カメラ
+	std::string cameraName = "no";
+	// カメラを変更するか
+	bool isChangeCamera = false;
+	// 移動補間
+	float interpolation = 0.0f;
+	// カメラ切り替え開始時間
+	float changeCameraStartTime = 0.0f;
+	// カメラをシェイクするか
+	bool isShake = false;
+	// シェイク量
+	float shakeCameraPower = 0.0f;
+	// シェイク開始時間
+	float shakeStartTime = 0.0f;
+	// シェイク継続時間
+	float shakeDuration = 0.0f;
+	// カメラ基準のシェイク幅
+	Vector3 shakeOffset = { 0.0f, 0.0f, 0.0f };
+
+	// 攻撃中に注視点をずらすか
+	bool isActionTargetOffset = false;
+	// 注視点オフセット開始時間
+	float actionTargetOffsetStartTime = 0.0f;
+	// 注視点オフセット継続時間
+	float actionTargetOffsetDuration = 0.0f;
+	// 注視点オフセット補間速度
+	float actionTargetOffsetBlendSpeed = 8.0f;
+	// 追従ターゲットに加えるワールド座標オフセット
+	Vector3 actionTargetOffset = { 0.0f, 0.0f, 0.0f };
+
+	// 攻撃中に速度方向の先読みを使うか
+	bool isLookAhead = false;
+	// 先読み開始時間
+	float lookAheadStartTime = 0.0f;
+	// 先読み継続時間
+	float lookAheadDuration = 0.0f;
+	// 先読み最大距離
+	float lookAheadDistance = 0.0f;
+	// 先読みを始める速度
+	float lookAheadMinSpeed = 0.0f;
+	// 最大先読みになる速度
+	float lookAheadMaxSpeed = 30.0f;
+	// 先読み補間速度
+	float lookAheadSmoothSpeed = 8.0f;
+
+	// 攻撃中に速度でカメラ距離を変えるか
+	bool isSpeedZoom = false;
+	// 速度ズーム開始時間
+	float speedZoomStartTime = 0.0f;
+	// 速度ズーム継続時間
+	float speedZoomDuration = 0.0f;
+	// 速度ズームを始める速度
+	float speedZoomMinSpeed = 0.0f;
+	// 最大速度ズームになる速度
+	float speedZoomMaxSpeed = 30.0f;
+	// 低速時に足すカメラ距離
+	float speedZoomNearOffsetZ = 0.0f;
+	// 高速時に足すカメラ距離
+	float speedZoomFarOffsetZ = -8.0f;
+	// 速度ズーム補間速度
+	float speedZoomSmoothSpeed = 8.0f;
+
+	// カメラをズームするか
+	bool isZoom = false;
+	// ロックオンされていたらズームするか
+	bool isLockOnZoom = false;
+	// カメラズーム量
+	float zoomTargetDistance = 0.0f;
+	// カメラズーム開始時間
+	float zoomStartTime = 0.0f;
+	// カメラズーム時間
+	float zoomDuration = 0.0f;
+	// カメラズーム距離補間速度
+	float zoomSpeed = 0.0f;
+
+	// ロックオンするか
+	bool isLockOn = false;
+	// ロックオン後の回転を解除されても引き継ぐか
+	bool isLockOnRotate = true;
+	// ロックオン補間速度
+	float lockOnInterpolation = 0.5f;
+	// ロックオン解除時間(0以下なら解除しない)
+	float lockOnEndTime = 0.0f;
+
+	// 攻撃がヒットした瞬間に専用のカメラ演出を再生するか
+	bool isHitCameraEffect = false;
+	// ヒット時にカメラをシェイクするか
+	bool isHitShake = true;
+	// ヒット時シェイクの継続時間
+	float hitShakeDuration = 0.1f;
+	// ヒット時のカメラ基準シェイク幅
+	Vector3 hitShakeOffset = { 0.2f, 0.2f, 0.2f };
+	// ヒット時にカメラをズームするか
+	bool isHitZoom = false;
+	// ヒット時ズームの距離
+	float hitZoomTargetDistance = 0.0f;
+	// ヒット時ズームの補間速度
+	float hitZoomSpeed = 8.0f;
+	// ヒット時ズームの継続時間
+	float hitZoomDuration = 0.1f;
+};
 
 
 ============================================================
@@ -63834,7 +61855,7 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Collider/3d/CollisionManager.cpp
 ============================================================
 #include "CollisionManager.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 
 
@@ -79509,6 +77530,433 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Entity/ObjectComponent.cpp
+============================================================
+﻿#include "ObjectComponent.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+#include <DirectXGame/engine/3d/Object/Object3dInstanceManager.h>
+#include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include"DirectXGame/engine/collider/3d/ColliderComponent.h"
+
+/// <summary>
+/// オブジェクトの時間取得
+/// </summary>
+/// <returns></returns>
+float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
+
+/// <summary>
+/// オブジェクトの時間設定
+/// </summary>
+/// <param name="spped"></param>
+void ObjectComponent::SetTimeSpeed(float speed) { timeSpeed_ = speed; }
+
+
+/// <summary>
+/// SRT設定
+/// </summary>
+/// <param name="s"></param>
+/// <param name="r"></param>
+/// <param name="t"></param>
+void ObjectComponent::SetSRT(const Vector3& s, const Vector3& r, const Vector3& t)
+{
+    // オブジェクトが存在するなら
+    if (objectBase_) {
+        objectBase_->GetWorldTransform().scale_ = s;    // スケール
+        objectBase_->GetWorldTransform().rotate_ = r;   // 回転
+        objectBase_->GetWorldTransform().translate_ = t;// 位置
+    }
+}
+
+void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const Vector3& t)
+{
+    
+    objectInstance_->transform.scale_ = s;    // スケール
+    objectInstance_->transform.rotate_ = r;   // 回転
+    objectInstance_->transform.translate_ = t;// 位置
+}
+
+// 色の設定
+void ObjectComponent::SetColor(const Color& color) {
+    if(useInstancing){
+         objectInstance_->color = color.ToVector4();
+    }
+    else {
+        objectBase_->GetMaterial(0)->GetMaterialInstance().color = color;
+	}
+};
+
+
+// ワールド変換取得
+Engine::WorldTransform& ObjectComponent::GetWorldTransform() {
+    
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return objectInstance_->transform;
+    }
+    else {
+        return objectBase_->GetWorldTransform();
+    }
+}
+
+Engine::RigidBodyComponent* ObjectComponent::GetRigidBodyComponent() {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return objectInstance_->GetRigidBodyComponent();
+    }
+    else {
+        return objectBase_->GetRigidBodyComponent();
+    }
+};
+
+
+void ObjectComponent::SetIsDraw(bool is) {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        objectInstance_->isDraw_ = is;
+    }
+    else {
+        objectBase_->SetIsDraw(is);
+    }
+}
+
+void ObjectComponent::IsDelete() {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        objectInstance_->IsDelete();
+    }
+    else {
+        objectBase_->IsDelete();
+    }
+};
+
+
+// コライダーコンポーネント取得
+Engine::ColliderComponent* ObjectComponent::GetColliderComponent() {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return objectInstance_->GetColliderComponent();
+    }
+    else {
+        return objectBase_->GetColliderComponent();
+    }
+}
+// コライダー衝突履歴削除
+void ObjectComponent::ColliderHistoryClear() {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        objectInstance_->GetColliderComponent()->contactRecord_.Clear();
+    }
+    else {
+        objectBase_->GetColliderComponent()->contactRecord_.Clear();
+    }
+}
+// 衝突履歴取得
+Engine::ContactRecord& ObjectComponent::GetContactRecord() {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return objectInstance_->GetColliderComponent()->contactRecord_;
+    }
+    else {
+        return objectBase_->GetColliderComponent()->contactRecord_;
+    }
+}
+
+// スクリーン座標取得
+Vector2 ObjectComponent::GetScreenPosition() {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return ScreenPosition(objectInstance_->transform, entityManager->GetObject3dCommon()->GetDefaultCamera());
+    }
+    else {
+        return objectBase_->GetScreenPosition();
+    }
+}
+
+void ObjectComponent::SetIsUpdateColliderComponent(bool is) {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return objectInstance_->SetIsUpdateColliderComponent(is);
+    }
+    else {
+        return objectBase_->SetIsUpdateColliderComponent(is);
+    }
+};
+
+
+/// <summary>
+/// 初期化
+/// </summary>
+/// <param name="entity3DManager"></param>
+/// <param name="globalVariables"></param>
+void ObjectComponent::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
+    const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,
+    IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType,bool rigidUpdate) {
+
+    this->entityManager = entityManager;   // エンティティ3d
+    this->globalVariables = globalVariables;   // 保存項目
+    timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
+    useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
+    rigidUpdate_ = rigidUpdate;
+    name_ = objectName;
+
+    // オブジェクト生成
+    objectBase_ = entityManager->CreateObject3D(name_, modelType, {}, nullptr);
+    objectBase_->SetModel(modelName);                           // モデル指定
+    SetSRT({1,1,1},{0,0,0},{0,0,0});
+    // コライダ使うか
+    if (useCollider) {
+        objectBase_->InitColliderComponent();                   // コライダコンポーネント初期化
+        GetColliderComponent()->SetHitReceiver(iHitReceiver);   // 対象設定
+       
+    }
+    if (useRigidBody) {
+        objectBase_->InitRigidBodyComponent();                  // 
+        objectBase_->SetIsRigidUpdate(rigidUpdate); 
+    }
+}
+
+void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
+    const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
+    IHitReceiver* iHitReceiver, Engine::ObjectInstance::TransparencyType transparencyType, bool rigidUpdate)
+{
+    this->entityManager = entityManager;   // エンティティ3d
+    this->globalVariables = globalVariables;   // 保存項目
+    timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
+    useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
+    useRigidBody_ = useRigidBody;
+    rigidUpdate_ = rigidUpdate;
+    name_ = objectName;                         // 名前
+    modelName_ = modelName;                     // モデル名
+    useInstancing = true;                       // インスタンシング描画にする
+    // インスタンス初期化
+    Engine::ObjectInstance object;
+    object.Initialize(entityManager, useCollider_, rigidUpdate_);
+    // オブジェクト追加
+    entityManager->GetObject3dInstanceManager()->AddObject(modelName, texName, std::move(object), instanceId_,
+        Engine::Object3dInstanceManager::MeshType::kModel,transparencyType);
+
+    // インスタンス
+    objectInstance_ = entityManager->GetObject3dInstanceManager()->GetObjectById(modelName_, instanceId_, transparencyType);
+}
+
+/// <summary>
+/// 更新
+/// </summary>
+void ObjectComponent::Update() {
+    // インスタンシング描画なら
+    if (useInstancing)
+        objectInstance_->Update();
+};
+
+
+============================================================
+File Path: project/DirectXGame/engine/Entity/ObjectComponent.h
+============================================================
+#pragma once
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/3d/Object/ObjectInstance.h"
+#include "DirectXGame/engine/3d/Model/RenderComponent.h"
+#include"DirectXGame/engine/Animation/AnimationData.h"
+
+#include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
+
+//オブジェクトタイプ
+enum class ObjectType
+{
+	None = -1,	// なし
+	Character,	// キャラクター
+	Weapon,		// 武器
+	Bullet,		// 弾
+	Item,		// アイテム
+	Gimmick,	// ギミック
+	Environment,// 環境オブジェクト
+	Effect,		// エフェクト
+	Camera,		// カメラ
+	Light,		// ライト
+	Event,		// イベント
+	Other,		// その他
+};
+
+// オブジェクトステートクラス
+struct ObjectStateFlags
+{
+	bool isActive = true;		// アクティブ状態(デフォルトはtrue、falseで非アクティブ)
+	bool isVisible = true;		// 可視状態(デフォルトはtrue、falseで非表示)
+	bool isAlive = true;		// 生存状態(デフォルトはtrue、falseで死亡)
+	bool isDeleted = false;		// 削除状態(デフォルトはfalse、trueで削除済み)
+	bool isLockonTarget = false;// ロックオンターゲット状態(デフォルトはfalse、trueでロックオン対象)
+};
+
+
+// 前方宣言
+namespace Engine {
+	class EntityManager;
+	class Object3dInstanceManager;
+	class Camera;
+	class ColliderComponent;
+	class RigidBodyComponent;
+}
+/// <summary>
+/// オブジェクトコンポーネントくクラス
+/// </summary>
+class ObjectComponent {
+public:
+
+	/// <summary>通常描画オブジェクトと任意の物理コンポーネントを初期化する。</summary>
+	/// <param name="entityManager">オブジェクトと各コンポーネントの生成元。</param>
+	/// <param name="globalVariables">オブジェクト調整値の登録・保存先。不要な場合はnullptr。</param>
+	/// <param name="objectName">EntityManager上の一意なオブジェクト名。</param>
+	/// <param name="modelName">使用するモデルの登録名またはファイル名。</param>
+	/// <param name="useCollider">コライダーを生成する場合はtrue。</param>
+	/// <param name="useRigidBody">剛体を生成する場合はtrue。</param>
+	/// <param name="iHitReceiver">衝突通知先。コライダー未使用時または通知不要時はnullptr。</param>
+	/// <param name="modelType">通常、スキニングなどの描画モデル種別。</param>
+	/// <param name="rigidUpdate">Update内で剛体を自動更新する場合はtrue。</param>
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
+		const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, 
+		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal,bool rigidUpdate = true);
+
+	/// <summary>
+	/// インスタンシング用初期化
+	/// </summary>
+	/// <param name="entityManager">インスタンスと各コンポーネントの生成元。</param>
+	/// <param name="globalVariables">調整値の登録・保存先。不要な場合はnullptr。</param>
+	/// <param name="objectName">インスタンス識別名。</param>
+	/// <param name="modelName">使用するモデル名。</param>
+	/// <param name="texName">上書きテクスチャ名。モデル既定を使う場合は空文字。</param>
+	/// <param name="useCollider">コライダーを生成する場合はtrue。</param>
+	/// <param name="useRigidBody">剛体を生成する場合はtrue。</param>
+	/// <param name="iHitReceiver">衝突通知先。通知不要時はnullptr。</param>
+	/// <param name="transparencyType">不透明または半透明の描画区分。</param>
+	/// <param name="rigidUpdate">Update内で剛体を自動更新する場合はtrue。</param>
+	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
+		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
+		bool useRigidBody, IHitReceiver* iHitReceiver,
+		Engine::ObjectInstance::TransparencyType transparencyType, bool rigidUpdate = true);
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update();
+
+
+public: // コライダー
+	/// <summary>このオブジェクトへ接続したコライダーを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
+	Engine::ColliderComponent* GetColliderComponent();
+	/// <summary>
+	/// コライダー衝突履歴削除
+	/// </summary>
+	void ColliderHistoryClear();
+	/// <summary>コライダーが保持する接触履歴を取得する。</summary>
+	/// <returns>次回履歴クリアまで有効な接触履歴への参照。</returns>
+	Engine::ContactRecord& GetContactRecord();
+
+	/// <summary>オブジェクトの描画可否を設定する。</summary>
+	/// <param name="is">描画する場合はtrue。</param>
+	void SetIsDraw(bool is);
+
+	/// <summary>
+	/// 削除
+	/// </summary>
+	void IsDelete();
+
+public: // 取得
+	/// <summary>通常描画オブジェクトを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。インスタンシング利用時はnullptrの場合がある。</returns>
+	Engine::Object3d* GetObject3D() { return objectBase_; }
+	/// <summary>通常・インスタンシングを問わず、このオブジェクトのワールド変換を取得する。</summary>
+	/// <returns>オブジェクトの生存期間中有効な変更可能参照。</returns>
+	Engine::WorldTransform& GetWorldTransform();
+	/// <summary>
+	/// ワールド座標取得
+	/// </summary>
+	Vector3 GetWorldPosition() { return GetWorldTransform().GetWorldPosition(); };
+	/// <summary>現在のワールド座標を描画カメラのスクリーン座標へ変換する。</summary>
+	/// <returns>ピクセル単位のスクリーン座標。</returns>
+	Vector2 GetScreenPosition();
+	/// <summary>接続した剛体コンポーネントを取得する。</summary>
+	/// <returns>EntityManagerが所有する非所有ポインター。未生成の場合はnullptr。</returns>
+	Engine::RigidBodyComponent* GetRigidBodyComponent();
+	/// <summary>Update内でコライダー・剛体を自動更新するか設定する。</summary>
+	/// <param name="is">ObjectComponent側で更新する場合はtrue。</param>
+	void SetIsUpdateColliderComponent(bool is);
+	/// <summary>
+	/// オブジェクト時間取得
+	/// </summary>
+	float GetTime() const;
+	/// <summary>
+	/// 名前取得
+	/// </summary>
+	std::string GetName() const { return name_; }
+	/// <summary>
+	/// 削除フラグ取得
+	/// </summary>
+	bool  GetDelete() const { return flags_.isDeleted; };
+	/// <summary>
+	/// 削除する
+	/// </summary>
+	void Delete() { flags_.isDeleted = true; };
+	/// <summary>
+	/// ロックオン状態の取得
+	/// </summary>
+	bool GetLockOn() const { return flags_.isLockonTarget; }
+	/// <summary>
+	/// ロックオン状態を設定
+	/// </summary>
+	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
+	
+public: // 設定
+
+	/// <summary>
+	/// 名前設定
+	/// </summary>
+	void SetName(std::string name) { this->name_ = name; };
+
+	/// <summary>このオブジェクト固有の時間倍率を設定する。</summary>
+	/// <param name="speed">時間倍率。1.0で通常、0.0で停止。</param>
+	void SetTimeSpeed(float speed);
+
+	/// <summary>
+	/// オブジェクト状態取得(設定可能)
+	/// </summary>
+	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
+	/// <summary>通常オブジェクトのスケール・回転・移動をまとめて設定する。</summary>
+	/// <param name="s">各軸のスケール。</param>
+	/// <param name="r">ラジアン単位のXYZ回転。</param>
+	/// <param name="t">ワールドまたは親基準の移動量。</param>
+	void SetSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
+	/// <summary>インスタンシングオブジェクトのスケール・回転・移動をまとめて設定する。</summary>
+	/// <param name="s">各軸のスケール。</param>
+	/// <param name="r">ラジアン単位のXYZ回転。</param>
+	/// <param name="t">ワールドまたは親基準の移動量。</param>
+	void SetInstancingSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
+	/// <summary>描画マテリアルまたはインスタンスの色を設定する。</summary>
+	/// <param name="color">RGBA色。各成分は通常0.0～1.0。</param>
+	void SetColor(const Color& color);
+private:
+	Engine::Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
+	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類(キャラクター、武器など)
+	std::string name_ = "";		// オブジェクト名
+	std::string modelName_ = "";		// オブジェクト名
+	ObjectStateFlags flags_;	// オブジェクトの状態
+	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	bool useCollider_ = false;	// コライダーコンポーネントを使うか
+	bool useRigidBody_ = false;	// リジッドボディーコンポーネントを使うか
+	bool useInstancing = false;	// インスタンシング描画にするか
+	bool rigidUpdate_ = true;
+
+	Engine::ObjectInstance* objectInstance_ = nullptr;
+	int instanceId_ = 0;
+
+protected: // 貰ってくるもの
+	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
+};
+
+
+============================================================
 File Path: project/DirectXGame/engine/Entity/PrimitiveEntity.h
 ============================================================
 #pragma once
@@ -79540,6 +77988,1116 @@ namespace Engine {
 	};
 }
 
+
+============================================================
+File Path: project/DirectXGame/engine/GlobalVariables/GlobalVariables.cpp
+============================================================
+﻿#include "GlobalVariables.h"
+#include "Windows.h"
+#include "imgui.h"
+#include <algorithm>
+#include <limits>
+
+
+
+/// -----
+/// 取得、生成、削除、検索
+/// -----
+
+/// <summary>
+/// グループ生成
+/// </summary>
+void Engine::GlobalVariables::CreateGroup(const std::string& groupName) {
+	// 指定名のオブジェクトがなければ追加する
+	datas_[groupName];
+}
+
+/// <summary>
+/// グループ検索
+/// </summary>
+bool Engine::GlobalVariables::HasGroup(const std::string& groupName) const
+{
+	return datas_.find(groupName) != datas_.end();
+}
+
+/// <summary>
+/// キー検索
+/// </summary>
+bool Engine::GlobalVariables::HasKey(const std::string& groupName, const std::string& key) const
+{
+	auto groupIt = datas_.find(groupName);
+	// 無いならfalse
+	if (groupIt == datas_.end()) {
+		return false;
+	}
+	const auto& group = groupIt->second;
+	return group.find(key) != group.end();
+}
+
+/// <summary>
+/// グループ名前取得
+/// </summary>
+std::vector<std::string> Engine::GlobalVariables::GetGroupNames() const
+{
+	std::vector<std::string> groupNames;
+	groupNames.reserve(datas_.size());
+	for (const auto& [groupName, _] : datas_) {
+		groupNames.push_back(groupName);
+	}
+	return groupNames;
+}
+
+/// <summary>
+/// キー名前取得
+/// </summary>
+std::vector<std::string> Engine::GlobalVariables::GetKeys(const std::string& groupName) const
+{
+	std::vector<std::string> keys;
+	auto it = datas_.find(groupName);
+	if (it == datas_.end()) return keys;
+
+	const auto& group = it->second;
+	keys.reserve(group.size());
+	for (const auto& [key, _] : group) {
+		keys.push_back(key);
+	}
+	return keys;
+}
+
+/// <summary>
+/// 型タイプ取得
+/// </summary>
+std::string Engine::GlobalVariables::GetTypeName(const std::string& groupName, const std::string& key) const
+{
+	auto groupIt = datas_.find(groupName);
+	if (groupIt == datas_.end()) {
+		return "UnknownGroup";
+	}
+
+	const auto& group = groupIt->second;
+	auto itemIt = group.find(key);
+	if (itemIt == group.end()) {
+		return "UnknownKey";
+	}
+
+	const auto& item = itemIt->second;
+
+	// 各条件のどれかに当てはまっていたらタイプ設定
+	if (std::holds_alternative<int32_t>(item)) return "int32_t";		// 
+	if (std::holds_alternative<uint32_t>(item)) return "uint32_t";		// 
+	if (std::holds_alternative<float>(item)) return "float";			// 
+	if (std::holds_alternative<Vector2>(item)) return "Vector2";		// 
+	if (std::holds_alternative<Vector3>(item)) return "Vector3";		// 
+	if (std::holds_alternative<Vector4>(item)) return "Vector4";		// 
+	if (std::holds_alternative<bool>(item)) return "bool";				// 
+	if (std::holds_alternative<std::string>(item)) return "string";		// 
+	if (std::holds_alternative<Transform>(item)) return "Transform";	// 
+	if (std::holds_alternative<GvData::EnumItem>(item)) return "enum";
+
+	return "UnknownType";
+}
+
+/// <summary>
+/// アイテム削除
+/// </summary>
+void Engine::GlobalVariables::RemoveItem(const std::string& groupName, const std::string& key)
+{
+	auto groupIt = datas_.find(groupName);
+	if (groupIt != datas_.end()) {
+		groupIt->second.erase(key);
+
+		// キーの順序リストからも削除
+		auto& keys = groupKeys_[groupName];
+		keys.erase(std::remove(keys.begin(), keys.end(), key), keys.end());
+	}
+}
+
+/// <summary>
+/// グループ削除
+/// </summary>
+void Engine::GlobalVariables::RemoveGroup(const std::string& groupName)
+{
+	datas_.erase(groupName);
+	groupKeys_.erase(groupName);
+}
+
+bool Engine::GlobalVariables::RenameGroup(const std::string& oldName, const std::string& newName)
+{
+	if (oldName.empty() || newName.empty() || oldName == newName ||
+		datas_.find(oldName) == datas_.end() || datas_.find(newName) != datas_.end()) {
+		return false;
+	}
+
+	datas_[newName] = std::move(datas_[oldName]);
+	datas_.erase(oldName);
+
+	auto keyIt = groupKeys_.find(oldName);
+	if (keyIt != groupKeys_.end()) {
+		groupKeys_[newName] = std::move(keyIt->second);
+		groupKeys_.erase(keyIt);
+	}
+	auto categoryIt = groupCategories_.find(oldName);
+	if (categoryIt != groupCategories_.end()) {
+		// リネーム後も同じカテゴリへ保存されるよう、カテゴリ設定も移動する。
+		groupCategories_[newName] = std::move(categoryIt->second);
+		groupCategories_.erase(categoryIt);
+	}
+	return true;
+}
+
+void Engine::GlobalVariables::SetGroupCategory(const std::string& groupName, const std::string& categoryName)
+{
+	if (groupName.empty() || categoryName.empty()) {
+		return;
+	}
+
+	// 外部保存時にグループをどのフォルダへ出すか指定する。
+	groupCategories_[groupName] = categoryName;
+}
+
+/// <summary>
+/// 複製
+/// </summary>
+bool Engine::GlobalVariables::DuplicateItem(const std::string& srcGroupName, const std::string& srcKey, const std::string& dstGroupName, const std::string& dstKey)
+{
+	// コピー元グループの存在チェック
+	auto itSrcGroup = datas_.find(srcGroupName);
+	if (itSrcGroup == datas_.end()) return false;
+
+	auto& srcGroup = itSrcGroup->second;
+	// コピー元キーの存在チェック
+	auto itSrcItem = srcGroup.find(srcKey);
+	if (itSrcItem == srcGroup.end()) return false;
+
+	// コピー先グループを作成または取得
+	auto itDstGroup = datas_.find(dstGroupName);
+	if (itDstGroup == datas_.end()) {
+		CreateGroup(dstGroupName);
+		itDstGroup = datas_.find(dstGroupName);
+		if (itDstGroup == datas_.end()) return false; // 失敗した場合
+	}
+	auto& dstGroup = itDstGroup->second;
+
+	// コピー先キーが既にある場合は上書きしない
+	if (dstGroup.find(dstKey) != dstGroup.end()) return false;
+
+	// 複製
+	dstGroup[dstKey] = itSrcItem->second;
+
+	// groupKeys_の管理も忘れずに
+	auto& dstKeys = groupKeys_[dstGroupName];
+	dstKeys.push_back(dstKey);
+
+	return true;
+}
+
+/// <summary>
+/// 複製したときの重複対処
+/// </summary>
+std::string Engine::GlobalVariables::MakeUniqueKey(const std::string& baseKey, const GvData::Group& group)
+{
+	std::string newKey = baseKey;
+	int count = 1;
+	while (group.find(newKey) != group.end()) {
+		newKey = baseKey + "(" + std::to_string(count++) + ")";
+	}
+	return newKey;
+}
+
+std::string Engine::GlobalVariables::ResolveCategory(const std::string& groupName) const
+{
+	auto categoryIt = groupCategories_.find(groupName);
+	if (categoryIt != groupCategories_.end() && !categoryIt->second.empty()) {
+		return categoryIt->second;
+	}
+
+	// よく使うグループ名は自動で分類し、既存のSaveFile呼び出しをそのまま使えるようにする。
+	if (groupName == "EffectEditor" || groupName == "EffectEditorDeleted" ||
+		groupName.rfind("Emitter", 0) == 0) {
+		return "Effect";
+	}
+	if (groupName == "ParticleEditor" || groupName == "ParticleEditorDeleted" ||
+		groupName.rfind("ParticleGroup_", 0) == 0) {
+		return "Effect/Particle";
+	}
+	if (groupName == "ComboPlayer" ||
+		groupName.find("Attack") != std::string::npos ||
+		groupName.find("Combo") != std::string::npos ||
+		groupName.find("Skill") != std::string::npos ||
+		groupName.find("Launch") != std::string::npos) {
+		return "Character/Combo";
+	}
+	if (groupName.rfind("MoveData", 0) == 0 ||
+		groupName == "Player" ||
+		groupName.find("Enemy") != std::string::npos) {
+		return "Character/Parameter";
+	}
+	return "Misc";
+}
+
+std::filesystem::path Engine::GlobalVariables::GetCategoryDirectory(const std::string& groupName) const
+{
+	// カテゴリ名はスラッシュ区切りも許可し、階層フォルダとして扱う。
+	return std::filesystem::path(kDirectoryPath) / std::filesystem::path(ResolveCategory(groupName));
+}
+
+std::filesystem::path Engine::GlobalVariables::GetSaveFilePath(const std::string& groupName) const
+{
+	return GetCategoryDirectory(groupName) / (groupName + ".json");
+}
+
+std::filesystem::path Engine::GlobalVariables::FindExistingFilePath(const std::string& groupName) const
+{
+	const std::filesystem::path categoryPath = GetSaveFilePath(groupName);
+	if (std::filesystem::exists(categoryPath)) {
+		return categoryPath;
+	}
+
+	// 旧形式の直下保存ファイルも読めるように残す。
+	const std::filesystem::path legacyPath = std::filesystem::path(kDirectoryPath) / (groupName + ".json");
+	if (std::filesystem::exists(legacyPath)) {
+		return legacyPath;
+	}
+
+	if (!std::filesystem::exists(kDirectoryPath)) {
+		return categoryPath;
+	}
+
+	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(kDirectoryPath)) {
+		if (!entry.is_regular_file() || entry.path().extension() != ".json") {
+			continue;
+		}
+		if (entry.path().stem().string() == groupName) {
+			return entry.path();
+		}
+	}
+	return categoryPath;
+}
+
+
+
+
+/// ------
+/// セーブ、ロード、更新
+/// ------
+
+/// <summary>
+/// セーブ
+/// </summary>
+void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
+
+	// グループを検索
+	std::map<std::string, GvData::Group>::iterator itGroup = datas_.find(groupName);
+	// 未登録チェック
+	assert(itGroup != datas_.end());
+
+	GvData::json root;
+	root = GvData::json::object();
+
+	// jsonオブジェクト登録
+	root[groupName] = GvData::json::object();
+
+	// 各項目について
+	for (std::map<std::string, GvData::Item>::iterator itItem = itGroup->second.begin(); itItem != itGroup->second.end(); ++itItem) {
+		// 項目名を取得
+		const std::string& itemName = itItem->first;
+		// 項目の参照を取得
+		GvData::Item& item = itItem->second;
+
+		// 各型の値を保存
+		GvFunction::Save(groupName, root, item, itemName);
+
+	}
+	// ディレクトリがなければ作成する
+	// 書き込みはループの外で1回だけ行う
+	std::filesystem::path dir = GetCategoryDirectory(groupName);
+	if (!std::filesystem::exists(dir)) {
+		std::filesystem::create_directories(dir);
+	}
+
+	// 書き込むJSONファイルのフルパスを合成する
+	std::filesystem::path filePath = GetSaveFilePath(groupName);
+
+	// 書き込み用ファイルストリーム
+	std::ofstream ofs;
+	// ファイルを書き込み用に開く
+	ofs.open(filePath);
+	// ファイルオープン失敗
+	if (ofs.fail()) {
+		std::string message = "Failed open data file for write.";
+		MessageBoxA(nullptr, message.c_str(), "GlobalVariables", 0);
+		assert(0);
+		return;
+	}
+
+	// ファイルにjson文字列を書き込む(インデント幅4)
+	ofs << std::setw(4) << root << std::endl;
+	// ファイルを閉じる
+	ofs.close();
+}
+
+bool Engine::GlobalVariables::RemoveSavedFile(const std::string& groupName) {
+	const std::filesystem::path filePath = FindExistingFilePath(groupName);
+	std::error_code error;
+	const bool removed = std::filesystem::remove(filePath, error);
+	return removed && !error;
+}
+
+/// <summary>
+/// 全ロード
+/// </summary>
+void Engine::GlobalVariables::LoadFiles() {
+
+	std::filesystem::path dir(kDirectoryPath);
+	// ディレクトリがなければスキップする
+	if (!std::filesystem::exists(kDirectoryPath)) {
+		return;
+	}
+
+	std::filesystem::recursive_directory_iterator dir_it(kDirectoryPath);
+	for (const std::filesystem::directory_entry& entry : dir_it) {
+		if (!entry.is_regular_file()) {
+			continue;
+		}
+		// ファイルパスを取得
+		const std::filesystem::path& filePath = entry.path();
+
+		// ファイル拡張子を取得
+		std::string extension = filePath.extension().string();
+		// 　.jsonファイル以外はスキップ
+		if (extension.compare(".json") != 0) {
+			continue;
+		}
+
+		std::ifstream ifs(filePath);
+		if (ifs.fail()) {
+			continue;
+		}
+
+		// JSON内のルートキーをグループ名として読み込み、ファイル配置変更後も名前衝突を避ける。
+		GvData::json root;
+		ifs >> root;
+		ifs.close();
+		if (!root.is_object() || root.empty()) {
+			continue;
+		}
+		LoadFile(root.begin().key());
+	}
+}
+
+/// <summary>
+/// グループロード
+/// </summary>
+void Engine::GlobalVariables::LoadFile(const std::string& groupName) {
+	std::filesystem::path filePath = FindExistingFilePath(groupName);
+	std::ifstream ifs(filePath);
+	if (ifs.fail()) {
+		MessageBoxA(nullptr, "Failed open data file for read.", "GlobalVariables", 0);
+		assert(0);
+		return;
+	}
+
+	GvData::json root;
+	ifs >> root;
+	ifs.close();
+
+	auto itGroup = root.find(groupName);
+	assert(itGroup != root.end());
+
+	for (auto itItem = itGroup->begin(); itItem != itGroup->end(); ++itItem) {
+		const std::string& itemName = itItem.key();
+
+		// 型情報があるかチェック
+		if (itItem->is_object() && itItem->contains("type") && itItem->contains("value")) {
+			std::string typeStr = itItem->at("type").get<std::string>();
+			const auto& val = itItem->at("value");
+
+			if (typeStr == "int32_t") {
+				SetValue(groupName, itemName, val.get<int32_t>());
+			}
+			else if (typeStr == "uint32_t") {
+				SetValue(groupName, itemName, val.get<uint32_t>());
+			}
+			else if (typeStr == "float") {
+				SetValue(groupName, itemName, val.get<float>());
+			}
+			else if (typeStr == "Vector2") {
+				Vector2 v = { val.at(0).get<float>(), val.at(1).get<float>() };
+				SetValue(groupName, itemName, v);
+			}
+			else if (typeStr == "Vector3") {
+				Vector3 v = { val.at(0).get<float>(), val.at(1).get<float>(), val.at(2).get<float>() };
+				SetValue(groupName, itemName, v);
+			}
+			else if (typeStr == "Vector4") {
+				Vector4 v = { val.at(0).get<float>(), val.at(1).get<float>(), val.at(2).get<float>(), val.at(3).get<float>() };
+				SetValue(groupName, itemName, v);
+			}
+			else if (typeStr == "bool") {
+				SetValue(groupName, itemName, val.get<bool>());
+			}
+			else if (typeStr == "string") {
+				SetValue(groupName, itemName, val.get<std::string>());
+			}
+			else if (typeStr == "Transform") {
+				const auto& val = (*itItem)["value"];
+				Transform t;
+				if (val.contains("scale") && val["scale"].is_array() && val["scale"].size() == 3) {
+					t.scale = { val["scale"][0], val["scale"][1], val["scale"][2] };
+				}
+				if (val.contains("rotate") && val["rotate"].is_array() && val["rotate"].size() == 3) {
+					t.rotate = { val["rotate"][0], val["rotate"][1], val["rotate"][2] };
+				}
+				if (val.contains("translate") && val["translate"].is_array() && val["translate"].size() == 3) {
+					t.translate = { val["translate"][0], val["translate"][1], val["translate"][2] };
+				}
+				SetValue(groupName, itemName, t);
+			}
+			else if (typeStr == "enum") {
+				GvData::EnumItem e;
+				if (itItem->contains("enumType")) {
+					e.enumType = (*itItem)["enumType"].get<std::string>();
+				}
+				e.value = val.get<int64_t>(); // "value" は int64 で読む
+				// enum は内部表現として EnumItem を SetValue で入れる
+				SetValue(groupName, itemName, e);
+			}
+			else {
+				assert(false && "Unknown type found in JSON");
+			}
+		}
+	}
+}
+
+/// <summary>
+/// 更新
+/// </summary>
+void Engine::GlobalVariables::Update() {
+#ifdef _DEBUG
+
+	//ImGui::BeginMenuBar();
+
+	static std::pair<std::string, std::string> pendingDeleteItem;
+	static bool confirmDelete = false;
+
+	std::vector<std::string> groupsToRemove;
+	std::vector<std::pair<std::string, std::string>> itemsToRemove;
+
+	ImGui::Begin("GlobalVariables");
+
+	for (auto& [groupName, group] : datas_) {
+	
+
+		if (!ImGui::BeginMenu(groupName.c_str()))
+			continue;
+
+		for (auto& [itemName, item] : group) {
+			ImGui::PushID(itemName.c_str());
+
+			// 値表示・編集
+			if (std::holds_alternative<int32_t>(item)) {
+				ImGui::DragInt(itemName.c_str(), std::get_if<int32_t>(&item));
+			}
+			else if (std::holds_alternative<uint32_t>(item)) {
+				uint32_t& value = std::get<uint32_t>(item);
+				int32_t tmp = static_cast<int32_t>(value);
+				if (ImGui::DragInt(itemName.c_str(), &tmp)) {
+					if (tmp < 0) tmp = 0;
+					value = static_cast<uint32_t>(tmp);
+				}
+			}
+			else if (std::holds_alternative<float>(item)) {
+				ImGui::DragFloat(itemName.c_str(), std::get_if<float>(&item), 0.01f);
+			}
+			else if (std::holds_alternative<Vector2>(item)) {
+				ImGui::DragFloat2(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector2>(&item)), 0.1f);
+			}
+			else if (std::holds_alternative<Vector3>(item)) {
+				ImGui::DragFloat3(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector3>(&item)), 0.1f);
+			}
+			else if (std::holds_alternative<Vector4>(item)) {
+				ImGui::DragFloat4(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector4>(&item)), 0.1f);
+			}
+			else if (std::holds_alternative<bool>(item)) {
+				ImGui::Checkbox(itemName.c_str(), std::get_if<bool>(&item));
+			}
+			else if (std::holds_alternative<std::string>(item)) {
+				std::string* ptr = std::get_if<std::string>(&item);
+				char buffer[256];
+				strncpy_s(buffer, ptr->c_str(), sizeof(buffer));
+				buffer[sizeof(buffer) - 1] = '\0';
+				if (ImGui::InputText(itemName.c_str(), buffer, sizeof(buffer))) {
+					*ptr = std::string(buffer);
+				}
+			}
+			else if (std::holds_alternative<Transform>(item)) {
+				Transform* ptr = std::get_if<Transform>(&item);
+				ImGui::DragFloat3(("Scale##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->scale), 0.1f);
+				ImGui::DragFloat3(("Rotate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->rotate), 0.1f);
+				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
+			}
+			else if (std::holds_alternative<GvData::EnumItem>(item)) {
+				auto* e = std::get_if<GvData::EnumItem>(&item);
+
+				// enumType 表示（必要なら編集も可）
+				ImGui::Text("%s", itemName.c_str());
+				ImGui::SameLine();
+				ImGui::TextDisabled("(%s)", e->enumType.c_str());
+
+				// 登録済み候補を探す
+				const auto* entries = EnumRegistry::Instance().Find(e->enumType);
+
+				if (entries && !entries->empty()) {
+					// 現在の value に一致する index を探す
+					int currentIndex = 0;
+					for (int i = 0; i < (int)entries->size(); ++i) {
+						if ((*entries)[i].value == e->value) {
+							currentIndex = i;
+							break;
+						}
+					}
+
+					// Combo 用の表示名配列を作る（毎フレーム作るのが嫌ならキャッシュしてOK）
+					std::vector<const char*> names;
+					names.reserve(entries->size());
+					for (auto& it : *entries) names.push_back(it.name);
+
+					if (ImGui::Combo(itemName.c_str(), &currentIndex, names.data(), (int)names.size())) {
+						e->value = (*entries)[currentIndex].value; // ★名前選択→値更新
+					}
+				}
+				else {
+					// 未登録なら仕方ないので数値編集（保険）
+					int tmp = (int)e->value;
+					if (ImGui::DragInt(itemName.c_str(), &tmp, 1.0f)) {
+						e->value = (int64_t)tmp;
+					}
+					ImGui::SameLine();
+					ImGui::TextDisabled("No enum entries registered.");
+				}
+			}
+
+
+			ImGui::PopID();
+		}
+
+		ImGui::Text("\n");
+
+		if (ImGui::Button("Save")) {
+			SaveFile(groupName);
+			std::string message = std::format("{}.json saved.", groupName);
+			MessageBoxA(nullptr, message.c_str(), "GlobalVariables", 0);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Group")) {
+			groupsToRemove.push_back(groupName);
+		}
+
+		ImGui::EndMenu();
+
+		
+	}
+	ImGui::End();
+
+	//ImGui::EndMenuBar();
+
+
+
+
+	// 削除予約された項目を後で実行（安全）
+	for (const auto& [group, item] : itemsToRemove) {
+		RemoveItem(group, item);
+	}
+
+	// 削除予約されたグループも後で実行
+	for (const std::string& group : groupsToRemove) {
+		RemoveGroup(group);
+	}
+#endif
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/GlobalVariables/GlobalVariables.h
+============================================================
+#pragma once
+#include"GlobalVariablesFunction.h"
+#include <filesystem>
+
+
+namespace Engine {
+	// 設定値を未登録時だけ追加するか、現在値で上書きするかを表す
+	enum class GlobalVariableWriteMode {
+		Register,
+		Save,
+	};
+
+	/// <summary>
+	/// グローバル変数
+	/// </summary>
+	class GlobalVariables {
+	private:
+
+
+	public:
+		/// <summary>
+		/// グループの作成
+		/// </summary>
+		/// <param name="groupName">グループ名</param>
+		void CreateGroup(const std::string& groupName);
+
+		// 値のセット
+		template<typename T>
+		void SetValue(const std::string& groupName, const std::string& key, T value);
+
+		// 値の追加
+		template<typename T>
+		void AddItem(const std::string& groupName, const std::string& key, const T& value);
+
+		// 値の取得
+		template<typename T>
+		T GetValue(const std::string& groupName, const std::string& key) const;
+
+
+		// enum 専用：追加
+		template<typename E>
+		void AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
+
+		// enum 専用：上書き
+		template<typename E>
+		void SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
+
+		// enum 専用：取得
+		template<typename E>
+		E GetEnumValue(const std::string& groupName, const std::string& key) const;
+
+
+
+		/// <summary>
+		/// グループが存在するか？
+		/// </summary>
+		bool HasGroup(const std::string& groupName) const;
+
+		/// <summary>
+		/// キーが存在するか？
+		/// </summary>
+		bool HasKey(const std::string& groupName, const std::string& key) const;
+
+		/// <summary>
+		/// グループやキーの一覧取得
+		/// </summary>
+		std::vector<std::string> GetGroupNames() const;
+		/// <summary>
+		/// グループやキーの取得(名前取得)
+		/// </summary>
+		std::vector<std::string> GetKeys(const std::string& groupName) const;
+
+		/// <summary>
+		/// 何の型か？
+		/// </summary>
+		std::string GetTypeName(const std::string& groupName, const std::string& key) const;
+
+		/// <summary>
+		/// 削除(アイテム)
+		/// </summary>
+		void RemoveItem(const std::string& groupName, const std::string& key);
+		/// <summary>
+		/// 削除(グループ)
+		/// </summary>
+		void RemoveGroup(const std::string& groupName);
+		/// <summary>
+		/// グループ名変更
+		/// </summary>
+		bool RenameGroup(const std::string& oldName, const std::string& newName);
+		/// <summary>
+		/// 保存カテゴリを設定
+		/// </summary>
+		void SetGroupCategory(const std::string& groupName, const std::string& categoryName);
+
+		// 複製
+		bool DuplicateItem(
+			const std::string& srcGroupName, const std::string& srcKey,
+			const std::string& dstGroupName, const std::string& dstKey);
+
+		/// <summary>
+		/// 固有キー取得
+		/// </summary>
+		std::string MakeUniqueKey(const std::string& baseKey, const GvData::Group& group);
+
+		/// <summary>
+		/// ファイルに書き出し
+		/// </summary>
+		/// <param name="groupName"></param>
+		void SaveFile(const std::string& groupName);
+
+		/// <summary>
+		/// 保存ファイル削除
+		/// </summary>
+		bool RemoveSavedFile(const std::string& groupName);
+
+		/// <summary>
+		/// ディレクトリの全ファイル読み込み
+		/// </summary>
+		void LoadFiles();
+
+		/// <summary>
+		/// ファイルから読み込む
+		/// </summary>
+		/// <param name="groupName"></param>
+		void LoadFile(const std::string& groupName);
+
+		/// <summary>
+		/// データ取得
+		/// </summary>
+		GvData::Group GetGroupData(const std::string& name) { return datas_[name]; }
+
+	public:
+		/// <summary>
+		/// 毎フレーム処理
+		/// </summary>
+		void Update();
+
+
+		GlobalVariables() = default;
+		~GlobalVariables() = default;
+		GlobalVariables(const GlobalVariables& global) = default;
+		GlobalVariables& operator=(const GlobalVariables& global) = default;
+	private:
+
+		// 全データ
+		std::map<std::string, GvData::Group> datas_;
+		std::map<std::string, std::vector<std::string>> groupKeys_; // 順序を保持するためのリスト
+		std::map<std::string, std::string> groupCategories_; // グループごとの保存先カテゴリ
+
+		//グローバル変数の保存先
+		const std::string kDirectoryPath = "resources/GlobalVariables/";
+
+		/// <summary>
+		/// 保存カテゴリ名を取得
+		/// </summary>
+		std::string ResolveCategory(const std::string& groupName) const;
+		/// <summary>
+		/// 保存カテゴリのフォルダパスを取得
+		/// </summary>
+		std::filesystem::path GetCategoryDirectory(const std::string& groupName) const;
+		/// <summary>
+		/// グループの保存ファイルパスを取得
+		/// </summary>
+		std::filesystem::path GetSaveFilePath(const std::string& groupName) const;
+		/// <summary>
+		/// 旧形式を含めた既存保存ファイルパスを探す
+		/// </summary>
+		std::filesystem::path FindExistingFilePath(const std::string& groupName) const;
+	};
+
+	/// <summary>
+	/// 設定項目の列挙処理から、登録と保存のAPI差を隠蔽するライター
+	/// </summary>
+	class GlobalVariableWriter {
+	public:
+		// 書き込み先と登録・保存モードを設定する
+		GlobalVariableWriter(GlobalVariables* globalVariables, GlobalVariableWriteMode mode)
+			: globalVariables_(globalVariables), mode_(mode) {
+		}
+
+		// 通常値を新規登録、または現在値で上書きする
+		template<typename T>
+		void Value(const std::string& groupName, const std::string& key, const T& value) {
+			if (mode_ == GlobalVariableWriteMode::Save) {
+				globalVariables_->SetValue(groupName, key, value);
+			}
+			else {
+				globalVariables_->AddItem(groupName, key, value);
+			}
+		}
+
+		// enum値を型情報付きで新規登録、または現在値で上書きする
+		template<typename E>
+		void EnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType) {
+			if (mode_ == GlobalVariableWriteMode::Save) {
+				globalVariables_->SetEnumValue(groupName, key, value, enumType);
+			}
+			else {
+				globalVariables_->AddEnumItem(groupName, key, value, enumType);
+			}
+		}
+
+	private:
+		GlobalVariables* globalVariables_ = nullptr; // 設定値の書き込み先
+		GlobalVariableWriteMode mode_ = GlobalVariableWriteMode::Register; // 登録または保存モード
+	};
+
+
+	template<typename T>
+	void GlobalVariables::SetValue(const std::string& groupName, const std::string& key, T value)
+	{
+		// グループの参照を取得
+		GvData::Group& group = datas_[groupName];
+		// 新しい項目のデータを参照
+		GvData::Item newItem{};
+		newItem = value;
+		// 設定した項目をstd::mapに追加
+		group[key] = newItem;
+	}
+
+	template<typename T>
+	void GlobalVariables::AddItem(const std::string& groupName, const std::string& key, const T& value)
+	{
+		static_assert(
+			std::is_same_v<T, int32_t> ||
+			std::is_same_v<T, uint32_t> ||
+			std::is_same_v<T, float> ||
+			std::is_same_v<T, Vector2> ||
+			std::is_same_v<T, Vector3> ||
+			std::is_same_v<T, Vector4> ||
+			std::is_same_v<T, bool> ||
+			std::is_same_v<T, std::string> ||
+			std::is_same_v<T, Transform>,
+			"Unsupported type for AddItem"
+			);
+
+		/// <summary>
+		/// グループが存在しない場合は作成
+		/// </summary>
+		CreateGroup(groupName);
+
+		// グループを取得
+		GvData::Group& group = datas_[groupName];
+
+		/// <summary>
+		/// キーが存在しなければ追加
+		/// </summary>
+		if (group.find(key) == group.end()) {
+			group[key] = value;
+		}
+	};
+
+
+	template<typename T>
+	T GlobalVariables::GetValue(const std::string& groupName, const std::string& key) const
+	{
+		/// <summary>
+		/// グループ存在チェック
+		/// </summary>
+		assert(datas_.find(groupName) != datas_.end());
+		const GvData::Group& group = datas_.at(groupName);
+
+		/// <summary>
+		/// キー存在チェック
+		/// </summary>
+		assert(group.find(key) != group.end());
+
+		/// <summary>
+		/// std::variantから型Tを取得。型が違うと例外 std::bad_variant_access が投げられるので注意
+		/// </summary>
+		return std::get<T>(group.at(key));
+	}
+
+
+	template<typename E>
+	void GlobalVariables::AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType)
+	{
+		static_assert(std::is_enum_v<E>, "AddEnumItem requires enum type.");
+
+		CreateGroup(groupName);
+
+		GvData::Group& group = datas_[groupName];
+		if (group.find(key) == group.end()) {
+			GvData::EnumItem e;
+			e.enumType = enumType;
+			e.value = static_cast<int64_t>(static_cast<std::underlying_type_t<E>>(value));
+			group[key] = e;
+		}
+	}
+
+	template<typename E>
+	void GlobalVariables::SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType)
+	{
+		static_assert(std::is_enum_v<E>, "SetEnumValue requires enum type.");
+
+		GvData::Group& group = datas_[groupName];
+
+		GvData::EnumItem e;
+		e.enumType = enumType;
+		e.value = static_cast<int64_t>(static_cast<std::underlying_type_t<E>>(value));
+		group[key] = e;
+	}
+
+	template<typename E>
+	E GlobalVariables::GetEnumValue(const std::string& groupName, const std::string& key) const
+	{
+		static_assert(std::is_enum_v<E>, "GetEnumValue requires enum type.");
+
+		assert(datas_.find(groupName) != datas_.end());
+		const GvData::Group& group = datas_.at(groupName);
+
+		assert(group.find(key) != group.end());
+
+		const auto& item = group.at(key);
+		const auto& e = std::get<GvData::EnumItem>(item);
+		return static_cast<E>(static_cast<std::underlying_type_t<E>>(e.value));
+	}
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/GlobalVariables/GlobalVariablesFunction.cpp
+============================================================
+﻿#include "GlobalVariablesFunction.h"
+
+void GvFunction::Save(const std::string& groupName, GvData::json& root, GvData::Item& item, const std::string& itemName)
+{
+	if (std::holds_alternative<int32_t>(item)) { // int32_t
+		root[groupName][itemName] = {
+		   {"type", "int32_t"},
+		   {"value", std::get<int32_t>(item)}
+		};
+	}
+	else if (std::holds_alternative<uint32_t>(item)) { // uint32_t
+		root[groupName][itemName] = {
+			{"type", "uint32_t"},
+			{"value", std::get<uint32_t>(item)}
+		};
+	}
+	else if (std::holds_alternative<float>(item)) { // float
+		root[groupName][itemName] = {
+		   {"type", "float"},
+		   {"value", std::get<float>(item)}
+		};
+	}
+	else if (std::holds_alternative<Vector2>(item)) { // Vector2
+		Vector2 v = std::get<Vector2>(item);
+		root[groupName][itemName] = {
+			{"type", "Vector2"},
+			{"value", { v.x, v.y }}
+		};
+	}
+	else if (std::holds_alternative<Vector3>(item)) { // Vector3
+		Vector3 v = std::get<Vector3>(item);
+		root[groupName][itemName] = {
+			{"type", "Vector3"},
+			{"value", { v.x, v.y, v.z }}
+		};
+	}
+	else if (std::holds_alternative<Vector4>(item)) { // Vector4
+		Vector4 v = std::get<Vector4>(item);
+		root[groupName][itemName] = {
+			{"type", "Vector4"},
+			{"value", { v.x, v.y, v.z, v.w }}
+		};
+	}
+	else if (std::holds_alternative<bool>(item)) { // bool
+		root[groupName][itemName] = {
+		  {"type", "bool"},
+		  {"value", std::get<bool>(item)}
+		};
+	}
+	else if (std::holds_alternative<std::string>(item)) { // string
+		root[groupName][itemName] = {
+		  {"type", "string"},
+		  {"value", std::get<std::string>(item)}
+		};
+	}
+	else if (std::holds_alternative<Transform>(item)) { // Transform
+		Transform v = std::get<Transform>(item);
+		root[groupName][itemName] = {
+			{"type", "Transform"},
+			{"value", {
+				{"scale", { v.scale.x, v.scale.y, v.scale.z }},
+				{"rotate", { v.rotate.x, v.rotate.y, v.rotate.z }},
+				{"translate", { v.translate.x, v.translate.y, v.translate.z }}
+			}}
+		};
+	} 
+	else if (std::holds_alternative<GvData::EnumItem>(item)) { // ★ EnumItem
+		const auto& e = std::get<GvData::EnumItem>(item);
+		root[groupName][itemName] = {
+			{"type", "enum"},
+			{"enumType", e.enumType},
+			{"value", e.value}
+		};
+	}
+}
+
+void GvFunction::SetValue(const std::string& groupName, const std::string& itemName, const std::string& typeStr)
+{
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/GlobalVariables/GlobalVariablesFunction.h
+============================================================
+#pragma once
+#include"DirectXGame/engine/math/MathFunctions.h"
+#include <iostream>
+#include <fstream>
+#include <variant>
+#include <string>
+#include <map>
+#include<json.hpp>
+
+
+struct EnumEntry {
+	const char* name;   // 表示名
+	int64_t value;      // EnumItem.value に入る値
+};
+
+/// <summary>
+/// EnumRegistryを管理・実装するクラス。
+/// </summary>
+class EnumRegistry {
+public:
+	static EnumRegistry& Instance() {
+		static EnumRegistry inst;
+		return inst;
+	}
+
+	void Register(const std::string& enumType, std::vector<EnumEntry> entries) {
+		table_[enumType] = std::move(entries);
+	}
+
+	const std::vector<EnumEntry>* Find(const std::string& enumType) const {
+		auto it = table_.find(enumType);
+		if (it == table_.end()) return nullptr;
+		return &it->second;
+	}
+
+private:
+	std::unordered_map<std::string, std::vector<EnumEntry>> table_;
+};
+
+namespace GvData {
+
+	// ★ enum保存用：型名 + 値（整数）
+	struct EnumItem {
+		std::string enumType; // 例: "EnemyType"
+		int64_t value = 0;    // underlying をここに格納
+	};
+
+	// 項目
+	using Item = std::variant<int32_t, uint32_t, float, Vector2, Vector3, Vector4, bool, std::string, Transform, EnumItem>;
+
+	// グループ
+	using Group = std::map<std::string, Item>;
+
+	// JSON
+	using json = nlohmann::json;
+}
+
+namespace GvFunction {
+	/// <summary>
+	/// 型を判別して値を保存
+	/// </summary>
+	void Save(const std::string& groupName, GvData::json& root,GvData::Item& item, const std::string& itemName);
+
+	/// <summary>
+	/// 値を設定
+	/// </summary>
+	void SetValue(const std::string& groupName,const std::string& itemName,const std::string& typeStr);
+
+}
 
 ============================================================
 File Path: project/DirectXGame/engine/Light/LightCommon.cpp
@@ -79767,7 +79325,7 @@ File Path: project/DirectXGame/engine/Light/LightCommon.h
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 #include"Lights.h"
 
@@ -86233,7 +85791,7 @@ File Path: project/DirectXGame/engine/MyGame/Framework.h
 
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
-#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 
 // C++
 #include"memory"
@@ -93216,6 +92774,434 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/input/InputManager.cpp
+============================================================
+#include "InputManager.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
+
+
+
+void InputManager::Initialize(Engine::Input* input){
+	input_ = input;
+}
+
+void InputManager::Update(float dt) {
+    frameCounter_++;
+    ClearFrame();
+    
+    if (!input_) return;
+
+    switch (context_)
+    {
+    case Context::Gameplay:
+        BuildGameplayActions();
+        break;
+    case Context::UI:
+        BuildUIActions();
+        break;
+    case Context::Pause:
+        // 必要なら
+        BuildUIActions();
+        break;
+    }
+    RecordBufferedEvents();
+}
+
+void InputManager::ClearFrame(){
+    for (int i = 0; i < Idx(Action::Max); ++i)
+    {
+        pressed_[i] = triggered_[i] = released_[i] = false;
+        value2_[i] = Vector2{ 0,0 };
+        value1_[i] = 0.0f;
+    }
+}
+
+void InputManager::BuildGameplayActions(){
+    // ---- Move（WASD + LeftStick 合成）----
+    Vector2 move{ 0,0 };
+
+    if (input_->IsPushKey(DIK_A)) move.x -= 1.0f;
+    if (input_->IsPushKey(DIK_D)) move.x += 1.0f;
+    if (input_->IsPushKey(DIK_W)) move.y += 1.0f;
+    if (input_->IsPushKey(DIK_S)) move.y -= 1.0f;
+
+    const Vector2 ls = input_->GetGamePadLeftStick();
+    move.x += ls.x;
+    move.y += ls.y;
+
+    move = Math::ClampLength(move);
+    value2_[Idx(Action::Move)] = move;
+    pressed_[Idx(Action::Move)] = move.x != 0.0f || move.y != 0.0f;
+    triggered_[Idx(Action::Move)] = pressed_[Idx(Action::Move)] && !isDown_[Idx(Action::Move)];
+    released_[Idx(Action::Move)] = !pressed_[Idx(Action::Move)] && isDown_[Idx(Action::Move)];
+
+    // ---- Look（RightStick + 矢印キー + 右クリック中のマウス移動）----
+    Vector2 look = input_->GetGamePadRightStick();
+    if (input_->IsPushKey(DIK_LEFT)) look.x -= 1.0f;
+    if (input_->IsPushKey(DIK_RIGHT)) look.x += 1.0f;
+    if (input_->IsPushKey(DIK_UP)) look.y += 1.0f;
+    if (input_->IsPushKey(DIK_DOWN)) look.y -= 1.0f;
+    if (input_->IsMousePressed(1)) {
+        const Vector2 mouseDelta = input_->GetMouseMoveDelta();
+        look.x += mouseDelta.x * 0.05f;
+        look.y -= mouseDelta.y * 0.05f;
+    }
+    look = Math::ClampLength(look);
+    value2_[Idx(Action::Look)] = look;
+    pressed_[Idx(Action::Look)] = look.x != 0.0f || look.y != 0.0f;
+    triggered_[Idx(Action::Look)] = pressed_[Idx(Action::Look)] && !isDown_[Idx(Action::Look)];
+    released_[Idx(Action::Look)] = !pressed_[Idx(Action::Look)] && isDown_[Idx(Action::Look)];
+
+    // ---- Attack（Pad X / 左クリック / J）----
+    triggered_[Idx(Action::LightAttack)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X) ||
+        input_->IsMouseTriggered(0) ||
+        input_->IsTriggerKey(DIK_J);
+
+    pressed_[Idx(Action::LightAttack)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_X) ||
+        input_->IsMousePressed(0) ||
+        input_->IsPushKey(DIK_J);
+
+    released_[Idx(Action::LightAttack)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_X) ||
+        input_->IsMouseReleased(0) ||
+        input_->IsKeyReleased(DIK_J);
+
+    // ---- Attack（Pad Y / K）----
+    triggered_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y) ||
+        input_->IsTriggerKey(DIK_K);
+
+    pressed_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y) ||
+        input_->IsPushKey(DIK_K);
+
+    released_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y) ||
+        input_->IsKeyReleased(DIK_K);
+
+    // ---- Jump（Pad A / Space）----
+    triggered_[Idx(Action::Jump)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A) ||
+        input_->IsTriggerKey(DIK_SPACE);
+
+    pressed_[Idx(Action::Jump)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_A) ||
+        input_->IsPushKey(DIK_SPACE);
+
+    released_[Idx(Action::Jump)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_A) ||
+        input_->IsKeyReleased(DIK_SPACE);
+
+    // ---- Special（Pad RB / R）----
+    triggered_[Idx(Action::Special)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
+        input_->IsTriggerKey(DIK_R);
+
+    pressed_[Idx(Action::Special)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_RB) ||
+        input_->IsPushKey(DIK_R);
+
+    released_[Idx(Action::Special)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB) ||
+        input_->IsKeyReleased(DIK_R);
+
+    // ---- Skill（Pad B / E）----
+    triggered_[Idx(Action::Skill)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
+        input_->IsTriggerKey(DIK_E);
+
+    pressed_[Idx(Action::Skill)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B) ||
+        input_->IsPushKey(DIK_E);
+
+    released_[Idx(Action::Skill)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B) ||
+        input_->IsKeyReleased(DIK_E);
+
+    // ---- Dodge（Pad LB / LeftShift）----
+    triggered_[Idx(Action::Dodge)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_LB) ||
+        input_->IsTriggerKey(DIK_LSHIFT);
+
+    pressed_[Idx(Action::Dodge)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_LB) ||
+        input_->IsPushKey(DIK_LSHIFT);
+
+    released_[Idx(Action::Dodge)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_LB) ||
+        input_->IsKeyReleased(DIK_LSHIFT);
+
+    // ---- Dash（LT / LeftShift）----
+    triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_LSHIFT);
+    pressed_[Idx(Action::Dash)] = input_->IsLeftTriggerPressed(0.5f) || input_->IsPushKey(DIK_LSHIFT);
+    released_[Idx(Action::Dash)] = input_->IsLeftTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_LSHIFT);
+    value1_[Idx(Action::Dash)] = input_->GetGamePadLeftTrigger(); // アナログ値も欲しい場合
+
+    // ---- LockOn（RT / Q）----
+    triggered_[Idx(Action::LockOn)] = input_->IsRightTriggerTriggered(0.5f) || input_->IsTriggerKey(DIK_Q);
+    pressed_[Idx(Action::LockOn)] = input_->IsRightTriggerPressed(0.5f) || input_->IsPushKey(DIK_Q);
+    released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_Q);
+    value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
+
+   
+    // ---- Pause（Esc or Start）----
+    triggered_[Idx(Action::Pause)] =
+        input_->IsTriggerKey(DIK_ESCAPE) ||
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Start);
+}
+
+void InputManager::BuildUIActions(){
+}
+
+void InputManager::RecordBufferedEvents(){
+    for (int i = 0; i < Idx(Action::Max); ++i)
+    {
+        const Action a = static_cast<Action>(i);
+
+        if (Triggered(a))
+        {
+            isDown_[i] = true;
+            pressFrame_[i] = frameCounter_;
+
+            PushEvent(a, InputEvent::Type::Press, Value1(a), Value2(a));
+        }
+        if (Released(a))
+        {
+            isDown_[i] = false;
+            PushEvent(a, InputEvent::Type::Release, Value1(a), Value2(a));
+        }
+    }
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/input/InputManager.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/input/Input.h>
+#include <limits>
+
+namespace Character {
+	class BaseCharacter; // 前方宣言
+}
+
+
+/// <summary>
+/// 入力管理クラス(action層)
+/// </summary>
+class InputManager {
+public:
+	enum class Context : uint8_t
+	{
+		Gameplay,
+		UI,
+		Pause,
+	};
+
+	enum class Action : uint8_t
+	{
+		Move,       // Vector2
+		Look,       // Vector2
+		LightAttack,// bool
+		HeavyAttack,// bool 
+		Dodge,      // bool
+		Dash,       // bool (LT)
+		LockOn,     // bool
+		Pause,      // bool
+		Skill,		// bool	
+		Jump,		// bool
+		Special,	// bool
+		Max
+	};
+
+	// 入力イベント構造体
+	struct InputEvent
+	{
+		Action action;
+		enum class Type : uint8_t { Press, Release } type;
+
+		uint32_t frame;      // 発生フレーム
+		float value1 = 0.0f; // 例: LTの押し込み量
+		Vector2 value2{};    // 例: Move/Look
+	};
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize(Engine::Input* input);
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update(float dt);
+
+	/// <summary>
+	/// キャラクターの設定
+	/// </summary>
+	void SetOwner(Character::BaseCharacter* character) { this->character = character; }
+
+
+
+	/// <summary>
+	/// Context
+	/// </summary>
+	void SetContext(Context c) { context_ = c; }
+	Context GetContext() const { return context_; }
+
+	/// <summary>
+	/// Action状態の取得（ゲーム側はこれだけ使う）
+	/// </summary>
+	bool Pressed(Action a) const { return pressed_[Idx(a)]; }
+	bool Triggered(Action a) const { return triggered_[Idx(a)]; }
+	bool Released(Action a) const { return released_[Idx(a)]; }
+
+	Vector2 Value2(Action a) const { return value2_[Idx(a)]; }
+	float   Value1(Action a) const { return value1_[Idx(a)]; }
+
+	/// <summary>
+	/// 移動ベクトルは長さ1に制限（斜めが速くならない）
+	/// </summary>
+	Vector2 MoveVector() const { return value2_[Idx(Action::Move)]; }
+	Vector2 LookVector() const { return value2_[Idx(Action::Look)]; }
+
+	// 同時押し
+	bool ConsumeChord(Action a, Action b, uint32_t toleranceFrames = 2, uint32_t windowFrames = 8)
+	{
+		const uint32_t oldest = (frameCounter_ > windowFrames) ? (frameCounter_ - windowFrames) : 0;
+
+		/// <summary>
+		/// a の Press を起点に、b が近傍にあるか探す
+		/// </summary>
+		for (uint32_t k = 0; k < kBufferSize; ++k)
+		{
+			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
+			const InputEvent& e = buffer_[idx];
+
+			if (e.frame < oldest) break;
+			if (e.action != a || e.type != InputEvent::Type::Press) continue;
+
+			const uint32_t from = (e.frame > toleranceFrames) ? (e.frame - toleranceFrames) : 0;
+			const uint32_t to = e.frame + toleranceFrames;
+
+			if (HasPressInWindow(b, from, to))
+			{
+				// 消費（簡易に両方を “古くする” 実装を入れるのがベター）
+				/// <summary>
+				/// ここは実装簡略化：ConsumePress を2回呼ぶ方式でもOK（ただし起点がずれる場合あり）
+				/// </summary>
+				ConsumePress(a, windowFrames);
+				ConsumePress(b, windowFrames);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// 指定フレーム内に押されたか？（消費可能）
+	bool ConsumePress(Action a, uint32_t windowFrames = 0)
+	{
+		if (windowFrames == 0) windowFrames = bufferWindowFrames_;
+		const uint32_t oldest = (frameCounter_ > windowFrames) ? (frameCounter_ - windowFrames) : 0;
+
+		for (uint32_t k = 0; k < kBufferSize; ++k)
+		{
+			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
+			const InputEvent& e = buffer_[idx];
+
+			if (e.frame < oldest) break;
+			if (e.action == a && e.type == InputEvent::Type::Press)
+			{
+				// “消費”しても探索の break 条件を壊さないように無効化
+				buffer_[idx].action = Action::Max;
+				buffer_[idx].frame = (std::numeric_limits<uint32_t>::max)();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// 指定フレーム内に長押しされたか？
+	bool IsHeld(Action a, uint32_t holdFrames) const
+	{
+		const int i = Idx(a);
+		if (!isDown_[i]) return false;
+		return (frameCounter_ - pressFrame_[i]) >= holdFrames;
+	}
+
+private:
+	static constexpr int Idx(Action a) { return static_cast<int>(a); }
+
+	void ClearFrame();
+	void BuildGameplayActions();
+	void BuildUIActions(); // 必要なら
+
+	/// <summary>
+	/// 入力合成ユーティリティ
+	/// </summary>
+
+
+	void RecordBufferedEvents();
+
+	void PushEvent(Action a, InputEvent::Type t, float v1 = 0.0f, Vector2 v2 = {})
+	{
+		buffer_[bufferHead_] = InputEvent{ a, t, frameCounter_, v1, v2 };
+		bufferHead_ = (bufferHead_ + 1) % kBufferSize;
+	}
+
+
+
+	// 同時押し
+	bool HasPressInWindow(Action a, uint32_t fromFrame, uint32_t toFrame) const
+	{
+		for (uint32_t k = 0; k < kBufferSize; ++k)
+		{
+			const uint32_t idx = (bufferHead_ + kBufferSize - 1 - k) % kBufferSize;
+			const InputEvent& e = buffer_[idx];
+			if (e.frame < fromFrame) break;
+			if (e.frame <= toFrame && e.action == a && e.type == InputEvent::Type::Press)
+				return true;
+		}
+		return false;
+	}
+private:
+	// 入力クラスのポインタ
+	Engine::Input* input_ = nullptr;
+	Character::BaseCharacter* character = nullptr; // キャラクターのポインタ
+
+private:
+	Context context_ = Context::Gameplay;
+
+
+	/// <summary>
+	/// Action 状態（毎フレーム Update で作る）
+	/// </summary>
+	bool pressed_[static_cast<int>(Action::Max)] = {};
+	bool triggered_[static_cast<int>(Action::Max)] = {};
+	bool released_[static_cast<int>(Action::Max)] = {};
+	Vector2 value2_[static_cast<int>(Action::Max)] = {};
+	float value1_[static_cast<int>(Action::Max)] = {};
+
+private:
+	uint32_t frameCounter_ = 0;
+
+	// バッファ（固定長リング）
+	static constexpr uint32_t kBufferSize = 128;
+	InputEvent buffer_[kBufferSize]{};
+	uint32_t bufferHead_ = 0;
+
+	// 何フレーム有効にするか（例：6f=0.1秒）
+	uint32_t bufferWindowFrames_ = 6;
+
+	/// <summary>
+	/// 長押し判定用
+	/// </summary>
+	uint32_t pressFrame_[static_cast<int>(Action::Max)] = {};
+	bool isDown_[static_cast<int>(Action::Max)] = {};
+};
+
+
+============================================================
 File Path: project/DirectXGame/engine/scene/AbstractSceneFactory.h
 ============================================================
 #pragma once
@@ -98260,7 +98246,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp" />
@@ -98319,7 +98305,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Tutorial\TutorialStep.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Tutorial\TutorialSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\input\InputManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementSystem.cpp" />
@@ -98329,7 +98315,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\CollisionRegistrationSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
+    <ClCompile Include="DirectXGame\engine\Entity\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Base\BaseSpecial.cpp" />
@@ -98404,8 +98390,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\UI\Base\BaseUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp" />
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp" />
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.cpp" />
+    <ClCompile Include="DirectXGame\engine\GlobalVariables\GlobalVariables.cpp" />
+    <ClCompile Include="DirectXGame\engine\GlobalVariables\GlobalVariablesFunction.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
@@ -98707,7 +98693,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraData.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h" />
@@ -98763,7 +98749,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\State\MainState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraController.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionManager.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\SlowMotion\SlowMotionRequest.h" />
@@ -98780,14 +98766,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\TutorialUI.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstance.h" />
     <ClInclude Include="DirectXGame\engine\Audio\AudioData.h" />
-    <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Result\ResultSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Select\SelectSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputData.h" />
-    <ClInclude Include="DirectXGame\application\base\Input\InputManager.h" />
+    <ClInclude Include="DirectXGame\engine\input\InputManager.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapData.h" />
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapItem.h" />
@@ -98810,7 +98795,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Move\Move\MoveData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.h" />
-    <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h" />
+    <ClInclude Include="DirectXGame\engine\Entity\ObjectComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameEventController.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialData.h" />
@@ -98902,8 +98887,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\Base\BaseUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h" />
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h" />
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.h" />
+    <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariables.h" />
+    <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariablesFunction.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\SelectScene.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
@@ -99071,6 +99056,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
+
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -99446,10 +99432,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp">
+    <ClCompile Include="DirectXGame\engine\GlobalVariables\GlobalVariables.cpp">
       <Filter>ソース ファイル\application\globalVariables</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.cpp">
+    <ClCompile Include="DirectXGame\engine\GlobalVariables\GlobalVariablesFunction.cpp">
       <Filter>ソース ファイル\application\globalVariables</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp">
@@ -99665,7 +99651,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp">
       <Filter>ソース ファイル\engine\3d\animation</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp">
+    <ClCompile Include="DirectXGame\engine\Entity\ObjectComponent.cpp">
       <Filter>ソース ファイル\engine\3d\object</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3d.cpp">
@@ -99869,7 +99855,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp">
+    <ClCompile Include="DirectXGame\engine\input\InputManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp">
@@ -100073,7 +100059,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp">
@@ -100576,10 +100562,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFunction.h">
+    <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariablesFunction.h">
       <Filter>ヘッダー ファイル\application\globalVariables</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
+    <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariables.h">
       <Filter>ヘッダー ファイル\application\globalVariables</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h">
@@ -100684,7 +100670,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Effect\Ocean\OceanManager.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h">
+    <ClInclude Include="DirectXGame\engine\Entity\ObjectComponent.h">
       <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstanceManager.h">
@@ -101101,7 +101087,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\scene\ResultScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Input\InputManager.h">
+    <ClInclude Include="DirectXGame\engine\input\InputManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h">
@@ -101353,7 +101339,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h">
@@ -101446,7 +101432,6 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h">
@@ -101519,6 +101504,7 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
+
 
 ============================================================
 File Path: project/main.cpp
