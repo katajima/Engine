@@ -134,6 +134,8 @@ namespace Combo {
 		std::string pendingRenameComboName_;
 		std::string pendingDeleteComboName_;
 		std::string nodeManagementMessage_;
+		// Combo欄からコンボ関連のデバッグ描画を一括で切り替える。
+		bool showComboDebugDraw_ = true;
 		bool showAllNodeLinks_ = false;			// ノードグラフで全接続線を表示するか
 		std::set<int> initializedNodeGraphNodeIds_;	// imnodes上で初期配置済みのノードID
 

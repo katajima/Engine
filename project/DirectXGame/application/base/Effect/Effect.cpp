@@ -39,13 +39,14 @@ void EffectSystem::SetCamera(Engine::Camera* camera)
 
 void EffectSystem::CreateTrailEffect(const std::string& name, const std::string& texture, float lifeTime,
 	Engine::WorldTransform& parent, Engine::Camera* camera, const Color& color,
+
 	const Vector3& offsetStart, const Vector3& offsetEnd,
-	const Engine::TrailTrajectorySettings& trajectory)
+	const Engine::TrailTrajectorySettings& trajectory, const Engine::TrailSettings& settings)
 {
 	// 新しいコンボ設定で再生成する前に、既存の実行用エントリを置き換える。
 	effectComponent_->RemoveTrailEffect(name);
 	effectComponent_->SetCamera(camera);
-	effectComponent_->AddTrailEffect(name, texture, lifeTime, parent, color, offsetStart, offsetEnd);
+	effectComponent_->AddTrailEffect(name, texture, lifeTime, parent, settings, color, offsetStart, offsetEnd);
 	if (Engine::TrailEffect* trail = effectComponent_->GetTrailEffect(name)) {
 		trail->SetTrajectory(trajectory, &parent);
 	}

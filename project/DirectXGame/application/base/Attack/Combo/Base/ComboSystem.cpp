@@ -66,11 +66,31 @@ namespace Combo {
 			{ "時間範囲", static_cast<int64_t>(ComboEffectTriggerType::kTimeWindow) },
 			{ "時間経過", static_cast<int64_t>(ComboEffectTriggerType::kTimer) },
 			{ "着地したら", static_cast<int64_t>(ComboEffectTriggerType::kLanding) },
+			{ "ヒット時", static_cast<int64_t>(ComboEffectTriggerType::kHit) },
+			{ "ミス時", static_cast<int64_t>(ComboEffectTriggerType::kMiss) },
+			{ "ヒット数到達", static_cast<int64_t>(ComboEffectTriggerType::kHitCount) },
+			{ "コンボ分岐時", static_cast<int64_t>(ComboEffectTriggerType::kBranch) },
+			{ "キャンセル時", static_cast<int64_t>(ComboEffectTriggerType::kCancel) },
+			{ "地上", static_cast<int64_t>(ComboEffectTriggerType::kGround) },
+			{ "空中", static_cast<int64_t>(ComboEffectTriggerType::kAir) },
+			{ "ボタン入力時", static_cast<int64_t>(ComboEffectTriggerType::kButton) },
 			});
 
 		EnumRegistry::Instance().Register("ComboEffectType", {
 			{ "パーティクル", static_cast<int64_t>(ComboEffectType::Particle) },
 			{ "トレイル", static_cast<int64_t>(ComboEffectType::Trail) },
+		});
+		EnumRegistry::Instance().Register("ComboEffectInputType", {
+			{ "すべて", static_cast<int64_t>(ComboEffectInputType::kAny) },
+			{ "ジャンプ", static_cast<int64_t>(ComboEffectInputType::kJump) },
+			{ "回避", static_cast<int64_t>(ComboEffectInputType::kDodge) },
+			{ "スキル", static_cast<int64_t>(ComboEffectInputType::kSkill) },
+			{ "必殺技", static_cast<int64_t>(ComboEffectInputType::kSpecial) },
+		});
+		EnumRegistry::Instance().Register("TrailResetMode", {
+			{ "履歴を維持", static_cast<int64_t>(Engine::TrailResetMode::kKeepHistory) },
+			{ "発生開始時に消去", static_cast<int64_t>(Engine::TrailResetMode::kClearOnEmitStart) },
+			{ "親変更時に消去", static_cast<int64_t>(Engine::TrailResetMode::kClearOnParentChange) },
 		});
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
@@ -93,6 +113,7 @@ namespace Combo {
 			pendingStaminaCost_ = 0.0f;
 			pendingCooldownNode_.reset();
 		}
+		comboDebug_->SetEnabled(isDebugDraw_);
 		comboDebug_->Update(ctx.dt);
 	}
 
@@ -187,6 +208,13 @@ namespace Combo {
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット
+
+        // StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
+        for (auto& [nodeName, node] : comboNodes_) {
+            if (node) {
+                node->Data().GetComboEffect().ClearRuntimeEffects();
+            }
+        }
 		if (comboStateMachine_) {
 			comboStateMachine_.reset();
 			comboStateMachine_ = std::make_unique<StateMachine>(owner);
@@ -543,12 +571,30 @@ namespace Combo {
 				writer.Value(groupName, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
 				writer.Value(groupName, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
 				writer.Value(groupName, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
+				writer.Value(groupName, MakeComboEffectPositionKey(i), data.effect.comboEffects[i].transformPosition);
+				writer.Value(groupName, MakeComboEffectRotationKey(i), data.effect.comboEffects[i].transformRotation);
+				writer.Value(groupName, MakeComboEffectScaleKey(i), data.effect.comboEffects[i].transformScale);
+				writer.Value(groupName, MakeComboEffectRequiredHitCountKey(i), data.effect.comboEffects[i].requiredHitCount);
+				writer.EnumValue(groupName, MakeComboEffectInputTypeKey(i), data.effect.comboEffects[i].inputType, "ComboEffectInputType");
 				writer.EnumValue(groupName, MakeComboEffectTypeKey(i), data.effect.comboEffects[i].type, "ComboEffectType");
 				writer.Value(groupName, MakeComboEffectTrailTextureKey(i), data.effect.comboEffects[i].trailTexture);
 				writer.Value(groupName, MakeComboEffectTrailColorKey(i), data.effect.comboEffects[i].trailColor.ToVector4());
 				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(i), data.effect.comboEffects[i].trailOffsetStart);
 				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(i), data.effect.comboEffects[i].trailOffsetEnd);
 				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(i), data.effect.comboEffects[i].trailLifeTime);
+				writer.Value(groupName, MakeComboEffectTrailMinDistanceKey(i), data.effect.comboEffects[i].trailSettings.minEmitDistance);
+                writer.Value(groupName, MakeComboEffectTrailMaxSegmentsKey(i), static_cast<int>(data.effect.comboEffects[i].trailSettings.maxSegmentCount));
+                writer.Value(groupName, MakeComboEffectTrailUseSplineKey(i), data.effect.comboEffects[i].trailSettings.useSpline);
+                writer.Value(groupName, MakeComboEffectTrailSubdivisionKey(i), data.effect.comboEffects[i].trailSettings.splineSubdivision);
+                writer.Value(groupName, MakeComboEffectTrailWidthStartKey(i), data.effect.comboEffects[i].trailSettings.widthStart);
+				writer.Value(groupName, MakeComboEffectTrailWidthEndKey(i), data.effect.comboEffects[i].trailSettings.widthEnd);
+				writer.Value(groupName, MakeComboEffectTrailFadeInKey(i), data.effect.comboEffects[i].trailSettings.fadeInTime);
+				writer.Value(groupName, MakeComboEffectTrailFadeOutKey(i), data.effect.comboEffects[i].trailSettings.fadeOutTime);
+				writer.Value(groupName, MakeComboEffectTrailAlphaCurveKey(i), data.effect.comboEffects[i].trailSettings.alphaCurve);
+				writer.Value(groupName, MakeComboEffectTrailUvSpeedKey(i), data.effect.comboEffects[i].trailSettings.uvScrollSpeed);
+				writer.Value(groupName, MakeComboEffectTrailEmissionKey(i), data.effect.comboEffects[i].trailSettings.emissionStrength);
+				writer.Value(groupName, MakeComboEffectTrailFlipKey(i), data.effect.comboEffects[i].trailSettings.flipTexture);
+				writer.EnumValue(groupName, MakeComboEffectTrailResetKey(i), data.effect.comboEffects[i].trailSettings.resetMode, "TrailResetMode");
 				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(i), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
 				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(i), data.effect.comboEffects[i].trajectory.duration);
 				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(i), data.effect.comboEffects[i].trajectory.point0);
@@ -867,6 +913,13 @@ namespace Combo {
 				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
 				entry.startTime = globalVariables->GetValue<float>(name, MakeComboEffectStartTimeKey(i));
 				entry.offset = globalVariables->GetValue<Vector3>(name, MakeComboEffectOffsetKey(i));
+				if (globalVariables->HasKey(name, MakeComboEffectPositionKey(i))) {
+					entry.transformPosition = globalVariables->GetValue<Vector3>(name, MakeComboEffectPositionKey(i));
+					entry.transformRotation = globalVariables->GetValue<Vector3>(name, MakeComboEffectRotationKey(i));
+					entry.transformScale = globalVariables->GetValue<Vector3>(name, MakeComboEffectScaleKey(i));
+					entry.requiredHitCount = globalVariables->GetValue<int>(name, MakeComboEffectRequiredHitCountKey(i));
+					entry.inputType = globalVariables->GetEnumValue<ComboEffectInputType>(name, MakeComboEffectInputTypeKey(i));
+				}
 				if (globalVariables->HasKey(name, MakeComboEffectTypeKey(i))) {
 					entry.type = globalVariables->GetEnumValue<ComboEffectType>(name, MakeComboEffectTypeKey(i));
 					entry.trailTexture = globalVariables->GetValue<std::string>(name, MakeComboEffectTrailTextureKey(i));
@@ -875,6 +928,23 @@ namespace Combo {
 					entry.trailOffsetStart = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrailOffsetStartKey(i));
 					entry.trailOffsetEnd = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrailOffsetEndKey(i));
 					entry.trailLifeTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailLifeTimeKey(i));
+					if (globalVariables->HasKey(name, MakeComboEffectTrailWidthStartKey(i))) {
+                        if (globalVariables->HasKey(name, MakeComboEffectTrailMaxSegmentsKey(i))) {
+                                entry.trailSettings.minEmitDistance = globalVariables->GetValue<float>(name, MakeComboEffectTrailMinDistanceKey(i));
+                                entry.trailSettings.maxSegmentCount = static_cast<size_t>(globalVariables->GetValue<int>(name, MakeComboEffectTrailMaxSegmentsKey(i)));
+                                entry.trailSettings.useSpline = globalVariables->GetValue<bool>(name, MakeComboEffectTrailUseSplineKey(i));
+                                entry.trailSettings.splineSubdivision = globalVariables->GetValue<int>(name, MakeComboEffectTrailSubdivisionKey(i));
+                        }
+						entry.trailSettings.widthStart = globalVariables->GetValue<float>(name, MakeComboEffectTrailWidthStartKey(i));
+						entry.trailSettings.widthEnd = globalVariables->GetValue<float>(name, MakeComboEffectTrailWidthEndKey(i));
+						entry.trailSettings.fadeInTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailFadeInKey(i));
+						entry.trailSettings.fadeOutTime = globalVariables->GetValue<float>(name, MakeComboEffectTrailFadeOutKey(i));
+						entry.trailSettings.alphaCurve = globalVariables->GetValue<Vector4>(name, MakeComboEffectTrailAlphaCurveKey(i));
+						entry.trailSettings.uvScrollSpeed = globalVariables->GetValue<Vector2>(name, MakeComboEffectTrailUvSpeedKey(i));
+						entry.trailSettings.emissionStrength = globalVariables->GetValue<float>(name, MakeComboEffectTrailEmissionKey(i));
+						entry.trailSettings.flipTexture = globalVariables->GetValue<bool>(name, MakeComboEffectTrailFlipKey(i));
+						entry.trailSettings.resetMode = globalVariables->GetEnumValue<Engine::TrailResetMode>(name, MakeComboEffectTrailResetKey(i));
+					}
 					entry.trajectory.type = globalVariables->GetEnumValue<Engine::TrailTrajectoryType>(name, MakeComboEffectTrajectoryTypeKey(i));
 					entry.trajectory.duration = globalVariables->GetValue<float>(name, MakeComboEffectTrajectoryDurationKey(i));
 					entry.trajectory.point0 = globalVariables->GetValue<Vector3>(name, MakeComboEffectTrajectoryPoint0Key(i));

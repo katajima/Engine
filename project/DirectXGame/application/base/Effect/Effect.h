@@ -34,8 +34,9 @@ public:
 	// コンボ演出エントリ用のトレイルをエフェクトコンポーネント側で生成する。
 	void CreateTrailEffect(const std::string& name, const std::string& texture, float lifeTime,
 		Engine::WorldTransform& parent, Engine::Camera* camera, const Color& color,
+
 		const Vector3& offsetStart, const Vector3& offsetEnd,
-		const Engine::TrailTrajectorySettings& trajectory);
+		const Engine::TrailTrajectorySettings& trajectory, const Engine::TrailSettings& settings);
 
 	// 動的に生成したコンボ用トレイルを停止して削除する。
 	void RemoveTrailEffect(const std::string& name);

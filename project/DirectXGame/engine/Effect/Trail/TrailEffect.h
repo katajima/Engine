@@ -72,6 +72,13 @@ namespace Engine {
 		return lhs;
 	}
 
+	// トレイル履歴を発生開始時にどう扱うか。
+	enum class TrailResetMode : uint32_t {
+		kKeepHistory,
+		kClearOnEmitStart,
+		kClearOnParentChange,
+	};
+
 	struct TrailSettings {
 		TrailFeature features = TrailFeature::Ribbon;
 		float minEmitDistance = 0.03f;
@@ -87,6 +94,17 @@ namespace Engine {
 		int afterImageCount = 4;
 		float meshTrailInterval = 0.03f;
 		float particleEmitInterval = 0.02f;
+		// 始点・終点の幅倍率。
+		float widthStart = 1.0f;
+		float widthEnd = 1.0f;
+		// フェードとアルファカーブの設定。
+		float fadeInTime = 0.0f;
+		float fadeOutTime = 0.0f;
+		Vector4 alphaCurve = { 0.0f, 1.0f, 1.0f, 0.0f };
+		// 見た目の追加設定。
+		float emissionStrength = 1.0f;
+		bool flipTexture = false;
+		TrailResetMode resetMode = TrailResetMode::kClearOnEmitStart;
 		float distortionStrength = 0.0f;
 	};
 
@@ -133,7 +151,7 @@ namespace Engine {
 		/// <summary>
 		/// 発生フラグをセット
 		/// </summary>
-		void SetIsEmit(bool is) { flag_ = is; }
+		void SetIsEmit(bool is);
 		/// <summary>
 		/// 発生フラグを取得
 		/// </summary>
@@ -217,6 +235,7 @@ namespace Engine {
 		Vector3 velocity_; // 速度
 
 		float timer = 0;
+		float effectElapsed_ = 0.0f;
 		float lifeTime_ = 0.2f;
 		float minEmitDistance_ = 0.03f;
 		size_t maxSegmentCount_ = 128;

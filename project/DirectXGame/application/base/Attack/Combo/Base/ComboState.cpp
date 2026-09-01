@@ -127,7 +127,12 @@ namespace Combo {
 		comboData.Update(ctx);
 
 		// 入力受付がないのなら終了する
-		if (GetEndStateTime() || GetIsCansel()) {
+		if (GetIsCansel()) {
+			comboData.GetComboEffect().NotifyCancel();
+			End(owner, ctx);
+			return;
+		}
+		if (GetEndStateTime()) {
 			// 終了処理
 			End(owner, ctx);
 		}
@@ -145,6 +150,9 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
+		if (!hasHit_) {
+			comboData.GetComboEffect().NotifyMiss();
+		}
 		if (ctx.inputData.jumpTrigger) {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump);
 		}
@@ -236,6 +244,12 @@ namespace Combo {
 				if (next) {
 					transitionedInput_ = transitionInput;
 					SetState(next, ctx);
+				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
+					nextNode->NotifyBranch();
+				}
+					if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
+						nextNode->NotifyBranch();
+					}
 				}
 				bufferedInput.reset();
 				bufferedInputAge_ = 0.0f;
@@ -248,6 +262,9 @@ namespace Combo {
 			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
 			if (next) {
 				SetState(next, ctx);
+				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
+					nextNode->NotifyBranch();
+				}
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-#include "ComboEditor.h"
+﻿#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManager.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -37,6 +37,10 @@ namespace Combo {
 
 	// 選択中コンボの軌道デバッグ描画
 	void Editor::DrawSelectedTrajectoryDebug() {
+        // Combo欄のトグルがオフなら、コンボ関連のデバッグ描画を停止する。
+        if (!showComboDebugDraw_) {
+            return;
+        }
 		// 選択中コンボが存在しない場合は描画を省略する。
 		auto selected = comboEditorBlocks_.find(selectedComboEditorBlockName_);
 		if (selected == comboEditorBlocks_.end()) {
@@ -49,7 +53,9 @@ namespace Combo {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
+        ImGui::Checkbox("コンボデバッグ描画", &showComboDebugDraw_);
 		comboSystem->SetIsDebug(isComboEditorActive_);
+        comboSystem->SetIsDebugDraw(showComboDebugDraw_);
 
 		// ノード管理の描画
 		DrawNodeManagement();

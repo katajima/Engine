@@ -12,6 +12,7 @@ namespace Combo {
 	// 更新
 	void ComboDebug::Update(float dt) {
 #ifdef _DEBUG
+		if (!enabled_) { return; }
 		if (owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()) {
 			ComboData data = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()->Data();
 			Vector3 ownerPos = owner->GetWorldTransform().GetWorldPosition();

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
 #include <memory>
@@ -46,6 +46,24 @@ namespace Combo {
 	static std::string MakeComboEffectOffsetKey(int index) {
 		return "コンボエフェクトオフセット" + std::to_string(index);
 	}
+	static std::string MakeComboEffectPositionKey(int index) { return "コンボエフェクト位置" + std::to_string(index); }
+	static std::string MakeComboEffectRotationKey(int index) { return "コンボエフェクト回転" + std::to_string(index); }
+	static std::string MakeComboEffectScaleKey(int index) { return "コンボエフェクトスケール" + std::to_string(index); }
+	static std::string MakeComboEffectRequiredHitCountKey(int index) { return "コンボエフェクト必要ヒット数" + std::to_string(index); }
+	static std::string MakeComboEffectInputTypeKey(int index) { return "コンボエフェクト入力種別" + std::to_string(index); }
+	static std::string MakeComboEffectTrailWidthStartKey(int index) { return "コンボエフェクトトレイル開始幅" + std::to_string(index); }
+    static std::string MakeComboEffectTrailMinDistanceKey(int index) { return "コンボエフェクトトレイル最小発生距離" + std::to_string(index); }
+    static std::string MakeComboEffectTrailMaxSegmentsKey(int index) { return "コンボエフェクトトレイル最大セグメント数" + std::to_string(index); }
+    static std::string MakeComboEffectTrailUseSplineKey(int index) { return "コンボエフェクトトレイルスプライン" + std::to_string(index); }
+    static std::string MakeComboEffectTrailSubdivisionKey(int index) { return "コンボエフェクトトレイル分割数" + std::to_string(index); }
+	static std::string MakeComboEffectTrailWidthEndKey(int index) { return "コンボエフェクトトレイル終了幅" + std::to_string(index); }
+	static std::string MakeComboEffectTrailFadeInKey(int index) { return "コンボエフェクトトレイルフェードイン" + std::to_string(index); }
+	static std::string MakeComboEffectTrailFadeOutKey(int index) { return "コンボエフェクトトレイルフェードアウト" + std::to_string(index); }
+	static std::string MakeComboEffectTrailAlphaCurveKey(int index) { return "コンボエフェクトトレイルアルファカーブ" + std::to_string(index); }
+	static std::string MakeComboEffectTrailUvSpeedKey(int index) { return "コンボエフェクトトレイルUV速度" + std::to_string(index); }
+	static std::string MakeComboEffectTrailEmissionKey(int index) { return "コンボエフェクトトレイル発光強度" + std::to_string(index); }
+	static std::string MakeComboEffectTrailFlipKey(int index) { return "コンボエフェクトトレイルテクスチャ反転" + std::to_string(index); }
+	static std::string MakeComboEffectTrailResetKey(int index) { return "コンボエフェクトトレイル軌跡リセット" + std::to_string(index); }
 
 	static std::string MakeComboEffectTypeKey(int index) { return "コンボエフェクト種別" + std::to_string(index); }
 	static std::string MakeComboEffectTrailTextureKey(int index) { return "コンボエフェクトトレイルテクスチャ" + std::to_string(index); }
@@ -260,6 +278,8 @@ namespace Combo {
 			return comboStateMachine_->IsComboFinished();
 		}
 		void SetIsDebug(bool is) { isDebug = is; }
+		// コンボ関連のデバッグ描画だけを切り替える。
+		void SetIsDebugDraw(bool is) { isDebugDraw_ = is; }
 	public:
 		/// <summary>
 		/// データ設定
@@ -333,6 +353,7 @@ namespace Combo {
 		Engine::AudioManager* audioManager_ = nullptr;
 
 		bool isDebug = false;
+		bool isDebugDraw_ = true;
 		std::optional<ActionInput> pendingCostInput_;
 		float pendingStaminaCost_ = 0.0f;
 		std::shared_ptr<NodeState> pendingCooldownNode_ = nullptr;

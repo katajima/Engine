@@ -95,10 +95,29 @@ namespace Combo {
 	};
 
 	// コンボ演出の発生条件
+
+	// コンボ演出の発生条件。今後のイベント条件はこの列挙値を拡張して追加する。
 	enum class ComboEffectTriggerType {
-		kTimeWindow,	// 指定時間範囲中に頻度ごと発生
-		kTimer,			// 指定時間経過で一回発生
-		kLanding,		// 着地した瞬間に一回発生
+		kTimeWindow,
+		kTimer,
+		kLanding,
+		kHit,
+		kMiss,
+		kHitCount,
+		kBranch,
+		kCancel,
+		kGround,
+		kAir,
+		kButton,
+	};
+
+	// ボタン入力条件。PlayerInputDataの入力をエフェクト条件へ変換する。
+	enum class ComboEffectInputType {
+		kAny,
+		kJump,
+		kDodge,
+		kSkill,
+		kSpecial,
 	};
 
 	// 保存項目用遠距離攻撃データ
@@ -374,12 +393,21 @@ struct GlobalAudio {
 		float endTime = 0.0f;							// コンボ開始から発生終了までの時間
 		float interval = 0.1f;							// 発生頻度
 		Vector3 offset = { 0.0f, 0.0f, 0.0f };			// 追従先からの発生オフセット
+		// パーティクルとトレイルで共有するローカルTransform。
+		Vector3 transformPosition = { 0.0f, 0.0f, 0.0f };
+		Vector3 transformRotation = { 0.0f, 0.0f, 0.0f };
+		Vector3 transformScale = { 1.0f, 1.0f, 1.0f };
+		// イベント条件の追加パラメータ。
+		int requiredHitCount = 1;
+		ComboEffectInputType inputType = ComboEffectInputType::kAny;
 		// トレイル専用のテクスチャ、始点・終点レール設定。
 		std::string trailTexture = "resources/Texture/effect/texture_GradationRepeat_512px_deg270.dds";
 		Color trailColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Vector3 trailOffsetStart = { 0.0f, 0.5f, 0.0f };
 		Vector3 trailOffsetEnd = { 0.0f, -0.5f, 0.0f };
 		float trailLifeTime = 1.0f;
+		// トレイルの見た目と履歴制御をまとめた設定。
+		Engine::TrailSettings trailSettings{};
 		// パーティクルとトレイルで共有する軌跡設定。
 		Engine::TrailTrajectorySettings trajectory{};
 	};

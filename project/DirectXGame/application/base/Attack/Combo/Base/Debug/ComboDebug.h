@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboState.h"
 
@@ -30,9 +30,12 @@ namespace Combo {
 		/// </summary>
 		/// <param name="dt"> deltaTime </param>
 		void Update(float dt);
+		// コンボ欄からデバッグラインの描画可否を設定する。
+		void SetEnabled(bool enabled) { enabled_ = enabled; }
 
 	private:
 		Character::BaseCharacter* owner = nullptr;
+		bool enabled_ = true;
 		Engine::LineCommon* lineCommon = nullptr;
 	};
 }

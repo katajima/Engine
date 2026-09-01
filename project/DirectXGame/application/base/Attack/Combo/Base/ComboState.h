@@ -164,6 +164,7 @@ namespace Combo {
             hasHit_ = true;
             comboData.GetComboRange().NotifyHit();
             comboData.GetComboCamera().OnHit();
+            comboData.GetComboEffect().NotifyHit();
 			/// <summary>
 			/// 命中確定時だけ、このコンボに設定されたヒット音を再生する。
 			/// </summary>
@@ -184,6 +185,12 @@ namespace Combo {
         /// </summary>
         /// <returns>命中済みならtrue、それ以外はfalseです。</returns>
         bool HasHit() const { return hasHit_; }
+        // コンボ分岐時に、次のノードの演出へ分岐イベントを通知する。
+        void NotifyBranch() { comboData.GetComboEffect().NotifyBranch(); }
+        // コンボキャンセル時に演出へキャンセルイベントを通知する。
+        void NotifyCancel() { comboData.GetComboEffect().NotifyCancel(); }
+        // コンボ終了時に命中しなかった場合、演出へミスイベントを通知する。
+        void NotifyMiss() { comboData.GetComboEffect().NotifyMiss(); }
 
         /// <summary>
         /// 入力と現在条件から実際に遷移する次ノードを解決します。

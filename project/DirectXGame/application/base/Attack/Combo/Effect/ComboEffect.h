@@ -92,6 +92,13 @@ namespace Combo {
 		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer, float dt);
+		// コンボ外部のヒットや分岐イベントを演出条件へ通知する。
+		void NotifyHit();
+		void NotifyMiss();
+		void NotifyBranch();
+		void NotifyCancel();
+        // リロード時に実行中のトレイルを解放する。
+        void ClearRuntimeEffects();
 
 		/// <summary>
 		/// コンボエフェクトを終了し、発生済みフラグなどの一時状態を整理します。
@@ -125,6 +132,7 @@ namespace Combo {
 		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		/// <returns>発生可能な時間範囲内ならtrue、それ以外はfalseです。</returns>
 		bool IsTriggerTimeValid(const ComboEffectEntry& entry, float timer) const;
+		bool IsTriggerSatisfied(const ComboEffectEntry& entry, const Character::CharacterContext& ctx) const;
 
 		/// <summary>
 		/// 指定演出を現在の基準位置へ発生させます。
@@ -142,7 +150,7 @@ namespace Combo {
 		void CreateTrailEntries();
 		void RemoveTrailEntries();
 		// 各トレイルの有効状態を、共通の発生時間範囲で更新する。
-		void UpdateTrailEntries(float timer);
+		void UpdateTrailEntries(const Character::CharacterContext& ctx, float timer);
 		// パーティクル発生用に、エントリの軌跡上の位置を求める。
 		Vector3 GetTrajectoryPosition(const ComboEffectEntry& entry, float normalizedTime) const;
 	private:
@@ -156,6 +164,12 @@ namespace Combo {
 		std::vector<float> nextEmitTimes_;			// 各コンボエフェクトの次回発生時間
 		std::vector<bool> emittedFlags_;				// 一回発生条件が発生済みか
 		bool wasOnGround_ = false;
+		// 各イベント条件の発生済み状態。次回コンボ開始時にリセットする。
+		bool hitEvent_ = false;
+		bool missEvent_ = false;
+		bool branchEvent_ = false;
+		bool cancelEvent_ = false;
+		float currentTimer_ = 0.0f;
 		// 実行名により、複数のコンボインスタンスが別々のトレイルを所有できるようにする。
 		std::vector<std::string> trailRuntimeNames_;					// 前フレームの接地状態
 	};
@@ -185,6 +199,7 @@ namespace Combo {
 		/// <param name="timer">コンボステート開始からの経過時間です。単位は秒です。</param>
 		/// <param name="dt">前フレームからの経過時間です。単位は秒です。</param>
 		void Update(const Character::CharacterContext& ctx, float timer, float dt);
+		// コンボ外部のヒットや分岐イベントを演出条件へ通知する。
 
 		/// <summary>
 		/// コンボ音声状態を終了します。

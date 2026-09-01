@@ -10,6 +10,7 @@
 #include "DirectXGame/engine/Audio/Audio.h"
 #include <cctype>
 #include <cstring>
+#include <algorithm>
 
 namespace Combo {
 
@@ -896,6 +897,9 @@ namespace Combo {
 
 		int removeIndex = -1;
 		bool shouldSyncSequence = false;
+		int duplicateIndex = -1;
+		int moveUpIndex = -1;
+		int moveDownIndex = -1;
 
 		for (int i = 0; i < static_cast<int>(effect.comboEffects.size()); ++i) {
 			ImGui::PushID(i);
@@ -925,12 +929,9 @@ namespace Combo {
 					}
 				}
 				ImGui::EndCombo();
-			}
-
-			static const char* ComboEffectTriggerTypeLabels[] = {
-				"時間範囲",
-				"時間経過",
-				"着地したら",
+			}			static const char* ComboEffectTriggerTypeLabels[] = {
+				"時間範囲", "時間経過", "着地したら", "ヒット時", "ミス時",
+				"ヒット数到達", "コンボ分岐時", "キャンセル時", "地上", "空中", "ボタン入力時",
 			};
 			Engine::ImGuiManager::Select("発生条件", ComboEffectTriggerTypeLabels, entry.triggerType);
 
@@ -942,6 +943,16 @@ namespace Combo {
 				ImGui::DragFloat("発生頻度", &entry.interval, 0.01f, 0.001f, 60.0f, "%.3f");
 			}
 			ImGui::DragFloat3("発生オフセット", &entry.offset.x, 0.01f);
+			ImGui::DragFloat3("共通位置", &entry.transformPosition.x, 0.01f);
+			ImGui::DragFloat3("共通回転", &entry.transformRotation.x, 0.01f);
+			ImGui::DragFloat3("共通スケール", &entry.transformScale.x, 0.01f);
+			if (entry.triggerType == ComboEffectTriggerType::kHitCount) {
+				ImGui::DragInt("必要ヒット数", &entry.requiredHitCount, 1, 1, 999);
+			}
+			if (entry.triggerType == ComboEffectTriggerType::kButton) {
+				static const char* ComboEffectInputTypeLabels[] = { "すべて", "ジャンプ", "回避", "スキル", "必殺技" };
+				Engine::ImGuiManager::Select("入力ボタン", ComboEffectInputTypeLabels, entry.inputType);
+			}
 			if (entry.type == ComboEffectType::Trail) {
 				char trailTextureBuffer[256]{};
 				strncpy_s(trailTextureBuffer, entry.trailTexture.c_str(), _TRUNCATE);
@@ -952,6 +963,21 @@ namespace Combo {
 				ImGui::DragFloat3("トレイル開始レール", &entry.trailOffsetStart.x, 0.01f);
 				ImGui::DragFloat3("トレイル終了レール", &entry.trailOffsetEnd.x, 0.01f);
 				ImGui::ColorEdit4("トレイル色", &entry.trailColor.r);
+                ImGui::DragFloat("最小発生距離", &entry.trailSettings.minEmitDistance, 0.001f, 0.0f, 10.0f);
+                int trailMaxSegments = static_cast<int>(entry.trailSettings.maxSegmentCount);
+                if (ImGui::DragInt("最大セグメント数", &trailMaxSegments, 1.0f, 1, 2048)) { entry.trailSettings.maxSegmentCount = static_cast<size_t>((std::max)(1, trailMaxSegments)); }
+                ImGui::Checkbox("スプライン補間", &entry.trailSettings.useSpline);
+                ImGui::DragInt("スプライン分割数", &entry.trailSettings.splineSubdivision, 1.0f, 1, 16);
+				ImGui::DragFloat("開始幅", &entry.trailSettings.widthStart, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("終了幅", &entry.trailSettings.widthEnd, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("フェードイン時間", &entry.trailSettings.fadeInTime, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("フェードアウト時間", &entry.trailSettings.fadeOutTime, 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat4("アルファカーブ", &entry.trailSettings.alphaCurve.x, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat2("UVスクロール速度", &entry.trailSettings.uvScrollSpeed.x, 0.01f);
+				ImGui::DragFloat("発光強度", &entry.trailSettings.emissionStrength, 0.01f, 0.0f, 20.0f);
+				ImGui::Checkbox("テクスチャ反転", &entry.trailSettings.flipTexture);
+				static const char* TrailResetModeLabels[] = { "履歴を維持", "発生開始時に消去", "親変更時に消去" };
+				Engine::ImGuiManager::Select("軌跡リセット", TrailResetModeLabels, entry.trailSettings.resetMode);
 			}
 			static const char* EntryTrajectoryTypeLabels[] = {
 				"なし",
@@ -984,6 +1010,18 @@ namespace Combo {
 				entry.interval = 0.001f;
 			}
 
+			if (ImGui::Button("複製")) {
+				duplicateIndex = i;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("上へ") && i > 0) {
+				moveUpIndex = i;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("下へ") && i + 1 < static_cast<int>(effect.comboEffects.size())) {
+				moveDownIndex = i;
+			}
+			ImGui::SameLine();
 			if (ImGui::Button("削除")) {
 				removeIndex = i;
 			}
@@ -992,6 +1030,18 @@ namespace Combo {
 			ImGui::PopID();
 		}
 
+		if (duplicateIndex >= 0) {
+			effect.comboEffects.insert(effect.comboEffects.begin() + duplicateIndex + 1, effect.comboEffects[duplicateIndex]);
+			shouldSyncSequence = true;
+		}
+		if (moveUpIndex > 0) {
+			std::swap(effect.comboEffects[moveUpIndex], effect.comboEffects[moveUpIndex - 1]);
+			shouldSyncSequence = true;
+		}
+		if (moveDownIndex >= 0 && moveDownIndex + 1 < static_cast<int>(effect.comboEffects.size())) {
+			std::swap(effect.comboEffects[moveDownIndex], effect.comboEffects[moveDownIndex + 1]);
+			shouldSyncSequence = true;
+		}
 		if (removeIndex >= 0 && removeIndex < static_cast<int>(effect.comboEffects.size())) {
 			effect.comboEffects.erase(effect.comboEffects.begin() + removeIndex);
 			shouldSyncSequence = true;
@@ -1030,17 +1080,34 @@ namespace Combo {
 
 	// 選択中コンボの軌道デバッグ描画
 	void EditorBlock::DrawTrajectoryDebug() {
-		// 軌道未使用、選択解除、または描画に必要な参照がない場合は何もしない。
-		if (!nowChoice_ || data_.hitBox.trajectoryType == HitBox::TrajectoryType::kNone || lineCommon == nullptr || comboSystem == nullptr) {
-			return;
+		// 選択解除または描画に必要な参照がない場合は何もしない。
+		if (!nowChoice_ || lineCommon == nullptr || comboSystem == nullptr) { return; }
+		if (data_.hitBox.trajectoryType != HitBox::TrajectoryType::kNone) {
+			// ヒットボックスの軌道を既存の共通デバッグ描画へ渡す。
+			Engine::WorldTransform* anchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
+			if (anchor == nullptr && owner != nullptr) { anchor = &owner->GetWorldTransform(); }
+			HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, anchor, lineCommon);
 		}
-		// 設定された依存先を取得し、未設定ならキャラクター本体をアンカーにする。
-		Engine::WorldTransform* trajectoryAnchor = comboSystem->GetParentTransform(data_.hitBox.parentName);
-		if (trajectoryAnchor == nullptr && owner != nullptr) {
-			trajectoryAnchor = &owner->GetWorldTransform();
+		// パーティクルとトレイルの軌道を同じエディタ上へ表示する。
+		Engine::LineMeshData& lines = lineCommon->GetDebugLineMeshData();
+		for (const ComboEffectEntry& entry : data_.effect.comboEffects) {
+			if (entry.trajectory.type == Engine::TrailTrajectoryType::kNone) { continue; }
+			Engine::WorldTransform* effectAnchor = comboSystem->GetParentTransform(entry.parentName);
+			const Vector3 origin = effectAnchor ? effectAnchor->worldMat_.GetWorldPosition() : Vector3{};
+			const Matrix4x4 local = MakeAffineMatrix(entry.transformScale, entry.transformRotation, entry.transformPosition);
+			const Vector4 color = entry.type == ComboEffectType::Trail ? Vector4{ 0.2f, 0.9f, 1.0f, 1.0f } : Vector4{ 0.9f, 0.3f, 1.0f, 1.0f };
+			Vector3 previous = local.Transform(Engine::EvaluateTrailTrajectory(entry.trajectory, 0.0f));
+			for (int segment = 1; segment <= 32; ++segment) {
+				const float t = static_cast<float>(segment) / 32.0f;
+				Vector3 current = local.Transform(Engine::EvaluateTrailTrajectory(entry.trajectory, t));
+				if (effectAnchor) {
+					current = origin + Vector3{ effectAnchor->worldMat_.m[0][0] * current.x + effectAnchor->worldMat_.m[0][1] * current.y + effectAnchor->worldMat_.m[0][2] * current.z, effectAnchor->worldMat_.m[1][0] * current.x + effectAnchor->worldMat_.m[1][1] * current.y + effectAnchor->worldMat_.m[1][2] * current.z, effectAnchor->worldMat_.m[2][0] * current.x + effectAnchor->worldMat_.m[2][1] * current.y + effectAnchor->worldMat_.m[2][2] * current.z };
+				}
+				if (segment == 1 && effectAnchor) { previous = origin + (current - origin); }
+				lines.AddLine(previous, current, color);
+				previous = current;
+			}
 		}
-		// ヒットボックス生成前でも、現在のキャラクター位置を基準に軌道を描画する。
-		HitBox::HitBoxInstance::DrawTrajectoryDebug(data_.hitBox, trajectoryAnchor, lineCommon);
 	}
 #pragma endregion // ImGui管理
 

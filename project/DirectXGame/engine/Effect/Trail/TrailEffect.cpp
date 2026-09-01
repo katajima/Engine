@@ -60,14 +60,26 @@ namespace {
 		return true;
 	}
 
-	void AppendTrailQuad(std::vector<VertexData>& vertices,
-		const Vector3& currentStart,
-		const Vector3& currentEnd,
-		const Vector3& previousStart,
-		const Vector3& previousEnd,
-		float currentU,
-		float previousU)
+	float EvaluateAlphaCurve(const Vector4& curve, float t)
 	{
+		// 4点を三次ベジェ曲線の値として扱い、トレイル全体のアルファを補間する。
+		const float inverse = 1.0f - t;
+		return inverse * inverse * inverse * curve.x + 3.0f * inverse * inverse * t * curve.y +
+			3.0f * inverse * t * t * curve.z + t * t * t * curve.w;
+	}
+
+	void AppendTrailQuad(std::vector<VertexData>& vertices,
+		Vector3 currentStart, Vector3 currentEnd, Vector3 previousStart, Vector3 previousEnd,
+		float currentU, float previousU, float currentWidth, float previousWidth)
+	{
+		// レールの中心から幅倍率を適用し、開始幅から終了幅へ補間する。
+		const Vector3 currentCenter = (currentStart + currentEnd) * 0.5f;
+		const Vector3 previousCenter = (previousStart + previousEnd) * 0.5f;
+		currentStart = currentCenter + (currentStart - currentCenter) * currentWidth;
+		currentEnd = currentCenter + (currentEnd - currentCenter) * currentWidth;
+		previousStart = previousCenter + (previousStart - previousCenter) * previousWidth;
+		previousEnd = previousCenter + (previousEnd - previousCenter) * previousWidth;
+
 		const Vector2 uvCurrentTop = { currentU, 0.0f };
 		const Vector2 uvCurrentBottom = { currentU, 1.0f };
 		const Vector2 uvPreviousTop = { previousU, 0.0f };
@@ -166,7 +178,21 @@ void Engine::TrailEffect::Update()
 	parentTransform_ = MakeAffineMatrix({ 1,1,1 }, Vector3{ 0,0,0 }, { 0,0,0 });
 	transformation->Update(camera_, parentTransform_);
 
-	material->GetMaterialInstance().color = baseColor_;
+	// 発生開始からの経過時間を使ってフェードとアルファカーブを反映する。
+	effectElapsed_ += deltaTime;
+	float fade = 1.0f;
+	if (settings_.fadeInTime > 0.0f) {
+		fade = (std::min)(fade, effectElapsed_ / settings_.fadeInTime);
+	}
+	if (settings_.fadeOutTime > 0.0f) {
+		fade = (std::min)(fade, (std::max)(0.0f, (lifeTime_ - effectElapsed_) / settings_.fadeOutTime));
+	}
+	// フェード未使用時は、アルファカーブの初期値によってトレイル全体が透明にならないようにする。
+	const bool hasFadeSetting = settings_.fadeInTime > 0.0f || settings_.fadeOutTime > 0.0f;
+	const float curveAlpha = hasFadeSetting ? std::clamp(EvaluateAlphaCurve(settings_.alphaCurve, std::clamp(fade, 0.0f, 1.0f)), 0.0f, 1.0f) : 1.0f;
+	material->GetMaterialInstance().color = { baseColor_.r * settings_.emissionStrength, baseColor_.g * settings_.emissionStrength,
+		baseColor_.b * settings_.emissionStrength, baseColor_.a * fade * curveAlpha };
+	material->GetMaterialInstance().transform.scale.x = settings_.flipTexture ? -1.0f : 1.0f;
 	UpdateComposableModules(deltaTime);
 	material->GPUData();
 
@@ -307,6 +333,18 @@ void Engine::TrailEffect::SetQuality(float minEmitDistance, size_t maxSegmentCou
 	meshDirty_ = true;
 }
 
+void Engine::TrailEffect::SetIsEmit(bool is)
+{
+	// 発生開始時に履歴を消去し、前回の位置から不自然な帯が伸びることを防ぐ。
+	if (is && !flag_ && settings_.resetMode == TrailResetMode::kClearOnEmitStart) {
+		segments_.clear();
+		hasLastSample_ = false;
+		meshDirty_ = true;
+		effectElapsed_ = 0.0f;
+	}
+	flag_ = is;
+}
+
 void Engine::TrailEffect::SetSettings(const TrailSettings& settings)
 {
 	settings_ = settings;
@@ -429,7 +467,9 @@ void Engine::TrailEffect::RebuildLinearMesh()
 		const float nextAgeRate = std::clamp(ageRate + (1.0f / static_cast<float>((std::max)(size_t{ 1 }, segments_.size()))), 0.0f, 1.0f);
 
 		// 1セグメントを必ず2三角形単位で生成し、寿命削除で三角形が崩れないようにする。
-		AppendTrailQuad(mesh->vertices, segment.start, segment.end, segment.prevStart, segment.prevEnd, ageRate, nextAgeRate);
+		const float currentWidth = settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * ageRate;
+		const float previousWidth = settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * nextAgeRate;
+		AppendTrailQuad(mesh->vertices, segment.start, segment.end, segment.prevStart, segment.prevEnd, ageRate, nextAgeRate, currentWidth, previousWidth);
 	}
 }
 
@@ -479,7 +519,9 @@ void Engine::TrailEffect::RebuildSplineMesh()
 			sampledStart[i - 1],
 			sampledEnd[i - 1],
 			currentU,
-			previousU);
+			previousU,
+			settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * currentU,
+			settings_.widthStart + (settings_.widthEnd - settings_.widthStart) * previousU);
 	}
 }
 
