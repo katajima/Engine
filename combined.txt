@@ -120,13 +120,9 @@
     └── └── └── └── └── PlayerRangeBombingBullet.h
     └── └── └── ├── Camera/
     └── └── └── └── ├── Base/
-    └── └── └── └── └── ├── BaseCamera.cpp
-    └── └── └── └── └── ├── BaseCamera.h
     └── └── └── └── └── ├── BaseFixedCamera.h
     └── └── └── └── └── ├── BaseFollowCamera.h
-    └── └── └── └── └── ├── BaseRailCamera.h
-    └── └── └── └── └── ├── CameraManager.cpp
-    └── └── └── └── └── └── CameraManager.h
+    └── └── └── └── └── └── BaseRailCamera.h
     └── └── └── └── ├── FixedCamera/
     └── └── └── └── └── ├── EffectCamera.cpp
     └── └── └── └── └── ├── EffectCamera.h
@@ -526,6 +522,8 @@
     └──     └── └── └── WinApp.h
     └──     └── └── pch.h
     └──     ├── Camera/
+    └──     └── ├── BaseCamera.cpp
+    └──     └── ├── BaseCamera.h
     └──     └── ├── Camera.cpp
     └──     └── ├── Camera.h
     └──     └── ├── CameraCollision.cpp
@@ -540,6 +538,8 @@
     └──     └── ├── CameraLag.h
     └──     └── ├── CameraLockOn.cpp
     └──     └── ├── CameraLockOn.h
+    └──     └── ├── CameraManager.cpp
+    └──     └── ├── CameraManager.h
     └──     └── ├── CameraRotation.cpp
     └──     └── ├── CameraRotation.h
     └──     └── ├── CameraShake.cpp
@@ -7541,7 +7541,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
-#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
+#include <DirectXGame/engine/Camera/CameraManager.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/engine/3d/Object/Object3d.h>
@@ -9153,7 +9153,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cp
 ============================================================
 #include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
@@ -12994,9 +12994,9 @@ struct LockOnData {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/LockOn/LockOnSystem.cpp
 ============================================================
-﻿#include "LockOnSystem.h"
+#include "LockOnSystem.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include <algorithm>
 #include <limits>
 
@@ -15990,163 +15990,11 @@ private: // 一旦
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.cpp
-============================================================
-﻿#include "BaseCamera.h"
-
-#include "DirectXGame/engine/MyGame/MyGame.h"
-
-
-/// <summary>
-/// オブジェクトの時間取得
-/// </summary>
-/// <returns></returns>
-float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
-
-void BaseCamera::CreateFixedCamera(Engine::EntityManager* entityManager, const Transform& transform, float farClip) {
-	this->entityManager = entityManager;	// エンティティ3d
-
-	// カメラ初期化
-	uniqueCamera_ = std::make_unique<Engine::Camera>();
-	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->SetFarClip(farClip);
-
-	// カメラ位置と回転設定
-	uniqueCamera_->SetTranslate(transform.translate);
-	uniqueCamera_->SetRotate(transform.rotate);
-
-
-	// ポストエフェクト追加
-	uniqueCamera_->AddEffectBlock("copy", Engine::PostEffectBlockType::kCopy, true);
-}
-
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.h
-============================================================
-﻿#pragma once
-#include <DirectXGame/engine/Camera/CameraController.h>
-#include <DirectXGame/engine/Camera/Camera.h>
-#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
-// 前方宣言
-class CameraManager;
-class InputSystem;
-
-namespace Engine {
-	class EntityManager;
-	class GlobalVariables;
-}
-
-/// <summary>
-/// カメラ基底クラス
-/// </summary>
-class BaseCamera
-{
-public:
-	virtual ~BaseCamera()
-	{
-		/// <summary>
-		/// 派生カメラが所有する描画カメラのD3Dリソースを、シーン破棄時に確実に解放する
-		/// </summary>
-		if (uniqueCamera_) {
-			uniqueCamera_->Finalize();
-		}
-	}
-	/// <summary>カメラ固有の制御器と描画カメラを初期化する。</summary>
-	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラではnullptrを許容する。</param>
-	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>
-	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
-	/// <param name="position">カメラの初期ワールド座標。</param>
-	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
-
-	///< summary>
-	/// 更新
-	///</summary>
-	virtual void Update() = 0;
-
-
-
-	/// <summary>
-	/// カメラ取得
-	/// </summary>
-	/// <returns>このBaseCameraが所有する描画カメラへの非所有ポインター。</returns>
-	Engine::Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
-
-	/// <summary>
-	///	カメラ統括クラス取得
-	/// </summary>
-	/// <returns>このBaseCameraが所有する制御器への非所有ポインター。</returns>
-	CameraController* GetCameraController() { return controller.get(); }
-
-	/// <summary>
-	/// ロックオン対象を設定
-	/// </summary>
-	/// <param name="object">注視対象のワールド変換。解除する場合はnullptr。</param>
-	void LockOn(const Engine::WorldTransform* object) { target = object; };
-
-	/// <summary>
-	/// カメラ管理を設定
-	/// </summary>
-	/// <param name="cameraManager">カメラ切り替えを管理する非所有ポインター。</param>
-	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
-
-
-	/// <summary>
-	/// 時間取得
-	/// </summary>
-	/// <returns>シーンのタイムスケールを反映したフレーム時間。</returns>
-	float GetTime() const;
-
-	/// <summary>
-	/// 名前設定
-	/// </summary>
-	void SetName(const std::string& name) { name_ = name; };
-	/// <summary>
-	/// 名前取得
-	/// </summary>
-	std::string GetName() const { return name_; }
-	/// <summary>
-	/// カメラ使用フラグ
-	/// </summary>
-	bool GetUseCamera() const { return useCamera; }
-	/// <summary>
-	/// カメラ使用フラグ設定
-	/// </summary>
-	void SetUseCamera(bool is) { useCamera = is; }
-
-protected:
-	void CreateFixedCamera(Engine::EntityManager* entityManager,const Transform& transform, float farClip);
-
-protected:
-	// カメラ使用フラグ
-	bool useCamera = false;
-	// 固有カメラ
-	std::unique_ptr<Engine::Camera> uniqueCamera_;	
-	// 統括
-	std::unique_ptr<CameraController> controller = nullptr;
-	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
-	float timeSpeed_ = 1.0f;	
-	// 名前
-	std::string name_;
-protected:
-	const Engine::WorldTransform* target = nullptr;		// ロックオン対象
-	CameraManager* cameraManager = nullptr;			// カメラ管理
-protected:
-	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
-	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
-	InputSystem* inputSystem = nullptr;						// 入力(使わないならnullptr)
-
-};
-
-
-
-============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/BaseFixedCamera.h
 ============================================================
 #pragma once
 
-#include"BaseCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 
 /// <summary>
@@ -16176,7 +16024,7 @@ protected:
 File Path: project/DirectXGame/application/base/Camera/Base/BaseFollowCamera.h
 ============================================================
 #pragma once
-#include "BaseCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 /// <summary>
 /// フォローカメラ
@@ -16213,7 +16061,7 @@ protected:
 File Path: project/DirectXGame/application/base/Camera/Base/BaseRailCamera.h
 ============================================================
 #pragma once
-#include "BaseCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 
 /// <summary>
@@ -16238,334 +16086,6 @@ protected:
 	bool autoMove = false;				// 自動で進むか
 
 };
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraManager.cpp
-============================================================
-#include "CameraManager.h"
-#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-
-
-CameraManager::~CameraManager()
-{
-	// シーン破棄時にCameraManager所有のD3Dリソースを確実に解放する
-	Finalize();
-}
-
-void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
-{
-	this->inputSystem = inputSystem;						// インプット
-	this->entityManager = entityManager;	// エンティティ3d
-	this->globalVariables = globalVariables;	// 保存項目
-
-	// カメラ初期化
-	camera = std::make_unique <Engine::Camera>();
-	camera->Initialize(entityManager->GetCameraCommon());
-	camera->SetRotate({ 0.36f,0,0 });			// 回転指定
-	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
-	camera->SetFarClip(Engine::Camera::kDefaultFarClip);	// 共通のFarクリップ距離を設定
-	isGameCamera = true;								// ゲームに使用する
-
-	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
-	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
-	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
-	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());						// デフォルトカメラ設定
-}
-
-void CameraManager::Finalize()
-{
-	// 登録カメラは非所有なので、先に参照だけ切る
-	cameras.clear();
-
-	// 各描画システムが保持しているCameraの非所有ポインタを無効化する
-	if (entityManager) {
-		if (entityManager->GetObject3dCommon()) {
-			entityManager->GetObject3dCommon()->SetDefaultCamera(nullptr);
-		}
-		if (entityManager->GetEffectManager()) {
-			if (entityManager->GetEffectManager()->GetParticleManager()) {
-				entityManager->GetEffectManager()->GetParticleManager()->SetCamera(nullptr);
-			}
-			if (entityManager->GetEffectManager()->GetGpuParticleManager()) {
-				entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(nullptr);
-			}
-		}
-		if (entityManager->Get3DLineCommon()) {
-			entityManager->Get3DLineCommon()->SetDefaultCamera(nullptr);
-		}
-		if (entityManager->GetObject3dInstanceManager()) {
-			entityManager->GetObject3dInstanceManager()->SetCamera(nullptr);
-		}
-	}
-
-	// CameraManagerが所有する出力カメラを明示解放する
-	if (camera) {
-		camera->Finalize();
-		camera.reset();
-	}
-
-	entityManager = nullptr;
-	globalVariables = nullptr;
-	inputSystem = nullptr;
-	isInterpolating = false;
-	currentTime = 0.0f;
-}
-
-void CameraManager::Update()
-{
-	// ImGui更新
-	UpdateImGui();
-
-	// ゲームカメラOn
-	if (isGameCamera) {
-
-		// 各カメラ更新
-		for (auto& cam : cameras) {
-			cam.second->Update();
-		}
-
-		// 補間中
-		if (isInterpolating) {
-			// カメラ補間時間はゲーム時間倍率を反映して進める
-			currentTime += Engine::MyGame::GameTime();
-
-			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
-
-			// 位置と回転を補間
-			camera->SetTranslate(Lerp(startTransform.translate, targetTransform.translate, t));
-			camera->SetRotate(QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t)));
-			camera->UpdateMatrix();
-
-			if (t >= 1.0f) {
-				isInterpolating = false;
-			}
-		}
-		else {
-			// 使っているカメラを更新
-			for (auto& cam : cameras) {
-				if (cam.second->GetUseCamera()) {
-					camera->SetTransform(cam.second->GetUniqueCamera()->GetTransform());
-					camera->UpdateMatrix();
-				}
-			}
-		}
-	}
-
-
-	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
-	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());				// デフォルトカメラ設定
-	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
-	entityManager->GetObject3dInstanceManager()->SetCamera(camera.get());				// デフォルトカメラ設定
-	// カメラ更新
-	camera->UpdateMatrix();
-}
-
-
-void CameraManager::AddCamera(const CameraInfo& cameraInfo, const std::string& name) {
-	// CameraManagerは所有権を受け取らず、登録元が所有するカメラを参照する。
-	if (!cameraInfo.camera) {
-		return;
-	}
-	// カメラ管理クラスを渡す
-	cameraInfo.camera->SetCameraManager(this);
-	cameraInfo.camera->SetUseCamera(cameraInfo.useCamera);	// 使っているか
-	cameras.insert(std::make_pair(name, cameraInfo.camera));	// カメラ追加
-}
-
-void CameraManager::SetUseCamera(const std::string& name, float time) {
-
-	auto it = cameras.find(name);
-	if (it != cameras.end()) {
-
-		// 全てのカメラを使用していないことに
-		for (auto& cam : cameras) {
-			cam.second->SetUseCamera(false);
-		}
-		// カメラ使用
-		it->second->SetUseCamera(true);
-
-
-		if (time <= 0.0f) {
-			// 即時切り替え
-			isInterpolating = false;
-			camera->SetTransform(it->second->GetUniqueCamera()->GetTransform());
-			camera->UpdateMatrix();
-		}
-		else {
-			// 補間開始
-			isInterpolating = true;
-			currentTime = 0.0f;
-			interpolationTime = time;
-
-			// 初期トランスフォーム計算
-			startTransform.translate = camera->GetTranslate();
-			startTransform.rotate = MakeQuaternionFromEuler(camera->GetRotate());
-
-			// ターゲットトランスフォーム計算
-			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
-			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
-
-		}
-	}
-}
-
-void CameraManager::UpdateImGui() {
-
-#ifdef _DEBUG
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("CameraManager")) {
-		Vector3 translate = camera->GetTranslate();
-		ImGui::DragFloat3("Translate", &translate.x, 0.1f);	// 位置
-		camera->SetTranslate(translate);
-		Vector3 rotate = camera->GetRotate();
-		ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);		// 回転
-		camera->SetRotate(rotate);
-		ImGui::Checkbox("isGameCamera", &isGameCamera);							// カメラを使用するか
-		bool isPro = camera->GetIsProjection();									// プロジェクション設定
-		ImGui::Checkbox("isProjection", &isPro);
-		camera->SetIsProjection(isPro);
-	}
-	ImGui::End();
-
-	ImGui::Begin("Camera Properties");
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::Separator();
-		ImGui::DragFloat("chengeTime", &chengeTime, 0.01f);
-		ImGui::Separator();
-
-		// 各カメラのSRT設定
-		for (auto& cameraData : cameras) {
-			if (ImGui::TreeNode(cameraData.first.c_str())) {
-				Vector3 translate = cameraData.second->GetUniqueCamera()->GetTranslate();
-				Vector3 rotate = cameraData.second->GetUniqueCamera()->GetRotate();
-				Vector3 scale = cameraData.second->GetUniqueCamera()->GetScale();
-				ImGui::DragFloat3("Translate", &translate.x, 0.1f);
-				ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &scale.x, 0.01f);
-				cameraData.second->GetUniqueCamera()->SetTransform({scale,rotate,translate});
-
-				// 使う
-				if (ImGui::Button("use")) {
-					SetUseCamera(cameraData.first.c_str(), chengeTime);
-				}
-
-				ImGui::TreePop();
-			}
-		}
-	}
-	ImGui::End();
-
-#endif
-}
-
-BaseCamera* CameraManager::GetBaseCamera() {
-	// 使っているカメラを更新
-	for (auto& cam : cameras) {
-		if (cam.second->GetUseCamera()) {
-			return cam.second;
-		}
-	}
-	return nullptr;
-}
-
-void CameraManager::DeleteCamera(const std::string& name)
-{
-	auto it = cameras.find(name);
-	if (it != cameras.end()) {
-		// カメラ本体は登録元のunique_ptrが所有するため、非所有参照だけを削除する。
-		cameras.erase(it);
-	}
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Camera/Base/CameraManager.h
-============================================================
-#pragma once
-#include "BaseCamera.h"
-
-/// <summary>CameraManagerへ登録する非所有カメラ情報。</summary>
-struct CameraInfo {
-	BaseCamera* camera = nullptr; // 呼び出し側が所有し、登録中は有効であること
-	bool useCamera = false;       // 登録直後から使用カメラにする場合はtrue
-};
-
-/// <summary>
-/// カメラマネージャークラス
-/// </summary>
-class CameraManager
-{
-public:
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
-	~CameraManager();
-
-	/// <summary>シーン共通の出力カメラを生成し、描画システムへ設定する。</summary>
-	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラのみの場合はnullptrを許容する。</param>
-	/// <param name="entityManager">カメラを設定する描画・エフェクト管理元。利用中は有効であること。</param>
-	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
-	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
-
-	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
-	void Update();
-	/// <summary>登録解除と所有カメラの解放を行う。</summary>
-	void Finalize();
-
-	/// <summary>呼び出し側が所有するカメラを名前付きで登録する。</summary>
-	/// <param name="cameraInfo">登録する非所有カメラと初期使用状態。cameraはnullptr不可。</param>
-	/// <param name="name">検索と切り替えに使用する一意な名前。同名登録時は追加されない。</param>
-	void AddCamera(const CameraInfo& cameraInfo, const std::string& name);
-
-	/// <summary>指定名のカメラへ切り替える。</summary>
-	/// <param name="name">AddCameraで登録したカメラ名。未登録名の場合は何もしない。</param>
-	/// <param name="time">切り替え補間時間（秒）。0以下の場合は即時切り替え。</param>
-	void SetUseCamera(const std::string& name, float time);
-	/// <summary>デバッグ用カメラ編集UIを更新する。</summary>
-	void UpdateImGui();
-	/// <summary>各描画システムへ渡す共通出力カメラを取得する。</summary>
-	/// <returns>CameraManagerが所有するカメラへの非所有ポインター。</returns>
-	Engine::Camera* GetCamera() { return camera.get(); }
-	/// <summary>現在使用中の登録カメラを取得する。</summary>
-	/// <returns>登録元が所有するBaseCameraへの非所有ポインター。使用中カメラがなければnullptr。</returns>
-	BaseCamera* GetBaseCamera();
-	/// <summary>指定したカメラを登録対象から外す。</summary>
-	/// <param name="name">削除する登録名。未登録名の場合は何もしない。</param>
-	/// <remarks>カメラの所有権は呼び出し側にあるため、オブジェクト自体は破棄しない。</remarks>
-	void DeleteCamera(const std::string& name);
-	/// <summary>全カメラを登録対象から外す。登録元が所有するカメラは破棄しない。</summary>
-	void Clear() {
-		cameras.clear();
-	};
-
-private:
-	// 呼び出し側が所有する全カメラへの非所有ポインター
-	std::map<std::string, BaseCamera*> cameras;
-	// カメラ
-	std::unique_ptr < Engine::Camera> camera;
-	// ゲームでの画面か
-	bool isGameCamera = true;
-
-	// カメラ補間状態
-	bool isInterpolating = false;
-	float interpolationTime = 0.0f;
-	float currentTime = 0.0f;
-
-
-	float chengeTime = 0.1f;
-
-	QuaternionTransform startTransform;
-	QuaternionTransform targetTransform;
-
-
-
-private:
-	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
-	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
-	InputSystem* inputSystem = nullptr;						// 入力
-};
-
 
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/FixedCamera/EffectCamera.cpp
@@ -17165,9 +16685,9 @@ private: // 一旦
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.cpp
 ============================================================
-﻿#include "UniverseCamera.h"
+#include "UniverseCamera.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 
 
 void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
@@ -28551,7 +28071,7 @@ File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPl
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
-#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
+#include <DirectXGame/engine/Camera/CameraManager.h>
 
 namespace Character {
 #pragma region Idle
@@ -34316,7 +33836,7 @@ File Path: project/DirectXGame/application/base/Game/GameEventController.cpp
 #include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 namespace Game {
 
@@ -34944,7 +34464,7 @@ File Path: project/DirectXGame/application/base/Game/GameplaySession.h
 #include <memory>
 
 #include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -37919,7 +37439,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Special/RangeBombingSpecial.cpp
 ============================================================
-﻿#include "RangeBombingSpecial.h"
+#include "RangeBombingSpecial.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -37928,7 +37448,7 @@ File Path: project/DirectXGame/application/base/Special/RangeBombingSpecial.cpp
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include <DirectXGame/application/base/Camera/Base/CameraManager.h>
+#include <DirectXGame/engine/Camera/CameraManager.h>
 #include "DirectXgame/application/base/Stage/MainStage.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
@@ -38239,9 +37759,9 @@ private: // 一旦
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/BaseStage.cpp
 ============================================================
-﻿#include "BaseStage.h"
+#include "BaseStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 namespace {
 	// ステージ上でプレイヤー車が接地する共通の高さ。
@@ -38515,9 +38035,9 @@ protected: // 貰いもの
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/CustomStage.cpp
 ============================================================
-﻿#include "CustomStage.h"
+#include "CustomStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 
 void CustomStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager){
 
@@ -38555,9 +38075,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/MainStage.cpp
 ============================================================
-﻿#include "MainStage.h"
+#include "MainStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
 void MainStage::Initialize(Engine::EntityManager* entityManager, Engine::AudioManager* audioManager, CameraManager* cameraManager) {
@@ -38649,9 +38169,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/ResultStage.cpp
 ============================================================
-﻿#include "ResultStage.h"
+#include "ResultStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
@@ -38746,9 +38266,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/SelectStage.cpp
 ============================================================
-﻿#include "SelectStage.h"
+#include "SelectStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
@@ -39018,9 +38538,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/TitleStage.cpp
 ============================================================
-﻿#include "TitleStage.h"
+#include "TitleStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
@@ -39178,9 +38698,9 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/TutorialStage.cpp
 ============================================================
-﻿#include "TutorialStage.h"
+#include "TutorialStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 
@@ -42929,7 +42449,7 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
@@ -43194,7 +42714,7 @@ File Path: project/DirectXGame/application/scene/CustomScene.h
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 
@@ -43663,7 +43183,7 @@ File Path: project/DirectXGame/application/scene/EffectScene.h
 #include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 
 
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 
@@ -44072,7 +43592,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
@@ -44325,7 +43845,7 @@ File Path: project/DirectXGame/application/scene/ResultScene.h
 
 #include "DirectXGame/application/base/Stage/ResultStage.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
@@ -44648,7 +44168,7 @@ File Path: project/DirectXGame/application/scene/SampleScene.h
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstanceManager.h"
 
 #include "DirectXGame/engine/Audio/Audio.h"
@@ -45021,7 +44541,7 @@ File Path: project/DirectXGame/application/scene/SelectScene.h
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/application/base/Stage/SelectStage.h"
@@ -45662,7 +45182,7 @@ File Path: project/DirectXGame/application/scene/TestScene.h
 #include "DirectXGame/engine/GlobalVariables/GlobalVariables.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
 
@@ -46061,7 +45581,7 @@ File Path: project/DirectXGame/application/scene/TitleScene.h
 #include"DirectXGame/application/base/Stage/TitleStage.h"
 #include "DirectXGame/application/base/UI/TitleUI.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 
@@ -46313,7 +45833,7 @@ File Path: project/DirectXGame/application/scene/TutorialScene.h
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
@@ -55793,13 +55313,13 @@ namespace LoadDataFanc
 ============================================================
 File Path: project/DirectXGame/engine/Base/Load/LoadLevelData.cpp
 ============================================================
-﻿#include "LoadLevelData.h"
+#include "LoadLevelData.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/manager/entity/EntityManager.h"
 
 #include "LoadDataFunction.h"
 
-#include"DirectXGame/application/base/Camera/Base/CameraManager.h"
+#include"DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
 LoadLevelData::~LoadLevelData()
@@ -56981,6 +56501,158 @@ MakeUniqueDebug(const char* file, int line, Args&&... args) {
 #else
 #define UNIQUE_PTR_DEBUG(T) std::unique_ptr<T>
 #endif
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/BaseCamera.cpp
+============================================================
+﻿#include "BaseCamera.h"
+
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
+
+/// <summary>
+/// オブジェクトの時間取得
+/// </summary>
+/// <returns></returns>
+float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
+
+void BaseCamera::CreateFixedCamera(Engine::EntityManager* entityManager, const Transform& transform, float farClip) {
+	this->entityManager = entityManager;	// エンティティ3d
+
+	// カメラ初期化
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
+	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
+	uniqueCamera_->SetFarClip(farClip);
+
+	// カメラ位置と回転設定
+	uniqueCamera_->SetTranslate(transform.translate);
+	uniqueCamera_->SetRotate(transform.rotate);
+
+
+	// ポストエフェクト追加
+	uniqueCamera_->AddEffectBlock("copy", Engine::PostEffectBlockType::kCopy, true);
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/BaseCamera.h
+============================================================
+﻿#pragma once
+#include <DirectXGame/engine/Camera/CameraController.h>
+#include <DirectXGame/engine/Camera/Camera.h>
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+// 前方宣言
+class CameraManager;
+class InputSystem;
+
+namespace Engine {
+	class EntityManager;
+	class GlobalVariables;
+}
+
+/// <summary>
+/// カメラ基底クラス
+/// </summary>
+class BaseCamera
+{
+public:
+	virtual ~BaseCamera()
+	{
+		/// <summary>
+		/// 派生カメラが所有する描画カメラのD3Dリソースを、シーン破棄時に確実に解放する
+		/// </summary>
+		if (uniqueCamera_) {
+			uniqueCamera_->Finalize();
+		}
+	}
+	/// <summary>カメラ固有の制御器と描画カメラを初期化する。</summary>
+	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラではnullptrを許容する。</param>
+	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>
+	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
+	/// <param name="position">カメラの初期ワールド座標。</param>
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	virtual void Update() = 0;
+
+
+
+	/// <summary>
+	/// カメラ取得
+	/// </summary>
+	/// <returns>このBaseCameraが所有する描画カメラへの非所有ポインター。</returns>
+	Engine::Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
+
+	/// <summary>
+	///	カメラ統括クラス取得
+	/// </summary>
+	/// <returns>このBaseCameraが所有する制御器への非所有ポインター。</returns>
+	CameraController* GetCameraController() { return controller.get(); }
+
+	/// <summary>
+	/// ロックオン対象を設定
+	/// </summary>
+	/// <param name="object">注視対象のワールド変換。解除する場合はnullptr。</param>
+	void LockOn(const Engine::WorldTransform* object) { target = object; };
+
+	/// <summary>
+	/// カメラ管理を設定
+	/// </summary>
+	/// <param name="cameraManager">カメラ切り替えを管理する非所有ポインター。</param>
+	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
+
+
+	/// <summary>
+	/// 時間取得
+	/// </summary>
+	/// <returns>シーンのタイムスケールを反映したフレーム時間。</returns>
+	float GetTime() const;
+
+	/// <summary>
+	/// 名前設定
+	/// </summary>
+	void SetName(const std::string& name) { name_ = name; };
+	/// <summary>
+	/// 名前取得
+	/// </summary>
+	std::string GetName() const { return name_; }
+	/// <summary>
+	/// カメラ使用フラグ
+	/// </summary>
+	bool GetUseCamera() const { return useCamera; }
+	/// <summary>
+	/// カメラ使用フラグ設定
+	/// </summary>
+	void SetUseCamera(bool is) { useCamera = is; }
+
+protected:
+	void CreateFixedCamera(Engine::EntityManager* entityManager,const Transform& transform, float farClip);
+
+protected:
+	// カメラ使用フラグ
+	bool useCamera = false;
+	// 固有カメラ
+	std::unique_ptr<Engine::Camera> uniqueCamera_;	
+	// 統括
+	std::unique_ptr<CameraController> controller = nullptr;
+	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	float timeSpeed_ = 1.0f;	
+	// 名前
+	std::string name_;
+protected:
+	const Engine::WorldTransform* target = nullptr;		// ロックオン対象
+	CameraManager* cameraManager = nullptr;			// カメラ管理
+protected:
+	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
+	InputSystem* inputSystem = nullptr;						// 入力(使わないならnullptr)
+
+};
+
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Camera/Camera.cpp
@@ -58386,6 +58058,334 @@ public:
 	
 private:
 	CameraLockOnData data;
+};
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraManager.cpp
+============================================================
+#include "CameraManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
+
+CameraManager::~CameraManager()
+{
+	// シーン破棄時にCameraManager所有のD3Dリソースを確実に解放する
+	Finalize();
+}
+
+void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
+{
+	this->inputSystem = inputSystem;						// インプット
+	this->entityManager = entityManager;	// エンティティ3d
+	this->globalVariables = globalVariables;	// 保存項目
+
+	// カメラ初期化
+	camera = std::make_unique <Engine::Camera>();
+	camera->Initialize(entityManager->GetCameraCommon());
+	camera->SetRotate({ 0.36f,0,0 });			// 回転指定
+	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
+	camera->SetFarClip(Engine::Camera::kDefaultFarClip);	// 共通のFarクリップ距離を設定
+	isGameCamera = true;								// ゲームに使用する
+
+	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());						// デフォルトカメラ設定
+}
+
+void CameraManager::Finalize()
+{
+	// 登録カメラは非所有なので、先に参照だけ切る
+	cameras.clear();
+
+	// 各描画システムが保持しているCameraの非所有ポインタを無効化する
+	if (entityManager) {
+		if (entityManager->GetObject3dCommon()) {
+			entityManager->GetObject3dCommon()->SetDefaultCamera(nullptr);
+		}
+		if (entityManager->GetEffectManager()) {
+			if (entityManager->GetEffectManager()->GetParticleManager()) {
+				entityManager->GetEffectManager()->GetParticleManager()->SetCamera(nullptr);
+			}
+			if (entityManager->GetEffectManager()->GetGpuParticleManager()) {
+				entityManager->GetEffectManager()->GetGpuParticleManager()->SetCamera(nullptr);
+			}
+		}
+		if (entityManager->Get3DLineCommon()) {
+			entityManager->Get3DLineCommon()->SetDefaultCamera(nullptr);
+		}
+		if (entityManager->GetObject3dInstanceManager()) {
+			entityManager->GetObject3dInstanceManager()->SetCamera(nullptr);
+		}
+	}
+
+	// CameraManagerが所有する出力カメラを明示解放する
+	if (camera) {
+		camera->Finalize();
+		camera.reset();
+	}
+
+	entityManager = nullptr;
+	globalVariables = nullptr;
+	inputSystem = nullptr;
+	isInterpolating = false;
+	currentTime = 0.0f;
+}
+
+void CameraManager::Update()
+{
+	// ImGui更新
+	UpdateImGui();
+
+	// ゲームカメラOn
+	if (isGameCamera) {
+
+		// 各カメラ更新
+		for (auto& cam : cameras) {
+			cam.second->Update();
+		}
+
+		// 補間中
+		if (isInterpolating) {
+			// カメラ補間時間はゲーム時間倍率を反映して進める
+			currentTime += Engine::MyGame::GameTime();
+
+			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
+
+			// 位置と回転を補間
+			camera->SetTranslate(Lerp(startTransform.translate, targetTransform.translate, t));
+			camera->SetRotate(QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t)));
+			camera->UpdateMatrix();
+
+			if (t >= 1.0f) {
+				isInterpolating = false;
+			}
+		}
+		else {
+			// 使っているカメラを更新
+			for (auto& cam : cameras) {
+				if (cam.second->GetUseCamera()) {
+					camera->SetTransform(cam.second->GetUniqueCamera()->GetTransform());
+					camera->UpdateMatrix();
+				}
+			}
+		}
+	}
+
+
+	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());				// デフォルトカメラ設定
+	entityManager->Get3DLineCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->GetObject3dInstanceManager()->SetCamera(camera.get());				// デフォルトカメラ設定
+	// カメラ更新
+	camera->UpdateMatrix();
+}
+
+
+void CameraManager::AddCamera(const CameraInfo& cameraInfo, const std::string& name) {
+	// CameraManagerは所有権を受け取らず、登録元が所有するカメラを参照する。
+	if (!cameraInfo.camera) {
+		return;
+	}
+	// カメラ管理クラスを渡す
+	cameraInfo.camera->SetCameraManager(this);
+	cameraInfo.camera->SetUseCamera(cameraInfo.useCamera);	// 使っているか
+	cameras.insert(std::make_pair(name, cameraInfo.camera));	// カメラ追加
+}
+
+void CameraManager::SetUseCamera(const std::string& name, float time) {
+
+	auto it = cameras.find(name);
+	if (it != cameras.end()) {
+
+		// 全てのカメラを使用していないことに
+		for (auto& cam : cameras) {
+			cam.second->SetUseCamera(false);
+		}
+		// カメラ使用
+		it->second->SetUseCamera(true);
+
+
+		if (time <= 0.0f) {
+			// 即時切り替え
+			isInterpolating = false;
+			camera->SetTransform(it->second->GetUniqueCamera()->GetTransform());
+			camera->UpdateMatrix();
+		}
+		else {
+			// 補間開始
+			isInterpolating = true;
+			currentTime = 0.0f;
+			interpolationTime = time;
+
+			// 初期トランスフォーム計算
+			startTransform.translate = camera->GetTranslate();
+			startTransform.rotate = MakeQuaternionFromEuler(camera->GetRotate());
+
+			// ターゲットトランスフォーム計算
+			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
+			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
+
+		}
+	}
+}
+
+void CameraManager::UpdateImGui() {
+
+#ifdef _DEBUG
+	ImGui::Begin("engine");
+	if (ImGui::CollapsingHeader("CameraManager")) {
+		Vector3 translate = camera->GetTranslate();
+		ImGui::DragFloat3("Translate", &translate.x, 0.1f);	// 位置
+		camera->SetTranslate(translate);
+		Vector3 rotate = camera->GetRotate();
+		ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);		// 回転
+		camera->SetRotate(rotate);
+		ImGui::Checkbox("isGameCamera", &isGameCamera);							// カメラを使用するか
+		bool isPro = camera->GetIsProjection();									// プロジェクション設定
+		ImGui::Checkbox("isProjection", &isPro);
+		camera->SetIsProjection(isPro);
+	}
+	ImGui::End();
+
+	ImGui::Begin("Camera Properties");
+	if (ImGui::CollapsingHeader("Camera")) {
+		ImGui::Separator();
+		ImGui::DragFloat("chengeTime", &chengeTime, 0.01f);
+		ImGui::Separator();
+
+		// 各カメラのSRT設定
+		for (auto& cameraData : cameras) {
+			if (ImGui::TreeNode(cameraData.first.c_str())) {
+				Vector3 translate = cameraData.second->GetUniqueCamera()->GetTranslate();
+				Vector3 rotate = cameraData.second->GetUniqueCamera()->GetRotate();
+				Vector3 scale = cameraData.second->GetUniqueCamera()->GetScale();
+				ImGui::DragFloat3("Translate", &translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &scale.x, 0.01f);
+				cameraData.second->GetUniqueCamera()->SetTransform({scale,rotate,translate});
+
+				// 使う
+				if (ImGui::Button("use")) {
+					SetUseCamera(cameraData.first.c_str(), chengeTime);
+				}
+
+				ImGui::TreePop();
+			}
+		}
+	}
+	ImGui::End();
+
+#endif
+}
+
+BaseCamera* CameraManager::GetBaseCamera() {
+	// 使っているカメラを更新
+	for (auto& cam : cameras) {
+		if (cam.second->GetUseCamera()) {
+			return cam.second;
+		}
+	}
+	return nullptr;
+}
+
+void CameraManager::DeleteCamera(const std::string& name)
+{
+	auto it = cameras.find(name);
+	if (it != cameras.end()) {
+		// カメラ本体は登録元のunique_ptrが所有するため、非所有参照だけを削除する。
+		cameras.erase(it);
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Camera/CameraManager.h
+============================================================
+#pragma once
+#include "BaseCamera.h"
+
+/// <summary>CameraManagerへ登録する非所有カメラ情報。</summary>
+struct CameraInfo {
+	BaseCamera* camera = nullptr; // 呼び出し側が所有し、登録中は有効であること
+	bool useCamera = false;       // 登録直後から使用カメラにする場合はtrue
+};
+
+/// <summary>
+/// カメラマネージャークラス
+/// </summary>
+class CameraManager
+{
+public:
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~CameraManager();
+
+	/// <summary>シーン共通の出力カメラを生成し、描画システムへ設定する。</summary>
+	/// <param name="inputSystem">カメラ操作に使用する入力。自動カメラのみの場合はnullptrを許容する。</param>
+	/// <param name="entityManager">カメラを設定する描画・エフェクト管理元。利用中は有効であること。</param>
+	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
+
+	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
+	void Update();
+	/// <summary>登録解除と所有カメラの解放を行う。</summary>
+	void Finalize();
+
+	/// <summary>呼び出し側が所有するカメラを名前付きで登録する。</summary>
+	/// <param name="cameraInfo">登録する非所有カメラと初期使用状態。cameraはnullptr不可。</param>
+	/// <param name="name">検索と切り替えに使用する一意な名前。同名登録時は追加されない。</param>
+	void AddCamera(const CameraInfo& cameraInfo, const std::string& name);
+
+	/// <summary>指定名のカメラへ切り替える。</summary>
+	/// <param name="name">AddCameraで登録したカメラ名。未登録名の場合は何もしない。</param>
+	/// <param name="time">切り替え補間時間（秒）。0以下の場合は即時切り替え。</param>
+	void SetUseCamera(const std::string& name, float time);
+	/// <summary>デバッグ用カメラ編集UIを更新する。</summary>
+	void UpdateImGui();
+	/// <summary>各描画システムへ渡す共通出力カメラを取得する。</summary>
+	/// <returns>CameraManagerが所有するカメラへの非所有ポインター。</returns>
+	Engine::Camera* GetCamera() { return camera.get(); }
+	/// <summary>現在使用中の登録カメラを取得する。</summary>
+	/// <returns>登録元が所有するBaseCameraへの非所有ポインター。使用中カメラがなければnullptr。</returns>
+	BaseCamera* GetBaseCamera();
+	/// <summary>指定したカメラを登録対象から外す。</summary>
+	/// <param name="name">削除する登録名。未登録名の場合は何もしない。</param>
+	/// <remarks>カメラの所有権は呼び出し側にあるため、オブジェクト自体は破棄しない。</remarks>
+	void DeleteCamera(const std::string& name);
+	/// <summary>全カメラを登録対象から外す。登録元が所有するカメラは破棄しない。</summary>
+	void Clear() {
+		cameras.clear();
+	};
+
+private:
+	// 呼び出し側が所有する全カメラへの非所有ポインター
+	std::map<std::string, BaseCamera*> cameras;
+	// カメラ
+	std::unique_ptr < Engine::Camera> camera;
+	// ゲームでの画面か
+	bool isGameCamera = true;
+
+	// カメラ補間状態
+	bool isInterpolating = false;
+	float interpolationTime = 0.0f;
+	float currentTime = 0.0f;
+
+
+	float chengeTime = 0.1f;
+
+	QuaternionTransform startTransform;
+	QuaternionTransform targetTransform;
+
+
+
+private:
+	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
+	InputSystem* inputSystem = nullptr;						// 入力
 };
 
 
@@ -98244,12 +98244,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraFollow.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraLockOn.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Camera\CameraManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraRotation.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraShake.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraZoom.cpp" />
@@ -98781,7 +98781,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Light\BaseLights.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BasePointLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseSpotLight.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseCamera.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\BaseCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
@@ -98864,7 +98864,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\WeaponData.h" />
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManager.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraManager.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h" />
@@ -99348,7 +99348,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\CameraManager.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp">
@@ -99399,7 +99399,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp">
+    <ClCompile Include="DirectXGame\engine\Camera\BaseCamera.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManager.cpp">
@@ -100403,7 +100403,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h">
       <Filter>ヘッダー ファイル\engine\base\win</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseCamera.h">
+    <ClInclude Include="DirectXGame\engine\Camera\BaseCamera.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h">
@@ -100457,7 +100457,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManager.h">
+    <ClInclude Include="DirectXGame\engine\Camera\CameraManager.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\CollisionTypeIdDef.h">
