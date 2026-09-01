@@ -1,10 +1,10 @@
 #pragma once
-#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 /// <summary>
 /// 範囲爆撃の着弾地点を真上から映すカメラ。
 /// </summary>
-class RangeBombingCamera : public BaseFixedCamera
+class RangeBombingCamera : public BaseCamera
 {
 public:
 	/// <summary>

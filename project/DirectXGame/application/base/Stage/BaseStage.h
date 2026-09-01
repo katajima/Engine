@@ -1,7 +1,7 @@
 #pragma once
 // engine
 #include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
+#include "DirectXGame/engine/Light/BaseLights.h"
 #include "DirectXGame/application/base/Car/PlayerCar.h"
 #include "DirectXGame/engine/Base/Load/LoadLevelData.h"
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"

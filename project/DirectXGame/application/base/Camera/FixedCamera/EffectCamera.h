@@ -1,11 +1,11 @@
 #pragma once
-#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 
 /// <summary>
 /// 固定カメラ
 /// </summary>
-class EffectCamera : public BaseFixedCamera
+class EffectCamera : public BaseCamera
 {
 public:
 	///< summary>

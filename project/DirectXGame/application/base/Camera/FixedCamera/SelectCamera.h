@@ -1,11 +1,11 @@
 #pragma once
-#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 
 /// <summary>
 /// SelectCameraを管理・実装するクラス。
 /// </summary>
-class SelectCamera : public BaseFixedCamera {
+class SelectCamera : public BaseCamera {
 public:
 	///< summary>
 	/// 初期化

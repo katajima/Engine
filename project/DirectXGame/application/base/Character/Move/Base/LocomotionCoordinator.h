@@ -1,5 +1,5 @@
 #pragma once
-#include "LocomotionContext.h"
+#include "DirectXGame/engine/Move/LocomotionContext.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 #include <vector>
 

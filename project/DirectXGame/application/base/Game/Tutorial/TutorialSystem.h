@@ -9,7 +9,7 @@
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
+#include "DirectXGame/engine/Light/BaseLights.h"
 
 #include "TutorialStep.h"
 

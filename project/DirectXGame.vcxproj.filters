@@ -744,7 +744,7 @@
     <ClCompile Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.cpp">
+    <ClCompile Include="DirectXGame\engine\Move\MovementRestrictions.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp">
@@ -1343,19 +1343,14 @@
     <ClInclude Include="DirectXGame\engine\Camera\BaseCamera.h">
       <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h">
+    <ClInclude Include="DirectXGame\engine\Light\BaseDirectionalLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h">
-      <Filter>ヘッダー ファイル\engine\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h">
-      <Filter>ヘッダー ファイル\engine\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Light\BaseLight.h">
+
+    <ClInclude Include="DirectXGame\engine\Light\BaseLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Light\BaseLights.h">
+    <ClInclude Include="DirectXGame\engine\Light\BaseLights.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\State\BaseMainState.h">
@@ -1367,19 +1362,16 @@
     <ClInclude Include="DirectXGame\engine\Mesh\Base\BaseMesh.h">
       <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h">
-      <Filter>ヘッダー ファイル\engine\camera</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\UI\BaseSprite.h">
       <Filter>ヘッダー ファイル\engine\2d</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Light\BaseSpotLight.h">
+    <ClInclude Include="DirectXGame\engine\Light\BaseSpotLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\State\BaseSubState.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Light\BasePointLight.h">
+    <ClInclude Include="DirectXGame\engine\Light\BasePointLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h">
@@ -1967,7 +1959,7 @@
     <ClInclude Include="DirectXGame\application\base\Character\Move\Jump\JumpSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.h">
+    <ClInclude Include="DirectXGame\engine\Move\MovementRestrictions.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.h">
@@ -2171,7 +2163,7 @@
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\LocomotionContext.h">
+    <ClInclude Include="DirectXGame\engine\Move\LocomotionContext.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h">
@@ -2367,8 +2359,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Camera\CameraZoom.h">

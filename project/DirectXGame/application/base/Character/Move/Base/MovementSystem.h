@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
-#include "LocomotionContext.h"
+#include "DirectXGame/engine/Move/LocomotionContext.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 /// <summary>

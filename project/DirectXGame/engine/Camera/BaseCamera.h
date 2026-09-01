@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <DirectXGame/engine/Camera/CameraController.h>
 #include <DirectXGame/engine/Camera/Camera.h>
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
@@ -31,12 +31,12 @@ public:
 	/// <param name="entityManager">カメラが参照するオブジェクトの管理元。</param>
 	/// <param name="globalVariables">カメラ調整値の登録・保存先。</param>
 	/// <param name="position">カメラの初期ワールド座標。</param>
-	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position);
 
 	///< summary>
 	/// 更新
 	///</summary>
-	virtual void Update() = 0;
+	virtual void Update();
 
 
 

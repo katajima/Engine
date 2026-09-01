@@ -5,7 +5,6 @@
 #include "LoadDataFunction.h"
 
 #include"DirectXGame/engine/Camera/CameraManager.h"
-#include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
 LoadLevelData::~LoadLevelData()
 {
@@ -166,7 +165,7 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 
 
 	for (auto& cameraData : levelData->cameras) {
-		std::unique_ptr<BaseCamera> camera = std::make_unique<FixedCamera>();
+		std::unique_ptr<BaseCamera> camera = std::make_unique<BaseCamera>();
 		camera->Initialize(nullptr, entityManager, nullptr, {});
 		camera->GetUniqueCamera()->SetTransform({ cameraData.scale,
 			Math::DegreesToRadians(cameraData.rotation),cameraData.position });

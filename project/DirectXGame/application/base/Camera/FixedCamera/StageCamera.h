@@ -1,10 +1,10 @@
 #pragma once
-#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 /// <summary>
 /// StageCameraを管理・実装するクラス。
 /// </summary>
-class StageCamera : public BaseFixedCamera {
+class StageCamera : public BaseCamera {
 public:
 	///< summary>
 	/// 初期化

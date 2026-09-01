@@ -1,11 +1,12 @@
 #pragma once
-#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
+#include "DirectXGame/engine/Animation/AnimationData.h"
 
 
 /// <summary>
 /// ミサイルを映すカメラ
 /// </summary>
-class UniverseCamera : public BaseFixedCamera
+class UniverseCamera : public BaseCamera
 {
 public:
 	///< summary>
@@ -25,6 +26,10 @@ private:
 	float strScaleZCamera = 5.5f;
 	float endScaleZCamera = 1.0f;
 
+
+private:
+	// カメラ演出の経過時間を管理するタイマー。
+	Timer timer_;
 
 private: // 一旦
 

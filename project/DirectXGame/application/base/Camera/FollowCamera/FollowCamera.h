@@ -1,10 +1,10 @@
 #pragma once
-#include "DirectXGame/application/base/Camera/Base/BaseFollowCamera.h"
+#include "DirectXGame/engine/Camera/BaseCamera.h"
 
 /// <summary>
 /// フォローカメラ
 /// </summary>
-class FollowCamera : public BaseFollowCamera
+class FollowCamera : public BaseCamera
 {
 public:
 	///< summary>
@@ -17,6 +17,14 @@ public:
 	/// 更新
 	///</summary>
 	void Update() override;
+public:
+	// 追従対象を設定する。
+	void SetTarget(Engine::WorldTransform* target) { target_ = target; }
+
+protected:
+	// 追従対象への非所有ポインター。
+	Engine::WorldTransform* target_ = nullptr;
+
 private: // 一旦
 
 	struct ProvisionalData {

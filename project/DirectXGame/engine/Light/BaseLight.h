@@ -2,6 +2,12 @@
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include <DirectXGame/engine/Light/Lights.h>
 
+namespace Engine {
+	class Input;
+	class EntityManager;
+	class GlobalVariables;
+}
+
 /// <summary>
 /// ライト基底クラス
 /// </summary>
