@@ -26,7 +26,7 @@ void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* i
 	config.positiveDirectionStep = kResultPositiveDirectionStep;
 	config.decisionDelay = kResultDecisionDelaySeconds;
 	config.transitionScenes = { "GAMEPLAY", "TITLE" };
-	menuSelectionController_.Initialize(sceneManager, input, config);
+	menuSelectionController_.Initialize(sceneManager, input ? input->GetGameInputDataAddress() : nullptr, config);
 	// リザルト開始時はスコア加算表示から始める。
 	phase_ = ResultPhase::kScoreCount;
 	phaseTimer_ = 0.0f;

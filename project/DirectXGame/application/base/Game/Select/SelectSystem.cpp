@@ -1,4 +1,4 @@
-﻿#include "SelectSystem.h"
+#include "SelectSystem.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
@@ -20,7 +20,7 @@ void SelectSystem::Initialize(Engine::SceneManager* sceneManager ,InputSystem* i
 	config.axis = MenuSelectionAxis::kVertical;
 	config.positiveDirectionStep = kSelectPositiveDirectionStep;
 	config.transitionScenes = { "GAMEPLAY", "", "", "TITLE" };
-	menuSelectionController_.Initialize(sceneManager, input, config);
+	menuSelectionController_.Initialize(sceneManager, input ? input->GetGameInputDataAddress() : nullptr, config);
 }
 
 void SelectSystem::Update(float dt) {

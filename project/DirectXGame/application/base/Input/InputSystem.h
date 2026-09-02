@@ -52,6 +52,8 @@ public:
 	/// ゲーム操作の入力データ取得
 	/// </summary>
 	GameInputData GetGameInputData() const { return gameInputData_; }
+	/// <summary>メニュー制御が共通入力データを参照するための非所有参照を返す。</summary>
+	const Engine::MenuInputData* GetGameInputDataAddress() const { return &gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
 

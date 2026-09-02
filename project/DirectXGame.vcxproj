@@ -788,6 +788,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\MainStage.h" />
     <ClInclude Include="DirectXGame\engine\UI\BaseUI.h" />
+    <ClInclude Include="DirectXGame\engine\UI\MenuSelectionController.h" />
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h" />
     <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariables.h" />

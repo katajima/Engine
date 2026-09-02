@@ -12,7 +12,7 @@
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/engine/Light/BaseLights.h"
-#include "DirectXGame/application/base/Game/Menu/MenuSelectionController.h"
+#include "DirectXGame/engine/UI/MenuSelectionController.h"
 
 // 前方宣言
 namespace Engine {

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/engine/input/InputData.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
 /// <summary>
@@ -43,7 +43,7 @@ public:
 	/// <summary>
 	/// 入力元、遷移先管理、メニュー構成を設定する。
 	/// </summary>
-	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, const MenuSelectionConfig& config) {
+	void Initialize(Engine::SceneManager* sceneManager, const Engine::MenuInputData* input, const MenuSelectionConfig& config) {
 		// 更新時に利用する外部システムを保持する。
 		sceneManager_ = sceneManager;
 		input_ = input;
@@ -68,7 +68,7 @@ public:
 		/// <summary>
 		/// 設定された軸の値だけを選択操作へ利用する。
 		/// </summary>
-		const Vector2 moveStick = input_->GetGameInputData().moveShick;
+		const Vector2 moveStick = input_->moveShick;
 		const float axisValue = config_.axis == MenuSelectionAxis::kHorizontal ? moveStick.x : moveStick.y;
 		if (moveTimer_ >= config_.moveInterval) {
 			if (axisValue > config_.inputThreshold) {
@@ -85,7 +85,7 @@ public:
 		selectedIndex_ = std::clamp(selectedIndex_, 0, config_.itemCount - 1);
 
 		// 誤決定防止時間の経過後だけ、設定された遷移先へ移動する。
-		if (decisionTimer_ >= config_.decisionDelay && input_->GetGameInputData().decisionTrigger &&
+		if (decisionTimer_ >= config_.decisionDelay && input_->decisionTrigger &&
 			selectedIndex_ < static_cast<int>(config_.transitionScenes.size())) {
 			const std::string& transitionScene = config_.transitionScenes[selectedIndex_];
 			if (!transitionScene.empty()) {
@@ -102,8 +102,8 @@ public:
 private:
 	// シーン遷移を実行する管理クラス。
 	Engine::SceneManager* sceneManager_ = nullptr;
-	// メニュー操作に使用するゲーム入力。
-	InputSystem* input_ = nullptr;
+	// メニュー操作に使用するエンジン共通入力。
+	const Engine::MenuInputData* input_ = nullptr;
 	// 項目数、軸、遷移先をまとめた設定。
 	MenuSelectionConfig config_;
 	// 現在選択されている項目インデックス。

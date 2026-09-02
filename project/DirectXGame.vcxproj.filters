@@ -1789,7 +1789,10 @@
       <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\UI\BaseUI.h">
-      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+      <Filter>ヘッダー ファイル\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\MenuSelectionController.h">
+      <Filter>ヘッダー ファイル\engine</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\VertexData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
@@ -2152,7 +2155,10 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\input\InputData.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\engine\input</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Input\InputData.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementSystem.h">
       <Filter>ヘッダー ファイル</Filter>
