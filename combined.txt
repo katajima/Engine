@@ -300,8 +300,6 @@
     └── └── └── └── ├── GameFlowController.h
     └── └── └── └── ├── GameplaySession.cpp
     └── └── └── └── ├── GameplaySession.h
-    └── └── └── └── ├── Menu/
-    └── └── └── └── └── └── MenuSelectionController.h
     └── └── └── └── ├── Pose/
     └── └── └── └── └── ├── PoseSystem.cpp
     └── └── └── └── └── └── PoseSystem.h
@@ -779,6 +777,7 @@
     └──     └── ├── BaseSprite.h
     └──     └── ├── BaseUI.cpp
     └──     └── ├── BaseUI.h
+    └──     └── ├── MenuSelectionController.h
     └──     └── ├── UIBoard.cpp
     └──     └── ├── UIBoard.h
     └──     └── ├── UIData.h
@@ -31447,126 +31446,6 @@ private:
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Game/Menu/MenuSelectionController.h
-============================================================
-#pragma once
-
-#include <algorithm>
-#include <string>
-#include <vector>
-
-#include "DirectXGame/application/base/Input/InputSystem.h"
-#include "DirectXGame/engine/scene/SceneManager.h"
-
-/// <summary>
-/// メニュー項目の移動に使用するスティック軸。
-/// </summary>
-enum class MenuSelectionAxis {
-	kHorizontal,
-	kVertical,
-};
-
-/// <summary>
-/// メニュー選択操作を構成する設定値。
-/// </summary>
-struct MenuSelectionConfig {
-	// 選択可能な項目数。
-	int itemCount = 1;
-	// 項目移動に使用するスティック軸。
-	MenuSelectionAxis axis = MenuSelectionAxis::kVertical;
-	// 軸の正方向へ入力した際に加算するインデックス値。
-	int positiveDirectionStep = 1;
-	// 入力として扱うスティック値のしきい値。
-	float inputThreshold = 0.5f;
-	// 項目移動を繰り返せる間隔。
-	float moveInterval = 0.25f;
-	// 初期化直後に決定入力を受け付けない時間。
-	float decisionDelay = 0.0f;
-	// 項目インデックスに対応する遷移先。空文字の項目は遷移しない。
-	std::vector<std::string> transitionScenes;
-};
-
-/// <summary>
-/// 設定に従ってメニュー選択とシーン遷移を処理する共通クラス。
-/// </summary>
-class MenuSelectionController {
-public:
-	/// <summary>
-	/// 入力元、遷移先管理、メニュー構成を設定する。
-	/// </summary>
-	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, const MenuSelectionConfig& config) {
-		// 更新時に利用する外部システムを保持する。
-		sceneManager_ = sceneManager;
-		input_ = input;
-		config_ = config;
-		/// <summary>
-		/// 不正な項目数でも選択範囲が成立するよう最低値を保証する。
-		/// </summary>
-		config_.itemCount = (std::max)(config_.itemCount, 1);
-		selectedIndex_ = 0;
-		moveTimer_ = 0.0f;
-		decisionTimer_ = 0.0f;
-	}
-
-	/// <summary>
-	/// 軸入力による項目移動と、決定入力によるシーン遷移を更新する。
-	/// </summary>
-	void Update(float dt) {
-		// 移動入力と決定入力の経過時間を進める。
-		moveTimer_ += dt;
-		decisionTimer_ += dt;
-
-		/// <summary>
-		/// 設定された軸の値だけを選択操作へ利用する。
-		/// </summary>
-		const Vector2 moveStick = input_->GetGameInputData().moveShick;
-		const float axisValue = config_.axis == MenuSelectionAxis::kHorizontal ? moveStick.x : moveStick.y;
-		if (moveTimer_ >= config_.moveInterval) {
-			if (axisValue > config_.inputThreshold) {
-				selectedIndex_ += config_.positiveDirectionStep;
-				moveTimer_ = 0.0f;
-			} else if (axisValue < -config_.inputThreshold) {
-				selectedIndex_ -= config_.positiveDirectionStep;
-				moveTimer_ = 0.0f;
-			}
-		}
-		/// <summary>
-		/// 選択位置が項目範囲を超えないよう補正する。
-		/// </summary>
-		selectedIndex_ = std::clamp(selectedIndex_, 0, config_.itemCount - 1);
-
-		// 誤決定防止時間の経過後だけ、設定された遷移先へ移動する。
-		if (decisionTimer_ >= config_.decisionDelay && input_->GetGameInputData().decisionTrigger &&
-			selectedIndex_ < static_cast<int>(config_.transitionScenes.size())) {
-			const std::string& transitionScene = config_.transitionScenes[selectedIndex_];
-			if (!transitionScene.empty()) {
-				sceneManager_->ChangeScene(transitionScene);
-			}
-		}
-	}
-
-	/// <summary>
-	/// 現在選択されている項目インデックスを取得する。
-	/// </summary>
-	int GetSelectedIndex() const { return selectedIndex_; }
-
-private:
-	// シーン遷移を実行する管理クラス。
-	Engine::SceneManager* sceneManager_ = nullptr;
-	// メニュー操作に使用するゲーム入力。
-	InputSystem* input_ = nullptr;
-	// 項目数、軸、遷移先をまとめた設定。
-	MenuSelectionConfig config_;
-	// 現在選択されている項目インデックス。
-	int selectedIndex_ = 0;
-	// 項目移動の連続入力を制限するタイマー。
-	float moveTimer_ = 0.0f;
-	// 初期決定入力を抑制するタイマー。
-	float decisionTimer_ = 0.0f;
-};
-
-
-============================================================
 File Path: project/DirectXGame/application/base/Game/Pose/PoseSystem.cpp
 ============================================================
 ﻿#include "PoseSystem.h"
@@ -31661,7 +31540,7 @@ void ResultSystem::Initialize(Engine::SceneManager* sceneManager, InputSystem* i
 	config.positiveDirectionStep = kResultPositiveDirectionStep;
 	config.decisionDelay = kResultDecisionDelaySeconds;
 	config.transitionScenes = { "GAMEPLAY", "TITLE" };
-	menuSelectionController_.Initialize(sceneManager, input, config);
+	menuSelectionController_.Initialize(sceneManager, input ? input->GetGameInputDataAddress() : nullptr, config);
 	// リザルト開始時はスコア加算表示から始める。
 	phase_ = ResultPhase::kScoreCount;
 	phaseTimer_ = 0.0f;
@@ -31722,7 +31601,7 @@ File Path: project/DirectXGame/application/base/Game/Result/ResultSystem.h
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/engine/Light/BaseLights.h"
-#include "DirectXGame/application/base/Game/Menu/MenuSelectionController.h"
+#include "DirectXGame/engine/UI/MenuSelectionController.h"
 
 // 前方宣言
 namespace Engine {
@@ -31818,7 +31697,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.cpp
 ============================================================
-﻿#include "SelectSystem.h"
+#include "SelectSystem.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/engine/scene/SceneManager.h"
 
@@ -31840,7 +31719,7 @@ void SelectSystem::Initialize(Engine::SceneManager* sceneManager ,InputSystem* i
 	config.axis = MenuSelectionAxis::kVertical;
 	config.positiveDirectionStep = kSelectPositiveDirectionStep;
 	config.transitionScenes = { "GAMEPLAY", "", "", "TITLE" };
-	menuSelectionController_.Initialize(sceneManager, input, config);
+	menuSelectionController_.Initialize(sceneManager, input ? input->GetGameInputDataAddress() : nullptr, config);
 }
 
 void SelectSystem::Update(float dt) {
@@ -31867,7 +31746,7 @@ File Path: project/DirectXGame/application/base/Game/Select/SelectSystem.h
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/engine/Light/BaseLights.h"
-#include "DirectXGame/application/base/Game/Menu/MenuSelectionController.h"
+#include "DirectXGame/engine/UI/MenuSelectionController.h"
 
 
 // 前方宣言
@@ -32543,19 +32422,13 @@ private:
 File Path: project/DirectXGame/application/base/Input/InputData.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/struct/Vector2.h"
+#include "DirectXGame/engine/input/InputData.h"
 
 /// <summary>
-/// アプリケーション固有のゲーム画面操作入力を保持する構造体。
+/// アプリケーション側で利用するメニュー入力データの互換名。
+/// 実体はエンジン共通のMenuInputDataです。
 /// </summary>
-struct GameInputData {
-	// メニュー移動に使う左スティック入力。
-	Vector2 moveShick{};
-	// 決定入力が発生したか。
-	bool decisionTrigger = false;
-	// ポーズ入力が発生したか。
-	bool pauseTrigger = false;
-};
+using GameInputData = Engine::MenuInputData;
 
 ============================================================
 File Path: project/DirectXGame/application/base/Input/InputHander.cpp
@@ -32964,6 +32837,8 @@ public:
 	/// ゲーム操作の入力データ取得
 	/// </summary>
 	GameInputData GetGameInputData() const { return gameInputData_; }
+	/// <summary>メニュー制御が共通入力データを参照するための非所有参照を返す。</summary>
+	const Engine::MenuInputData* GetGameInputDataAddress() const { return &gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
 
@@ -90238,6 +90113,126 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/engine/UI/MenuSelectionController.h
+============================================================
+#pragma once
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "DirectXGame/engine/input/InputData.h"
+#include "DirectXGame/engine/scene/SceneManager.h"
+
+/// <summary>
+/// メニュー項目の移動に使用するスティック軸。
+/// </summary>
+enum class MenuSelectionAxis {
+	kHorizontal,
+	kVertical,
+};
+
+/// <summary>
+/// メニュー選択操作を構成する設定値。
+/// </summary>
+struct MenuSelectionConfig {
+	// 選択可能な項目数。
+	int itemCount = 1;
+	// 項目移動に使用するスティック軸。
+	MenuSelectionAxis axis = MenuSelectionAxis::kVertical;
+	// 軸の正方向へ入力した際に加算するインデックス値。
+	int positiveDirectionStep = 1;
+	// 入力として扱うスティック値のしきい値。
+	float inputThreshold = 0.5f;
+	// 項目移動を繰り返せる間隔。
+	float moveInterval = 0.25f;
+	// 初期化直後に決定入力を受け付けない時間。
+	float decisionDelay = 0.0f;
+	// 項目インデックスに対応する遷移先。空文字の項目は遷移しない。
+	std::vector<std::string> transitionScenes;
+};
+
+/// <summary>
+/// 設定に従ってメニュー選択とシーン遷移を処理する共通クラス。
+/// </summary>
+class MenuSelectionController {
+public:
+	/// <summary>
+	/// 入力元、遷移先管理、メニュー構成を設定する。
+	/// </summary>
+	void Initialize(Engine::SceneManager* sceneManager, const Engine::MenuInputData* input, const MenuSelectionConfig& config) {
+		// 更新時に利用する外部システムを保持する。
+		sceneManager_ = sceneManager;
+		input_ = input;
+		config_ = config;
+		/// <summary>
+		/// 不正な項目数でも選択範囲が成立するよう最低値を保証する。
+		/// </summary>
+		config_.itemCount = (std::max)(config_.itemCount, 1);
+		selectedIndex_ = 0;
+		moveTimer_ = 0.0f;
+		decisionTimer_ = 0.0f;
+	}
+
+	/// <summary>
+	/// 軸入力による項目移動と、決定入力によるシーン遷移を更新する。
+	/// </summary>
+	void Update(float dt) {
+		// 移動入力と決定入力の経過時間を進める。
+		moveTimer_ += dt;
+		decisionTimer_ += dt;
+
+		/// <summary>
+		/// 設定された軸の値だけを選択操作へ利用する。
+		/// </summary>
+		const Vector2 moveStick = input_->moveShick;
+		const float axisValue = config_.axis == MenuSelectionAxis::kHorizontal ? moveStick.x : moveStick.y;
+		if (moveTimer_ >= config_.moveInterval) {
+			if (axisValue > config_.inputThreshold) {
+				selectedIndex_ += config_.positiveDirectionStep;
+				moveTimer_ = 0.0f;
+			} else if (axisValue < -config_.inputThreshold) {
+				selectedIndex_ -= config_.positiveDirectionStep;
+				moveTimer_ = 0.0f;
+			}
+		}
+		/// <summary>
+		/// 選択位置が項目範囲を超えないよう補正する。
+		/// </summary>
+		selectedIndex_ = std::clamp(selectedIndex_, 0, config_.itemCount - 1);
+
+		// 誤決定防止時間の経過後だけ、設定された遷移先へ移動する。
+		if (decisionTimer_ >= config_.decisionDelay && input_->decisionTrigger &&
+			selectedIndex_ < static_cast<int>(config_.transitionScenes.size())) {
+			const std::string& transitionScene = config_.transitionScenes[selectedIndex_];
+			if (!transitionScene.empty()) {
+				sceneManager_->ChangeScene(transitionScene);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 現在選択されている項目インデックスを取得する。
+	/// </summary>
+	int GetSelectedIndex() const { return selectedIndex_; }
+
+private:
+	// シーン遷移を実行する管理クラス。
+	Engine::SceneManager* sceneManager_ = nullptr;
+	// メニュー操作に使用するエンジン共通入力。
+	const Engine::MenuInputData* input_ = nullptr;
+	// 項目数、軸、遷移先をまとめた設定。
+	MenuSelectionConfig config_;
+	// 現在選択されている項目インデックス。
+	int selectedIndex_ = 0;
+	// 項目移動の連続入力を制限するタイマー。
+	float moveTimer_ = 0.0f;
+	// 初期決定入力を抑制するタイマー。
+	float decisionTimer_ = 0.0f;
+};
+
+
+============================================================
 File Path: project/DirectXGame/engine/UI/UIBoard.cpp
 ============================================================
 #include "UIBoard.h"
@@ -92692,6 +92687,20 @@ struct PlayerInputData {
 	// コントローラが接続されているか
 	bool isControllerConnected = false;
 };
+
+/// <summary>
+/// エンジン共通のメニュー操作入力を保持する構造体。
+/// </summary>
+namespace Engine {
+struct MenuInputData {
+	// メニュー移動に使う左スティック入力。
+	Vector2 moveShick{};
+	// 決定入力が発生したか。
+	bool decisionTrigger = false;
+	// ポーズ入力が発生したか。
+	bool pauseTrigger = false;
+};
+}
 
 
 ============================================================
@@ -98803,6 +98812,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\MainStage.h" />
     <ClInclude Include="DirectXGame\engine\UI\BaseUI.h" />
+    <ClInclude Include="DirectXGame\engine\UI\MenuSelectionController.h" />
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h" />
     <ClInclude Include="DirectXGame\engine\GlobalVariables\GlobalVariables.h" />
@@ -100770,7 +100780,10 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\UI\BaseUI.h">
-      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+      <Filter>ヘッダー ファイル\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\MenuSelectionController.h">
+      <Filter>ヘッダー ファイル\engine</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\VertexData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
@@ -101133,7 +101146,10 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\input\InputData.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\engine\input</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Input\InputData.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementSystem.h">
       <Filter>ヘッダー ファイル</Filter>
