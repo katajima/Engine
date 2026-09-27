@@ -15298,10 +15298,8 @@ void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& ta
 		moveDir = Normalize(Lerp(forward, targetDir, t));
 
 		// 向きを移動方向へ合わせる
-		world.rotate_.y = std::atan2(moveDir.x, moveDir.z);
-
-		const float horizontalLen = std::sqrt(moveDir.x * moveDir.x + moveDir.z * moveDir.z);
-		world.rotate_.x = std::atan2(-moveDir.y, horizontalLen);
+		// 共通の方向変換関数で弾の姿勢を移動方向へ合わせる。
+		world.rotate_ = Math::DirectionToRotate(moveDir, Dire::Z);
 	}
 
 	// =========================
@@ -15531,6 +15529,7 @@ File Path: project/DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.
 ============================================================
 #include "PlayerRangeBombingBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
@@ -15614,10 +15613,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 
 
 	// Y軸周り角度(θy)
-	object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
-	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
-	// X軸周り角度(θx)
-	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
+	// 共通の方向変換関数で弾の姿勢を速度方向へ合わせる。
+	object_->GetWorldTransform().rotate_ = Math::DirectionToRotate(velocity_, Dire::Z);
 
 	// ダメージ量
 	parameter_.damage = provisionalData_.damage;
@@ -15800,11 +15797,8 @@ void PlayerRangeBombingBullet::Update() {
 		
 		
 
-		// Y軸周り角度(θy)
-		object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
-		float length = Length(Vector3(velocity_.x, 0, velocity_.z));
-		// X軸周り角度(θx)
-		object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
+		// 共通の方向変換関数で弾の姿勢を速度方向へ合わせる。
+		object_->GetWorldTransform().rotate_ = Math::DirectionToRotate(velocity_, Dire::Z);
 
 		// ヒットオブジェクト位置と回転設定
 		hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{ 0,provisionalData_.hitObjectY,0 };
@@ -21360,6 +21354,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCro
 ============================================================
 #include "EnemyCrowdPatternSystem.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21514,7 +21509,8 @@ namespace Character {
 		const Vector3& targetPos, const Vector3& forward
 	) const {
 		// 前方側に開口部を残す270度の弧へ配置し、逃げ道を意図的に作る
-		float baseAngle = std::atan2(forward.x, forward.z);
+		// 共通関数で配置基準の前方向からY軸角度を求める。
+        const float baseAngle = Math::DirectionToYaw(forward);
 		float arc = std::numbers::pi_v<float> * 1.5f;
 		float t = memberCount <= 1 ? 0.5f : static_cast<float>(memberIndex) / static_cast<float>(memberCount - 1);
 		float angle = baseAngle + std::numbers::pi_v<float> * 0.25f + arc * t;
@@ -24100,6 +24096,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+#include <DirectXGame/engine/Math/MathFunctions.h>
 
 namespace Character {
 	void MediumMeleeEnemyAttackReadySubState::Enter() {
@@ -24141,7 +24138,8 @@ namespace Character {
 			Vector3 targetDire = toTarget.Normalize();
 
 			// ここは即向きでもいいが、本当は角度補間推奨
-			enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
+			// 共通関数でXZ方向からY軸回転へ変換する。
+			enemy->GetWorldTransform().rotate_.y = Math::DirectionToYaw(targetDire);
 
 			// Swingで使う方向は Ready の最後まで更新しておく
 			dire_ = targetDire;
@@ -24216,7 +24214,8 @@ namespace Character {
 		}
 
 		// 向きを固定
-		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
+		// 共通関数でXZ方向からY軸回転へ変換する。
+		enemy->GetWorldTransform().rotate_.y = Math::DirectionToYaw(dire_);
 
 		HitBox::CollData data{};
 		data.hitBoxData.isEneble = true;
@@ -24278,15 +24277,15 @@ namespace Character {
 
 		if (toPlayer.Length() > 0.001f) {
 			toPlayer = toPlayer.Normalize();
-			targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+			targetRotateY_ = Math::DirectionToYaw(toPlayer);
 		}
 		else {
 			targetRotateY_ = startRotateY_;
 		}
 
 		// 最短差分を保存
-		rotateDiffY_ = targetRotateY_ - startRotateY_;
-		rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
+		// 共通関数で最短方向の角度差を保存する。
+		rotateDiffY_ = Math::DeltaAngle(startRotateY_, targetRotateY_);
 	}
 
 	void MediumMeleeEnemyAttackEndSubState::Update(float deltaTime) {
@@ -24297,10 +24296,8 @@ namespace Character {
 
 		timer_ += deltaTime;
 
-		float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
-
-		// 必要なら ease をかける
-		float easedT = t * t * (3.0f - 2.0f * t);
+		// 共通の滑らかな補間率を使って回転を戻す。
+		const float easedT = Math::SmoothStep(timer_ / endTime_);
 
 		float newY = startRotateY_ + rotateDiffY_ * easedT;
 		enemy->GetWorldTransform().rotate_.y = newY;
@@ -25100,6 +25097,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/Smal
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+#include <DirectXGame/engine/Math/MathFunctions.h>
 namespace Character {
 	void SmallMeleeAttackReadySubState::Enter() {
 		timer_ = 0.0f;
@@ -25141,7 +25139,8 @@ namespace Character {
 			Vector3 targetDire = toTarget.Normalize();
 
 			// ここは即向きでもいいが、本当は角度補間推奨
-			enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
+			// 共通関数でXZ方向からY軸回転へ変換する。
+			enemy->GetWorldTransform().rotate_.y = Math::DirectionToYaw(targetDire);
 
 			// Swingで使う方向は Ready の最後まで更新しておく
 			dire_ = targetDire;
@@ -25215,7 +25214,8 @@ namespace Character {
 		}
 
 		// 向きを固定
-		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
+		// 共通関数でXZ方向からY軸回転へ変換する。
+		enemy->GetWorldTransform().rotate_.y = Math::DirectionToYaw(dire_);
 
 		HitBox::CollData data{};
 		data.hitBoxData.isEneble = true;
@@ -25283,15 +25283,15 @@ namespace Character {
 
 		if (toPlayer.Length() > 0.001f) {
 			toPlayer = toPlayer.Normalize();
-			targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+			targetRotateY_ = Math::DirectionToYaw(toPlayer);
 		}
 		else {
 			targetRotateY_ = startRotateY_;
 		}
 
 		// 最短差分を保存
-		rotateDiffY_ = targetRotateY_ - startRotateY_;
-		rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
+		// 共通関数で最短方向の角度差を保存する。
+		rotateDiffY_ = Math::DeltaAngle(startRotateY_, targetRotateY_);
 	}
 
 	void SmallMeleeAttackEndSubState::Update(float deltaTime) {
@@ -25302,10 +25302,8 @@ namespace Character {
 
 		timer_ += deltaTime;
 
-		float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
-
-		// 必要なら ease をかける
-		float easedT = t * t * (3.0f - 2.0f * t);
+		// 共通の滑らかな補間率を使って回転を戻す。
+		const float easedT = Math::SmoothStep(timer_ / endTime_);
 
 		float newY = startRotateY_ + rotateDiffY_ * easedT;
 		enemy->GetWorldTransform().rotate_.y = newY;
@@ -25567,6 +25565,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/Smal
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Effect/Effect.h>
+#include <DirectXGame/engine/Math/MathFunctions.h>
 namespace Character {
 
 #pragma region Move
@@ -25617,16 +25616,11 @@ namespace Character {
 		if (toTarget.Length() > 0.001f) {
 			toTarget = toTarget.Normalize();
 
-			float targetRotY = std::atan2(toTarget.x, toTarget.z);
 			float& currentRotY = enemy->GetWorldTransform().rotate_.y;
 
-			float diff = targetRotY - currentRotY;
-			diff = std::atan2(std::sin(diff), std::cos(diff));
-
-			float maxTurn = turnSpeed_ * ctx.dt;
-			diff = std::clamp(diff, -maxTurn, maxTurn);
-
-			currentRotY += diff;
+			// 共通の角度追従関数で、最短方向へ指定速度だけ回転する。
+			const float targetRotY = Math::DirectionToYaw(toTarget);
+			currentRotY = Math::RotateTowards(currentRotY, targetRotY, turnSpeed_ * ctx.dt);
 		}
 
 		// 狙い時間が経過したら1回だけ撃つ
@@ -26236,6 +26230,7 @@ struct MovementData {
 File Path: project/DirectXGame/application/base/Character/Move/Base/MovementSystem.cpp
 ============================================================
 #include "MovementSystem.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 // 初期化時に外部リソースを持たないため、現状は空実装
 void MovementSystem::Initialize() {}
@@ -26364,7 +26359,8 @@ void MovementSystem::RotateProcess(const Character::CharacterContext& cxt, Engin
 	if (direction_.Length() == 0.0f) return;
 
 	// 目標方向（X=Right, Y=Up, Z=Forward）
-	float targetYaw = std::atan2(direction_.x, direction_.z);
+	// 共通関数で移動方向からY軸回転角を求める。
+    const float targetYaw = Math::DirectionToYaw(direction_);
 
 	float& currentYaw = world.rotate_.y;
 
@@ -27305,7 +27301,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -27543,13 +27539,6 @@ namespace Character {
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
 		isSpecial = ctx.isSpecialAttacking;
-#ifdef _DEBUG
-		ImGui::Begin("Debug");
-		if (ImGui::Button("SP")) {
-			special_->SetGauge(100);
-		}
-		ImGui::End();
-#endif // _DEBUG
 
 		if (special_->GetPhese() == 1) {
 			attackController_->IsStopHitTimer(true);
@@ -32759,6 +32748,25 @@ void InputSystem::GameInputUpdate(float dt) {
 		input->IsTriggerKey(DIK_ESCAPE);
 }
 
+Vector2 InputSystem::GetMousePosition() const {
+	// 入力オブジェクトが未設定の場合でも安全な原点を返す。
+	return input ? input->GetMousePosition() : Vector2{};
+}
+
+bool InputSystem::IsMouseTriggered(uint8_t button) const {
+	// 入力オブジェクトが未設定の場合は押下されていないものとして扱う。
+	return input && input->IsMouseTriggered(button);
+}
+
+bool InputSystem::IsMousePressed(uint8_t button) const {
+	// 入力オブジェクトが未設定の場合は押下されていないものとして扱う。
+	return input && input->IsMousePressed(button);
+}
+
+bool InputSystem::IsMouseReleased(uint8_t button) const {
+	// 入力オブジェクトが未設定の場合は解放されていないものとして扱う。
+	return input && input->IsMouseReleased(button);
+}
 bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
 {
 	switch (press)
@@ -32841,6 +32849,22 @@ public:
 	const Engine::MenuInputData* GetGameInputDataAddress() const { return &gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
+	/// <summary>
+	/// UI操作に使用するマウス位置を取得する。
+	/// </summary>
+	Vector2 GetMousePosition() const;
+	/// <summary>
+	/// UI操作用のマウスボタン押下開始を取得する。
+	/// </summary>
+	bool IsMouseTriggered(uint8_t button) const;
+	/// <summary>
+	/// UI操作用のマウスボタン押下中を取得する。
+	/// </summary>
+	bool IsMousePressed(uint8_t button) const;
+	/// <summary>
+	/// UI操作用のマウスボタン解放を取得する。
+	/// </summary>
+	bool IsMouseReleased(uint8_t button) const;
 
 private:
 	// プレイヤー操作の入力データ
@@ -37998,6 +38022,7 @@ File Path: project/DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.cp
 #include "PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 #include <algorithm>
 #include <cmath>
 
@@ -38070,7 +38095,8 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	// 必要なら投擲方向にサブ武器の向きを合わせる
 	if (throwData_.alignToDirection) {
 		GetWorldTransform().rotate_ = throwData_.rotateOffset;
-		GetWorldTransform().rotate_.y += std::atan2(throwDirection_.x, throwDirection_.z);
+		// 共通関数で投擲方向からY軸回転角を求める。
+        GetWorldTransform().rotate_.y += Math::DirectionToYaw(throwDirection_);
 	}
 }
 
@@ -38658,24 +38684,6 @@ void CharacterDebugScene::UpdateDebug(float dt){
 void CharacterDebugScene::UpdateImGui() {
 
 #ifdef _DEBUG
-	ImGui::Begin("Debug");
-	ImGui::InputInt("playerID", &GetSceneData().playerID);
-	Vector2 inputPos = input_->GetGamePadLeftStick();
-	ImGui::InputFloat2("Input", &inputPos.x);
-	
-	ImGui::DragFloat3("shakeData.offset", &shakeData.offset.x, 0.01f);
-	ImGui::DragFloat("shakeData.duration", &shakeData.duration, 0.01f);
-	if (ImGui::Button("シェイク")) {
-		
-		cameraManager_->GetBaseCamera()->GetCameraController()->GetShake()->Request(shakeData);
-	}
-	ImGui::DragFloat("zoomData.targetDistance", &zoomData.targetDistance, 0.01f);
-	ImGui::DragFloat("zoomData.duration", &zoomData.duration, 0.01f);
-	ImGui::DragFloat("zoomData.zoomSpeed", &zoomData.zoomSpeed, 0.01f);
-	if (ImGui::Button("ズーム")) {
-		cameraManager_->GetBaseCamera()->GetCameraController()->GetZoom()->Request(zoomData);
-	}
-	ImGui::End();
 #endif // _DEBUG
 }
 
@@ -39601,7 +39609,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/scene/GamePlayScene.cpp
 ============================================================
-#include "GamePlayScene.h"
+﻿#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -39724,21 +39732,6 @@ void GamePlayScene::UpdateImGui()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
-
-	ImGui::Begin("Debug");
-	ImGui::InputInt("playerID", &GetSceneData().playerID);
-
-	Vector2 inputPos = input->GetGamePadLeftStick();
-	ImGui::InputFloat2("Input", &inputPos.x);
-	if (ImGui::Button("lockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", kDebugCameraBlendSeconds);
-	}
-	if (ImGui::Button("noLockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", kDebugCameraBlendSeconds);
-	}
-
-
-	ImGui::End();
 #endif // _DEBUG
 
 	gameUI_->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
@@ -52955,6 +52948,7 @@ File Path: project/DirectXGame/engine/Camera/Camera.cpp
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/input/Input.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
@@ -53101,7 +53095,8 @@ void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& target
 
 	// カメラの回転行列を設定
 	transform_.rotate.x = std::atan2(forward.y, std::sqrt(forward.x * forward.x + forward.z * forward.z));
-	transform_.rotate.y = std::atan2(forward.x, forward.z);
+	// 共通関数でカメラ前方向からY軸回転角を求める。
+    transform_.rotate.y = Math::DirectionToYaw(forward);
 
 	// ワールド行列の更新
 	worldMatrix_ = MakeAffineMatrix(transform_.scale, transform_.rotate, cameraPosition);
@@ -54311,7 +54306,8 @@ Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 
 	Vector3 targetRotate{};
 	targetRotate.x = std::atan2(toTarget.y, horizontalLength);
-	targetRotate.y = std::atan2(toTarget.x, toTarget.z);
+	// 共通関数でロックオン対象方向からY軸回転角を求める。
+    targetRotate.y = Math::DirectionToYaw(toTarget);
 	targetRotate.z = 0.0f;
 
 	const float lerpRate = std::clamp(data.rotateSpeed, 0.0f, 1.0f);
@@ -59488,7 +59484,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/Common/DirectXCommon.cpp
 ============================================================
-#include "DirectXCommon.h"
+﻿#include "DirectXCommon.h"
 #include<format>
 #include<cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -60804,7 +60800,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/RenderTexture/RenderTexture.cpp
 ============================================================
-#include "RenderTexture.h"
+﻿#include "RenderTexture.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -60848,10 +60844,10 @@ void Engine::RenderTexture::Update()
 	postEffectData_->SetCamera(camera);
 #ifdef _DEBUG
 
-	if (ImGui::TreeNode(name_.c_str())) {
-		postEffectData_->UpdateImgui();
-		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
-	}
+	//if (ImGui::TreeNode(name_.c_str())) {
+	//	postEffectData_->UpdateImgui();
+	//	ImGui::TreePop();
+	//}
 #endif // _DEBUG
 }
 
@@ -73214,7 +73210,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Primitive/Primitive.cpp
 ============================================================
-#include "Primitive.h"
+﻿#include "Primitive.h"
 
 #include"PrimitiveCommon.h"
 
@@ -73242,27 +73238,43 @@ void Engine::BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const s
 	}
 }
 
-void Engine::BasePrimitive::Update(float deltaTime)
+void Engine::BasePrimitive::ImGuiUpdate(float dt)
 {
+	// 現時点ではImGuiの入力値更新にdtを使用しないため、未使用警告を抑制する。
+	(void)dt;
 #ifdef _DEBUG
+	// ImGuiで表示するプリミティブのデバッグ名を作成する。
 	std::string str = name_ + "_translate";
 
+	// メッシュの頂点数を確認するための一時的なインデックス値を作成する。
 	int i = (int)mesh->vertices.size();
 	ImGui::InputInt("index2", &i);
+
+	// プリミティブのマテリアル拡縮と回転を編集する。
 	str = name_ + "material";
 	ImGui::DragFloat3(str.c_str(), &mesh->material->GetMaterialInstance().transform.scale.x, 0.01f);
 	str += "rotate";
 	ImGui::DragFloat3(str.c_str(), &mesh->material->GetMaterialInstance().transform.rotate.x, 0.01f);
 
+	// 拡縮アニメーションの有効状態とパラメータを編集する。
 	ImGui::Checkbox("isScaleX", &aimetion_.isScaleX);
 	ImGui::Checkbox("isScaleY", &aimetion_.isScaleY);
 	ImGui::DragFloat2("speed", &aimetion_.speed.x, 0.01f);
 	ImGui::DragFloat2("maxCount", &aimetion_.maxCount.x, 0.01f);
 
+	// 回転アニメーションの有効状態とパラメータを編集する。
 	ImGui::Checkbox("isRotateX", &aimetion_.isRotateX);
 	ImGui::Checkbox("isRotateY", &aimetion_.isRotateY);
 	ImGui::DragFloat2("rotateSpeed", &aimetion_.rotateSpeed.x, 0.01f);
 	ImGui::DragFloat2("maxRotate", &aimetion_.maxRotate.x, 0.01f);
+#endif // _DEBUG
+}
+
+void Engine::BasePrimitive::Update(float deltaTime)
+{
+#ifdef _DEBUG
+	// プリミティブのデバッグ用ImGuiを更新する。
+	//ImGuiUpdate(deltaTime);
 #endif // _DEBUG
 
 	// アニメーションスケールX
@@ -73368,6 +73380,19 @@ void Engine::TrianglePrimitive::UniqueUpdate()
 	preTriangle = triangle;
 }
 
+void Engine::CirclePrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
+#ifdef _DEBUG
+	// 円形状固有のパラメータを表示・編集する。
+	if (ImGui::CollapsingHeader("Circle")) {
+		ImGui::DragInt("segments", &circle.segments);
+		ImGui::DragFloat("radius", &circle.radius, 0.1f);
+	}
+#endif // _DEBUG
+}
+
 void Engine::CirclePrimitive::UniqueUpdate()
 {
 	if (preCircle != circle) {
@@ -73375,10 +73400,16 @@ void Engine::CirclePrimitive::UniqueUpdate()
 	}
 
 	preCircle = circle;
+}
+
+void Engine::CubePrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
-	if (ImGui::CollapsingHeader("Circle")) {
-		ImGui::DragInt("segments", &circle.segments);
-		ImGui::DragFloat("radius", &circle.radius, 0.1f);
+	// 立方体形状固有のパラメータを表示・編集する。
+	if (ImGui::CollapsingHeader("Cube")) {
+		ImGui::DragFloat3("size", &cube.size.x, 0.1f);
 	}
 #endif // _DEBUG
 }
@@ -73390,21 +73421,14 @@ void Engine::CubePrimitive::UniqueUpdate()
 	}
 
 	preCube = cube;
-#ifdef _DEBUG
-	if (ImGui::CollapsingHeader("Cube")) {
-		ImGui::DragFloat3("size", &cube.size.x, 0.1f);
-	}
-#endif // _DEBUG
-
 }
 
-void Engine::StarPrimitive::UniqueUpdate()
+void Engine::StarPrimitive::ImGuiUpdate(float dt)
 {
-	if ((preStar != star)) {
-		star.Create(mesh.get());
-	}
-	preStar = star;
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 星形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Star")) {
 		ImGui::DragFloat("innerRadius", &star.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &star.outerRadius, 0.1f);
@@ -73416,14 +73440,20 @@ void Engine::StarPrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::CrescentPrimitive::UniqueUpdate()
+void Engine::StarPrimitive::UniqueUpdate()
 {
-	if ((preCrescent != crescent)) {
-		crescent.Create(mesh.get());
+	if ((preStar != star)) {
+		star.Create(mesh.get());
 	}
+	preStar = star;
+}
 
-	preCrescent = crescent;
+void Engine::CrescentPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 三日月形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Crescent")) {
 		ImGui::DragFloat("innerRadius", &crescent.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &crescent.outerRadius, 0.1f);
@@ -73440,17 +73470,23 @@ void Engine::CrescentPrimitive::UniqueUpdate()
 		}
 	}
 #endif // _DEBUG
-
 }
 
-void Engine::RingPrimitive::UniqueUpdate()
+void Engine::CrescentPrimitive::UniqueUpdate()
 {
-	if ((preRing != ring)) {
-		ring.Create(mesh.get());
+	if ((preCrescent != crescent)) {
+		crescent.Create(mesh.get());
 	}
 
-	preRing = ring;
+	preCrescent = crescent;
+}
+
+void Engine::RingPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// リング形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Ring")) {
 		ImGui::DragFloat("innerRadius", &ring.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &ring.outerRadius, 0.1f);
@@ -73460,7 +73496,28 @@ void Engine::RingPrimitive::UniqueUpdate()
 		}
 	}
 #endif // _DEBUG
+}
 
+void Engine::RingPrimitive::UniqueUpdate()
+{
+	if ((preRing != ring)) {
+		ring.Create(mesh.get());
+	}
+
+	preRing = ring;
+}
+
+void Engine::CrossPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
+#ifdef _DEBUG
+	// 十字形状固有のパラメータを表示・編集する。
+	if (ImGui::CollapsingHeader("Cross")) {
+		ImGui::DragFloat("armLength", &cross.armLength, 0.1f);
+		ImGui::DragFloat("armWidth", &cross.armWidth, 0.1f);
+	}
+#endif // _DEBUG
 }
 
 void Engine::CrossPrimitive::UniqueUpdate()
@@ -73470,24 +73527,14 @@ void Engine::CrossPrimitive::UniqueUpdate()
 	}
 
 	preCross = cross;
-#ifdef _DEBUG
-	if (ImGui::CollapsingHeader("Cross")) {
-		ImGui::DragFloat("armLength", &cross.armLength, 0.1f);
-		ImGui::DragFloat("armWidth", &cross.armWidth, 0.1f);
-	}
-#endif // _DEBUG
-
 }
 
-void Engine::CylinderPrimitive::UniqueUpdate()
+void Engine::CylinderPrimitive::ImGuiUpdate(float dt)
 {
-	if ((preCylinder != cylinder)) {
-		cylinder.Create(mesh.get());
-	}
-
-	preCylinder = cylinder;
-
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 円柱形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Cylinder")) {
 		ImGui::DragFloat("height", &cylinder.height, 0.1f);
 		ImGui::DragFloat("innerRadius", &cylinder.innerRadius, 0.1f);
@@ -73501,14 +73548,21 @@ void Engine::CylinderPrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::SpherePrimitive::UniqueUpdate()
+void Engine::CylinderPrimitive::UniqueUpdate()
 {
-	if ((sphere != preSphere)) {
-		sphere.Create(mesh.get());
+	if ((preCylinder != cylinder)) {
+		cylinder.Create(mesh.get());
 	}
 
-	preSphere = sphere;
+	preCylinder = cylinder;
+}
+
+void Engine::SpherePrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 球形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Sphere")) {
 		ImGui::DragFloat("radius", &sphere.radius, 0.1f);
 		ImGui::DragInt("latitudeSegments", &sphere.latitudeSegments);
@@ -73516,7 +73570,15 @@ void Engine::SpherePrimitive::UniqueUpdate()
 		ImGui::Checkbox("isTopBased", &sphere.isTopBased);
 	}
 #endif // _DEBUG
+}
 
+void Engine::SpherePrimitive::UniqueUpdate()
+{
+	if ((sphere != preSphere)) {
+		sphere.Create(mesh.get());
+	}
+
+	preSphere = sphere;
 }
 
 void Engine::ArrowPrimitive::UniqueUpdate()
@@ -73528,14 +73590,12 @@ void Engine::ArrowPrimitive::UniqueUpdate()
 	preArrow = arrow;
 }
 
-void Engine::TubePrimitive::UniqueUpdate()
+void Engine::TubePrimitive::ImGuiUpdate(float dt)
 {
-	if ((preTube != tube)) {
-		tube.Create(mesh.get());
-	}
-
-	preTube = tube;
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 筒形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Tube")) {
 		ImGui::DragFloat("height", &tube.height, 0.1f);
 		ImGui::DragFloat("radius", &tube.radius, 0.1f);
@@ -73548,15 +73608,21 @@ void Engine::TubePrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::PyramidPrimitive::UniqueUpdate()
+void Engine::TubePrimitive::UniqueUpdate()
 {
-	if ((prePyramid != pyramid)) {
-		pyramid.Create(mesh.get());
+	if ((preTube != tube)) {
+		tube.Create(mesh.get());
 	}
 
-	prePyramid = pyramid;
+	preTube = tube;
+}
 
+void Engine::PyramidPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 角錐形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Pyramid")) {
 		ImGui::DragFloat("height", &pyramid.height, 0.1f);
 		ImGui::DragFloat("radius", &pyramid.radius, 0.1f);
@@ -73568,15 +73634,21 @@ void Engine::PyramidPrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::TorusPrimitive::UniqueUpdate()
+void Engine::PyramidPrimitive::UniqueUpdate()
 {
-	if ((torus != preTorus)) {
-		torus.Create(mesh.get());
+	if ((prePyramid != pyramid)) {
+		pyramid.Create(mesh.get());
 	}
 
-	preTorus = torus;
+	prePyramid = pyramid;
+}
 
+void Engine::TorusPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// トーラス形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Torus")) {
 		ImGui::DragFloat("innerRadius", &torus.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &torus.outerRadius, 0.1f);
@@ -73590,6 +73662,15 @@ void Engine::TorusPrimitive::UniqueUpdate()
 		}
 	}
 #endif // _DEBUG
+}
+
+void Engine::TorusPrimitive::UniqueUpdate()
+{
+	if ((torus != preTorus)) {
+		torus.Create(mesh.get());
+	}
+
+	preTorus = torus;
 }
 
 
@@ -73655,6 +73736,10 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update(float deltaTime);
+		/// <summary>
+		/// プリミティブのデバッグ用ImGuiを更新する。
+		/// </summary>
+		virtual void ImGuiUpdate(float dt);
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -73785,6 +73870,10 @@ namespace Engine {
 		void MeshInitialize() override { circle.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -73808,6 +73897,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { cube.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -73833,6 +73926,10 @@ namespace Engine {
 		void MeshInitialize() override { star.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -73856,6 +73953,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { crescent.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -73881,6 +73982,10 @@ namespace Engine {
 		void MeshInitialize() override { ring.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -73904,6 +74009,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { cross.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -73929,6 +74038,10 @@ namespace Engine {
 		void MeshInitialize() override { cylinder.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -73952,6 +74065,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { sphere.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -74001,6 +74118,10 @@ namespace Engine {
 		void MeshInitialize() override { tube.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -74025,6 +74146,10 @@ namespace Engine {
 		void MeshInitialize() override { pyramid.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -74048,6 +74173,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { torus.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -82764,9 +82893,33 @@ File Path: project/DirectXGame/engine/Math/MathFunctions.cpp
 #pragma region Math
 
 float Math::LerpShortAngle(float current, float target, float t) {
-	// sin/cosから[-PI, PI]の角度差を求め、常に最短方向へ補間する。
-	const float difference = std::atan2(std::sin(target - current), std::cos(target - current));
-	return current + difference * t;
+	// 共通の最短角度差を使って、常に最短方向へ補間する。
+	return current + DeltaAngle(current, target) * t;
+}
+
+float Math::DeltaAngle(float current, float target) {
+	// atan2を使って角度差を[-PI, PI]へ正規化し、回転方向を最短にする。
+	return std::atan2(std::sin(target - current), std::cos(target - current));
+}
+
+float Math::RotateTowards(float current, float target, float maxDelta) {
+	// 負の最大角度差では回転しないよう、安全な値へ補正する。
+	const float safeMaxDelta = (std::max)(maxDelta, 0.0f);
+	const float difference = DeltaAngle(current, target);
+
+	// 目標までの角度差が最大値以内なら、目標角度をそのまま返す。
+	if (std::abs(difference) <= safeMaxDelta) {
+		return target;
+	}
+
+	// 最短方向へ最大角度差だけ回転する。
+	return current + std::copysign(safeMaxDelta, difference);
+}
+
+float Math::SmoothStep(float t) {
+	// 補間率を有効範囲へ制限し、始点と終点で速度が0になる補間を行う。
+	const float clampedT = Clamp(t, 0.0f, 1.0f);
+	return clampedT * clampedT * (3.0f - 2.0f * clampedT);
 }
 
 float Math::Length(const float& v) {
@@ -83010,6 +83163,11 @@ Vector3 Math::DirectionToRotate(const Vector3& direction, Dire dire)
 float Math::DirectionToRotateZ(const Vector3& direction)
 {
 	return 0.0f;
+}
+
+float Math::DirectionToYaw(const Vector3& direction) {
+	// XZ平面上の方向から、+Zを基準にしたY軸回転角を求める。
+	return std::atan2(direction.x, direction.z);
 }
 // 
 float Math::DegreesToRadians(float degrees) { return float(degrees * ((float)M_PI / 180.0)); }
@@ -83316,6 +83474,18 @@ namespace Math {
 	/// </summary>
 	float LerpShortAngle(float current, float target, float t);
 	/// <summary>
+	/// 現在角度から目標角度までの最短角度差を求める
+	/// </summary>
+	float DeltaAngle(float current, float target);
+	/// <summary>
+	/// 最大角度差を超えない範囲で目標角度へ近づける
+	/// </summary>
+	float RotateTowards(float current, float target, float maxDelta);
+	/// <summary>
+	/// 0から1の補間率を滑らかに変化させる
+	/// </summary>
+	float SmoothStep(float t);
+	/// <summary>
 	/// 長さ
 	/// </summary>
 	float Length(const float& v);
@@ -83393,6 +83563,10 @@ namespace Math {
 	/// 方向による回転位置計算Z
 	/// </summary>
 	float DirectionToRotateZ(const Vector3& direction);
+	/// <summary>
+	/// XZ平面上の方向ベクトルからY軸回転角を求める
+	/// </summary>
+	float DirectionToYaw(const Vector3& direction);
 	/// <summary>
 	/// 角度からラジアン
 	/// </summary>
@@ -90549,6 +90723,7 @@ File Path: project/DirectXGame/engine/UI/UIElement.cpp
 #include "UIElement.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 void Engine::UIElement::Init(EntityManager* entityManager, std::string name)
 {
@@ -90588,8 +90763,21 @@ Engine::BaseSprite* Engine::UIElement::GetSprite(std::string name)
 	}
 }
 
+bool Engine::UIElement::IsMouseOver(const BaseSprite* sprite) const {
+	// 入力、対象スプライト、表示状態のいずれかが無効なら操作対象外とする。
+	if (!inputSystem || !sprite || !isVisible_ || !isEnabled_) {
+		return false;
+	}
+
+	// スプライトの更新済み矩形と画面上のマウス位置を比較する。
+	return sprite->GetBox().intersects(inputSystem->GetMousePosition());
+}
 void Engine::UIElement::Draw()
 {
+	// 非表示のUI要素は固有描画を含めて描画しない。
+	if (!isVisible_) {
+		return;
+	}
 	// スプライト更新描画
 	for (auto& sprit : sprites_) {
 		sprit.second->Update();
@@ -90655,20 +90843,13 @@ void Engine::UICheckBox::Update(float deltaTime)
 
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
 
-	//// 入っているなら
-	//if (backgroundSprite->GetBox().intersects(input_->GetMousePosition())) {
-	//	if (input_->IsMouseTriggered(0)){
-	//		if (!isCheck_) {
-	//			isCheck_ = true;
-	//		}
-	//		else {
-	//			isCheck_ = false;
-	//		}
-	//	}
-	//}
-	//else {
+	// 背景の矩形を更新してから、マウスクリックを判定する。
+	backgroundSprite->Update();
+	if (IsMouseOver(backgroundSprite.get()) && inputSystem->IsMouseTriggered(0)) {
+		// クリックされるたびにチェック状態を反転する。
+		isCheck_ = !isCheck_;
+	}
 
-	//}
 	// 更新
 	checkSprite->Update();
 	backgroundSprite->Update();
@@ -90718,7 +90899,12 @@ void Engine::UISlider::Update(float deltaTime) {
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 	slidSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 
-	//preMousePos = input_->GetMousePosition();
+	// 当たり判定を最新の位置へ更新してから入力を判定する。
+	backgroundSprite->Update();
+	slidSprite->Update();
+
+	// UI入力の現在マウス位置を保存する。
+	if (inputSystem) { preMousePos = inputSystem->GetMousePosition(); }
 
 	Box box = backgroundSprite->GetBox();
 	Vector2 size = backgroundSprite->GetSize();
@@ -90750,17 +90936,14 @@ void Engine::UISlider::Update(float deltaTime) {
 
 
 
-	//// スライダーのクリック判定
-	//if (slidSprite->GetBox().intersects(preMousePos)) {
-	//	if (input_->IsMousePressed(0)) {
-	//		isClick = true;
-	//	}
-	//}
-	//else {
-	//	if (input_->IsMouseReleased(0)) {
-	//		isClick = false;
-	//	}
-	//}
+	// つまみまたは背景が押されたらドラッグ状態へ移行する。
+	if (isVisible_ && isEnabled_ && inputSystem && inputSystem->IsMouseTriggered(0) &&
+		(slidSprite->GetBox().intersects(preMousePos) || backgroundSprite->GetBox().intersects(preMousePos))) {
+		isClick = true;
+	}
+	if (inputSystem && inputSystem->IsMouseReleased(0)) {
+		isClick = false;
+	}
 
 	// スライダーの移動処理（背景Boxの範囲に制限）
 	if (isClick) {
@@ -90803,7 +90986,29 @@ void Engine::UISlider::Update(float deltaTime) {
 	slidSprite->Update();
 }
 
-void Engine::UISlider::UniqueDraw() {
+
+void Engine::UISlider::SetValue(float value) {
+	// 値を設定範囲へ制限し、表示位置へ変換する。
+	const float safeRange = max_ - min_;
+	if (std::abs(safeRange) <= 0.000001f) {
+		offsetPos_.x = 0.0f;
+		return;
+	}
+	const float rate = Math::Clamp((value - min_) / safeRange, 0.0f, 1.0f);
+	const float trackWidth = backgroundSprite ? backgroundSprite->GetSize().x : 0.0f;
+	offsetPos_.x = rate * trackWidth;
+}
+
+float Engine::UISlider::GetValue() const {
+	// 表示位置を設定範囲の値へ逆変換する。
+	const float safeRange = max_ - min_;
+	const float trackWidth = backgroundSprite ? backgroundSprite->GetSize().x : 0.0f;
+	if (std::abs(safeRange) <= 0.000001f || trackWidth <= 0.0f) {
+		return min_;
+	}
+	const float rate = Math::Clamp(offsetPos_.x / trackWidth, 0.0f, 1.0f);
+	return min_ + safeRange * rate;
+}void Engine::UISlider::UniqueDraw() {
 	backgroundSprite->Draw();
 	slidSprite->Draw();
 }
@@ -91130,6 +91335,22 @@ namespace Engine {
 		/// </summary>
 		void SetInput(InputSystem* inputSystem) { this->inputSystem = inputSystem; }
 		/// <summary>
+		/// UI要素の表示状態を設定する。
+		/// </summary>
+		void SetVisible(bool visible) { isVisible_ = visible; }
+		/// <summary>
+		/// UI要素の表示状態を取得する。
+		/// </summary>
+		bool IsVisible() const { return isVisible_; }
+		/// <summary>
+		/// UI要素の操作可否を設定する。
+		/// </summary>
+		void SetEnabled(bool enabled) { isEnabled_ = enabled; }
+		/// <summary>
+		/// UI要素の操作可否を取得する。
+		/// </summary>
+		bool IsEnabled() const { return isEnabled_; }
+		/// <summary>
 		/// スプライト追加
 		/// </summary>
 		void AddSprite(std::string name, std::string textureName);
@@ -91147,7 +91368,11 @@ namespace Engine {
 		/// <summary>
 		/// 親子付け
 		/// </summary>
-		void SetParent(WorldTransform2d* parent) {
+				/// <summary>
+		/// マウス位置が指定スプライトの当たり判定内にあるかを取得する。
+		/// </summary>
+		bool IsMouseOver(const BaseSprite* sprite) const;
+void SetParent(WorldTransform2d* parent) {
 			this->parent = parent;
 		}
 
@@ -91173,6 +91398,10 @@ namespace Engine {
 		int instance_ = 1;		// 生成量
 		Vector2 pos_ = {};		// 位置
 		bool useNameSprite_ = false;
+		// UI全体の表示状態を保持する。
+		bool isVisible_ = true;
+		// UI全体の操作可否を保持する。
+		bool isEnabled_ = true;
 
 	};
 
@@ -91231,7 +91460,14 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update(float deltaTime)override;
+		void Update(float deltaTime)override;		/// <summary>
+		/// チェック状態を設定する。
+		/// </summary>
+		void SetChecked(bool isChecked) { isCheck_ = isChecked; }
+		/// <summary>
+		/// チェック状態を取得する。
+		/// </summary>
+		bool IsChecked() const { return isCheck_; }
 		/// <summary>
 		/// クリックスプライト取得
 		/// </summary>
@@ -91277,9 +91513,18 @@ namespace Engine {
 		/// 最小値最大値設定
 		/// </summary>
 		void SetMinMax(float min, float max) {
+			// スライダーの値域を保存する。
 			min_ = min;
 			max_ = max;
-		};
+		}
+		/// <summary>
+		/// スライダーの現在値を設定する。
+		/// </summary>
+		void SetValue(float value);
+		/// <summary>
+		/// スライダーの現在値を取得する。
+		/// </summary>
+		float GetValue() const;
 	protected:
 		/// <summary>
 		/// 固有描画
@@ -91292,8 +91537,8 @@ namespace Engine {
 	private:
 		std::unique_ptr<BaseSprite> slidSprite;
 		std::unique_ptr<BaseSprite> backgroundSprite;
-		float min_;
-		float max_;
+		float min_ = 0.0f;
+		float max_ = 1.0f;
 		bool isClick = false;
 
 		Vector2 preMousePos{};
@@ -91809,40 +92054,41 @@ File Path: project/DirectXGame/engine/Utility/RangeUtility.h
 #include <iostream>
 
 /// <summary>
-/// 最小値
+/// 2つの値から小さい方を取得する
 /// </summary>
-inline float ConversionMin(float a, float b) {
+template<typename T>
+inline T ConversionMin(const T& a, const T& b) {
+    // 型ごとの重複実装を避け、標準関数へ処理を委譲する。
     return (std::min)(a, b);
 }
+
 /// <summary>
-/// 最小値
+/// 2つの値から大きい方を取得する
 /// </summary>
-inline int ConversionMin(int a, int b) {
-    return (std::min)(a, b);
-}
-/// <summary>
-/// 最大値
-/// </summary>
-inline float ConversionMax(float a, float b) {
-    return (std::max)(a, b);
-}
-/// <summary>
-/// 最大値
-/// </summary>
-inline int ConversionMax(int a, int b) {
+template<typename T>
+inline T ConversionMax(const T& a, const T& b) {
+    // 型ごとの重複実装を避け、標準関数へ処理を委譲する。
     return (std::max)(a, b);
 }
 // 範囲の最小値と最大値を入れ替える(float)
 static void ConversionRangeFloat(Range <float>& range)
 {
-	range.min = ConversionMin(range.min, range.max);
-	range.max = ConversionMax(range.min, range.max);
+	// 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+	const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 // 範囲の最小値と最大値を入れ替える(int)
 static void ConversionRangeInt(Range <int>& range)
 {
-    range.min = ConversionMin(range.min, range.max);
-    range.max = ConversionMax(range.min, range.max);
+    // 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+    const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 
 // 範囲の最小値と最大値を入れ替える(Vector2,3,4)
@@ -91857,14 +92103,22 @@ void ConversionRange(Range<Vec>& range) {
 // 範囲の最小値と最大値を入れ替える(float)
 static void ConversionRangeFloat(ValueRange <float>& range)
 {
-    range.min = ConversionMin(range.min, range.max);
-    range.max = ConversionMax(range.min, range.max);
+    // 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+    const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 // 範囲の最小値と最大値を入れ替える(int)
 static void ConversionRangeInt(ValueRange <int>& range)
 {
-    range.min = ConversionMin(range.min, range.max);
-    range.max = ConversionMax(range.min, range.max);
+    // 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+    const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 
 // 範囲の最小値と最大値を入れ替える(Vector2,3,4)
