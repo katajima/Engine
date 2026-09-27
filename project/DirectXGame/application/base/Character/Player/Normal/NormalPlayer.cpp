@@ -1,4 +1,4 @@
-#include "NormalPlayer.h"
+﻿#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -236,13 +236,6 @@ namespace Character {
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
 		isSpecial = ctx.isSpecialAttacking;
-#ifdef _DEBUG
-		ImGui::Begin("Debug");
-		if (ImGui::Button("SP")) {
-			special_->SetGauge(100);
-		}
-		ImGui::End();
-#endif // _DEBUG
 
 		if (special_->GetPhese() == 1) {
 			attackController_->IsStopHitTimer(true);

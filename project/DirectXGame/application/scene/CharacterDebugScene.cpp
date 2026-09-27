@@ -218,24 +218,6 @@ void CharacterDebugScene::UpdateDebug(float dt){
 void CharacterDebugScene::UpdateImGui() {
 
 #ifdef _DEBUG
-	ImGui::Begin("Debug");
-	ImGui::InputInt("playerID", &GetSceneData().playerID);
-	Vector2 inputPos = input_->GetGamePadLeftStick();
-	ImGui::InputFloat2("Input", &inputPos.x);
-	
-	ImGui::DragFloat3("shakeData.offset", &shakeData.offset.x, 0.01f);
-	ImGui::DragFloat("shakeData.duration", &shakeData.duration, 0.01f);
-	if (ImGui::Button("シェイク")) {
-		
-		cameraManager_->GetBaseCamera()->GetCameraController()->GetShake()->Request(shakeData);
-	}
-	ImGui::DragFloat("zoomData.targetDistance", &zoomData.targetDistance, 0.01f);
-	ImGui::DragFloat("zoomData.duration", &zoomData.duration, 0.01f);
-	ImGui::DragFloat("zoomData.zoomSpeed", &zoomData.zoomSpeed, 0.01f);
-	if (ImGui::Button("ズーム")) {
-		cameraManager_->GetBaseCamera()->GetCameraController()->GetZoom()->Request(zoomData);
-	}
-	ImGui::End();
 #endif // _DEBUG
 }
 

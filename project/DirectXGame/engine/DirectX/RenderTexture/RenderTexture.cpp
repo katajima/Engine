@@ -1,4 +1,4 @@
-#include "RenderTexture.h"
+﻿#include "RenderTexture.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -42,10 +42,10 @@ void Engine::RenderTexture::Update()
 	postEffectData_->SetCamera(camera);
 #ifdef _DEBUG
 
-	if (ImGui::TreeNode(name_.c_str())) {
-		postEffectData_->UpdateImgui();
-		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
-	}
+	//if (ImGui::TreeNode(name_.c_str())) {
+	//	postEffectData_->UpdateImgui();
+	//	ImGui::TreePop();
+	//}
 #endif // _DEBUG
 }
 

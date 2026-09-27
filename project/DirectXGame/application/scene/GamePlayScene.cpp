@@ -1,4 +1,4 @@
-#include "GamePlayScene.h"
+﻿#include "GamePlayScene.h"
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -121,21 +121,6 @@ void GamePlayScene::UpdateImGui()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
-
-	ImGui::Begin("Debug");
-	ImGui::InputInt("playerID", &GetSceneData().playerID);
-
-	Vector2 inputPos = input->GetGamePadLeftStick();
-	ImGui::InputFloat2("Input", &inputPos.x);
-	if (ImGui::Button("lockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("fixedCamera", kDebugCameraBlendSeconds);
-	}
-	if (ImGui::Button("noLockOn")) {
-		gameplaySession_->GetCameraManager()->SetUseCamera("followCamera", kDebugCameraBlendSeconds);
-	}
-
-
-	ImGui::End();
 #endif // _DEBUG
 
 	gameUI_->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());

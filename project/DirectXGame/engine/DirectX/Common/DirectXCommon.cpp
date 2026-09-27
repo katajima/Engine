@@ -1,4 +1,4 @@
-#include "DirectXCommon.h"
+﻿#include "DirectXCommon.h"
 #include<format>
 #include<cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -234,7 +234,7 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 	entity3DManager->GetLightManager()->Update();
 
 #ifdef _DEBUG
-	entity3DManager->UpdateImgui();
+	//entity3DManager->UpdateImgui();
 #endif // _DEBUG
 
 
