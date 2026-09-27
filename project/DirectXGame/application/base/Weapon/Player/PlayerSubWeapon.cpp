@@ -1,6 +1,7 @@
 #include "PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 #include <algorithm>
 #include <cmath>
 
@@ -73,7 +74,8 @@ void PlayerSubWeapon::Throw(const Vector3& startPosition, const Vector3& directi
 	// 必要なら投擲方向にサブ武器の向きを合わせる
 	if (throwData_.alignToDirection) {
 		GetWorldTransform().rotate_ = throwData_.rotateOffset;
-		GetWorldTransform().rotate_.y += std::atan2(throwDirection_.x, throwDirection_.z);
+		// 共通関数で投擲方向からY軸回転角を求める。
+        GetWorldTransform().rotate_.y += Math::DirectionToYaw(throwDirection_);
 	}
 }
 

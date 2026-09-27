@@ -7,9 +7,33 @@
 #pragma region Math
 
 float Math::LerpShortAngle(float current, float target, float t) {
-	// sin/cosから[-PI, PI]の角度差を求め、常に最短方向へ補間する。
-	const float difference = std::atan2(std::sin(target - current), std::cos(target - current));
-	return current + difference * t;
+	// 共通の最短角度差を使って、常に最短方向へ補間する。
+	return current + DeltaAngle(current, target) * t;
+}
+
+float Math::DeltaAngle(float current, float target) {
+	// atan2を使って角度差を[-PI, PI]へ正規化し、回転方向を最短にする。
+	return std::atan2(std::sin(target - current), std::cos(target - current));
+}
+
+float Math::RotateTowards(float current, float target, float maxDelta) {
+	// 負の最大角度差では回転しないよう、安全な値へ補正する。
+	const float safeMaxDelta = (std::max)(maxDelta, 0.0f);
+	const float difference = DeltaAngle(current, target);
+
+	// 目標までの角度差が最大値以内なら、目標角度をそのまま返す。
+	if (std::abs(difference) <= safeMaxDelta) {
+		return target;
+	}
+
+	// 最短方向へ最大角度差だけ回転する。
+	return current + std::copysign(safeMaxDelta, difference);
+}
+
+float Math::SmoothStep(float t) {
+	// 補間率を有効範囲へ制限し、始点と終点で速度が0になる補間を行う。
+	const float clampedT = Clamp(t, 0.0f, 1.0f);
+	return clampedT * clampedT * (3.0f - 2.0f * clampedT);
 }
 
 float Math::Length(const float& v) {
@@ -253,6 +277,11 @@ Vector3 Math::DirectionToRotate(const Vector3& direction, Dire dire)
 float Math::DirectionToRotateZ(const Vector3& direction)
 {
 	return 0.0f;
+}
+
+float Math::DirectionToYaw(const Vector3& direction) {
+	// XZ平面上の方向から、+Zを基準にしたY軸回転角を求める。
+	return std::atan2(direction.x, direction.z);
 }
 // 
 float Math::DegreesToRadians(float degrees) { return float(degrees * ((float)M_PI / 180.0)); }

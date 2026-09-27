@@ -151,6 +151,25 @@ void InputSystem::GameInputUpdate(float dt) {
 		input->IsTriggerKey(DIK_ESCAPE);
 }
 
+Vector2 InputSystem::GetMousePosition() const {
+	// 入力オブジェクトが未設定の場合でも安全な原点を返す。
+	return input ? input->GetMousePosition() : Vector2{};
+}
+
+bool InputSystem::IsMouseTriggered(uint8_t button) const {
+	// 入力オブジェクトが未設定の場合は押下されていないものとして扱う。
+	return input && input->IsMouseTriggered(button);
+}
+
+bool InputSystem::IsMousePressed(uint8_t button) const {
+	// 入力オブジェクトが未設定の場合は押下されていないものとして扱う。
+	return input && input->IsMousePressed(button);
+}
+
+bool InputSystem::IsMouseReleased(uint8_t button) const {
+	// 入力オブジェクトが未設定の場合は解放されていないものとして扱う。
+	return input && input->IsMouseReleased(button);
+}
 bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
 {
 	switch (press)

@@ -27,6 +27,18 @@ namespace Math {
 	/// </summary>
 	float LerpShortAngle(float current, float target, float t);
 	/// <summary>
+	/// 現在角度から目標角度までの最短角度差を求める
+	/// </summary>
+	float DeltaAngle(float current, float target);
+	/// <summary>
+	/// 最大角度差を超えない範囲で目標角度へ近づける
+	/// </summary>
+	float RotateTowards(float current, float target, float maxDelta);
+	/// <summary>
+	/// 0から1の補間率を滑らかに変化させる
+	/// </summary>
+	float SmoothStep(float t);
+	/// <summary>
 	/// 長さ
 	/// </summary>
 	float Length(const float& v);
@@ -104,6 +116,10 @@ namespace Math {
 	/// 方向による回転位置計算Z
 	/// </summary>
 	float DirectionToRotateZ(const Vector3& direction);
+	/// <summary>
+	/// XZ平面上の方向ベクトルからY軸回転角を求める
+	/// </summary>
+	float DirectionToYaw(const Vector3& direction);
 	/// <summary>
 	/// 角度からラジアン
 	/// </summary>

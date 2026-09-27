@@ -45,6 +45,22 @@ namespace Engine {
 		/// </summary>
 		void SetInput(InputSystem* inputSystem) { this->inputSystem = inputSystem; }
 		/// <summary>
+		/// UI要素の表示状態を設定する。
+		/// </summary>
+		void SetVisible(bool visible) { isVisible_ = visible; }
+		/// <summary>
+		/// UI要素の表示状態を取得する。
+		/// </summary>
+		bool IsVisible() const { return isVisible_; }
+		/// <summary>
+		/// UI要素の操作可否を設定する。
+		/// </summary>
+		void SetEnabled(bool enabled) { isEnabled_ = enabled; }
+		/// <summary>
+		/// UI要素の操作可否を取得する。
+		/// </summary>
+		bool IsEnabled() const { return isEnabled_; }
+		/// <summary>
 		/// スプライト追加
 		/// </summary>
 		void AddSprite(std::string name, std::string textureName);
@@ -62,7 +78,11 @@ namespace Engine {
 		/// <summary>
 		/// 親子付け
 		/// </summary>
-		void SetParent(WorldTransform2d* parent) {
+				/// <summary>
+		/// マウス位置が指定スプライトの当たり判定内にあるかを取得する。
+		/// </summary>
+		bool IsMouseOver(const BaseSprite* sprite) const;
+void SetParent(WorldTransform2d* parent) {
 			this->parent = parent;
 		}
 
@@ -88,6 +108,10 @@ namespace Engine {
 		int instance_ = 1;		// 生成量
 		Vector2 pos_ = {};		// 位置
 		bool useNameSprite_ = false;
+		// UI全体の表示状態を保持する。
+		bool isVisible_ = true;
+		// UI全体の操作可否を保持する。
+		bool isEnabled_ = true;
 
 	};
 
@@ -146,7 +170,14 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update(float deltaTime)override;
+		void Update(float deltaTime)override;		/// <summary>
+		/// チェック状態を設定する。
+		/// </summary>
+		void SetChecked(bool isChecked) { isCheck_ = isChecked; }
+		/// <summary>
+		/// チェック状態を取得する。
+		/// </summary>
+		bool IsChecked() const { return isCheck_; }
 		/// <summary>
 		/// クリックスプライト取得
 		/// </summary>
@@ -192,9 +223,18 @@ namespace Engine {
 		/// 最小値最大値設定
 		/// </summary>
 		void SetMinMax(float min, float max) {
+			// スライダーの値域を保存する。
 			min_ = min;
 			max_ = max;
-		};
+		}
+		/// <summary>
+		/// スライダーの現在値を設定する。
+		/// </summary>
+		void SetValue(float value);
+		/// <summary>
+		/// スライダーの現在値を取得する。
+		/// </summary>
+		float GetValue() const;
 	protected:
 		/// <summary>
 		/// 固有描画
@@ -207,8 +247,8 @@ namespace Engine {
 	private:
 		std::unique_ptr<BaseSprite> slidSprite;
 		std::unique_ptr<BaseSprite> backgroundSprite;
-		float min_;
-		float max_;
+		float min_ = 0.0f;
+		float max_ = 1.0f;
 		bool isClick = false;
 
 		Vector2 preMousePos{};

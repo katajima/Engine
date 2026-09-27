@@ -1,4 +1,5 @@
 #include "MovementSystem.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 // 初期化時に外部リソースを持たないため、現状は空実装
 void MovementSystem::Initialize() {}
@@ -127,7 +128,8 @@ void MovementSystem::RotateProcess(const Character::CharacterContext& cxt, Engin
 	if (direction_.Length() == 0.0f) return;
 
 	// 目標方向（X=Right, Y=Up, Z=Forward）
-	float targetYaw = std::atan2(direction_.x, direction_.z);
+	// 共通関数で移動方向からY軸回転角を求める。
+    const float targetYaw = Math::DirectionToYaw(direction_);
 
 	float& currentYaw = world.rotate_.y;
 

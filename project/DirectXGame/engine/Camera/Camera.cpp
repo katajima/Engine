@@ -4,6 +4,7 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/input/Input.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
@@ -150,7 +151,8 @@ void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& target
 
 	// カメラの回転行列を設定
 	transform_.rotate.x = std::atan2(forward.y, std::sqrt(forward.x * forward.x + forward.z * forward.z));
-	transform_.rotate.y = std::atan2(forward.x, forward.z);
+	// 共通関数でカメラ前方向からY軸回転角を求める。
+    transform_.rotate.y = Math::DirectionToYaw(forward);
 
 	// ワールド行列の更新
 	worldMatrix_ = MakeAffineMatrix(transform_.scale, transform_.rotate, cameraPosition);

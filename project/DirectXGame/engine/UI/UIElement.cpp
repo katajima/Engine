@@ -1,6 +1,7 @@
 #include "UIElement.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Math/MathFunctions.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 void Engine::UIElement::Init(EntityManager* entityManager, std::string name)
 {
@@ -40,8 +41,21 @@ Engine::BaseSprite* Engine::UIElement::GetSprite(std::string name)
 	}
 }
 
+bool Engine::UIElement::IsMouseOver(const BaseSprite* sprite) const {
+	// 入力、対象スプライト、表示状態のいずれかが無効なら操作対象外とする。
+	if (!inputSystem || !sprite || !isVisible_ || !isEnabled_) {
+		return false;
+	}
+
+	// スプライトの更新済み矩形と画面上のマウス位置を比較する。
+	return sprite->GetBox().intersects(inputSystem->GetMousePosition());
+}
 void Engine::UIElement::Draw()
 {
+	// 非表示のUI要素は固有描画を含めて描画しない。
+	if (!isVisible_) {
+		return;
+	}
 	// スプライト更新描画
 	for (auto& sprit : sprites_) {
 		sprit.second->Update();
@@ -107,20 +121,13 @@ void Engine::UICheckBox::Update(float deltaTime)
 
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
 
-	//// 入っているなら
-	//if (backgroundSprite->GetBox().intersects(input_->GetMousePosition())) {
-	//	if (input_->IsMouseTriggered(0)){
-	//		if (!isCheck_) {
-	//			isCheck_ = true;
-	//		}
-	//		else {
-	//			isCheck_ = false;
-	//		}
-	//	}
-	//}
-	//else {
+	// 背景の矩形を更新してから、マウスクリックを判定する。
+	backgroundSprite->Update();
+	if (IsMouseOver(backgroundSprite.get()) && inputSystem->IsMouseTriggered(0)) {
+		// クリックされるたびにチェック状態を反転する。
+		isCheck_ = !isCheck_;
+	}
 
-	//}
 	// 更新
 	checkSprite->Update();
 	backgroundSprite->Update();
@@ -170,7 +177,12 @@ void Engine::UISlider::Update(float deltaTime) {
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 	slidSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 
-	//preMousePos = input_->GetMousePosition();
+	// 当たり判定を最新の位置へ更新してから入力を判定する。
+	backgroundSprite->Update();
+	slidSprite->Update();
+
+	// UI入力の現在マウス位置を保存する。
+	if (inputSystem) { preMousePos = inputSystem->GetMousePosition(); }
 
 	Box box = backgroundSprite->GetBox();
 	Vector2 size = backgroundSprite->GetSize();
@@ -202,17 +214,14 @@ void Engine::UISlider::Update(float deltaTime) {
 
 
 
-	//// スライダーのクリック判定
-	//if (slidSprite->GetBox().intersects(preMousePos)) {
-	//	if (input_->IsMousePressed(0)) {
-	//		isClick = true;
-	//	}
-	//}
-	//else {
-	//	if (input_->IsMouseReleased(0)) {
-	//		isClick = false;
-	//	}
-	//}
+	// つまみまたは背景が押されたらドラッグ状態へ移行する。
+	if (isVisible_ && isEnabled_ && inputSystem && inputSystem->IsMouseTriggered(0) &&
+		(slidSprite->GetBox().intersects(preMousePos) || backgroundSprite->GetBox().intersects(preMousePos))) {
+		isClick = true;
+	}
+	if (inputSystem && inputSystem->IsMouseReleased(0)) {
+		isClick = false;
+	}
 
 	// スライダーの移動処理（背景Boxの範囲に制限）
 	if (isClick) {
@@ -255,7 +264,29 @@ void Engine::UISlider::Update(float deltaTime) {
 	slidSprite->Update();
 }
 
-void Engine::UISlider::UniqueDraw() {
+
+void Engine::UISlider::SetValue(float value) {
+	// 値を設定範囲へ制限し、表示位置へ変換する。
+	const float safeRange = max_ - min_;
+	if (std::abs(safeRange) <= 0.000001f) {
+		offsetPos_.x = 0.0f;
+		return;
+	}
+	const float rate = Math::Clamp((value - min_) / safeRange, 0.0f, 1.0f);
+	const float trackWidth = backgroundSprite ? backgroundSprite->GetSize().x : 0.0f;
+	offsetPos_.x = rate * trackWidth;
+}
+
+float Engine::UISlider::GetValue() const {
+	// 表示位置を設定範囲の値へ逆変換する。
+	const float safeRange = max_ - min_;
+	const float trackWidth = backgroundSprite ? backgroundSprite->GetSize().x : 0.0f;
+	if (std::abs(safeRange) <= 0.000001f || trackWidth <= 0.0f) {
+		return min_;
+	}
+	const float rate = Math::Clamp(offsetPos_.x / trackWidth, 0.0f, 1.0f);
+	return min_ + safeRange * rate;
+}void Engine::UISlider::UniqueDraw() {
 	backgroundSprite->Draw();
 	slidSprite->Draw();
 }

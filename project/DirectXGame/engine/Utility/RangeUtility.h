@@ -6,40 +6,41 @@
 #include <iostream>
 
 /// <summary>
-/// 最小値
+/// 2つの値から小さい方を取得する
 /// </summary>
-inline float ConversionMin(float a, float b) {
+template<typename T>
+inline T ConversionMin(const T& a, const T& b) {
+    // 型ごとの重複実装を避け、標準関数へ処理を委譲する。
     return (std::min)(a, b);
 }
+
 /// <summary>
-/// 最小値
+/// 2つの値から大きい方を取得する
 /// </summary>
-inline int ConversionMin(int a, int b) {
-    return (std::min)(a, b);
-}
-/// <summary>
-/// 最大値
-/// </summary>
-inline float ConversionMax(float a, float b) {
-    return (std::max)(a, b);
-}
-/// <summary>
-/// 最大値
-/// </summary>
-inline int ConversionMax(int a, int b) {
+template<typename T>
+inline T ConversionMax(const T& a, const T& b) {
+    // 型ごとの重複実装を避け、標準関数へ処理を委譲する。
     return (std::max)(a, b);
 }
 // 範囲の最小値と最大値を入れ替える(float)
 static void ConversionRangeFloat(Range <float>& range)
 {
-	range.min = ConversionMin(range.min, range.max);
-	range.max = ConversionMax(range.min, range.max);
+	// 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+	const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 // 範囲の最小値と最大値を入れ替える(int)
 static void ConversionRangeInt(Range <int>& range)
 {
-    range.min = ConversionMin(range.min, range.max);
-    range.max = ConversionMax(range.min, range.max);
+    // 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+    const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 
 // 範囲の最小値と最大値を入れ替える(Vector2,3,4)
@@ -54,14 +55,22 @@ void ConversionRange(Range<Vec>& range) {
 // 範囲の最小値と最大値を入れ替える(float)
 static void ConversionRangeFloat(ValueRange <float>& range)
 {
-    range.min = ConversionMin(range.min, range.max);
-    range.max = ConversionMax(range.min, range.max);
+    // 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+    const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 // 範囲の最小値と最大値を入れ替える(int)
 static void ConversionRangeInt(ValueRange <int>& range)
 {
-    range.min = ConversionMin(range.min, range.max);
-    range.max = ConversionMax(range.min, range.max);
+    // 元の最小端点を保存し、入れ替え処理で値を失わないようにする。
+    const auto oldMin = range.min;
+    // 元の最大端点を保存し、正規化後の最小値に依存しないようにする。
+    const auto oldMax = range.max;
+    range.min = ConversionMin(oldMin, oldMax);
+    range.max = ConversionMax(oldMin, oldMax);
 }
 
 // 範囲の最小値と最大値を入れ替える(Vector2,3,4)

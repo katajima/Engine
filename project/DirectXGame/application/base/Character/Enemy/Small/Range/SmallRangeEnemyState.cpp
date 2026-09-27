@@ -7,6 +7,7 @@
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Effect/Effect.h>
+#include <DirectXGame/engine/Math/MathFunctions.h>
 namespace Character {
 
 #pragma region Move
@@ -57,16 +58,11 @@ namespace Character {
 		if (toTarget.Length() > 0.001f) {
 			toTarget = toTarget.Normalize();
 
-			float targetRotY = std::atan2(toTarget.x, toTarget.z);
 			float& currentRotY = enemy->GetWorldTransform().rotate_.y;
 
-			float diff = targetRotY - currentRotY;
-			diff = std::atan2(std::sin(diff), std::cos(diff));
-
-			float maxTurn = turnSpeed_ * ctx.dt;
-			diff = std::clamp(diff, -maxTurn, maxTurn);
-
-			currentRotY += diff;
+			// 共通の角度追従関数で、最短方向へ指定速度だけ回転する。
+			const float targetRotY = Math::DirectionToYaw(toTarget);
+			currentRotY = Math::RotateTowards(currentRotY, targetRotY, turnSpeed_ * ctx.dt);
 		}
 
 		// 狙い時間が経過したら1回だけ撃つ

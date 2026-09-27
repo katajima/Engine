@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+#include <DirectXGame/engine/Math/MathFunctions.h>
 namespace Character {
 	void SmallMeleeAttackReadySubState::Enter() {
 		timer_ = 0.0f;
@@ -46,7 +47,8 @@ namespace Character {
 			Vector3 targetDire = toTarget.Normalize();
 
 			// ここは即向きでもいいが、本当は角度補間推奨
-			enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
+			// 共通関数でXZ方向からY軸回転へ変換する。
+			enemy->GetWorldTransform().rotate_.y = Math::DirectionToYaw(targetDire);
 
 			// Swingで使う方向は Ready の最後まで更新しておく
 			dire_ = targetDire;
@@ -120,7 +122,8 @@ namespace Character {
 		}
 
 		// 向きを固定
-		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
+		// 共通関数でXZ方向からY軸回転へ変換する。
+		enemy->GetWorldTransform().rotate_.y = Math::DirectionToYaw(dire_);
 
 		HitBox::CollData data{};
 		data.hitBoxData.isEneble = true;
@@ -188,15 +191,15 @@ namespace Character {
 
 		if (toPlayer.Length() > 0.001f) {
 			toPlayer = toPlayer.Normalize();
-			targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+			targetRotateY_ = Math::DirectionToYaw(toPlayer);
 		}
 		else {
 			targetRotateY_ = startRotateY_;
 		}
 
 		// 最短差分を保存
-		rotateDiffY_ = targetRotateY_ - startRotateY_;
-		rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
+		// 共通関数で最短方向の角度差を保存する。
+		rotateDiffY_ = Math::DeltaAngle(startRotateY_, targetRotateY_);
 	}
 
 	void SmallMeleeAttackEndSubState::Update(float deltaTime) {
@@ -207,10 +210,8 @@ namespace Character {
 
 		timer_ += deltaTime;
 
-		float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
-
-		// 必要なら ease をかける
-		float easedT = t * t * (3.0f - 2.0f * t);
+		// 共通の滑らかな補間率を使って回転を戻す。
+		const float easedT = Math::SmoothStep(timer_ / endTime_);
 
 		float newY = startRotateY_ + rotateDiffY_ * easedT;
 		enemy->GetWorldTransform().rotate_.y = newY;

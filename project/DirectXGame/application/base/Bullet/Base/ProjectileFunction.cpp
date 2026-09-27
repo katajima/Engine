@@ -51,10 +51,8 @@ void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& ta
 		moveDir = Normalize(Lerp(forward, targetDir, t));
 
 		// 向きを移動方向へ合わせる
-		world.rotate_.y = std::atan2(moveDir.x, moveDir.z);
-
-		const float horizontalLen = std::sqrt(moveDir.x * moveDir.x + moveDir.z * moveDir.z);
-		world.rotate_.x = std::atan2(-moveDir.y, horizontalLen);
+		// 共通の方向変換関数で弾の姿勢を移動方向へ合わせる。
+		world.rotate_ = Math::DirectionToRotate(moveDir, Dire::Z);
 	}
 
 	// =========================

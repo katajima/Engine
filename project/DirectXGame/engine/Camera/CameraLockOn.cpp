@@ -19,7 +19,8 @@ Vector3 CameraLockOn::Update(const Transform& transform, float dt) {
 
 	Vector3 targetRotate{};
 	targetRotate.x = std::atan2(toTarget.y, horizontalLength);
-	targetRotate.y = std::atan2(toTarget.x, toTarget.z);
+	// 共通関数でロックオン対象方向からY軸回転角を求める。
+    targetRotate.y = Math::DirectionToYaw(toTarget);
 	targetRotate.z = 0.0f;
 
 	const float lerpRate = std::clamp(data.rotateSpeed, 0.0f, 1.0f);

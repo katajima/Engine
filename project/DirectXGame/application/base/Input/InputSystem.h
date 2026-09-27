@@ -56,6 +56,22 @@ public:
 	const Engine::MenuInputData* GetGameInputDataAddress() const { return &gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
+	/// <summary>
+	/// UI操作に使用するマウス位置を取得する。
+	/// </summary>
+	Vector2 GetMousePosition() const;
+	/// <summary>
+	/// UI操作用のマウスボタン押下開始を取得する。
+	/// </summary>
+	bool IsMouseTriggered(uint8_t button) const;
+	/// <summary>
+	/// UI操作用のマウスボタン押下中を取得する。
+	/// </summary>
+	bool IsMousePressed(uint8_t button) const;
+	/// <summary>
+	/// UI操作用のマウスボタン解放を取得する。
+	/// </summary>
+	bool IsMouseReleased(uint8_t button) const;
 
 private:
 	// プレイヤー操作の入力データ

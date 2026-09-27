@@ -1,5 +1,6 @@
 #include "PlayerRangeBombingBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
@@ -83,10 +84,8 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 
 
 	// Y軸周り角度(θy)
-	object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
-	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
-	// X軸周り角度(θx)
-	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
+	// 共通の方向変換関数で弾の姿勢を速度方向へ合わせる。
+	object_->GetWorldTransform().rotate_ = Math::DirectionToRotate(velocity_, Dire::Z);
 
 	// ダメージ量
 	parameter_.damage = provisionalData_.damage;
@@ -269,11 +268,8 @@ void PlayerRangeBombingBullet::Update() {
 		
 		
 
-		// Y軸周り角度(θy)
-		object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
-		float length = Length(Vector3(velocity_.x, 0, velocity_.z));
-		// X軸周り角度(θx)
-		object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
+		// 共通の方向変換関数で弾の姿勢を速度方向へ合わせる。
+		object_->GetWorldTransform().rotate_ = Math::DirectionToRotate(velocity_, Dire::Z);
 
 		// ヒットオブジェクト位置と回転設定
 		hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{ 0,provisionalData_.hitObjectY,0 };

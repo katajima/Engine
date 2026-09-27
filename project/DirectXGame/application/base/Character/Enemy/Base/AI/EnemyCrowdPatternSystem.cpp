@@ -1,5 +1,6 @@
 #include "EnemyCrowdPatternSystem.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include <algorithm>
 #include <cmath>
@@ -154,7 +155,8 @@ namespace Character {
 		const Vector3& targetPos, const Vector3& forward
 	) const {
 		// 前方側に開口部を残す270度の弧へ配置し、逃げ道を意図的に作る
-		float baseAngle = std::atan2(forward.x, forward.z);
+		// 共通関数で配置基準の前方向からY軸角度を求める。
+        const float baseAngle = Math::DirectionToYaw(forward);
 		float arc = std::numbers::pi_v<float> * 1.5f;
 		float t = memberCount <= 1 ? 0.5f : static_cast<float>(memberIndex) / static_cast<float>(memberCount - 1);
 		float angle = baseAngle + std::numbers::pi_v<float> * 0.25f + arc * t;
