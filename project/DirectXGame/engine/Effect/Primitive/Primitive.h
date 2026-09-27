@@ -58,6 +58,10 @@ namespace Engine {
 		/// </summary>
 		void Update(float deltaTime);
 		/// <summary>
+		/// プリミティブのデバッグ用ImGuiを更新する。
+		/// </summary>
+		virtual void ImGuiUpdate(float dt);
+		/// <summary>
 		/// 描画
 		/// </summary>
 		void Draw();
@@ -187,6 +191,10 @@ namespace Engine {
 		void MeshInitialize() override { circle.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -210,6 +218,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { cube.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -235,6 +247,10 @@ namespace Engine {
 		void MeshInitialize() override { star.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -258,6 +274,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { crescent.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -283,6 +303,10 @@ namespace Engine {
 		void MeshInitialize() override { ring.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -306,6 +330,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { cross.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -331,6 +359,10 @@ namespace Engine {
 		void MeshInitialize() override { cylinder.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -354,6 +386,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { sphere.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>
@@ -403,6 +439,10 @@ namespace Engine {
 		void MeshInitialize() override { tube.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -427,6 +467,10 @@ namespace Engine {
 		void MeshInitialize() override { pyramid.Create(mesh.get()); };
 	private:
 		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
+		/// <summary>
 		/// 固有の更新
 		/// </summary>
 		void UniqueUpdate() override;
@@ -450,6 +494,10 @@ namespace Engine {
 		/// </summary>
 		void MeshInitialize() override { torus.Create(mesh.get()); };
 	private:
+		/// <summary>
+		/// 形状固有のデバッグ用ImGuiを更新する。
+		/// </summary>
+		void ImGuiUpdate(float dt) override;
 		/// <summary>
 		/// 固有の更新
 		/// </summary>

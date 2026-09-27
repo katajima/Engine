@@ -26,27 +26,43 @@ void Engine::BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const s
 	}
 }
 
-void Engine::BasePrimitive::Update(float deltaTime)
+void Engine::BasePrimitive::ImGuiUpdate(float dt)
 {
+	// 現時点ではImGuiの入力値更新にdtを使用しないため、未使用警告を抑制する。
+	(void)dt;
 #ifdef _DEBUG
+	// ImGuiで表示するプリミティブのデバッグ名を作成する。
 	std::string str = name_ + "_translate";
 
+	// メッシュの頂点数を確認するための一時的なインデックス値を作成する。
 	int i = (int)mesh->vertices.size();
 	ImGui::InputInt("index2", &i);
+
+	// プリミティブのマテリアル拡縮と回転を編集する。
 	str = name_ + "material";
 	ImGui::DragFloat3(str.c_str(), &mesh->material->GetMaterialInstance().transform.scale.x, 0.01f);
 	str += "rotate";
 	ImGui::DragFloat3(str.c_str(), &mesh->material->GetMaterialInstance().transform.rotate.x, 0.01f);
 
+	// 拡縮アニメーションの有効状態とパラメータを編集する。
 	ImGui::Checkbox("isScaleX", &aimetion_.isScaleX);
 	ImGui::Checkbox("isScaleY", &aimetion_.isScaleY);
 	ImGui::DragFloat2("speed", &aimetion_.speed.x, 0.01f);
 	ImGui::DragFloat2("maxCount", &aimetion_.maxCount.x, 0.01f);
 
+	// 回転アニメーションの有効状態とパラメータを編集する。
 	ImGui::Checkbox("isRotateX", &aimetion_.isRotateX);
 	ImGui::Checkbox("isRotateY", &aimetion_.isRotateY);
 	ImGui::DragFloat2("rotateSpeed", &aimetion_.rotateSpeed.x, 0.01f);
 	ImGui::DragFloat2("maxRotate", &aimetion_.maxRotate.x, 0.01f);
+#endif // _DEBUG
+}
+
+void Engine::BasePrimitive::Update(float deltaTime)
+{
+#ifdef _DEBUG
+	// プリミティブのデバッグ用ImGuiを更新する。
+	//ImGuiUpdate(deltaTime);
 #endif // _DEBUG
 
 	// アニメーションスケールX
@@ -152,6 +168,19 @@ void Engine::TrianglePrimitive::UniqueUpdate()
 	preTriangle = triangle;
 }
 
+void Engine::CirclePrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
+#ifdef _DEBUG
+	// 円形状固有のパラメータを表示・編集する。
+	if (ImGui::CollapsingHeader("Circle")) {
+		ImGui::DragInt("segments", &circle.segments);
+		ImGui::DragFloat("radius", &circle.radius, 0.1f);
+	}
+#endif // _DEBUG
+}
+
 void Engine::CirclePrimitive::UniqueUpdate()
 {
 	if (preCircle != circle) {
@@ -159,10 +188,16 @@ void Engine::CirclePrimitive::UniqueUpdate()
 	}
 
 	preCircle = circle;
+}
+
+void Engine::CubePrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
-	if (ImGui::CollapsingHeader("Circle")) {
-		ImGui::DragInt("segments", &circle.segments);
-		ImGui::DragFloat("radius", &circle.radius, 0.1f);
+	// 立方体形状固有のパラメータを表示・編集する。
+	if (ImGui::CollapsingHeader("Cube")) {
+		ImGui::DragFloat3("size", &cube.size.x, 0.1f);
 	}
 #endif // _DEBUG
 }
@@ -174,21 +209,14 @@ void Engine::CubePrimitive::UniqueUpdate()
 	}
 
 	preCube = cube;
-#ifdef _DEBUG
-	if (ImGui::CollapsingHeader("Cube")) {
-		ImGui::DragFloat3("size", &cube.size.x, 0.1f);
-	}
-#endif // _DEBUG
-
 }
 
-void Engine::StarPrimitive::UniqueUpdate()
+void Engine::StarPrimitive::ImGuiUpdate(float dt)
 {
-	if ((preStar != star)) {
-		star.Create(mesh.get());
-	}
-	preStar = star;
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 星形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Star")) {
 		ImGui::DragFloat("innerRadius", &star.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &star.outerRadius, 0.1f);
@@ -200,14 +228,20 @@ void Engine::StarPrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::CrescentPrimitive::UniqueUpdate()
+void Engine::StarPrimitive::UniqueUpdate()
 {
-	if ((preCrescent != crescent)) {
-		crescent.Create(mesh.get());
+	if ((preStar != star)) {
+		star.Create(mesh.get());
 	}
+	preStar = star;
+}
 
-	preCrescent = crescent;
+void Engine::CrescentPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 三日月形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Crescent")) {
 		ImGui::DragFloat("innerRadius", &crescent.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &crescent.outerRadius, 0.1f);
@@ -224,17 +258,23 @@ void Engine::CrescentPrimitive::UniqueUpdate()
 		}
 	}
 #endif // _DEBUG
-
 }
 
-void Engine::RingPrimitive::UniqueUpdate()
+void Engine::CrescentPrimitive::UniqueUpdate()
 {
-	if ((preRing != ring)) {
-		ring.Create(mesh.get());
+	if ((preCrescent != crescent)) {
+		crescent.Create(mesh.get());
 	}
 
-	preRing = ring;
+	preCrescent = crescent;
+}
+
+void Engine::RingPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// リング形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Ring")) {
 		ImGui::DragFloat("innerRadius", &ring.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &ring.outerRadius, 0.1f);
@@ -244,7 +284,28 @@ void Engine::RingPrimitive::UniqueUpdate()
 		}
 	}
 #endif // _DEBUG
+}
 
+void Engine::RingPrimitive::UniqueUpdate()
+{
+	if ((preRing != ring)) {
+		ring.Create(mesh.get());
+	}
+
+	preRing = ring;
+}
+
+void Engine::CrossPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
+#ifdef _DEBUG
+	// 十字形状固有のパラメータを表示・編集する。
+	if (ImGui::CollapsingHeader("Cross")) {
+		ImGui::DragFloat("armLength", &cross.armLength, 0.1f);
+		ImGui::DragFloat("armWidth", &cross.armWidth, 0.1f);
+	}
+#endif // _DEBUG
 }
 
 void Engine::CrossPrimitive::UniqueUpdate()
@@ -254,24 +315,14 @@ void Engine::CrossPrimitive::UniqueUpdate()
 	}
 
 	preCross = cross;
-#ifdef _DEBUG
-	if (ImGui::CollapsingHeader("Cross")) {
-		ImGui::DragFloat("armLength", &cross.armLength, 0.1f);
-		ImGui::DragFloat("armWidth", &cross.armWidth, 0.1f);
-	}
-#endif // _DEBUG
-
 }
 
-void Engine::CylinderPrimitive::UniqueUpdate()
+void Engine::CylinderPrimitive::ImGuiUpdate(float dt)
 {
-	if ((preCylinder != cylinder)) {
-		cylinder.Create(mesh.get());
-	}
-
-	preCylinder = cylinder;
-
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 円柱形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Cylinder")) {
 		ImGui::DragFloat("height", &cylinder.height, 0.1f);
 		ImGui::DragFloat("innerRadius", &cylinder.innerRadius, 0.1f);
@@ -285,14 +336,21 @@ void Engine::CylinderPrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::SpherePrimitive::UniqueUpdate()
+void Engine::CylinderPrimitive::UniqueUpdate()
 {
-	if ((sphere != preSphere)) {
-		sphere.Create(mesh.get());
+	if ((preCylinder != cylinder)) {
+		cylinder.Create(mesh.get());
 	}
 
-	preSphere = sphere;
+	preCylinder = cylinder;
+}
+
+void Engine::SpherePrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 球形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Sphere")) {
 		ImGui::DragFloat("radius", &sphere.radius, 0.1f);
 		ImGui::DragInt("latitudeSegments", &sphere.latitudeSegments);
@@ -300,7 +358,15 @@ void Engine::SpherePrimitive::UniqueUpdate()
 		ImGui::Checkbox("isTopBased", &sphere.isTopBased);
 	}
 #endif // _DEBUG
+}
 
+void Engine::SpherePrimitive::UniqueUpdate()
+{
+	if ((sphere != preSphere)) {
+		sphere.Create(mesh.get());
+	}
+
+	preSphere = sphere;
 }
 
 void Engine::ArrowPrimitive::UniqueUpdate()
@@ -312,14 +378,12 @@ void Engine::ArrowPrimitive::UniqueUpdate()
 	preArrow = arrow;
 }
 
-void Engine::TubePrimitive::UniqueUpdate()
+void Engine::TubePrimitive::ImGuiUpdate(float dt)
 {
-	if ((preTube != tube)) {
-		tube.Create(mesh.get());
-	}
-
-	preTube = tube;
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 筒形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Tube")) {
 		ImGui::DragFloat("height", &tube.height, 0.1f);
 		ImGui::DragFloat("radius", &tube.radius, 0.1f);
@@ -332,15 +396,21 @@ void Engine::TubePrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::PyramidPrimitive::UniqueUpdate()
+void Engine::TubePrimitive::UniqueUpdate()
 {
-	if ((prePyramid != pyramid)) {
-		pyramid.Create(mesh.get());
+	if ((preTube != tube)) {
+		tube.Create(mesh.get());
 	}
 
-	prePyramid = pyramid;
+	preTube = tube;
+}
 
+void Engine::PyramidPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// 角錐形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Pyramid")) {
 		ImGui::DragFloat("height", &pyramid.height, 0.1f);
 		ImGui::DragFloat("radius", &pyramid.radius, 0.1f);
@@ -352,15 +422,21 @@ void Engine::PyramidPrimitive::UniqueUpdate()
 #endif // _DEBUG
 }
 
-void Engine::TorusPrimitive::UniqueUpdate()
+void Engine::PyramidPrimitive::UniqueUpdate()
 {
-	if ((torus != preTorus)) {
-		torus.Create(mesh.get());
+	if ((prePyramid != pyramid)) {
+		pyramid.Create(mesh.get());
 	}
 
-	preTorus = torus;
+	prePyramid = pyramid;
+}
 
+void Engine::TorusPrimitive::ImGuiUpdate(float dt)
+{
+	// 基底クラス共通のプリミティブ設定を表示する。
+	BasePrimitive::ImGuiUpdate(dt);
 #ifdef _DEBUG
+	// トーラス形状固有のパラメータを表示・編集する。
 	if (ImGui::CollapsingHeader("Torus")) {
 		ImGui::DragFloat("innerRadius", &torus.innerRadius, 0.1f);
 		ImGui::DragFloat("outerRadius", &torus.outerRadius, 0.1f);
@@ -374,4 +450,13 @@ void Engine::TorusPrimitive::UniqueUpdate()
 		}
 	}
 #endif // _DEBUG
+}
+
+void Engine::TorusPrimitive::UniqueUpdate()
+{
+	if ((torus != preTorus)) {
+		torus.Create(mesh.get());
+	}
+
+	preTorus = torus;
 }

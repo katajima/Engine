@@ -234,7 +234,7 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 	entity3DManager->GetLightManager()->Update();
 
 #ifdef _DEBUG
-	//entity3DManager->UpdateImgui();
+	entity3DManager->UpdateImgui();
 #endif // _DEBUG
 
 
