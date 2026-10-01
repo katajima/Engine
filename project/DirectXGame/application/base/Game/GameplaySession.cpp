@@ -14,11 +14,15 @@ void GameplaySession::Initialize(Engine::Input* input, Engine::EntityManager* en
 	// 全ゲームプレイシーンで使用する追従カメラを生成する。
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
+	// ゲームプレイ中にF3で切り替える自由操作カメラを生成する。
+	debugCamera_ = std::make_unique<EffectCamera>();
+	debugCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
 
 	// 追従カメラを既定カメラとしてカメラ管理へ登録する。
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables);
 	cameraManager_->AddCamera({ followCamera_.get(), true }, "followCamera");
+	cameraManager_->AddCamera({ debugCamera_.get(), false }, "debugCamera");
 	entityManager->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 
 	// キャラクターと弾が登録するヒットボックスを管理する。
@@ -76,5 +80,6 @@ void GameplaySession::Finalize() {
 	}
 	// 登録元カメラが所有するEngine::Cameraを破棄する。
 	followCamera_.reset();
+	debugCamera_.reset();
 	inputCoordinator_.reset();
 }

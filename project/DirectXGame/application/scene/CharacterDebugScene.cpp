@@ -119,6 +119,9 @@ void CharacterDebugScene::InitializeCamera(){
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
 	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	// キャラクターデバッグ中にF3で切り替える自由操作カメラを生成する。
+	debugCamera_ = std::make_unique<EffectCamera>();
+	debugCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
@@ -127,6 +130,7 @@ void CharacterDebugScene::InitializeCamera(){
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->AddCamera({ debugCamera_.get(),false }, "debugCamera");
 }
 // エフェクト関係初期化
 void CharacterDebugScene::InitializeEffect(){

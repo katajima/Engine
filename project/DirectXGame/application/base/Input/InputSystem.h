@@ -57,6 +57,11 @@ public:
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
 	/// <summary>
+	/// 指定キーがこのフレームで押されたかを取得する。
+	/// </summary>
+	/// <param name="key">DirectInputのキーコード。</param>
+	bool IsTriggerKey(BYTE key) const;
+	/// <summary>
 	/// UI操作に使用するマウス位置を取得する。
 	/// </summary>
 	Vector2 GetMousePosition() const;

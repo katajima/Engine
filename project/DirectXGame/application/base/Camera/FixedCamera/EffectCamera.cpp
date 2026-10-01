@@ -42,24 +42,20 @@ void EffectCamera::UpdateEffectCameraControl(float dt) {
 	transform.rotate.x -= playerInput.lookStick.y * provisionalData_.rotateSpeed * dt;
 	transform.rotate.x = Math::Clamp(transform.rotate.x, provisionalData_.minPitch, provisionalData_.maxPitch);
 
-	// カメラのYawを基準に、水平移動用の前方・右方向を作る。
+	// カメラのYawを基準に、水平移動用の右方向を作る。
 	const float sinYaw = std::sin(transform.rotate.y);
 	const float cosYaw = std::cos(transform.rotate.y);
-	const Vector3 forward = { sinYaw,0.0f,cosYaw };
 	const Vector3 right = { cosYaw,0.0f,-sinYaw };
+	// カメラの回転を反映した正面方向を作り、視線方向へ移動できるようにする。
+	const float cosPitch = std::cos(transform.rotate.x);
+	const float sinPitch = std::sin(transform.rotate.x);
+	// このカメラのピッチ回転は画面上の上下方向と符号が反転するため、Y成分を反転する。
+	const Vector3 forward = { sinYaw * cosPitch,-sinPitch,cosYaw * cosPitch };
 	const float moveSpeed = playerInput.dashHeld ? provisionalData_.dashMoveSpeed : provisionalData_.moveSpeed;
 
-	// 左右と前後の平面移動を反映する。
+	// 左右とカメラ正面方向の移動を反映する。
 	transform.translate += right * (playerInput.moveShick.x * moveSpeed * dt);
 	transform.translate += forward * (playerInput.moveShick.y * moveSpeed * dt);
-
-	// Spaceで上昇、Q/RTで下降し、確認中の高さをすばやく調整できるようにする。
-	if (playerInput.jumpPressed) {
-		transform.translate.y += provisionalData_.verticalSpeed * dt;
-	}
-	if (playerInput.lockOnHeld) {
-		transform.translate.y -= provisionalData_.verticalSpeed * dt;
-	}
 
 	uniqueCamera_->SetTransform(transform);
 }

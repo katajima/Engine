@@ -11,6 +11,7 @@
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
@@ -129,6 +130,8 @@ private:
 	std::unique_ptr<UniverseCamera> universeCamera_;
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
+	// F3キーで切り替えるデバッグ用自由カメラ
+	std::unique_ptr<EffectCamera> debugCamera_;
 	// カメラ管理
 	std::unique_ptr<CameraManager> cameraManager_;
 	// エフェクト

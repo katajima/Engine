@@ -30,9 +30,11 @@ namespace Combo {
 		isLockOnReleased_ = false;
 		cameraManager = owner ? owner->GetCameraManager() : nullptr;
 		camera = cameraManager ? cameraManager->GetBaseCamera() : nullptr;
-		if (camera && data_.isLockOn) {
+		// 自由カメラや固定カメラはCameraControllerを持たないため、演出制御が可能か確認する。
+		auto* cameraController = camera ? camera->GetCameraController() : nullptr;
+		if (cameraController && data_.isLockOn) {
 			// 攻撃中だけ対象を注視するため、ロックオン用の補間と引き継ぎ設定を渡す
-			camera->GetCameraController()->GetCameraLockOn()->GetData() =
+			cameraController->GetCameraLockOn()->GetData() =
 				CameraLockOnData{ target,data_.lockOnInterpolation,data_.isLockOn,data_.isLockOnRotate };
 			camera->LockOn(target);
 		}
@@ -58,6 +60,11 @@ namespace Combo {
 				return;
 			}
 		}
+		// CameraControllerを持たないカメラでは、追従系の攻撃演出を適用しない。
+		auto* cameraController = camera->GetCameraController();
+		if (!cameraController) {
+			return;
+		}
 
 		// 終了時間が設定されている場合だけ、攻撃中のロックオンを解除する
 		if (data_.lockOnEndTime > 0.0f && data_.lockOnEndTime <= timer && data_.isLockOn && !isLockOnReleased_) {
@@ -72,7 +79,7 @@ namespace Combo {
 
 		// 指定時間になったら、攻撃の寄り演出を一回だけ開始する
 		if (data_.zoomStartTime <= timer && isZoom && !isZoomRequested_) {
-			camera->GetCameraController()->GetZoom()->Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
+			cameraController->GetZoom()->Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
 			isZoomRequested_ = true;
 		}
 
@@ -83,7 +90,7 @@ namespace Combo {
 				shakeOffset = { data_.shakeCameraPower,data_.shakeCameraPower,data_.shakeCameraPower };
 			}
 			if (data_.shakeDuration > 0.0f) {
-				camera->GetCameraController()->GetShake()->Request({ data_.shakeDuration,shakeOffset });
+				cameraController->GetShake()->Request({ data_.shakeDuration,shakeOffset });
 			}
 			isShakeRequested_ = true;
 		}
@@ -91,7 +98,7 @@ namespace Combo {
 		// 指定時間になったら、攻撃中だけ注視点をずらして構図を作る
 		if (data_.isActionTargetOffset && !isTargetOffsetRequested_ &&
 			data_.actionTargetOffsetStartTime <= timer) {
-			camera->GetCameraController()->RequestActionTargetOffset({
+			cameraController->RequestActionTargetOffset({
 				data_.actionTargetOffset,
 				data_.actionTargetOffsetBlendSpeed,
 				data_.actionTargetOffsetDuration
@@ -101,7 +108,7 @@ namespace Combo {
 
 		// 指定時間になったら、移動方向への先読みを一時的に強くする
 		if (data_.isLookAhead && !isLookAheadRequested_ && data_.lookAheadStartTime <= timer) {
-			camera->GetCameraController()->RequestLookAhead({
+			cameraController->RequestLookAhead({
 				true,
 				data_.lookAheadDistance,
 				data_.lookAheadMinSpeed,
@@ -113,7 +120,7 @@ namespace Combo {
 
 		// 指定時間になったら、速度に応じて一時的にカメラを引く
 		if (data_.isSpeedZoom && !isSpeedZoomRequested_ && data_.speedZoomStartTime <= timer) {
-			camera->GetCameraController()->RequestSpeedZoom({
+			cameraController->RequestSpeedZoom({
 				true,
 				data_.speedZoomMinSpeed,
 				data_.speedZoomMaxSpeed,
@@ -136,15 +143,20 @@ namespace Combo {
 		if (!camera) {
 			return;
 		}
+		// デバッグカメラなどCameraControllerを持たないカメラではヒット演出を適用しない。
+		auto* cameraController = camera->GetCameraController();
+		if (!cameraController) {
+			return;
+		}
 
 		// 命中の衝撃をカメラ基準の揺れとして再生する
 		if (data_.isHitShake && data_.hitShakeDuration > 0.0f) {
-			camera->GetCameraController()->GetShake()->Request({ data_.hitShakeDuration, data_.hitShakeOffset });
+			cameraController->GetShake()->Request({ data_.hitShakeDuration, data_.hitShakeOffset });
 		}
 
 		// 命中時だけ一時的にカメラ距離を変えて打撃感を強調する
 		if (data_.isHitZoom && data_.hitZoomDuration > 0.0f) {
-			camera->GetCameraController()->GetZoom()->Request({
+			cameraController->GetZoom()->Request({
 				data_.hitZoomTargetDistance,
 				data_.hitZoomSpeed,
 				data_.hitZoomDuration
@@ -155,9 +167,14 @@ namespace Combo {
 	// 終了
 	void ComboCamera::Exit() {
 		if (cameraManager && cameraManager->GetBaseCamera()) {
+			BaseCamera* currentCamera = cameraManager->GetBaseCamera();
 			// 攻撃が終わったら攻撃用ロックオンを解除して通常操作へ戻す
-			cameraManager->GetBaseCamera()->LockOn(nullptr);
-			cameraManager->GetBaseCamera()->GetCameraController()->ClearActionAssist();
+			currentCamera->LockOn(nullptr);
+			// CameraControllerが存在する場合だけ一時演出を解除する。
+			auto* cameraController = currentCamera->GetCameraController();
+			if (cameraController) {
+				cameraController->ClearActionAssist();
+			}
 		}
 		camera = nullptr;
 	}

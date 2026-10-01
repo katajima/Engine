@@ -33,7 +33,6 @@ private: // 一旦
 		float moveSpeed = 35.0f;			// 通常移動速度
 		float dashMoveSpeed = 90.0f;		// ダッシュ時の移動速度
 		float rotateSpeed = 1.8f;			// 視点回転速度
-		float verticalSpeed = 28.0f;		// 上下移動速度
 		float minPitch = -1.45f;			// 下向き回転の制限
 		float maxPitch = 1.45f;			// 上向き回転の制限
 	};

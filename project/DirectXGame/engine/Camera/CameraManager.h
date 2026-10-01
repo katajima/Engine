@@ -67,6 +67,10 @@ private:
 	bool isInterpolating = false;
 	float interpolationTime = 0.0f;
 	float currentTime = 0.0f;
+	// 現在使用中のカメラ名。
+	std::string activeCameraName_;
+	// デバッグカメラへ切り替える前に使用していたカメラ名。
+	std::string previousCameraName_;
 
 
 	float chengeTime = 0.1f;

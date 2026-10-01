@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include "DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 #include "DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
@@ -86,6 +87,8 @@ private:
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 	// ゲームプレイ共通の追従カメラ。
 	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
+	// F3キーで切り替えるデバッグ用自由カメラ。
+	std::unique_ptr<EffectCamera> debugCamera_ = nullptr;
 	// シーンで利用するカメラを管理する。
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 	// ゲームプレイ中のエフェクトを管理する。

@@ -1,6 +1,8 @@
 #include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include <dinput.h>
 
 
 CameraManager::~CameraManager()
@@ -22,6 +24,8 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
 	camera->SetFarClip(Engine::Camera::kDefaultFarClip);	// 共通のFarクリップ距離を設定
 	isGameCamera = true;								// ゲームに使用する
+	activeCameraName_.clear();
+	previousCameraName_.clear();
 
 	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
@@ -66,10 +70,30 @@ void CameraManager::Finalize()
 	inputSystem = nullptr;
 	isInterpolating = false;
 	currentTime = 0.0f;
+	activeCameraName_.clear();
+	previousCameraName_.clear();
 }
 
 void CameraManager::Update()
 {
+	// F3キーでデバッグカメラと直前のカメラを切り替える。
+	if (inputSystem && inputSystem->IsTriggerKey(DIK_F3)) {
+		auto debugCamera = cameras.find("debugCamera");
+		if (debugCamera != cameras.end()) {
+			if (activeCameraName_ == "debugCamera") {
+				// 復帰先が登録済みなら、デバッグカメラへ切り替える前のカメラへ戻す。
+				if (!previousCameraName_.empty() && cameras.contains(previousCameraName_)) {
+					SetUseCamera(previousCameraName_, chengeTime);
+				}
+			}
+			else {
+				// 現在のカメラ名を保存してからデバッグカメラへ切り替える。
+				previousCameraName_ = activeCameraName_;
+				SetUseCamera("debugCamera", chengeTime);
+			}
+		}
+	}
+
 	// ImGui更新
 	UpdateImGui();
 
@@ -127,6 +151,10 @@ void CameraManager::AddCamera(const CameraInfo& cameraInfo, const std::string& n
 	cameraInfo.camera->SetCameraManager(this);
 	cameraInfo.camera->SetUseCamera(cameraInfo.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, cameraInfo.camera));	// カメラ追加
+	if (cameraInfo.useCamera) {
+		// 初期使用カメラを復帰先として記録する。
+		activeCameraName_ = name;
+	}
 }
 
 void CameraManager::SetUseCamera(const std::string& name, float time) {
@@ -140,6 +168,8 @@ void CameraManager::SetUseCamera(const std::string& name, float time) {
 		}
 		// カメラ使用
 		it->second->SetUseCamera(true);
+		// 切り替え後のカメラ名を記録する。
+		activeCameraName_ = name;
 
 
 		if (time <= 0.0f) {

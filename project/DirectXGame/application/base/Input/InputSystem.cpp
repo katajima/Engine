@@ -51,6 +51,12 @@ void InputSystem::ClearKeyboardMousePlayerInput() {
 	// 再構成したコントローラ入力へ置き換え、キーボード・マウス入力を除去する。
 	playerInputData_ = controllerInput;
 }
+
+bool InputSystem::IsTriggerKey(BYTE key) const {
+	// 入力元が存在しない場合は、キー入力が発生していないものとして扱う。
+	return input != nullptr && input->IsTriggerKey(key);
+}
+
 void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();
