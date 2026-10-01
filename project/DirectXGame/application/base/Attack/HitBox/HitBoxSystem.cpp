@@ -146,12 +146,21 @@ namespace HitBox {
 			break;
 		}
 	}
-	// クリア
-	void System::Clear() {
+	// 一時判定だけをクリアし、無期限判定の再利用状態を維持する
+	void System::ClearLifeTimeHitBoxes() {
 		for (auto& hit : lifeTimeHitBoxDatas_) {
+			// 一時判定のコライダーを先に破棄して登録を解除する
 			hit.hitBox.reset();
 		}
 		lifeTimeHitBoxDatas_.clear();
+	}
+
+	// 一時判定と無期限判定を含む全ヒットボックスを解放する
+	void System::Clear() {
+		// 一時判定は専用処理で確実に破棄する
+		ClearLifeTimeHitBoxes();
+		// 無期限判定はシステム破棄や再初期化時にだけ全解放する
+		hitBoxDatas_.clear();
 	}
 }
 

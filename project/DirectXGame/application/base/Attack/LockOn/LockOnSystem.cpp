@@ -48,13 +48,13 @@ const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
 }
 
 const Character::BaseCharacter* LockOnSystem::GetTarget() const {
-	if (!targetCharacters.empty()) {
-		// 明示ターゲットがある場合は先頭を現在ターゲットとして扱う
-		return targetCharacters.front();
+	// 現在ロックオン中で、保持している対象がまだ有効な場合だけ返す
+	if (isLockOn_ && IsValidTarget(currentTarget_, data_.lockOnRadius)) {
+		return currentTarget_;
 	}
-	else {
-		return nullptr;
-	}
+
+	// ロックオンしていない場合や対象が無効になった場合は、誤った候補を返さない
+	return nullptr;
 };
 
 

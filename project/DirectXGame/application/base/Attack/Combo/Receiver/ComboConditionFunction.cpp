@@ -1,7 +1,7 @@
 #include "ComboConditionFunction.h"
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
-void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterContext& ctx,EndConditionType type, ComboButton button, float timer, float endTime, bool isPress){
+void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterContext& ctx, EndConditionType type, ComboButton button, float& timer, float endTime, bool& isPress) {
 	// 終了条件の種類に応じて、コンボ終了判定に使うタイマーを進める
 	// 終了タイプ
 	switch (type)
@@ -12,9 +12,11 @@ void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterCon
 			timer += ctx.dt;
 		}
 		break;
-	case Combo::EndConditionType::kOnButtonRelease:	// 押し続けているなら
+	case Combo::EndConditionType::kOnButtonRelease: { // 押し続けているなら
 		// 指定ボタンを押し続けている間だけ受付時間を伸ばす
-		if (button.IsPressed(*ctx.input)) {
+		// AIなど入力システムを持たないコンテキストでは、離した状態として扱う
+		const bool isButtonPressed = ctx.input != nullptr && button.IsPressed(*ctx.input);
+		if (isButtonPressed) {
 			if (isPress) {
 				timer += ctx.dt;
 			}
@@ -23,6 +25,7 @@ void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterCon
 			isPress = false;
 		}
 		break;
+	}
 	case Combo::EndConditionType::kOnMeterEmpty:	// 何かのメータが空なら
 		// メーター連携は今後の拡張用
 

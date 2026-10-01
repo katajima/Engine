@@ -242,14 +242,14 @@ namespace Combo {
 
 				// もし次のステートがあれば、遷移
 				if (next) {
+					// 遷移元ノードを保存し、分岐演出を遷移先へ誤通知しないようにする
+					auto sourceNode = std::dynamic_pointer_cast<NodeState>(currentState);
 					transitionedInput_ = transitionInput;
-					SetState(next, ctx);
-				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
-					nextNode->NotifyBranch();
-				}
-					if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
-						nextNode->NotifyBranch();
+					if (sourceNode) {
+						// 分岐通知は状態終了前の遷移元へ一度だけ送る
+						sourceNode->NotifyBranch();
 					}
+					SetState(next, ctx);
 				}
 				bufferedInput.reset();
 				bufferedInputAge_ = 0.0f;
@@ -261,10 +261,13 @@ namespace Combo {
 
 			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
 			if (next) {
-				SetState(next, ctx);
-				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
-					nextNode->NotifyBranch();
+				// 強制移行でも分岐演出は遷移元ノードへ通知する
+				auto sourceNode = std::dynamic_pointer_cast<NodeState>(currentState);
+				if (sourceNode) {
+					// 遷移元の分岐通知を一度だけ発行する
+					sourceNode->NotifyBranch();
 				}
+				SetState(next, ctx);
 			}
 		}
 	}

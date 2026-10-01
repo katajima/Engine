@@ -30,6 +30,11 @@ void AttackController::Update(const Character::CharacterContext& ctx) {
 		hitCounter_.Update(ctx.dt);
 	}
 
+	if (!IsAttack() && !isDebugEditor_) {
+		// 攻撃状態でなくてもクールタイムだけは時間経過させる
+		comboSystem_->UpdateCooldowns(ctx.dt);
+	}
+
 	if (IsAttack() || isDebugEditor_) {
 		// コンボシステムの更新
 		// デバッグエディタ中は攻撃中でなくてもコンボ調整を動かす

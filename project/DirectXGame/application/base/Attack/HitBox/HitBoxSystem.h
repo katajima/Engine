@@ -15,7 +15,8 @@ namespace HitBox {
 	class System {
 	public:
 		~System() {
-			lifeTimeHitBoxDatas_.clear();
+			// システム破棄時は一時判定と無期限判定をまとめて解放する
+			Clear();
 		}
 
 		struct Data {
@@ -60,7 +61,11 @@ namespace HitBox {
 		/// </summary>
 		HitBoxInstance* GetHitBoxInstance(int32_t id);
 		/// <summary>
-		/// クリア
+		/// 一時判定だけをクリアし、再利用する無期限判定は保持する。
+		/// </summary>
+		void ClearLifeTimeHitBoxes();
+		/// <summary>
+		/// 一時判定と無期限判定を含む全ヒットボックスを解放する。
 		/// </summary>
 		void Clear();
 

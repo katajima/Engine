@@ -137,6 +137,9 @@ namespace Combo {
 		/// <summary>現在のコンボノード、入力受付、スタミナ、クールダウンを更新する。</summary>
 		/// <param name="ctx">所有者の入力、移動、状態をまとめたフレームコンテキスト。</param>
 		void Update(const Character::CharacterContext& ctx);
+		/// <summary>攻撃状態に依存せず、コンボクールタイムだけを更新する。</summary>
+		/// <param name="dt">前フレームからの経過時間です。</param>
+		void UpdateCooldowns(float dt);
 		/// <summary>攻撃入力から開始または派生可能なコンボを要求する。</summary>
 		/// <param name="input">弱攻撃、強攻撃、スキルなどのアクション入力。</param>
 		/// <returns>コンボ開始または遷移要求を受理した場合はtrue。</returns>
@@ -329,7 +332,6 @@ namespace Combo {
 		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
 		bool CanPayStamina(float cost) const;
 		void PayStamina(float cost);
-		void UpdateCooldowns(float dt);
 		void StartCooldown(const std::shared_ptr<NodeState>& node);
 
 

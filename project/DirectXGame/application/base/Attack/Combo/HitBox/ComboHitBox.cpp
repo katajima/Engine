@@ -80,7 +80,8 @@ namespace Combo {
 	void ComboHitBox::Exit() {
 		// 次のコンボへ生成済み状態を持ち越さないようリセットする
 		isPopHitBox_ = false;
-		hitBoxSystem->Clear();
+		// 無期限判定はノード間で再利用するため、一時判定だけを解放する
+		hitBoxSystem->ClearLifeTimeHitBoxes();
 		if (hitBox) {
 			// 常時型ヒットボックスの当たり履歴も次回用に消す
 			hitBox->Disable();

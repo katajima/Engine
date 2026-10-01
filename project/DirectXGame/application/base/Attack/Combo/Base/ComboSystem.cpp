@@ -208,8 +208,12 @@ namespace Combo {
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット
+		// コンボノードが生成した無期限ヒットボックスを、ノード再構築前に解放する
+		if (owner && owner->GetHitBoxSystem()) {
+			owner->GetHitBoxSystem()->Clear();
+		}
 
-        // StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
+		// StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
         for (auto& [nodeName, node] : comboNodes_) {
             if (node) {
                 node->Data().GetComboEffect().ClearRuntimeEffects();
