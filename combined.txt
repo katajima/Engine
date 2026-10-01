@@ -7560,9 +7560,11 @@ namespace Combo {
 		isLockOnReleased_ = false;
 		cameraManager = owner ? owner->GetCameraManager() : nullptr;
 		camera = cameraManager ? cameraManager->GetBaseCamera() : nullptr;
-		if (camera && data_.isLockOn) {
+		// 自由カメラや固定カメラはCameraControllerを持たないため、演出制御が可能か確認する。
+		auto* cameraController = camera ? camera->GetCameraController() : nullptr;
+		if (cameraController && data_.isLockOn) {
 			// 攻撃中だけ対象を注視するため、ロックオン用の補間と引き継ぎ設定を渡す
-			camera->GetCameraController()->GetCameraLockOn()->GetData() =
+			cameraController->GetCameraLockOn()->GetData() =
 				CameraLockOnData{ target,data_.lockOnInterpolation,data_.isLockOn,data_.isLockOnRotate };
 			camera->LockOn(target);
 		}
@@ -7588,6 +7590,11 @@ namespace Combo {
 				return;
 			}
 		}
+		// CameraControllerを持たないカメラでは、追従系の攻撃演出を適用しない。
+		auto* cameraController = camera->GetCameraController();
+		if (!cameraController) {
+			return;
+		}
 
 		// 終了時間が設定されている場合だけ、攻撃中のロックオンを解除する
 		if (data_.lockOnEndTime > 0.0f && data_.lockOnEndTime <= timer && data_.isLockOn && !isLockOnReleased_) {
@@ -7602,7 +7609,7 @@ namespace Combo {
 
 		// 指定時間になったら、攻撃の寄り演出を一回だけ開始する
 		if (data_.zoomStartTime <= timer && isZoom && !isZoomRequested_) {
-			camera->GetCameraController()->GetZoom()->Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
+			cameraController->GetZoom()->Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
 			isZoomRequested_ = true;
 		}
 
@@ -7613,7 +7620,7 @@ namespace Combo {
 				shakeOffset = { data_.shakeCameraPower,data_.shakeCameraPower,data_.shakeCameraPower };
 			}
 			if (data_.shakeDuration > 0.0f) {
-				camera->GetCameraController()->GetShake()->Request({ data_.shakeDuration,shakeOffset });
+				cameraController->GetShake()->Request({ data_.shakeDuration,shakeOffset });
 			}
 			isShakeRequested_ = true;
 		}
@@ -7621,7 +7628,7 @@ namespace Combo {
 		// 指定時間になったら、攻撃中だけ注視点をずらして構図を作る
 		if (data_.isActionTargetOffset && !isTargetOffsetRequested_ &&
 			data_.actionTargetOffsetStartTime <= timer) {
-			camera->GetCameraController()->RequestActionTargetOffset({
+			cameraController->RequestActionTargetOffset({
 				data_.actionTargetOffset,
 				data_.actionTargetOffsetBlendSpeed,
 				data_.actionTargetOffsetDuration
@@ -7631,7 +7638,7 @@ namespace Combo {
 
 		// 指定時間になったら、移動方向への先読みを一時的に強くする
 		if (data_.isLookAhead && !isLookAheadRequested_ && data_.lookAheadStartTime <= timer) {
-			camera->GetCameraController()->RequestLookAhead({
+			cameraController->RequestLookAhead({
 				true,
 				data_.lookAheadDistance,
 				data_.lookAheadMinSpeed,
@@ -7643,7 +7650,7 @@ namespace Combo {
 
 		// 指定時間になったら、速度に応じて一時的にカメラを引く
 		if (data_.isSpeedZoom && !isSpeedZoomRequested_ && data_.speedZoomStartTime <= timer) {
-			camera->GetCameraController()->RequestSpeedZoom({
+			cameraController->RequestSpeedZoom({
 				true,
 				data_.speedZoomMinSpeed,
 				data_.speedZoomMaxSpeed,
@@ -7666,15 +7673,20 @@ namespace Combo {
 		if (!camera) {
 			return;
 		}
+		// デバッグカメラなどCameraControllerを持たないカメラではヒット演出を適用しない。
+		auto* cameraController = camera->GetCameraController();
+		if (!cameraController) {
+			return;
+		}
 
 		// 命中の衝撃をカメラ基準の揺れとして再生する
 		if (data_.isHitShake && data_.hitShakeDuration > 0.0f) {
-			camera->GetCameraController()->GetShake()->Request({ data_.hitShakeDuration, data_.hitShakeOffset });
+			cameraController->GetShake()->Request({ data_.hitShakeDuration, data_.hitShakeOffset });
 		}
 
 		// 命中時だけ一時的にカメラ距離を変えて打撃感を強調する
 		if (data_.isHitZoom && data_.hitZoomDuration > 0.0f) {
-			camera->GetCameraController()->GetZoom()->Request({
+			cameraController->GetZoom()->Request({
 				data_.hitZoomTargetDistance,
 				data_.hitZoomSpeed,
 				data_.hitZoomDuration
@@ -7685,9 +7697,14 @@ namespace Combo {
 	// 終了
 	void ComboCamera::Exit() {
 		if (cameraManager && cameraManager->GetBaseCamera()) {
+			BaseCamera* currentCamera = cameraManager->GetBaseCamera();
 			// 攻撃が終わったら攻撃用ロックオンを解除して通常操作へ戻す
-			cameraManager->GetBaseCamera()->LockOn(nullptr);
-			cameraManager->GetBaseCamera()->GetCameraController()->ClearActionAssist();
+			currentCamera->LockOn(nullptr);
+			// CameraControllerが存在する場合だけ一時演出を解除する。
+			auto* cameraController = currentCamera->GetCameraController();
+			if (cameraController) {
+				cameraController->ClearActionAssist();
+			}
 		}
 		camera = nullptr;
 	}
@@ -16023,24 +16040,20 @@ void EffectCamera::UpdateEffectCameraControl(float dt) {
 	transform.rotate.x -= playerInput.lookStick.y * provisionalData_.rotateSpeed * dt;
 	transform.rotate.x = Math::Clamp(transform.rotate.x, provisionalData_.minPitch, provisionalData_.maxPitch);
 
-	// カメラのYawを基準に、水平移動用の前方・右方向を作る。
+	// カメラのYawを基準に、水平移動用の右方向を作る。
 	const float sinYaw = std::sin(transform.rotate.y);
 	const float cosYaw = std::cos(transform.rotate.y);
-	const Vector3 forward = { sinYaw,0.0f,cosYaw };
 	const Vector3 right = { cosYaw,0.0f,-sinYaw };
+	// カメラの回転を反映した正面方向を作り、視線方向へ移動できるようにする。
+	const float cosPitch = std::cos(transform.rotate.x);
+	const float sinPitch = std::sin(transform.rotate.x);
+	// このカメラのピッチ回転は画面上の上下方向と符号が反転するため、Y成分を反転する。
+	const Vector3 forward = { sinYaw * cosPitch,-sinPitch,cosYaw * cosPitch };
 	const float moveSpeed = playerInput.dashHeld ? provisionalData_.dashMoveSpeed : provisionalData_.moveSpeed;
 
-	// 左右と前後の平面移動を反映する。
+	// 左右とカメラ正面方向の移動を反映する。
 	transform.translate += right * (playerInput.moveShick.x * moveSpeed * dt);
 	transform.translate += forward * (playerInput.moveShick.y * moveSpeed * dt);
-
-	// Spaceで上昇、Q/RTで下降し、確認中の高さをすばやく調整できるようにする。
-	if (playerInput.jumpPressed) {
-		transform.translate.y += provisionalData_.verticalSpeed * dt;
-	}
-	if (playerInput.lockOnHeld) {
-		transform.translate.y -= provisionalData_.verticalSpeed * dt;
-	}
 
 	uniqueCamera_->SetTransform(transform);
 }
@@ -16084,7 +16097,6 @@ private: // 一旦
 		float moveSpeed = 35.0f;			// 通常移動速度
 		float dashMoveSpeed = 90.0f;		// ダッシュ時の移動速度
 		float rotateSpeed = 1.8f;			// 視点回転速度
-		float verticalSpeed = 28.0f;		// 上下移動速度
 		float minPitch = -1.45f;			// 下向き回転の制限
 		float maxPitch = 1.45f;			// 上向き回転の制限
 	};
@@ -31260,11 +31272,15 @@ void GameplaySession::Initialize(Engine::Input* input, Engine::EntityManager* en
 	// 全ゲームプレイシーンで使用する追従カメラを生成する。
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
+	// ゲームプレイ中にF3で切り替える自由操作カメラを生成する。
+	debugCamera_ = std::make_unique<EffectCamera>();
+	debugCamera_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables, {});
 
 	// 追従カメラを既定カメラとしてカメラ管理へ登録する。
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(inputCoordinator_->GetInputSystem(), entityManager, globalVariables);
 	cameraManager_->AddCamera({ followCamera_.get(), true }, "followCamera");
+	cameraManager_->AddCamera({ debugCamera_.get(), false }, "debugCamera");
 	entityManager->GetObject3dInstanceManager()->SetCamera(cameraManager_->GetCamera());
 
 	// キャラクターと弾が登録するヒットボックスを管理する。
@@ -31322,6 +31338,7 @@ void GameplaySession::Finalize() {
 	}
 	// 登録元カメラが所有するEngine::Cameraを破棄する。
 	followCamera_.reset();
+	debugCamera_.reset();
 	inputCoordinator_.reset();
 }
 
@@ -31336,6 +31353,7 @@ File Path: project/DirectXGame/application/base/Game/GameplaySession.h
 #include "DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/engine/Camera/CameraManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include "DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 #include "DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Input/InputCoordinator.h"
@@ -31417,6 +31435,8 @@ private:
 	std::unique_ptr<InputCoordinator> inputCoordinator_ = nullptr;
 	// ゲームプレイ共通の追従カメラ。
 	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
+	// F3キーで切り替えるデバッグ用自由カメラ。
+	std::unique_ptr<EffectCamera> debugCamera_ = nullptr;
 	// シーンで利用するカメラを管理する。
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 	// ゲームプレイ中のエフェクトを管理する。
@@ -32648,6 +32668,12 @@ void InputSystem::ClearKeyboardMousePlayerInput() {
 	// 再構成したコントローラ入力へ置き換え、キーボード・マウス入力を除去する。
 	playerInputData_ = controllerInput;
 }
+
+bool InputSystem::IsTriggerKey(BYTE key) const {
+	// 入力元が存在しない場合は、キー入力が発生していないものとして扱う。
+	return input != nullptr && input->IsTriggerKey(key);
+}
+
 void InputSystem::PlayerInputUpdate(float dt) {
 	// コントローラが接続されているか取得
 	playerInputData_.isControllerConnected = input->IsControllerConnected();
@@ -32849,6 +32875,11 @@ public:
 	const Engine::MenuInputData* GetGameInputDataAddress() const { return &gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
+	/// <summary>
+	/// 指定キーがこのフレームで押されたかを取得する。
+	/// </summary>
+	/// <param name="key">DirectInputのキーコード。</param>
+	bool IsTriggerKey(BYTE key) const;
 	/// <summary>
 	/// UI操作に使用するマウス位置を取得する。
 	/// </summary>
@@ -38585,6 +38616,9 @@ void CharacterDebugScene::InitializeCamera(){
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
 	fixedCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
+	// キャラクターデバッグ中にF3で切り替える自由操作カメラを生成する。
+	debugCamera_ = std::make_unique<EffectCamera>();
+	debugCamera_->Initialize(inputCoordinator_->GetInputSystem(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
@@ -38593,6 +38627,7 @@ void CharacterDebugScene::InitializeCamera(){
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->AddCamera({ debugCamera_.get(),false }, "debugCamera");
 }
 // エフェクト関係初期化
 void CharacterDebugScene::InitializeEffect(){
@@ -38722,6 +38757,7 @@ File Path: project/DirectXGame/application/scene/CharacterDebugScene.h
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/EffectCamera.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
@@ -38840,6 +38876,8 @@ private:
 	std::unique_ptr<UniverseCamera> universeCamera_;
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
+	// F3キーで切り替えるデバッグ用自由カメラ
+	std::unique_ptr<EffectCamera> debugCamera_;
 	// カメラ管理
 	std::unique_ptr<CameraManager> cameraManager_;
 	// エフェクト
@@ -54355,6 +54393,8 @@ File Path: project/DirectXGame/engine/Camera/CameraManager.cpp
 #include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include <dinput.h>
 
 
 CameraManager::~CameraManager()
@@ -54376,6 +54416,8 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
 	camera->SetFarClip(Engine::Camera::kDefaultFarClip);	// 共通のFarクリップ距離を設定
 	isGameCamera = true;								// ゲームに使用する
+	activeCameraName_.clear();
+	previousCameraName_.clear();
 
 	entityManager->GetObject3dCommon()->SetDefaultCamera(camera.get());					// デフォルトカメラ設定
 	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
@@ -54420,10 +54462,30 @@ void CameraManager::Finalize()
 	inputSystem = nullptr;
 	isInterpolating = false;
 	currentTime = 0.0f;
+	activeCameraName_.clear();
+	previousCameraName_.clear();
 }
 
 void CameraManager::Update()
 {
+	// F3キーでデバッグカメラと直前のカメラを切り替える。
+	if (inputSystem && inputSystem->IsTriggerKey(DIK_F3)) {
+		auto debugCamera = cameras.find("debugCamera");
+		if (debugCamera != cameras.end()) {
+			if (activeCameraName_ == "debugCamera") {
+				// 復帰先が登録済みなら、デバッグカメラへ切り替える前のカメラへ戻す。
+				if (!previousCameraName_.empty() && cameras.contains(previousCameraName_)) {
+					SetUseCamera(previousCameraName_, chengeTime);
+				}
+			}
+			else {
+				// 現在のカメラ名を保存してからデバッグカメラへ切り替える。
+				previousCameraName_ = activeCameraName_;
+				SetUseCamera("debugCamera", chengeTime);
+			}
+		}
+	}
+
 	// ImGui更新
 	UpdateImGui();
 
@@ -54481,6 +54543,10 @@ void CameraManager::AddCamera(const CameraInfo& cameraInfo, const std::string& n
 	cameraInfo.camera->SetCameraManager(this);
 	cameraInfo.camera->SetUseCamera(cameraInfo.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, cameraInfo.camera));	// カメラ追加
+	if (cameraInfo.useCamera) {
+		// 初期使用カメラを復帰先として記録する。
+		activeCameraName_ = name;
+	}
 }
 
 void CameraManager::SetUseCamera(const std::string& name, float time) {
@@ -54494,6 +54560,8 @@ void CameraManager::SetUseCamera(const std::string& name, float time) {
 		}
 		// カメラ使用
 		it->second->SetUseCamera(true);
+		// 切り替え後のカメラ名を記録する。
+		activeCameraName_ = name;
 
 
 		if (time <= 0.0f) {
@@ -54661,6 +54729,10 @@ private:
 	bool isInterpolating = false;
 	float interpolationTime = 0.0f;
 	float currentTime = 0.0f;
+	// 現在使用中のカメラ名。
+	std::string activeCameraName_;
+	// デバッグカメラへ切り替える前に使用していたカメラ名。
+	std::string previousCameraName_;
 
 
 	float chengeTime = 0.1f;
