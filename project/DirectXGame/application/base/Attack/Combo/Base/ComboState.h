@@ -1,5 +1,8 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
+#include <deque>
+#include <cstddef>
+#include <vector>
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
@@ -214,6 +217,12 @@ namespace Combo {
         bool HasNextState(ActionInput input) const;
 
         /// <summary>
+        /// このノードから登録されたすべての遷移先を取得します。
+        /// </summary>
+        /// <returns>重複を含む遷移先ノードの一覧です。</returns>
+        std::vector<std::shared_ptr<NodeState>> GetTransitionTargets() const;
+
+        /// <summary>
         /// 現在のステート経過時間が入力受付ウィンドウ内か確認します。
         /// </summary>
         /// <returns>入力を受け付けられる時間ならtrue、それ以外はfalseです。</returns>
@@ -275,6 +284,20 @@ namespace Combo {
         ComboData& Data() { return comboData; }
 
         /// <summary>
+        /// このノードが保持するコンボデータを読み取り専用で取得します。
+        /// </summary>
+        /// <returns>ノードのコンボデータへの読み取り専用参照です。</returns>
+        const ComboData& Data() const { return comboData; }
+
+        /// <summary>このノードを開始した入力種別を設定します。</summary>
+        /// <param name="input">ノードを開始した攻撃入力です。</param>
+        void SetActionInput(ActionInput input) { actionInput_ = input; }
+
+        /// <summary>このノードを開始した入力種別を取得します。</summary>
+        /// <returns>ノード開始時の攻撃入力です。</returns>
+        ActionInput GetActionInput() const { return actionInput_; }
+
+        /// <summary>
         /// コンボデータのコピーを取得します。
         /// </summary>
         /// <returns>このノードが保持するコンボデータのコピーを返します。</returns>
@@ -301,6 +324,12 @@ namespace Combo {
         bool hasHit_ = false; // このノードの実行中に攻撃が命中したか
 		// 一度だけ加算設定のヒットカウントを既に実行したか
 		bool hasIncrementedHitCount_ = false;
+		// キャンセルで終了したノードか
+		bool canceled_ = false;
+		// ミスイベントを既に通知したノードか
+		bool missed_ = false;
+		// ノードを開始した攻撃入力
+		ActionInput actionInput_ = ActionInput::LightAttack;
     };
 
     /// <summary>
@@ -332,9 +361,12 @@ namespace Combo {
         /// </summary>
         /// <param name="input">保存する攻撃入力です。</param>
         void HandleInput(ActionInput input) {
-            bufferedInput = input;
-            bufferedInputAge_ = 0.0f;
-            isBufferedInputAccepted_ = false;
+            // 複数入力を順番どおり保持し、古い入力から消費できるようにする
+            if (bufferedInputs_.size() >= kMaxBufferedInputs_) {
+                // 上限を超えた場合は最も古い入力だけを破棄する
+                bufferedInputs_.pop_front();
+            }
+            bufferedInputs_.push_back({ input, 0.0f });
         }
 
         /// <summary>
@@ -358,6 +390,17 @@ namespace Combo {
         std::optional<ActionInput> ConsumeTransitionedInput();
 
         /// <summary>
+        /// 保持中の入力バッファをすべて消費済みとして破棄します。
+        /// </summary>
+        void ClearInputBuffer();
+
+        /// <summary>
+        /// 保持中の先行入力数を取得します。
+        /// </summary>
+        /// <returns>まだ消費されていない先行入力数です。</returns>
+        size_t GetBufferedInputCount() const { return bufferedInputs_.size(); }
+
+        /// <summary>
         /// 現在ノードへ命中通知を転送します。
         /// </summary>
         void NotifyCurrentStateHit();
@@ -365,7 +408,11 @@ namespace Combo {
         /// <summary>
         /// ルートステートへ戻します。
         /// </summary>
-        void Reset() { SetState(rootState,{}); }
+        void Reset() {
+            // ルートへ戻る際は前段ノードの先行入力を持ち越さない
+            ClearInputBuffer();
+            SetState(rootState,{});
+        }
 
         /// <summary>
         /// コンボ開始時に使うルートステートを設定します。
@@ -406,10 +453,15 @@ namespace Combo {
         std::shared_ptr<State> currentState;   // 現在のステート
         std::shared_ptr<State> rootState;      // 初期ステート
 
-        std::optional<ActionInput> bufferedInput;   // 入力バッファ
-        float bufferedInputAge_ = 0.0f;                    // バッファ入力を保持してからの経過時間（秒）
+        struct BufferedInput {
+            ActionInput input = ActionInput::LightAttack;
+            float age = 0.0f;
+        };
+        // 複数の先行入力を時系列で保持するキュー
+        std::deque<BufferedInput> bufferedInputs_;
+        // 1ステートで保持できる入力数の上限
+        static constexpr size_t kMaxBufferedInputs_ = 8;
         std::optional<ActionInput> transitionedInput_;     // 実際に遷移へ使われた入力
-        bool isBufferedInputAccepted_ = false;             // バッファ入力が現在ステートで受理済みか
         bool isDebug = false;                              // デバッグ表示や編集用の挙動を有効にするか
     };
 }

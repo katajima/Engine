@@ -31,6 +31,9 @@ namespace Combo {
 		/// CollData
 		/// </summary>
 		HitBox::CollData& GetCollData() { return collData_;}
+		/// <summary>コライダー設定を読み取り専用で取得します。</summary>
+		/// <returns>内部コライダーデータへの読み取り専用参照です。</returns>
+		const HitBox::CollData& GetCollData() const { return collData_; }
 		/// <summary>
 		/// コライダーデータ追加
 		/// </summary>

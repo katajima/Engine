@@ -26,6 +26,8 @@ void InputManager::Update(float dt) {
         BuildUIActions();
         break;
     }
+	// 入力状態から長押し時間と離した直前の保持時間を更新する
+	UpdateHoldDurations(dt);
     RecordBufferedEvents();
 }
 
@@ -36,6 +38,27 @@ void InputManager::ClearFrame(){
         value2_[i] = Vector2{ 0,0 };
         value1_[i] = 0.0f;
     }
+}
+
+void InputManager::UpdateHoldDurations(float dt){
+	// 各アクションの押下状態から、長押しと溜め入力に使う時間を更新する
+	for (int i = 0; i < Idx(Action::Max); ++i) {
+		if (pressed_[i]) {
+			// 押下中は現在の保持時間を加算し、離した直前の値を無効にする
+			heldSeconds_[i] += (std::max)(dt, 0.0f);
+			releasedHeldSeconds_[i] = 0.0f;
+		}
+		else if (released_[i]) {
+			// 離したフレームでは保持時間を保存してから現在値をリセットする
+			releasedHeldSeconds_[i] = heldSeconds_[i];
+			heldSeconds_[i] = 0.0f;
+		}
+		else {
+			// 未入力状態では現在の長押し時間を維持しない
+			heldSeconds_[i] = 0.0f;
+			releasedHeldSeconds_[i] = 0.0f;
+		}
+	}
 }
 
 void InputManager::BuildGameplayActions(){
@@ -167,6 +190,17 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_Q);
     value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
 
+	// ---- Guard（Pad RS / G）----
+	triggered_[Idx(Action::Guard)] =
+		input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RS) ||
+		input_->IsTriggerKey(DIK_G);
+	pressed_[Idx(Action::Guard)] =
+		input_->IsGamePadPressed(GamePadButton::GAMEPAD_RS) ||
+		input_->IsPushKey(DIK_G);
+	released_[Idx(Action::Guard)] =
+		input_->IsGamePadReleased(GamePadButton::GAMEPAD_RS) ||
+		input_->IsKeyReleased(DIK_G);
+
    
     // ---- Pause（Esc or Start）----
     triggered_[Idx(Action::Pause)] =
@@ -182,14 +216,16 @@ void InputManager::RecordBufferedEvents(){
     {
         const Action a = static_cast<Action>(i);
 
-        if (Triggered(a))
+        // コンテキスト切り替えでTriggeredが生成されない場合も、押下状態の差分から開始を補完する
+        if (Triggered(a) || (Pressed(a) && !isDown_[i]))
         {
             isDown_[i] = true;
             pressFrame_[i] = frameCounter_;
 
             PushEvent(a, InputEvent::Type::Press, Value1(a), Value2(a));
         }
-        if (Released(a))
+        // コンテキスト切り替えでReleasedが生成されない場合も、押下解除を補完する
+        if (Released(a) || (!Pressed(a) && isDown_[i]))
         {
             isDown_[i] = false;
             PushEvent(a, InputEvent::Type::Release, Value1(a), Value2(a));

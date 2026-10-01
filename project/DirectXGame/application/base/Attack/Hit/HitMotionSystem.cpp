@@ -169,6 +169,14 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	damageMotions_.push_back(damageMotion);
 }
 
+void HitMotionSystem::QueueDamageOnly(const HitReactionData& data) {
+	// スーパーアーマー中でもダメージだけを適用できるよう、リアクションとは別キューへ積む
+	data_ = data;
+	DamageMotion damageMotion;
+	damageMotion.SetData(data.damageData);
+	damageMotions_.push_back(damageMotion);
+}
+
 // 終了したか
 bool HitMotionSystem::IsFinished() const { return !IsHitMotion(); }
 

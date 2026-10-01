@@ -1,4 +1,4 @@
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -234,6 +234,8 @@ namespace Character {
 
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
+		// ガード、パリィ受付、アクション由来の一時無敵を共通更新する
+		UpdateActionDefense(ctx);
 		isCanJump = ctx.isCanJump;
 		isSpecial = ctx.isSpecialAttacking;
 

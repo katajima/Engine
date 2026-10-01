@@ -45,6 +45,9 @@ void InputSystem::ClearKeyboardMousePlayerInput() {
 	controllerInput.dodgeTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
 	controllerInput.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 	controllerInput.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+	controllerInput.guardTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RS);
+	controllerInput.guardPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_RS);
+	controllerInput.guardReleased = input->IsGamePadReleased(GamePadButton::GAMEPAD_RS);
 	// トリガー入力を保持する。
 	controllerInput.dashHeld = input->GetGamePadLeftTrigger() > kTriggerDeadZone;
 	controllerInput.lockOnHeld = input->GetGamePadRightTrigger() > kTriggerDeadZone;
@@ -130,6 +133,17 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	playerInputData_.specialTrigger =
 		input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
 		input->IsTriggerKey(DIK_R);
+
+	// ガード入力は右スティック押し込み、またはキーボードGへ割り当てる
+	playerInputData_.guardTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_RS) ||
+		input->IsTriggerKey(DIK_G);
+	playerInputData_.guardPressed =
+		input->IsGamePadPressed(GamePadButton::GAMEPAD_RS) ||
+		input->IsPushKey(DIK_G);
+	playerInputData_.guardReleased =
+		input->IsGamePadReleased(GamePadButton::GAMEPAD_RS) ||
+		input->IsKeyReleased(DIK_G);
 
 }
 

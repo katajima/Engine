@@ -81,6 +81,9 @@ namespace Combo {
 		/// データ取得
 		/// </summary>
 		GlobalCondition& GetData() { return data_; }
+		/// <summary>条件データを読み取り専用で取得します。</summary>
+		/// <returns>内部条件データへの読み取り専用参照です。</returns>
+		const GlobalCondition& GetData() const { return data_; }
 		/// <summary>
 		/// コンボ移行受付クラス取得
 		/// </summary>

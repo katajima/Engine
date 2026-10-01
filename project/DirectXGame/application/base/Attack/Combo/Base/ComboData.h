@@ -38,6 +38,9 @@ namespace Combo {
 		/// </summary>
 		/// <returns>内部で管理しているコンボ条件への参照です.</returns>
 		ComboCondition& GetComboCondition() { return comboCondition; }
+		/// <summary>コンボ条件を読み取り専用で取得します。</summary>
+		/// <returns>内部条件データへの読み取り専用参照です。</returns>
+		const ComboCondition& GetComboCondition() const { return comboCondition; }
 		/// <summary>
 		/// コンボモーションへの参照を取得します。
 		/// </summary>
@@ -53,6 +56,9 @@ namespace Combo {
 		/// </summary>
 		/// <returns>内部で管理しているヒットボックスへの参照です.</returns>
 		ComboHitBox& GetComboHitBox() { return hitBox; }
+		/// <summary>コンボヒットボックス設定を読み取り専用で取得します。</summary>
+		/// <returns>内部ヒットボックス設定への読み取り専用参照です。</returns>
+		const ComboHitBox& GetComboHitBox() const { return hitBox; }
 		/// <summary>
 		/// コンボエフェクトへの参照を取得します。
 		/// </summary>

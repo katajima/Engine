@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -49,6 +49,9 @@ public:
 	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
 	/// <param name="data">リアクション種別、時間、移動量、演出を含む設定。</param>
 	void SetReactionData(const HitReactionData& data);
+	/// <summary>リアクションを発生させず、ダメージだけをキューへ追加します。</summary>
+	/// <param name="data">適用するダメージと攻撃属性。</param>
+	void QueueDamageOnly(const HitReactionData& data);
 	/// <summary>所有者自身へ適用するヒットストップ時間を設定する。</summary>
 	/// <param name="time">停止時間（秒）。0以下で停止を解除する。</param>
 	void SetSelfHitStopTime(float time) { selfHitStopTime_ = time; }

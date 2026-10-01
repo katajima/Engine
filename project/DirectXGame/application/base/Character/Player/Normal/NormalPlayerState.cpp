@@ -220,7 +220,9 @@ namespace Character {
 
 	void PlayerStateAvoidance::Exit() {
 		timer_ = 0.0f;				// 次回回避用に経過時間を戻す
-		isDirectionFixed_ = false;	// 次回回避用に方向決定を解除する
+			isDirectionFixed_ = false;	// 次回回避用に方向決定を解除する
+			// 回避終了時に共通無敵状態を解除する
+			character->ClearActionDefenseFlags();
 	}
 
 	void PlayerStateAvoidance::Enter() {
@@ -228,6 +230,8 @@ namespace Character {
 		isDirectionFixed_ = false;	// 初回更新で入力方向を確定する
 		character->GetCharacterParameterComponent()->Stamina().Add(-staminaCost_);	// 回避コストを支払う
 		character->GetCharacterParameterComponent()->Stamina().useRate = false;		// 回避中はスタミナ回復を止める
+		// 回避中は共通無敵状態を有効にする
+		character->SetActionDefenseFlags(false, true, false);
 
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		anima->SetIsLoop(false);					// 回避は短い単発モーションとして扱う

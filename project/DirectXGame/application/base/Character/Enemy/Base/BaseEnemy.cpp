@@ -177,6 +177,8 @@ namespace Character {
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
+		// 敵側も攻撃ノードのスーパーアーマーや無敵時間を共通更新する
+		UpdateActionDefense(ctx);
 
 		// 保存項目更新(キャラクター全体)
 		UpdateBaseGetValue();

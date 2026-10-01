@@ -17,6 +17,12 @@ struct PlayerInputData {
 	bool skillTrigger = false;
 	// 必殺技
 	bool specialTrigger = false;
+	// ガードを押した瞬間
+	bool guardTrigger = false;
+	// ガードを押している間
+	bool guardPressed = false;
+	// ガードを離した瞬間
+	bool guardReleased = false;
 
 	// 押している
 	// ダッシュ

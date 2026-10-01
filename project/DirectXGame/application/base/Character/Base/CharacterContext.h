@@ -81,6 +81,12 @@ namespace Character {
 		bool isDamage = false;
 		// ダッシュ中か
 		bool isDashing = false;
+		// ガード入力を押しているか
+		bool isGuarding = false;
+		// ガード入力を押したフレームか
+		bool guardTrigger = false;
+		// ガード入力を離したフレームか
+		bool guardReleased = false;
 
 		// 高さ
 		float skyHeight = 1.5f;

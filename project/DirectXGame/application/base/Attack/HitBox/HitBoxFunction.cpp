@@ -87,21 +87,57 @@ namespace HitBox {
 			}
 		}
 
+		// プレイヤーと敵の両方で、共通防御状態を最終ヒット結果へ反映する
+		Character::BaseCharacter* targetCharacter = other ?
+			dynamic_cast<Character::BaseCharacter*>(other->GetHitReceiver()) : nullptr;
+		if (targetCharacter) {
+			result.defenseResult = targetCharacter->ResolveActionDefense();
+			switch (result.defenseResult) {
+			case GameAction::DefenseResult::Invincible:
+			case GameAction::DefenseResult::Parried:
+			case GameAction::DefenseResult::Guarded:
+				// 無敵、パリィ、ガードはダメージ・リアクション・コンボ命中を無効化する
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.notifyComboHit = false;
+				break;
+			case GameAction::DefenseResult::SuperArmored:
+				// スーパーアーマーはダメージだけを受け、被弾リアクションを抑制する
+				result.applyReaction = false;
+				break;
+			default:
+				break;
+			}
+		}
+
 		return result;
 	}
 
 	void HitBoxFunction::UpdateTypePlayer() {
 		if (otherColl->GetTag() != CollisionTag::Enemy) return;
 		HitResult result = BuildHitResult();
-		if (!result.accepted) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
+		if (!result.accepted) {
+			// 防御成立を受け手へ通知し、通常のヒット処理を行わない
+			if (result.defenseResult == GameAction::DefenseResult::Parried ||
+				result.defenseResult == GameAction::DefenseResult::Guarded) {
+				const GameAction::EventType eventType = result.defenseResult == GameAction::DefenseResult::Parried ?
+					GameAction::EventType::Parried : GameAction::EventType::Guarded;
+				enemy->EmitActionEvent({ eventType, enemy, player });
+			}
+			return;
+		}
 		// リアクションデータ
-		if (result.applyReaction) {
+		if (result.defenseResult == GameAction::DefenseResult::SuperArmored) {
+			enemy->GetHitMotionSystem()->QueueDamageOnly(result.reaction);
+		}
+		else if (result.applyReaction) {
 			enemy->GetHitMotionSystem()->SetReactionData(result.reaction);
 		}
 
@@ -114,8 +150,10 @@ namespace HitBox {
 		}
 		//	エフェクト出現
 		enemy->GetHitMotionSystem()->EmitHitEffect();
-		// 敵ステート設定
-		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		// スーパーアーマー中は敵ステートを被弾へ変更しない
+		if (result.applyReaction) {
+			enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		}
 		// プレイヤーのロックオンシステムに相手タグを設定
 		player->GetAttackController()->GetLockOnSystem()->SetHitTag(enemy->GetTagNumber());
 		// コンボ中はコンボ設定側で加算を判定し、コンボ外は従来どおり加算する。
@@ -129,13 +167,22 @@ namespace HitBox {
 	void HitBoxFunction::UpdateTypeEnemy() {
 		if (otherColl->GetTag() != CollisionTag::Player) return;
 		HitResult result = BuildHitResult();
-		if (!result.accepted) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
+		if (!result.accepted) {
+			// 防御成立を受け手へ通知し、通常のヒット処理を行わない
+			if (result.defenseResult == GameAction::DefenseResult::Parried ||
+				result.defenseResult == GameAction::DefenseResult::Guarded) {
+				const GameAction::EventType eventType = result.defenseResult == GameAction::DefenseResult::Parried ?
+					GameAction::EventType::Parried : GameAction::EventType::Guarded;
+				player->EmitActionEvent({ eventType, player, enemy });
+			}
+			return;
+		}
 
 		const bool shouldSelfHitStop =
 			data_.selfHitStopPolicy == SelfHitStopPolicy::EveryHit ||
@@ -145,12 +192,17 @@ namespace HitBox {
 			hasAppliedSelfHitStop_ = true;
 		}
 
-		// リアクションデータ
-		if (result.applyReaction) {
+		// スーパーアーマー中はダメージだけを適用し、被弾リアクションを生成しない
+		if (result.defenseResult == GameAction::DefenseResult::SuperArmored) {
+			player->GetHitMotionSystem()->QueueDamageOnly(result.reaction);
+		}
+		else if (result.applyReaction) {
 			player->GetHitMotionSystem()->SetReactionData(result.reaction);
 		}
-		// プレイヤーステート設定
-		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		// スーパーアーマー中はプレイヤーステートを被弾へ変更しない
+		if (result.applyReaction) {
+			player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		}
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GetLockOnSystem()->SetHitTag(player->GetTagNumber());
 		// 敵側コンボにも命中を通知し、ヒット音と命中条件を同じタイミングで処理する。

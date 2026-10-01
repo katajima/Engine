@@ -60,6 +60,10 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 
 	// 現在のステート
 	ctx.state = owner->GetCurrentMainState();
+	// 入力データから共通防御判定で使うガード状態を作成する
+	ctx.isGuarding = ctx.inputData.guardPressed;
+	ctx.guardTrigger = ctx.inputData.guardTrigger;
+	ctx.guardReleased = ctx.inputData.guardReleased;
 
 
 

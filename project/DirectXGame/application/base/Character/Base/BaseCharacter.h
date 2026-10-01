@@ -4,6 +4,8 @@
 #include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
+#include <DirectXGame/application/base/Action/ActionRuntime.h>
+#include <vector>
 
 class HitResponse;
 class HitMotionSystem;
@@ -300,6 +302,35 @@ namespace Character {
 		/// <summary>HPへダメージが実際に反映された後の通知を受け取る。</summary>
 		/// <param name="damage">実際に適用されたダメージ量。</param>
 		virtual void OnDamageApplied(float damage) { (void)damage; }
+	public:
+		/// <summary>入力と攻撃ノードから共通防御状態を更新する。</summary>
+		/// <param name="ctx">現在フレームのキャラクターコンテキスト。</param>
+		void UpdateActionDefense(const Character::CharacterContext& ctx);
+		/// <summary>攻撃ノードが付与するスーパーアーマー、無敵、ガードポイントを設定する。</summary>
+		/// <param name="superArmor">被ダメージ時にリアクションを抑制するか。</param>
+		/// <param name="invincible">ダメージとリアクションを無効化するか。</param>
+		/// <param name="guardPoint">攻撃中でもガード判定を有効にするか。</param>
+		/// <param name="guardDamageScale">ガード時に許可するダメージ倍率。</param>
+		void SetActionDefenseFlags(bool superArmor, bool invincible, bool guardPoint, float guardDamageScale = 0.0f);
+		/// <summary>共通の一時無敵時間を設定する。</summary>
+		/// <param name="seconds">設定する無敵時間。0以下なら解除する。</param>
+		void SetActionInvincibleTime(float seconds);
+		/// <summary>攻撃ノード由来の防御状態を解除する。</summary>
+		void ClearActionDefenseFlags();
+		/// <summary>現在の共通防御状態を取得する。</summary>
+		/// <returns>防御状態への読み取り専用参照。</returns>
+		const GameAction::DefenseState& GetActionDefense() const { return actionDefense_; }
+		/// <summary>現在の攻撃を共通防御状態で評価する。</summary>
+		/// <returns>ヒット、ガード、パリィなどの判定結果。</returns>
+		GameAction::DefenseResult ResolveActionDefense() const;
+		/// <summary>アクションイベントを購読する。</summary>
+		/// <param name="listener">イベントを受け取るコールバック。</param>
+		void AddActionEventListener(GameAction::EventListener listener);
+		/// <summary>登録済みのアクションイベント購読をすべて解除する。</summary>
+		void ClearActionEventListeners();
+		/// <summary>登録済みの購読者へアクションイベントを通知する。</summary>
+		/// <param name="event">通知するアクションイベント。</param>
+		void EmitActionEvent(const GameAction::Event& event);
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
@@ -345,6 +376,10 @@ namespace Character {
 		CameraManager* cameraManager = nullptr;
 		// 必殺技ポイント管理クラス
 		SpecialPointManager* specialPointManager = nullptr;
+		// キャラクター共通のアクション防御状態
+		GameAction::DefenseState actionDefense_{};
+		// キャラクターへ登録されたアクションイベント購読者
+		std::vector<GameAction::EventListener> actionEventListeners_;
 	protected: // 貰ってくるもの(エンジン層)
 		// 3Dエンティティマネージャー
 		Engine::EntityManager* entityManager = nullptr;

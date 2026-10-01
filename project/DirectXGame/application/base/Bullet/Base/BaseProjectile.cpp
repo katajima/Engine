@@ -1,4 +1,4 @@
-﻿#include "BaseProjectile.h"
+#include "BaseProjectile.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
@@ -194,16 +194,48 @@ void Projectile::BaseProjectile::OnHitPlayer(Character::BasePlayer* player) {
 	if (player->IsDamageInvincible()) {
 		return; // 被弾後無敵中は弾によるダメージと被弾ステートを入れない
 	}
+	const GameAction::DefenseResult defenseResult = player->ResolveActionDefense();
+	if (defenseResult == GameAction::DefenseResult::Guarded ||
+		defenseResult == GameAction::DefenseResult::Parried ||
+		defenseResult == GameAction::DefenseResult::Invincible) {
+		// ガード、パリィ、無敵中は弾のダメージと被弾ステートを無効化する
+		if (defenseResult == GameAction::DefenseResult::Parried) {
+			player->EmitActionEvent({ GameAction::EventType::Parried, player, owner });
+		}
+		else if (defenseResult == GameAction::DefenseResult::Guarded) {
+			player->EmitActionEvent({ GameAction::EventType::Guarded, player, owner });
+		}
+		return;
+	}
 	player->AddDamage(param_.damage); // ダメージを与える
-	player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	if (defenseResult != GameAction::DefenseResult::SuperArmored) {
+		// スーパーアーマーでなければ通常の被弾ステートへ遷移する
+		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	}
 }
 
 void Projectile::BaseProjectile::OnHitEnemy(Character::BaseEnemy* enemy) {
 	if (!enemy) {
 		return;
 	}
+	const GameAction::DefenseResult defenseResult = enemy->ResolveActionDefense();
+	if (defenseResult == GameAction::DefenseResult::Guarded ||
+		defenseResult == GameAction::DefenseResult::Parried ||
+		defenseResult == GameAction::DefenseResult::Invincible) {
+		// ガード、パリィ、無敵中は弾のダメージと被弾ステートを無効化する
+		if (defenseResult == GameAction::DefenseResult::Parried) {
+			enemy->EmitActionEvent({ GameAction::EventType::Parried, enemy, owner });
+		}
+		else if (defenseResult == GameAction::DefenseResult::Guarded) {
+			enemy->EmitActionEvent({ GameAction::EventType::Guarded, enemy, owner });
+		}
+		return;
+	}
 	enemy->AddDamage(param_.damage); // ダメージを与える
-	enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	if (defenseResult != GameAction::DefenseResult::SuperArmored) {
+		// スーパーアーマーでなければ通常の被弾ステートへ遷移する
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	}
 }
 
 // 衝突処理

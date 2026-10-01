@@ -90,7 +90,7 @@
         },
         "アニメーション速度": {
             "type": "float",
-            "value": 3.319999933242798
+            "value": 4.230000019073486
         },
         "アニメーション遷移時間": {
             "type": "float",
@@ -608,6 +608,14 @@
             "type": "int32_t",
             "value": 4
         },
+        "ヒットカウントを一度だけ増やす": {
+            "type": "bool",
+            "value": false
+        },
+        "ヒットカウントを増やす": {
+            "type": "bool",
+            "value": true
+        },
         "ヒットカメラシェイク量": {
             "type": "float",
             "value": 0.25
@@ -698,6 +706,71 @@
             "enumType": "HitBoxSpawnType",
             "type": "enum",
             "value": 0
+        },
+        "ヒットボックス軌道中心": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "ヒットボックス軌道半径": {
+            "type": "float",
+            "value": 2.0
+        },
+        "ヒットボックス軌道方式": {
+            "enumType": "HitBoxTrajectoryType",
+            "type": "enum",
+            "value": 0
+        },
+        "ヒットボックス軌道時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "ヒットボックス軌道点0": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "ヒットボックス軌道点1": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                2.0
+            ]
+        },
+        "ヒットボックス軌道点2": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                4.0
+            ]
+        },
+        "ヒットボックス軌道点3": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                6.0
+            ]
+        },
+        "ヒットボックス軌道終了角": {
+            "type": "float",
+            "value": 6.2831854820251465
+        },
+        "ヒットボックス軌道開始角": {
+            "type": "float",
+            "value": 0.0
+        },
+        "ヒットボックス軌道高さ": {
+            "type": "float",
+            "value": 0.0
         },
         "ヒットポーズ倍率": {
             "type": "float",

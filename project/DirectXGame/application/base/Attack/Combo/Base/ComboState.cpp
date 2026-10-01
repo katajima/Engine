@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
+#include <utility>
 
 namespace Combo {
 
@@ -15,8 +16,15 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		hasHit_ = false;
+		canceled_ = false;
+		missed_ = false;
 		// ノード開始時に一度だけ加算の判定状態をリセットする
 		hasIncrementedHitCount_ = false;
+		// コンボノードに設定された防御効果をキャラクター共通状態へ反映する
+		owner->SetActionDefenseFlags(
+			comboData.GetActionData().superArmor,
+			comboData.GetActionData().invincible,
+			comboData.GetActionData().guardPoint);
 		// アニメーションの設定
 		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 
@@ -118,6 +126,29 @@ namespace Combo {
 			!targets.lockOn.expired() || !targets.noLockOn.expired();
 	}
 
+	std::vector<std::shared_ptr<NodeState>> NodeState::GetTransitionTargets() const {
+		// 検証用に、条件付き遷移を含むすべての遷移先を解決する
+		std::vector<std::shared_ptr<NodeState>> targets;
+		for (const auto& [input, transition] : nextStates) {
+			(void)input;
+			const std::weak_ptr<NodeState>* candidates[] = {
+				&transition.defaultTarget,
+				&transition.groundMiss,
+				&transition.groundHit,
+				&transition.airMiss,
+				&transition.airHit,
+				&transition.lockOn,
+				&transition.noLockOn,
+			};
+			for (const auto* candidate : candidates) {
+				if (auto target = candidate->lock()) {
+					targets.push_back(std::move(target));
+				}
+			}
+		}
+		return targets;
+	}
+
 	// 更新
 	void NodeState::Update(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間更新
@@ -128,6 +159,9 @@ namespace Combo {
 
 		// 入力受付がないのなら終了する
 		if (GetIsCansel()) {
+			// キャンセル終了をミスと区別できるアクションイベントとして通知する
+			canceled_ = true;
+			owner->EmitActionEvent({ GameAction::EventType::Canceled, owner, nullptr, actionInput_, name });
 			comboData.GetComboEffect().NotifyCancel();
 			End(owner, ctx);
 			return;
@@ -142,15 +176,26 @@ namespace Combo {
 	void NodeState::Exit(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化
 		timeInState = 0.0f;
+		if (!hasHit_ && !canceled_ && !missed_) {
+			// 次段へ遷移してノードを抜ける場合も、命中しなかった攻撃をミスとして通知する
+			missed_ = true;
+			owner->EmitActionEvent({ GameAction::EventType::Missed, owner, nullptr, actionInput_, name });
+			comboData.GetComboEffect().NotifyMiss();
+		}
 		// コンボデータ終了処理
 		comboData.Exit(owner);
+		// ノード終了時に攻撃由来の防御効果を解除する
+		owner->ClearActionDefenseFlags();
 	}
 
 	void NodeState::End(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
-		if (!hasHit_) {
+		if (!hasHit_ && !canceled_ && !missed_) {
+			// 命中もキャンセルも無い場合だけミスイベントを通知する
+			missed_ = true;
+			owner->EmitActionEvent({ GameAction::EventType::Missed, owner, nullptr, actionInput_, name });
 			comboData.GetComboEffect().NotifyMiss();
 		}
 		if (ctx.inputData.jumpTrigger) {
@@ -160,6 +205,8 @@ namespace Combo {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Idle);
 		}
 		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
+		// Endから直接通常状態へ戻る場合にも防御効果を残さない
+		owner->ClearActionDefenseFlags();
 	};
 
 
@@ -175,9 +222,6 @@ namespace Combo {
 		if (currentState) {
 			currentState->Enter(owner, ctx);	// 開始処理
 		}
-		bufferedInput.reset(); // 状態遷移したら入力リセット
-		bufferedInputAge_ = 0.0f;
-		isBufferedInputAccepted_ = false;
 	}
 
 	bool StateMachine::CanTransition(ActionInput input) const {
@@ -195,6 +239,11 @@ namespace Combo {
 		return result;
 	}
 
+	void StateMachine::ClearInputBuffer() {
+		// 保持中の先行入力をすべて消費済みとして破棄する
+		bufferedInputs_.clear();
+	}
+
 	void StateMachine::NotifyCurrentStateHit() {
 		auto node = std::dynamic_pointer_cast<NodeState>(currentState);
 		if (node) {
@@ -210,53 +259,50 @@ namespace Combo {
 		currentState->Update(owner, ctx);
 
 		if (!isDebug && owner->GetCurrentMainState() != Character::CharacterMainState::Attack) {
-			bufferedInput.reset();
-			bufferedInputAge_ = 0.0f;
-			isBufferedInputAccepted_ = false;
+			// 攻撃終了後の入力は次の攻撃へ持ち越さない
+			ClearInputBuffer();
 			return;
 		}
 
-		// 入力種類は RequestAttack から渡された ActionInput を正とする。
-		if (bufferedInput) {
-			bufferedInputAge_ += ctx.dt;
-			auto currentNode = std::dynamic_pointer_cast<NodeState>(currentState);
-			const float bufferTime = currentNode ? currentNode->Data().GetComboCondition().GetData().inputBufferTime : 0.0f;
-			if (bufferedInputAge_ > bufferTime) {
-				bufferedInput.reset();
-				bufferedInputAge_ = 0.0f;
-				isBufferedInputAccepted_ = false;
-				return;
+		// 現在ノードの入力受付時間を基準に、古くなった先行入力を破棄する
+		auto currentNode = std::dynamic_pointer_cast<NodeState>(currentState);
+		const float bufferTime = currentNode ? currentNode->Data().GetComboCondition().GetData().inputBufferTime : 0.0f;
+		for (auto it = bufferedInputs_.begin(); it != bufferedInputs_.end();) {
+			it->age += ctx.dt;
+			if (it->age > bufferTime) {
+				it = bufferedInputs_.erase(it);
 			}
+			else {
+				++it;
+			}
+		}
 
-			if (currentState->IsInputAcceptable()) {
-				isBufferedInputAccepted_ = true;
-			}
-			// 入力受付済みで、コンボ移行時間に達したら状態遷移する。
-			if (isBufferedInputAccepted_ && currentState->GetNextStateTime()) {
-				ActionInput transitionInput = *bufferedInput;
+		// 入力受付済みで、コンボ移行時間に達したら古い入力から遷移を試す
+		if (!bufferedInputs_.empty() && currentState->IsInputAcceptable() && currentState->GetNextStateTime()) {
+			for (size_t index = 0; index < bufferedInputs_.size(); ++index) {
+				ActionInput transitionInput = bufferedInputs_[index].input;
 				auto next = currentState->HandleInput(owner, transitionInput);
 				if (currentState->GetIsCompulsionNext()) {
+					// 強制移行ノードは入力種別を弱攻撃として評価する
 					transitionInput = ActionInput::LightAttack;
 					next = currentState->HandleInput(owner, transitionInput);
 				}
 
-				// もし次のステートがあれば、遷移
 				if (next) {
-					// 遷移元ノードを保存し、分岐演出を遷移先へ誤通知しないようにする
+					// 遷移に使用した入力だけを消費し、残りは次ノードへ引き継ぐ
+					bufferedInputs_.erase(bufferedInputs_.begin() + static_cast<std::ptrdiff_t>(index));
+					// 遷移元ノードへ分岐イベントを一度だけ通知する
 					auto sourceNode = std::dynamic_pointer_cast<NodeState>(currentState);
 					transitionedInput_ = transitionInput;
 					if (sourceNode) {
-						// 分岐通知は状態終了前の遷移元へ一度だけ送る
 						sourceNode->NotifyBranch();
 					}
 					SetState(next, ctx);
+					return;
 				}
-				bufferedInput.reset();
-				bufferedInputAge_ = 0.0f;
-				isBufferedInputAccepted_ = false;
 			}
 		}
-		else if (currentState->GetNextStateTime() && currentState->GetIsCompulsionNext()) {
+		else if (bufferedInputs_.empty() && currentState->GetNextStateTime() && currentState->GetIsCompulsionNext()) {
 			auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
 
 			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
@@ -273,6 +319,8 @@ namespace Combo {
 	}
 
 	void StateMachine::SetRoot(std::shared_ptr<State> state) {
+		// 新しいコンボ開始時は前のコンボの入力を持ち越さない
+		ClearInputBuffer();
 		rootState = state;
 		if (rootState) {
 			SetState(rootState,{});

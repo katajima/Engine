@@ -1,5 +1,6 @@
-﻿#pragma once
+#pragma once
 #include <DirectXGame/application/base/Attack/AttackData.h>
+#include <DirectXGame/application/base/Action/ActionRuntime.h>
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 
 
@@ -14,6 +15,7 @@ namespace HitBox {
 		bool applySelfHitStop = true;
 		bool notifyComboHit = true;
 		float damageScale = 1.0f;
+		GameAction::DefenseResult defenseResult = GameAction::DefenseResult::Hit; // 受け手側の共通防御結果
 		HitReactionData reaction{};
 	};
 

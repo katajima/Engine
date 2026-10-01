@@ -1,8 +1,10 @@
-﻿#pragma once
+#pragma once
 #include <map>
+#include <deque>
 #include <string>
 #include <memory>
 #include <optional>
+#include <vector>
 #include "DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
@@ -112,6 +114,23 @@ namespace Combo {
 		std::string dodgeSuccessLight;
 		std::string dodgeSuccessHeavy;
 		std::string dodgeSuccessSkill;
+	};
+
+	/// <summary>
+	/// コンボデータ検証で見つかった問題の重要度です。
+	/// </summary>
+	enum class ValidationSeverity {
+		Warning,
+		Error,
+	};
+
+	/// <summary>
+	/// コンボグラフの検証結果を保持します。
+	/// </summary>
+	struct ValidationIssue {
+		ValidationSeverity severity = ValidationSeverity::Warning;
+		std::string nodeName;
+		std::string message;
 	};
 
 
@@ -239,6 +258,16 @@ namespace Combo {
 		/// 開始コンボ設定
 		/// </summary>
 		void SetStartComboRoutes(const StartComboRoutes& routes);
+		/// <summary>
+		/// 現在読み込まれているコンボグラフと各ノード設定を検証します。
+		/// </summary>
+		/// <returns>見つかった警告とエラーの一覧です。</returns>
+		std::vector<ValidationIssue> ValidateComboGraph() const;
+		/// <summary>
+		/// 最後に実行したコンボグラフ検証結果を取得します。
+		/// </summary>
+		/// <returns>検証結果への読み取り専用参照です。</returns>
+		const std::vector<ValidationIssue>& GetValidationIssues() const { return validationIssues_; }
 		/// <summary>名前に対応するコンボノードを取得する。</summary>
 		/// <param name="name">検索するノード名。</param>
 		/// <returns>共有所有権を持つノード。存在しない場合はnullptr。</returns>
@@ -248,6 +277,13 @@ namespace Combo {
 				return it->second;
 			}
 			return nullptr;
+		}
+		/// <summary>読み取り専用コンボノード検索を行います。</summary>
+		/// <param name="name">検索するノード名。</param>
+		/// <returns>存在するノード、またはnullptr。</returns>
+		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) const {
+			auto it = comboNodes_.find(name);
+			return it != comboNodes_.end() ? it->second : nullptr;
 		}
 	public:
 		/// <summary>生成済みコンボノードを名前付きで登録する。</summary>
@@ -349,6 +385,8 @@ namespace Combo {
 
 		// 保存データマップ
 		std::map<std::string, GlobalData> comboGlobalDatas_;
+		// 最後に実行したコンボグラフ検証結果
+		std::vector<ValidationIssue> validationIssues_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 		// Frameworkが所有する音声管理への非所有ポインター。
@@ -356,9 +394,15 @@ namespace Combo {
 
 		bool isDebug = false;
 		bool isDebugDraw_ = true;
-		std::optional<ActionInput> pendingCostInput_;
-		float pendingStaminaCost_ = 0.0f;
-		std::shared_ptr<NodeState> pendingCooldownNode_ = nullptr;
+		struct PendingCost {
+			ActionInput input = ActionInput::LightAttack;
+			float staminaCost = 0.0f;
+			std::shared_ptr<NodeState> cooldownNode = nullptr;
+		};
+		// 入力バッファと対応する未払いリソース予約を時系列で保持する
+		std::deque<PendingCost> pendingCosts_;
+		// 現在のコンボノードを開始した入力種別
+		ActionInput currentActionInput_ = ActionInput::LightAttack;
 		std::map<std::string, float> cooldownTimers_;
 		std::string groundLightStart_ = "MeleeAttack1";
 		std::string airLightStart_ = "JumpAttack";

@@ -4,6 +4,8 @@
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
 #include <DirectXGame/application/base/Character/State/CharacterStateMachine.h>
+#include <algorithm>
+#include <unordered_set>
 
 namespace Combo {
 
@@ -104,14 +106,29 @@ namespace Combo {
 		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
 		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
-		if (transitionedInput && pendingCostInput_ && *transitionedInput == *pendingCostInput_) {
-			PayStamina(pendingStaminaCost_);
-			StartCooldown(pendingCooldownNode_);
-		}
 		if (transitionedInput) {
-			pendingCostInput_.reset();
-			pendingStaminaCost_ = 0.0f;
-			pendingCooldownNode_.reset();
+			// 次ノードの命中・キャンセル・ミスイベントへ入力種別を引き継ぐ
+			currentActionInput_ = *transitionedInput;
+			if (auto transitionedNode = comboStateMachine_->GetCurrentState()) {
+				transitionedNode->SetActionInput(currentActionInput_);
+			}
+			// 実際に消費された入力に対応する予約コストだけを確定する
+			auto pending = std::find_if(pendingCosts_.begin(), pendingCosts_.end(),
+				[&transitionedInput](const PendingCost& cost) {
+					return cost.input == *transitionedInput;
+				});
+			if (pending != pendingCosts_.end()) {
+				PayStamina(pending->staminaCost);
+				StartCooldown(pending->cooldownNode);
+				owner->EmitActionEvent({ GameAction::EventType::ResourceConsumed, owner, nullptr,
+					*transitionedInput, pending->cooldownNode ? pending->cooldownNode->GetName() : "", pending->staminaCost });
+				pendingCosts_.erase(pending);
+			}
+		}
+		if (owner->GetCurrentMainState() != Character::CharacterMainState::Attack &&
+			comboStateMachine_->GetBufferedInputCount() == 0) {
+			// 攻撃終了または受付期限切れになった入力のコスト予約を破棄する
+			pendingCosts_.clear();
 		}
 		comboDebug_->SetEnabled(isDebugDraw_);
 		comboDebug_->Update(ctx.dt);
@@ -137,9 +154,12 @@ namespace Combo {
 			}
 
 			comboStateMachine_->HandleInput(input);
-			pendingCostInput_ = input;
-			pendingStaminaCost_ = transitionCost;
-			pendingCooldownNode_ = nextNode;
+			// 複数の先行入力に対応するため、入力とコスト予約を同じ順序で保持する
+			if (pendingCosts_.size() >= 8) {
+				// 入力キューと同じ上限で、最も古い予約だけを破棄する
+				pendingCosts_.pop_front();
+			}
+			pendingCosts_.push_back({ input, transitionCost, nextNode });
 			return true;
 		}
 
@@ -171,13 +191,22 @@ namespace Combo {
 			return false;
 		}
 
-		pendingCostInput_.reset();
-		pendingStaminaCost_ = 0.0f;
-		pendingCooldownNode_.reset();
+		// 新しいコンボ開始時は前段コンボの未確定コストを破棄する
+		pendingCosts_.clear();
+		currentActionInput_ = input;
+		if (auto startedNode = comboStateMachine_->GetCurrentState()) {
+			// 開始ノードのキャンセル・ミスイベントへ開始入力を記録する
+			startedNode->SetActionInput(input);
+		}
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
 		PayStamina(startCost);
 		StartCooldown(startNode);
+		// 攻撃開始とリソース消費を同じアクションイベント経路へ通知する
+		owner->EmitActionEvent({ GameAction::EventType::AttackStarted, owner, nullptr, input, startNode->GetName() });
+		if (startCost > 0.0f) {
+			owner->EmitActionEvent({ GameAction::EventType::ResourceConsumed, owner, nullptr, input, startNode->GetName(), startCost });
+		}
 		return true;
 	}
 
@@ -202,6 +231,9 @@ namespace Combo {
 
 		// ヒット条件、遠距離、カメラ、音の通知はカウント設定に関係なく行う。
 		comboStateMachine_->NotifyCurrentStateHit();
+		// 命中確定をアクションイベントとして通知する
+		owner->EmitActionEvent({ GameAction::EventType::HitConfirmed, owner,
+			owner->GetAttackController()->GetLockOnSystem()->GetTarget(), currentActionInput_, currentNode->GetName() });
 		return true;
 	}
 
@@ -211,6 +243,10 @@ namespace Combo {
 		// コンボノードが生成した無期限ヒットボックスを、ノード再構築前に解放する
 		if (owner && owner->GetHitBoxSystem()) {
 			owner->GetHitBoxSystem()->Clear();
+		}
+		if (owner) {
+			// コンボ状態機械を破棄する場合も、ノード由来の防御状態を解除する
+			owner->ClearActionDefenseFlags();
 		}
 
 		// StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
@@ -228,9 +264,10 @@ namespace Combo {
 		comboGlobalDatas_.clear();
 		comboNodenames_.clear();
 		parentTransforms_.clear();
-		pendingCostInput_.reset();
-		pendingStaminaCost_ = 0.0f;
-		pendingCooldownNode_.reset();
+		// コンボグラフを再構築するため、未確定リソース予約も破棄する
+		pendingCosts_.clear();
+		// ノード再構築前に古い検証結果も破棄する
+		validationIssues_.clear();
 		cooldownTimers_.clear();
 	}
 
@@ -1363,6 +1400,111 @@ namespace Combo {
 		}
 	}
 
+	std::vector<ValidationIssue> System::ValidateComboGraph() const {
+		// 検証結果をノード名付きで蓄積し、エディターやログ側から利用できるようにする
+		std::vector<ValidationIssue> issues;
+		auto addIssue = [&issues](ValidationSeverity severity, const std::string& nodeName, const std::string& message) {
+			issues.push_back({ severity, nodeName, message });
+		};
+		auto checkTarget = [this, &addIssue](const std::string& nodeName, const std::string& targetName, const std::string& fieldName) {
+			if (!targetName.empty() && comboNodes_.find(targetName) == comboNodes_.end()) {
+				addIssue(ValidationSeverity::Error, nodeName, fieldName + " の遷移先が存在しません: " + targetName);
+			}
+		};
+
+		// 保存データ上のすべての遷移先が実在するか検証する
+		for (const auto& [nodeName, data] : comboGlobalDatas_) {
+			checkTarget(nodeName, data.connection.lightAttack, "弱攻撃");
+			checkTarget(nodeName, data.connection.heavyAttack, "強攻撃");
+			checkTarget(nodeName, data.connection.skill, "スキル");
+			const GlobalConditionalConnection* conditionalConnections[] = {
+				&data.connection.lightCondition,
+				&data.connection.heavyCondition,
+				&data.connection.skillCondition,
+			};
+			for (const auto* connection : conditionalConnections) {
+				checkTarget(nodeName, connection->groundMiss, "地上ミス");
+				checkTarget(nodeName, connection->groundHit, "地上ヒット");
+				checkTarget(nodeName, connection->airMiss, "空中ミス");
+				checkTarget(nodeName, connection->airHit, "空中ヒット");
+				checkTarget(nodeName, connection->lockOn, "ロックオン");
+				checkTarget(nodeName, connection->noLockOn, "非ロックオン");
+			}
+		}
+
+		// 各ノードの時間、リソース、ヒットボックス設定を検証する
+		for (const auto& [nodeName, node] : comboNodes_) {
+			if (!node) {
+				addIssue(ValidationSeverity::Error, nodeName, "ノードがnullptrです。");
+				continue;
+			}
+			const auto& condition = node->Data().GetComboCondition().GetData();
+			if (condition.stateInput.startTime > condition.stateInput.endTime) {
+				addIssue(ValidationSeverity::Error, nodeName, "入力受付時間の開始が終了より後です。");
+			}
+			if (condition.stateCancel.startTime > condition.stateCancel.endTime) {
+				addIssue(ValidationSeverity::Error, nodeName, "キャンセル受付時間の開始が終了より後です。");
+			}
+			if (condition.stateMoveCancel.startTime > condition.stateMoveCancel.endTime) {
+				addIssue(ValidationSeverity::Error, nodeName, "移動キャンセル時間の開始が終了より後です。");
+			}
+			if (condition.inputBufferTime < 0.0f || condition.stateEndTime < 0.0f || condition.stateNextTime < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "時間設定に負の値があります。");
+			}
+			if (condition.stateNextTime > condition.stateEndTime) {
+				addIssue(ValidationSeverity::Warning, nodeName, "次段移行時間がノード終了時間より後です。");
+			}
+			const auto& action = node->Data().GetActionData();
+			if (action.staminaCost < 0.0f || action.cooldown < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "スタミナコストまたはクールダウンに負の値があります。");
+			}
+			const auto& hitBox = node->Data().GetComboHitBox().GetCollData().hitBoxData;
+			if (hitBox.lifetimeType == HitBox::LifetimeType::kTimed && hitBox.lifeTime <= 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "時間制限ヒットボックスの生存時間が0以下です。");
+			}
+			if (hitBox.windowStart < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス発生時間が負の値です。");
+			}
+		}
+
+		// 開始ルートから到達できないノードを検出する
+		std::unordered_set<const NodeState*> reachable;
+		std::vector<std::shared_ptr<NodeState>> pendingNodes;
+		const std::string startNames[] = {
+			groundLightStart_, airLightStart_, groundHeavyStart_, airHeavyStart_,
+			groundSkillStart_, airSkillStart_, dodgeLightStart_, dodgeHeavyStart_,
+			dodgeSkillStart_, dodgeSuccessLightStart_, dodgeSuccessHeavyStart_, dodgeSuccessSkillStart_,
+		};
+		for (const auto& startName : startNames) {
+			if (startName.empty()) {
+				continue;
+			}
+			auto start = GetComboNodeState(startName);
+			if (!start) {
+				addIssue(ValidationSeverity::Error, "", "開始コンボが存在しません: " + startName);
+			}
+			else {
+				pendingNodes.push_back(start);
+			}
+		}
+		while (!pendingNodes.empty()) {
+			auto node = pendingNodes.back();
+			pendingNodes.pop_back();
+			if (!node || !reachable.insert(node.get()).second) {
+				continue;
+			}
+			for (const auto& target : node->GetTransitionTargets()) {
+				pendingNodes.push_back(target);
+			}
+		}
+		for (const auto& [nodeName, node] : comboNodes_) {
+			if (node && reachable.find(node.get()) == reachable.end()) {
+				addIssue(ValidationSeverity::Warning, nodeName, "開始ルートから到達できないノードです。");
+			}
+		}
+		return issues;
+	}
+
 	void System::Create(const std::string name) {
 		this->name = name;
 		globalVariables->CreateGroup(name);
@@ -1400,6 +1542,8 @@ namespace Combo {
 		}
 
 		ConnectSavedCombos();
+		// コンボ生成完了時にグラフ検証を実行し、結果を保持する
+		validationIssues_ = ValidateComboGraph();
 	}
 
 #pragma endregion // 保存　適応

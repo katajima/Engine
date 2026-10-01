@@ -1,5 +1,6 @@
 #pragma once
 #include <DirectXGame/engine/input/Input.h>
+#include <algorithm>
 #include <limits>
 
 namespace Character {
@@ -32,6 +33,7 @@ public:
 		Skill,		// bool	
 		Jump,		// bool
 		Special,	// bool
+		Guard,		// bool
 		Max
 	};
 
@@ -74,6 +76,39 @@ public:
 	bool Pressed(Action a) const { return pressed_[Idx(a)]; }
 	bool Triggered(Action a) const { return triggered_[Idx(a)]; }
 	bool Released(Action a) const { return released_[Idx(a)]; }
+	/// <summary>
+	/// アクションを押してからの経過時間を取得します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <returns>押下中なら経過秒、押下していなければ0秒です。</returns>
+	float HeldSeconds(Action a) const { return heldSeconds_[Idx(a)]; }
+	/// <summary>
+	/// アクションを離した直前の保持時間を取得します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <returns>直前の押下継続時間を秒で返します。</returns>
+	float ReleasedHeldSeconds(Action a) const { return releasedHeldSeconds_[Idx(a)]; }
+	/// <summary>
+	/// 指定時間以上の長押し状態か取得します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <param name="seconds">長押しと判定する秒数です。</param>
+	/// <returns>押下中で指定時間を超えていればtrueです。</returns>
+	bool IsLongPressed(Action a, float seconds) const {
+		return Pressed(a) && HeldSeconds(a) >= seconds;
+	}
+	/// <summary>
+	/// 押下時間を溜め入力の0〜1範囲へ変換します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <param name="fullChargeSeconds">最大溜め時間です。</param>
+	/// <returns>溜め率を0〜1で返します。</returns>
+	float ChargeRatio(Action a, float fullChargeSeconds) const {
+		if (fullChargeSeconds <= 0.0f) {
+			return 1.0f;
+		}
+		return (std::min)(HeldSeconds(a) / fullChargeSeconds, 1.0f);
+	}
 
 	Vector2 Value2(Action a) const { return value2_[Idx(a)]; }
 	float   Value1(Action a) const { return value1_[Idx(a)]; }
@@ -154,6 +189,7 @@ private:
 	void ClearFrame();
 	void BuildGameplayActions();
 	void BuildUIActions(); // 必要なら
+	void UpdateHoldDurations(float dt);
 
 	/// <summary>
 	/// 入力合成ユーティリティ
@@ -200,6 +236,10 @@ private:
 	bool released_[static_cast<int>(Action::Max)] = {};
 	Vector2 value2_[static_cast<int>(Action::Max)] = {};
 	float value1_[static_cast<int>(Action::Max)] = {};
+	// 各アクションの現在の長押し時間を秒で保持する
+	float heldSeconds_[static_cast<int>(Action::Max)] = {};
+	// 各アクションを離した直前の長押し時間を秒で保持する
+	float releasedHeldSeconds_[static_cast<int>(Action::Max)] = {};
 
 private:
 	uint32_t frameCounter_ = 0;
