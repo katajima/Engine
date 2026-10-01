@@ -1,5 +1,4 @@
 #include "Matrix4x4.h"
-#include <future>
 
 Matrix4x4 Matrix4x4::operator*(const Matrix4x4& mat)
 {
@@ -461,26 +460,30 @@ Matrix4x4 Transpose(const Matrix4x4& m) {
 }
 //アフィン変換
 Matrix4x4 MakeAffineMatrix(const  Vector3& scale, const  Vector3& rotate, const  Vector3& translate) {
+	// 回転角ごとのサインとコサインを一度だけ計算する。
+	const float cosX = std::cos(rotate.x);
+	const float sinX = std::sin(rotate.x);
+	const float cosY = std::cos(rotate.y);
+	const float sinY = std::sin(rotate.y);
+	const float cosZ = std::cos(rotate.z);
+	const float sinZ = std::sin(rotate.z);
+
+	// X・Y・Z回転を直接展開し、毎回の行列生成と乗算を省略する。
 	Matrix4x4 result{};
-
-	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
-	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
-	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
-	Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
-
-
-	result.m[0][0] = scale.x * rotateXYZMatrix.m[0][0];
-	result.m[0][1] = scale.x * rotateXYZMatrix.m[0][1];
-	result.m[0][2] = scale.x * rotateXYZMatrix.m[0][2];
+	result.m[0][0] = scale.x * (cosY * cosZ);
+	result.m[0][1] = scale.x * (cosY * sinZ);
+	result.m[0][2] = scale.x * (-sinY);
 	result.m[0][3] = 0;
-	result.m[1][0] = scale.y * rotateXYZMatrix.m[1][0];
-	result.m[1][1] = scale.y * rotateXYZMatrix.m[1][1];
-	result.m[1][2] = scale.y * rotateXYZMatrix.m[1][2];
+	result.m[1][0] = scale.y * (sinX * sinY * cosZ - cosX * sinZ);
+	result.m[1][1] = scale.y * (sinX * sinY * sinZ + cosX * cosZ);
+	result.m[1][2] = scale.y * (sinX * cosY);
 	result.m[1][3] = 0;
-	result.m[2][0] = scale.z * rotateXYZMatrix.m[2][0];
-	result.m[2][1] = scale.z * rotateXYZMatrix.m[2][1];
-	result.m[2][2] = scale.z * rotateXYZMatrix.m[2][2];
+	result.m[2][0] = scale.z * (cosX * sinY * cosZ + sinX * sinZ);
+	result.m[2][1] = scale.z * (cosX * sinY * sinZ - sinX * cosZ);
+	result.m[2][2] = scale.z * (cosX * cosY);
 	result.m[2][3] = 0;
+
+	// 変換行列の最終行に平行移動と同次座標を設定する。
 	result.m[3][0] = translate.x;
 	result.m[3][1] = translate.y;
 	result.m[3][2] = translate.z;
@@ -598,62 +601,9 @@ Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, f
 }
 Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const Vector3& translate)
 {
-	Matrix4x4 result{};
-
-	// 並列で回転成分を計算
-	auto futureCx = std::async(std::launch::async, std::cosf, rotate.x);
-	auto futureSx = std::async(std::launch::async, std::sinf, rotate.x);
-	auto futureCy = std::async(std::launch::async, std::cosf, rotate.y);
-	auto futureSy = std::async(std::launch::async, std::sinf, rotate.y);
-	auto futureCz = std::async(std::launch::async, std::cosf, rotate.z);
-	auto futureSz = std::async(std::launch::async, std::sinf, rotate.z);
-
-	// 計算結果を取得
-	float cx = futureCx.get();
-	float sx = futureSx.get();
-	float cy = futureCy.get();
-	float sy = futureSy.get();
-	float cz = futureCz.get();
-	float sz = futureSz.get();
-
-	// 並列で行ごとに計算
-	auto row0 = std::async(std::launch::async, [&]() {
-		result.m[0][0] = scale.x * (cy * cz);
-		result.m[0][1] = scale.x * (cy * sz);
-		result.m[0][2] = scale.x * (-sy);
-		result.m[0][3] = 0;
-		});
-
-	auto row1 = std::async(std::launch::async, [&]() {
-		result.m[1][0] = scale.y * (sx * sy * cz - cx * sz);
-		result.m[1][1] = scale.y * (sx * sy * sz + cx * cz);
-		result.m[1][2] = scale.y * (sx * cy);
-		result.m[1][3] = 0;
-		});
-
-	auto row2 = std::async(std::launch::async, [&]() {
-		result.m[2][0] = scale.z * (cx * sy * cz + sx * sz);
-		result.m[2][1] = scale.z * (cx * sy * sz - sx * cz);
-		result.m[2][2] = scale.z * (cx * cy);
-		result.m[2][3] = 0;
-		});
-
-	auto row3 = std::async(std::launch::async, [&]() {
-		result.m[3][0] = translate.x;
-		result.m[3][1] = translate.y;
-		result.m[3][2] = translate.z;
-		result.m[3][3] = 1;
-		});
-
-	// すべての非同期処理が完了するまで待機
-	row0.get();
-	row1.get();
-	row2.get();
-	row3.get();
-
-	return result;
+	// 旧APIとの互換性を保ちながら、アフィン行列生成処理を一箇所に統合する。
+	return MakeAffineMatrix(scale, rotate, translate);
 }
-;
 
 Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix)
 {

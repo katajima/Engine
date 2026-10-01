@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <future>
 
 void Engine::AnimationComponent::Init(LineCommon* lineCommon) {
 	this->lineCommon = lineCommon;
@@ -213,22 +212,15 @@ void Engine::AnimationComponent::UpdateSkinClusters(ModelData& modelData)
 
 void Engine::AnimationComponent::UpdateMaterialGPUData(ModelData& modelData)
 {
-	std::vector<std::future<void>> futures;
+	// GPU転送用データは描画処理と同じフレーム内で更新するため、ここでは直接更新する。
 	for (auto& mesh : modelData.mesh) {
 		// マテリアルが無いメッシュはGPU転送できないためスキップする
 		if (!mesh || !mesh->material) {
 			continue;
 		}
 
-		Material* material = mesh->material.get(); // 非同期更新で使うマテリアル実体
-		futures.push_back(std::async(std::launch::async, [material]() {
-			material->GPUData();
-			}));
-	}
-
-	// 全スレッドの終了を待ってから次の描画処理へ進む
-	for (auto& f : futures) {
-		f.get();
+		// メッシュのマテリアル実体を更新し、毎フレームのasync生成と待機を避ける。
+		mesh->material->GPUData();
 	}
 }
 

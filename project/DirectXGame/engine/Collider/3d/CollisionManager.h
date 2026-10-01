@@ -3,12 +3,9 @@
 #include "ColliderComponent.h"
 #include"list"
 #include"Collider.h"
+#include <memory>
 #include <unordered_set>
-#include <future>
-#include <thread>
 #include <vector>
-#include <unordered_set>
-#include <algorithm>
 #include "DirectXGame/engine/collider/Octree/Octree.h"  
 
 
@@ -24,6 +21,8 @@ namespace Engine {
 
 	// 前方宣言
 	class GlobalVariables;
+	// 衝突判定のワーカースレッドを再利用するジョブシステム
+	class CollisionJobSystem;
 	/// <summary>
 	/// 衝突マネージャ
 	/// </summary>
@@ -125,10 +124,16 @@ namespace Engine {
 		std::unique_ptr<OctreeCollider> octreeColliderStatic_; // オクツリー管理
 
 		DebugTimer debugTimer_;
+		// 毎フレームのスレッド生成を避けるために再利用するジョブシステム
+		std::unique_ptr<CollisionJobSystem> jobSystem_;
 	public:
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		CollisionManager();
 		/// <summary>
 		/// デストラクタ
 		/// </summary>
-		CollisionManager() = default;
+		~CollisionManager();
 	};
 }
