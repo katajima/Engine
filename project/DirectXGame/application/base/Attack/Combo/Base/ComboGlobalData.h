@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/engine/Camera/CameraData.h"
+#include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include <string>
 #include <vector>
 
@@ -369,6 +370,10 @@ struct GlobalAudio {
 		float stateNextTime = 0.45f;
 		// 強制的に次のコンボに移行するか
 		bool isCompulsionNext = false;
+		// 次段へ進む入力列。空の場合は従来の標準入力設定を使用する。
+		std::vector<ComboInputStep> nextInputSequence;
+		// キャンセルに使う入力列。空の場合は従来の標準入力設定を使用する。
+		std::vector<ComboInputStep> cancelInputSequence;
 		///	終了条件 ///
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};

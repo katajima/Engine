@@ -125,9 +125,23 @@ void InputSystem::PlayerInputUpdate(float dt) {
 		input->IsPushKey(DIK_Q);
 
 	// スキル入力押した瞬間
+	playerInputData_.skillPressed =
+		input->IsGamePadPressed(GamePadButton::GAMEPAD_B) ||
+		input->IsPushKey(DIK_E);
 	playerInputData_.skillTrigger =
 		input->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
 		input->IsTriggerKey(DIK_E);
+	playerInputData_.skillReleased =
+		input->IsGamePadReleased(GamePadButton::GAMEPAD_B) ||
+		input->IsKeyReleased(DIK_E);
+
+	// X/Yを通常攻撃入力として公開し、コンボ条件側からも押下状態を参照できるようにする。
+	playerInputData_.lightAttackPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_X);
+	playerInputData_.lightAttackTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
+	playerInputData_.lightAttackReleased = input->IsGamePadReleased(GamePadButton::GAMEPAD_X);
+	playerInputData_.heavyAttackPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+	playerInputData_.heavyAttackTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	playerInputData_.heavyAttackReleased = input->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
 
 	// 必殺技入力押した瞬間
 	playerInputData_.specialTrigger =

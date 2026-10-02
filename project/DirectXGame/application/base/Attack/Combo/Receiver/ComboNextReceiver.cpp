@@ -43,8 +43,9 @@ namespace Combo {
 		}
 	};
 
-	void NextReceiver::SetButton(const std::vector<ComboButton>& button) { 
-		comboSequence_.RegisterCombo(button); 
+	void NextReceiver::SetButton(const std::vector<ComboButton>& button, bool sequential) {
+		// 入力列と評価モードをランタイムへ渡す。
+		comboSequence_.RegisterCombo(button, sequential);
 	}
 
 	

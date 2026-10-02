@@ -36,6 +36,15 @@ namespace Combo {
 		AirHitNoLockOn,
 	};
 
+	// 複合条件をビットで組み合わせるためのマスクです。
+	using TransitionConditionMask = std::uint32_t;
+	static constexpr TransitionConditionMask kTransitionGround = 1u << 0;
+	static constexpr TransitionConditionMask kTransitionAir = 1u << 1;
+	static constexpr TransitionConditionMask kTransitionHit = 1u << 2;
+	static constexpr TransitionConditionMask kTransitionMiss = 1u << 3;
+	static constexpr TransitionConditionMask kTransitionLockOn = 1u << 4;
+	static constexpr TransitionConditionMask kTransitionNoLockOn = 1u << 5;
+
     /// <summary>
     /// コンボ1段分の共通インターフェースです。
     /// </summary>
@@ -176,7 +185,16 @@ namespace Combo {
         /// <param name="input">次ノードへ進むための攻撃入力です。</param>
         /// <param name="condition">命中、空中、ロックオンなどの追加遷移条件です。</param>
         /// <param name="next">遷移先ノードです。weak_ptrとして保持されるため所有権は受け取りません。</param>
-        void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
+		void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
+		/// <summary>
+		/// ビットマスクと優先度で拡張可能な遷移条件を登録します。
+		/// </summary>
+		/// <param name="input">遷移に使用する攻撃入力です。</param>
+		/// <param name="conditionMask">地上/ヒット/ロックオンなどの条件マスクです。</param>
+		/// <param name="next">条件成立時の遷移先です。</param>
+		/// <param name="priority">同時成立時に大きい方を優先します。</param>
+		void SetNextState(ActionInput input, TransitionConditionMask conditionMask,
+			std::shared_ptr<NodeState> next, int priority = 0);
 
         /// <summary>
         /// このノードの攻撃が命中したことを、キャンセル条件・遠距離攻撃・カメラ・音へ通知します。
@@ -330,6 +348,11 @@ namespace Combo {
         // コンボデータ
         ComboData comboData;
         struct TransitionTargets {
+			struct Rule {
+				TransitionConditionMask conditionMask = 0;
+				int priority = 0;
+				std::weak_ptr<NodeState> target;
+			};
             std::weak_ptr<NodeState> defaultTarget;
             std::weak_ptr<NodeState> groundMiss;
             std::weak_ptr<NodeState> groundHit;
@@ -344,7 +367,9 @@ namespace Combo {
 			std::weak_ptr<NodeState> groundMissNoLockOn;
 			std::weak_ptr<NodeState> groundHitNoLockOn;
 			std::weak_ptr<NodeState> airMissNoLockOn;
-			std::weak_ptr<NodeState> airHitNoLockOn;
+            std::weak_ptr<NodeState> airHitNoLockOn;
+			// 保存形式に依存しない拡張条件ルールです。
+			std::vector<Rule> rules;
         };
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;

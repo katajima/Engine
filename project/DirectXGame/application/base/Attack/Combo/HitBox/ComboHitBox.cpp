@@ -1,6 +1,7 @@
 ﻿#include "ComboHitBox.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include <algorithm>
 
 namespace Combo {
 #pragma region ComboHitBox
@@ -14,6 +15,10 @@ namespace Combo {
 		hitBoxSystem = owner->GetHitBoxSystem();
 		// ノードごとの一時判定を他の攻撃と分離して終了できるようにする。
 		hitBoxOwnerId_ = hitBoxSystem->AllocateOwnerId();
+		// ノード再利用時に判定波の進行状態を初期化する。
+		spawnedCount_ = 0;
+		nextSpawnTime_ = collData_.hitBoxData.windowStart;
+		spawnStarted_ = false;
 		// 移動システムを渡す
 		movementComponent = owner->GetMoveComponent();
 
@@ -29,38 +34,49 @@ namespace Combo {
 
 	// 更新
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
-		(void)ctx;
 		// ノックバック方向
 		collData_.reactionData.normal = direction;
 
 		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
 			// 一時的なコライダーなら
-			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
+			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed &&
+				spawnedCount_ < (std::max)(1u, collData_.hitBoxData.spawnCount)) {
+				const bool intervalReady = spawnStarted_ && timer >= nextSpawnTime_;
+				bool firstSpawnReady = false;
 				// 一時型は生成条件を満たした瞬間だけヒットボックスを追加する
 				// 出現方法によっての処理
 				switch (collData_.hitBoxData.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
 					// 指定された開始時間を過ぎたら生成する
-					if (timer >= collData_.hitBoxData.windowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent, hitBoxOwnerId_);
-						isPopHitBox_ = true;
-					}
+					firstSpawnReady = !spawnStarted_ && timer >= collData_.hitBoxData.windowStart;
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					// 空中攻撃などで、着地した瞬間に発生する攻撃用
-					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent, hitBoxOwnerId_);
-						isPopHitBox_ = true;
-					}
+					firstSpawnReady = !spawnStarted_ && movementComponent && movementComponent->GetIsLanding();
 					break;
 				case HitBox::SpawnType::kOnAir:
+					firstSpawnReady = !spawnStarted_ && movementComponent && !movementComponent->GetIsLanding();
 					break;
 				case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
+					firstSpawnReady = !spawnStarted_ &&
+						(ctx.inputData.lightAttackReleased || ctx.inputData.heavyAttackReleased ||
+							ctx.inputData.skillReleased || ctx.inputData.guardReleased);
 					break;
 				default:
 					break;
+				}
+				if (firstSpawnReady || intervalReady) {
+					// 生成条件が成立した波だけを追加し、同一所有者IDで終了管理する。
+					hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent, hitBoxOwnerId_);
+					++spawnedCount_;
+					spawnStarted_ = true;
+					nextSpawnTime_ = timer + (std::max)(collData_.hitBoxData.spawnInterval, 0.0f);
+					if (collData_.hitBoxData.spawnInterval <= 0.0f) {
+						// 間隔0は同一フレームに重複生成せず、単発として扱う。
+						spawnedCount_ = (std::max)(1u, collData_.hitBoxData.spawnCount);
+					}
 				}
 			}
 			// 常時なら
@@ -81,7 +97,9 @@ namespace Combo {
 	// 終了
 	void ComboHitBox::Exit() {
 		// 次のコンボへ生成済み状態を持ち越さないようリセットする
-		isPopHitBox_ = false;
+		spawnedCount_ = 0;
+		nextSpawnTime_ = 0.0f;
+		spawnStarted_ = false;
 		// このComboHitBoxが生成した一時判定だけを解放し、他の攻撃判定は残す。
 		if (hitBoxSystem && hitBoxOwnerId_ != 0) {
 			hitBoxSystem->ClearLifeTimeHitBoxes(hitBoxOwnerId_);

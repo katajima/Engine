@@ -65,8 +65,12 @@ namespace Combo {
 		// コライダーデータ
 		HitBox::CollData collData_;
 	private:
-		// ヒットボックス出現
-		bool isPopHitBox_ = false;
+		// 生成済みの判定波数です。
+		std::uint32_t spawnedCount_ = 0;
+		// 次の判定波を生成できるコンボ時間です。
+		float nextSpawnTime_ = 0.0f;
+		// 最初の発生条件が成立したかどうかです。
+		bool spawnStarted_ = false;
 		//
 		Character::BaseCharacter* owner = nullptr;
 	};

@@ -195,6 +195,12 @@ namespace Combo {
 				"期限付き",
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
+			// 期限付き判定を複数波で発生させる設定
+			int spawnCount = static_cast<int>(data_.hitBox.spawnCount);
+			if (ImGui::DragInt("ヒットボックス発生回数", &spawnCount, 1.0f, 1, 32)) {
+				data_.hitBox.spawnCount = static_cast<std::uint32_t>((std::max)(1, spawnCount));
+			}
+			ImGui::DragFloat("ヒットボックス再発生間隔", &data_.hitBox.spawnInterval, 0.01f, 0.0f, 5.0f);
 
 
 			// タグタイプ
@@ -258,6 +264,50 @@ namespace Combo {
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+
+			// 入力ソース、順番、方向、保持時間をノードごとに編集する。
+			auto drawInputSequence = [](const char* label, std::vector<ComboInputStep>& sequence) {
+				ImGui::SeparatorText(label);
+				static const char* sourceLabels[] = { "ゲームパッド", "キャラクターアクション" };
+				static const char* actionLabels[] = { "弱攻撃", "強攻撃", "スキル", "ジャンプ", "回避", "ガード", "特殊" };
+				static const char* inputTypeLabels[] = { "押下中", "押した瞬間", "離した瞬間", "押下/瞬間/離し", "押下/瞬間", "押下/離し", "瞬間/離し" };
+				static const char* directionLabels[] = { "任意", "ニュートラル", "上", "下", "左", "右" };
+				static const char* buttonLabels[] = {
+					"十字上", "十字下", "十字左", "十字右", "A", "B", "X", "Y", "LB", "RB", "LS", "RS", "Start", "Back",
+				};
+				int removeIndex = -1;
+				for (std::size_t index = 0; index < sequence.size(); ++index) {
+					auto& step = sequence[index];
+					ImGui::PushID(static_cast<int>(index));
+					ImGui::Text("ステップ %zu", index + 1);
+					int source = static_cast<int>(step.source);
+					int action = static_cast<int>(step.action);
+					int inputType = static_cast<int>(step.inputType);
+					int direction = static_cast<int>(step.direction);
+					int button = static_cast<int>(step.button);
+					if (ImGui::Combo("入力ソース", &source, sourceLabels, IM_ARRAYSIZE(sourceLabels))) step.source = static_cast<ComboInputSource>(source);
+					if (ImGui::Combo("アクション", &action, actionLabels, IM_ARRAYSIZE(actionLabels))) step.action = static_cast<ComboActionType>(action);
+					if (ImGui::Combo("入力種別", &inputType, inputTypeLabels, IM_ARRAYSIZE(inputTypeLabels))) step.inputType = static_cast<ComboButtonInputType>(inputType);
+					if (ImGui::Combo("方向", &direction, directionLabels, IM_ARRAYSIZE(directionLabels))) step.direction = static_cast<ComboInputDirection>(direction);
+					if (ImGui::Combo("ボタン", &button, buttonLabels, IM_ARRAYSIZE(buttonLabels))) step.button = static_cast<ComboGamePadButton>(button);
+					ImGui::DragFloat("最小保持時間", &step.minHoldSeconds, 0.01f, 0.0f, 10.0f, "%.2f");
+					ImGui::DragFloat("最大保持時間", &step.maxHoldSeconds, 0.01f, 0.0f, 10.0f, "%.2f");
+					ImGui::DragFloat("最小溜め率", &step.minChargeRatio, 0.01f, 0.0f, 1.0f, "%.2f");
+					ImGui::DragFloat("最大溜め率", &step.maxChargeRatio, 0.01f, 0.0f, 1.0f, "%.2f");
+					ImGui::DragFloat("溜め時間", &step.chargeSeconds, 0.01f, 0.01f, 10.0f, "%.2f");
+					if (ImGui::Button("このステップを削除")) removeIndex = static_cast<int>(index);
+					ImGui::Separator();
+					ImGui::PopID();
+				}
+				if (removeIndex >= 0) {
+					sequence.erase(sequence.begin() + removeIndex);
+				}
+				if (ImGui::Button("入力ステップを追加")) {
+					sequence.emplace_back();
+				}
+			};
+			drawInputSequence("次段入力シーケンス", data_.condition.nextInputSequence);
+			drawInputSequence("キャンセル入力シーケンス", data_.condition.cancelInputSequence);
 
 			ImGui::SeparatorText("キャンセル制約");
 			ImGui::Checkbox("ヒット時のみキャンセル", &data_.action.cancelOnHitOnly);

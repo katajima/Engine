@@ -35,7 +35,10 @@ namespace Combo {
 		/// <summary>
 		/// ボタン設定
 		/// </summary>
-		void SetButton(const std::vector<ComboButton>& button);
+		/// <summary>次段入力を登録します。</summary>
+		/// <param name="button">入力ステップの一覧です。</param>
+		/// <param name="sequential">trueなら登録順に評価します。</param>
+		void SetButton(const std::vector<ComboButton>& button, bool sequential = false);
 	private:
 		ComboSequence comboSequence_;			// ボタン条件
 		// 受付可能か

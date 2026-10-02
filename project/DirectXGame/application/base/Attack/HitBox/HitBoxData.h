@@ -2,6 +2,7 @@
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Action/ActionRuntime.h>
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
+#include <cstdint>
 
 
 namespace HitBox {
@@ -72,6 +73,10 @@ namespace HitBox {
 		float windowStart = 0.0f;
 		// ヒットボックスの生存時間
 		float lifeTime = 0.5f;
+		// 1ノード内で生成する判定波の数。1なら従来の単発判定。
+		std::uint32_t spawnCount = 1;
+		// 判定波を再生成する間隔。秒単位。
+		float spawnInterval = 0.0f;
 		// ヒット記録を使用するか（使用した場合連続ヒットしない）
 		bool useContactRecord = true;
 		/// 親子付け設定  ///　 

@@ -6,6 +6,7 @@
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
 #include <utility>
+#include <algorithm>
 
 namespace Combo {
 
@@ -62,6 +63,32 @@ namespace Combo {
 			owner->GetAttackController()->GetLockOnSystem() &&
 			owner->GetAttackController()->GetLockOnSystem()->IsLockOn();
 		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
+		// 拡張ルールは、条件一致・優先度・条件の具体性の順で遷移先を決める。
+		const TransitionConditionMask currentMask =
+			(onGround ? kTransitionGround : kTransitionAir) |
+			(hasHit_ ? kTransitionHit : kTransitionMiss) |
+			(isLockOn ? kTransitionLockOn : kTransitionNoLockOn);
+		std::shared_ptr<NodeState> bestTarget;
+		int bestPriority = -1;
+		std::uint32_t bestSpecificity = 0;
+		for (const TransitionTargets::Rule& rule : it->second.rules) {
+			if ((rule.conditionMask & currentMask) != rule.conditionMask) continue;
+			std::uint32_t remainingBits = rule.conditionMask;
+			std::uint32_t specificity = 0;
+			while (remainingBits != 0) {
+				specificity += remainingBits & 1u;
+				remainingBits >>= 1u;
+			}
+			if (auto target = rule.target.lock()) {
+				if (rule.priority > bestPriority ||
+					(rule.priority == bestPriority && specificity > bestSpecificity)) {
+					bestTarget = std::move(target);
+					bestPriority = rule.priority;
+					bestSpecificity = specificity;
+				}
+			}
+		}
+		if (bestTarget) return bestTarget;
 		// 最も具体的な「地上/空中 + ヒット/ミス + ロックオン有無」を先に評価する。
 		const std::weak_ptr<NodeState>& exactTarget = onGround
 			? (hasHit_ ? (isLockOn ? it->second.groundHitLockOn : it->second.groundHitNoLockOn)
@@ -88,57 +115,105 @@ namespace Combo {
 
 	void NodeState::SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next) {
 		TransitionTargets& targets = nextStates[input];
+		TransitionConditionMask conditionMask = 0;
+		int priority = 0;
 		switch (condition) {
 		case TransitionCondition::GroundMiss:
 			targets.groundMiss = next;
+			conditionMask = kTransitionGround | kTransitionMiss;
+			priority = 1;
 			break;
 		case TransitionCondition::GroundHit:
 			targets.groundHit = next;
+			conditionMask = kTransitionGround | kTransitionHit;
+			priority = 1;
 			break;
 		case TransitionCondition::AirMiss:
 			targets.airMiss = next;
+			conditionMask = kTransitionAir | kTransitionMiss;
+			priority = 1;
 			break;
 		case TransitionCondition::AirHit:
 			targets.airHit = next;
+			conditionMask = kTransitionAir | kTransitionHit;
+			priority = 1;
 			break;
 		case TransitionCondition::LockOn:
 			targets.lockOn = next;
+			conditionMask = kTransitionLockOn;
+			priority = 2;
 			break;
 		case TransitionCondition::NoLockOn:
 			targets.noLockOn = next;
+			conditionMask = kTransitionNoLockOn;
+			priority = 2;
 			break;
 		case TransitionCondition::GroundMissLockOn:
 			targets.groundMissLockOn = next;
+			conditionMask = kTransitionGround | kTransitionMiss | kTransitionLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::GroundHitLockOn:
 			targets.groundHitLockOn = next;
+			conditionMask = kTransitionGround | kTransitionHit | kTransitionLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::AirMissLockOn:
 			targets.airMissLockOn = next;
+			conditionMask = kTransitionAir | kTransitionMiss | kTransitionLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::AirHitLockOn:
 			targets.airHitLockOn = next;
+			conditionMask = kTransitionAir | kTransitionHit | kTransitionLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::GroundMissNoLockOn:
 			targets.groundMissNoLockOn = next;
+			conditionMask = kTransitionGround | kTransitionMiss | kTransitionNoLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::GroundHitNoLockOn:
 			targets.groundHitNoLockOn = next;
+			conditionMask = kTransitionGround | kTransitionHit | kTransitionNoLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::AirMissNoLockOn:
 			targets.airMissNoLockOn = next;
+			conditionMask = kTransitionAir | kTransitionMiss | kTransitionNoLockOn;
+			priority = 3;
 			break;
 		case TransitionCondition::AirHitNoLockOn:
 			targets.airHitNoLockOn = next;
+			conditionMask = kTransitionAir | kTransitionHit | kTransitionNoLockOn;
+			priority = 3;
 			break;
 		default:
 			targets.defaultTarget = next;
+			conditionMask = 0;
+			priority = 0;
 			break;
 		}
+		SetNextState(input, conditionMask, std::move(next), priority);
+	}
+
+	void NodeState::SetNextState(ActionInput input, TransitionConditionMask conditionMask,
+		std::shared_ptr<NodeState> next, int priority) {
+		TransitionTargets& targets = nextStates[input];
+		// 同じ条件の登録を置き換え、保存データの再接続でルールが増殖しないようにする。
+		targets.rules.erase(std::remove_if(targets.rules.begin(), targets.rules.end(),
+			[conditionMask, priority](const TransitionTargets::Rule& rule) {
+				return rule.conditionMask == conditionMask && rule.priority == priority;
+			}), targets.rules.end());
+		targets.rules.push_back({ conditionMask, priority, std::move(next) });
 	}
 
 	bool NodeState::HasNextState() const {
 		for (const auto& [input, targets] : nextStates) {
+			if (std::any_of(targets.rules.begin(), targets.rules.end(),
+				[](const TransitionTargets::Rule& rule) { return !rule.target.expired(); })) {
+				return true;
+			}
 			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
 				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
 				!targets.lockOn.expired() || !targets.noLockOn.expired() ||
@@ -158,6 +233,10 @@ namespace Combo {
 			return false;
 		}
 		const TransitionTargets& targets = it->second;
+		if (std::any_of(targets.rules.begin(), targets.rules.end(),
+			[](const TransitionTargets::Rule& rule) { return !rule.target.expired(); })) {
+			return true;
+		}
 		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
 			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
 			!targets.lockOn.expired() || !targets.noLockOn.expired() ||
@@ -191,6 +270,11 @@ namespace Combo {
 			};
 			for (const auto* candidate : candidates) {
 				if (auto target = candidate->lock()) {
+					targets.push_back(std::move(target));
+				}
+			}
+			for (const TransitionTargets::Rule& rule : transition.rules) {
+				if (auto target = rule.target.lock()) {
 					targets.push_back(std::move(target));
 				}
 			}

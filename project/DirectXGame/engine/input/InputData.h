@@ -14,7 +14,16 @@ struct PlayerInputData {
 	// 回避
 	bool dodgeTrigger = false;
 	// スキル
+	bool skillPressed = false;
 	bool skillTrigger = false;
+	bool skillReleased = false;
+	// コンボ条件でも利用できる通常攻撃入力
+	bool lightAttackPressed = false;
+	bool lightAttackTrigger = false;
+	bool lightAttackReleased = false;
+	bool heavyAttackPressed = false;
+	bool heavyAttackTrigger = false;
+	bool heavyAttackReleased = false;
 	// 必殺技
 	bool specialTrigger = false;
 	// ガードを押した瞬間

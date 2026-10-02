@@ -91,7 +91,10 @@ namespace Combo {
 		/// <summary>
 		/// コンボキャンセル受付クラス取得
 		/// </summary>
-		CancelReceiver GetCancelReceiver() const { return cancelReceiver_;}
+		CancelReceiver& GetCancelReceiver() { return cancelReceiver_; }
+		/// <summary>キャンセル条件を読み取り専用で取得します。</summary>
+		/// <returns>内部キャンセル条件への読み取り専用参照です。</returns>
+		const CancelReceiver& GetCancelReceiver() const { return cancelReceiver_; }
 		/// <summary>
 		/// コンボ終了条件クラス取得
 		/// </summary>

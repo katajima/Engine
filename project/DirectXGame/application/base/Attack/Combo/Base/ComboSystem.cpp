@@ -578,6 +578,25 @@ namespace Combo {
 		// 項目一覧は一か所に集約し、writerが登録と保存の違いを吸収する
 		Engine::GlobalVariableWriter writer(globalVariables, overwrite ?
 			Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
+		// 入力シーケンスを配列順で保存し、旧データには存在しない場合も読み飛ばせる形式にする。
+		auto writeInputSequence = [&](const char* prefix, const std::vector<ComboInputStep>& sequence) {
+			const std::string prefixText = prefix;
+			writer.Value(groupName, prefixText + "数", static_cast<int>(sequence.size()));
+			for (std::size_t index = 0; index < sequence.size(); ++index) {
+				const std::string suffix = std::to_string(index);
+				const auto& step = sequence[index];
+				writer.Value(groupName, prefixText + "ソース" + suffix, static_cast<int>(step.source));
+				writer.Value(groupName, prefixText + "ボタン" + suffix, static_cast<int>(step.button));
+				writer.Value(groupName, prefixText + "アクション" + suffix, static_cast<int>(step.action));
+				writer.Value(groupName, prefixText + "入力種別" + suffix, static_cast<int>(step.inputType));
+				writer.Value(groupName, prefixText + "方向" + suffix, static_cast<int>(step.direction));
+				writer.Value(groupName, prefixText + "最小保持時間" + suffix, step.minHoldSeconds);
+				writer.Value(groupName, prefixText + "最大保持時間" + suffix, step.maxHoldSeconds);
+				writer.Value(groupName, prefixText + "最小溜め率" + suffix, step.minChargeRatio);
+				writer.Value(groupName, prefixText + "最大溜め率" + suffix, step.maxChargeRatio);
+				writer.Value(groupName, prefixText + "溜め時間" + suffix, step.chargeSeconds);
+			}
+		};
 		// 攻撃タイプと遠距離攻撃
 		{
 			writer.Value(groupName, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
@@ -747,6 +766,8 @@ namespace Combo {
 			writer.Value(groupName, "コンボキャンセル可能", data.condition.isCancel);
 			writer.Value(groupName, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
 			writer.Value(groupName, "コンボ入力遅延", data.condition.inputDelay);
+			writeInputSequence("次段入力", data.condition.nextInputSequence);
+			writeInputSequence("キャンセル入力", data.condition.cancelInputSequence);
 		}
 		// アニメーション
 		{
@@ -827,6 +848,8 @@ namespace Combo {
 			writer.Value(groupName, "親オブジェクト名前", data.hitBox.parentName);
 			writer.Value(groupName, "ヒットボックス発生時間", data.hitBox.windowStart);
 			writer.Value(groupName, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			writer.Value(groupName, "ヒットボックス発生回数", static_cast<int>(data.hitBox.spawnCount));
+			writer.Value(groupName, "ヒットボックス再発生間隔", data.hitBox.spawnInterval);
 			writer.Value(groupName, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 			writer.Value(groupName, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			writer.Value(groupName, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
@@ -947,6 +970,32 @@ namespace Combo {
 		}
 	}
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
+		// 保存されている入力シーケンスを復元し、未保存の旧データは空配列として扱う。
+		auto readInputSequence = [&](const char* prefix, std::vector<ComboInputStep>& sequence) {
+			const std::string prefixText = prefix;
+			const std::string countKey = prefixText + "数";
+			sequence.clear();
+			if (!globalVariables->HasKey(name, countKey)) {
+				return;
+			}
+			const int savedCount = globalVariables->GetValue<int>(name, countKey);
+			const int count = (std::max)(0, (std::min)(savedCount, 32));
+			sequence.resize(static_cast<std::size_t>(count));
+			for (int index = 0; index < count; ++index) {
+				const std::string suffix = std::to_string(index);
+				auto& step = sequence[static_cast<std::size_t>(index)];
+				step.source = static_cast<ComboInputSource>(globalVariables->GetValue<int>(name, prefixText + "ソース" + suffix));
+				step.button = static_cast<ComboGamePadButton>(globalVariables->GetValue<int>(name, prefixText + "ボタン" + suffix));
+				step.action = static_cast<ComboActionType>(globalVariables->GetValue<int>(name, prefixText + "アクション" + suffix));
+				step.inputType = static_cast<ComboButtonInputType>(globalVariables->GetValue<int>(name, prefixText + "入力種別" + suffix));
+				step.direction = static_cast<ComboInputDirection>(globalVariables->GetValue<int>(name, prefixText + "方向" + suffix));
+				step.minHoldSeconds = globalVariables->GetValue<float>(name, prefixText + "最小保持時間" + suffix);
+				step.maxHoldSeconds = globalVariables->GetValue<float>(name, prefixText + "最大保持時間" + suffix);
+				step.minChargeRatio = globalVariables->GetValue<float>(name, prefixText + "最小溜め率" + suffix);
+				step.maxChargeRatio = globalVariables->GetValue<float>(name, prefixText + "最大溜め率" + suffix);
+				step.chargeSeconds = globalVariables->GetValue<float>(name, prefixText + "溜め時間" + suffix);
+			}
+		};
 		// 攻撃タイプと遠距離攻撃
 		{
 			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
@@ -1144,6 +1193,8 @@ namespace Combo {
 			data.condition.isCancel = globalVariables->GetValue<bool>(name, "コンボキャンセル可能");
 			data.condition.isMoveCancel = globalVariables->GetValue<bool>(name, "コンボ移動キャンセル可能");
 			data.condition.inputDelay = globalVariables->GetValue<float>(name, "コンボ入力遅延");
+			readInputSequence("次段入力", data.condition.nextInputSequence);
+			readInputSequence("キャンセル入力", data.condition.cancelInputSequence);
 		}
 		// アニメーション
 		{
@@ -1276,6 +1327,12 @@ namespace Combo {
 			data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
 			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+			if (globalVariables->HasKey(name, "ヒットボックス発生回数")) {
+				data.hitBox.spawnCount = static_cast<std::uint32_t>((std::max)(1, globalVariables->GetValue<int>(name, "ヒットボックス発生回数")));
+			}
+			if (globalVariables->HasKey(name, "ヒットボックス再発生間隔")) {
+				data.hitBox.spawnInterval = globalVariables->GetValue<float>(name, "ヒットボックス再発生間隔");
+			}
 			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
 			data.hitBox.recordPerCollider = globalVariables->GetValue<bool>(name, "ヒットボックスコライダー別ヒット記録");
 			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
@@ -1401,17 +1458,32 @@ namespace Combo {
 		data.GetComboEffect().SetParentTransforms(parentTransforms_);
 		// カメラ
 		data.GetComboCamera().GetData() = gData.camera;
-		// コンボボタン設定
-		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
-		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);
-		ComboButton bo3 = ComboButton(ComboGamePadButton::GAMEPAD_Y, ComboButtonInputType::kPressed);
-
-		// 押し続ける
-		std::vector<ComboButton> button;
-		button.push_back(bo);
-		button.push_back(bo2);
-		button.push_back(bo3);
-		data.GetComboCondition().GetNextReceiver().SetButton(button);
+		// 保存設定に入力列がある場合は、方向・長押し・溜め条件を含めて変換する。
+		auto createInputButtons = [](const std::vector<ComboInputStep>& steps) {
+			std::vector<ComboButton> buttons;
+			buttons.reserve(steps.size());
+			for (const ComboInputStep& step : steps) {
+				buttons.emplace_back(step);
+			}
+			return buttons;
+		};
+		if (!gData.condition.nextInputSequence.empty()) {
+			data.GetComboCondition().GetNextReceiver().SetButton(
+				createInputButtons(gData.condition.nextInputSequence), true);
+		}
+		else {
+			// 旧データは従来どおり、B/X/Yのいずれかで成立させる。
+			std::vector<ComboButton> legacyButtons = {
+				ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed),
+				ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed),
+				ComboButton(ComboGamePadButton::GAMEPAD_Y, ComboButtonInputType::kPressed),
+			};
+			data.GetComboCondition().GetNextReceiver().SetButton(legacyButtons);
+		}
+		if (!gData.condition.cancelInputSequence.empty()) {
+			data.GetComboCondition().GetCancelReceiver().SetButton(
+				createInputButtons(gData.condition.cancelInputSequence), true);
+		}
 	}
 
 	void System::CreateCombo(const std::string& comboNodeName) {
@@ -1584,6 +1656,34 @@ namespace Combo {
 			}
 			if (hitBox.windowStart < 0.0f) {
 				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス発生時間が負の値です。");
+			}
+			if (hitBox.spawnCount == 0) {
+				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス発生回数が0です。");
+			}
+			if (hitBox.spawnInterval < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス再発生間隔が負の値です。");
+			}
+			if (hitBox.spawnCount > 1 && hitBox.spawnInterval <= 0.0f) {
+				addIssue(ValidationSeverity::Warning, nodeName, "ヒットボックスを複数回発生させるには再発生間隔を0より大きくしてください。");
+			}
+			// 次段とキャンセルの入力シーケンスに矛盾した範囲がないか検証する。
+			const std::vector<std::pair<const char*, const std::vector<ComboInputStep>*>> inputSequences = {
+				{ "次段", &condition.nextInputSequence },
+				{ "キャンセル", &condition.cancelInputSequence },
+			};
+			for (const auto& [sequenceName, sequence] : inputSequences) {
+				for (const auto& step : *sequence) {
+					if (step.minHoldSeconds < 0.0f || step.maxHoldSeconds < 0.0f ||
+						step.minChargeRatio < 0.0f || step.maxChargeRatio < 0.0f || step.chargeSeconds < 0.0f) {
+						addIssue(ValidationSeverity::Error, nodeName, std::string(sequenceName) + "入力シーケンスに負の値があります。");
+					}
+					if (step.maxHoldSeconds > 0.0f && step.minHoldSeconds > step.maxHoldSeconds) {
+						addIssue(ValidationSeverity::Error, nodeName, std::string(sequenceName) + "入力シーケンスの保持時間範囲が逆です。");
+					}
+					if (step.minChargeRatio > step.maxChargeRatio) {
+						addIssue(ValidationSeverity::Error, nodeName, std::string(sequenceName) + "入力シーケンスの溜め率範囲が逆です。");
+					}
+				}
 			}
 		}
 

@@ -56,4 +56,9 @@ namespace Combo {
 		}
 	};
 
+	void CancelReceiver::SetButton(const std::vector<ComboButton>& button, bool sequential) {
+		// キャンセル用入力列を条件評価へ登録する。
+		comboSequence_.RegisterCombo(button, sequential);
+	}
+
 }
