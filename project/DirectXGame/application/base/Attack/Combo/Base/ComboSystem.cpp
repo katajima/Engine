@@ -104,24 +104,46 @@ namespace Combo {
 	void System::Update(const Character::CharacterContext& ctx) {
 		UpdateCooldowns(ctx.dt);
 		comboStateMachine_->SetIsDebug(isDebug);
+		// 開始時のEnterを実コンテキストで先に実行し、空のコンテキストを渡さない。
+		comboStateMachine_->ActivatePendingRoot(ctx);
+		if (pendingStartInput_) {
+			if (auto startedNode = comboStateMachine_->GetCurrentState()) {
+				// 開始入力をノードへ設定してから最初のUpdateを実行する。
+				startedNode->SetActionInput(*pendingStartInput_);
+			}
+			pendingStartInput_.reset();
+		}
 		comboStateMachine_->Update(ctx);
 		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
 		if (transitionedInput) {
 			// 次ノードの命中・キャンセル・ミスイベントへ入力種別を引き継ぐ
-			currentActionInput_ = *transitionedInput;
+			currentActionInput_ = transitionedInput->input;
 			if (auto transitionedNode = comboStateMachine_->GetCurrentState()) {
 				transitionedNode->SetActionInput(currentActionInput_);
 			}
-			// 実際に消費された入力に対応する予約コストだけを確定する
+			// 実際に消費された入力IDに対応する予約コストだけを確定する。
 			auto pending = std::find_if(pendingCosts_.begin(), pendingCosts_.end(),
 				[&transitionedInput](const PendingCost& cost) {
-					return cost.input == *transitionedInput;
+					return cost.inputBufferId == transitionedInput->id;
 				});
 			if (pending != pendingCosts_.end()) {
-				PayStamina(pending->staminaCost);
-				StartCooldown(pending->cooldownNode);
+				// 予約分を解放してから、実際に遷移したノードのコストを確定する。
+				reservedStamina_ = (std::max)(0.0f, reservedStamina_ - pending->staminaCost);
+				const std::shared_ptr<NodeState> transitionedNode = comboStateMachine_->GetCurrentState();
+				const float actualCost = GetComboStaminaCost(currentActionInput_, transitionedNode);
+				PayStamina(actualCost);
+				StartCooldown(transitionedNode);
 				owner->EmitActionEvent({ GameAction::EventType::ResourceConsumed, owner, nullptr,
-					*transitionedInput, pending->cooldownNode ? pending->cooldownNode->GetName() : "", pending->staminaCost });
+					currentActionInput_, transitionedNode ? transitionedNode->GetName() : "", actualCost });
+				pendingCosts_.erase(pending);
+			}
+		}
+		// 期限切れ・上限超過の入力に紐付いた予約を漏れなく解放する。
+		for (const InputBufferId discardedId : comboStateMachine_->ConsumeDiscardedInputIds()) {
+			auto pending = std::find_if(pendingCosts_.begin(), pendingCosts_.end(),
+				[discardedId](const PendingCost& cost) { return cost.inputBufferId == discardedId; });
+			if (pending != pendingCosts_.end()) {
+				reservedStamina_ = (std::max)(0.0f, reservedStamina_ - pending->staminaCost);
 				pendingCosts_.erase(pending);
 			}
 		}
@@ -129,6 +151,7 @@ namespace Combo {
 			comboStateMachine_->GetBufferedInputCount() == 0) {
 			// 攻撃終了または受付期限切れになった入力のコスト予約を破棄する
 			pendingCosts_.clear();
+			reservedStamina_ = 0.0f;
 		}
 		comboDebug_->SetEnabled(isDebugDraw_);
 		comboDebug_->Update(ctx.dt);
@@ -149,17 +172,19 @@ namespace Combo {
 			}
 
 			const float transitionCost = GetComboStaminaCost(input, nextNode);
-			if (!CanPayStamina(transitionCost)) {
+			if (!CanPayStamina(transitionCost + reservedStamina_)) {
 				return false;
 			}
 
-			comboStateMachine_->HandleInput(input);
+			const InputBufferId inputBufferId = comboStateMachine_->HandleInput(input);
 			// 複数の先行入力に対応するため、入力とコスト予約を同じ順序で保持する
 			if (pendingCosts_.size() >= 8) {
 				// 入力キューと同じ上限で、最も古い予約だけを破棄する
+				reservedStamina_ = (std::max)(0.0f, reservedStamina_ - pendingCosts_.front().staminaCost);
 				pendingCosts_.pop_front();
 			}
-			pendingCosts_.push_back({ input, transitionCost, nextNode });
+			pendingCosts_.push_back({ inputBufferId, input, transitionCost, nextNode });
+			reservedStamina_ += transitionCost;
 			return true;
 		}
 
@@ -193,11 +218,10 @@ namespace Combo {
 
 		// 新しいコンボ開始時は前段コンボの未確定コストを破棄する
 		pendingCosts_.clear();
+		reservedStamina_ = 0.0f;
 		currentActionInput_ = input;
-		if (auto startedNode = comboStateMachine_->GetCurrentState()) {
-			// 開始ノードのキャンセル・ミスイベントへ開始入力を記録する
-			startedNode->SetActionInput(input);
-		}
+		// 開始ノードは次回Updateで実コンテキスト付きEnterを行うため、入力もそこで適用する。
+		pendingStartInput_ = input;
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
 		PayStamina(startCost);
@@ -266,6 +290,8 @@ namespace Combo {
 		parentTransforms_.clear();
 		// コンボグラフを再構築するため、未確定リソース予約も破棄する
 		pendingCosts_.clear();
+		reservedStamina_ = 0.0f;
+		pendingStartInput_.reset();
 		// ノード再構築前に古い検証結果も破棄する
 		validationIssues_.clear();
 		cooldownTimers_.clear();
@@ -315,6 +341,14 @@ namespace Combo {
 				renameTarget(targets.airHit);
 				renameTarget(targets.lockOn);
 				renameTarget(targets.noLockOn);
+				renameTarget(targets.groundMissLockOn);
+				renameTarget(targets.groundHitLockOn);
+				renameTarget(targets.airMissLockOn);
+				renameTarget(targets.airHitLockOn);
+				renameTarget(targets.groundMissNoLockOn);
+				renameTarget(targets.groundHitNoLockOn);
+				renameTarget(targets.airMissNoLockOn);
+				renameTarget(targets.airHitNoLockOn);
 			};
 			renameTarget(data.connection.lightAttack);
 			renameTarget(data.connection.heavyAttack);
@@ -660,18 +694,42 @@ namespace Combo {
 			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
 			writer.Value(groupName, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
 			writer.Value(groupName, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-未ヒット-ロックオン)", data.connection.lightCondition.groundMissLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-ヒット-ロックオン)", data.connection.lightCondition.groundHitLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-未ヒット-ロックオン)", data.connection.lightCondition.airMissLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット-ロックオン)", data.connection.lightCondition.airHitLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-未ヒット-ロックオンなし)", data.connection.lightCondition.groundMissNoLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-ヒット-ロックオンなし)", data.connection.lightCondition.groundHitNoLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-未ヒット-ロックオンなし)", data.connection.lightCondition.airMissNoLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット-ロックオンなし)", data.connection.lightCondition.airHitNoLockOn);
 			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
 			writer.Value(groupName, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
 			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
 			writer.Value(groupName, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
 			writer.Value(groupName, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
 			writer.Value(groupName, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット-ロックオン)", data.connection.heavyCondition.groundMissLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-ヒット-ロックオン)", data.connection.heavyCondition.groundHitLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット-ロックオン)", data.connection.heavyCondition.airMissLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-ヒット-ロックオン)", data.connection.heavyCondition.airHitLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット-ロックオンなし)", data.connection.heavyCondition.groundMissNoLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-ヒット-ロックオンなし)", data.connection.heavyCondition.groundHitNoLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット-ロックオンなし)", data.connection.heavyCondition.airMissNoLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-ヒット-ロックオンなし)", data.connection.heavyCondition.airHitNoLockOn);
 			writer.Value(groupName, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
 			writer.Value(groupName, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
 			writer.Value(groupName, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
 			writer.Value(groupName, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
 			writer.Value(groupName, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
 			writer.Value(groupName, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-未ヒット-ロックオン)", data.connection.skillCondition.groundMissLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-ヒット-ロックオン)", data.connection.skillCondition.groundHitLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-未ヒット-ロックオン)", data.connection.skillCondition.airMissLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-ヒット-ロックオン)", data.connection.skillCondition.airHitLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-未ヒット-ロックオンなし)", data.connection.skillCondition.groundMissNoLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-ヒット-ロックオンなし)", data.connection.skillCondition.groundHitNoLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-未ヒット-ロックオンなし)", data.connection.skillCondition.airMissNoLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-ヒット-ロックオンなし)", data.connection.skillCondition.airHitNoLockOn);
 		}
 		// 条件
 		{
@@ -1018,6 +1076,12 @@ namespace Combo {
 		}
 		// 接続
 		{
+			// 複合条件は旧保存データに存在しないため、未登録なら空接続として補完する。
+			auto readOptionalConnection = [&](const char* key) {
+				return globalVariables->HasKey(name, key)
+					? globalVariables->GetValue<std::string>(name, key)
+					: std::string{};
+			};
 			data.connection.lightAttack = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃)");
 			data.connection.heavyAttack = globalVariables->GetValue<std::string>(name, "接続先(強攻撃)");
 			data.connection.skill = globalVariables->GetValue<std::string>(name, "接続先(スキル)");
@@ -1027,18 +1091,42 @@ namespace Combo {
 			data.connection.lightCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-ヒット)");
 			data.connection.lightCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオン中)");
 			data.connection.lightCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオンなし)");
+			data.connection.lightCondition.groundMissLockOn = readOptionalConnection("接続先(弱攻撃-地上-未ヒット-ロックオン)");
+			data.connection.lightCondition.groundHitLockOn = readOptionalConnection("接続先(弱攻撃-地上-ヒット-ロックオン)");
+			data.connection.lightCondition.airMissLockOn = readOptionalConnection("接続先(弱攻撃-空中-未ヒット-ロックオン)");
+			data.connection.lightCondition.airHitLockOn = readOptionalConnection("接続先(弱攻撃-空中-ヒット-ロックオン)");
+			data.connection.lightCondition.groundMissNoLockOn = readOptionalConnection("接続先(弱攻撃-地上-未ヒット-ロックオンなし)");
+			data.connection.lightCondition.groundHitNoLockOn = readOptionalConnection("接続先(弱攻撃-地上-ヒット-ロックオンなし)");
+			data.connection.lightCondition.airMissNoLockOn = readOptionalConnection("接続先(弱攻撃-空中-未ヒット-ロックオンなし)");
+			data.connection.lightCondition.airHitNoLockOn = readOptionalConnection("接続先(弱攻撃-空中-ヒット-ロックオンなし)");
 			data.connection.heavyCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-未ヒット)");
 			data.connection.heavyCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-ヒット)");
 			data.connection.heavyCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-未ヒット)");
 			data.connection.heavyCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-ヒット)");
 			data.connection.heavyCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオン中)");
 			data.connection.heavyCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオンなし)");
+			data.connection.heavyCondition.groundMissLockOn = readOptionalConnection("接続先(強攻撃-地上-未ヒット-ロックオン)");
+			data.connection.heavyCondition.groundHitLockOn = readOptionalConnection("接続先(強攻撃-地上-ヒット-ロックオン)");
+			data.connection.heavyCondition.airMissLockOn = readOptionalConnection("接続先(強攻撃-空中-未ヒット-ロックオン)");
+			data.connection.heavyCondition.airHitLockOn = readOptionalConnection("接続先(強攻撃-空中-ヒット-ロックオン)");
+			data.connection.heavyCondition.groundMissNoLockOn = readOptionalConnection("接続先(強攻撃-地上-未ヒット-ロックオンなし)");
+			data.connection.heavyCondition.groundHitNoLockOn = readOptionalConnection("接続先(強攻撃-地上-ヒット-ロックオンなし)");
+			data.connection.heavyCondition.airMissNoLockOn = readOptionalConnection("接続先(強攻撃-空中-未ヒット-ロックオンなし)");
+			data.connection.heavyCondition.airHitNoLockOn = readOptionalConnection("接続先(強攻撃-空中-ヒット-ロックオンなし)");
 			data.connection.skillCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-未ヒット)");
 			data.connection.skillCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-ヒット)");
 			data.connection.skillCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-未ヒット)");
 			data.connection.skillCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-ヒット)");
 			data.connection.skillCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオン中)");
 			data.connection.skillCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオンなし)");
+			data.connection.skillCondition.groundMissLockOn = readOptionalConnection("接続先(スキル-地上-未ヒット-ロックオン)");
+			data.connection.skillCondition.groundHitLockOn = readOptionalConnection("接続先(スキル-地上-ヒット-ロックオン)");
+			data.connection.skillCondition.airMissLockOn = readOptionalConnection("接続先(スキル-空中-未ヒット-ロックオン)");
+			data.connection.skillCondition.airHitLockOn = readOptionalConnection("接続先(スキル-空中-ヒット-ロックオン)");
+			data.connection.skillCondition.groundMissNoLockOn = readOptionalConnection("接続先(スキル-地上-未ヒット-ロックオンなし)");
+			data.connection.skillCondition.groundHitNoLockOn = readOptionalConnection("接続先(スキル-地上-ヒット-ロックオンなし)");
+			data.connection.skillCondition.airMissNoLockOn = readOptionalConnection("接続先(スキル-空中-未ヒット-ロックオンなし)");
+			data.connection.skillCondition.airHitNoLockOn = readOptionalConnection("接続先(スキル-空中-ヒット-ロックオンなし)");
 		}
 		// 条件
 		{
@@ -1363,7 +1451,7 @@ namespace Combo {
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
 	}
 
-	void System::ConnectSavedCombos() {
+		void System::ConnectSavedCombos() {
 		for (const auto& [nodeName, data] : comboGlobalDatas_) {
 			auto connectConditional = [&](ActionInput input, const GlobalConditionalConnection& targets) {
 				if (!targets.lockOn.empty()) {
@@ -1383,6 +1471,30 @@ namespace Combo {
 				}
 				if (!targets.airHit.empty()) {
 					ConnectCombo(nodeName, input, targets.airHit, TransitionCondition::AirHit);
+				}
+				if (!targets.groundMissLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundMissLockOn, TransitionCondition::GroundMissLockOn);
+				}
+				if (!targets.groundHitLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundHitLockOn, TransitionCondition::GroundHitLockOn);
+				}
+				if (!targets.airMissLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airMissLockOn, TransitionCondition::AirMissLockOn);
+				}
+				if (!targets.airHitLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airHitLockOn, TransitionCondition::AirHitLockOn);
+				}
+				if (!targets.groundMissNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundMissNoLockOn, TransitionCondition::GroundMissNoLockOn);
+				}
+				if (!targets.groundHitNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundHitNoLockOn, TransitionCondition::GroundHitNoLockOn);
+				}
+				if (!targets.airMissNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airMissNoLockOn, TransitionCondition::AirMissNoLockOn);
+				}
+				if (!targets.airHitNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airHitNoLockOn, TransitionCondition::AirHitNoLockOn);
 				}
 			};
 			if (!data.connection.lightAttack.empty()) {
@@ -1429,6 +1541,14 @@ namespace Combo {
 				checkTarget(nodeName, connection->airHit, "空中ヒット");
 				checkTarget(nodeName, connection->lockOn, "ロックオン");
 				checkTarget(nodeName, connection->noLockOn, "非ロックオン");
+				checkTarget(nodeName, connection->groundMissLockOn, "地上ミス・ロックオン");
+				checkTarget(nodeName, connection->groundHitLockOn, "地上ヒット・ロックオン");
+				checkTarget(nodeName, connection->airMissLockOn, "空中ミス・ロックオン");
+				checkTarget(nodeName, connection->airHitLockOn, "空中ヒット・ロックオン");
+				checkTarget(nodeName, connection->groundMissNoLockOn, "地上ミス・非ロックオン");
+				checkTarget(nodeName, connection->groundHitNoLockOn, "地上ヒット・非ロックオン");
+				checkTarget(nodeName, connection->airMissNoLockOn, "空中ミス・非ロックオン");
+				checkTarget(nodeName, connection->airHitNoLockOn, "空中ヒット・非ロックオン");
 			}
 		}
 

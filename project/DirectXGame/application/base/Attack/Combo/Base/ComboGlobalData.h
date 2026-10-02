@@ -434,6 +434,15 @@ struct GlobalAudio {
 		std::string airHit = "";
 		std::string lockOn = "";
 		std::string noLockOn = "";
+		// 地上/空中とヒット/ミス、ロックオン有無を組み合わせた接続先です。
+		std::string groundMissLockOn = "";
+		std::string groundHitLockOn = "";
+		std::string airMissLockOn = "";
+		std::string airHitLockOn = "";
+		std::string groundMissNoLockOn = "";
+		std::string groundHitNoLockOn = "";
+		std::string airMissNoLockOn = "";
+		std::string airHitNoLockOn = "";
 	};
 
 	/// <summary>

@@ -12,6 +12,8 @@ namespace Combo {
 		this->owner = owner;
 		// ヒットボックスシステムを渡す
 		hitBoxSystem = owner->GetHitBoxSystem();
+		// ノードごとの一時判定を他の攻撃と分離して終了できるようにする。
+		hitBoxOwnerId_ = hitBoxSystem->AllocateOwnerId();
 		// 移動システムを渡す
 		movementComponent = owner->GetMoveComponent();
 
@@ -42,14 +44,14 @@ namespace Combo {
 				case HitBox::SpawnType::kOnTime: // 時間経過で
 					// 指定された開始時間を過ぎたら生成する
 					if (timer >= collData_.hitBoxData.windowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
+						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent, hitBoxOwnerId_);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					// 空中攻撃などで、着地した瞬間に発生する攻撃用
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
+						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent, hitBoxOwnerId_);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -80,8 +82,11 @@ namespace Combo {
 	void ComboHitBox::Exit() {
 		// 次のコンボへ生成済み状態を持ち越さないようリセットする
 		isPopHitBox_ = false;
-		// 無期限判定はノード間で再利用するため、一時判定だけを解放する
-		hitBoxSystem->ClearLifeTimeHitBoxes();
+		// このComboHitBoxが生成した一時判定だけを解放し、他の攻撃判定は残す。
+		if (hitBoxSystem && hitBoxOwnerId_ != 0) {
+			hitBoxSystem->ClearLifeTimeHitBoxes(hitBoxOwnerId_);
+		}
+		hitBoxOwnerId_ = 0;
 		if (hitBox) {
 			// 常時型ヒットボックスの当たり履歴も次回用に消す
 			hitBox->Disable();

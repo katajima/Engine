@@ -57,6 +57,8 @@ namespace Combo {
 		Vector3 direction = {};
 		// コンボタイプ
 		Type type{};
+		// このComboHitBoxが生成した期限付き判定を識別する所有者IDです。
+		HitBox::HitBoxOwnerId hitBoxOwnerId_ = 0;
 		//
 		int32_t id = -1;
 	private:

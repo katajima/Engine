@@ -377,6 +377,22 @@ namespace Combo {
 					drawConnectionCombo("ロックオン中", targets.lockOn);
 					ImGui::SetNextItemWidth(260.0f);
 					drawConnectionCombo("ロックオンなし", targets.noLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / 未ヒット / ロックオン", targets.groundMissLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / ヒット / ロックオン", targets.groundHitLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / 未ヒット / ロックオン", targets.airMissLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / ヒット / ロックオン", targets.airHitLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / 未ヒット / ロックオンなし", targets.groundMissNoLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / ヒット / ロックオンなし", targets.groundHitNoLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / 未ヒット / ロックオンなし", targets.airMissNoLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / ヒット / ロックオンなし", targets.airHitNoLockOn);
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
@@ -605,6 +621,14 @@ namespace Combo {
 				clearTarget(targets.airHit);
 				clearTarget(targets.lockOn);
 				clearTarget(targets.noLockOn);
+				clearTarget(targets.groundMissLockOn);
+				clearTarget(targets.groundHitLockOn);
+				clearTarget(targets.airMissLockOn);
+				clearTarget(targets.airHitLockOn);
+				clearTarget(targets.groundMissNoLockOn);
+				clearTarget(targets.groundHitNoLockOn);
+				clearTarget(targets.airMissNoLockOn);
+				clearTarget(targets.airHitNoLockOn);
 			};
 			clearTarget(data.connection.lightAttack);
 			clearTarget(data.connection.heavyAttack);

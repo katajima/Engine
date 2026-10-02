@@ -74,6 +74,9 @@ void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons
 /// </summary>
 bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 	if (comboButtons_.empty()) return false;
+	// AIや入力を持たないキャラクターでは入力システムがnullptrになり得る。
+	// 入力条件を満たさない扱いで安全に終了し、戦闘更新自体は継続させる。
+	if (!ctx.input) return false;
 	// 入力判定
 	// 現状は順番入力ではなく、登録されたどれかのボタンが成立したら次コンボへ進める
 	for (auto& bu : comboButtons_) {

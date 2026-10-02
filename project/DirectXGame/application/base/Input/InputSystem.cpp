@@ -192,6 +192,11 @@ bool InputSystem::IsMouseReleased(uint8_t button) const {
 }
 bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
 {
+	// AI・リプレイ・入力未接続キャラクターでは入力オブジェクトが存在しない。
+	// 未入力として扱うことで、条件評価からのnullptr参照を防ぐ。
+	if (!input) {
+		return false;
+	}
 	switch (press)
 	{
 	case InputButton::kPressed:

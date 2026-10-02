@@ -61,13 +61,22 @@ namespace Combo {
 			owner->GetAttackController() &&
 			owner->GetAttackController()->GetLockOnSystem() &&
 			owner->GetAttackController()->GetLockOnSystem()->IsLockOn();
+		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
+		// 最も具体的な「地上/空中 + ヒット/ミス + ロックオン有無」を先に評価する。
+		const std::weak_ptr<NodeState>& exactTarget = onGround
+			? (hasHit_ ? (isLockOn ? it->second.groundHitLockOn : it->second.groundHitNoLockOn)
+				: (isLockOn ? it->second.groundMissLockOn : it->second.groundMissNoLockOn))
+			: (hasHit_ ? (isLockOn ? it->second.airHitLockOn : it->second.airHitNoLockOn)
+				: (isLockOn ? it->second.airMissLockOn : it->second.airMissNoLockOn));
+		if (auto next = exactTarget.lock()) {
+			return next;
+		}
 		const std::weak_ptr<NodeState>& lockOnTarget = isLockOn ? it->second.lockOn : it->second.noLockOn;
 		if (auto next = lockOnTarget.lock()) {
 			// ロックオン用の分岐が設定されている場合は、地上/空中やヒット状態より優先する
 			return next;
 		}
 
-		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
 		const std::weak_ptr<NodeState>& conditionalTarget =
 			onGround ? (hasHit_ ? it->second.groundHit : it->second.groundMiss)
 			: (hasHit_ ? it->second.airHit : it->second.airMiss);
@@ -98,6 +107,30 @@ namespace Combo {
 		case TransitionCondition::NoLockOn:
 			targets.noLockOn = next;
 			break;
+		case TransitionCondition::GroundMissLockOn:
+			targets.groundMissLockOn = next;
+			break;
+		case TransitionCondition::GroundHitLockOn:
+			targets.groundHitLockOn = next;
+			break;
+		case TransitionCondition::AirMissLockOn:
+			targets.airMissLockOn = next;
+			break;
+		case TransitionCondition::AirHitLockOn:
+			targets.airHitLockOn = next;
+			break;
+		case TransitionCondition::GroundMissNoLockOn:
+			targets.groundMissNoLockOn = next;
+			break;
+		case TransitionCondition::GroundHitNoLockOn:
+			targets.groundHitNoLockOn = next;
+			break;
+		case TransitionCondition::AirMissNoLockOn:
+			targets.airMissNoLockOn = next;
+			break;
+		case TransitionCondition::AirHitNoLockOn:
+			targets.airHitNoLockOn = next;
+			break;
 		default:
 			targets.defaultTarget = next;
 			break;
@@ -108,7 +141,11 @@ namespace Combo {
 		for (const auto& [input, targets] : nextStates) {
 			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
 				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
-				!targets.lockOn.expired() || !targets.noLockOn.expired()) {
+				!targets.lockOn.expired() || !targets.noLockOn.expired() ||
+				!targets.groundMissLockOn.expired() || !targets.groundHitLockOn.expired() ||
+				!targets.airMissLockOn.expired() || !targets.airHitLockOn.expired() ||
+				!targets.groundMissNoLockOn.expired() || !targets.groundHitNoLockOn.expired() ||
+				!targets.airMissNoLockOn.expired() || !targets.airHitNoLockOn.expired()) {
 				return true;
 			}
 		}
@@ -123,7 +160,11 @@ namespace Combo {
 		const TransitionTargets& targets = it->second;
 		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
 			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
-			!targets.lockOn.expired() || !targets.noLockOn.expired();
+			!targets.lockOn.expired() || !targets.noLockOn.expired() ||
+			!targets.groundMissLockOn.expired() || !targets.groundHitLockOn.expired() ||
+			!targets.airMissLockOn.expired() || !targets.airHitLockOn.expired() ||
+			!targets.groundMissNoLockOn.expired() || !targets.groundHitNoLockOn.expired() ||
+			!targets.airMissNoLockOn.expired() || !targets.airHitNoLockOn.expired();
 	}
 
 	std::vector<std::shared_ptr<NodeState>> NodeState::GetTransitionTargets() const {
@@ -139,6 +180,14 @@ namespace Combo {
 				&transition.airHit,
 				&transition.lockOn,
 				&transition.noLockOn,
+				&transition.groundMissLockOn,
+				&transition.groundHitLockOn,
+				&transition.airMissLockOn,
+				&transition.airHitLockOn,
+				&transition.groundMissNoLockOn,
+				&transition.groundHitNoLockOn,
+				&transition.airMissNoLockOn,
+				&transition.airHitNoLockOn,
 			};
 			for (const auto* candidate : candidates) {
 				if (auto target = candidate->lock()) {
@@ -233,14 +282,28 @@ namespace Combo {
 		return node ? node->ResolveNextState(owner, input) : nullptr;
 	}
 
-	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
-		std::optional<ActionInput> result = transitionedInput_;
+	std::optional<ConsumedInput> StateMachine::ConsumeTransitionedInput() {
+		std::optional<ConsumedInput> result = transitionedInput_;
 		transitionedInput_.reset();
+		return result;
+	}
+
+	std::vector<InputBufferId> StateMachine::ConsumeDiscardedInputIds() {
+		// 期限切れ入力のIDを一度だけ資源予約システムへ渡す。
+		std::vector<InputBufferId> result;
+		result.reserve(discardedInputIds_.size());
+		while (!discardedInputIds_.empty()) {
+			result.push_back(discardedInputIds_.front());
+			discardedInputIds_.pop_front();
+		}
 		return result;
 	}
 
 	void StateMachine::ClearInputBuffer() {
 		// 保持中の先行入力をすべて消費済みとして破棄する
+		for (const BufferedInput& bufferedInput : bufferedInputs_) {
+			discardedInputIds_.push_back(bufferedInput.id);
+		}
 		bufferedInputs_.clear();
 	}
 
@@ -252,6 +315,8 @@ namespace Combo {
 	}
 
 	void StateMachine::Update(const Character::CharacterContext& ctx) {
+		// 開始要求はここで実コンテキストを使ってEnterするため、空のコンテキストを渡さない。
+		ActivatePendingRoot(ctx);
 		// ステートが無いなら早期リターン
 		if (!currentState) return;
 
@@ -270,6 +335,7 @@ namespace Combo {
 		for (auto it = bufferedInputs_.begin(); it != bufferedInputs_.end();) {
 			it->age += ctx.dt;
 			if (it->age > bufferTime) {
+				discardedInputIds_.push_back(it->id);
 				it = bufferedInputs_.erase(it);
 			}
 			else {
@@ -281,6 +347,7 @@ namespace Combo {
 		if (!bufferedInputs_.empty() && currentState->IsInputAcceptable() && currentState->GetNextStateTime()) {
 			for (size_t index = 0; index < bufferedInputs_.size(); ++index) {
 				ActionInput transitionInput = bufferedInputs_[index].input;
+				const InputBufferId transitionInputId = bufferedInputs_[index].id;
 				auto next = currentState->HandleInput(owner, transitionInput);
 				if (currentState->GetIsCompulsionNext()) {
 					// 強制移行ノードは入力種別を弱攻撃として評価する
@@ -293,7 +360,7 @@ namespace Combo {
 					bufferedInputs_.erase(bufferedInputs_.begin() + static_cast<std::ptrdiff_t>(index));
 					// 遷移元ノードへ分岐イベントを一度だけ通知する
 					auto sourceNode = std::dynamic_pointer_cast<NodeState>(currentState);
-					transitionedInput_ = transitionInput;
+					transitionedInput_ = ConsumedInput{ transitionInputId, transitionInput };
 					if (sourceNode) {
 						sourceNode->NotifyBranch();
 					}
@@ -319,12 +386,23 @@ namespace Combo {
 	}
 
 	void StateMachine::SetRoot(std::shared_ptr<State> state) {
-		// 新しいコンボ開始時は前のコンボの入力を持ち越さない
+		// 新しいコンボ開始時は前のコンボの入力を持ち越さず、開始は次回Updateへ保留する。
 		ClearInputBuffer();
 		rootState = state;
-		if (rootState) {
-			SetState(rootState,{});
+		pendingRootState_ = rootState;
+	}
+
+	bool StateMachine::ActivatePendingRoot(const Character::CharacterContext& ctx) {
+		// 保留がない場合は何も変更せず、呼び出し側が通常更新を続けられるようにする。
+		if (!pendingRootState_ && !rootState) {
+			return false;
 		}
+		if (!pendingRootState_) {
+			return false;
+		}
+		SetState(pendingRootState_, ctx);
+		pendingRootState_.reset();
+		return true;
 	}
 
 #pragma endregion // ステートマシーン

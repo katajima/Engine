@@ -1,6 +1,8 @@
 #pragma once
 #include "HitBox.h"
+#include <algorithm>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
+#include <cstdint>
 
 namespace Engine {
 	class EntityManager; // 前方宣言
@@ -9,6 +11,9 @@ namespace Engine {
 }
 
 namespace HitBox {
+	// 期限付きヒットボックスを発生させた実行単位を識別するIDです。
+	using HitBoxOwnerId = std::uint64_t;
+
 	/// <summary>
 	/// 当たり判定を管理するシステム
 	/// </summary>
@@ -22,6 +27,8 @@ namespace HitBox {
 		struct Data {
 			std::unique_ptr<HitBoxInstance> hitBox = nullptr;
 			int32_t id = 0;
+			// 同じキャラクター上の別アクションを混同しないための所有者IDです。
+			HitBoxOwnerId ownerId = 0;
 			float lifeTime = 0.0f;
 			float timer = 0.0f;
 			/// <summary>
@@ -41,9 +48,17 @@ namespace HitBox {
 		void Update(float dt);
 
 
-		// ヒットボックス追加（期限付き）
+		/// <summary>期限付きヒットボックスを追加します。</summary>
+		/// <param name="character">ヒットボックスの所有キャラクターです。</param>
+		/// <param name="datas">生成する形状と寿命の設定です。</param>
+		/// <param name="parent">親トランスフォームです。</param>
+		/// <param name="ownerId">この判定グループの所有者IDです。</param>
 		void AddLifeTimeHitBox(Character::BaseCharacter* character,const CollData& datas,
-			Engine::WorldTransform* parent = nullptr);
+			Engine::WorldTransform* parent = nullptr, HitBoxOwnerId ownerId = 0);
+
+		/// <summary>新しい期限付き判定グループ用の所有者IDを発行します。</summary>
+		/// <returns>このシステム内で一意な所有者IDです。</returns>
+		HitBoxOwnerId AllocateOwnerId();
 
 		// ヒットボックス追加（無期限）
 		void AddHitBox(int32_t& id,Character::BaseCharacter* character,const CollData& datas,
@@ -64,6 +79,9 @@ namespace HitBox {
 		/// 一時判定だけをクリアし、再利用する無期限判定は保持する。
 		/// </summary>
 		void ClearLifeTimeHitBoxes();
+		/// <summary>指定した所有者の期限付き判定だけを解放します。</summary>
+		/// <param name="ownerId">解放対象の所有者IDです。</param>
+		void ClearLifeTimeHitBoxes(HitBoxOwnerId ownerId);
 		/// <summary>
 		/// 一時判定と無期限判定を含む全ヒットボックスを解放する。
 		/// </summary>
@@ -89,6 +107,8 @@ namespace HitBox {
 		std::vector<Data> hitBoxDatas_;
 	private:
 		Engine::EntityManager* entityManager = nullptr;
+		// 0を未指定値として予約し、実際のIDには使用しない連番です。
+		HitBoxOwnerId nextOwnerId_ = 1;
 	};
 
 

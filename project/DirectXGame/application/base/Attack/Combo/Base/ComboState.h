@@ -2,11 +2,21 @@
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include <deque>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
+	// 入力バッファとリソース予約を一対一で結び付ける識別子です。
+	using InputBufferId = std::uint64_t;
+
+	/// <summary>実際に消費された入力と、その入力バッファの識別子です。</summary>
+	struct ConsumedInput {
+		InputBufferId id = 0;
+		ActionInput input = ActionInput::LightAttack;
+	};
+
 	enum class TransitionCondition {
 		Default,
 		GroundMiss,
@@ -15,6 +25,15 @@ namespace Combo {
 		AirHit,
 		LockOn,
 		NoLockOn,
+		// 地上/空中、ヒット/ミス、ロックオン有無を同時に評価する複合条件です。
+		GroundMissLockOn,
+		GroundHitLockOn,
+		AirMissLockOn,
+		AirHitLockOn,
+		GroundMissNoLockOn,
+		GroundHitNoLockOn,
+		AirMissNoLockOn,
+		AirHitNoLockOn,
 	};
 
     /// <summary>
@@ -318,6 +337,14 @@ namespace Combo {
             std::weak_ptr<NodeState> airHit;
             std::weak_ptr<NodeState> lockOn;
             std::weak_ptr<NodeState> noLockOn;
+			std::weak_ptr<NodeState> groundMissLockOn;
+			std::weak_ptr<NodeState> groundHitLockOn;
+			std::weak_ptr<NodeState> airMissLockOn;
+			std::weak_ptr<NodeState> airHitLockOn;
+			std::weak_ptr<NodeState> groundMissNoLockOn;
+			std::weak_ptr<NodeState> groundHitNoLockOn;
+			std::weak_ptr<NodeState> airMissNoLockOn;
+			std::weak_ptr<NodeState> airHitNoLockOn;
         };
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;
@@ -360,13 +387,16 @@ namespace Combo {
         /// 入力を即時遷移させず、次の受付タイミング用にバッファします。
         /// </summary>
         /// <param name="input">保存する攻撃入力です。</param>
-        void HandleInput(ActionInput input) {
-            // 複数入力を順番どおり保持し、古い入力から消費できるようにする
-            if (bufferedInputs_.size() >= kMaxBufferedInputs_) {
-                // 上限を超えた場合は最も古い入力だけを破棄する
-                bufferedInputs_.pop_front();
-            }
-            bufferedInputs_.push_back({ input, 0.0f });
+		InputBufferId HandleInput(ActionInput input) {
+			// 複数入力を順番どおり保持し、古い入力から消費できるようにする
+			if (bufferedInputs_.size() >= kMaxBufferedInputs_) {
+				// 上限を超えた場合は最も古い入力だけを破棄する
+				discardedInputIds_.push_back(bufferedInputs_.front().id);
+				bufferedInputs_.pop_front();
+			}
+			const InputBufferId id = nextInputId_++;
+			bufferedInputs_.push_back({ id, input, 0.0f });
+			return id;
         }
 
         /// <summary>
@@ -387,7 +417,11 @@ namespace Combo {
         /// 実際に遷移へ使われた入力を取り出してクリアします。
         /// </summary>
         /// <returns>遷移に使用済みの入力があればその値、なければstd::nulloptです。</returns>
-        std::optional<ActionInput> ConsumeTransitionedInput();
+		std::optional<ConsumedInput> ConsumeTransitionedInput();
+
+		/// <summary>期限切れなどで破棄された入力IDを取り出します。</summary>
+		/// <returns>今回破棄された入力バッファIDの一覧です。</returns>
+		std::vector<InputBufferId> ConsumeDiscardedInputIds();
 
         /// <summary>
         /// 保持中の入力バッファをすべて消費済みとして破棄します。
@@ -408,17 +442,24 @@ namespace Combo {
         /// <summary>
         /// ルートステートへ戻します。
         /// </summary>
-        void Reset() {
-            // ルートへ戻る際は前段ノードの先行入力を持ち越さない
-            ClearInputBuffer();
-            SetState(rootState,{});
-        }
+		void Reset() {
+			// ルートへ戻る際は前段ノードの先行入力を持ち越さない
+			ClearInputBuffer();
+			pendingRootState_ = rootState;
+		}
 
         /// <summary>
         /// コンボ開始時に使うルートステートを設定します。
         /// </summary>
         /// <param name="state">ルートにするステートです。共有所有として保持します。</param>
-        void SetRoot(std::shared_ptr<State> state);
+		void SetRoot(std::shared_ptr<State> state);
+
+		/// <summary>
+		/// 保留中のルートを実コンテキストで開始します。
+		/// </summary>
+		/// <param name="ctx">開始時点の入力・移動・時間コンテキストです。</param>
+		/// <returns>保留ルートを開始した場合はtrueです。</returns>
+		bool ActivatePendingRoot(const Character::CharacterContext& ctx);
 
         /// <summary>
         /// 現在のコンボが終端ノードに到達しているか確認します。
@@ -452,8 +493,11 @@ namespace Combo {
     private:
         std::shared_ptr<State> currentState;   // 現在のステート
         std::shared_ptr<State> rootState;      // 初期ステート
+		// 次回Updateで実コンテキストを受け取って開始するルートです。
+		std::shared_ptr<State> pendingRootState_;
 
         struct BufferedInput {
+			InputBufferId id = 0;
             ActionInput input = ActionInput::LightAttack;
             float age = 0.0f;
         };
@@ -461,7 +505,11 @@ namespace Combo {
         std::deque<BufferedInput> bufferedInputs_;
         // 1ステートで保持できる入力数の上限
         static constexpr size_t kMaxBufferedInputs_ = 8;
-        std::optional<ActionInput> transitionedInput_;     // 実際に遷移へ使われた入力
+		std::optional<ConsumedInput> transitionedInput_;   // 実際に遷移へ使われた入力
+		// 期限切れ・上限超過で破棄された入力IDを資源予約側へ通知するキューです。
+		std::deque<InputBufferId> discardedInputIds_;
+		// 入力IDが0にならないようにする連番です。
+		InputBufferId nextInputId_ = 1;
         bool isDebug = false;                              // デバッグ表示や編集用の挙動を有効にするか
     };
 }

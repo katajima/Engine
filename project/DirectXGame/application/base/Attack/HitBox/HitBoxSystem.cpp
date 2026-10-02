@@ -31,8 +31,10 @@ namespace HitBox {
 
 	// ヒットボックス追加
 	void System::AddLifeTimeHitBox(Character::BaseCharacter* character, const CollData& datas,
-		Engine::WorldTransform* parent) {
+		Engine::WorldTransform* parent, HitBoxOwnerId ownerId) {
 		Data d;
+		// 呼び出し側が指定しない場合も、個別判定として追跡できるIDを発行する。
+		d.ownerId = ownerId == 0 ? AllocateOwnerId() : ownerId;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
 		d.hitBox->SetRecordPerCollider(datas.hitBoxData.recordPerCollider);
@@ -46,6 +48,14 @@ namespace HitBox {
 		d.timer = 0.0f;									// 時間
 		// ヒットボックス(期限付き)データに挿入
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
+	}
+
+	HitBoxOwnerId System::AllocateOwnerId() {
+		// 0は未指定を表す予約値なので、実IDには使用しない。
+		if (nextOwnerId_ == 0) {
+			nextOwnerId_ = 1;
+		}
+		return nextOwnerId_++;
 	}
 
 	void System::AddHitBox(int32_t& id, Character::BaseCharacter* character, const CollData& datas,
@@ -153,6 +163,17 @@ namespace HitBox {
 			hit.hitBox.reset();
 		}
 		lifeTimeHitBoxDatas_.clear();
+	}
+
+	void System::ClearLifeTimeHitBoxes(HitBoxOwnerId ownerId) {
+		// 指定グループ以外の一時判定を残し、終了したアクションだけを解放する。
+		if (ownerId == 0) {
+			return;
+		}
+		lifeTimeHitBoxDatas_.erase(
+			std::remove_if(lifeTimeHitBoxDatas_.begin(), lifeTimeHitBoxDatas_.end(),
+				[ownerId](const Data& data) { return data.ownerId == ownerId; }),
+			lifeTimeHitBoxDatas_.end());
 	}
 
 	// 一時判定と無期限判定を含む全ヒットボックスを解放する

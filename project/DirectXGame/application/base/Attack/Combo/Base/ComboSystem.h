@@ -395,12 +395,18 @@ namespace Combo {
 		bool isDebug = false;
 		bool isDebugDraw_ = true;
 		struct PendingCost {
+			// 入力バッファ側と同一のIDで予約を特定する。
+			InputBufferId inputBufferId = 0;
 			ActionInput input = ActionInput::LightAttack;
 			float staminaCost = 0.0f;
 			std::shared_ptr<NodeState> cooldownNode = nullptr;
 		};
 		// 入力バッファと対応する未払いリソース予約を時系列で保持する
 		std::deque<PendingCost> pendingCosts_;
+		// 先行入力で確保済みのコスト。実際の遷移までは現在スタミナから引かない。
+		float reservedStamina_ = 0.0f;
+		// 開始ノードへ実コンテキストでEnterした後に適用する開始入力です。
+		std::optional<ActionInput> pendingStartInput_;
 		// 現在のコンボノードを開始した入力種別
 		ActionInput currentActionInput_ = ActionInput::LightAttack;
 		std::map<std::string, float> cooldownTimers_;
