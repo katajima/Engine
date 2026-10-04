@@ -12,7 +12,7 @@ namespace Combo {
 	public:
 		// 現在の時間
 		static void CurrentFrame(float dt,bool isActive ,const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
-			int& currentFrame, int& firstFrame, int& maxFrame);
+			int& currentFrame, float& playbackFrame, int& firstFrame, int& maxFrame);
 
 		// アニメーション設定と表示
 		static void ApplyAnimationToState(const std::string& name, bool isActive, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,

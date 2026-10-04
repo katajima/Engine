@@ -145,6 +145,8 @@ namespace Combo {
 	private:
 		// 現在のフレーム
 		int currentFrame = 0;
+		// タイムスケールによる1フレーム未満の進行を保持する再生用フレーム
+		float playbackFrame = 0.0f;
 		// 再生中か
 		bool isPlaying = true;
 		// ループ再生するか

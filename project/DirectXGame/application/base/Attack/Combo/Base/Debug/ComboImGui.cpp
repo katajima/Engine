@@ -1,9 +1,16 @@
 #include "ComboImGui.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include <algorithm>
+#include <cmath>
 
 void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
-	int& currentFrame, int& firstFrame, int& maxFrame) {
+	int& currentFrame, float& playbackFrame, int& firstFrame, int& maxFrame) {
+	// シーケンサー操作で現在フレームが変更された場合は、再生用の小数フレームへ同期する。
+	// 通常再生中の小数部分は許容し、手動操作による大きな差だけを編集値として扱う。
+	if (!isPlaying || !isActive || std::abs(playbackFrame - static_cast<float>(currentFrame)) > 1.0f) {
+		playbackFrame = static_cast<float>(currentFrame);
+	}
+
 	// 現在のフレーム表示
 	if (isActive) {
 		ImGui::Checkbox("再生するか", &isPlaying);
@@ -23,15 +30,28 @@ void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequen
 	ImGui::Separator();
 
 	if (isPlaying && isActive) {
-		currentFrame += static_cast<int>(dt * ConvertUtility::kDefaultFps); // 既定FPS換算
+		// タイムスケールで1フレーム未満になっても、小数部分を次フレームへ持ち越す。
+		playbackFrame += (std::max)(dt, 0.0f) * ConvertUtility::kDefaultFps;
 	}
 
-	// 最大値に行ったら戻す
-	if (currentFrame >= sequence.GetFrameMax() && loopPlay) {
+	// シーケンスの最大フレームを超えた場合は、ループまたは終端で停止する。
+	const int frameLimit = (std::max)(sequence.GetFrameMax(), 0);
+	if (frameLimit <= 0) {
+		playbackFrame = 0.0f;
 		currentFrame = 0;
 	}
-	else if (currentFrame >= sequence.GetFrameMax()) {
-		currentFrame = sequence.GetFrameMax();
+	else if (playbackFrame >= static_cast<float>(frameLimit) && loopPlay) {
+		playbackFrame = std::fmod(playbackFrame, static_cast<float>(frameLimit));
+		currentFrame = static_cast<int>(playbackFrame);
+	}
+	else if (playbackFrame >= static_cast<float>(frameLimit)) {
+		playbackFrame = static_cast<float>(frameLimit);
+		currentFrame = frameLimit;
+		isPlaying = false;
+	}
+	else {
+		// UIへ渡すフレームだけ整数化し、内部の小数値は保持する。
+		currentFrame = static_cast<int>(playbackFrame);
 	}
 }
 

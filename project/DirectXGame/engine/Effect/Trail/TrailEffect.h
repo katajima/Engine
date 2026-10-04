@@ -256,12 +256,12 @@ namespace Engine {
 		bool trajectoryEnabled_ = false;
 		TrailTrajectorySettings trajectory_{};
 		float trajectoryElapsed_ = 0.0f;
+		// 軌道を親へ追従させるための非所有アンカー。
+		WorldTransform* trajectoryAnchor_ = nullptr;
 		Vector3 trajectoryAnchorPosition_{};
 		Vector3 trajectoryRight_{ 1.0f, 0.0f, 0.0f };
 		Vector3 trajectoryUp_{ 0.0f, 1.0f, 0.0f };
 		Vector3 trajectoryForward_{ 0.0f, 0.0f, 1.0f };
-		Vector3 trajectoryStartOffset_{};
-		Vector3 trajectoryEndOffset_{};
 
 	private:
 		EffectManager* effectManager = nullptr;

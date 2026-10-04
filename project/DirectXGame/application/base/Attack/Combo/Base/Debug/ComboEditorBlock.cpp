@@ -63,7 +63,7 @@ namespace Combo {
 		ImGui::Separator();
 
 		// 現在の時間
-		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
+		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, playbackFrame, firstFrame, maxFrame);
 
 		// シーケンサーの設定と表示
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);

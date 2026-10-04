@@ -136,14 +136,16 @@ void Engine::TrailEffect::Update()
 	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
 	const float deltaTime = MyGame::GameTime();
 
-	// 独立した軌道を進め、リボンの両レールを同じ量だけ移動させる。
+	// 軌道を進めながら、リボンの両レールを現在の親位置へ追従させる。
 	if (trajectoryEnabled_) {
 		trajectoryElapsed_ += deltaTime;
 		const float duration = trajectory_.duration > 0.0f ? trajectory_.duration : lifeTime_;
 		const float normalizedTime = std::clamp(trajectoryElapsed_ / (std::max)(duration, 0.001f), 0.0f, 1.0f);
-		const Vector3 pathOffset = ToTrajectoryWorldPosition(EvaluateTrajectory(normalizedTime)) - trajectoryAnchorPosition_;
-		start = trajectoryStartOffset_ + pathOffset;
-		end = trajectoryEndOffset_ + pathOffset;
+		// 軌道の形状は維持しつつ、現在の親位置を基準に毎フレーム再配置する。
+		const Vector3 currentAnchorPosition = trajectoryAnchor_ ? trajectoryAnchor_->GetWorldPosition() : trajectoryAnchorPosition_;
+		const Vector3 pathOffset = ToTrajectoryWorldPosition(EvaluateTrajectory(normalizedTime)) - currentAnchorPosition;
+		start += pathOffset;
+		end += pathOffset;
 	}
 
 	// 発生していない間も最後の座標は追従させ、再発生時に長い帯が一気に伸びるのを防ぐ。
@@ -360,15 +362,15 @@ void Engine::TrailEffect::SetTrajectory(const TrailTrajectorySettings& trajector
 	trajectory_ = trajectory;
 	trajectoryEnabled_ = trajectory_.type != TrailTrajectoryType::kNone;
 	trajectoryElapsed_ = 0.0f;
+	trajectoryAnchor_ = anchor;
 	if (!trajectoryEnabled_) {
+		trajectoryAnchor_ = nullptr;
 		return;
 	}
 
-	// 現在のリボンとアンカー基底を保存し、後の親移動で軌道が歪まないようにする。
+	// 初期値を保存し、アンカーが失われた場合にも最後の基底で評価できるようにする。
 	worldtransformTstr_.Update();
 	worldtransformTend_.Update();
-	trajectoryStartOffset_ = worldtransformTstr_.worldMat_.GetWorldPosition();
-	trajectoryEndOffset_ = worldtransformTend_.worldMat_.GetWorldPosition();
 	trajectoryAnchorPosition_ = anchor ? anchor->GetWorldPosition() : Vector3{};
 	if (anchor) {
 		trajectoryRight_ = { anchor->worldMat_.m[0][0], anchor->worldMat_.m[0][1], anchor->worldMat_.m[0][2] };
@@ -385,11 +387,15 @@ Vector3 Engine::TrailEffect::EvaluateTrajectory(float normalizedTime) const
 
 Vector3 Engine::TrailEffect::ToTrajectoryWorldPosition(const Vector3& localPosition) const
 {
-	// 保存した右・上・前方向のアンカー基底でローカル軌道を変換する。
+	// 現在のアンカー基底を優先し、親の移動・回転へ軌道を追従させる。
+	const Vector3 anchorPosition = trajectoryAnchor_ ? trajectoryAnchor_->GetWorldPosition() : trajectoryAnchorPosition_;
+	const Vector3 right = trajectoryAnchor_ ? Vector3{ trajectoryAnchor_->worldMat_.m[0][0], trajectoryAnchor_->worldMat_.m[0][1], trajectoryAnchor_->worldMat_.m[0][2] } : trajectoryRight_;
+	const Vector3 up = trajectoryAnchor_ ? Vector3{ trajectoryAnchor_->worldMat_.m[1][0], trajectoryAnchor_->worldMat_.m[1][1], trajectoryAnchor_->worldMat_.m[1][2] } : trajectoryUp_;
+	const Vector3 forward = trajectoryAnchor_ ? Vector3{ trajectoryAnchor_->worldMat_.m[2][0], trajectoryAnchor_->worldMat_.m[2][1], trajectoryAnchor_->worldMat_.m[2][2] } : trajectoryForward_;
 	return {
-		trajectoryAnchorPosition_.x + trajectoryRight_.x * localPosition.x + trajectoryUp_.x * localPosition.y + trajectoryForward_.x * localPosition.z,
-		trajectoryAnchorPosition_.y + trajectoryRight_.y * localPosition.x + trajectoryUp_.y * localPosition.y + trajectoryForward_.y * localPosition.z,
-		trajectoryAnchorPosition_.z + trajectoryRight_.z * localPosition.x + trajectoryUp_.z * localPosition.y + trajectoryForward_.z * localPosition.z
+		anchorPosition.x + right.x * localPosition.x + up.x * localPosition.y + forward.x * localPosition.z,
+		anchorPosition.y + right.y * localPosition.x + up.y * localPosition.y + forward.y * localPosition.z,
+		anchorPosition.z + right.z * localPosition.x + up.z * localPosition.y + forward.z * localPosition.z
 	};
 }
 void Engine::TrailEffect::AddFeature(TrailFeature feature)
