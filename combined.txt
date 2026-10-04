@@ -5,6 +5,8 @@
     ├── DirectXGame/
     └── ├── application/
     └── └── ├── base/
+    └── └── └── ├── Action/
+    └── └── └── └── └── ActionRuntime.h
     └── └── └── ├── Attack/
     └── └── └── └── ├── AttackController.cpp
     └── └── └── └── ├── AttackController.h
@@ -836,6 +838,77 @@ File Path: DirectXGame.vcxproj
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Action/ActionRuntime.h
+============================================================
+#pragma once
+
+#include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
+#include <functional>
+#include <string>
+
+namespace Character {
+	class BaseCharacter;
+}
+
+namespace GameAction {
+
+	/// <summary>
+	/// 受けた攻撃をどの防御状態で処理したかを表します。
+	/// </summary>
+	enum class DefenseResult {
+		Hit,
+		Guarded,
+		Parried,
+		Invincible,
+		SuperArmored,
+	};
+
+	/// <summary>
+	/// キャラクター共通の防御状態を保持します。
+	/// </summary>
+	struct DefenseState {
+		bool guarding = false; // 通常ガード入力を保持しているか
+		bool superArmor = false; // 被弾リアクションを抑制するか
+		bool invincible = false; // 恒常的なアクション無敵を有効にするか
+		bool guardPoint = false; // 攻撃中にもガードを有効にするか
+		float parryTimer = 0.0f; // パリィ受付の残り時間
+		float actionInvincibleTimer = 0.0f; // 一時無敵の残り時間
+		float guardDamageScale = 0.0f; // ガード時に通すダメージ倍率
+	};
+
+	/// <summary>
+	/// アクション処理のライフサイクルイベント種別です。
+	/// </summary>
+	enum class EventType {
+		AttackStarted,
+		HitConfirmed,
+		Guarded,
+		Parried,
+		Missed,
+		Canceled,
+		ResourceConsumed,
+	};
+
+	/// <summary>
+	/// アクションイベントの通知データです。
+	/// </summary>
+	struct Event {
+		EventType type = EventType::AttackStarted; // 発生したイベント種別
+		Character::BaseCharacter* actor = nullptr; // イベントを発生させたキャラクター
+		const Character::BaseCharacter* target = nullptr; // イベント対象のキャラクター
+		ActionInput input = ActionInput::LightAttack; // イベントに対応する攻撃入力
+		std::string actionName; // コンボノードやアクションの名前
+		float value = 0.0f; // リソース量などの数値
+	};
+
+	/// <summary>
+	/// アクションイベントを受け取るコールバック型です。
+	/// </summary>
+	using EventListener = std::function<void(const Event&)>;
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Attack/AttackController.cpp
 ============================================================
 #include "AttackController.h"
@@ -868,6 +941,11 @@ void AttackController::Update(const Character::CharacterContext& ctx) {
 	if (!isStopHitTimer_) {
 		// ヒット間隔の計測を進め、連続ヒット表示や判定に使う
 		hitCounter_.Update(ctx.dt);
+	}
+
+	if (!IsAttack() && !isDebugEditor_) {
+		// 攻撃状態でなくてもクールタイムだけは時間経過させる
+		comboSystem_->UpdateCooldowns(ctx.dt);
 	}
 
 	if (IsAttack() || isDebugEditor_) {
@@ -1660,6 +1738,9 @@ namespace Combo {
 		/// </summary>
 		/// <returns>内部で管理しているコンボ条件への参照です.</returns>
 		ComboCondition& GetComboCondition() { return comboCondition; }
+		/// <summary>コンボ条件を読み取り専用で取得します。</summary>
+		/// <returns>内部条件データへの読み取り専用参照です。</returns>
+		const ComboCondition& GetComboCondition() const { return comboCondition; }
 		/// <summary>
 		/// コンボモーションへの参照を取得します。
 		/// </summary>
@@ -1675,6 +1756,9 @@ namespace Combo {
 		/// </summary>
 		/// <returns>内部で管理しているヒットボックスへの参照です.</returns>
 		ComboHitBox& GetComboHitBox() { return hitBox; }
+		/// <summary>コンボヒットボックス設定を読み取り専用で取得します。</summary>
+		/// <returns>内部ヒットボックス設定への読み取り専用参照です。</returns>
+		const ComboHitBox& GetComboHitBox() const { return hitBox; }
 		/// <summary>
 		/// コンボエフェクトへの参照を取得します。
 		/// </summary>
@@ -1761,6 +1845,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalDat
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/engine/Camera/CameraData.h"
+#include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include <string>
 #include <vector>
 
@@ -2126,6 +2211,10 @@ struct GlobalAudio {
 		float stateNextTime = 0.45f;
 		// 強制的に次のコンボに移行するか
 		bool isCompulsionNext = false;
+		// 次段へ進む入力列。空の場合は従来の標準入力設定を使用する。
+		std::vector<ComboInputStep> nextInputSequence;
+		// キャンセルに使う入力列。空の場合は従来の標準入力設定を使用する。
+		std::vector<ComboInputStep> cancelInputSequence;
 		///	終了条件 ///
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
@@ -2191,6 +2280,15 @@ struct GlobalAudio {
 		std::string airHit = "";
 		std::string lockOn = "";
 		std::string noLockOn = "";
+		// 地上/空中とヒット/ミス、ロックオン有無を組み合わせた接続先です。
+		std::string groundMissLockOn = "";
+		std::string groundHitLockOn = "";
+		std::string airMissLockOn = "";
+		std::string airHitLockOn = "";
+		std::string groundMissNoLockOn = "";
+		std::string groundHitNoLockOn = "";
+		std::string airMissNoLockOn = "";
+		std::string airHitNoLockOn = "";
 	};
 
 	/// <summary>
@@ -2248,6 +2346,8 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.cpp
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/engine/Entity/ObjectComponent.h"
+#include <utility>
+#include <algorithm>
 
 namespace Combo {
 
@@ -2258,8 +2358,15 @@ namespace Combo {
 		// 時間初期化
 		timeInState = 0.0f;
 		hasHit_ = false;
+		canceled_ = false;
+		missed_ = false;
 		// ノード開始時に一度だけ加算の判定状態をリセットする
 		hasIncrementedHitCount_ = false;
+		// コンボノードに設定された防御効果をキャラクター共通状態へ反映する
+		owner->SetActionDefenseFlags(
+			comboData.GetActionData().superArmor,
+			comboData.GetActionData().invincible,
+			comboData.GetActionData().guardPoint);
 		// アニメーションの設定
 		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 
@@ -2296,13 +2403,48 @@ namespace Combo {
 			owner->GetAttackController() &&
 			owner->GetAttackController()->GetLockOnSystem() &&
 			owner->GetAttackController()->GetLockOnSystem()->IsLockOn();
+		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
+		// 拡張ルールは、条件一致・優先度・条件の具体性の順で遷移先を決める。
+		const TransitionConditionMask currentMask =
+			(onGround ? kTransitionGround : kTransitionAir) |
+			(hasHit_ ? kTransitionHit : kTransitionMiss) |
+			(isLockOn ? kTransitionLockOn : kTransitionNoLockOn);
+		std::shared_ptr<NodeState> bestTarget;
+		int bestPriority = -1;
+		std::uint32_t bestSpecificity = 0;
+		for (const TransitionTargets::Rule& rule : it->second.rules) {
+			if ((rule.conditionMask & currentMask) != rule.conditionMask) continue;
+			std::uint32_t remainingBits = rule.conditionMask;
+			std::uint32_t specificity = 0;
+			while (remainingBits != 0) {
+				specificity += remainingBits & 1u;
+				remainingBits >>= 1u;
+			}
+			if (auto target = rule.target.lock()) {
+				if (rule.priority > bestPriority ||
+					(rule.priority == bestPriority && specificity > bestSpecificity)) {
+					bestTarget = std::move(target);
+					bestPriority = rule.priority;
+					bestSpecificity = specificity;
+				}
+			}
+		}
+		if (bestTarget) return bestTarget;
+		// 最も具体的な「地上/空中 + ヒット/ミス + ロックオン有無」を先に評価する。
+		const std::weak_ptr<NodeState>& exactTarget = onGround
+			? (hasHit_ ? (isLockOn ? it->second.groundHitLockOn : it->second.groundHitNoLockOn)
+				: (isLockOn ? it->second.groundMissLockOn : it->second.groundMissNoLockOn))
+			: (hasHit_ ? (isLockOn ? it->second.airHitLockOn : it->second.airHitNoLockOn)
+				: (isLockOn ? it->second.airMissLockOn : it->second.airMissNoLockOn));
+		if (auto next = exactTarget.lock()) {
+			return next;
+		}
 		const std::weak_ptr<NodeState>& lockOnTarget = isLockOn ? it->second.lockOn : it->second.noLockOn;
 		if (auto next = lockOnTarget.lock()) {
 			// ロックオン用の分岐が設定されている場合は、地上/空中やヒット状態より優先する
 			return next;
 		}
 
-		const bool onGround = owner && owner->GetMoveComponent() && owner->GetMoveComponent()->GetIsLanding();
 		const std::weak_ptr<NodeState>& conditionalTarget =
 			onGround ? (hasHit_ ? it->second.groundHit : it->second.groundMiss)
 			: (hasHit_ ? it->second.airHit : it->second.airMiss);
@@ -2314,36 +2456,112 @@ namespace Combo {
 
 	void NodeState::SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next) {
 		TransitionTargets& targets = nextStates[input];
+		TransitionConditionMask conditionMask = 0;
+		int priority = 0;
 		switch (condition) {
 		case TransitionCondition::GroundMiss:
 			targets.groundMiss = next;
+			conditionMask = kTransitionGround | kTransitionMiss;
+			priority = 1;
 			break;
 		case TransitionCondition::GroundHit:
 			targets.groundHit = next;
+			conditionMask = kTransitionGround | kTransitionHit;
+			priority = 1;
 			break;
 		case TransitionCondition::AirMiss:
 			targets.airMiss = next;
+			conditionMask = kTransitionAir | kTransitionMiss;
+			priority = 1;
 			break;
 		case TransitionCondition::AirHit:
 			targets.airHit = next;
+			conditionMask = kTransitionAir | kTransitionHit;
+			priority = 1;
 			break;
 		case TransitionCondition::LockOn:
 			targets.lockOn = next;
+			conditionMask = kTransitionLockOn;
+			priority = 2;
 			break;
 		case TransitionCondition::NoLockOn:
 			targets.noLockOn = next;
+			conditionMask = kTransitionNoLockOn;
+			priority = 2;
+			break;
+		case TransitionCondition::GroundMissLockOn:
+			targets.groundMissLockOn = next;
+			conditionMask = kTransitionGround | kTransitionMiss | kTransitionLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::GroundHitLockOn:
+			targets.groundHitLockOn = next;
+			conditionMask = kTransitionGround | kTransitionHit | kTransitionLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::AirMissLockOn:
+			targets.airMissLockOn = next;
+			conditionMask = kTransitionAir | kTransitionMiss | kTransitionLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::AirHitLockOn:
+			targets.airHitLockOn = next;
+			conditionMask = kTransitionAir | kTransitionHit | kTransitionLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::GroundMissNoLockOn:
+			targets.groundMissNoLockOn = next;
+			conditionMask = kTransitionGround | kTransitionMiss | kTransitionNoLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::GroundHitNoLockOn:
+			targets.groundHitNoLockOn = next;
+			conditionMask = kTransitionGround | kTransitionHit | kTransitionNoLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::AirMissNoLockOn:
+			targets.airMissNoLockOn = next;
+			conditionMask = kTransitionAir | kTransitionMiss | kTransitionNoLockOn;
+			priority = 3;
+			break;
+		case TransitionCondition::AirHitNoLockOn:
+			targets.airHitNoLockOn = next;
+			conditionMask = kTransitionAir | kTransitionHit | kTransitionNoLockOn;
+			priority = 3;
 			break;
 		default:
 			targets.defaultTarget = next;
+			conditionMask = 0;
+			priority = 0;
 			break;
 		}
+		SetNextState(input, conditionMask, std::move(next), priority);
+	}
+
+	void NodeState::SetNextState(ActionInput input, TransitionConditionMask conditionMask,
+		std::shared_ptr<NodeState> next, int priority) {
+		TransitionTargets& targets = nextStates[input];
+		// 同じ条件の登録を置き換え、保存データの再接続でルールが増殖しないようにする。
+		targets.rules.erase(std::remove_if(targets.rules.begin(), targets.rules.end(),
+			[conditionMask, priority](const TransitionTargets::Rule& rule) {
+				return rule.conditionMask == conditionMask && rule.priority == priority;
+			}), targets.rules.end());
+		targets.rules.push_back({ conditionMask, priority, std::move(next) });
 	}
 
 	bool NodeState::HasNextState() const {
 		for (const auto& [input, targets] : nextStates) {
+			if (std::any_of(targets.rules.begin(), targets.rules.end(),
+				[](const TransitionTargets::Rule& rule) { return !rule.target.expired(); })) {
+				return true;
+			}
 			if (!targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
 				!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
-				!targets.lockOn.expired() || !targets.noLockOn.expired()) {
+				!targets.lockOn.expired() || !targets.noLockOn.expired() ||
+				!targets.groundMissLockOn.expired() || !targets.groundHitLockOn.expired() ||
+				!targets.airMissLockOn.expired() || !targets.airHitLockOn.expired() ||
+				!targets.groundMissNoLockOn.expired() || !targets.groundHitNoLockOn.expired() ||
+				!targets.airMissNoLockOn.expired() || !targets.airHitNoLockOn.expired()) {
 				return true;
 			}
 		}
@@ -2356,9 +2574,53 @@ namespace Combo {
 			return false;
 		}
 		const TransitionTargets& targets = it->second;
+		if (std::any_of(targets.rules.begin(), targets.rules.end(),
+			[](const TransitionTargets::Rule& rule) { return !rule.target.expired(); })) {
+			return true;
+		}
 		return !targets.defaultTarget.expired() || !targets.groundMiss.expired() ||
 			!targets.groundHit.expired() || !targets.airMiss.expired() || !targets.airHit.expired() ||
-			!targets.lockOn.expired() || !targets.noLockOn.expired();
+			!targets.lockOn.expired() || !targets.noLockOn.expired() ||
+			!targets.groundMissLockOn.expired() || !targets.groundHitLockOn.expired() ||
+			!targets.airMissLockOn.expired() || !targets.airHitLockOn.expired() ||
+			!targets.groundMissNoLockOn.expired() || !targets.groundHitNoLockOn.expired() ||
+			!targets.airMissNoLockOn.expired() || !targets.airHitNoLockOn.expired();
+	}
+
+	std::vector<std::shared_ptr<NodeState>> NodeState::GetTransitionTargets() const {
+		// 検証用に、条件付き遷移を含むすべての遷移先を解決する
+		std::vector<std::shared_ptr<NodeState>> targets;
+		for (const auto& [input, transition] : nextStates) {
+			(void)input;
+			const std::weak_ptr<NodeState>* candidates[] = {
+				&transition.defaultTarget,
+				&transition.groundMiss,
+				&transition.groundHit,
+				&transition.airMiss,
+				&transition.airHit,
+				&transition.lockOn,
+				&transition.noLockOn,
+				&transition.groundMissLockOn,
+				&transition.groundHitLockOn,
+				&transition.airMissLockOn,
+				&transition.airHitLockOn,
+				&transition.groundMissNoLockOn,
+				&transition.groundHitNoLockOn,
+				&transition.airMissNoLockOn,
+				&transition.airHitNoLockOn,
+			};
+			for (const auto* candidate : candidates) {
+				if (auto target = candidate->lock()) {
+					targets.push_back(std::move(target));
+				}
+			}
+			for (const TransitionTargets::Rule& rule : transition.rules) {
+				if (auto target = rule.target.lock()) {
+					targets.push_back(std::move(target));
+				}
+			}
+		}
+		return targets;
 	}
 
 	// 更新
@@ -2371,6 +2633,9 @@ namespace Combo {
 
 		// 入力受付がないのなら終了する
 		if (GetIsCansel()) {
+			// キャンセル終了をミスと区別できるアクションイベントとして通知する
+			canceled_ = true;
+			owner->EmitActionEvent({ GameAction::EventType::Canceled, owner, nullptr, actionInput_, name });
 			comboData.GetComboEffect().NotifyCancel();
 			End(owner, ctx);
 			return;
@@ -2385,15 +2650,26 @@ namespace Combo {
 	void NodeState::Exit(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化
 		timeInState = 0.0f;
+		if (!hasHit_ && !canceled_ && !missed_) {
+			// 次段へ遷移してノードを抜ける場合も、命中しなかった攻撃をミスとして通知する
+			missed_ = true;
+			owner->EmitActionEvent({ GameAction::EventType::Missed, owner, nullptr, actionInput_, name });
+			comboData.GetComboEffect().NotifyMiss();
+		}
 		// コンボデータ終了処理
 		comboData.Exit(owner);
+		// ノード終了時に攻撃由来の防御効果を解除する
+		owner->ClearActionDefenseFlags();
 	}
 
 	void NodeState::End(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
-		if (!hasHit_) {
+		if (!hasHit_ && !canceled_ && !missed_) {
+			// 命中もキャンセルも無い場合だけミスイベントを通知する
+			missed_ = true;
+			owner->EmitActionEvent({ GameAction::EventType::Missed, owner, nullptr, actionInput_, name });
 			comboData.GetComboEffect().NotifyMiss();
 		}
 		if (ctx.inputData.jumpTrigger) {
@@ -2403,6 +2679,8 @@ namespace Combo {
 			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Idle);
 		}
 		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
+		// Endから直接通常状態へ戻る場合にも防御効果を残さない
+		owner->ClearActionDefenseFlags();
 	};
 
 
@@ -2418,9 +2696,6 @@ namespace Combo {
 		if (currentState) {
 			currentState->Enter(owner, ctx);	// 開始処理
 		}
-		bufferedInput.reset(); // 状態遷移したら入力リセット
-		bufferedInputAge_ = 0.0f;
-		isBufferedInputAccepted_ = false;
 	}
 
 	bool StateMachine::CanTransition(ActionInput input) const {
@@ -2432,10 +2707,29 @@ namespace Combo {
 		return node ? node->ResolveNextState(owner, input) : nullptr;
 	}
 
-	std::optional<ActionInput> StateMachine::ConsumeTransitionedInput() {
-		std::optional<ActionInput> result = transitionedInput_;
+	std::optional<ConsumedInput> StateMachine::ConsumeTransitionedInput() {
+		std::optional<ConsumedInput> result = transitionedInput_;
 		transitionedInput_.reset();
 		return result;
+	}
+
+	std::vector<InputBufferId> StateMachine::ConsumeDiscardedInputIds() {
+		// 期限切れ入力のIDを一度だけ資源予約システムへ渡す。
+		std::vector<InputBufferId> result;
+		result.reserve(discardedInputIds_.size());
+		while (!discardedInputIds_.empty()) {
+			result.push_back(discardedInputIds_.front());
+			discardedInputIds_.pop_front();
+		}
+		return result;
+	}
+
+	void StateMachine::ClearInputBuffer() {
+		// 保持中の先行入力をすべて消費済みとして破棄する
+		for (const BufferedInput& bufferedInput : bufferedInputs_) {
+			discardedInputIds_.push_back(bufferedInput.id);
+		}
+		bufferedInputs_.clear();
 	}
 
 	void StateMachine::NotifyCurrentStateHit() {
@@ -2446,6 +2740,8 @@ namespace Combo {
 	}
 
 	void StateMachine::Update(const Character::CharacterContext& ctx) {
+		// 開始要求はここで実コンテキストを使ってEnterするため、空のコンテキストを渡さない。
+		ActivatePendingRoot(ctx);
 		// ステートが無いなら早期リターン
 		if (!currentState) return;
 
@@ -2453,70 +2749,85 @@ namespace Combo {
 		currentState->Update(owner, ctx);
 
 		if (!isDebug && owner->GetCurrentMainState() != Character::CharacterMainState::Attack) {
-			bufferedInput.reset();
-			bufferedInputAge_ = 0.0f;
-			isBufferedInputAccepted_ = false;
+			// 攻撃終了後の入力は次の攻撃へ持ち越さない
+			ClearInputBuffer();
 			return;
 		}
 
-		// 入力種類は RequestAttack から渡された ActionInput を正とする。
-		if (bufferedInput) {
-			bufferedInputAge_ += ctx.dt;
-			auto currentNode = std::dynamic_pointer_cast<NodeState>(currentState);
-			const float bufferTime = currentNode ? currentNode->Data().GetComboCondition().GetData().inputBufferTime : 0.0f;
-			if (bufferedInputAge_ > bufferTime) {
-				bufferedInput.reset();
-				bufferedInputAge_ = 0.0f;
-				isBufferedInputAccepted_ = false;
-				return;
+		// 現在ノードの入力受付時間を基準に、古くなった先行入力を破棄する
+		auto currentNode = std::dynamic_pointer_cast<NodeState>(currentState);
+		const float bufferTime = currentNode ? currentNode->Data().GetComboCondition().GetData().inputBufferTime : 0.0f;
+		for (auto it = bufferedInputs_.begin(); it != bufferedInputs_.end();) {
+			it->age += ctx.dt;
+			if (it->age > bufferTime) {
+				discardedInputIds_.push_back(it->id);
+				it = bufferedInputs_.erase(it);
 			}
+			else {
+				++it;
+			}
+		}
 
-			if (currentState->IsInputAcceptable()) {
-				isBufferedInputAccepted_ = true;
-			}
-			// 入力受付済みで、コンボ移行時間に達したら状態遷移する。
-			if (isBufferedInputAccepted_ && currentState->GetNextStateTime()) {
-				ActionInput transitionInput = *bufferedInput;
+		// 入力受付済みで、コンボ移行時間に達したら古い入力から遷移を試す
+		if (!bufferedInputs_.empty() && currentState->IsInputAcceptable() && currentState->GetNextStateTime()) {
+			for (size_t index = 0; index < bufferedInputs_.size(); ++index) {
+				ActionInput transitionInput = bufferedInputs_[index].input;
+				const InputBufferId transitionInputId = bufferedInputs_[index].id;
 				auto next = currentState->HandleInput(owner, transitionInput);
 				if (currentState->GetIsCompulsionNext()) {
+					// 強制移行ノードは入力種別を弱攻撃として評価する
 					transitionInput = ActionInput::LightAttack;
 					next = currentState->HandleInput(owner, transitionInput);
 				}
 
-				// もし次のステートがあれば、遷移
 				if (next) {
-					transitionedInput_ = transitionInput;
-					SetState(next, ctx);
-				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
-					nextNode->NotifyBranch();
-				}
-					if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
-						nextNode->NotifyBranch();
+					// 遷移に使用した入力だけを消費し、残りは次ノードへ引き継ぐ
+					bufferedInputs_.erase(bufferedInputs_.begin() + static_cast<std::ptrdiff_t>(index));
+					// 遷移元ノードへ分岐イベントを一度だけ通知する
+					auto sourceNode = std::dynamic_pointer_cast<NodeState>(currentState);
+					transitionedInput_ = ConsumedInput{ transitionInputId, transitionInput };
+					if (sourceNode) {
+						sourceNode->NotifyBranch();
 					}
+					SetState(next, ctx);
+					return;
 				}
-				bufferedInput.reset();
-				bufferedInputAge_ = 0.0f;
-				isBufferedInputAccepted_ = false;
 			}
 		}
-		else if (currentState->GetNextStateTime() && currentState->GetIsCompulsionNext()) {
+		else if (bufferedInputs_.empty() && currentState->GetNextStateTime() && currentState->GetIsCompulsionNext()) {
 			auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
 
 			// 強制移行ノードは入力なしで次の弱攻撃へ遷移する。
 			if (next) {
-				SetState(next, ctx);
-				if (auto nextNode = std::dynamic_pointer_cast<NodeState>(currentState)) {
-					nextNode->NotifyBranch();
+				// 強制移行でも分岐演出は遷移元ノードへ通知する
+				auto sourceNode = std::dynamic_pointer_cast<NodeState>(currentState);
+				if (sourceNode) {
+					// 遷移元の分岐通知を一度だけ発行する
+					sourceNode->NotifyBranch();
 				}
+				SetState(next, ctx);
 			}
 		}
 	}
 
 	void StateMachine::SetRoot(std::shared_ptr<State> state) {
+		// 新しいコンボ開始時は前のコンボの入力を持ち越さず、開始は次回Updateへ保留する。
+		ClearInputBuffer();
 		rootState = state;
-		if (rootState) {
-			SetState(rootState,{});
+		pendingRootState_ = rootState;
+	}
+
+	bool StateMachine::ActivatePendingRoot(const Character::CharacterContext& ctx) {
+		// 保留がない場合は何も変更せず、呼び出し側が通常更新を続けられるようにする。
+		if (!pendingRootState_ && !rootState) {
+			return false;
 		}
+		if (!pendingRootState_) {
+			return false;
+		}
+		SetState(pendingRootState_, ctx);
+		pendingRootState_.reset();
+		return true;
 	}
 
 #pragma endregion // ステートマシーン
@@ -2529,10 +2840,23 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboState.h
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
+#include <deque>
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
+	// 入力バッファとリソース予約を一対一で結び付ける識別子です。
+	using InputBufferId = std::uint64_t;
+
+	/// <summary>実際に消費された入力と、その入力バッファの識別子です。</summary>
+	struct ConsumedInput {
+		InputBufferId id = 0;
+		ActionInput input = ActionInput::LightAttack;
+	};
+
 	enum class TransitionCondition {
 		Default,
 		GroundMiss,
@@ -2541,7 +2865,25 @@ namespace Combo {
 		AirHit,
 		LockOn,
 		NoLockOn,
+		// 地上/空中、ヒット/ミス、ロックオン有無を同時に評価する複合条件です。
+		GroundMissLockOn,
+		GroundHitLockOn,
+		AirMissLockOn,
+		AirHitLockOn,
+		GroundMissNoLockOn,
+		GroundHitNoLockOn,
+		AirMissNoLockOn,
+		AirHitNoLockOn,
 	};
+
+	// 複合条件をビットで組み合わせるためのマスクです。
+	using TransitionConditionMask = std::uint32_t;
+	static constexpr TransitionConditionMask kTransitionGround = 1u << 0;
+	static constexpr TransitionConditionMask kTransitionAir = 1u << 1;
+	static constexpr TransitionConditionMask kTransitionHit = 1u << 2;
+	static constexpr TransitionConditionMask kTransitionMiss = 1u << 3;
+	static constexpr TransitionConditionMask kTransitionLockOn = 1u << 4;
+	static constexpr TransitionConditionMask kTransitionNoLockOn = 1u << 5;
 
     /// <summary>
     /// コンボ1段分の共通インターフェースです。
@@ -2683,7 +3025,16 @@ namespace Combo {
         /// <param name="input">次ノードへ進むための攻撃入力です。</param>
         /// <param name="condition">命中、空中、ロックオンなどの追加遷移条件です。</param>
         /// <param name="next">遷移先ノードです。weak_ptrとして保持されるため所有権は受け取りません。</param>
-        void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
+		void SetNextState(ActionInput input, TransitionCondition condition, std::shared_ptr<NodeState> next);
+		/// <summary>
+		/// ビットマスクと優先度で拡張可能な遷移条件を登録します。
+		/// </summary>
+		/// <param name="input">遷移に使用する攻撃入力です。</param>
+		/// <param name="conditionMask">地上/ヒット/ロックオンなどの条件マスクです。</param>
+		/// <param name="next">条件成立時の遷移先です。</param>
+		/// <param name="priority">同時成立時に大きい方を優先します。</param>
+		void SetNextState(ActionInput input, TransitionConditionMask conditionMask,
+			std::shared_ptr<NodeState> next, int priority = 0);
 
         /// <summary>
         /// このノードの攻撃が命中したことを、キャンセル条件・遠距離攻撃・カメラ・音へ通知します。
@@ -2741,6 +3092,12 @@ namespace Combo {
         /// <param name="input">確認する攻撃入力です。</param>
         /// <returns>指定入力に次ノード候補があればtrue、それ以外はfalseです。</returns>
         bool HasNextState(ActionInput input) const;
+
+        /// <summary>
+        /// このノードから登録されたすべての遷移先を取得します。
+        /// </summary>
+        /// <returns>重複を含む遷移先ノードの一覧です。</returns>
+        std::vector<std::shared_ptr<NodeState>> GetTransitionTargets() const;
 
         /// <summary>
         /// 現在のステート経過時間が入力受付ウィンドウ内か確認します。
@@ -2804,6 +3161,20 @@ namespace Combo {
         ComboData& Data() { return comboData; }
 
         /// <summary>
+        /// このノードが保持するコンボデータを読み取り専用で取得します。
+        /// </summary>
+        /// <returns>ノードのコンボデータへの読み取り専用参照です。</returns>
+        const ComboData& Data() const { return comboData; }
+
+        /// <summary>このノードを開始した入力種別を設定します。</summary>
+        /// <param name="input">ノードを開始した攻撃入力です。</param>
+        void SetActionInput(ActionInput input) { actionInput_ = input; }
+
+        /// <summary>このノードを開始した入力種別を取得します。</summary>
+        /// <returns>ノード開始時の攻撃入力です。</returns>
+        ActionInput GetActionInput() const { return actionInput_; }
+
+        /// <summary>
         /// コンボデータのコピーを取得します。
         /// </summary>
         /// <returns>このノードが保持するコンボデータのコピーを返します。</returns>
@@ -2817,6 +3188,11 @@ namespace Combo {
         // コンボデータ
         ComboData comboData;
         struct TransitionTargets {
+			struct Rule {
+				TransitionConditionMask conditionMask = 0;
+				int priority = 0;
+				std::weak_ptr<NodeState> target;
+			};
             std::weak_ptr<NodeState> defaultTarget;
             std::weak_ptr<NodeState> groundMiss;
             std::weak_ptr<NodeState> groundHit;
@@ -2824,12 +3200,28 @@ namespace Combo {
             std::weak_ptr<NodeState> airHit;
             std::weak_ptr<NodeState> lockOn;
             std::weak_ptr<NodeState> noLockOn;
+			std::weak_ptr<NodeState> groundMissLockOn;
+			std::weak_ptr<NodeState> groundHitLockOn;
+			std::weak_ptr<NodeState> airMissLockOn;
+			std::weak_ptr<NodeState> airHitLockOn;
+			std::weak_ptr<NodeState> groundMissNoLockOn;
+			std::weak_ptr<NodeState> groundHitNoLockOn;
+			std::weak_ptr<NodeState> airMissNoLockOn;
+            std::weak_ptr<NodeState> airHitNoLockOn;
+			// 保存形式に依存しない拡張条件ルールです。
+			std::vector<Rule> rules;
         };
         // 次のステートマップ
         std::map<ActionInput, TransitionTargets> nextStates;
         bool hasHit_ = false; // このノードの実行中に攻撃が命中したか
 		// 一度だけ加算設定のヒットカウントを既に実行したか
 		bool hasIncrementedHitCount_ = false;
+		// キャンセルで終了したノードか
+		bool canceled_ = false;
+		// ミスイベントを既に通知したノードか
+		bool missed_ = false;
+		// ノードを開始した攻撃入力
+		ActionInput actionInput_ = ActionInput::LightAttack;
     };
 
     /// <summary>
@@ -2860,10 +3252,16 @@ namespace Combo {
         /// 入力を即時遷移させず、次の受付タイミング用にバッファします。
         /// </summary>
         /// <param name="input">保存する攻撃入力です。</param>
-        void HandleInput(ActionInput input) {
-            bufferedInput = input;
-            bufferedInputAge_ = 0.0f;
-            isBufferedInputAccepted_ = false;
+		InputBufferId HandleInput(ActionInput input) {
+			// 複数入力を順番どおり保持し、古い入力から消費できるようにする
+			if (bufferedInputs_.size() >= kMaxBufferedInputs_) {
+				// 上限を超えた場合は最も古い入力だけを破棄する
+				discardedInputIds_.push_back(bufferedInputs_.front().id);
+				bufferedInputs_.pop_front();
+			}
+			const InputBufferId id = nextInputId_++;
+			bufferedInputs_.push_back({ id, input, 0.0f });
+			return id;
         }
 
         /// <summary>
@@ -2884,7 +3282,22 @@ namespace Combo {
         /// 実際に遷移へ使われた入力を取り出してクリアします。
         /// </summary>
         /// <returns>遷移に使用済みの入力があればその値、なければstd::nulloptです。</returns>
-        std::optional<ActionInput> ConsumeTransitionedInput();
+		std::optional<ConsumedInput> ConsumeTransitionedInput();
+
+		/// <summary>期限切れなどで破棄された入力IDを取り出します。</summary>
+		/// <returns>今回破棄された入力バッファIDの一覧です。</returns>
+		std::vector<InputBufferId> ConsumeDiscardedInputIds();
+
+        /// <summary>
+        /// 保持中の入力バッファをすべて消費済みとして破棄します。
+        /// </summary>
+        void ClearInputBuffer();
+
+        /// <summary>
+        /// 保持中の先行入力数を取得します。
+        /// </summary>
+        /// <returns>まだ消費されていない先行入力数です。</returns>
+        size_t GetBufferedInputCount() const { return bufferedInputs_.size(); }
 
         /// <summary>
         /// 現在ノードへ命中通知を転送します。
@@ -2894,13 +3307,24 @@ namespace Combo {
         /// <summary>
         /// ルートステートへ戻します。
         /// </summary>
-        void Reset() { SetState(rootState,{}); }
+		void Reset() {
+			// ルートへ戻る際は前段ノードの先行入力を持ち越さない
+			ClearInputBuffer();
+			pendingRootState_ = rootState;
+		}
 
         /// <summary>
         /// コンボ開始時に使うルートステートを設定します。
         /// </summary>
         /// <param name="state">ルートにするステートです。共有所有として保持します。</param>
-        void SetRoot(std::shared_ptr<State> state);
+		void SetRoot(std::shared_ptr<State> state);
+
+		/// <summary>
+		/// 保留中のルートを実コンテキストで開始します。
+		/// </summary>
+		/// <param name="ctx">開始時点の入力・移動・時間コンテキストです。</param>
+		/// <returns>保留ルートを開始した場合はtrueです。</returns>
+		bool ActivatePendingRoot(const Character::CharacterContext& ctx);
 
         /// <summary>
         /// 現在のコンボが終端ノードに到達しているか確認します。
@@ -2934,11 +3358,23 @@ namespace Combo {
     private:
         std::shared_ptr<State> currentState;   // 現在のステート
         std::shared_ptr<State> rootState;      // 初期ステート
+		// 次回Updateで実コンテキストを受け取って開始するルートです。
+		std::shared_ptr<State> pendingRootState_;
 
-        std::optional<ActionInput> bufferedInput;   // 入力バッファ
-        float bufferedInputAge_ = 0.0f;                    // バッファ入力を保持してからの経過時間（秒）
-        std::optional<ActionInput> transitionedInput_;     // 実際に遷移へ使われた入力
-        bool isBufferedInputAccepted_ = false;             // バッファ入力が現在ステートで受理済みか
+        struct BufferedInput {
+			InputBufferId id = 0;
+            ActionInput input = ActionInput::LightAttack;
+            float age = 0.0f;
+        };
+        // 複数の先行入力を時系列で保持するキュー
+        std::deque<BufferedInput> bufferedInputs_;
+        // 1ステートで保持できる入力数の上限
+        static constexpr size_t kMaxBufferedInputs_ = 8;
+		std::optional<ConsumedInput> transitionedInput_;   // 実際に遷移へ使われた入力
+		// 期限切れ・上限超過で破棄された入力IDを資源予約側へ通知するキューです。
+		std::deque<InputBufferId> discardedInputIds_;
+		// 入力IDが0にならないようにする連番です。
+		InputBufferId nextInputId_ = 1;
         bool isDebug = false;                              // デバッグ表示や編集用の挙動を有効にするか
     };
 }
@@ -2953,6 +3389,8 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.cp
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include <DirectXGame/application/base/Character/Move/Base/MoveComponent.h>
 #include <DirectXGame/application/base/Character/State/CharacterStateMachine.h>
+#include <algorithm>
+#include <unordered_set>
 
 namespace Combo {
 
@@ -3051,16 +3489,54 @@ namespace Combo {
 	void System::Update(const Character::CharacterContext& ctx) {
 		UpdateCooldowns(ctx.dt);
 		comboStateMachine_->SetIsDebug(isDebug);
+		// 開始時のEnterを実コンテキストで先に実行し、空のコンテキストを渡さない。
+		comboStateMachine_->ActivatePendingRoot(ctx);
+		if (pendingStartInput_) {
+			if (auto startedNode = comboStateMachine_->GetCurrentState()) {
+				// 開始入力をノードへ設定してから最初のUpdateを実行する。
+				startedNode->SetActionInput(*pendingStartInput_);
+			}
+			pendingStartInput_.reset();
+		}
 		comboStateMachine_->Update(ctx);
 		const auto transitionedInput = comboStateMachine_->ConsumeTransitionedInput();
-		if (transitionedInput && pendingCostInput_ && *transitionedInput == *pendingCostInput_) {
-			PayStamina(pendingStaminaCost_);
-			StartCooldown(pendingCooldownNode_);
-		}
 		if (transitionedInput) {
-			pendingCostInput_.reset();
-			pendingStaminaCost_ = 0.0f;
-			pendingCooldownNode_.reset();
+			// 次ノードの命中・キャンセル・ミスイベントへ入力種別を引き継ぐ
+			currentActionInput_ = transitionedInput->input;
+			if (auto transitionedNode = comboStateMachine_->GetCurrentState()) {
+				transitionedNode->SetActionInput(currentActionInput_);
+			}
+			// 実際に消費された入力IDに対応する予約コストだけを確定する。
+			auto pending = std::find_if(pendingCosts_.begin(), pendingCosts_.end(),
+				[&transitionedInput](const PendingCost& cost) {
+					return cost.inputBufferId == transitionedInput->id;
+				});
+			if (pending != pendingCosts_.end()) {
+				// 予約分を解放してから、実際に遷移したノードのコストを確定する。
+				reservedStamina_ = (std::max)(0.0f, reservedStamina_ - pending->staminaCost);
+				const std::shared_ptr<NodeState> transitionedNode = comboStateMachine_->GetCurrentState();
+				const float actualCost = GetComboStaminaCost(currentActionInput_, transitionedNode);
+				PayStamina(actualCost);
+				StartCooldown(transitionedNode);
+				owner->EmitActionEvent({ GameAction::EventType::ResourceConsumed, owner, nullptr,
+					currentActionInput_, transitionedNode ? transitionedNode->GetName() : "", actualCost });
+				pendingCosts_.erase(pending);
+			}
+		}
+		// 期限切れ・上限超過の入力に紐付いた予約を漏れなく解放する。
+		for (const InputBufferId discardedId : comboStateMachine_->ConsumeDiscardedInputIds()) {
+			auto pending = std::find_if(pendingCosts_.begin(), pendingCosts_.end(),
+				[discardedId](const PendingCost& cost) { return cost.inputBufferId == discardedId; });
+			if (pending != pendingCosts_.end()) {
+				reservedStamina_ = (std::max)(0.0f, reservedStamina_ - pending->staminaCost);
+				pendingCosts_.erase(pending);
+			}
+		}
+		if (owner->GetCurrentMainState() != Character::CharacterMainState::Attack &&
+			comboStateMachine_->GetBufferedInputCount() == 0) {
+			// 攻撃終了または受付期限切れになった入力のコスト予約を破棄する
+			pendingCosts_.clear();
+			reservedStamina_ = 0.0f;
 		}
 		comboDebug_->SetEnabled(isDebugDraw_);
 		comboDebug_->Update(ctx.dt);
@@ -3081,14 +3557,19 @@ namespace Combo {
 			}
 
 			const float transitionCost = GetComboStaminaCost(input, nextNode);
-			if (!CanPayStamina(transitionCost)) {
+			if (!CanPayStamina(transitionCost + reservedStamina_)) {
 				return false;
 			}
 
-			comboStateMachine_->HandleInput(input);
-			pendingCostInput_ = input;
-			pendingStaminaCost_ = transitionCost;
-			pendingCooldownNode_ = nextNode;
+			const InputBufferId inputBufferId = comboStateMachine_->HandleInput(input);
+			// 複数の先行入力に対応するため、入力とコスト予約を同じ順序で保持する
+			if (pendingCosts_.size() >= 8) {
+				// 入力キューと同じ上限で、最も古い予約だけを破棄する
+				reservedStamina_ = (std::max)(0.0f, reservedStamina_ - pendingCosts_.front().staminaCost);
+				pendingCosts_.pop_front();
+			}
+			pendingCosts_.push_back({ inputBufferId, input, transitionCost, nextNode });
+			reservedStamina_ += transitionCost;
 			return true;
 		}
 
@@ -3120,13 +3601,21 @@ namespace Combo {
 			return false;
 		}
 
-		pendingCostInput_.reset();
-		pendingStaminaCost_ = 0.0f;
-		pendingCooldownNode_.reset();
+		// 新しいコンボ開始時は前段コンボの未確定コストを破棄する
+		pendingCosts_.clear();
+		reservedStamina_ = 0.0f;
+		currentActionInput_ = input;
+		// 開始ノードは次回Updateで実コンテキスト付きEnterを行うため、入力もそこで適用する。
+		pendingStartInput_ = input;
 		owner->GetAttackController()->SetIsAttack(true);
 		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Attack);
 		PayStamina(startCost);
 		StartCooldown(startNode);
+		// 攻撃開始とリソース消費を同じアクションイベント経路へ通知する
+		owner->EmitActionEvent({ GameAction::EventType::AttackStarted, owner, nullptr, input, startNode->GetName() });
+		if (startCost > 0.0f) {
+			owner->EmitActionEvent({ GameAction::EventType::ResourceConsumed, owner, nullptr, input, startNode->GetName(), startCost });
+		}
 		return true;
 	}
 
@@ -3151,14 +3640,25 @@ namespace Combo {
 
 		// ヒット条件、遠距離、カメラ、音の通知はカウント設定に関係なく行う。
 		comboStateMachine_->NotifyCurrentStateHit();
+		// 命中確定をアクションイベントとして通知する
+		owner->EmitActionEvent({ GameAction::EventType::HitConfirmed, owner,
+			owner->GetAttackController()->GetLockOnSystem()->GetTarget(), currentActionInput_, currentNode->GetName() });
 		return true;
 	}
 
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット
+		// コンボノードが生成した無期限ヒットボックスを、ノード再構築前に解放する
+		if (owner && owner->GetHitBoxSystem()) {
+			owner->GetHitBoxSystem()->Clear();
+		}
+		if (owner) {
+			// コンボ状態機械を破棄する場合も、ノード由来の防御状態を解除する
+			owner->ClearActionDefenseFlags();
+		}
 
-        // StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
+		// StateMachineを破棄する前に、各ノードが生成した実行中演出を解放する。
         for (auto& [nodeName, node] : comboNodes_) {
             if (node) {
                 node->Data().GetComboEffect().ClearRuntimeEffects();
@@ -3173,9 +3673,12 @@ namespace Combo {
 		comboGlobalDatas_.clear();
 		comboNodenames_.clear();
 		parentTransforms_.clear();
-		pendingCostInput_.reset();
-		pendingStaminaCost_ = 0.0f;
-		pendingCooldownNode_.reset();
+		// コンボグラフを再構築するため、未確定リソース予約も破棄する
+		pendingCosts_.clear();
+		reservedStamina_ = 0.0f;
+		pendingStartInput_.reset();
+		// ノード再構築前に古い検証結果も破棄する
+		validationIssues_.clear();
 		cooldownTimers_.clear();
 	}
 
@@ -3223,6 +3726,14 @@ namespace Combo {
 				renameTarget(targets.airHit);
 				renameTarget(targets.lockOn);
 				renameTarget(targets.noLockOn);
+				renameTarget(targets.groundMissLockOn);
+				renameTarget(targets.groundHitLockOn);
+				renameTarget(targets.airMissLockOn);
+				renameTarget(targets.airHitLockOn);
+				renameTarget(targets.groundMissNoLockOn);
+				renameTarget(targets.groundHitNoLockOn);
+				renameTarget(targets.airMissNoLockOn);
+				renameTarget(targets.airHitNoLockOn);
 			};
 			renameTarget(data.connection.lightAttack);
 			renameTarget(data.connection.heavyAttack);
@@ -3452,6 +3963,25 @@ namespace Combo {
 		// 項目一覧は一か所に集約し、writerが登録と保存の違いを吸収する
 		Engine::GlobalVariableWriter writer(globalVariables, overwrite ?
 			Engine::GlobalVariableWriteMode::Save : Engine::GlobalVariableWriteMode::Register);
+		// 入力シーケンスを配列順で保存し、旧データには存在しない場合も読み飛ばせる形式にする。
+		auto writeInputSequence = [&](const char* prefix, const std::vector<ComboInputStep>& sequence) {
+			const std::string prefixText = prefix;
+			writer.Value(groupName, prefixText + "数", static_cast<int>(sequence.size()));
+			for (std::size_t index = 0; index < sequence.size(); ++index) {
+				const std::string suffix = std::to_string(index);
+				const auto& step = sequence[index];
+				writer.Value(groupName, prefixText + "ソース" + suffix, static_cast<int>(step.source));
+				writer.Value(groupName, prefixText + "ボタン" + suffix, static_cast<int>(step.button));
+				writer.Value(groupName, prefixText + "アクション" + suffix, static_cast<int>(step.action));
+				writer.Value(groupName, prefixText + "入力種別" + suffix, static_cast<int>(step.inputType));
+				writer.Value(groupName, prefixText + "方向" + suffix, static_cast<int>(step.direction));
+				writer.Value(groupName, prefixText + "最小保持時間" + suffix, step.minHoldSeconds);
+				writer.Value(groupName, prefixText + "最大保持時間" + suffix, step.maxHoldSeconds);
+				writer.Value(groupName, prefixText + "最小溜め率" + suffix, step.minChargeRatio);
+				writer.Value(groupName, prefixText + "最大溜め率" + suffix, step.maxChargeRatio);
+				writer.Value(groupName, prefixText + "溜め時間" + suffix, step.chargeSeconds);
+			}
+		};
 		// 攻撃タイプと遠距離攻撃
 		{
 			writer.Value(groupName, "スタミナコスト個別指定", data.action.useCustomStaminaCost);
@@ -3568,18 +4098,42 @@ namespace Combo {
 			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット)", data.connection.lightCondition.airHit);
 			writer.Value(groupName, "接続先(弱攻撃-ロックオン中)", data.connection.lightCondition.lockOn);
 			writer.Value(groupName, "接続先(弱攻撃-ロックオンなし)", data.connection.lightCondition.noLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-未ヒット-ロックオン)", data.connection.lightCondition.groundMissLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-ヒット-ロックオン)", data.connection.lightCondition.groundHitLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-未ヒット-ロックオン)", data.connection.lightCondition.airMissLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット-ロックオン)", data.connection.lightCondition.airHitLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-未ヒット-ロックオンなし)", data.connection.lightCondition.groundMissNoLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-地上-ヒット-ロックオンなし)", data.connection.lightCondition.groundHitNoLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-未ヒット-ロックオンなし)", data.connection.lightCondition.airMissNoLockOn);
+			writer.Value(groupName, "接続先(弱攻撃-空中-ヒット-ロックオンなし)", data.connection.lightCondition.airHitNoLockOn);
 			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット)", data.connection.heavyCondition.groundMiss);
 			writer.Value(groupName, "接続先(強攻撃-地上-ヒット)", data.connection.heavyCondition.groundHit);
 			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット)", data.connection.heavyCondition.airMiss);
 			writer.Value(groupName, "接続先(強攻撃-空中-ヒット)", data.connection.heavyCondition.airHit);
 			writer.Value(groupName, "接続先(強攻撃-ロックオン中)", data.connection.heavyCondition.lockOn);
 			writer.Value(groupName, "接続先(強攻撃-ロックオンなし)", data.connection.heavyCondition.noLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット-ロックオン)", data.connection.heavyCondition.groundMissLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-ヒット-ロックオン)", data.connection.heavyCondition.groundHitLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット-ロックオン)", data.connection.heavyCondition.airMissLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-ヒット-ロックオン)", data.connection.heavyCondition.airHitLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-未ヒット-ロックオンなし)", data.connection.heavyCondition.groundMissNoLockOn);
+			writer.Value(groupName, "接続先(強攻撃-地上-ヒット-ロックオンなし)", data.connection.heavyCondition.groundHitNoLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-未ヒット-ロックオンなし)", data.connection.heavyCondition.airMissNoLockOn);
+			writer.Value(groupName, "接続先(強攻撃-空中-ヒット-ロックオンなし)", data.connection.heavyCondition.airHitNoLockOn);
 			writer.Value(groupName, "接続先(スキル-地上-未ヒット)", data.connection.skillCondition.groundMiss);
 			writer.Value(groupName, "接続先(スキル-地上-ヒット)", data.connection.skillCondition.groundHit);
 			writer.Value(groupName, "接続先(スキル-空中-未ヒット)", data.connection.skillCondition.airMiss);
 			writer.Value(groupName, "接続先(スキル-空中-ヒット)", data.connection.skillCondition.airHit);
 			writer.Value(groupName, "接続先(スキル-ロックオン中)", data.connection.skillCondition.lockOn);
 			writer.Value(groupName, "接続先(スキル-ロックオンなし)", data.connection.skillCondition.noLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-未ヒット-ロックオン)", data.connection.skillCondition.groundMissLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-ヒット-ロックオン)", data.connection.skillCondition.groundHitLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-未ヒット-ロックオン)", data.connection.skillCondition.airMissLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-ヒット-ロックオン)", data.connection.skillCondition.airHitLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-未ヒット-ロックオンなし)", data.connection.skillCondition.groundMissNoLockOn);
+			writer.Value(groupName, "接続先(スキル-地上-ヒット-ロックオンなし)", data.connection.skillCondition.groundHitNoLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-未ヒット-ロックオンなし)", data.connection.skillCondition.airMissNoLockOn);
+			writer.Value(groupName, "接続先(スキル-空中-ヒット-ロックオンなし)", data.connection.skillCondition.airHitNoLockOn);
 		}
 		// 条件
 		{
@@ -3597,6 +4151,8 @@ namespace Combo {
 			writer.Value(groupName, "コンボキャンセル可能", data.condition.isCancel);
 			writer.Value(groupName, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
 			writer.Value(groupName, "コンボ入力遅延", data.condition.inputDelay);
+			writeInputSequence("次段入力", data.condition.nextInputSequence);
+			writeInputSequence("キャンセル入力", data.condition.cancelInputSequence);
 		}
 		// アニメーション
 		{
@@ -3677,6 +4233,8 @@ namespace Combo {
 			writer.Value(groupName, "親オブジェクト名前", data.hitBox.parentName);
 			writer.Value(groupName, "ヒットボックス発生時間", data.hitBox.windowStart);
 			writer.Value(groupName, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			writer.Value(groupName, "ヒットボックス発生回数", static_cast<int>(data.hitBox.spawnCount));
+			writer.Value(groupName, "ヒットボックス再発生間隔", data.hitBox.spawnInterval);
 			writer.Value(groupName, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 			writer.Value(groupName, "ヒットボックスコライダー別ヒット記録", data.hitBox.recordPerCollider);
 			writer.Value(groupName, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
@@ -3797,6 +4355,32 @@ namespace Combo {
 		}
 	}
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
+		// 保存されている入力シーケンスを復元し、未保存の旧データは空配列として扱う。
+		auto readInputSequence = [&](const char* prefix, std::vector<ComboInputStep>& sequence) {
+			const std::string prefixText = prefix;
+			const std::string countKey = prefixText + "数";
+			sequence.clear();
+			if (!globalVariables->HasKey(name, countKey)) {
+				return;
+			}
+			const int savedCount = globalVariables->GetValue<int>(name, countKey);
+			const int count = (std::max)(0, (std::min)(savedCount, 32));
+			sequence.resize(static_cast<std::size_t>(count));
+			for (int index = 0; index < count; ++index) {
+				const std::string suffix = std::to_string(index);
+				auto& step = sequence[static_cast<std::size_t>(index)];
+				step.source = static_cast<ComboInputSource>(globalVariables->GetValue<int>(name, prefixText + "ソース" + suffix));
+				step.button = static_cast<ComboGamePadButton>(globalVariables->GetValue<int>(name, prefixText + "ボタン" + suffix));
+				step.action = static_cast<ComboActionType>(globalVariables->GetValue<int>(name, prefixText + "アクション" + suffix));
+				step.inputType = static_cast<ComboButtonInputType>(globalVariables->GetValue<int>(name, prefixText + "入力種別" + suffix));
+				step.direction = static_cast<ComboInputDirection>(globalVariables->GetValue<int>(name, prefixText + "方向" + suffix));
+				step.minHoldSeconds = globalVariables->GetValue<float>(name, prefixText + "最小保持時間" + suffix);
+				step.maxHoldSeconds = globalVariables->GetValue<float>(name, prefixText + "最大保持時間" + suffix);
+				step.minChargeRatio = globalVariables->GetValue<float>(name, prefixText + "最小溜め率" + suffix);
+				step.maxChargeRatio = globalVariables->GetValue<float>(name, prefixText + "最大溜め率" + suffix);
+				step.chargeSeconds = globalVariables->GetValue<float>(name, prefixText + "溜め時間" + suffix);
+			}
+		};
 		// 攻撃タイプと遠距離攻撃
 		{
 			data.type = globalVariables->GetEnumValue<Combo::Type>(name, "コンボ攻撃タイプ");
@@ -3926,6 +4510,12 @@ namespace Combo {
 		}
 		// 接続
 		{
+			// 複合条件は旧保存データに存在しないため、未登録なら空接続として補完する。
+			auto readOptionalConnection = [&](const char* key) {
+				return globalVariables->HasKey(name, key)
+					? globalVariables->GetValue<std::string>(name, key)
+					: std::string{};
+			};
 			data.connection.lightAttack = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃)");
 			data.connection.heavyAttack = globalVariables->GetValue<std::string>(name, "接続先(強攻撃)");
 			data.connection.skill = globalVariables->GetValue<std::string>(name, "接続先(スキル)");
@@ -3935,18 +4525,42 @@ namespace Combo {
 			data.connection.lightCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-空中-ヒット)");
 			data.connection.lightCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオン中)");
 			data.connection.lightCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(弱攻撃-ロックオンなし)");
+			data.connection.lightCondition.groundMissLockOn = readOptionalConnection("接続先(弱攻撃-地上-未ヒット-ロックオン)");
+			data.connection.lightCondition.groundHitLockOn = readOptionalConnection("接続先(弱攻撃-地上-ヒット-ロックオン)");
+			data.connection.lightCondition.airMissLockOn = readOptionalConnection("接続先(弱攻撃-空中-未ヒット-ロックオン)");
+			data.connection.lightCondition.airHitLockOn = readOptionalConnection("接続先(弱攻撃-空中-ヒット-ロックオン)");
+			data.connection.lightCondition.groundMissNoLockOn = readOptionalConnection("接続先(弱攻撃-地上-未ヒット-ロックオンなし)");
+			data.connection.lightCondition.groundHitNoLockOn = readOptionalConnection("接続先(弱攻撃-地上-ヒット-ロックオンなし)");
+			data.connection.lightCondition.airMissNoLockOn = readOptionalConnection("接続先(弱攻撃-空中-未ヒット-ロックオンなし)");
+			data.connection.lightCondition.airHitNoLockOn = readOptionalConnection("接続先(弱攻撃-空中-ヒット-ロックオンなし)");
 			data.connection.heavyCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-未ヒット)");
 			data.connection.heavyCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-地上-ヒット)");
 			data.connection.heavyCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-未ヒット)");
 			data.connection.heavyCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-空中-ヒット)");
 			data.connection.heavyCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオン中)");
 			data.connection.heavyCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(強攻撃-ロックオンなし)");
+			data.connection.heavyCondition.groundMissLockOn = readOptionalConnection("接続先(強攻撃-地上-未ヒット-ロックオン)");
+			data.connection.heavyCondition.groundHitLockOn = readOptionalConnection("接続先(強攻撃-地上-ヒット-ロックオン)");
+			data.connection.heavyCondition.airMissLockOn = readOptionalConnection("接続先(強攻撃-空中-未ヒット-ロックオン)");
+			data.connection.heavyCondition.airHitLockOn = readOptionalConnection("接続先(強攻撃-空中-ヒット-ロックオン)");
+			data.connection.heavyCondition.groundMissNoLockOn = readOptionalConnection("接続先(強攻撃-地上-未ヒット-ロックオンなし)");
+			data.connection.heavyCondition.groundHitNoLockOn = readOptionalConnection("接続先(強攻撃-地上-ヒット-ロックオンなし)");
+			data.connection.heavyCondition.airMissNoLockOn = readOptionalConnection("接続先(強攻撃-空中-未ヒット-ロックオンなし)");
+			data.connection.heavyCondition.airHitNoLockOn = readOptionalConnection("接続先(強攻撃-空中-ヒット-ロックオンなし)");
 			data.connection.skillCondition.groundMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-未ヒット)");
 			data.connection.skillCondition.groundHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-地上-ヒット)");
 			data.connection.skillCondition.airMiss = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-未ヒット)");
 			data.connection.skillCondition.airHit = globalVariables->GetValue<std::string>(name, "接続先(スキル-空中-ヒット)");
 			data.connection.skillCondition.lockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオン中)");
 			data.connection.skillCondition.noLockOn = globalVariables->GetValue<std::string>(name, "接続先(スキル-ロックオンなし)");
+			data.connection.skillCondition.groundMissLockOn = readOptionalConnection("接続先(スキル-地上-未ヒット-ロックオン)");
+			data.connection.skillCondition.groundHitLockOn = readOptionalConnection("接続先(スキル-地上-ヒット-ロックオン)");
+			data.connection.skillCondition.airMissLockOn = readOptionalConnection("接続先(スキル-空中-未ヒット-ロックオン)");
+			data.connection.skillCondition.airHitLockOn = readOptionalConnection("接続先(スキル-空中-ヒット-ロックオン)");
+			data.connection.skillCondition.groundMissNoLockOn = readOptionalConnection("接続先(スキル-地上-未ヒット-ロックオンなし)");
+			data.connection.skillCondition.groundHitNoLockOn = readOptionalConnection("接続先(スキル-地上-ヒット-ロックオンなし)");
+			data.connection.skillCondition.airMissNoLockOn = readOptionalConnection("接続先(スキル-空中-未ヒット-ロックオンなし)");
+			data.connection.skillCondition.airHitNoLockOn = readOptionalConnection("接続先(スキル-空中-ヒット-ロックオンなし)");
 		}
 		// 条件
 		{
@@ -3964,6 +4578,8 @@ namespace Combo {
 			data.condition.isCancel = globalVariables->GetValue<bool>(name, "コンボキャンセル可能");
 			data.condition.isMoveCancel = globalVariables->GetValue<bool>(name, "コンボ移動キャンセル可能");
 			data.condition.inputDelay = globalVariables->GetValue<float>(name, "コンボ入力遅延");
+			readInputSequence("次段入力", data.condition.nextInputSequence);
+			readInputSequence("キャンセル入力", data.condition.cancelInputSequence);
 		}
 		// アニメーション
 		{
@@ -4096,6 +4712,12 @@ namespace Combo {
 			data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
 			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+			if (globalVariables->HasKey(name, "ヒットボックス発生回数")) {
+				data.hitBox.spawnCount = static_cast<std::uint32_t>((std::max)(1, globalVariables->GetValue<int>(name, "ヒットボックス発生回数")));
+			}
+			if (globalVariables->HasKey(name, "ヒットボックス再発生間隔")) {
+				data.hitBox.spawnInterval = globalVariables->GetValue<float>(name, "ヒットボックス再発生間隔");
+			}
 			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
 			data.hitBox.recordPerCollider = globalVariables->GetValue<bool>(name, "ヒットボックスコライダー別ヒット記録");
 			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
@@ -4221,17 +4843,32 @@ namespace Combo {
 		data.GetComboEffect().SetParentTransforms(parentTransforms_);
 		// カメラ
 		data.GetComboCamera().GetData() = gData.camera;
-		// コンボボタン設定
-		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
-		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);
-		ComboButton bo3 = ComboButton(ComboGamePadButton::GAMEPAD_Y, ComboButtonInputType::kPressed);
-
-		// 押し続ける
-		std::vector<ComboButton> button;
-		button.push_back(bo);
-		button.push_back(bo2);
-		button.push_back(bo3);
-		data.GetComboCondition().GetNextReceiver().SetButton(button);
+		// 保存設定に入力列がある場合は、方向・長押し・溜め条件を含めて変換する。
+		auto createInputButtons = [](const std::vector<ComboInputStep>& steps) {
+			std::vector<ComboButton> buttons;
+			buttons.reserve(steps.size());
+			for (const ComboInputStep& step : steps) {
+				buttons.emplace_back(step);
+			}
+			return buttons;
+		};
+		if (!gData.condition.nextInputSequence.empty()) {
+			data.GetComboCondition().GetNextReceiver().SetButton(
+				createInputButtons(gData.condition.nextInputSequence), true);
+		}
+		else {
+			// 旧データは従来どおり、B/X/Yのいずれかで成立させる。
+			std::vector<ComboButton> legacyButtons = {
+				ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed),
+				ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed),
+				ComboButton(ComboGamePadButton::GAMEPAD_Y, ComboButtonInputType::kPressed),
+			};
+			data.GetComboCondition().GetNextReceiver().SetButton(legacyButtons);
+		}
+		if (!gData.condition.cancelInputSequence.empty()) {
+			data.GetComboCondition().GetCancelReceiver().SetButton(
+				createInputButtons(gData.condition.cancelInputSequence), true);
+		}
 	}
 
 	void System::CreateCombo(const std::string& comboNodeName) {
@@ -4271,7 +4908,7 @@ namespace Combo {
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
 	}
 
-	void System::ConnectSavedCombos() {
+		void System::ConnectSavedCombos() {
 		for (const auto& [nodeName, data] : comboGlobalDatas_) {
 			auto connectConditional = [&](ActionInput input, const GlobalConditionalConnection& targets) {
 				if (!targets.lockOn.empty()) {
@@ -4292,6 +4929,30 @@ namespace Combo {
 				if (!targets.airHit.empty()) {
 					ConnectCombo(nodeName, input, targets.airHit, TransitionCondition::AirHit);
 				}
+				if (!targets.groundMissLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundMissLockOn, TransitionCondition::GroundMissLockOn);
+				}
+				if (!targets.groundHitLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundHitLockOn, TransitionCondition::GroundHitLockOn);
+				}
+				if (!targets.airMissLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airMissLockOn, TransitionCondition::AirMissLockOn);
+				}
+				if (!targets.airHitLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airHitLockOn, TransitionCondition::AirHitLockOn);
+				}
+				if (!targets.groundMissNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundMissNoLockOn, TransitionCondition::GroundMissNoLockOn);
+				}
+				if (!targets.groundHitNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.groundHitNoLockOn, TransitionCondition::GroundHitNoLockOn);
+				}
+				if (!targets.airMissNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airMissNoLockOn, TransitionCondition::AirMissNoLockOn);
+				}
+				if (!targets.airHitNoLockOn.empty()) {
+					ConnectCombo(nodeName, input, targets.airHitNoLockOn, TransitionCondition::AirHitNoLockOn);
+				}
 			};
 			if (!data.connection.lightAttack.empty()) {
 				ConnectCombo(nodeName, ActionInput::LightAttack, data.connection.lightAttack);
@@ -4306,6 +4967,147 @@ namespace Combo {
 			connectConditional(ActionInput::HeavyAttack, data.connection.heavyCondition);
 			connectConditional(ActionInput::Skill, data.connection.skillCondition);
 		}
+	}
+
+	std::vector<ValidationIssue> System::ValidateComboGraph() const {
+		// 検証結果をノード名付きで蓄積し、エディターやログ側から利用できるようにする
+		std::vector<ValidationIssue> issues;
+		auto addIssue = [&issues](ValidationSeverity severity, const std::string& nodeName, const std::string& message) {
+			issues.push_back({ severity, nodeName, message });
+		};
+		auto checkTarget = [this, &addIssue](const std::string& nodeName, const std::string& targetName, const std::string& fieldName) {
+			if (!targetName.empty() && comboNodes_.find(targetName) == comboNodes_.end()) {
+				addIssue(ValidationSeverity::Error, nodeName, fieldName + " の遷移先が存在しません: " + targetName);
+			}
+		};
+
+		// 保存データ上のすべての遷移先が実在するか検証する
+		for (const auto& [nodeName, data] : comboGlobalDatas_) {
+			checkTarget(nodeName, data.connection.lightAttack, "弱攻撃");
+			checkTarget(nodeName, data.connection.heavyAttack, "強攻撃");
+			checkTarget(nodeName, data.connection.skill, "スキル");
+			const GlobalConditionalConnection* conditionalConnections[] = {
+				&data.connection.lightCondition,
+				&data.connection.heavyCondition,
+				&data.connection.skillCondition,
+			};
+			for (const auto* connection : conditionalConnections) {
+				checkTarget(nodeName, connection->groundMiss, "地上ミス");
+				checkTarget(nodeName, connection->groundHit, "地上ヒット");
+				checkTarget(nodeName, connection->airMiss, "空中ミス");
+				checkTarget(nodeName, connection->airHit, "空中ヒット");
+				checkTarget(nodeName, connection->lockOn, "ロックオン");
+				checkTarget(nodeName, connection->noLockOn, "非ロックオン");
+				checkTarget(nodeName, connection->groundMissLockOn, "地上ミス・ロックオン");
+				checkTarget(nodeName, connection->groundHitLockOn, "地上ヒット・ロックオン");
+				checkTarget(nodeName, connection->airMissLockOn, "空中ミス・ロックオン");
+				checkTarget(nodeName, connection->airHitLockOn, "空中ヒット・ロックオン");
+				checkTarget(nodeName, connection->groundMissNoLockOn, "地上ミス・非ロックオン");
+				checkTarget(nodeName, connection->groundHitNoLockOn, "地上ヒット・非ロックオン");
+				checkTarget(nodeName, connection->airMissNoLockOn, "空中ミス・非ロックオン");
+				checkTarget(nodeName, connection->airHitNoLockOn, "空中ヒット・非ロックオン");
+			}
+		}
+
+		// 各ノードの時間、リソース、ヒットボックス設定を検証する
+		for (const auto& [nodeName, node] : comboNodes_) {
+			if (!node) {
+				addIssue(ValidationSeverity::Error, nodeName, "ノードがnullptrです。");
+				continue;
+			}
+			const auto& condition = node->Data().GetComboCondition().GetData();
+			if (condition.stateInput.startTime > condition.stateInput.endTime) {
+				addIssue(ValidationSeverity::Error, nodeName, "入力受付時間の開始が終了より後です。");
+			}
+			if (condition.stateCancel.startTime > condition.stateCancel.endTime) {
+				addIssue(ValidationSeverity::Error, nodeName, "キャンセル受付時間の開始が終了より後です。");
+			}
+			if (condition.stateMoveCancel.startTime > condition.stateMoveCancel.endTime) {
+				addIssue(ValidationSeverity::Error, nodeName, "移動キャンセル時間の開始が終了より後です。");
+			}
+			if (condition.inputBufferTime < 0.0f || condition.stateEndTime < 0.0f || condition.stateNextTime < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "時間設定に負の値があります。");
+			}
+			if (condition.stateNextTime > condition.stateEndTime) {
+				addIssue(ValidationSeverity::Warning, nodeName, "次段移行時間がノード終了時間より後です。");
+			}
+			const auto& action = node->Data().GetActionData();
+			if (action.staminaCost < 0.0f || action.cooldown < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "スタミナコストまたはクールダウンに負の値があります。");
+			}
+			const auto& hitBox = node->Data().GetComboHitBox().GetCollData().hitBoxData;
+			if (hitBox.lifetimeType == HitBox::LifetimeType::kTimed && hitBox.lifeTime <= 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "時間制限ヒットボックスの生存時間が0以下です。");
+			}
+			if (hitBox.windowStart < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス発生時間が負の値です。");
+			}
+			if (hitBox.spawnCount == 0) {
+				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス発生回数が0です。");
+			}
+			if (hitBox.spawnInterval < 0.0f) {
+				addIssue(ValidationSeverity::Error, nodeName, "ヒットボックス再発生間隔が負の値です。");
+			}
+			if (hitBox.spawnCount > 1 && hitBox.spawnInterval <= 0.0f) {
+				addIssue(ValidationSeverity::Warning, nodeName, "ヒットボックスを複数回発生させるには再発生間隔を0より大きくしてください。");
+			}
+			// 次段とキャンセルの入力シーケンスに矛盾した範囲がないか検証する。
+			const std::vector<std::pair<const char*, const std::vector<ComboInputStep>*>> inputSequences = {
+				{ "次段", &condition.nextInputSequence },
+				{ "キャンセル", &condition.cancelInputSequence },
+			};
+			for (const auto& [sequenceName, sequence] : inputSequences) {
+				for (const auto& step : *sequence) {
+					if (step.minHoldSeconds < 0.0f || step.maxHoldSeconds < 0.0f ||
+						step.minChargeRatio < 0.0f || step.maxChargeRatio < 0.0f || step.chargeSeconds < 0.0f) {
+						addIssue(ValidationSeverity::Error, nodeName, std::string(sequenceName) + "入力シーケンスに負の値があります。");
+					}
+					if (step.maxHoldSeconds > 0.0f && step.minHoldSeconds > step.maxHoldSeconds) {
+						addIssue(ValidationSeverity::Error, nodeName, std::string(sequenceName) + "入力シーケンスの保持時間範囲が逆です。");
+					}
+					if (step.minChargeRatio > step.maxChargeRatio) {
+						addIssue(ValidationSeverity::Error, nodeName, std::string(sequenceName) + "入力シーケンスの溜め率範囲が逆です。");
+					}
+				}
+			}
+		}
+
+		// 開始ルートから到達できないノードを検出する
+		std::unordered_set<const NodeState*> reachable;
+		std::vector<std::shared_ptr<NodeState>> pendingNodes;
+		const std::string startNames[] = {
+			groundLightStart_, airLightStart_, groundHeavyStart_, airHeavyStart_,
+			groundSkillStart_, airSkillStart_, dodgeLightStart_, dodgeHeavyStart_,
+			dodgeSkillStart_, dodgeSuccessLightStart_, dodgeSuccessHeavyStart_, dodgeSuccessSkillStart_,
+		};
+		for (const auto& startName : startNames) {
+			if (startName.empty()) {
+				continue;
+			}
+			auto start = GetComboNodeState(startName);
+			if (!start) {
+				addIssue(ValidationSeverity::Error, "", "開始コンボが存在しません: " + startName);
+			}
+			else {
+				pendingNodes.push_back(start);
+			}
+		}
+		while (!pendingNodes.empty()) {
+			auto node = pendingNodes.back();
+			pendingNodes.pop_back();
+			if (!node || !reachable.insert(node.get()).second) {
+				continue;
+			}
+			for (const auto& target : node->GetTransitionTargets()) {
+				pendingNodes.push_back(target);
+			}
+		}
+		for (const auto& [nodeName, node] : comboNodes_) {
+			if (node && reachable.find(node.get()) == reachable.end()) {
+				addIssue(ValidationSeverity::Warning, nodeName, "開始ルートから到達できないノードです。");
+			}
+		}
+		return issues;
 	}
 
 	void System::Create(const std::string name) {
@@ -4345,6 +5147,8 @@ namespace Combo {
 		}
 
 		ConnectSavedCombos();
+		// コンボ生成完了時にグラフ検証を実行し、結果を保持する
+		validationIssues_ = ValidateComboGraph();
 	}
 
 #pragma endregion // 保存　適応
@@ -4355,11 +5159,13 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <map>
+#include <deque>
 #include <string>
 #include <memory>
 #include <optional>
+#include <vector>
 #include "DirectXGame/application/base/Attack/Combo/Base/Debug/ComboDebug.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
@@ -4471,6 +5277,23 @@ namespace Combo {
 		std::string dodgeSuccessSkill;
 	};
 
+	/// <summary>
+	/// コンボデータ検証で見つかった問題の重要度です。
+	/// </summary>
+	enum class ValidationSeverity {
+		Warning,
+		Error,
+	};
+
+	/// <summary>
+	/// コンボグラフの検証結果を保持します。
+	/// </summary>
+	struct ValidationIssue {
+		ValidationSeverity severity = ValidationSeverity::Warning;
+		std::string nodeName;
+		std::string message;
+	};
+
 
 	/// <summary>
 	/// コンボシステム
@@ -4494,6 +5317,9 @@ namespace Combo {
 		/// <summary>現在のコンボノード、入力受付、スタミナ、クールダウンを更新する。</summary>
 		/// <param name="ctx">所有者の入力、移動、状態をまとめたフレームコンテキスト。</param>
 		void Update(const Character::CharacterContext& ctx);
+		/// <summary>攻撃状態に依存せず、コンボクールタイムだけを更新する。</summary>
+		/// <param name="dt">前フレームからの経過時間です。</param>
+		void UpdateCooldowns(float dt);
 		/// <summary>攻撃入力から開始または派生可能なコンボを要求する。</summary>
 		/// <param name="input">弱攻撃、強攻撃、スキルなどのアクション入力。</param>
 		/// <returns>コンボ開始または遷移要求を受理した場合はtrue。</returns>
@@ -4593,6 +5419,16 @@ namespace Combo {
 		/// 開始コンボ設定
 		/// </summary>
 		void SetStartComboRoutes(const StartComboRoutes& routes);
+		/// <summary>
+		/// 現在読み込まれているコンボグラフと各ノード設定を検証します。
+		/// </summary>
+		/// <returns>見つかった警告とエラーの一覧です。</returns>
+		std::vector<ValidationIssue> ValidateComboGraph() const;
+		/// <summary>
+		/// 最後に実行したコンボグラフ検証結果を取得します。
+		/// </summary>
+		/// <returns>検証結果への読み取り専用参照です。</returns>
+		const std::vector<ValidationIssue>& GetValidationIssues() const { return validationIssues_; }
 		/// <summary>名前に対応するコンボノードを取得する。</summary>
 		/// <param name="name">検索するノード名。</param>
 		/// <returns>共有所有権を持つノード。存在しない場合はnullptr。</returns>
@@ -4602,6 +5438,13 @@ namespace Combo {
 				return it->second;
 			}
 			return nullptr;
+		}
+		/// <summary>読み取り専用コンボノード検索を行います。</summary>
+		/// <param name="name">検索するノード名。</param>
+		/// <returns>存在するノード、またはnullptr。</returns>
+		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) const {
+			auto it = comboNodes_.find(name);
+			return it != comboNodes_.end() ? it->second : nullptr;
 		}
 	public:
 		/// <summary>生成済みコンボノードを名前付きで登録する。</summary>
@@ -4686,7 +5529,6 @@ namespace Combo {
 		bool CanUseComboNode(const std::shared_ptr<NodeState>& node) const;
 		bool CanPayStamina(float cost) const;
 		void PayStamina(float cost);
-		void UpdateCooldowns(float dt);
 		void StartCooldown(const std::shared_ptr<NodeState>& node);
 
 
@@ -4704,6 +5546,8 @@ namespace Combo {
 
 		// 保存データマップ
 		std::map<std::string, GlobalData> comboGlobalDatas_;
+		// 最後に実行したコンボグラフ検証結果
+		std::vector<ValidationIssue> validationIssues_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 		// Frameworkが所有する音声管理への非所有ポインター。
@@ -4711,9 +5555,21 @@ namespace Combo {
 
 		bool isDebug = false;
 		bool isDebugDraw_ = true;
-		std::optional<ActionInput> pendingCostInput_;
-		float pendingStaminaCost_ = 0.0f;
-		std::shared_ptr<NodeState> pendingCooldownNode_ = nullptr;
+		struct PendingCost {
+			// 入力バッファ側と同一のIDで予約を特定する。
+			InputBufferId inputBufferId = 0;
+			ActionInput input = ActionInput::LightAttack;
+			float staminaCost = 0.0f;
+			std::shared_ptr<NodeState> cooldownNode = nullptr;
+		};
+		// 入力バッファと対応する未払いリソース予約を時系列で保持する
+		std::deque<PendingCost> pendingCosts_;
+		// 先行入力で確保済みのコスト。実際の遷移までは現在スタミナから引かない。
+		float reservedStamina_ = 0.0f;
+		// 開始ノードへ実コンテキストでEnterした後に適用する開始入力です。
+		std::optional<ActionInput> pendingStartInput_;
+		// 現在のコンボノードを開始した入力種別
+		ActionInput currentActionInput_ = ActionInput::LightAttack;
 		std::map<std::string, float> cooldownTimers_;
 		std::string groundLightStart_ = "MeleeAttack1";
 		std::string airLightStart_ = "JumpAttack";
@@ -5208,6 +6064,22 @@ namespace Combo {
 					drawConnectionCombo("ロックオン中", targets.lockOn);
 					ImGui::SetNextItemWidth(260.0f);
 					drawConnectionCombo("ロックオンなし", targets.noLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / 未ヒット / ロックオン", targets.groundMissLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / ヒット / ロックオン", targets.groundHitLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / 未ヒット / ロックオン", targets.airMissLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / ヒット / ロックオン", targets.airHitLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / 未ヒット / ロックオンなし", targets.groundMissNoLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("地上 / ヒット / ロックオンなし", targets.groundHitNoLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / 未ヒット / ロックオンなし", targets.airMissNoLockOn);
+					ImGui::SetNextItemWidth(260.0f);
+					drawConnectionCombo("空中 / ヒット / ロックオンなし", targets.airHitNoLockOn);
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
@@ -5436,6 +6308,14 @@ namespace Combo {
 				clearTarget(targets.airHit);
 				clearTarget(targets.lockOn);
 				clearTarget(targets.noLockOn);
+				clearTarget(targets.groundMissLockOn);
+				clearTarget(targets.groundHitLockOn);
+				clearTarget(targets.airMissLockOn);
+				clearTarget(targets.airHitLockOn);
+				clearTarget(targets.groundMissNoLockOn);
+				clearTarget(targets.groundHitNoLockOn);
+				clearTarget(targets.airMissNoLockOn);
+				clearTarget(targets.airHitNoLockOn);
 			};
 			clearTarget(data.connection.lightAttack);
 			clearTarget(data.connection.heavyAttack);
@@ -5872,7 +6752,7 @@ namespace Combo {
 		ImGui::Separator();
 
 		// 現在の時間
-		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
+		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, playbackFrame, firstFrame, maxFrame);
 
 		// シーケンサーの設定と表示
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
@@ -6004,6 +6884,12 @@ namespace Combo {
 				"期限付き",
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
+			// 期限付き判定を複数波で発生させる設定
+			int spawnCount = static_cast<int>(data_.hitBox.spawnCount);
+			if (ImGui::DragInt("ヒットボックス発生回数", &spawnCount, 1.0f, 1, 32)) {
+				data_.hitBox.spawnCount = static_cast<std::uint32_t>((std::max)(1, spawnCount));
+			}
+			ImGui::DragFloat("ヒットボックス再発生間隔", &data_.hitBox.spawnInterval, 0.01f, 0.0f, 5.0f);
 
 
 			// タグタイプ
@@ -6067,6 +6953,50 @@ namespace Combo {
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
+
+			// 入力ソース、順番、方向、保持時間をノードごとに編集する。
+			auto drawInputSequence = [](const char* label, std::vector<ComboInputStep>& sequence) {
+				ImGui::SeparatorText(label);
+				static const char* sourceLabels[] = { "ゲームパッド", "キャラクターアクション" };
+				static const char* actionLabels[] = { "弱攻撃", "強攻撃", "スキル", "ジャンプ", "回避", "ガード", "特殊" };
+				static const char* inputTypeLabels[] = { "押下中", "押した瞬間", "離した瞬間", "押下/瞬間/離し", "押下/瞬間", "押下/離し", "瞬間/離し" };
+				static const char* directionLabels[] = { "任意", "ニュートラル", "上", "下", "左", "右" };
+				static const char* buttonLabels[] = {
+					"十字上", "十字下", "十字左", "十字右", "A", "B", "X", "Y", "LB", "RB", "LS", "RS", "Start", "Back",
+				};
+				int removeIndex = -1;
+				for (std::size_t index = 0; index < sequence.size(); ++index) {
+					auto& step = sequence[index];
+					ImGui::PushID(static_cast<int>(index));
+					ImGui::Text("ステップ %zu", index + 1);
+					int source = static_cast<int>(step.source);
+					int action = static_cast<int>(step.action);
+					int inputType = static_cast<int>(step.inputType);
+					int direction = static_cast<int>(step.direction);
+					int button = static_cast<int>(step.button);
+					if (ImGui::Combo("入力ソース", &source, sourceLabels, IM_ARRAYSIZE(sourceLabels))) step.source = static_cast<ComboInputSource>(source);
+					if (ImGui::Combo("アクション", &action, actionLabels, IM_ARRAYSIZE(actionLabels))) step.action = static_cast<ComboActionType>(action);
+					if (ImGui::Combo("入力種別", &inputType, inputTypeLabels, IM_ARRAYSIZE(inputTypeLabels))) step.inputType = static_cast<ComboButtonInputType>(inputType);
+					if (ImGui::Combo("方向", &direction, directionLabels, IM_ARRAYSIZE(directionLabels))) step.direction = static_cast<ComboInputDirection>(direction);
+					if (ImGui::Combo("ボタン", &button, buttonLabels, IM_ARRAYSIZE(buttonLabels))) step.button = static_cast<ComboGamePadButton>(button);
+					ImGui::DragFloat("最小保持時間", &step.minHoldSeconds, 0.01f, 0.0f, 10.0f, "%.2f");
+					ImGui::DragFloat("最大保持時間", &step.maxHoldSeconds, 0.01f, 0.0f, 10.0f, "%.2f");
+					ImGui::DragFloat("最小溜め率", &step.minChargeRatio, 0.01f, 0.0f, 1.0f, "%.2f");
+					ImGui::DragFloat("最大溜め率", &step.maxChargeRatio, 0.01f, 0.0f, 1.0f, "%.2f");
+					ImGui::DragFloat("溜め時間", &step.chargeSeconds, 0.01f, 0.01f, 10.0f, "%.2f");
+					if (ImGui::Button("このステップを削除")) removeIndex = static_cast<int>(index);
+					ImGui::Separator();
+					ImGui::PopID();
+				}
+				if (removeIndex >= 0) {
+					sequence.erase(sequence.begin() + removeIndex);
+				}
+				if (ImGui::Button("入力ステップを追加")) {
+					sequence.emplace_back();
+				}
+			};
+			drawInputSequence("次段入力シーケンス", data_.condition.nextInputSequence);
+			drawInputSequence("キャンセル入力シーケンス", data_.condition.cancelInputSequence);
 
 			ImGui::SeparatorText("キャンセル制約");
 			ImGui::Checkbox("ヒット時のみキャンセル", &data_.action.cancelOnHitOnly);
@@ -7074,6 +8004,8 @@ namespace Combo {
 	private:
 		// 現在のフレーム
 		int currentFrame = 0;
+		// タイムスケールによる1フレーム未満の進行を保持する再生用フレーム
+		float playbackFrame = 0.0f;
 		// 再生中か
 		bool isPlaying = true;
 		// ループ再生するか
@@ -7105,9 +8037,16 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboImG
 #include "ComboImGui.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include <algorithm>
+#include <cmath>
 
 void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
-	int& currentFrame, int& firstFrame, int& maxFrame) {
+	int& currentFrame, float& playbackFrame, int& firstFrame, int& maxFrame) {
+	// シーケンサー操作で現在フレームが変更された場合は、再生用の小数フレームへ同期する。
+	// 通常再生中の小数部分は許容し、手動操作による大きな差だけを編集値として扱う。
+	if (!isPlaying || !isActive || std::abs(playbackFrame - static_cast<float>(currentFrame)) > 1.0f) {
+		playbackFrame = static_cast<float>(currentFrame);
+	}
+
 	// 現在のフレーム表示
 	if (isActive) {
 		ImGui::Checkbox("再生するか", &isPlaying);
@@ -7127,15 +8066,28 @@ void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequen
 	ImGui::Separator();
 
 	if (isPlaying && isActive) {
-		currentFrame += static_cast<int>(dt * ConvertUtility::kDefaultFps); // 既定FPS換算
+		// タイムスケールで1フレーム未満になっても、小数部分を次フレームへ持ち越す。
+		playbackFrame += (std::max)(dt, 0.0f) * ConvertUtility::kDefaultFps;
 	}
 
-	// 最大値に行ったら戻す
-	if (currentFrame >= sequence.GetFrameMax() && loopPlay) {
+	// シーケンスの最大フレームを超えた場合は、ループまたは終端で停止する。
+	const int frameLimit = (std::max)(sequence.GetFrameMax(), 0);
+	if (frameLimit <= 0) {
+		playbackFrame = 0.0f;
 		currentFrame = 0;
 	}
-	else if (currentFrame >= sequence.GetFrameMax()) {
-		currentFrame = sequence.GetFrameMax();
+	else if (playbackFrame >= static_cast<float>(frameLimit) && loopPlay) {
+		playbackFrame = std::fmod(playbackFrame, static_cast<float>(frameLimit));
+		currentFrame = static_cast<int>(playbackFrame);
+	}
+	else if (playbackFrame >= static_cast<float>(frameLimit)) {
+		playbackFrame = static_cast<float>(frameLimit);
+		currentFrame = frameLimit;
+		isPlaying = false;
+	}
+	else {
+		// UIへ渡すフレームだけ整数化し、内部の小数値は保持する。
+		currentFrame = static_cast<int>(playbackFrame);
 	}
 }
 
@@ -7319,7 +8271,7 @@ namespace Combo {
 	public:
 		// 現在の時間
 		static void CurrentFrame(float dt,bool isActive ,const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
-			int& currentFrame, int& firstFrame, int& maxFrame);
+			int& currentFrame, float& playbackFrame, int& firstFrame, int& maxFrame);
 
 		// アニメーション設定と表示
 		static void ApplyAnimationToState(const std::string& name, bool isActive, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
@@ -7340,6 +8292,7 @@ namespace Combo {
 	};
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboSequencer.h
@@ -8280,6 +9233,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.
 ﻿#include "ComboHitBox.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include <algorithm>
 
 namespace Combo {
 #pragma region ComboHitBox
@@ -8291,6 +9245,12 @@ namespace Combo {
 		this->owner = owner;
 		// ヒットボックスシステムを渡す
 		hitBoxSystem = owner->GetHitBoxSystem();
+		// ノードごとの一時判定を他の攻撃と分離して終了できるようにする。
+		hitBoxOwnerId_ = hitBoxSystem->AllocateOwnerId();
+		// ノード再利用時に判定波の進行状態を初期化する。
+		spawnedCount_ = 0;
+		nextSpawnTime_ = collData_.hitBoxData.windowStart;
+		spawnStarted_ = false;
 		// 移動システムを渡す
 		movementComponent = owner->GetMoveComponent();
 
@@ -8306,38 +9266,49 @@ namespace Combo {
 
 	// 更新
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
-		(void)ctx;
 		// ノックバック方向
 		collData_.reactionData.normal = direction;
 
 		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
 			// 一時的なコライダーなら
-			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
+			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed &&
+				spawnedCount_ < (std::max)(1u, collData_.hitBoxData.spawnCount)) {
+				const bool intervalReady = spawnStarted_ && timer >= nextSpawnTime_;
+				bool firstSpawnReady = false;
 				// 一時型は生成条件を満たした瞬間だけヒットボックスを追加する
 				// 出現方法によっての処理
 				switch (collData_.hitBoxData.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
 					// 指定された開始時間を過ぎたら生成する
-					if (timer >= collData_.hitBoxData.windowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
-						isPopHitBox_ = true;
-					}
+					firstSpawnReady = !spawnStarted_ && timer >= collData_.hitBoxData.windowStart;
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					// 空中攻撃などで、着地した瞬間に発生する攻撃用
-					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
-						isPopHitBox_ = true;
-					}
+					firstSpawnReady = !spawnStarted_ && movementComponent && movementComponent->GetIsLanding();
 					break;
 				case HitBox::SpawnType::kOnAir:
+					firstSpawnReady = !spawnStarted_ && movementComponent && !movementComponent->GetIsLanding();
 					break;
 				case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
+					firstSpawnReady = !spawnStarted_ &&
+						(ctx.inputData.lightAttackReleased || ctx.inputData.heavyAttackReleased ||
+							ctx.inputData.skillReleased || ctx.inputData.guardReleased);
 					break;
 				default:
 					break;
+				}
+				if (firstSpawnReady || intervalReady) {
+					// 生成条件が成立した波だけを追加し、同一所有者IDで終了管理する。
+					hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent, hitBoxOwnerId_);
+					++spawnedCount_;
+					spawnStarted_ = true;
+					nextSpawnTime_ = timer + (std::max)(collData_.hitBoxData.spawnInterval, 0.0f);
+					if (collData_.hitBoxData.spawnInterval <= 0.0f) {
+						// 間隔0は同一フレームに重複生成せず、単発として扱う。
+						spawnedCount_ = (std::max)(1u, collData_.hitBoxData.spawnCount);
+					}
 				}
 			}
 			// 常時なら
@@ -8358,8 +9329,14 @@ namespace Combo {
 	// 終了
 	void ComboHitBox::Exit() {
 		// 次のコンボへ生成済み状態を持ち越さないようリセットする
-		isPopHitBox_ = false;
-		hitBoxSystem->Clear();
+		spawnedCount_ = 0;
+		nextSpawnTime_ = 0.0f;
+		spawnStarted_ = false;
+		// このComboHitBoxが生成した一時判定だけを解放し、他の攻撃判定は残す。
+		if (hitBoxSystem && hitBoxOwnerId_ != 0) {
+			hitBoxSystem->ClearLifeTimeHitBoxes(hitBoxOwnerId_);
+		}
+		hitBoxOwnerId_ = 0;
 		if (hitBox) {
 			// 常時型ヒットボックスの当たり履歴も次回用に消す
 			hitBox->Disable();
@@ -8416,6 +9393,9 @@ namespace Combo {
 		/// CollData
 		/// </summary>
 		HitBox::CollData& GetCollData() { return collData_;}
+		/// <summary>コライダー設定を読み取り専用で取得します。</summary>
+		/// <returns>内部コライダーデータへの読み取り専用参照です。</returns>
+		const HitBox::CollData& GetCollData() const { return collData_; }
 		/// <summary>
 		/// コライダーデータ追加
 		/// </summary>
@@ -8439,14 +9419,20 @@ namespace Combo {
 		Vector3 direction = {};
 		// コンボタイプ
 		Type type{};
+		// このComboHitBoxが生成した期限付き判定を識別する所有者IDです。
+		HitBox::HitBoxOwnerId hitBoxOwnerId_ = 0;
 		//
 		int32_t id = -1;
 	private:
 		// コライダーデータ
 		HitBox::CollData collData_;
 	private:
-		// ヒットボックス出現
-		bool isPopHitBox_ = false;
+		// 生成済みの判定波数です。
+		std::uint32_t spawnedCount_ = 0;
+		// 次の判定波を生成できるコンボ時間です。
+		float nextSpawnTime_ = 0.0f;
+		// 最初の発生条件が成立したかどうかです。
+		bool spawnStarted_ = false;
 		//
 		Character::BaseCharacter* owner = nullptr;
 	};
@@ -8459,6 +9445,22 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Input/ComboButton.c
 #include "ComboButton.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 #include "DirectXGame//application/base/Input/InputSystem.h"
+#include <algorithm>
+#include <cmath>
+
+namespace {
+	// 方向入力が条件に一致するかを判定する共通処理です。
+	bool MatchesComboDirection(Combo::ComboInputDirection direction, const Vector2& stick) {
+		const float length = stick.Length();
+		if (direction == Combo::ComboInputDirection::Any) return true;
+		if (direction == Combo::ComboInputDirection::Neutral) return length < 0.25f;
+		if (length < 0.25f) return false;
+		if (direction == Combo::ComboInputDirection::Up) return stick.y >= std::abs(stick.x);
+		if (direction == Combo::ComboInputDirection::Down) return -stick.y >= std::abs(stick.x);
+		if (direction == Combo::ComboInputDirection::Right) return stick.x >= std::abs(stick.y);
+		return -stick.x >= std::abs(stick.y);
+	}
+}
 
 
 // 押したら
@@ -8513,34 +9515,157 @@ bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
 	}
 }
 
+Combo::ComboButton::ComboButton(const ComboInputStep& step)
+	: button_(step.button), type_(step.inputType) {
+	// 設定データを実行用の入力条件へ展開する。
+	SetStep(step);
+}
+
+void Combo::ComboButton::SetStep(const ComboInputStep& step) {
+	// 入力ソースと長押し・溜め条件を1ステップへ反映する。
+	button_ = step.button;
+	type_ = step.inputType;
+	source_ = step.source;
+	action_ = step.action;
+	direction_ = step.direction;
+	minHoldSeconds_ = (std::max)(0.0f, step.minHoldSeconds);
+	maxHoldSeconds_ = (std::max)(0.0f, step.maxHoldSeconds);
+	minChargeRatio_ = (std::clamp)(step.minChargeRatio, 0.0f, 1.0f);
+	maxChargeRatio_ = (std::clamp)(step.maxChargeRatio, minChargeRatio_, 1.0f);
+	chargeSeconds_ = (std::max)(0.001f, step.chargeSeconds);
+	ResetState();
+}
+
+void Combo::ComboButton::ResetState() const {
+	// シーケンス再開時に前回の押下時間を持ち越さない。
+	holdSeconds_ = 0.0f;
+	releasedHoldSeconds_ = 0.0f;
+	wasPressed_ = false;
+}
+
+bool Combo::ComboButton::IsInput(const Character::CharacterContext& ctx) const {
+	// 入力なしキャラクターでは条件不成立として安全に扱う。
+	if (source_ == ComboInputSource::GamePadButton && !ctx.input) return false;
+
+	bool pressed = false;
+	bool triggered = false;
+	bool released = false;
+	if (source_ == ComboInputSource::GamePadButton) {
+		// ゲームパッド由来の押下状態を取得する。
+		pressed = ctx.input->GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
+		triggered = ctx.input->GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
+		released = ctx.input->GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
+	}
+	else {
+		// キャラクター共通入力から攻撃・移動系アクションを取得する。
+		switch (action_) {
+		case ComboActionType::LightAttack:
+			pressed = ctx.inputData.lightAttackPressed;
+			triggered = ctx.inputData.lightAttackTrigger;
+			released = ctx.inputData.lightAttackReleased;
+			break;
+		case ComboActionType::HeavyAttack:
+			pressed = ctx.inputData.heavyAttackPressed;
+			triggered = ctx.inputData.heavyAttackTrigger;
+			released = ctx.inputData.heavyAttackReleased;
+			break;
+		case ComboActionType::Skill:
+			pressed = ctx.inputData.skillPressed;
+			triggered = ctx.inputData.skillTrigger;
+			released = ctx.inputData.skillReleased;
+			break;
+		case ComboActionType::Jump:
+			pressed = ctx.inputData.jumpPressed;
+			triggered = ctx.inputData.jumpTrigger;
+			break;
+		case ComboActionType::Dodge:
+			triggered = ctx.inputData.dodgeTrigger;
+			break;
+		case ComboActionType::Guard:
+			pressed = ctx.inputData.guardPressed;
+			triggered = ctx.inputData.guardTrigger;
+			released = ctx.inputData.guardReleased;
+			break;
+		case ComboActionType::Special:
+			triggered = ctx.inputData.specialTrigger;
+			break;
+		}
+	}
+
+	// 押下時間と離した直前の保持時間を更新する。
+	if (pressed) {
+		if (!wasPressed_) holdSeconds_ = 0.0f;
+		holdSeconds_ += (std::max)(ctx.dt, 0.0f);
+	}
+	else if (wasPressed_) {
+		releasedHoldSeconds_ = holdSeconds_;
+		holdSeconds_ = 0.0f;
+	}
+	wasPressed_ = pressed;
+
+	bool typeMatched = false;
+	switch (type_) {
+	case ComboButtonInputType::kPressed: typeMatched = pressed; break;
+	case ComboButtonInputType::kTriggered: typeMatched = triggered; break;
+	case ComboButtonInputType::kReleased: typeMatched = released; break;
+	case ComboButtonInputType::kPressTriggerReleased: typeMatched = pressed || triggered || released; break;
+	case ComboButtonInputType::kPressTriggered: typeMatched = pressed || triggered; break;
+	case ComboButtonInputType::kPressReleased: typeMatched = pressed || released; break;
+	case ComboButtonInputType::kTriggerReleased: typeMatched = triggered || released; break;
+	default: break;
+	}
+	if (!typeMatched || !MatchesComboDirection(direction_, ctx.worldStickDirection)) return false;
+
+	// 離し入力では離した直前、その他では現在の保持時間を条件に使う。
+	const float measuredHold = released ? releasedHoldSeconds_ : holdSeconds_;
+	if (measuredHold < minHoldSeconds_ || (maxHoldSeconds_ > 0.0f && measuredHold > maxHoldSeconds_)) return false;
+	const float chargeRatio = (std::min)(measuredHold / chargeSeconds_, 1.0f);
+	return chargeRatio >= minChargeRatio_ && chargeRatio <= maxChargeRatio_;
+}
+
 #pragma region ComboSequence
 
 /// <summary>
 /// コンボボタンを順番に登録
 /// </summary>
-void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons) {
+void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons, bool sequential) {
 	// 新しいコンボ入力列を登録するため、古い入力列を破棄する
 	comboButtons_.clear();
+	currentIndex_ = 0;
+	sequential_ = sequential;
 	for (auto& b : buttons) {
 		// ボタン設定は値としてコピーして保持する
 		comboButtons_.emplace_back(b);
+	}
+	for (const ComboButton& button : comboButtons_) {
+		// 登録時点では前回の押下時間を持ち越さない。
+		button.ResetState();
 	}
 }
 
 /// <summary>
 /// コンボ成立チェック
 /// </summary>
-bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
-	if (comboButtons_.empty()) return false;
-	// 入力判定
-	// 現状は順番入力ではなく、登録されたどれかのボタンが成立したら次コンボへ進める
-	for (auto& bu : comboButtons_) {
-		if (bu.IsInput(*ctx.input)) {
-			return true;
+	bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
+		if (comboButtons_.empty()) return false;
+		// ゲームパッド入力はIsInput内で安全に不成立となり、アクション入力は
+		// 入力システムを持たないAIキャラクターでも評価できるようにする。
+		if (sequential_) {
+			// 順番入力では現在位置の入力だけを受け付ける。
+			if (!comboButtons_[currentIndex_].IsInput(ctx)) return false;
+			++currentIndex_;
+			if (currentIndex_ >= comboButtons_.size()) {
+				currentIndex_ = 0;
+				return true;
+			}
+			return false;
 		}
+		// 旧データ互換として、順番指定がない場合はどれか1つの入力で成立させる。
+		for (const ComboButton& button : comboButtons_) {
+			if (button.IsInput(ctx)) return true;
+		}
+		return false;
 	}
-	return false;
-}
 
 #pragma endregion // コンボボタン
 
@@ -8617,6 +9742,32 @@ namespace Character {
 }
 
 namespace Combo {
+	// コンボ条件が参照する入力の種類です。
+	enum class ComboInputSource : uint8_t {
+		GamePadButton,
+		CharacterAction,
+	};
+
+	// キャラクター入力として扱えるアクションです。
+	enum class ComboActionType : uint8_t {
+		LightAttack,
+		HeavyAttack,
+		Skill,
+		Jump,
+		Dodge,
+		Guard,
+		Special,
+	};
+
+	// 入力方向の条件です。Anyなら方向を評価しません。
+	enum class ComboInputDirection : uint8_t {
+		Any,
+		Neutral,
+		Up,
+		Down,
+		Left,
+		Right,
+	};
 
 	/// <summary>
 	/// コンボ条件ボタン
@@ -8651,6 +9802,20 @@ namespace Combo {
 		GAMEPAD_Max       // 最大ボタン数
 	};
 
+	/// <summary>入力ソース、方向、長押し時間をまとめた1ステップの設定です。</summary>
+	struct ComboInputStep {
+		ComboInputSource source = ComboInputSource::GamePadButton;
+		ComboGamePadButton button = ComboGamePadButton::GAMEPAD_B;
+		ComboActionType action = ComboActionType::LightAttack;
+		ComboButtonInputType inputType = ComboButtonInputType::kPressed;
+		ComboInputDirection direction = ComboInputDirection::Any;
+		float minHoldSeconds = 0.0f;
+		float maxHoldSeconds = 0.0f;
+		float minChargeRatio = 0.0f;
+		float maxChargeRatio = 1.0f;
+		float chargeSeconds = 1.0f;
+	};
+
 	/// <summary>
 	/// コンボ用ボタン種別を入力システム用ボタン種別へ変換する
 	/// </summary>
@@ -8665,6 +9830,9 @@ namespace Combo {
 		/// コンストラクタ
 		/// </summary>
 		ComboButton(ComboGamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
+		/// <summary>拡張入力ステップからコンボボタンを作成します。</summary>
+		/// <param name="step">入力ソース、方向、保持時間を含む設定です。</param>
+		explicit ComboButton(const ComboInputStep& step);
 
 		/// <summary>
 		/// 押したら
@@ -8685,16 +9853,35 @@ namespace Combo {
 			/// <summary>
 			/// 押して反応する条件
 			/// </summary>
-			bool IsInput(const InputSystem& inputSystem) const;
+		bool IsInput(const InputSystem& inputSystem) const;
+		/// <summary>キャラクターコンテキストを使って拡張入力を評価します。</summary>
+		/// <param name="ctx">入力データ、方向、経過時間を含むコンテキストです。</param>
+		bool IsInput(const Character::CharacterContext& ctx) const;
 
 		/// <summary>
 		/// どのボタンに反応するかを設定する
 		/// </summary>
 		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
+		/// <summary>入力ステップの設定を上書きします。</summary>
+		/// <param name="step">適用する入力設定です。</param>
+		void SetStep(const ComboInputStep& step);
+		/// <summary>入力状態を新しいシーケンス開始状態へ戻します。</summary>
+		void ResetState() const;
 
 	private:
 		ComboGamePadButton button_;	// 判定対象のゲームパッドボタン
 		ComboButtonInputType type_ = ComboButtonInputType::kPressed;	// 押下、トリガー、リリースなどの入力条件
+		ComboInputSource source_ = ComboInputSource::GamePadButton;	// 入力を取得する場所
+		ComboActionType action_ = ComboActionType::LightAttack;	// キャラクターアクションの種類
+		ComboInputDirection direction_ = ComboInputDirection::Any;	// 必要な方向
+		float minHoldSeconds_ = 0.0f;	// 最小保持時間
+		float maxHoldSeconds_ = 0.0f;	// 最大保持時間。0は無制限
+		float minChargeRatio_ = 0.0f;	// 最小溜め率
+		float maxChargeRatio_ = 1.0f;	// 最大溜め率
+		float chargeSeconds_ = 1.0f;	// 最大溜め時間
+		mutable float holdSeconds_ = 0.0f;	// 現在の保持時間
+		mutable float releasedHoldSeconds_ = 0.0f;	// 直前の離し時保持時間
+		mutable bool wasPressed_ = false;	// 前フレームの押下状態
 	};
 
 
@@ -8706,19 +9893,23 @@ namespace Combo {
 		/// <summary>
 		/// コンボボタンを順番に登録
 		/// </summary>
-		void RegisterCombo(const std::vector<ComboButton>& buttons);
+		void RegisterCombo(const std::vector<ComboButton>& buttons, bool sequential = false);
 
 		/// <summary>
 		/// コンボ成立チェック
 		/// </summary>
 		bool Update(const Character::CharacterContext& ctx);
+		/// <summary>現在のシーケンス入力位置を取得します。</summary>
+		/// <returns>次に成立させる入力のインデックスです。</returns>
+		size_t GetCurrentIndex() const { return currentIndex_; }
 
 
 
 	private:
 		// コンボ移行ボタン
 		std::vector<ComboButton> comboButtons_;
-		size_t currentIndex_ = 0;	// 将来の順番入力判定で使う現在位置
+		size_t currentIndex_ = 0;	// 次に成立させる入力の位置
+		bool sequential_ = false;	// trueなら登録順に1つずつ評価する
 	};
 
 
@@ -10411,6 +11602,11 @@ namespace Combo {
 		}
 	};
 
+	void CancelReceiver::SetButton(const std::vector<ComboButton>& button, bool sequential) {
+		// キャンセル用入力列を条件評価へ登録する。
+		comboSequence_.RegisterCombo(button, sequential);
+	}
+
 }
 
 
@@ -10441,6 +11637,10 @@ namespace Combo {
 		/// 更新
 		/// </summary>
 		void Update(const Character::CharacterContext& ctx, const GlobalCondition& data, float time);
+		/// <summary>キャンセル入力列を登録します。</summary>
+		/// <param name="button">入力ステップの一覧です。</param>
+		/// <param name="sequential">trueなら登録順に評価します。</param>
+		void SetButton(const std::vector<ComboButton>& button, bool sequential = false);
 
 	public: // 設定
 		/// <summary>
@@ -10460,6 +11660,7 @@ namespace Combo {
 		bool isCancel_ = false;
 	};
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCondition.cpp
@@ -10589,6 +11790,9 @@ namespace Combo {
 		/// データ取得
 		/// </summary>
 		GlobalCondition& GetData() { return data_; }
+		/// <summary>条件データを読み取り専用で取得します。</summary>
+		/// <returns>内部条件データへの読み取り専用参照です。</returns>
+		const GlobalCondition& GetData() const { return data_; }
 		/// <summary>
 		/// コンボ移行受付クラス取得
 		/// </summary>
@@ -10596,7 +11800,10 @@ namespace Combo {
 		/// <summary>
 		/// コンボキャンセル受付クラス取得
 		/// </summary>
-		CancelReceiver GetCancelReceiver() const { return cancelReceiver_;}
+		CancelReceiver& GetCancelReceiver() { return cancelReceiver_; }
+		/// <summary>キャンセル条件を読み取り専用で取得します。</summary>
+		/// <returns>内部キャンセル条件への読み取り専用参照です。</returns>
+		const CancelReceiver& GetCancelReceiver() const { return cancelReceiver_; }
 		/// <summary>
 		/// コンボ終了条件クラス取得
 		/// </summary>
@@ -10627,7 +11834,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCondi
 #include "ComboConditionFunction.h"
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
-void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterContext& ctx,EndConditionType type, ComboButton button, float timer, float endTime, bool isPress){
+void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterContext& ctx, EndConditionType type, ComboButton button, float& timer, float endTime, bool& isPress) {
 	// 終了条件の種類に応じて、コンボ終了判定に使うタイマーを進める
 	// 終了タイプ
 	switch (type)
@@ -10638,9 +11845,11 @@ void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterCon
 			timer += ctx.dt;
 		}
 		break;
-	case Combo::EndConditionType::kOnButtonRelease:	// 押し続けているなら
+	case Combo::EndConditionType::kOnButtonRelease: { // 押し続けているなら
 		// 指定ボタンを押し続けている間だけ受付時間を伸ばす
-		if (button.IsPressed(*ctx.input)) {
+		// AIなど入力システムを持たないコンテキストでは、離した状態として扱う
+		const bool isButtonPressed = ctx.input != nullptr && button.IsPressed(*ctx.input);
+		if (isButtonPressed) {
 			if (isPress) {
 				timer += ctx.dt;
 			}
@@ -10649,6 +11858,7 @@ void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterCon
 			isPress = false;
 		}
 		break;
+	}
 	case Combo::EndConditionType::kOnMeterEmpty:	// 何かのメータが空なら
 		// メーター連携は今後の拡張用
 
@@ -10688,9 +11898,17 @@ namespace Combo {
 	/// </summary>
 	class ConditionFunction {
 	public:
-		// 終了条件によってタイマーや押下状態を更新する
+		/// <summary>
+		/// 終了条件によってタイマーと押下状態を更新する。
+		/// </summary>
+		/// <param name="ctx">現在フレームのキャラクターコンテキストです。</param>
+		/// <param name="type">評価する終了条件の種類です。</param>
+		/// <param name="button">条件判定に使用するボタンです。</param>
+		/// <param name="timer">更新対象の経過タイマーです。</param>
+		/// <param name="endTime">条件が成立する基準時間です。</param>
+		/// <param name="isPress">押下継続状態の更新対象です。</param>
 		static void ConditionTypeUpdate(const Character::CharacterContext& ctx, EndConditionType type, ComboButton button,
-		float timer, float endTime, bool isPress);
+		float& timer, float endTime, bool& isPress);
 	};
 
 }
@@ -10706,11 +11924,14 @@ namespace Combo {
 	// 開始
 	void EndCondition::Enter(const GlobalCondition& data) {
 		endTime_ = data.stateEndTime;	// 終了時間
+		// 新しいノード開始時は、ボタン保持条件を評価できる状態に戻す
+		isPress_ = true;
 	};
 	
 	//　終了
 	void EndCondition::Exit() {
-
+		// 次回のノード開始へ押下状態を持ち越さない
+		isPress_ = false;
 	};
 	
 	// 更新
@@ -10718,6 +11939,7 @@ namespace Combo {
 		ConditionFunction::ConditionTypeUpdate(ctx, data.endConditionType,button_, endTime_, data.stateEndTime,isPress_);
 	};
 };
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboEndCondition.h
@@ -10770,9 +11992,13 @@ namespace Combo {
 	// 開始
 	void NextCondition::Enter(const GlobalCondition& data) {
 		nextTime_ = data.stateNextTime;	// 移行時間
+		// 新しいノード開始時は、ボタン保持条件を評価できる状態に戻す
+		isPress_ = true;
 	}
 	//　終了
 	void NextCondition::Exit() {
+		// 次回のノード開始へ押下状態を持ち越さない
+		isPress_ = false;
 	}
 	// 更新
 	void NextCondition::Update(const Character::CharacterContext& ctx, const GlobalCondition& data, float time) {
@@ -10872,8 +12098,9 @@ namespace Combo {
 		}
 	};
 
-	void NextReceiver::SetButton(const std::vector<ComboButton>& button) { 
-		comboSequence_.RegisterCombo(button); 
+	void NextReceiver::SetButton(const std::vector<ComboButton>& button, bool sequential) {
+		// 入力列と評価モードをランタイムへ渡す。
+		comboSequence_.RegisterCombo(button, sequential);
 	}
 
 	
@@ -10920,7 +12147,10 @@ namespace Combo {
 		/// <summary>
 		/// ボタン設定
 		/// </summary>
-		void SetButton(const std::vector<ComboButton>& button);
+		/// <summary>次段入力を登録します。</summary>
+		/// <param name="button">入力ステップの一覧です。</param>
+		/// <param name="sequential">trueなら登録順に評価します。</param>
+		void SetButton(const std::vector<ComboButton>& button, bool sequential = false);
 	private:
 		ComboSequence comboSequence_;			// ボタン条件
 		// 受付可能か
@@ -10933,6 +12163,7 @@ namespace Combo {
 		bool isInput_ = false;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitCounter.cpp
@@ -11431,6 +12662,14 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	damageMotions_.push_back(damageMotion);
 }
 
+void HitMotionSystem::QueueDamageOnly(const HitReactionData& data) {
+	// スーパーアーマー中でもダメージだけを適用できるよう、リアクションとは別キューへ積む
+	data_ = data;
+	DamageMotion damageMotion;
+	damageMotion.SetData(data.damageData);
+	damageMotions_.push_back(damageMotion);
+}
+
 // 終了したか
 bool HitMotionSystem::IsFinished() const { return !IsHitMotion(); }
 
@@ -11657,7 +12896,7 @@ void HitMotionSystem::ConfigureVignette() {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
 #include <list>
@@ -11708,6 +12947,9 @@ public:
 	/// <summary>次に適用する被弾リアクション設定を開始する。</summary>
 	/// <param name="data">リアクション種別、時間、移動量、演出を含む設定。</param>
 	void SetReactionData(const HitReactionData& data);
+	/// <summary>リアクションを発生させず、ダメージだけをキューへ追加します。</summary>
+	/// <param name="data">適用するダメージと攻撃属性。</param>
+	void QueueDamageOnly(const HitReactionData& data);
 	/// <summary>所有者自身へ適用するヒットストップ時間を設定する。</summary>
 	/// <param name="time">停止時間（秒）。0以下で停止を解除する。</param>
 	void SetSelfHitStopTime(float time) { selfHitStopTime_ = time; }
@@ -12007,9 +13249,11 @@ namespace HitBox {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxData.h
 ============================================================
-﻿#pragma once
+#pragma once
 #include <DirectXGame/application/base/Attack/AttackData.h>
+#include <DirectXGame/application/base/Action/ActionRuntime.h>
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
+#include <cstdint>
 
 
 namespace HitBox {
@@ -12023,6 +13267,7 @@ namespace HitBox {
 		bool applySelfHitStop = true;
 		bool notifyComboHit = true;
 		float damageScale = 1.0f;
+		GameAction::DefenseResult defenseResult = GameAction::DefenseResult::Hit; // 受け手側の共通防御結果
 		HitReactionData reaction{};
 	};
 
@@ -12079,6 +13324,10 @@ namespace HitBox {
 		float windowStart = 0.0f;
 		// ヒットボックスの生存時間
 		float lifeTime = 0.5f;
+		// 1ノード内で生成する判定波の数。1なら従来の単発判定。
+		std::uint32_t spawnCount = 1;
+		// 判定波を再生成する間隔。秒単位。
+		float spawnInterval = 0.0f;
 		// ヒット記録を使用するか（使用した場合連続ヒットしない）
 		bool useContactRecord = true;
 		/// 親子付け設定  ///　 
@@ -12242,21 +13491,57 @@ namespace HitBox {
 			}
 		}
 
+		// プレイヤーと敵の両方で、共通防御状態を最終ヒット結果へ反映する
+		Character::BaseCharacter* targetCharacter = other ?
+			dynamic_cast<Character::BaseCharacter*>(other->GetHitReceiver()) : nullptr;
+		if (targetCharacter) {
+			result.defenseResult = targetCharacter->ResolveActionDefense();
+			switch (result.defenseResult) {
+			case GameAction::DefenseResult::Invincible:
+			case GameAction::DefenseResult::Parried:
+			case GameAction::DefenseResult::Guarded:
+				// 無敵、パリィ、ガードはダメージ・リアクション・コンボ命中を無効化する
+				result.accepted = false;
+				result.applyDamage = false;
+				result.applyReaction = false;
+				result.notifyComboHit = false;
+				break;
+			case GameAction::DefenseResult::SuperArmored:
+				// スーパーアーマーはダメージだけを受け、被弾リアクションを抑制する
+				result.applyReaction = false;
+				break;
+			default:
+				break;
+			}
+		}
+
 		return result;
 	}
 
 	void HitBoxFunction::UpdateTypePlayer() {
 		if (otherColl->GetTag() != CollisionTag::Enemy) return;
 		HitResult result = BuildHitResult();
-		if (!result.accepted) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
+		if (!result.accepted) {
+			// 防御成立を受け手へ通知し、通常のヒット処理を行わない
+			if (result.defenseResult == GameAction::DefenseResult::Parried ||
+				result.defenseResult == GameAction::DefenseResult::Guarded) {
+				const GameAction::EventType eventType = result.defenseResult == GameAction::DefenseResult::Parried ?
+					GameAction::EventType::Parried : GameAction::EventType::Guarded;
+				enemy->EmitActionEvent({ eventType, enemy, player });
+			}
+			return;
+		}
 		// リアクションデータ
-		if (result.applyReaction) {
+		if (result.defenseResult == GameAction::DefenseResult::SuperArmored) {
+			enemy->GetHitMotionSystem()->QueueDamageOnly(result.reaction);
+		}
+		else if (result.applyReaction) {
 			enemy->GetHitMotionSystem()->SetReactionData(result.reaction);
 		}
 
@@ -12269,8 +13554,10 @@ namespace HitBox {
 		}
 		//	エフェクト出現
 		enemy->GetHitMotionSystem()->EmitHitEffect();
-		// 敵ステート設定
-		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		// スーパーアーマー中は敵ステートを被弾へ変更しない
+		if (result.applyReaction) {
+			enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		}
 		// プレイヤーのロックオンシステムに相手タグを設定
 		player->GetAttackController()->GetLockOnSystem()->SetHitTag(enemy->GetTagNumber());
 		// コンボ中はコンボ設定側で加算を判定し、コンボ外は従来どおり加算する。
@@ -12284,13 +13571,22 @@ namespace HitBox {
 	void HitBoxFunction::UpdateTypeEnemy() {
 		if (otherColl->GetTag() != CollisionTag::Player) return;
 		HitResult result = BuildHitResult();
-		if (!result.accepted) return;
 		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
+		if (!result.accepted) {
+			// 防御成立を受け手へ通知し、通常のヒット処理を行わない
+			if (result.defenseResult == GameAction::DefenseResult::Parried ||
+				result.defenseResult == GameAction::DefenseResult::Guarded) {
+				const GameAction::EventType eventType = result.defenseResult == GameAction::DefenseResult::Parried ?
+					GameAction::EventType::Parried : GameAction::EventType::Guarded;
+				player->EmitActionEvent({ eventType, player, enemy });
+			}
+			return;
+		}
 
 		const bool shouldSelfHitStop =
 			data_.selfHitStopPolicy == SelfHitStopPolicy::EveryHit ||
@@ -12300,12 +13596,17 @@ namespace HitBox {
 			hasAppliedSelfHitStop_ = true;
 		}
 
-		// リアクションデータ
-		if (result.applyReaction) {
+		// スーパーアーマー中はダメージだけを適用し、被弾リアクションを生成しない
+		if (result.defenseResult == GameAction::DefenseResult::SuperArmored) {
+			player->GetHitMotionSystem()->QueueDamageOnly(result.reaction);
+		}
+		else if (result.applyReaction) {
 			player->GetHitMotionSystem()->SetReactionData(result.reaction);
 		}
-		// プレイヤーステート設定
-		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		// スーパーアーマー中はプレイヤーステートを被弾へ変更しない
+		if (result.applyReaction) {
+			player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+		}
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GetLockOnSystem()->SetHitTag(player->GetTagNumber());
 		// 敵側コンボにも命中を通知し、ヒット音と命中条件を同じタイミングで処理する。
@@ -12438,8 +13739,10 @@ namespace HitBox {
 
 	// ヒットボックス追加
 	void System::AddLifeTimeHitBox(Character::BaseCharacter* character, const CollData& datas,
-		Engine::WorldTransform* parent) {
+		Engine::WorldTransform* parent, HitBoxOwnerId ownerId) {
 		Data d;
+		// 呼び出し側が指定しない場合も、個別判定として追跡できるIDを発行する。
+		d.ownerId = ownerId == 0 ? AllocateOwnerId() : ownerId;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
 		d.hitBox->SetRecordPerCollider(datas.hitBoxData.recordPerCollider);
@@ -12453,6 +13756,14 @@ namespace HitBox {
 		d.timer = 0.0f;									// 時間
 		// ヒットボックス(期限付き)データに挿入
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
+	}
+
+	HitBoxOwnerId System::AllocateOwnerId() {
+		// 0は未指定を表す予約値なので、実IDには使用しない。
+		if (nextOwnerId_ == 0) {
+			nextOwnerId_ = 1;
+		}
+		return nextOwnerId_++;
 	}
 
 	void System::AddHitBox(int32_t& id, Character::BaseCharacter* character, const CollData& datas,
@@ -12553,12 +13864,32 @@ namespace HitBox {
 			break;
 		}
 	}
-	// クリア
-	void System::Clear() {
+	// 一時判定だけをクリアし、無期限判定の再利用状態を維持する
+	void System::ClearLifeTimeHitBoxes() {
 		for (auto& hit : lifeTimeHitBoxDatas_) {
+			// 一時判定のコライダーを先に破棄して登録を解除する
 			hit.hitBox.reset();
 		}
 		lifeTimeHitBoxDatas_.clear();
+	}
+
+	void System::ClearLifeTimeHitBoxes(HitBoxOwnerId ownerId) {
+		// 指定グループ以外の一時判定を残し、終了したアクションだけを解放する。
+		if (ownerId == 0) {
+			return;
+		}
+		lifeTimeHitBoxDatas_.erase(
+			std::remove_if(lifeTimeHitBoxDatas_.begin(), lifeTimeHitBoxDatas_.end(),
+				[ownerId](const Data& data) { return data.ownerId == ownerId; }),
+			lifeTimeHitBoxDatas_.end());
+	}
+
+	// 一時判定と無期限判定を含む全ヒットボックスを解放する
+	void System::Clear() {
+		// 一時判定は専用処理で確実に破棄する
+		ClearLifeTimeHitBoxes();
+		// 無期限判定はシステム破棄や再初期化時にだけ全解放する
+		hitBoxDatas_.clear();
 	}
 }
 
@@ -12569,7 +13900,9 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h
 ============================================================
 #pragma once
 #include "HitBox.h"
+#include <algorithm>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
+#include <cstdint>
 
 namespace Engine {
 	class EntityManager; // 前方宣言
@@ -12578,18 +13911,24 @@ namespace Engine {
 }
 
 namespace HitBox {
+	// 期限付きヒットボックスを発生させた実行単位を識別するIDです。
+	using HitBoxOwnerId = std::uint64_t;
+
 	/// <summary>
 	/// 当たり判定を管理するシステム
 	/// </summary>
 	class System {
 	public:
 		~System() {
-			lifeTimeHitBoxDatas_.clear();
+			// システム破棄時は一時判定と無期限判定をまとめて解放する
+			Clear();
 		}
 
 		struct Data {
 			std::unique_ptr<HitBoxInstance> hitBox = nullptr;
 			int32_t id = 0;
+			// 同じキャラクター上の別アクションを混同しないための所有者IDです。
+			HitBoxOwnerId ownerId = 0;
 			float lifeTime = 0.0f;
 			float timer = 0.0f;
 			/// <summary>
@@ -12609,9 +13948,17 @@ namespace HitBox {
 		void Update(float dt);
 
 
-		// ヒットボックス追加（期限付き）
+		/// <summary>期限付きヒットボックスを追加します。</summary>
+		/// <param name="character">ヒットボックスの所有キャラクターです。</param>
+		/// <param name="datas">生成する形状と寿命の設定です。</param>
+		/// <param name="parent">親トランスフォームです。</param>
+		/// <param name="ownerId">この判定グループの所有者IDです。</param>
 		void AddLifeTimeHitBox(Character::BaseCharacter* character,const CollData& datas,
-			Engine::WorldTransform* parent = nullptr);
+			Engine::WorldTransform* parent = nullptr, HitBoxOwnerId ownerId = 0);
+
+		/// <summary>新しい期限付き判定グループ用の所有者IDを発行します。</summary>
+		/// <returns>このシステム内で一意な所有者IDです。</returns>
+		HitBoxOwnerId AllocateOwnerId();
 
 		// ヒットボックス追加（無期限）
 		void AddHitBox(int32_t& id,Character::BaseCharacter* character,const CollData& datas,
@@ -12629,7 +13976,14 @@ namespace HitBox {
 		/// </summary>
 		HitBoxInstance* GetHitBoxInstance(int32_t id);
 		/// <summary>
-		/// クリア
+		/// 一時判定だけをクリアし、再利用する無期限判定は保持する。
+		/// </summary>
+		void ClearLifeTimeHitBoxes();
+		/// <summary>指定した所有者の期限付き判定だけを解放します。</summary>
+		/// <param name="ownerId">解放対象の所有者IDです。</param>
+		void ClearLifeTimeHitBoxes(HitBoxOwnerId ownerId);
+		/// <summary>
+		/// 一時判定と無期限判定を含む全ヒットボックスを解放する。
 		/// </summary>
 		void Clear();
 
@@ -12653,6 +14007,8 @@ namespace HitBox {
 		std::vector<Data> hitBoxDatas_;
 	private:
 		Engine::EntityManager* entityManager = nullptr;
+		// 0を未指定値として予約し、実際のIDには使用しない連番です。
+		HitBoxOwnerId nextOwnerId_ = 1;
 	};
 
 
@@ -13054,13 +14410,13 @@ const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
 }
 
 const Character::BaseCharacter* LockOnSystem::GetTarget() const {
-	if (!targetCharacters.empty()) {
-		// 明示ターゲットがある場合は先頭を現在ターゲットとして扱う
-		return targetCharacters.front();
+	// 現在ロックオン中で、保持している対象がまだ有効な場合だけ返す
+	if (isLockOn_ && IsValidTarget(currentTarget_, data_.lockOnRadius)) {
+		return currentTarget_;
 	}
-	else {
-		return nullptr;
-	}
+
+	// ロックオンしていない場合や対象が無効になった場合は、誤った候補を返さない
+	return nullptr;
 };
 
 
@@ -13707,7 +15063,7 @@ protected:
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BaseProjectile.cpp
 ============================================================
-﻿#include "BaseProjectile.h"
+#include "BaseProjectile.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
@@ -13903,16 +15259,48 @@ void Projectile::BaseProjectile::OnHitPlayer(Character::BasePlayer* player) {
 	if (player->IsDamageInvincible()) {
 		return; // 被弾後無敵中は弾によるダメージと被弾ステートを入れない
 	}
+	const GameAction::DefenseResult defenseResult = player->ResolveActionDefense();
+	if (defenseResult == GameAction::DefenseResult::Guarded ||
+		defenseResult == GameAction::DefenseResult::Parried ||
+		defenseResult == GameAction::DefenseResult::Invincible) {
+		// ガード、パリィ、無敵中は弾のダメージと被弾ステートを無効化する
+		if (defenseResult == GameAction::DefenseResult::Parried) {
+			player->EmitActionEvent({ GameAction::EventType::Parried, player, owner });
+		}
+		else if (defenseResult == GameAction::DefenseResult::Guarded) {
+			player->EmitActionEvent({ GameAction::EventType::Guarded, player, owner });
+		}
+		return;
+	}
 	player->AddDamage(param_.damage); // ダメージを与える
-	player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	if (defenseResult != GameAction::DefenseResult::SuperArmored) {
+		// スーパーアーマーでなければ通常の被弾ステートへ遷移する
+		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	}
 }
 
 void Projectile::BaseProjectile::OnHitEnemy(Character::BaseEnemy* enemy) {
 	if (!enemy) {
 		return;
 	}
+	const GameAction::DefenseResult defenseResult = enemy->ResolveActionDefense();
+	if (defenseResult == GameAction::DefenseResult::Guarded ||
+		defenseResult == GameAction::DefenseResult::Parried ||
+		defenseResult == GameAction::DefenseResult::Invincible) {
+		// ガード、パリィ、無敵中は弾のダメージと被弾ステートを無効化する
+		if (defenseResult == GameAction::DefenseResult::Parried) {
+			enemy->EmitActionEvent({ GameAction::EventType::Parried, enemy, owner });
+		}
+		else if (defenseResult == GameAction::DefenseResult::Guarded) {
+			enemy->EmitActionEvent({ GameAction::EventType::Guarded, enemy, owner });
+		}
+		return;
+	}
 	enemy->AddDamage(param_.damage); // ダメージを与える
-	enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	if (defenseResult != GameAction::DefenseResult::SuperArmored) {
+		// スーパーアーマーでなければ通常の被弾ステートへ遷移する
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
+	}
 }
 
 // 衝突処理
@@ -17577,6 +18965,8 @@ File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.cpp
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+#include <algorithm>
+#include <utility>
 
 namespace Character {
 	BaseCharacter::BaseCharacter() = default;
@@ -17626,6 +19016,20 @@ namespace Character {
 	float BaseCharacter::GetHP() const { return parameterComponent_->parameters->HP.value; }
 	// ダメージ
 	void BaseCharacter::AddDamage(float damage) {
+		// 共通防御判定で無敵、パリィ、ガード中のダメージを先に遮断する
+		const GameAction::DefenseResult defenseResult = ResolveActionDefense();
+		if (defenseResult == GameAction::DefenseResult::Invincible ||
+			defenseResult == GameAction::DefenseResult::Parried ||
+			defenseResult == GameAction::DefenseResult::Guarded) {
+			// 直接ダメージ系の弾でも、ガード系アクションイベントを発行する
+			if (defenseResult == GameAction::DefenseResult::Parried) {
+				EmitActionEvent({ GameAction::EventType::Parried, this, nullptr });
+			}
+			else if (defenseResult == GameAction::DefenseResult::Guarded) {
+				EmitActionEvent({ GameAction::EventType::Guarded, this, nullptr });
+			}
+			return;
+		}
 		// 無敵時間などでダメージを受けない状態なら、HPと被弾後処理を変更しない。
 		if (ShouldIgnoreDamage(damage)) {
 			return;
@@ -17650,6 +19054,87 @@ namespace Character {
 		// 生存中からHP0になった瞬間だけ、死亡原因の攻撃属性を記録する。
 		if (hpBefore > 0.0f && GetHP() <= 0.0f) {
 			fatalAttackAttribute_ = attribute;
+		}
+	}
+
+	void BaseCharacter::UpdateActionDefense(const CharacterContext& ctx) {
+		// ガード入力は毎フレーム更新し、入力を離した瞬間にはガードを解除する
+		actionDefense_.guarding = ctx.isGuarding;
+		if (ctx.guardTrigger && ctx.isGuarding) {
+			// ガード開始直後だけパリィ受付時間を付与する
+			actionDefense_.parryTimer = 0.12f;
+		}
+		else {
+			// パリィ受付時間は実時間で減少させる
+			actionDefense_.parryTimer = (std::max)(0.0f, actionDefense_.parryTimer - ctx.dt);
+		}
+		if (!actionDefense_.guarding) {
+			// ガードを離した後はパリィ受付も終了する
+			actionDefense_.parryTimer = 0.0f;
+		}
+		// アクション由来の一時無敵時間を減算する
+		actionDefense_.actionInvincibleTimer = (std::max)(0.0f, actionDefense_.actionInvincibleTimer - ctx.dt);
+	}
+
+	void BaseCharacter::SetActionDefenseFlags(bool superArmor, bool invincible, bool guardPoint, float guardDamageScale) {
+		// 現在ノードの防御設定を共通状態へ反映する
+		actionDefense_.superArmor = superArmor;
+		actionDefense_.invincible = invincible;
+		actionDefense_.guardPoint = guardPoint;
+		actionDefense_.guardDamageScale = (std::clamp)(guardDamageScale, 0.0f, 1.0f);
+	}
+
+	void BaseCharacter::SetActionInvincibleTime(float seconds) {
+		// 回避やスキルなど、ステートをまたぐ一時無敵時間を共通タイマーへ設定する
+		actionDefense_.actionInvincibleTimer = (std::max)(seconds, 0.0f);
+	}
+
+	void BaseCharacter::ClearActionDefenseFlags() {
+		// ノード終了時に攻撃由来の防御効果だけを解除する
+		actionDefense_.superArmor = false;
+		actionDefense_.invincible = false;
+		actionDefense_.guardPoint = false;
+		actionDefense_.guardDamageScale = 0.0f;
+	}
+
+	GameAction::DefenseResult BaseCharacter::ResolveActionDefense() const {
+		// 無敵時間またはアクション無敵はすべての被弾を無効化する
+		if (actionDefense_.invincible || actionDefense_.actionInvincibleTimer > 0.0f) {
+			return GameAction::DefenseResult::Invincible;
+		}
+		// ガード開始直後はパリィを優先する
+		if (actionDefense_.guarding && actionDefense_.parryTimer > 0.0f) {
+			return GameAction::DefenseResult::Parried;
+		}
+		// ガード入力または攻撃ノードのガードポイントを防御成功として扱う
+		if (actionDefense_.guarding || actionDefense_.guardPoint) {
+			return GameAction::DefenseResult::Guarded;
+		}
+		// スーパーアーマーはダメージを受けるが、被弾リアクションを抑制する
+		if (actionDefense_.superArmor) {
+			return GameAction::DefenseResult::SuperArmored;
+		}
+		return GameAction::DefenseResult::Hit;
+	}
+
+	void BaseCharacter::AddActionEventListener(GameAction::EventListener listener) {
+		// 空のコールバックは登録せず、イベント通知時の分岐を減らす
+		if (listener) {
+			actionEventListeners_.push_back(std::move(listener));
+		}
+	}
+
+	void BaseCharacter::ClearActionEventListeners() {
+		// キャラクター破棄やシーン切り替え時に購読者を解放する
+		actionEventListeners_.clear();
+	}
+
+	void BaseCharacter::EmitActionEvent(const GameAction::Event& event) {
+		// 登録順を維持してすべてのアクションイベント購読者へ通知する
+		for (const auto& listener : actionEventListeners_) {
+			if (listener) {
+				listener(event);
+			}
 		}
 	}
 	// 削除フラグ
@@ -17721,6 +19206,8 @@ File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.h
 #include <DirectXGame/engine/GlobalVariables/GlobalVariables.h>
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
+#include <DirectXGame/application/base/Action/ActionRuntime.h>
+#include <vector>
 
 class HitResponse;
 class HitMotionSystem;
@@ -18017,6 +19504,35 @@ namespace Character {
 		/// <summary>HPへダメージが実際に反映された後の通知を受け取る。</summary>
 		/// <param name="damage">実際に適用されたダメージ量。</param>
 		virtual void OnDamageApplied(float damage) { (void)damage; }
+	public:
+		/// <summary>入力と攻撃ノードから共通防御状態を更新する。</summary>
+		/// <param name="ctx">現在フレームのキャラクターコンテキスト。</param>
+		void UpdateActionDefense(const Character::CharacterContext& ctx);
+		/// <summary>攻撃ノードが付与するスーパーアーマー、無敵、ガードポイントを設定する。</summary>
+		/// <param name="superArmor">被ダメージ時にリアクションを抑制するか。</param>
+		/// <param name="invincible">ダメージとリアクションを無効化するか。</param>
+		/// <param name="guardPoint">攻撃中でもガード判定を有効にするか。</param>
+		/// <param name="guardDamageScale">ガード時に許可するダメージ倍率。</param>
+		void SetActionDefenseFlags(bool superArmor, bool invincible, bool guardPoint, float guardDamageScale = 0.0f);
+		/// <summary>共通の一時無敵時間を設定する。</summary>
+		/// <param name="seconds">設定する無敵時間。0以下なら解除する。</param>
+		void SetActionInvincibleTime(float seconds);
+		/// <summary>攻撃ノード由来の防御状態を解除する。</summary>
+		void ClearActionDefenseFlags();
+		/// <summary>現在の共通防御状態を取得する。</summary>
+		/// <returns>防御状態への読み取り専用参照。</returns>
+		const GameAction::DefenseState& GetActionDefense() const { return actionDefense_; }
+		/// <summary>現在の攻撃を共通防御状態で評価する。</summary>
+		/// <returns>ヒット、ガード、パリィなどの判定結果。</returns>
+		GameAction::DefenseResult ResolveActionDefense() const;
+		/// <summary>アクションイベントを購読する。</summary>
+		/// <param name="listener">イベントを受け取るコールバック。</param>
+		void AddActionEventListener(GameAction::EventListener listener);
+		/// <summary>登録済みのアクションイベント購読をすべて解除する。</summary>
+		void ClearActionEventListeners();
+		/// <summary>登録済みの購読者へアクションイベントを通知する。</summary>
+		/// <param name="event">通知するアクションイベント。</param>
+		void EmitActionEvent(const GameAction::Event& event);
 	protected:
 		// オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
@@ -18062,6 +19578,10 @@ namespace Character {
 		CameraManager* cameraManager = nullptr;
 		// 必殺技ポイント管理クラス
 		SpecialPointManager* specialPointManager = nullptr;
+		// キャラクター共通のアクション防御状態
+		GameAction::DefenseState actionDefense_{};
+		// キャラクターへ登録されたアクションイベント購読者
+		std::vector<GameAction::EventListener> actionEventListeners_;
 	protected: // 貰ってくるもの(エンジン層)
 		// 3Dエンティティマネージャー
 		Engine::EntityManager* entityManager = nullptr;
@@ -18142,6 +19662,10 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 
 	// 現在のステート
 	ctx.state = owner->GetCurrentMainState();
+	// 入力データから共通防御判定で使うガード状態を作成する
+	ctx.isGuarding = ctx.inputData.guardPressed;
+	ctx.guardTrigger = ctx.inputData.guardTrigger;
+	ctx.guardReleased = ctx.inputData.guardReleased;
 
 
 
@@ -18370,6 +19894,12 @@ namespace Character {
 		bool isDamage = false;
 		// ダッシュ中か
 		bool isDashing = false;
+		// ガード入力を押しているか
+		bool isGuarding = false;
+		// ガード入力を押したフレームか
+		bool guardTrigger = false;
+		// ガード入力を離したフレームか
+		bool guardReleased = false;
 
 		// 高さ
 		float skyHeight = 1.5f;
@@ -22853,6 +24383,8 @@ namespace Character {
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
+		// 敵側も攻撃ノードのスーパーアーマーや無敵時間を共通更新する
+		UpdateActionDefense(ctx);
 
 		// 保存項目更新(キャラクター全体)
 		UpdateBaseGetValue();
@@ -24784,7 +26316,7 @@ namespace Character {
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Enemy", &objectComponent_->GetObject3D()->GetWorldTransform());
-		// 軌道の依存先候補。軌道使用時は生成時位置だけをアンカーとして利用する。
+		// 軌道の依存先候補。軌道使用時も親の移動・回転へ追従する。
 		comboSystem->SetParentTransform("Trajectory", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
@@ -27313,7 +28845,7 @@ namespace Character {
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
-﻿#include "NormalPlayer.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -27549,6 +29081,8 @@ namespace Character {
 
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
+		// ガード、パリィ受付、アクション由来の一時無敵を共通更新する
+		UpdateActionDefense(ctx);
 		isCanJump = ctx.isCanJump;
 		isSpecial = ctx.isSpecialAttacking;
 
@@ -27694,7 +29228,7 @@ namespace Character {
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
-		// 軌道の依存先候補。軌道使用時は生成時位置だけをアンカーとして利用する。
+		// 軌道の依存先候補。軌道使用時も親の移動・回転へ追従する。
 		comboSystem->SetParentTransform("Trajectory", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
@@ -28057,7 +29591,9 @@ namespace Character {
 
 	void PlayerStateAvoidance::Exit() {
 		timer_ = 0.0f;				// 次回回避用に経過時間を戻す
-		isDirectionFixed_ = false;	// 次回回避用に方向決定を解除する
+			isDirectionFixed_ = false;	// 次回回避用に方向決定を解除する
+			// 回避終了時に共通無敵状態を解除する
+			character->ClearActionDefenseFlags();
 	}
 
 	void PlayerStateAvoidance::Enter() {
@@ -28065,6 +29601,8 @@ namespace Character {
 		isDirectionFixed_ = false;	// 初回更新で入力方向を確定する
 		character->GetCharacterParameterComponent()->Stamina().Add(-staminaCost_);	// 回避コストを支払う
 		character->GetCharacterParameterComponent()->Stamina().useRate = false;		// 回避中はスタミナ回復を止める
+		// 回避中は共通無敵状態を有効にする
+		character->SetActionDefenseFlags(false, true, false);
 
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		anima->SetIsLoop(false);					// 回避は短い単発モーションとして扱う
@@ -32662,6 +34200,9 @@ void InputSystem::ClearKeyboardMousePlayerInput() {
 	controllerInput.dodgeTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LB);
 	controllerInput.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 	controllerInput.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+	controllerInput.guardTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RS);
+	controllerInput.guardPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_RS);
+	controllerInput.guardReleased = input->IsGamePadReleased(GamePadButton::GAMEPAD_RS);
 	// トリガー入力を保持する。
 	controllerInput.dashHeld = input->GetGamePadLeftTrigger() > kTriggerDeadZone;
 	controllerInput.lockOnHeld = input->GetGamePadRightTrigger() > kTriggerDeadZone;
@@ -32739,14 +34280,39 @@ void InputSystem::PlayerInputUpdate(float dt) {
 		input->IsPushKey(DIK_Q);
 
 	// スキル入力押した瞬間
+	playerInputData_.skillPressed =
+		input->IsGamePadPressed(GamePadButton::GAMEPAD_B) ||
+		input->IsPushKey(DIK_E);
 	playerInputData_.skillTrigger =
 		input->IsGamePadTriggered(GamePadButton::GAMEPAD_B) ||
 		input->IsTriggerKey(DIK_E);
+	playerInputData_.skillReleased =
+		input->IsGamePadReleased(GamePadButton::GAMEPAD_B) ||
+		input->IsKeyReleased(DIK_E);
+
+	// X/Yを通常攻撃入力として公開し、コンボ条件側からも押下状態を参照できるようにする。
+	playerInputData_.lightAttackPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_X);
+	playerInputData_.lightAttackTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
+	playerInputData_.lightAttackReleased = input->IsGamePadReleased(GamePadButton::GAMEPAD_X);
+	playerInputData_.heavyAttackPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+	playerInputData_.heavyAttackTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	playerInputData_.heavyAttackReleased = input->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
 
 	// 必殺技入力押した瞬間
 	playerInputData_.specialTrigger =
 		input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB) ||
 		input->IsTriggerKey(DIK_R);
+
+	// ガード入力は右スティック押し込み、またはキーボードGへ割り当てる
+	playerInputData_.guardTrigger =
+		input->IsGamePadTriggered(GamePadButton::GAMEPAD_RS) ||
+		input->IsTriggerKey(DIK_G);
+	playerInputData_.guardPressed =
+		input->IsGamePadPressed(GamePadButton::GAMEPAD_RS) ||
+		input->IsPushKey(DIK_G);
+	playerInputData_.guardReleased =
+		input->IsGamePadReleased(GamePadButton::GAMEPAD_RS) ||
+		input->IsKeyReleased(DIK_G);
 
 }
 
@@ -32795,6 +34361,11 @@ bool InputSystem::IsMouseReleased(uint8_t button) const {
 }
 bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
 {
+	// AI・リプレイ・入力未接続キャラクターでは入力オブジェクトが存在しない。
+	// 未入力として扱うことで、条件評価からのnullptr参照を防ぐ。
+	if (!input) {
+		return false;
+	}
 	switch (press)
 	{
 	case InputButton::kPressed:
@@ -75992,14 +77563,16 @@ void Engine::TrailEffect::Update()
 	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
 	const float deltaTime = MyGame::GameTime();
 
-	// 独立した軌道を進め、リボンの両レールを同じ量だけ移動させる。
+	// 軌道を進めながら、リボンの両レールを現在の親位置へ追従させる。
 	if (trajectoryEnabled_) {
 		trajectoryElapsed_ += deltaTime;
 		const float duration = trajectory_.duration > 0.0f ? trajectory_.duration : lifeTime_;
 		const float normalizedTime = std::clamp(trajectoryElapsed_ / (std::max)(duration, 0.001f), 0.0f, 1.0f);
-		const Vector3 pathOffset = ToTrajectoryWorldPosition(EvaluateTrajectory(normalizedTime)) - trajectoryAnchorPosition_;
-		start = trajectoryStartOffset_ + pathOffset;
-		end = trajectoryEndOffset_ + pathOffset;
+		// 軌道の形状は維持しつつ、現在の親位置を基準に毎フレーム再配置する。
+		const Vector3 currentAnchorPosition = trajectoryAnchor_ ? trajectoryAnchor_->GetWorldPosition() : trajectoryAnchorPosition_;
+		const Vector3 pathOffset = ToTrajectoryWorldPosition(EvaluateTrajectory(normalizedTime)) - currentAnchorPosition;
+		start += pathOffset;
+		end += pathOffset;
 	}
 
 	// 発生していない間も最後の座標は追従させ、再発生時に長い帯が一気に伸びるのを防ぐ。
@@ -76216,15 +77789,15 @@ void Engine::TrailEffect::SetTrajectory(const TrailTrajectorySettings& trajector
 	trajectory_ = trajectory;
 	trajectoryEnabled_ = trajectory_.type != TrailTrajectoryType::kNone;
 	trajectoryElapsed_ = 0.0f;
+	trajectoryAnchor_ = anchor;
 	if (!trajectoryEnabled_) {
+		trajectoryAnchor_ = nullptr;
 		return;
 	}
 
-	// 現在のリボンとアンカー基底を保存し、後の親移動で軌道が歪まないようにする。
+	// 初期値を保存し、アンカーが失われた場合にも最後の基底で評価できるようにする。
 	worldtransformTstr_.Update();
 	worldtransformTend_.Update();
-	trajectoryStartOffset_ = worldtransformTstr_.worldMat_.GetWorldPosition();
-	trajectoryEndOffset_ = worldtransformTend_.worldMat_.GetWorldPosition();
 	trajectoryAnchorPosition_ = anchor ? anchor->GetWorldPosition() : Vector3{};
 	if (anchor) {
 		trajectoryRight_ = { anchor->worldMat_.m[0][0], anchor->worldMat_.m[0][1], anchor->worldMat_.m[0][2] };
@@ -76241,11 +77814,15 @@ Vector3 Engine::TrailEffect::EvaluateTrajectory(float normalizedTime) const
 
 Vector3 Engine::TrailEffect::ToTrajectoryWorldPosition(const Vector3& localPosition) const
 {
-	// 保存した右・上・前方向のアンカー基底でローカル軌道を変換する。
+	// 現在のアンカー基底を優先し、親の移動・回転へ軌道を追従させる。
+	const Vector3 anchorPosition = trajectoryAnchor_ ? trajectoryAnchor_->GetWorldPosition() : trajectoryAnchorPosition_;
+	const Vector3 right = trajectoryAnchor_ ? Vector3{ trajectoryAnchor_->worldMat_.m[0][0], trajectoryAnchor_->worldMat_.m[0][1], trajectoryAnchor_->worldMat_.m[0][2] } : trajectoryRight_;
+	const Vector3 up = trajectoryAnchor_ ? Vector3{ trajectoryAnchor_->worldMat_.m[1][0], trajectoryAnchor_->worldMat_.m[1][1], trajectoryAnchor_->worldMat_.m[1][2] } : trajectoryUp_;
+	const Vector3 forward = trajectoryAnchor_ ? Vector3{ trajectoryAnchor_->worldMat_.m[2][0], trajectoryAnchor_->worldMat_.m[2][1], trajectoryAnchor_->worldMat_.m[2][2] } : trajectoryForward_;
 	return {
-		trajectoryAnchorPosition_.x + trajectoryRight_.x * localPosition.x + trajectoryUp_.x * localPosition.y + trajectoryForward_.x * localPosition.z,
-		trajectoryAnchorPosition_.y + trajectoryRight_.y * localPosition.x + trajectoryUp_.y * localPosition.y + trajectoryForward_.y * localPosition.z,
-		trajectoryAnchorPosition_.z + trajectoryRight_.z * localPosition.x + trajectoryUp_.z * localPosition.y + trajectoryForward_.z * localPosition.z
+		anchorPosition.x + right.x * localPosition.x + up.x * localPosition.y + forward.x * localPosition.z,
+		anchorPosition.y + right.y * localPosition.x + up.y * localPosition.y + forward.y * localPosition.z,
+		anchorPosition.z + right.z * localPosition.x + up.z * localPosition.y + forward.z * localPosition.z
 	};
 }
 void Engine::TrailEffect::AddFeature(TrailFeature feature)
@@ -76731,12 +78308,12 @@ namespace Engine {
 		bool trajectoryEnabled_ = false;
 		TrailTrajectorySettings trajectory_{};
 		float trajectoryElapsed_ = 0.0f;
+		// 軌道を親へ追従させるための非所有アンカー。
+		WorldTransform* trajectoryAnchor_ = nullptr;
 		Vector3 trajectoryAnchorPosition_{};
 		Vector3 trajectoryRight_{ 1.0f, 0.0f, 0.0f };
 		Vector3 trajectoryUp_{ 0.0f, 1.0f, 0.0f };
 		Vector3 trajectoryForward_{ 0.0f, 0.0f, 1.0f };
-		Vector3 trajectoryStartOffset_{};
-		Vector3 trajectoryEndOffset_{};
 
 	private:
 		EffectManager* effectManager = nullptr;
@@ -93117,9 +94694,24 @@ struct PlayerInputData {
 	// 回避
 	bool dodgeTrigger = false;
 	// スキル
+	bool skillPressed = false;
 	bool skillTrigger = false;
+	bool skillReleased = false;
+	// コンボ条件でも利用できる通常攻撃入力
+	bool lightAttackPressed = false;
+	bool lightAttackTrigger = false;
+	bool lightAttackReleased = false;
+	bool heavyAttackPressed = false;
+	bool heavyAttackTrigger = false;
+	bool heavyAttackReleased = false;
 	// 必殺技
 	bool specialTrigger = false;
+	// ガードを押した瞬間
+	bool guardTrigger = false;
+	// ガードを押している間
+	bool guardPressed = false;
+	// ガードを離した瞬間
+	bool guardReleased = false;
 
 	// 押している
 	// ダッシュ
@@ -93178,6 +94770,8 @@ void InputManager::Update(float dt) {
         BuildUIActions();
         break;
     }
+	// 入力状態から長押し時間と離した直前の保持時間を更新する
+	UpdateHoldDurations(dt);
     RecordBufferedEvents();
 }
 
@@ -93188,6 +94782,27 @@ void InputManager::ClearFrame(){
         value2_[i] = Vector2{ 0,0 };
         value1_[i] = 0.0f;
     }
+}
+
+void InputManager::UpdateHoldDurations(float dt){
+	// 各アクションの押下状態から、長押しと溜め入力に使う時間を更新する
+	for (int i = 0; i < Idx(Action::Max); ++i) {
+		if (pressed_[i]) {
+			// 押下中は現在の保持時間を加算し、離した直前の値を無効にする
+			heldSeconds_[i] += (std::max)(dt, 0.0f);
+			releasedHeldSeconds_[i] = 0.0f;
+		}
+		else if (released_[i]) {
+			// 離したフレームでは保持時間を保存してから現在値をリセットする
+			releasedHeldSeconds_[i] = heldSeconds_[i];
+			heldSeconds_[i] = 0.0f;
+		}
+		else {
+			// 未入力状態では現在の長押し時間を維持しない
+			heldSeconds_[i] = 0.0f;
+			releasedHeldSeconds_[i] = 0.0f;
+		}
+	}
 }
 
 void InputManager::BuildGameplayActions(){
@@ -93319,6 +94934,17 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::LockOn)] = input_->IsRightTriggerReleased(0.5f) || input_->IsKeyReleased(DIK_Q);
     value1_[Idx(Action::LockOn)] = input_->GetGamePadRightTrigger(); // ロックオン入力の押し込み量
 
+	// ---- Guard（Pad RS / G）----
+	triggered_[Idx(Action::Guard)] =
+		input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RS) ||
+		input_->IsTriggerKey(DIK_G);
+	pressed_[Idx(Action::Guard)] =
+		input_->IsGamePadPressed(GamePadButton::GAMEPAD_RS) ||
+		input_->IsPushKey(DIK_G);
+	released_[Idx(Action::Guard)] =
+		input_->IsGamePadReleased(GamePadButton::GAMEPAD_RS) ||
+		input_->IsKeyReleased(DIK_G);
+
    
     // ---- Pause（Esc or Start）----
     triggered_[Idx(Action::Pause)] =
@@ -93334,14 +94960,16 @@ void InputManager::RecordBufferedEvents(){
     {
         const Action a = static_cast<Action>(i);
 
-        if (Triggered(a))
+        // コンテキスト切り替えでTriggeredが生成されない場合も、押下状態の差分から開始を補完する
+        if (Triggered(a) || (Pressed(a) && !isDown_[i]))
         {
             isDown_[i] = true;
             pressFrame_[i] = frameCounter_;
 
             PushEvent(a, InputEvent::Type::Press, Value1(a), Value2(a));
         }
-        if (Released(a))
+        // コンテキスト切り替えでReleasedが生成されない場合も、押下解除を補完する
+        if (Released(a) || (!Pressed(a) && isDown_[i]))
         {
             isDown_[i] = false;
             PushEvent(a, InputEvent::Type::Release, Value1(a), Value2(a));
@@ -93355,6 +94983,7 @@ File Path: project/DirectXGame/engine/input/InputManager.h
 ============================================================
 #pragma once
 #include <DirectXGame/engine/input/Input.h>
+#include <algorithm>
 #include <limits>
 
 namespace Character {
@@ -93387,6 +95016,7 @@ public:
 		Skill,		// bool	
 		Jump,		// bool
 		Special,	// bool
+		Guard,		// bool
 		Max
 	};
 
@@ -93429,6 +95059,39 @@ public:
 	bool Pressed(Action a) const { return pressed_[Idx(a)]; }
 	bool Triggered(Action a) const { return triggered_[Idx(a)]; }
 	bool Released(Action a) const { return released_[Idx(a)]; }
+	/// <summary>
+	/// アクションを押してからの経過時間を取得します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <returns>押下中なら経過秒、押下していなければ0秒です。</returns>
+	float HeldSeconds(Action a) const { return heldSeconds_[Idx(a)]; }
+	/// <summary>
+	/// アクションを離した直前の保持時間を取得します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <returns>直前の押下継続時間を秒で返します。</returns>
+	float ReleasedHeldSeconds(Action a) const { return releasedHeldSeconds_[Idx(a)]; }
+	/// <summary>
+	/// 指定時間以上の長押し状態か取得します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <param name="seconds">長押しと判定する秒数です。</param>
+	/// <returns>押下中で指定時間を超えていればtrueです。</returns>
+	bool IsLongPressed(Action a, float seconds) const {
+		return Pressed(a) && HeldSeconds(a) >= seconds;
+	}
+	/// <summary>
+	/// 押下時間を溜め入力の0〜1範囲へ変換します。
+	/// </summary>
+	/// <param name="a">対象アクションです。</param>
+	/// <param name="fullChargeSeconds">最大溜め時間です。</param>
+	/// <returns>溜め率を0〜1で返します。</returns>
+	float ChargeRatio(Action a, float fullChargeSeconds) const {
+		if (fullChargeSeconds <= 0.0f) {
+			return 1.0f;
+		}
+		return (std::min)(HeldSeconds(a) / fullChargeSeconds, 1.0f);
+	}
 
 	Vector2 Value2(Action a) const { return value2_[Idx(a)]; }
 	float   Value1(Action a) const { return value1_[Idx(a)]; }
@@ -93509,6 +95172,7 @@ private:
 	void ClearFrame();
 	void BuildGameplayActions();
 	void BuildUIActions(); // 必要なら
+	void UpdateHoldDurations(float dt);
 
 	/// <summary>
 	/// 入力合成ユーティリティ
@@ -93555,6 +95219,10 @@ private:
 	bool released_[static_cast<int>(Action::Max)] = {};
 	Vector2 value2_[static_cast<int>(Action::Max)] = {};
 	float value1_[static_cast<int>(Action::Max)] = {};
+	// 各アクションの現在の長押し時間を秒で保持する
+	float heldSeconds_[static_cast<int>(Action::Max)] = {};
+	// 各アクションを離した直前の長押し時間を秒で保持する
+	float releasedHeldSeconds_[static_cast<int>(Action::Max)] = {};
 
 private:
 	uint32_t frameCounter_ = 0;
