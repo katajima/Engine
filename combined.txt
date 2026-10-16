@@ -494,6 +494,9 @@
     └──     └── └── └── LoadLevelData.h
     └──     └── ├── Logger.cpp
     └──     └── ├── Logger.h
+    └──     └── ├── Profiler/
+    └──     └── └── ├── cpuProfiler.cpp
+    └──     └── └── └── cpuProfiler.h
     └──     └── ├── Texture/
     └──     └── └── ├── TextureManager.cpp
     └──     └── └── └── TextureManager.h
@@ -4040,51 +4043,55 @@ namespace Combo {
 		// エフェクト
 		{
 			writer.Value(groupName, "エフェクト(武器表示)", data.effect.weaponDraw);
-			writer.Value(groupName, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+			// 実行時に読み込める件数と同じ上限で保存し、異常な編集データを次回起動へ持ち越さない。
+			const std::size_t comboEffectCount = (std::min)(data.effect.comboEffects.size(), static_cast<std::size_t>(kMaxComboEffectCount));
+			writer.Value(groupName, kComboEffectCountKey, static_cast<int>(comboEffectCount));
 
-			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
-				writer.Value(groupName, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
-				writer.Value(groupName, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
-				writer.EnumValue(groupName, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
-				writer.Value(groupName, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
-				writer.Value(groupName, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
-				writer.Value(groupName, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
-				writer.Value(groupName, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
-				writer.Value(groupName, MakeComboEffectPositionKey(i), data.effect.comboEffects[i].transformPosition);
-				writer.Value(groupName, MakeComboEffectRotationKey(i), data.effect.comboEffects[i].transformRotation);
-				writer.Value(groupName, MakeComboEffectScaleKey(i), data.effect.comboEffects[i].transformScale);
-				writer.Value(groupName, MakeComboEffectRequiredHitCountKey(i), data.effect.comboEffects[i].requiredHitCount);
-				writer.EnumValue(groupName, MakeComboEffectInputTypeKey(i), data.effect.comboEffects[i].inputType, "ComboEffectInputType");
-				writer.EnumValue(groupName, MakeComboEffectTypeKey(i), data.effect.comboEffects[i].type, "ComboEffectType");
-				writer.Value(groupName, MakeComboEffectTrailTextureKey(i), data.effect.comboEffects[i].trailTexture);
-				writer.Value(groupName, MakeComboEffectTrailColorKey(i), data.effect.comboEffects[i].trailColor.ToVector4());
-				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(i), data.effect.comboEffects[i].trailOffsetStart);
-				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(i), data.effect.comboEffects[i].trailOffsetEnd);
-				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(i), data.effect.comboEffects[i].trailLifeTime);
-				writer.Value(groupName, MakeComboEffectTrailMinDistanceKey(i), data.effect.comboEffects[i].trailSettings.minEmitDistance);
-                writer.Value(groupName, MakeComboEffectTrailMaxSegmentsKey(i), static_cast<int>(data.effect.comboEffects[i].trailSettings.maxSegmentCount));
-                writer.Value(groupName, MakeComboEffectTrailUseSplineKey(i), data.effect.comboEffects[i].trailSettings.useSpline);
-                writer.Value(groupName, MakeComboEffectTrailSubdivisionKey(i), data.effect.comboEffects[i].trailSettings.splineSubdivision);
-                writer.Value(groupName, MakeComboEffectTrailWidthStartKey(i), data.effect.comboEffects[i].trailSettings.widthStart);
-				writer.Value(groupName, MakeComboEffectTrailWidthEndKey(i), data.effect.comboEffects[i].trailSettings.widthEnd);
-				writer.Value(groupName, MakeComboEffectTrailFadeInKey(i), data.effect.comboEffects[i].trailSettings.fadeInTime);
-				writer.Value(groupName, MakeComboEffectTrailFadeOutKey(i), data.effect.comboEffects[i].trailSettings.fadeOutTime);
-				writer.Value(groupName, MakeComboEffectTrailAlphaCurveKey(i), data.effect.comboEffects[i].trailSettings.alphaCurve);
-				writer.Value(groupName, MakeComboEffectTrailUvSpeedKey(i), data.effect.comboEffects[i].trailSettings.uvScrollSpeed);
-				writer.Value(groupName, MakeComboEffectTrailEmissionKey(i), data.effect.comboEffects[i].trailSettings.emissionStrength);
-				writer.Value(groupName, MakeComboEffectTrailFlipKey(i), data.effect.comboEffects[i].trailSettings.flipTexture);
-				writer.EnumValue(groupName, MakeComboEffectTrailResetKey(i), data.effect.comboEffects[i].trailSettings.resetMode, "TrailResetMode");
-				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(i), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
-				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(i), data.effect.comboEffects[i].trajectory.duration);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(i), data.effect.comboEffects[i].trajectory.point0);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint1Key(i), data.effect.comboEffects[i].trajectory.point1);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint2Key(i), data.effect.comboEffects[i].trajectory.point2);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint3Key(i), data.effect.comboEffects[i].trajectory.point3);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitCenterKey(i), data.effect.comboEffects[i].trajectory.orbitCenter);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitRadiusKey(i), data.effect.comboEffects[i].trajectory.orbitRadius);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitHeightKey(i), data.effect.comboEffects[i].trajectory.orbitHeight);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitStartAngleKey(i), data.effect.comboEffects[i].trajectory.orbitStartAngle);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitEndAngleKey(i), data.effect.comboEffects[i].trajectory.orbitEndAngle);
+			for (std::size_t i = 0; i < comboEffectCount; ++i) {
+				// 保存対象を上限内に限定し、添字をsize_tで扱って符号変換を避ける。
+				const int effectIndex = static_cast<int>(i);
+				writer.Value(groupName, MakeComboEffectNameKey(effectIndex), data.effect.comboEffects[i].effectName);
+				writer.Value(groupName, MakeComboEffectParentKey(effectIndex), data.effect.comboEffects[i].parentName);
+				writer.EnumValue(groupName, MakeComboEffectTriggerTypeKey(effectIndex), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
+				writer.Value(groupName, MakeComboEffectStartTimeKey(effectIndex), data.effect.comboEffects[i].startTime);
+				writer.Value(groupName, MakeComboEffectEndTimeKey(effectIndex), data.effect.comboEffects[i].endTime);
+				writer.Value(groupName, MakeComboEffectIntervalKey(effectIndex), data.effect.comboEffects[i].interval);
+				writer.Value(groupName, MakeComboEffectOffsetKey(effectIndex), data.effect.comboEffects[i].offset);
+				writer.Value(groupName, MakeComboEffectPositionKey(effectIndex), data.effect.comboEffects[i].transformPosition);
+				writer.Value(groupName, MakeComboEffectRotationKey(effectIndex), data.effect.comboEffects[i].transformRotation);
+				writer.Value(groupName, MakeComboEffectScaleKey(effectIndex), data.effect.comboEffects[i].transformScale);
+				writer.Value(groupName, MakeComboEffectRequiredHitCountKey(effectIndex), data.effect.comboEffects[i].requiredHitCount);
+				writer.EnumValue(groupName, MakeComboEffectInputTypeKey(effectIndex), data.effect.comboEffects[i].inputType, "ComboEffectInputType");
+				writer.EnumValue(groupName, MakeComboEffectTypeKey(effectIndex), data.effect.comboEffects[i].type, "ComboEffectType");
+				writer.Value(groupName, MakeComboEffectTrailTextureKey(effectIndex), data.effect.comboEffects[i].trailTexture);
+				writer.Value(groupName, MakeComboEffectTrailColorKey(effectIndex), data.effect.comboEffects[i].trailColor.ToVector4());
+				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(effectIndex), data.effect.comboEffects[i].trailOffsetStart);
+				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(effectIndex), data.effect.comboEffects[i].trailOffsetEnd);
+				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(effectIndex), data.effect.comboEffects[i].trailLifeTime);
+				writer.Value(groupName, MakeComboEffectTrailMinDistanceKey(effectIndex), data.effect.comboEffects[i].trailSettings.minEmitDistance);
+				writer.Value(groupName, MakeComboEffectTrailMaxSegmentsKey(effectIndex), static_cast<int>(data.effect.comboEffects[i].trailSettings.maxSegmentCount));
+				writer.Value(groupName, MakeComboEffectTrailUseSplineKey(effectIndex), data.effect.comboEffects[i].trailSettings.useSpline);
+				writer.Value(groupName, MakeComboEffectTrailSubdivisionKey(effectIndex), data.effect.comboEffects[i].trailSettings.splineSubdivision);
+				writer.Value(groupName, MakeComboEffectTrailWidthStartKey(effectIndex), data.effect.comboEffects[i].trailSettings.widthStart);
+				writer.Value(groupName, MakeComboEffectTrailWidthEndKey(effectIndex), data.effect.comboEffects[i].trailSettings.widthEnd);
+				writer.Value(groupName, MakeComboEffectTrailFadeInKey(effectIndex), data.effect.comboEffects[i].trailSettings.fadeInTime);
+				writer.Value(groupName, MakeComboEffectTrailFadeOutKey(effectIndex), data.effect.comboEffects[i].trailSettings.fadeOutTime);
+				writer.Value(groupName, MakeComboEffectTrailAlphaCurveKey(effectIndex), data.effect.comboEffects[i].trailSettings.alphaCurve);
+				writer.Value(groupName, MakeComboEffectTrailUvSpeedKey(effectIndex), data.effect.comboEffects[i].trailSettings.uvScrollSpeed);
+				writer.Value(groupName, MakeComboEffectTrailEmissionKey(effectIndex), data.effect.comboEffects[i].trailSettings.emissionStrength);
+				writer.Value(groupName, MakeComboEffectTrailFlipKey(effectIndex), data.effect.comboEffects[i].trailSettings.flipTexture);
+				writer.EnumValue(groupName, MakeComboEffectTrailResetKey(effectIndex), data.effect.comboEffects[i].trailSettings.resetMode, "TrailResetMode");
+				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(effectIndex), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
+				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(effectIndex), data.effect.comboEffects[i].trajectory.duration);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(effectIndex), data.effect.comboEffects[i].trajectory.point0);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint1Key(effectIndex), data.effect.comboEffects[i].trajectory.point1);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint2Key(effectIndex), data.effect.comboEffects[i].trajectory.point2);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint3Key(effectIndex), data.effect.comboEffects[i].trajectory.point3);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitCenterKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitCenter);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitRadiusKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitRadius);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitHeightKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitHeight);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitStartAngleKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitStartAngle);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitEndAngleKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitEndAngle);
 			}
 		}
 		// 接続
@@ -4440,7 +4447,9 @@ namespace Combo {
 			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
 			data.effect.comboEffects.clear();
 
-			const int comboEffectCount = globalVariables->GetValue<int>(name, kComboEffectCountKey);
+			// 保存ファイルが壊れていても、読込ループを有限件数に制限してエディタ停止を防ぐ。
+			const int savedComboEffectCount = globalVariables->GetValue<int>(name, kComboEffectCountKey);
+			const int comboEffectCount = (std::clamp)(savedComboEffectCount, 0, kMaxComboEffectCount);
 			for (int i = 0; i < comboEffectCount; ++i) {
 				ComboEffectEntry entry{};
 				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
@@ -4464,7 +4473,9 @@ namespace Combo {
 					if (globalVariables->HasKey(name, MakeComboEffectTrailWidthStartKey(i))) {
                         if (globalVariables->HasKey(name, MakeComboEffectTrailMaxSegmentsKey(i))) {
                                 entry.trailSettings.minEmitDistance = globalVariables->GetValue<float>(name, MakeComboEffectTrailMinDistanceKey(i));
-                                entry.trailSettings.maxSegmentCount = static_cast<size_t>(globalVariables->GetValue<int>(name, MakeComboEffectTrailMaxSegmentsKey(i)));
+								// 負値をsize_tへ直接変換すると巨大値になるため、整数の段階で制限する。
+								const int savedMaxSegmentCount = globalVariables->GetValue<int>(name, MakeComboEffectTrailMaxSegmentsKey(i));
+								entry.trailSettings.maxSegmentCount = static_cast<size_t>((std::clamp)(savedMaxSegmentCount, 1, static_cast<int>(Engine::kMaxTrailSegmentCount)));
                                 entry.trailSettings.useSpline = globalVariables->GetValue<bool>(name, MakeComboEffectTrailUseSplineKey(i));
                                 entry.trailSettings.splineSubdivision = globalVariables->GetValue<int>(name, MakeComboEffectTrailSubdivisionKey(i));
                         }
@@ -5173,6 +5184,8 @@ namespace Combo {
 
 	const std::string kHitEffectCountKey = "ヒットエフェクト数";
 	const std::string kComboEffectCountKey = "コンボエフェクト数";
+	// 保存データの破損時に、エフェクト読み込みが無制限に増えないようにする上限。
+	constexpr int kMaxComboEffectCount = 32;
 
 	static std::string MakeHitEffectSlotKey(int index) {
 		return "ヒットエフェクトスロット" + std::to_string(index);
@@ -5685,7 +5698,7 @@ namespace Combo {
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/Debug/ComboEditor.cpp
 ============================================================
-﻿#include "ComboEditor.h"
+#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManager.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -6437,53 +6450,70 @@ namespace Combo {
 	void Editor::SetGlobalData() {
 
 		for (auto& it : comboSystem->GetComboNodeStates()) {
-
-			AttackSequence combo = comboEditorBlocks_[it.first].GetAttackSequence();
+			// 状態とエディターブロックが一致しない一時状態では、空ブロックを追加せず保存を続行する。
+			auto blockIt = comboEditorBlocks_.find(it.first);
+			if (blockIt == comboEditorBlocks_.end()) {
+				continue;
+			}
+			EditorBlock& block = blockIt->second;
+			AttackSequence combo = block.GetAttackSequence();
 			GlobalData& data = comboSystem->GetComboGlobalData(it.first);
 
+			// シーケンサーに存在する時間イベントだけを保存データへ反映する。
+			auto applyTimeWindow = [&combo](const char* eventName, float& startTime, float& endTime) {
+				AttackEvent event{};
+				if (!combo.TryGetEvent(eventName, event)) {
+					return;
+				}
+				startTime = ConvertUtility::FramesToSeconds(event.startFrame);
+				endTime = ConvertUtility::FramesToSeconds(event.endFrame);
+			};
 
 			// 条件
 			{
-				data.condition = comboEditorBlocks_[it.first].GetData().condition;
-				data.action = comboEditorBlocks_[it.first].GetData().action;
+				data.condition = block.GetData().condition;
+				data.action = block.GetData().action;
 				// 入力の時間
-				data.condition.stateInput.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
-				data.condition.stateInput.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
+				applyTimeWindow("入力の可能時間", data.condition.stateInput.startTime, data.condition.stateInput.endTime);
 				// キャンセル可能時間
-				data.condition.stateCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").startFrame);
-				data.condition.stateCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").endFrame);
+				applyTimeWindow("キャンセル可能時間", data.condition.stateCancel.startTime, data.condition.stateCancel.endTime);
 				// キャンセル可能時間(移動)
-				data.condition.stateMoveCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").startFrame);
-				data.condition.stateMoveCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").endFrame);
+				applyTimeWindow("移動キャンセル可能時間", data.condition.stateMoveCancel.startTime, data.condition.stateMoveCancel.endTime);
 				// コンボ移行時間
-				data.condition.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
+				AttackEvent nextEvent{};
+				if (combo.TryGetEvent("コンボ移行開始時間", nextEvent)) {
+					data.condition.stateNextTime = ConvertUtility::FramesToSeconds(nextEvent.startFrame);
+				}
 				// ステート終了時間
-				data.condition.stateEndTime = comboEditorBlocks_[it.first].GetMaxFrame();
+				data.condition.stateEndTime = block.GetMaxFrame();
 			}
 
 			// リアクション
-			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
+			data.hitReaction = block.GetData().hitReaction;
 			// エディタで選択した音ID、再生時間、音量を保存データへ反映する。
-			data.audio = comboEditorBlocks_[it.first].GetData().audio;
+			data.audio = block.GetData().audio;
 			// ヒットボックス生成時間
-			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
-			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
-			data.hitBox.windowStart = hitBoxStart;
-			data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
+			data.hitBox = block.GetData().hitBox;
+			AttackEvent hitBoxEvent{};
+			if (combo.TryGetEvent("ヒットボックス生成時間", hitBoxEvent)) {
+				// ヒットボックスイベントが存在する場合だけ時間を更新する。
+				const float hitBoxStart = ConvertUtility::FramesToSeconds(hitBoxEvent.startFrame);
+				data.hitBox.windowStart = hitBoxStart;
+				data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(hitBoxEvent.endFrame) - hitBoxStart;
+			}
 
 			// 移動時間
-			data.move = comboEditorBlocks_[it.first].GetData().move;
-			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+			data.move = block.GetData().move;
+			applyTimeWindow("移動時間", data.move.moveWindow.startTime, data.move.moveWindow.endTime);
 
 
 			// アニメーションスピード
-			data.animation = comboEditorBlocks_[it.first].GetData().animation;
+			data.animation = block.GetData().animation;
 
 			// カメラ
-			data.camera = comboEditorBlocks_[it.first].GetData().camera;
+			data.camera = block.GetData().camera;
 			// エフェクト
-			data.effect = comboEditorBlocks_[it.first].GetData().effect;
+			data.effect = block.GetData().effect;
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				AttackEvent effectEvent{};
 				if (combo.TryGetEvent(MakeComboEffectSequenceName(i), effectEvent)) {
@@ -6496,10 +6526,10 @@ namespace Combo {
 			}
 
 			// 接続
-			data.connection = comboEditorBlocks_[it.first].GetData().connection;
+			data.connection = block.GetData().connection;
 			// 攻撃タイプと遠距離攻撃
-			data.type = comboEditorBlocks_[it.first].GetData().type;
-			data.range = comboEditorBlocks_[it.first].GetData().range;
+			data.type = block.GetData().type;
+			data.range = block.GetData().range;
 
 		}
 
@@ -7769,7 +7799,8 @@ namespace Combo {
 			ImGui::PopID();
 		}
 
-		if (duplicateIndex >= 0) {
+		if (duplicateIndex >= 0 && effect.comboEffects.size() < static_cast<std::size_t>(kMaxComboEffectCount)) {
+			// 保存可能な最大件数を超えない場合だけ複製を適用する。
 			effect.comboEffects.insert(effect.comboEffects.begin() + duplicateIndex + 1, effect.comboEffects[duplicateIndex]);
 			shouldSyncSequence = true;
 		}
@@ -7786,7 +7817,17 @@ namespace Combo {
 			shouldSyncSequence = true;
 		}
 
-		if (ImGui::Button("コンボエフェクト追加")) {
+		// 追加ボタンを上限で無効化し、保存時に項目が切り捨てられる状態を作らない。
+		const bool canAddComboEffect = effect.comboEffects.size() < static_cast<std::size_t>(kMaxComboEffectCount);
+		if (!canAddComboEffect) {
+			ImGui::BeginDisabled();
+		}
+		const bool addComboEffect = ImGui::Button("コンボエフェクト追加");
+		if (!canAddComboEffect) {
+			ImGui::EndDisabled();
+		}
+		if (addComboEffect && canAddComboEffect) {
+			// 新規項目は最小限の安全な初期値で作成する。
 			effect.comboEffects.push_back(ComboEffectEntry{
 				.effectName = "",
 				.parentName = "Player",
@@ -8425,6 +8466,11 @@ public: // 取得系
 	/// イベント取得
 	/// </summary>
 	const AttackEvent& GetEvent(int index) const {
+		// 不正な添字では空イベントを返し、保存処理から範囲外アクセスを発生させない。
+		static const AttackEvent emptyEvent{ 0, 0, 0, "" };
+		if (index < 0 || index >= static_cast<int>(events.size())) {
+			return emptyEvent;
+		}
 		return events[index];
 	}
 
@@ -8441,8 +8487,9 @@ public: // 取得系
 			}
 		}
 
-		/// 見つからなかった場合は空のイベントを返す
-		return events[0];
+		// イベントが空の新規攻撃や不完全な保存データでも安全に扱えるようにする。
+		static const AttackEvent emptyEvent{ 0, 0, 0, "" };
+		return emptyEvent;
 	}
 
 	/// <summary>
@@ -53572,6 +53619,70 @@ namespace Logger
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/cpuProfiler.cpp
+============================================================
+﻿#include "cpuProfiler.h"
+
+CPUProfiler::CPUProfiler(){}
+
+CPUProfiler::~CPUProfiler(){}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/cpuProfiler.h
+============================================================
+﻿#pragma once
+#include <cstdint>
+
+namespace Engine {
+
+
+	class ImGuiManager;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	struct CpuProfileEvent
+	{
+		const char* name = nullptr;
+
+		uint64_t startTime = 0;
+		uint64_t endTime = 0;
+
+		uint32_t threadId = 0;
+		uint32_t depth = 0;
+		uint32_t parentIndex = UINT32_MAX;
+	};
+
+	/// <summary>
+	/// CPU のプロファイリングを行うクラス。コンストラクタで初期化し、デストラクタでリソースを解放する。
+	/// </summary>
+	class CPUProfiler
+	{
+	public:
+		CPUProfiler();
+		~CPUProfiler();
+
+		/// <summary>
+		/// 新しいフレームの開始処理を行う。
+		/// </summary>
+		void BeginFrame();
+
+
+		void EndFrame();
+		
+		void BeginScope();
+
+		void EndScope();
+
+	private:
+
+	};
+}
+
+
+
+============================================================
 File Path: project/DirectXGame/engine/Base/Texture/TextureManager.cpp
 ============================================================
 #include "TextureManager.h"
@@ -77752,7 +77863,8 @@ void Engine::TrailEffect::UpdateImgui()
 void Engine::TrailEffect::SetQuality(float minEmitDistance, size_t maxSegmentCount)
 {
 	minEmitDistance_ = (std::max)(0.0f, minEmitDistance);
-	maxSegmentCount_ = (std::max)(size_t{ 1 }, maxSegmentCount);
+	// JSONや外部ツールからの異常値で履歴・頂点バッファが無制限に増えないようにする。
+	maxSegmentCount_ = (std::clamp)(maxSegmentCount, size_t{ 1 }, kMaxTrailSegmentCount);
 	settings_.minEmitDistance = minEmitDistance_;
 	settings_.maxSegmentCount = maxSegmentCount_;
 
@@ -78075,6 +78187,9 @@ File Path: project/DirectXGame/engine/Effect/Trail/TrailEffect.h
 
 
 namespace Engine {
+	// 保存データの異常値でトレイル履歴が過剰に増えないようにする最大セグメント数。
+	inline constexpr size_t kMaxTrailSegmentCount = 2048;
+
 	// トレイル移動で共有する軌道方式。
 	enum class TrailTrajectoryType : uint32_t { kNone, kBezier, kCatmullRom, kOrbit };
 
@@ -100236,6 +100351,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\cpuProfiler.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp" />
@@ -100684,6 +100800,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\cpuProfiler.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraCollision.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraFollow.h" />
@@ -101046,7 +101163,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -102172,6 +102288,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\cpuProfiler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -102399,7 +102518,6 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Light\BaseDirectionalLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-
     <ClInclude Include="DirectXGame\engine\Light\BaseLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
@@ -103477,6 +103595,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\cpuProfiler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -103487,7 +103608,6 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
-
 
 ============================================================
 File Path: project/main.cpp
