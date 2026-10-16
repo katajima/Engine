@@ -126,6 +126,11 @@ public: // 取得系
 	/// イベント取得
 	/// </summary>
 	const AttackEvent& GetEvent(int index) const {
+		// 不正な添字では空イベントを返し、保存処理から範囲外アクセスを発生させない。
+		static const AttackEvent emptyEvent{ 0, 0, 0, "" };
+		if (index < 0 || index >= static_cast<int>(events.size())) {
+			return emptyEvent;
+		}
 		return events[index];
 	}
 
@@ -142,8 +147,9 @@ public: // 取得系
 			}
 		}
 
-		/// 見つからなかった場合は空のイベントを返す
-		return events[0];
+		// イベントが空の新規攻撃や不完全な保存データでも安全に扱えるようにする。
+		static const AttackEvent emptyEvent{ 0, 0, 0, "" };
+		return emptyEvent;
 	}
 
 	/// <summary>

@@ -1,4 +1,4 @@
-﻿#include "ComboEditor.h"
+#include "ComboEditor.h"
 #include <DirectXGame/application/base/Character/Base/CharacterManager.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
@@ -750,53 +750,70 @@ namespace Combo {
 	void Editor::SetGlobalData() {
 
 		for (auto& it : comboSystem->GetComboNodeStates()) {
-
-			AttackSequence combo = comboEditorBlocks_[it.first].GetAttackSequence();
+			// 状態とエディターブロックが一致しない一時状態では、空ブロックを追加せず保存を続行する。
+			auto blockIt = comboEditorBlocks_.find(it.first);
+			if (blockIt == comboEditorBlocks_.end()) {
+				continue;
+			}
+			EditorBlock& block = blockIt->second;
+			AttackSequence combo = block.GetAttackSequence();
 			GlobalData& data = comboSystem->GetComboGlobalData(it.first);
 
+			// シーケンサーに存在する時間イベントだけを保存データへ反映する。
+			auto applyTimeWindow = [&combo](const char* eventName, float& startTime, float& endTime) {
+				AttackEvent event{};
+				if (!combo.TryGetEvent(eventName, event)) {
+					return;
+				}
+				startTime = ConvertUtility::FramesToSeconds(event.startFrame);
+				endTime = ConvertUtility::FramesToSeconds(event.endFrame);
+			};
 
 			// 条件
 			{
-				data.condition = comboEditorBlocks_[it.first].GetData().condition;
-				data.action = comboEditorBlocks_[it.first].GetData().action;
+				data.condition = block.GetData().condition;
+				data.action = block.GetData().action;
 				// 入力の時間
-				data.condition.stateInput.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
-				data.condition.stateInput.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
+				applyTimeWindow("入力の可能時間", data.condition.stateInput.startTime, data.condition.stateInput.endTime);
 				// キャンセル可能時間
-				data.condition.stateCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").startFrame);
-				data.condition.stateCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").endFrame);
+				applyTimeWindow("キャンセル可能時間", data.condition.stateCancel.startTime, data.condition.stateCancel.endTime);
 				// キャンセル可能時間(移動)
-				data.condition.stateMoveCancel.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").startFrame);
-				data.condition.stateMoveCancel.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").endFrame);
+				applyTimeWindow("移動キャンセル可能時間", data.condition.stateMoveCancel.startTime, data.condition.stateMoveCancel.endTime);
 				// コンボ移行時間
-				data.condition.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
+				AttackEvent nextEvent{};
+				if (combo.TryGetEvent("コンボ移行開始時間", nextEvent)) {
+					data.condition.stateNextTime = ConvertUtility::FramesToSeconds(nextEvent.startFrame);
+				}
 				// ステート終了時間
-				data.condition.stateEndTime = comboEditorBlocks_[it.first].GetMaxFrame();
+				data.condition.stateEndTime = block.GetMaxFrame();
 			}
 
 			// リアクション
-			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
+			data.hitReaction = block.GetData().hitReaction;
 			// エディタで選択した音ID、再生時間、音量を保存データへ反映する。
-			data.audio = comboEditorBlocks_[it.first].GetData().audio;
+			data.audio = block.GetData().audio;
 			// ヒットボックス生成時間
-			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
-			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
-			data.hitBox.windowStart = hitBoxStart;
-			data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
+			data.hitBox = block.GetData().hitBox;
+			AttackEvent hitBoxEvent{};
+			if (combo.TryGetEvent("ヒットボックス生成時間", hitBoxEvent)) {
+				// ヒットボックスイベントが存在する場合だけ時間を更新する。
+				const float hitBoxStart = ConvertUtility::FramesToSeconds(hitBoxEvent.startFrame);
+				data.hitBox.windowStart = hitBoxStart;
+				data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(hitBoxEvent.endFrame) - hitBoxStart;
+			}
 
 			// 移動時間
-			data.move = comboEditorBlocks_[it.first].GetData().move;
-			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+			data.move = block.GetData().move;
+			applyTimeWindow("移動時間", data.move.moveWindow.startTime, data.move.moveWindow.endTime);
 
 
 			// アニメーションスピード
-			data.animation = comboEditorBlocks_[it.first].GetData().animation;
+			data.animation = block.GetData().animation;
 
 			// カメラ
-			data.camera = comboEditorBlocks_[it.first].GetData().camera;
+			data.camera = block.GetData().camera;
 			// エフェクト
-			data.effect = comboEditorBlocks_[it.first].GetData().effect;
+			data.effect = block.GetData().effect;
 			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
 				AttackEvent effectEvent{};
 				if (combo.TryGetEvent(MakeComboEffectSequenceName(i), effectEvent)) {
@@ -809,10 +826,10 @@ namespace Combo {
 			}
 
 			// 接続
-			data.connection = comboEditorBlocks_[it.first].GetData().connection;
+			data.connection = block.GetData().connection;
 			// 攻撃タイプと遠距離攻撃
-			data.type = comboEditorBlocks_[it.first].GetData().type;
-			data.range = comboEditorBlocks_[it.first].GetData().range;
+			data.type = block.GetData().type;
+			data.range = block.GetData().range;
 
 		}
 

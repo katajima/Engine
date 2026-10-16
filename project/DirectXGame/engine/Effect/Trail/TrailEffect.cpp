@@ -325,7 +325,8 @@ void Engine::TrailEffect::UpdateImgui()
 void Engine::TrailEffect::SetQuality(float minEmitDistance, size_t maxSegmentCount)
 {
 	minEmitDistance_ = (std::max)(0.0f, minEmitDistance);
-	maxSegmentCount_ = (std::max)(size_t{ 1 }, maxSegmentCount);
+	// JSONや外部ツールからの異常値で履歴・頂点バッファが無制限に増えないようにする。
+	maxSegmentCount_ = (std::clamp)(maxSegmentCount, size_t{ 1 }, kMaxTrailSegmentCount);
 	settings_.minEmitDistance = minEmitDistance_;
 	settings_.maxSegmentCount = maxSegmentCount_;
 

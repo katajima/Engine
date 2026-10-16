@@ -23,6 +23,9 @@
 
 
 namespace Engine {
+	// 保存データの異常値でトレイル履歴が過剰に増えないようにする最大セグメント数。
+	inline constexpr size_t kMaxTrailSegmentCount = 2048;
+
 	// トレイル移動で共有する軌道方式。
 	enum class TrailTrajectoryType : uint32_t { kNone, kBezier, kCatmullRom, kOrbit };
 

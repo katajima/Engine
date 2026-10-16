@@ -12,6 +12,8 @@ namespace Combo {
 
 	const std::string kHitEffectCountKey = "ヒットエフェクト数";
 	const std::string kComboEffectCountKey = "コンボエフェクト数";
+	// 保存データの破損時に、エフェクト読み込みが無制限に増えないようにする上限。
+	constexpr int kMaxComboEffectCount = 32;
 
 	static std::string MakeHitEffectSlotKey(int index) {
 		return "ヒットエフェクトスロット" + std::to_string(index);

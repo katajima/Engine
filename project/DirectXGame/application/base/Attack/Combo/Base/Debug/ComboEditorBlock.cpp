@@ -1080,7 +1080,8 @@ namespace Combo {
 			ImGui::PopID();
 		}
 
-		if (duplicateIndex >= 0) {
+		if (duplicateIndex >= 0 && effect.comboEffects.size() < static_cast<std::size_t>(kMaxComboEffectCount)) {
+			// 保存可能な最大件数を超えない場合だけ複製を適用する。
 			effect.comboEffects.insert(effect.comboEffects.begin() + duplicateIndex + 1, effect.comboEffects[duplicateIndex]);
 			shouldSyncSequence = true;
 		}
@@ -1097,7 +1098,17 @@ namespace Combo {
 			shouldSyncSequence = true;
 		}
 
-		if (ImGui::Button("コンボエフェクト追加")) {
+		// 追加ボタンを上限で無効化し、保存時に項目が切り捨てられる状態を作らない。
+		const bool canAddComboEffect = effect.comboEffects.size() < static_cast<std::size_t>(kMaxComboEffectCount);
+		if (!canAddComboEffect) {
+			ImGui::BeginDisabled();
+		}
+		const bool addComboEffect = ImGui::Button("コンボエフェクト追加");
+		if (!canAddComboEffect) {
+			ImGui::EndDisabled();
+		}
+		if (addComboEffect && canAddComboEffect) {
+			// 新規項目は最小限の安全な初期値で作成する。
 			effect.comboEffects.push_back(ComboEffectEntry{
 				.effectName = "",
 				.parentName = "Player",

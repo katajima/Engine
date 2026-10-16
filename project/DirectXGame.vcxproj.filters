@@ -1119,6 +1119,9 @@
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\cpuProfiler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -1346,7 +1349,6 @@
     <ClInclude Include="DirectXGame\engine\Light\BaseDirectionalLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-
     <ClInclude Include="DirectXGame\engine\Light\BaseLight.h">
       <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
@@ -2422,6 +2424,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\cpuProfiler.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -655,51 +655,55 @@ namespace Combo {
 		// エフェクト
 		{
 			writer.Value(groupName, "エフェクト(武器表示)", data.effect.weaponDraw);
-			writer.Value(groupName, kComboEffectCountKey, static_cast<int>(data.effect.comboEffects.size()));
+			// 実行時に読み込める件数と同じ上限で保存し、異常な編集データを次回起動へ持ち越さない。
+			const std::size_t comboEffectCount = (std::min)(data.effect.comboEffects.size(), static_cast<std::size_t>(kMaxComboEffectCount));
+			writer.Value(groupName, kComboEffectCountKey, static_cast<int>(comboEffectCount));
 
-			for (int i = 0; i < static_cast<int>(data.effect.comboEffects.size()); ++i) {
-				writer.Value(groupName, MakeComboEffectNameKey(i), data.effect.comboEffects[i].effectName);
-				writer.Value(groupName, MakeComboEffectParentKey(i), data.effect.comboEffects[i].parentName);
-				writer.EnumValue(groupName, MakeComboEffectTriggerTypeKey(i), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
-				writer.Value(groupName, MakeComboEffectStartTimeKey(i), data.effect.comboEffects[i].startTime);
-				writer.Value(groupName, MakeComboEffectEndTimeKey(i), data.effect.comboEffects[i].endTime);
-				writer.Value(groupName, MakeComboEffectIntervalKey(i), data.effect.comboEffects[i].interval);
-				writer.Value(groupName, MakeComboEffectOffsetKey(i), data.effect.comboEffects[i].offset);
-				writer.Value(groupName, MakeComboEffectPositionKey(i), data.effect.comboEffects[i].transformPosition);
-				writer.Value(groupName, MakeComboEffectRotationKey(i), data.effect.comboEffects[i].transformRotation);
-				writer.Value(groupName, MakeComboEffectScaleKey(i), data.effect.comboEffects[i].transformScale);
-				writer.Value(groupName, MakeComboEffectRequiredHitCountKey(i), data.effect.comboEffects[i].requiredHitCount);
-				writer.EnumValue(groupName, MakeComboEffectInputTypeKey(i), data.effect.comboEffects[i].inputType, "ComboEffectInputType");
-				writer.EnumValue(groupName, MakeComboEffectTypeKey(i), data.effect.comboEffects[i].type, "ComboEffectType");
-				writer.Value(groupName, MakeComboEffectTrailTextureKey(i), data.effect.comboEffects[i].trailTexture);
-				writer.Value(groupName, MakeComboEffectTrailColorKey(i), data.effect.comboEffects[i].trailColor.ToVector4());
-				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(i), data.effect.comboEffects[i].trailOffsetStart);
-				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(i), data.effect.comboEffects[i].trailOffsetEnd);
-				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(i), data.effect.comboEffects[i].trailLifeTime);
-				writer.Value(groupName, MakeComboEffectTrailMinDistanceKey(i), data.effect.comboEffects[i].trailSettings.minEmitDistance);
-                writer.Value(groupName, MakeComboEffectTrailMaxSegmentsKey(i), static_cast<int>(data.effect.comboEffects[i].trailSettings.maxSegmentCount));
-                writer.Value(groupName, MakeComboEffectTrailUseSplineKey(i), data.effect.comboEffects[i].trailSettings.useSpline);
-                writer.Value(groupName, MakeComboEffectTrailSubdivisionKey(i), data.effect.comboEffects[i].trailSettings.splineSubdivision);
-                writer.Value(groupName, MakeComboEffectTrailWidthStartKey(i), data.effect.comboEffects[i].trailSettings.widthStart);
-				writer.Value(groupName, MakeComboEffectTrailWidthEndKey(i), data.effect.comboEffects[i].trailSettings.widthEnd);
-				writer.Value(groupName, MakeComboEffectTrailFadeInKey(i), data.effect.comboEffects[i].trailSettings.fadeInTime);
-				writer.Value(groupName, MakeComboEffectTrailFadeOutKey(i), data.effect.comboEffects[i].trailSettings.fadeOutTime);
-				writer.Value(groupName, MakeComboEffectTrailAlphaCurveKey(i), data.effect.comboEffects[i].trailSettings.alphaCurve);
-				writer.Value(groupName, MakeComboEffectTrailUvSpeedKey(i), data.effect.comboEffects[i].trailSettings.uvScrollSpeed);
-				writer.Value(groupName, MakeComboEffectTrailEmissionKey(i), data.effect.comboEffects[i].trailSettings.emissionStrength);
-				writer.Value(groupName, MakeComboEffectTrailFlipKey(i), data.effect.comboEffects[i].trailSettings.flipTexture);
-				writer.EnumValue(groupName, MakeComboEffectTrailResetKey(i), data.effect.comboEffects[i].trailSettings.resetMode, "TrailResetMode");
-				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(i), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
-				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(i), data.effect.comboEffects[i].trajectory.duration);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(i), data.effect.comboEffects[i].trajectory.point0);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint1Key(i), data.effect.comboEffects[i].trajectory.point1);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint2Key(i), data.effect.comboEffects[i].trajectory.point2);
-				writer.Value(groupName, MakeComboEffectTrajectoryPoint3Key(i), data.effect.comboEffects[i].trajectory.point3);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitCenterKey(i), data.effect.comboEffects[i].trajectory.orbitCenter);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitRadiusKey(i), data.effect.comboEffects[i].trajectory.orbitRadius);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitHeightKey(i), data.effect.comboEffects[i].trajectory.orbitHeight);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitStartAngleKey(i), data.effect.comboEffects[i].trajectory.orbitStartAngle);
-				writer.Value(groupName, MakeComboEffectTrajectoryOrbitEndAngleKey(i), data.effect.comboEffects[i].trajectory.orbitEndAngle);
+			for (std::size_t i = 0; i < comboEffectCount; ++i) {
+				// 保存対象を上限内に限定し、添字をsize_tで扱って符号変換を避ける。
+				const int effectIndex = static_cast<int>(i);
+				writer.Value(groupName, MakeComboEffectNameKey(effectIndex), data.effect.comboEffects[i].effectName);
+				writer.Value(groupName, MakeComboEffectParentKey(effectIndex), data.effect.comboEffects[i].parentName);
+				writer.EnumValue(groupName, MakeComboEffectTriggerTypeKey(effectIndex), data.effect.comboEffects[i].triggerType, "ComboEffectTriggerType");
+				writer.Value(groupName, MakeComboEffectStartTimeKey(effectIndex), data.effect.comboEffects[i].startTime);
+				writer.Value(groupName, MakeComboEffectEndTimeKey(effectIndex), data.effect.comboEffects[i].endTime);
+				writer.Value(groupName, MakeComboEffectIntervalKey(effectIndex), data.effect.comboEffects[i].interval);
+				writer.Value(groupName, MakeComboEffectOffsetKey(effectIndex), data.effect.comboEffects[i].offset);
+				writer.Value(groupName, MakeComboEffectPositionKey(effectIndex), data.effect.comboEffects[i].transformPosition);
+				writer.Value(groupName, MakeComboEffectRotationKey(effectIndex), data.effect.comboEffects[i].transformRotation);
+				writer.Value(groupName, MakeComboEffectScaleKey(effectIndex), data.effect.comboEffects[i].transformScale);
+				writer.Value(groupName, MakeComboEffectRequiredHitCountKey(effectIndex), data.effect.comboEffects[i].requiredHitCount);
+				writer.EnumValue(groupName, MakeComboEffectInputTypeKey(effectIndex), data.effect.comboEffects[i].inputType, "ComboEffectInputType");
+				writer.EnumValue(groupName, MakeComboEffectTypeKey(effectIndex), data.effect.comboEffects[i].type, "ComboEffectType");
+				writer.Value(groupName, MakeComboEffectTrailTextureKey(effectIndex), data.effect.comboEffects[i].trailTexture);
+				writer.Value(groupName, MakeComboEffectTrailColorKey(effectIndex), data.effect.comboEffects[i].trailColor.ToVector4());
+				writer.Value(groupName, MakeComboEffectTrailOffsetStartKey(effectIndex), data.effect.comboEffects[i].trailOffsetStart);
+				writer.Value(groupName, MakeComboEffectTrailOffsetEndKey(effectIndex), data.effect.comboEffects[i].trailOffsetEnd);
+				writer.Value(groupName, MakeComboEffectTrailLifeTimeKey(effectIndex), data.effect.comboEffects[i].trailLifeTime);
+				writer.Value(groupName, MakeComboEffectTrailMinDistanceKey(effectIndex), data.effect.comboEffects[i].trailSettings.minEmitDistance);
+				writer.Value(groupName, MakeComboEffectTrailMaxSegmentsKey(effectIndex), static_cast<int>(data.effect.comboEffects[i].trailSettings.maxSegmentCount));
+				writer.Value(groupName, MakeComboEffectTrailUseSplineKey(effectIndex), data.effect.comboEffects[i].trailSettings.useSpline);
+				writer.Value(groupName, MakeComboEffectTrailSubdivisionKey(effectIndex), data.effect.comboEffects[i].trailSettings.splineSubdivision);
+				writer.Value(groupName, MakeComboEffectTrailWidthStartKey(effectIndex), data.effect.comboEffects[i].trailSettings.widthStart);
+				writer.Value(groupName, MakeComboEffectTrailWidthEndKey(effectIndex), data.effect.comboEffects[i].trailSettings.widthEnd);
+				writer.Value(groupName, MakeComboEffectTrailFadeInKey(effectIndex), data.effect.comboEffects[i].trailSettings.fadeInTime);
+				writer.Value(groupName, MakeComboEffectTrailFadeOutKey(effectIndex), data.effect.comboEffects[i].trailSettings.fadeOutTime);
+				writer.Value(groupName, MakeComboEffectTrailAlphaCurveKey(effectIndex), data.effect.comboEffects[i].trailSettings.alphaCurve);
+				writer.Value(groupName, MakeComboEffectTrailUvSpeedKey(effectIndex), data.effect.comboEffects[i].trailSettings.uvScrollSpeed);
+				writer.Value(groupName, MakeComboEffectTrailEmissionKey(effectIndex), data.effect.comboEffects[i].trailSettings.emissionStrength);
+				writer.Value(groupName, MakeComboEffectTrailFlipKey(effectIndex), data.effect.comboEffects[i].trailSettings.flipTexture);
+				writer.EnumValue(groupName, MakeComboEffectTrailResetKey(effectIndex), data.effect.comboEffects[i].trailSettings.resetMode, "TrailResetMode");
+				writer.EnumValue(groupName, MakeComboEffectTrajectoryTypeKey(effectIndex), data.effect.comboEffects[i].trajectory.type, "TrailTrajectoryType");
+				writer.Value(groupName, MakeComboEffectTrajectoryDurationKey(effectIndex), data.effect.comboEffects[i].trajectory.duration);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint0Key(effectIndex), data.effect.comboEffects[i].trajectory.point0);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint1Key(effectIndex), data.effect.comboEffects[i].trajectory.point1);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint2Key(effectIndex), data.effect.comboEffects[i].trajectory.point2);
+				writer.Value(groupName, MakeComboEffectTrajectoryPoint3Key(effectIndex), data.effect.comboEffects[i].trajectory.point3);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitCenterKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitCenter);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitRadiusKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitRadius);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitHeightKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitHeight);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitStartAngleKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitStartAngle);
+				writer.Value(groupName, MakeComboEffectTrajectoryOrbitEndAngleKey(effectIndex), data.effect.comboEffects[i].trajectory.orbitEndAngle);
 			}
 		}
 		// 接続
@@ -1055,7 +1059,9 @@ namespace Combo {
 			data.effect.weaponDraw = globalVariables->GetValue<bool>(name, "エフェクト(武器表示)");
 			data.effect.comboEffects.clear();
 
-			const int comboEffectCount = globalVariables->GetValue<int>(name, kComboEffectCountKey);
+			// 保存ファイルが壊れていても、読込ループを有限件数に制限してエディタ停止を防ぐ。
+			const int savedComboEffectCount = globalVariables->GetValue<int>(name, kComboEffectCountKey);
+			const int comboEffectCount = (std::clamp)(savedComboEffectCount, 0, kMaxComboEffectCount);
 			for (int i = 0; i < comboEffectCount; ++i) {
 				ComboEffectEntry entry{};
 				entry.effectName = globalVariables->GetValue<std::string>(name, MakeComboEffectNameKey(i));
@@ -1079,7 +1085,9 @@ namespace Combo {
 					if (globalVariables->HasKey(name, MakeComboEffectTrailWidthStartKey(i))) {
                         if (globalVariables->HasKey(name, MakeComboEffectTrailMaxSegmentsKey(i))) {
                                 entry.trailSettings.minEmitDistance = globalVariables->GetValue<float>(name, MakeComboEffectTrailMinDistanceKey(i));
-                                entry.trailSettings.maxSegmentCount = static_cast<size_t>(globalVariables->GetValue<int>(name, MakeComboEffectTrailMaxSegmentsKey(i)));
+								// 負値をsize_tへ直接変換すると巨大値になるため、整数の段階で制限する。
+								const int savedMaxSegmentCount = globalVariables->GetValue<int>(name, MakeComboEffectTrailMaxSegmentsKey(i));
+								entry.trailSettings.maxSegmentCount = static_cast<size_t>((std::clamp)(savedMaxSegmentCount, 1, static_cast<int>(Engine::kMaxTrailSegmentCount)));
                                 entry.trailSettings.useSpline = globalVariables->GetValue<bool>(name, MakeComboEffectTrailUseSplineKey(i));
                                 entry.trailSettings.splineSubdivision = globalVariables->GetValue<int>(name, MakeComboEffectTrailSubdivisionKey(i));
                         }
