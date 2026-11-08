@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include <DirectXGame/engine/Audio/Audio.h>
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 
 void Engine::SceneManager::Init() {
 	fade_ = std::make_unique<Fade>();
@@ -16,6 +17,9 @@ void Engine::SceneManager::Init() {
 
 void Engine::SceneManager::Update()
 {
+	// シーン本体とフェード処理のCPU負荷を個別区間として記録する。
+	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Update");
+
 	// 通常シーン処理
 	if (scene_) {
 		scene_->AllUpdate();
@@ -89,12 +93,18 @@ void Engine::SceneManager::Update()
 
 void Engine::SceneManager::Draw3D()
 {
+	// 3Dシーン描画の呼び出し区間を記録する。
+	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Draw3D");
+
 	if (scene_)
 		scene_->Draw3D();
 }
 
 void Engine::SceneManager::Draw2D()
 {
+	// 2Dシーンとフェード描画の呼び出し区間を記録する。
+	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Draw2D");
+
 	if (scene_) {
 		scene_->AllDraw2D();
 	}

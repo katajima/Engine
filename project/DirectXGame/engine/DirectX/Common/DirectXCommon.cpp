@@ -1,4 +1,4 @@
-﻿#include "DirectXCommon.h"
+#include "DirectXCommon.h"
 #include<format>
 #include<cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -17,6 +17,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 
 void Engine::DirectXCommon::Initialize(WinApp* winApp) {
 
@@ -145,6 +146,9 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 
 void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
+	// コマンド発行とポストエフェクトを含むCPU描画区間を記録する。
+	ENGINE_CPU_PROFILE_SCOPE("DirectXCommon::Draw");
+
 	// 通常描画の前にライト視点の深度を書き出して、影判定に使えるようにする。
 	shadowMap_->Update(entity3DManager);
 	// インスタンシングとスキニングのシャドウ描画ではSRVを参照するため、通常描画前でもヒープを束縛しておく。
@@ -230,6 +234,9 @@ void Engine::DirectXCommon::UpdateFixFPS()
 
 void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
+	// DirectXとシーンの更新区間をフレーム内の主要区間として記録する。
+	ENGINE_CPU_PROFILE_SCOPE("DirectXCommon::Update");
+
 	// ライト
 	entity3DManager->GetLightManager()->Update();
 

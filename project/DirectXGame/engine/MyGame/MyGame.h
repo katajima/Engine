@@ -1,5 +1,6 @@
 #pragma once
 #include"Framework.h"
+#include "DirectXGame/engine/Base/Profiler/CpuProfilerWindow.h"
 
 namespace Engine {
 	/// <summary>
@@ -75,6 +76,8 @@ namespace Engine {
 		float fps = 0.0f;
 
 		DebugTimer debugTimer_;
+		// CPUプロファイル結果を表示するデバッグウィンドウ。
+		std::unique_ptr<CpuProfilerWindow> cpuProfilerWindow_ = nullptr;
 
 		std::unique_ptr<TorusPrimitive> primi = nullptr;
 		std::unique_ptr<PlanePrimitive> primiPlane = nullptr;

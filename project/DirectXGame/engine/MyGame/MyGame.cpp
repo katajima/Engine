@@ -1,7 +1,8 @@
-﻿#include "MyGame.h"
+#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
 const float Engine::MyGame::kDeltaTime_ = ConvertUtility::kDefaultDeltaTime;
@@ -24,6 +25,9 @@ void Engine::MyGame::Initialize() {
 	debugTimer_.StartTimer();
 
 	Framework::Initialize();
+
+	// ImGuiの準備後にCPUプロファイル表示を生成する。
+	cpuProfilerWindow_ = std::make_unique<CpuProfilerWindow>();
 
 
 	// 最初のシーン
@@ -72,6 +76,9 @@ void Engine::MyGame::Initialize() {
 
 void Engine::MyGame::Finalize()
 {
+	// プロファイラ表示はゲーム基盤より先に解放する。
+	cpuProfilerWindow_.reset();
+
 	// MyGameが直接所有するGPUリソース持ちのプリミティブを、DirectXCommon解放前に破棄する。
 	primi.reset();
 	primiPlane.reset();
@@ -90,6 +97,9 @@ void Engine::MyGame::Finalize()
 
 void Engine::MyGame::Update()
 {
+	// ゲーム固有の更新処理をフレーム階層へ記録する。
+	ENGINE_CPU_PROFILE_SCOPE("MyGame::Update");
+
 	entityManager_->Get3DLineCommon()->LineClear();
 	// ImGuiの受付開始
 	dxCommon_->GetImGuiManager()->Begin();
@@ -153,6 +163,10 @@ void Engine::MyGame::Update()
 #ifdef _DEBUG
 	dxCommon_->GetPostEffectManager()->RenderImGui();
 	dxCommon_->RenderShadowMapDebugImGui();
+	// 前フレームまでに確定したCPU計測結果をImGuiへ表示する。
+	if (cpuProfilerWindow_) {
+		cpuProfilerWindow_->Draw();
+	}
 #endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon_->GetImGuiManager()->End();
@@ -160,6 +174,9 @@ void Engine::MyGame::Update()
 
 void Engine::MyGame::Draw()
 {
+	// ゲーム描画処理をCPUプロファイルへ記録する。
+	ENGINE_CPU_PROFILE_SCOPE("MyGame::Draw");
+
 	dxCommon_->Draw(sceneManager_.get(), entityManager_.get());
 }
 

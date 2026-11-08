@@ -1,4 +1,5 @@
 #include"Framework.h"
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 
 void Engine::Framework::Initialize()
 {
@@ -82,6 +83,9 @@ void Engine::Framework::Finalize()
 
 void Engine::Framework::Update()
 {
+	// 基盤更新全体を計測し、音声・入力・メッセージ処理の負荷を確認できるようにする。
+	ENGINE_CPU_PROFILE_SCOPE("Framework::Update");
+
 	// 再生が完了した音声Voiceを毎フレーム回収する。
 	audioManager_->Update();
 
@@ -101,14 +105,25 @@ void Engine::Framework::Run()
 	// ゲームの初期化
 	Initialize();
 	while (true) {
+		// UpdateとDrawを含む1ループを1フレームとして記録する。
+		CpuProfiler::Get().BeginFrame();
+		{
+			// フレーム全体の時間を、UIの階層表示で最上位に表示する。
+			ENGINE_CPU_PROFILE_SCOPE("Frame");
+
 		// 毎フレーム更新
-		Update();
-		// 終了リクエストが来たら抜ける
+			Update();
+			// 終了リクエストが来たら描画をスキップしてフレームを閉じる。
+			if (!IsEndRequest()) {
+				// 描画
+				Draw();
+			}
+		}
+		// スコープの破棄後にフレームを確定し、次フレームのUIで参照できるようにする。
+		CpuProfiler::Get().EndFrame();
 		if (IsEndRequest()) {
 			break;
 		}
-		// 描画
-		Draw();
 	}
 	// ゲームの終了
 	Finalize();
