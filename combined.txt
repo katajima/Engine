@@ -495,8 +495,16 @@
     └──     └── ├── Logger.cpp
     └──     └── ├── Logger.h
     └──     └── ├── Profiler/
-    └──     └── └── ├── cpuProfiler.cpp
-    └──     └── └── └── cpuProfiler.h
+    └──     └── └── ├── CpuProfileData.cpp
+    └──     └── └── ├── CpuProfileData.h
+    └──     └── └── ├── CpuProfileHistory.cpp
+    └──     └── └── ├── CpuProfileHistory.h
+    └──     └── └── ├── CpuProfiler.cpp
+    └──     └── └── ├── CpuProfiler.h
+    └──     └── └── ├── CpuProfilerWindow.cpp
+    └──     └── └── ├── CpuProfilerWindow.h
+    └──     └── └── ├── ScopedCpuTimer.cpp
+    └──     └── └── └── ScopedCpuTimer.h
     └──     └── ├── Texture/
     └──     └── └── ├── TextureManager.cpp
     └──     └── └── └── TextureManager.h
@@ -53619,67 +53627,970 @@ namespace Logger
 
 
 ============================================================
-File Path: project/DirectXGame/engine/Base/Profiler/cpuProfiler.cpp
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfileData.cpp
 ============================================================
-﻿#include "cpuProfiler.h"
-
-CPUProfiler::CPUProfiler(){}
-
-CPUProfiler::~CPUProfiler(){}
-
-
-============================================================
-File Path: project/DirectXGame/engine/Base/Profiler/cpuProfiler.h
-============================================================
-﻿#pragma once
-#include <cstdint>
+#include "CpuProfileData.h"
 
 namespace Engine {
 
+	double ProfileEvent::GetDurationMilliseconds() const {
+		// 異常な終了時刻を受け取った場合でもUIの表示値を負にしない。
+		if (endTime <= startTime) {
+			return 0.0;
+		}
 
-	class ImGuiManager;
+		// マイクロ秒からミリ秒へ変換して、UIと統計処理で扱いやすくする。
+		return static_cast<double>(endTime - startTime) / 1000.0;
+	}
+
+	double ProfileFrame::GetDurationMilliseconds() const {
+		// フレームが未完了、または時計が逆転した場合は0ミリ秒を返す。
+		if (endTime <= startTime) {
+			return 0.0;
+		}
+
+		// マイクロ秒で保持しているフレーム時間をミリ秒へ変換する。
+		return static_cast<double>(endTime - startTime) / 1000.0;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfileData.h
+============================================================
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <string>
+#include <vector>
+
+namespace Engine {
+
+	// 親イベントを持たないイベントを表すインデックス値。
+	inline constexpr uint32_t kInvalidProfileEventIndex = std::numeric_limits<uint32_t>::max();
 
 	/// <summary>
-	/// 
+	/// CPU上で計測した1つのスコープの情報を保持する構造体。
 	/// </summary>
-	struct CpuProfileEvent
-	{
-		const char* name = nullptr;
-
+	struct ProfileEvent {
+		// ImGui表示や集計に使用するスコープ名。
+		std::string name{};
+		// 計測時計のエポックからの開始時刻（マイクロ秒）。
 		uint64_t startTime = 0;
+		// 計測時計のエポックからの終了時刻（マイクロ秒）。
 		uint64_t endTime = 0;
-
+		// このイベントを記録したOSスレッドID。
 		uint32_t threadId = 0;
+		// 階層表示用の深さ。
 		uint32_t depth = 0;
-		uint32_t parentIndex = UINT32_MAX;
+		// 親イベントのインデックス。ルートイベントの場合は無効値。
+		uint32_t parentIndex = kInvalidProfileEventIndex;
+
+		/// <summary>
+		/// イベントの実行時間をミリ秒で取得する。
+		/// </summary>
+		double GetDurationMilliseconds() const;
+	};
+
+	// 既存コードから参照される可能性がある旧名称を互換用に残す。
+	using CpuProfileEvent = ProfileEvent;
+
+	/// <summary>
+	/// 1フレーム分のCPUプロファイル結果を保持する構造体。
+	/// </summary>
+	struct ProfileFrame {
+		// プロファイラが割り当てた連番。
+		uint64_t frameNumber = 0;
+		// フレームの開始時刻（マイクロ秒）。
+		uint64_t startTime = 0;
+		// フレームの終了時刻（マイクロ秒）。
+		uint64_t endTime = 0;
+		// フレーム内で計測されたスコープ一覧。
+		std::vector<ProfileEvent> events{};
+
+		/// <summary>
+		/// フレーム全体の実行時間をミリ秒で取得する。
+		/// </summary>
+		double GetDurationMilliseconds() const;
 	};
 
 	/// <summary>
-	/// CPU のプロファイリングを行うクラス。コンストラクタで初期化し、デストラクタでリソースを解放する。
+	/// 保存済みフレームから算出した統計値を保持する構造体。
 	/// </summary>
-	class CPUProfiler
-	{
-	public:
-		CPUProfiler();
-		~CPUProfiler();
-
-		/// <summary>
-		/// 新しいフレームの開始処理を行う。
-		/// </summary>
-		void BeginFrame();
-
-
-		void EndFrame();
-		
-		void BeginScope();
-
-		void EndScope();
-
-	private:
-
+	struct ProfileStatistics {
+		// 統計対象にしたフレーム数。
+		size_t sampleCount = 0;
+		// 平均フレーム時間（ミリ秒）。
+		double averageFrameMilliseconds = 0.0;
+		// 最短フレーム時間（ミリ秒）。
+		double minimumFrameMilliseconds = 0.0;
+		// 最長フレーム時間（ミリ秒）。
+		double maximumFrameMilliseconds = 0.0;
+		// 平均フレーム時間から算出したFPS。
+		double framesPerSecond = 0.0;
 	};
 }
 
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfileHistory.cpp
+============================================================
+#include "CpuProfileHistory.h"
+
+#include <algorithm>
+#include <limits>
+#include <utility>
+
+namespace Engine {
+
+	CpuProfileHistory::CpuProfileHistory(size_t capacity) {
+		// 0件では最新フレームも表示できないため、最低1件は保持する。
+		capacity_ = std::max<size_t>(capacity, 1);
+	}
+
+	void CpuProfileHistory::AddFrame(ProfileFrame frame) {
+		// 履歴の追加と古いデータの削除を同じロック内で行う。
+		std::lock_guard<std::mutex> lock(mutex_);
+		frames_.push_back(std::move(frame));
+
+		// 設定された容量を超えた分だけ先頭から削除する。
+		while (frames_.size() > capacity_) {
+			frames_.pop_front();
+		}
+	}
+
+	void CpuProfileHistory::Clear() {
+		// UIが取得中のコピーと履歴の変更が競合しないように保護する。
+		std::lock_guard<std::mutex> lock(mutex_);
+		frames_.clear();
+	}
+
+	void CpuProfileHistory::SetCapacity(size_t capacity) {
+		// 容量0を指定されても履歴機能が停止しないように補正する。
+		std::lock_guard<std::mutex> lock(mutex_);
+		capacity_ = std::max<size_t>(capacity, 1);
+
+		// 縮小後の容量に収まるまで最も古いフレームを削除する。
+		while (frames_.size() > capacity_) {
+			frames_.pop_front();
+		}
+	}
+
+	size_t CpuProfileHistory::GetCapacity() const {
+		// 容量の読み取りも、UIと設定変更の競合を避けるために保護する。
+		std::lock_guard<std::mutex> lock(mutex_);
+		return capacity_;
+	}
+
+	std::vector<ProfileFrame> CpuProfileHistory::GetFrames() const {
+		// dequeの内容をvectorへコピーし、ロックを保持したまま外部へ返さない。
+		std::lock_guard<std::mutex> lock(mutex_);
+		return std::vector<ProfileFrame>(frames_.begin(), frames_.end());
+	}
+
+	std::optional<ProfileFrame> CpuProfileHistory::GetLatestFrame() const {
+		// 最新フレームが存在しない場合は空の結果を返す。
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (frames_.empty()) {
+			return std::nullopt;
+		}
+
+		// 履歴末尾のフレームをUI用にコピーする。
+		return frames_.back();
+	}
+
+	ProfileStatistics CpuProfileHistory::CalculateStatistics(size_t sampleCount) const {
+		// 統計中に履歴が更新されないよう、先に一貫したコピーを取得する。
+		const std::vector<ProfileFrame> frames = GetFrames();
+		ProfileStatistics statistics{};
+		if (frames.empty() || sampleCount == 0) {
+			return statistics;
+		}
+
+		// 指定件数を超える場合は最新側のフレームだけを集計する。
+		const size_t firstIndex = frames.size() > sampleCount ? frames.size() - sampleCount : 0;
+		const size_t count = frames.size() - firstIndex;
+		statistics.sampleCount = count;
+		statistics.minimumFrameMilliseconds = std::numeric_limits<double>::max();
+
+		// 対象フレームの合計・最小・最大を一度の走査で求める。
+		double totalMilliseconds = 0.0;
+		for (size_t index = firstIndex; index < frames.size(); ++index) {
+			const double durationMilliseconds = frames[index].GetDurationMilliseconds();
+			totalMilliseconds += durationMilliseconds;
+			statistics.minimumFrameMilliseconds = std::min(statistics.minimumFrameMilliseconds, durationMilliseconds);
+			statistics.maximumFrameMilliseconds = std::max(statistics.maximumFrameMilliseconds, durationMilliseconds);
+		}
+
+		// 平均値とFPSは、0除算を避けて算出する。
+		statistics.averageFrameMilliseconds = totalMilliseconds / static_cast<double>(count);
+		if (statistics.averageFrameMilliseconds > 0.0) {
+			statistics.framesPerSecond = 1000.0 / statistics.averageFrameMilliseconds;
+		}
+		return statistics;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfileHistory.h
+============================================================
+#pragma once
+
+#include "CpuProfileData.h"
+
+#include <cstddef>
+#include <deque>
+#include <mutex>
+#include <optional>
+#include <vector>
+
+namespace Engine {
+
+	/// <summary>
+	/// CPUプロファイルの直近フレームをリングバッファ形式で管理するクラス。
+	/// </summary>
+	class CpuProfileHistory {
+	public:
+		/// <summary>
+		/// 履歴管理を指定容量で初期化する。
+		/// </summary>
+		explicit CpuProfileHistory(size_t capacity = 240);
+
+		/// <summary>
+		/// 新しいフレームを履歴の末尾へ追加する。
+		/// </summary>
+		void AddFrame(ProfileFrame frame);
+
+		/// <summary>
+		/// 保存済みのフレームをすべて破棄する。
+		/// </summary>
+		void Clear();
+
+		/// <summary>
+		/// 保持する最大フレーム数を変更する。
+		/// </summary>
+		void SetCapacity(size_t capacity);
+
+		/// <summary>
+		/// 現在の最大保持数を取得する。
+		/// </summary>
+		size_t GetCapacity() const;
+
+		/// <summary>
+		/// 履歴をUIで安全に参照できるコピーとして取得する。
+		/// </summary>
+		std::vector<ProfileFrame> GetFrames() const;
+
+		/// <summary>
+		/// 最新フレームを取得する。履歴が空の場合は空のoptionalを返す。
+		/// </summary>
+		std::optional<ProfileFrame> GetLatestFrame() const;
+
+		/// <summary>
+		/// 直近フレームから統計値を算出する。
+		/// </summary>
+		ProfileStatistics CalculateStatistics(size_t sampleCount = 120) const;
+
+	private:
+		// 複数スレッドからの計測終了とUI参照を直列化するミューテックス。
+		mutable std::mutex mutex_;
+		// 古いフレームから順に削除する履歴コンテナ。
+		std::deque<ProfileFrame> frames_{};
+		// 履歴に保持するフレームの最大数。
+		size_t capacity_ = 240;
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfiler.cpp
+============================================================
+#include "CpuProfiler.h"
+
+#include <Windows.h>
+
+#include <algorithm>
+#include <chrono>
+#include <mutex>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace Engine {
+namespace {
+
+	// 1つのスレッドにおけるBeginScope/EndScopeの対応関係を保持するエントリ。
+	struct ScopeEntry {
+		// このスコープを開始したプロファイラ。
+		CpuProfiler* profiler = nullptr;
+		// 現在フレームのイベント配列内のインデックス。
+		uint32_t eventIndex = kInvalidProfileEventIndex;
+	};
+
+	// スコープの入れ子関係はスレッドごとに独立しているため、TLSで保持する。
+	thread_local std::vector<ScopeEntry> scopeStack;
+
+	// steady_clockの時刻をプロファイルデータで扱うマイクロ秒へ変換する。
+	uint64_t GetTimestampMicroseconds() {
+		using Clock = std::chrono::steady_clock;
+		using Microseconds = std::chrono::microseconds;
+		return static_cast<uint64_t>(std::chrono::duration_cast<Microseconds>(Clock::now().time_since_epoch()).count());
+	}
+
+	// 現在のWindowsスレッドIDをUIで識別しやすい整数へ変換する。
+	uint32_t GetCurrentThreadIdForProfile() {
+		return static_cast<uint32_t>(::GetCurrentThreadId());
+	}
+
+}
+
+CpuProfiler& CpuProfiler::Get() {
+	// 静的ローカル変数により、初回利用時に一度だけ生成する。
+	static CpuProfiler profiler;
+	return profiler;
+}
+
+CpuProfiler::CpuProfiler() = default;
+
+void CpuProfiler::BeginFrame() {
+	// 前フレームが閉じられずに残った場合も、データを失わずに確定させる。
+	if (IsFrameActive()) {
+		EndFrame();
+	}
+
+	// 計測が無効な場合はフレームバッファを作らず、呼び出しコストを抑える。
+	std::lock_guard<std::mutex> lock(mutex_);
+	if (!enabled_) {
+		frameActive_ = false;
+		return;
+	}
+
+	// 新しいフレームの識別子と開始時刻を設定する。
+	currentFrame_ = {};
+	currentFrame_.frameNumber = nextFrameNumber_++;
+	currentFrame_.startTime = GetTimestampMicroseconds();
+	frameActive_ = true;
+}
+
+void CpuProfiler::EndFrame() {
+	// 現在スレッドで閉じ忘れたスコープをフレーム終了時刻で補完する。
+	const uint64_t endTime = GetTimestampMicroseconds();
+	ProfileFrame finishedFrame{};
+	{
+		// フレームの終了・スコープ補完・移動を同じロックで行う。
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (!frameActive_) {
+			return;
+		}
+		currentFrame_.endTime = endTime;
+		for (ScopeEntry& scopeEntry : scopeStack) {
+			if (scopeEntry.profiler == this && scopeEntry.eventIndex != kInvalidProfileEventIndex && scopeEntry.eventIndex < currentFrame_.events.size()) {
+				currentFrame_.events[scopeEntry.eventIndex].endTime = endTime;
+			}
+		}
+
+		// 記録中のフレームを履歴追加用のローカル変数へ移動する。
+		finishedFrame = std::move(currentFrame_);
+		currentFrame_ = {};
+		frameActive_ = false;
+	}
+
+	// 閉じ忘れたスコープが次フレームの親にならないよう、現在スレッドの対応情報を破棄する。
+	scopeStack.erase(std::remove_if(scopeStack.begin(), scopeStack.end(), [this](const ScopeEntry& entry) {
+		return entry.profiler == this;
+	}), scopeStack.end());
+
+	// ロックを解放してから履歴側のロックを取得し、ロック順序の逆転を防ぐ。
+	history_.AddFrame(std::move(finishedFrame));
+}
+
+void CpuProfiler::BeginScope(std::string_view name) {
+	// EndScopeと対になるエントリを先に積み、無効時でもスタックを壊さない。
+	ScopeEntry scopeEntry{};
+	scopeEntry.profiler = this;
+
+	{
+		// フレーム状態とイベント追加を同じロックで保護する。
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (enabled_ && frameActive_ && currentFrame_.events.size() < kInvalidProfileEventIndex) {
+			ProfileEvent event{};
+			event.name = std::string(name);
+			event.startTime = GetTimestampMicroseconds();
+			event.threadId = GetCurrentThreadIdForProfile();
+
+			// 同じプロファイラの直近イベントを親にして階層を構築する。
+			for (auto iterator = scopeStack.rbegin(); iterator != scopeStack.rend(); ++iterator) {
+				if (iterator->profiler == this && iterator->eventIndex != kInvalidProfileEventIndex && iterator->eventIndex < currentFrame_.events.size()) {
+					event.parentIndex = iterator->eventIndex;
+					event.depth = currentFrame_.events[iterator->eventIndex].depth + 1;
+					break;
+				}
+			}
+
+			// 追加したイベントをEndScopeから参照できるように記録する。
+			currentFrame_.events.push_back(std::move(event));
+			scopeEntry.eventIndex = static_cast<uint32_t>(currentFrame_.events.size() - 1);
+		}
+	}
+
+	// イベントが無効でも対応するエントリを積み、RAIIの対称性を維持する。
+	scopeStack.push_back(scopeEntry);
+}
+
+void CpuProfiler::EndScope() {
+	// 対応するBeginScopeがない場合は不正な呼び出しとして無視する。
+	if (scopeStack.empty()) {
+		return;
+	}
+
+	// 最後に開始したスコープを取り出し、入れ子順を維持する。
+	const ScopeEntry scopeEntry = scopeStack.back();
+	scopeStack.pop_back();
+	if (scopeEntry.profiler != this || scopeEntry.eventIndex == kInvalidProfileEventIndex) {
+		return;
+	}
+
+	// イベントが終了した時点の時計を保存する。
+	const uint64_t endTime = GetTimestampMicroseconds();
+	std::lock_guard<std::mutex> lock(mutex_);
+	if (frameActive_ && scopeEntry.eventIndex < currentFrame_.events.size()) {
+		currentFrame_.events[scopeEntry.eventIndex].endTime = endTime;
+	}
+}
+
+void CpuProfiler::SetEnabled(bool enabled) {
+	// 有効状態の変更を計測開始・終了と競合させない。
+	std::lock_guard<std::mutex> lock(mutex_);
+	enabled_ = enabled;
+}
+
+bool CpuProfiler::IsEnabled() const {
+	// UIからの読み取りを計測側の書き込みと同期する。
+	std::lock_guard<std::mutex> lock(mutex_);
+	return enabled_;
+}
+
+bool CpuProfiler::IsFrameActive() const {
+	// フレーム状態の読み取りをミューテックスで保護する。
+	std::lock_guard<std::mutex> lock(mutex_);
+	return frameActive_;
+}
+
+void CpuProfiler::SetHistoryCapacity(size_t capacity) {
+	// 容量変更の責務を履歴管理クラスへ集約する。
+	history_.SetCapacity(capacity);
+}
+
+size_t CpuProfiler::GetHistoryCapacity() const {
+	// UIが現在値を表示できるよう、履歴管理クラスの容量を返す。
+	return history_.GetCapacity();
+}
+
+void CpuProfiler::ClearHistory() {
+	// 完了済みフレームだけを削除し、現在計測中のフレームには触れない。
+	history_.Clear();
+}
+
+std::vector<ProfileFrame> CpuProfiler::GetFrameHistory() const {
+	// 履歴管理クラスが作成したスナップショットをそのまま返す。
+	return history_.GetFrames();
+}
+
+std::optional<ProfileFrame> CpuProfiler::GetLatestFrame() const {
+	// 最新フレームの取得処理を履歴管理クラスへ委譲する。
+	return history_.GetLatestFrame();
+}
+
+ProfileStatistics CpuProfiler::GetStatistics(size_t sampleCount) const {
+	// 統計の算出条件を履歴管理クラスへ委譲する。
+	return history_.CalculateStatistics(sampleCount);
+}
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfiler.h
+============================================================
+#pragma once
+
+#include "CpuProfileData.h"
+#include "CpuProfileHistory.h"
+
+#include <cstddef>
+#include <mutex>
+#include <optional>
+#include <string_view>
+#include <vector>
+
+namespace Engine {
+
+	/// <summary>
+	/// CPUスコープをフレーム単位で記録するプロファイラ。
+	/// </summary>
+	class CpuProfiler {
+	public:
+		/// <summary>
+		/// アプリケーション全体で共有するプロファイラを取得する。
+		/// </summary>
+		static CpuProfiler& Get();
+
+		// コピーによって計測状態が分裂しないよう、コピーを禁止する。
+		CpuProfiler(const CpuProfiler&) = delete;
+		CpuProfiler& operator=(const CpuProfiler&) = delete;
+
+		/// <summary>
+		/// 新しいフレームの記録を開始する。
+		/// </summary>
+		void BeginFrame();
+
+		/// <summary>
+		/// 現在フレームの記録を完了し、履歴へ追加する。
+		/// </summary>
+		void EndFrame();
+
+		/// <summary>
+		/// 名前付きCPUスコープの記録を開始する。
+		/// </summary>
+		void BeginScope(std::string_view name);
+
+		/// <summary>
+		/// 現在スレッドで最後に開始したCPUスコープを完了する。
+		/// </summary>
+		void EndScope();
+
+		/// <summary>
+		/// 計測の有効・無効を設定する。
+		/// </summary>
+		void SetEnabled(bool enabled);
+
+		/// <summary>
+		/// 計測が有効かどうかを取得する。
+		/// </summary>
+		bool IsEnabled() const;
+
+		/// <summary>
+		/// 現在フレームの記録中かどうかを取得する。
+		/// </summary>
+		bool IsFrameActive() const;
+
+		/// <summary>
+		/// 保存する履歴の最大フレーム数を設定する。
+		/// </summary>
+		void SetHistoryCapacity(size_t capacity);
+
+		/// <summary>
+		/// 保存する履歴の最大フレーム数を取得する。
+		/// </summary>
+		size_t GetHistoryCapacity() const;
+
+		/// <summary>
+		/// 履歴をクリアする。
+		/// </summary>
+		void ClearHistory();
+
+		/// <summary>
+		/// 履歴をUI参照用のコピーとして取得する。
+		/// </summary>
+		std::vector<ProfileFrame> GetFrameHistory() const;
+
+		/// <summary>
+		/// 最新フレームを取得する。
+		/// </summary>
+		std::optional<ProfileFrame> GetLatestFrame() const;
+
+		/// <summary>
+		/// 履歴から統計値を取得する。
+		/// </summary>
+		ProfileStatistics GetStatistics(size_t sampleCount = 120) const;
+
+	private:
+		/// <summary>
+		/// プロファイラを既定設定で初期化する。
+		/// </summary>
+		CpuProfiler();
+
+		/// <summary>
+		/// 計測状態を終了する。
+		/// </summary>
+		~CpuProfiler() = default;
+
+		// フレーム状態とイベント配列を保護するミューテックス。
+		mutable std::mutex mutex_;
+		// 直近のBeginFrameからEndFrameまでに記録しているフレーム。
+		ProfileFrame currentFrame_{};
+		// 現在フレームが記録中かを示すフラグ。
+		bool frameActive_ = false;
+		// 計測機能全体の有効状態。
+		bool enabled_ = true;
+		// 次に割り当てるフレーム番号。
+		uint64_t nextFrameNumber_ = 0;
+		// 完了したフレームを保持する履歴管理クラス。
+		CpuProfileHistory history_{};
+	};
+
+	// 既存の大文字クラス名を使うコードとの互換用別名。
+	using CPUProfiler = CpuProfiler;
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfilerWindow.cpp
+============================================================
+#include "CpuProfilerWindow.h"
+
+#ifdef _DEBUG
+#include "imgui.h"
+
+#include <algorithm>
+#include <cmath>
+#include <string>
+
+namespace Engine {
+namespace {
+
+	// 階層の深さに応じて、タイムライン上のイベント色を変える。
+	ImU32 GetTimelineColor(uint32_t depth) {
+		const float hue = std::fmod(0.08f + static_cast<float>(depth) * 0.13f, 1.0f);
+		const ImVec4 color = ImColor::HSV(hue, 0.70f, 0.90f);
+		return ImGui::ColorConvertFloat4ToU32(color);
+	}
+
+}
+
+CpuProfilerWindow::CpuProfilerWindow(CpuProfiler& profiler) : profiler_(&profiler) {
+	// 表示対象プロファイラの参照を保存し、毎フレーム同じ履歴を表示する。
+}
+
+void CpuProfilerWindow::Draw() {
+	// ImGuiが未初期化のビルドでは、CPU計測本体だけを利用可能にする。
+	if (profiler_ == nullptr || !isOpen_) {
+		return;
+	}
+
+	// UIが計測結果をコピーしている間に履歴が変化しないよう、スナップショットを取得する。
+	const std::vector<ProfileFrame> frames = profiler_->GetFrameHistory();
+	if (!ImGui::Begin("CPU Profiler", &isOpen_)) {
+		ImGui::End();
+		return;
+	}
+
+	// 履歴が空でも設定項目は操作できるように、先に共通情報を描画する。
+	DrawStatistics(frames);
+	if (frames.empty()) {
+		ImGui::TextUnformatted("No completed frame yet.");
+		ImGui::End();
+		return;
+	}
+
+	// 履歴が縮小された場合に、選択インデックスを末尾へ補正する。
+	selectedFrameIndex_ = std::min(selectedFrameIndex_, frames.size() - 1);
+	int selectedFrame = static_cast<int>(selectedFrameIndex_);
+	if (ImGui::SliderInt("Frame", &selectedFrame, 0, static_cast<int>(frames.size() - 1))) {
+		selectedFrameIndex_ = static_cast<size_t>(selectedFrame);
+	}
+
+	// 選択フレームの詳細を3つの表示領域へ分けて描画する。
+	const ProfileFrame& frame = frames[selectedFrameIndex_];
+	if (ImGui::CollapsingHeader("Hierarchy", ImGuiTreeNodeFlags_DefaultOpen)) {
+		DrawHierarchy(frame);
+	}
+	if (ImGui::CollapsingHeader("Timeline", ImGuiTreeNodeFlags_DefaultOpen)) {
+		DrawTimeline(frame);
+	}
+	if (ImGui::CollapsingHeader("Frame Graph", ImGuiTreeNodeFlags_DefaultOpen)) {
+		DrawFrameGraph(frames);
+	}
+
+	ImGui::End();
+}
+
+bool CpuProfilerWindow::IsOpen() const {
+	// 呼び出し側がメニュー表示状態を確認できるように開閉状態を返す。
+	return isOpen_;
+}
+
+void CpuProfilerWindow::DrawStatistics(const std::vector<ProfileFrame>& frames) {
+	// 計測有効状態をUIへ反映し、チェック変更をプロファイラへ通知する。
+	bool enabled = profiler_->IsEnabled();
+	if (ImGui::Checkbox("Enabled", &enabled)) {
+		profiler_->SetEnabled(enabled);
+	}
+
+	// 履歴容量をUIから調整できるようにする。
+	int historyCapacity = static_cast<int>(profiler_->GetHistoryCapacity());
+	if (historyCapacity < 1) {
+		historyCapacity = 1;
+	}
+	if (ImGui::SliderInt("History Capacity", &historyCapacity, 1, 1000)) {
+		profiler_->SetHistoryCapacity(static_cast<size_t>(historyCapacity));
+	}
+
+	// 最新フレームを対象に統計情報を表示する。
+	const ProfileStatistics statistics = profiler_->GetStatistics();
+	ImGui::Text("Samples: %zu", statistics.sampleCount);
+	ImGui::Text("Frame: %.3f ms (%.1f FPS)", statistics.averageFrameMilliseconds, statistics.framesPerSecond);
+	ImGui::Text("Min / Max: %.3f / %.3f ms", statistics.minimumFrameMilliseconds, statistics.maximumFrameMilliseconds);
+	if (ImGui::Button("Clear History")) {
+		profiler_->ClearHistory();
+	}
+	ImGui::Separator();
+	(void)frames;
+}
+
+void CpuProfilerWindow::DrawHierarchy(const ProfileFrame& frame) {
+	// まず親を持たないイベントを描画し、子イベントは再帰関数へ委譲する。
+	for (uint32_t eventIndex = 0; eventIndex < frame.events.size(); ++eventIndex) {
+		if (frame.events[eventIndex].parentIndex == kInvalidProfileEventIndex) {
+			DrawHierarchyEvent(frame, eventIndex);
+		}
+	}
+}
+
+void CpuProfilerWindow::DrawHierarchyEvent(const ProfileFrame& frame, uint32_t eventIndex) {
+	// 不正な親参照があってもUIが停止しないよう、範囲外イベントは無視する。
+	if (eventIndex >= frame.events.size()) {
+		return;
+	}
+
+	const ProfileEvent& event = frame.events[eventIndex];
+	const std::string label = event.name + "  [" + std::to_string(event.GetDurationMilliseconds()) + " ms]";
+	ImGui::PushID(static_cast<int>(eventIndex));
+	const bool hasChild = std::any_of(frame.events.begin(), frame.events.end(), [eventIndex](const ProfileEvent& child) {
+		return child.parentIndex == eventIndex;
+	});
+
+	// 子を持つイベントはツリー、それ以外は葉として表示する。
+	if (hasChild) {
+		const bool isOpen = ImGui::TreeNode(label.c_str());
+		if (isOpen) {
+			for (uint32_t childIndex = 0; childIndex < frame.events.size(); ++childIndex) {
+				if (frame.events[childIndex].parentIndex == eventIndex) {
+					DrawHierarchyEvent(frame, childIndex);
+				}
+			}
+			ImGui::TreePop();
+		}
+	} else {
+		ImGui::BulletText("%s", label.c_str());
+	}
+	ImGui::PopID();
+}
+
+void CpuProfilerWindow::DrawTimeline(const ProfileFrame& frame) {
+	// 描画領域とフレーム時間から、イベント時刻をピクセル位置へ変換する。
+	const float width = std::max(ImGui::GetContentRegionAvail().x, 1.0f);
+	const float rowHeight = 18.0f;
+	const double totalMilliseconds = std::max(frame.GetDurationMilliseconds(), 0.001);
+	const float height = std::max(rowHeight, rowHeight * static_cast<float>(frame.events.size()));
+	const ImVec2 origin = ImGui::GetCursorScreenPos();
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+	// 背景領域を確保して、後続のImGuiコントロールが重ならないようにする。
+	ImGui::Dummy(ImVec2(width, height));
+	for (size_t eventIndex = 0; eventIndex < frame.events.size(); ++eventIndex) {
+		const ProfileEvent& event = frame.events[eventIndex];
+		const double startMilliseconds = event.startTime > frame.startTime ? static_cast<double>(event.startTime - frame.startTime) / 1000.0 : 0.0;
+		const double endMilliseconds = event.endTime > frame.startTime ? static_cast<double>(event.endTime - frame.startTime) / 1000.0 : startMilliseconds;
+		const float left = origin.x + static_cast<float>(std::min(startMilliseconds / totalMilliseconds, 1.0) * width);
+		const float right = origin.x + static_cast<float>(std::min(endMilliseconds / totalMilliseconds, 1.0) * width);
+		const float top = origin.y + rowHeight * static_cast<float>(eventIndex);
+
+		// つぶれたイベントも見えるよう、最低幅を1ピクセル確保する。
+		drawList->AddRectFilled(ImVec2(left, top), ImVec2(std::max(right, left + 1.0f), top + rowHeight - 2.0f), GetTimelineColor(event.depth));
+		if (right - left > 40.0f) {
+			drawList->AddText(ImVec2(left + 3.0f, top + 1.0f), IM_COL32_WHITE, event.name.c_str());
+		}
+	}
+}
+
+void CpuProfilerWindow::DrawFrameGraph(const std::vector<ProfileFrame>& frames) {
+	// PlotLinesへ渡す連続配列を履歴から構築する。
+	std::vector<float> durations;
+	durations.reserve(frames.size());
+	float maximumMilliseconds = 1.0f;
+	for (const ProfileFrame& frame : frames) {
+		const float durationMilliseconds = static_cast<float>(frame.GetDurationMilliseconds());
+		durations.push_back(durationMilliseconds);
+		maximumMilliseconds = std::max(maximumMilliseconds, durationMilliseconds);
+	}
+
+	// 履歴が存在する場合だけフレームグラフを描画する。
+	if (!durations.empty()) {
+		ImGui::PlotLines("Frame Time (ms)", durations.data(), static_cast<int>(durations.size()), 0, nullptr, 0.0f, maximumMilliseconds * 1.1f, ImVec2(-1.0f, 100.0f));
+	}
+}
+}
+#else
+
+namespace Engine {
+
+CpuProfilerWindow::CpuProfilerWindow(CpuProfiler& profiler) : profiler_(&profiler) {
+	// Releaseビルドでも型のライフサイクルを成立させる。
+}
+
+void CpuProfilerWindow::Draw() {
+	// ImGui表示はデバッグビルドだけで行う。
+}
+
+bool CpuProfilerWindow::IsOpen() const {
+	// Releaseビルドでは表示対象外のため、常に閉じていると扱う。
+	return false;
+}
+
+void CpuProfilerWindow::DrawStatistics(const std::vector<ProfileFrame>&) {
+	// ReleaseビルドではImGui表示を無効化する。
+}
+
+void CpuProfilerWindow::DrawHierarchy(const ProfileFrame&) {
+	// ReleaseビルドではImGui表示を無効化する。
+}
+
+void CpuProfilerWindow::DrawHierarchyEvent(const ProfileFrame&, uint32_t) {
+	// ReleaseビルドではImGui表示を無効化する。
+}
+
+void CpuProfilerWindow::DrawTimeline(const ProfileFrame&) {
+	// ReleaseビルドではImGui表示を無効化する。
+}
+
+void CpuProfilerWindow::DrawFrameGraph(const std::vector<ProfileFrame>&) {
+	// ReleaseビルドではImGui表示を無効化する。
+}
+}
+#endif
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/CpuProfilerWindow.h
+============================================================
+#pragma once
+
+#include "CpuProfiler.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+namespace Engine {
+
+	/// <summary>
+	/// CPUプロファイルの統計・階層・タイムライン・フレームグラフをImGuiへ描画するクラス。
+	/// </summary>
+	class CpuProfilerWindow {
+	public:
+		/// <summary>
+		/// 指定されたプロファイラを表示対象として初期化する。
+		/// </summary>
+		explicit CpuProfilerWindow(CpuProfiler& profiler = CpuProfiler::Get());
+
+		/// <summary>
+		/// プロファイルウィンドウを1フレーム分描画する。
+		/// </summary>
+		void Draw();
+
+		/// <summary>
+		/// ウィンドウが表示状態かどうかを取得する。
+		/// </summary>
+		bool IsOpen() const;
+
+	private:
+		/// <summary>
+		/// 統計値と履歴設定を描画する。
+		/// </summary>
+		void DrawStatistics(const std::vector<ProfileFrame>& frames);
+
+		/// <summary>
+		/// 選択フレームのイベント階層を描画する。
+		/// </summary>
+		void DrawHierarchy(const ProfileFrame& frame);
+
+		/// <summary>
+		/// イベントを再帰的に描画する。
+		/// </summary>
+		void DrawHierarchyEvent(const ProfileFrame& frame, uint32_t eventIndex);
+
+		/// <summary>
+		/// 選択フレームの時間軸を描画する。
+		/// </summary>
+		void DrawTimeline(const ProfileFrame& frame);
+
+		/// <summary>
+		/// 履歴のフレーム時間グラフを描画する。
+		/// </summary>
+		void DrawFrameGraph(const std::vector<ProfileFrame>& frames);
+
+		// 実際に計測データを供給するプロファイラへの参照。
+		CpuProfiler* profiler_ = nullptr;
+		// ImGui上で現在表示しているフレームの履歴内インデックス。
+		size_t selectedFrameIndex_ = 0;
+		// ウィンドウの開閉状態。
+		bool isOpen_ = true;
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/ScopedCpuTimer.cpp
+============================================================
+#include "ScopedCpuTimer.h"
+
+namespace Engine {
+
+	ScopedCpuTimer::ScopedCpuTimer(std::string_view name, CpuProfiler& profiler) : profiler_(&profiler) {
+		// 計測の有効状態にかかわらずBeginScopeを呼び、TLSの対応関係を揃える。
+		profiler_->BeginScope(name);
+	}
+
+	ScopedCpuTimer::~ScopedCpuTimer() {
+		// 生成時に保存したプロファイラへ、スコープの終了を通知する。
+		if (profiler_ != nullptr) {
+			profiler_->EndScope();
+		}
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h
+============================================================
+#pragma once
+
+#include "CpuProfiler.h"
+
+#include <string_view>
+
+namespace Engine {
+
+	/// <summary>
+	/// スコープの生成と破棄を利用してCPU計測を自動終了するRAIIクラス。
+	/// </summary>
+	class ScopedCpuTimer {
+	public:
+		/// <summary>
+		/// 指定名のCPUスコープを開始する。
+		/// </summary>
+		explicit ScopedCpuTimer(std::string_view name, CpuProfiler& profiler = CpuProfiler::Get());
+
+		/// <summary>
+		/// 対応するCPUスコープを終了する。
+		/// </summary>
+		~ScopedCpuTimer();
+
+		// コピーによる二重終了を防止する。
+		ScopedCpuTimer(const ScopedCpuTimer&) = delete;
+		ScopedCpuTimer& operator=(const ScopedCpuTimer&) = delete;
+
+	private:
+		// 計測終了を通知する対象プロファイラ。
+		CpuProfiler* profiler_ = nullptr;
+	};
+}
+
+// 同じ関数内で複数のスコープを置けるよう、行番号を変数名に利用する。
+#define ENGINE_CPU_PROFILE_SCOPE(name) ::Engine::ScopedCpuTimer cpuProfileScope##__LINE__(name)
 
 
 ============================================================
@@ -61356,7 +62267,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/DirectX/Common/DirectXCommon.cpp
 ============================================================
-﻿#include "DirectXCommon.h"
+#include "DirectXCommon.h"
 #include<format>
 #include<cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -61375,6 +62286,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 
 void Engine::DirectXCommon::Initialize(WinApp* winApp) {
 
@@ -61503,6 +62415,9 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 
 void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
+	// コマンド発行とポストエフェクトを含むCPU描画区間を記録する。
+	ENGINE_CPU_PROFILE_SCOPE("DirectXCommon::Draw");
+
 	// 通常描画の前にライト視点の深度を書き出して、影判定に使えるようにする。
 	shadowMap_->Update(entity3DManager);
 	// インスタンシングとスキニングのシャドウ描画ではSRVを参照するため、通常描画前でもヒープを束縛しておく。
@@ -61588,6 +62503,9 @@ void Engine::DirectXCommon::UpdateFixFPS()
 
 void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
+	// DirectXとシーンの更新区間をフレーム内の主要区間として記録する。
+	ENGINE_CPU_PROFILE_SCOPE("DirectXCommon::Update");
+
 	// ライト
 	entity3DManager->GetLightManager()->Update();
 
@@ -87146,6 +88064,7 @@ namespace Engine {
 File Path: project/DirectXGame/engine/MyGame/Framework.cpp
 ============================================================
 #include"Framework.h"
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 
 void Engine::Framework::Initialize()
 {
@@ -87229,6 +88148,9 @@ void Engine::Framework::Finalize()
 
 void Engine::Framework::Update()
 {
+	// 基盤更新全体を計測し、音声・入力・メッセージ処理の負荷を確認できるようにする。
+	ENGINE_CPU_PROFILE_SCOPE("Framework::Update");
+
 	// 再生が完了した音声Voiceを毎フレーム回収する。
 	audioManager_->Update();
 
@@ -87248,14 +88170,25 @@ void Engine::Framework::Run()
 	// ゲームの初期化
 	Initialize();
 	while (true) {
+		// UpdateとDrawを含む1ループを1フレームとして記録する。
+		CpuProfiler::Get().BeginFrame();
+		{
+			// フレーム全体の時間を、UIの階層表示で最上位に表示する。
+			ENGINE_CPU_PROFILE_SCOPE("Frame");
+
 		// 毎フレーム更新
-		Update();
-		// 終了リクエストが来たら抜ける
+			Update();
+			// 終了リクエストが来たら描画をスキップしてフレームを閉じる。
+			if (!IsEndRequest()) {
+				// 描画
+				Draw();
+			}
+		}
+		// スコープの破棄後にフレームを確定し、次フレームのUIで参照できるようにする。
+		CpuProfiler::Get().EndFrame();
 		if (IsEndRequest()) {
 			break;
 		}
-		// 描画
-		Draw();
 	}
 	// ゲームの終了
 	Finalize();
@@ -87361,10 +88294,11 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/MyGame.cpp
 ============================================================
-﻿#include "MyGame.h"
+#include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Utility/ConvertUtility.h"
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
 const float Engine::MyGame::kDeltaTime_ = ConvertUtility::kDefaultDeltaTime;
@@ -87387,6 +88321,9 @@ void Engine::MyGame::Initialize() {
 	debugTimer_.StartTimer();
 
 	Framework::Initialize();
+
+	// ImGuiの準備後にCPUプロファイル表示を生成する。
+	cpuProfilerWindow_ = std::make_unique<CpuProfilerWindow>();
 
 
 	// 最初のシーン
@@ -87435,6 +88372,9 @@ void Engine::MyGame::Initialize() {
 
 void Engine::MyGame::Finalize()
 {
+	// プロファイラ表示はゲーム基盤より先に解放する。
+	cpuProfilerWindow_.reset();
+
 	// MyGameが直接所有するGPUリソース持ちのプリミティブを、DirectXCommon解放前に破棄する。
 	primi.reset();
 	primiPlane.reset();
@@ -87453,6 +88393,9 @@ void Engine::MyGame::Finalize()
 
 void Engine::MyGame::Update()
 {
+	// ゲーム固有の更新処理をフレーム階層へ記録する。
+	ENGINE_CPU_PROFILE_SCOPE("MyGame::Update");
+
 	entityManager_->Get3DLineCommon()->LineClear();
 	// ImGuiの受付開始
 	dxCommon_->GetImGuiManager()->Begin();
@@ -87516,6 +88459,10 @@ void Engine::MyGame::Update()
 #ifdef _DEBUG
 	dxCommon_->GetPostEffectManager()->RenderImGui();
 	dxCommon_->RenderShadowMapDebugImGui();
+	// 前フレームまでに確定したCPU計測結果をImGuiへ表示する。
+	if (cpuProfilerWindow_) {
+		cpuProfilerWindow_->Draw();
+	}
 #endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon_->GetImGuiManager()->End();
@@ -87523,6 +88470,9 @@ void Engine::MyGame::Update()
 
 void Engine::MyGame::Draw()
 {
+	// ゲーム描画処理をCPUプロファイルへ記録する。
+	ENGINE_CPU_PROFILE_SCOPE("MyGame::Draw");
+
 	dxCommon_->Draw(sceneManager_.get(), entityManager_.get());
 }
 
@@ -87675,6 +88625,7 @@ File Path: project/DirectXGame/engine/MyGame/MyGame.h
 ============================================================
 #pragma once
 #include"Framework.h"
+#include "DirectXGame/engine/Base/Profiler/CpuProfilerWindow.h"
 
 namespace Engine {
 	/// <summary>
@@ -87750,6 +88701,8 @@ namespace Engine {
 		float fps = 0.0f;
 
 		DebugTimer debugTimer_;
+		// CPUプロファイル結果を表示するデバッグウィンドウ。
+		std::unique_ptr<CpuProfilerWindow> cpuProfilerWindow_ = nullptr;
 
 		std::unique_ptr<TorusPrimitive> primi = nullptr;
 		std::unique_ptr<PlanePrimitive> primiPlane = nullptr;
@@ -95804,6 +96757,7 @@ File Path: project/DirectXGame/engine/scene/SceneManager.cpp
 #include <algorithm>
 
 #include <DirectXGame/engine/Audio/Audio.h>
+#include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 
 void Engine::SceneManager::Init() {
 	fade_ = std::make_unique<Fade>();
@@ -95813,6 +96767,9 @@ void Engine::SceneManager::Init() {
 
 void Engine::SceneManager::Update()
 {
+	// シーン本体とフェード処理のCPU負荷を個別区間として記録する。
+	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Update");
+
 	// 通常シーン処理
 	if (scene_) {
 		scene_->AllUpdate();
@@ -95886,12 +96843,18 @@ void Engine::SceneManager::Update()
 
 void Engine::SceneManager::Draw3D()
 {
+	// 3Dシーン描画の呼び出し区間を記録する。
+	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Draw3D");
+
 	if (scene_)
 		scene_->Draw3D();
 }
 
 void Engine::SceneManager::Draw2D()
 {
+	// 2Dシーンとフェード描画の呼び出し区間を記録する。
+	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Draw2D");
+
 	if (scene_) {
 		scene_->AllDraw2D();
 	}
@@ -100351,7 +101314,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
-    <ClCompile Include="DirectXGame\engine\Base\Profiler\cpuProfiler.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfiler.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfileData.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfileHistory.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\ScopedCpuTimer.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfilerWindow.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraController.cpp" />
@@ -100800,7 +101767,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
-    <ClInclude Include="DirectXGame\engine\Base\Profiler\cpuProfiler.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfiler.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfileData.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfileHistory.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\ScopedCpuTimer.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfilerWindow.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraCollision.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraFollow.h" />
@@ -101163,6 +102134,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
+
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -102288,7 +103260,19 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\Profiler\cpuProfiler.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfiler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfileData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfileHistory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\ScopedCpuTimer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Profiler\CpuProfilerWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -103595,7 +104579,19 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\EffectCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Profiler\cpuProfiler.h">
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfiler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfileData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfileHistory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\ScopedCpuTimer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Profiler\CpuProfilerWindow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -103608,6 +104604,7 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
+
 
 ============================================================
 File Path: project/main.cpp
