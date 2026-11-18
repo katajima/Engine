@@ -1,10 +1,10 @@
 #include "ParticleManager.h"
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 
@@ -302,7 +302,9 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Engine::ParticleManager::Update() {
+void Engine::ParticleManager::Update() { Update(dxCommon->GetDeltaTime()); }
+
+void Engine::ParticleManager::Update(float deltaTime) {
 
 	if (particleGroups.empty()) {
 		return;
@@ -315,7 +317,7 @@ void Engine::ParticleManager::Update() {
 	ImGui::End();
 #endif // _DEBUG
 
-	float deltaTime = MyGame::GameTime(); // 毎フレーム一定時間と仮定
+
 
 	std::for_each(std::execution::par, particleGroups.begin(), particleGroups.end(),
 		[&](auto& pair) {
@@ -778,3 +780,5 @@ void Engine::ParticleManager::BlendMuliply()
 #pragma endregion // ブレンド
 
 #pragma endregion // パイプライン関係
+
+float Engine::ParticleManager::GetDeltaTime() const { return dxCommon->GetDeltaTime(); }

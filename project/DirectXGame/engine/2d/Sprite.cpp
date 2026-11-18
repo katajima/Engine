@@ -1,8 +1,8 @@
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
 #include"Sprite.h"
 #include"SpriteCommon.h"
 #include <iostream>
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 
 void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad)
 {
@@ -140,11 +140,13 @@ void Engine::Sprite::Update()
 	material->GPUData();
 }
 
-void Engine::Sprite::UpdateAmimetion(float time)
-{
-	animeTime_ += MyGame::GameTime();
+void Engine::Sprite::UpdateAmimetion(float time) { UpdateAmimetion(time, spriteCommon->GetDxCommon()->GetDeltaTime()); }
 
-	if (animeTime_ >= time) {
+void Engine::Sprite::UpdateAmimetion(float time, float deltaTime)
+{
+	const uint32_t frameCount = ConsumeEmissionBursts(animeTime_, deltaTime, time);
+
+	for (uint32_t frame = 0; frame < frameCount; ++frame) {
 		textureLeftTop.x += animeSize_.x;
 		animeNum_.x++;
 
@@ -160,7 +162,6 @@ void Engine::Sprite::UpdateAmimetion(float time)
 				animeNum_.y = 0;
 			}
 		}
-		animeTime_ = 0;
 	}
 	Update();
 }

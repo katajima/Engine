@@ -1,6 +1,6 @@
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
 #include "BaseParticleEmitter.h"
 // engine
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
@@ -74,7 +74,9 @@ void Engine::BaseParticleEmitter::Emit()
 }
 
 
-void Engine::BaseParticleEmitter::Update() {
+void Engine::BaseParticleEmitter::Update() { Update(particleManager->GetDeltaTime()); }
+
+void Engine::BaseParticleEmitter::Update(float deltaTime) {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	ApplyGlobalVariables(); // グローバル変数適用
@@ -173,10 +175,9 @@ void Engine::BaseParticleEmitter::Update() {
 	UpdateUnique();
 
 	// 出現
-	frequencyTime_ += MyGame::GameTime();
-	if (frequency_ <= frequencyTime_) {
+	const uint32_t burstCount = ConsumeEmissionBursts(frequencyTime_, deltaTime, frequency_);
+	for (uint32_t burst = 0; burst < burstCount; ++burst) {
 		Emit();
-		frequencyTime_ -= frequency_;
 	}
 	if (isLine) {
 		DrawEmitterLine();

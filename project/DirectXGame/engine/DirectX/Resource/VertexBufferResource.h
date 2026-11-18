@@ -22,7 +22,10 @@ namespace Engine {
 		// 生成
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> vertex, size_t num = 1)
 		{
+			if (data_ && resource_) resource_->Unmap(0, nullptr);
+			if (resource_) dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 			this->dxCommon = dxCommon;	// DX共通クラス
+			num = (std::max)(size_t{ 1 }, (std::max)(num, vertex.size()));
 
 			/// <summary>
 			/// リソース生成
@@ -37,8 +40,8 @@ namespace Engine {
 			/// </summary>
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
-			std::memcpy(Data(), vertex.data(), sizeof(Type) * num);
-			resource_->Unmap(0, nullptr);  // 🔧 安全なタイミングでアンマップ
+			if (!vertex.empty()) std::memcpy(Data(), vertex.data(), sizeof(Type) * vertex.size());
+			// SpriteはData()へ直接書くため、リソースの使用中はMapを維持する。
 
 			/// <summary>
 			/// リソースの先頭のアドレスを作成する
@@ -62,6 +65,9 @@ namespace Engine {
 					/// <summary>
 					/// バッファが不足している場合、再割り当て
 					/// </summary>
+					resource_->Unmap(0, nullptr);
+					data_ = nullptr;
+					dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 					resource_.Reset();
 
 					D3D12_HEAP_PROPERTIES heapProps = {};
@@ -74,6 +80,7 @@ namespace Engine {
 						// エラー処理
 						return;
 					}
+					resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 					/// <summary>
 					/// バッファビューの更新
@@ -84,10 +91,8 @@ namespace Engine {
 				}
 
 				// データのコピー
-				Type* data;
-				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data));
-				memcpy(data, vertex.data(), requiredSize);
-				resource_->Unmap(0, nullptr);
+				if (!vertex.empty()) memcpy(data_, vertex.data(), requiredSize);
+				bufferView.SizeInBytes = UINT(requiredSize);
 			}
 		}
 

@@ -124,7 +124,8 @@ private:
 				}
 			}
 
-			// 最後に完了したワーカーが待機中のRunを起こす。
+			// 条件確認と待機開始の間に完了通知を失わないよう、同じmutexで更新する。
+			std::lock_guard<std::mutex> lock(mutex_);
 			if (remainingWorkers_.fetch_sub(1) == 1) {
 				completedCondition_.notify_one();
 			}

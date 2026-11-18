@@ -1,4 +1,6 @@
-﻿#include "ModelManager.h"
+#include "ModelManager.h"
+#include "ModelAssetIdentity.h"
+#include <stdexcept>
 #include"ModelCommon.h"
 #include"Model.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
@@ -51,46 +53,50 @@ void Engine::ModelManager::Finalize()
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
 {
+	const auto key = ModelAssetIdentity::Normalize(filePath, dire);
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
 		// 読み込み済みモデルを検索
-		if (models.contains(filePath)) {
+		if (models.contains(key)) {
 			return;
 		}
 	}
 
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
+	const std::filesystem::path sourcePath(key);
+    model->Initialize(dxCommon, modelCommon_.get(), sourcePath.parent_path().string(), sourcePath.filename().string(), "", &gpuResourceMutex_);
 
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
 		// モデルをmapコンテナに格納
-		models.insert(std::make_pair(filePath, std::move(model)));
+		models.insert(std::make_pair(key, std::move(model)));
 	}
 }
 
 void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
 {
+	const auto key = ModelAssetIdentity::Normalize(filePath, dire);
 	// すでにロード済みかロックを使って確認
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
-		if (models.contains(filePath) || loadingModelKeys_.contains(filePath)) {
+		if (models.contains(key) || loadingModelKeys_.contains(key)) {
 			return;
 		}
-		loadingModelKeys_.insert(filePath);
+		loadingModelKeys_.insert(key);
 	}
 
 	// 非同期に読み込み開始
-	std::future<void> future = std::async(std::launch::async, [this, filePath, dire]() {
+	std::future<void> future = std::async(std::launch::async, [this, filePath, dire, key]() {
 		std::unique_ptr<Model> model = std::make_unique<Model>();
 		// Assimp解析は各スレッドで進め、GPU共有リソースだけModel内部で短くロックする。
-		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
+		const std::filesystem::path sourcePath(key);
+        model->Initialize(dxCommon, modelCommon_.get(), sourcePath.parent_path().string(), sourcePath.filename().string(), "", &gpuResourceMutex_);
 
 		{
 			std::lock_guard<std::mutex> lock(modelsMutex_);
-			models.insert(std::make_pair(filePath, std::move(model)));
-			loadingModelKeys_.erase(filePath);
+			models.insert(std::make_pair(key, std::move(model)));
+			loadingModelKeys_.erase(key);
 		}
 		});
 
@@ -120,17 +126,10 @@ void Engine::ModelManager::WaitAllLoadFinished()
 
 Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 {
-	std::lock_guard<std::mutex> lock(modelsMutex_);
-	// 読み込み済みモデルを検索
-	if (models.contains(filePath)) {
-		// 読み込みモデルを戻り値としてreturn
-		return models.at(filePath).get();
-	}
-
-	// ファイル名一致なし
-	return nullptr;
+    std::lock_guard<std::mutex> lock(modelsMutex_);
+    const auto found = ModelAssetIdentity::Find(models, filePath);
+    return found == models.end() ? nullptr : found->second.get();
 }
-
 bool Engine::ModelManager::IsLoading() const
 {
 	std::lock_guard<std::mutex> futureLock(futuresMutex_);

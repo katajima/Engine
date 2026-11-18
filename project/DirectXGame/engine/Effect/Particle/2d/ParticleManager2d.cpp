@@ -2,7 +2,6 @@
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Material/Material.h"
 
 #include "imgui.h"
@@ -29,8 +28,10 @@ void Engine::ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManage
 
 
 // 更新
-void Engine::ParticleManager2d::Update() {
-	float deltaTime = MyGame::GameTime(); // 毎フレーム一定時間と仮定
+void Engine::ParticleManager2d::Update() { Update(dxCommon->GetDeltaTime()); }
+
+void Engine::ParticleManager2d::Update(float deltaTime) {
+
 
 
 	std::for_each(std::execution::par, particleGroups.begin(), particleGroups.end(),
@@ -190,3 +191,5 @@ void Engine::ParticleManager2d::CreateGraphicsPipeline() {
 }
 
 
+
+float Engine::ParticleManager2d::GetDeltaTime() const { return dxCommon->GetDeltaTime(); }

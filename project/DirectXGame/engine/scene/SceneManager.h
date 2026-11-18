@@ -28,7 +28,9 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 2d描画
 		/// </summary>

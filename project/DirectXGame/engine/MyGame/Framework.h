@@ -37,7 +37,9 @@ namespace Engine {
 		/// <summary>
 		/// 毎フレーム更新
 		/// </summary>
-		virtual void Update();
+		/// @brief 実測された経過時間でフレームを更新する。
+		/// @param deltaTime 前フレームから経過した実時間（秒）。
+		virtual void Update(float deltaTime);
 
 		/// <summary>
 		/// 描画

@@ -1,8 +1,8 @@
-﻿#include "ParticleData.h"
+#include "ParticleData.h"
 
 #include <DirectXGame/engine/Base/WinApp/WinApp.h>
 #include <DirectXGame/engine/Math/Random.h>
-#include <DirectXGame/engine/MyGame/MyGame.h>
+
 
 Matrix4x4 Engine::ParticleFunction::Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
 {
@@ -112,7 +112,7 @@ void Engine::ParticleFunction::Effect(ParticleGroup& group, std::list<Particle>:
 		else if (particleIterator->direction == 3) {// ←
 			noize.y = 0;
 		}
-		particleIterator->velocity += noize * MyGame::GameTime();
+		particleIterator->velocity += noize * deltaTime;
 	}
 
 	// 透過するか

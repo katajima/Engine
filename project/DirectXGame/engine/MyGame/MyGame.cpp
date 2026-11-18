@@ -5,13 +5,14 @@
 #include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
-const float Engine::MyGame::kDeltaTime_ = ConvertUtility::kDefaultDeltaTime;
+float Engine::MyGame::mLegacyGameDeltaTime = 0.0f;
+float Engine::MyGame::mLegacyUnscaledDeltaTime = 0.0f;
 float Engine::MyGame::kTimeSpeed_ = 1.0f;
 float Engine::MyGame::nowTime = 0.0f;
 
 void Engine::MyGame::SetTimeScale(float timeScale) {
 	// スロー演出などから呼ばれても破綻しないよう、時間倍率を安全な範囲に丸める
-	if (timeScale < 0.0f) {
+	if (!std::isfinite(timeScale) || timeScale < 0.0f) {
 		timeScale = 0.0f;
 	}
 	if (timeScale > 4.0f) {
@@ -95,7 +96,7 @@ void Engine::MyGame::Finalize()
 	Framework::Finalize();
 }
 
-void Engine::MyGame::Update()
+void Engine::MyGame::Update(float unscaledDeltaTime)
 {
 	// ゲーム固有の更新処理をフレーム階層へ記録する。
 	ENGINE_CPU_PROFILE_SCOPE("MyGame::Update");
@@ -104,15 +105,13 @@ void Engine::MyGame::Update()
 	// ImGuiの受付開始
 	dxCommon_->GetImGuiManager()->Begin();
 
-	Framework::Update();
+	Framework::Update(unscaledDeltaTime);
 
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-	nowTime += deltaTime;
-	if (deltaTime > 0) {
-		fps = 1.0f / deltaTime;
-	}
-	lastTime = currentTime;
+	mFrameTime.Update(unscaledDeltaTime, kTimeSpeed_);
+	mLegacyGameDeltaTime = mFrameTime.GetDeltaTime();
+	mLegacyUnscaledDeltaTime = mFrameTime.GetUnscaledDeltaTime();
+	nowTime = static_cast<float>(mFrameTime.GetElapsedTime());
+	fps = unscaledDeltaTime > 0.0f ? 1.0f / unscaledDeltaTime : 0.0f;
 
 #ifdef _DEBUG
 
@@ -130,7 +129,7 @@ void Engine::MyGame::Update()
 			// 時間関連のデバッグ項目を表示する。
 			if (ImGui::BeginMenu("Time")) {
 				ImGui::Text("FPS: %.2f", fps);
-				ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
+				ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f, 0.0f, 4.0f);
 				ImGui::EndMenu();
 			}
 
@@ -155,7 +154,7 @@ void Engine::MyGame::Update()
 	// グローバル変数の更新
 	globalVariables_->Update();
 
-	dxCommon_->Update(sceneManager_.get(), entityManager_.get());
+	dxCommon_->Update(sceneManager_.get(), entityManager_.get(), mFrameTime.GetDeltaTime());
 
 
 
@@ -322,3 +321,11 @@ void Engine::MyGame::LoadModel()
 	// ここまでに投げた非同期モデル読み込みを待ち、GPU転送もまとめて完了させる。
 	modelManager->WaitAllLoadFinished();
 }
+
+float Engine::MyGame::GameTime() { return mLegacyGameDeltaTime; }
+
+float Engine::MyGame::BaseDeltaTime() { return mLegacyUnscaledDeltaTime; }
+
+float Engine::MyGame::GetTimeScale() { return kTimeSpeed_; }
+
+float Engine::MyGame::NowTime() { return nowTime; }

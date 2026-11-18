@@ -14,6 +14,7 @@
 #include<vector>
 #include<format>
 #include<span>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 
 #include"imgui.h"
@@ -181,7 +182,8 @@ namespace Engine {
 		/// </summary>
 		void Finalize();
 
-		SkinningSRVUAV srvUavIndices;
+		std::vector<DescriptorAllocation> mDescriptorAllocations;
+		SkinningSRVUAV srvUavIndices{};
 
 		std::vector<Matrix4x4> inverseBindPoseMatrices;
 		std::map<std::string, JointWeightData> skinClusterData;	// ← 全体で1つだけ
@@ -266,7 +268,7 @@ namespace Engine {
 		/// <summary>
 		/// アニメーション適応
 		/// </summary>
-		void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
+
 
 
 

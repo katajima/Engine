@@ -10,6 +10,7 @@
 #include<dxcapi.h>
 #include <filesystem>
 #include <mutex>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -103,6 +104,7 @@ namespace Engine {
 
 		//テクスチャ一枚分のデータ
 		struct TextureData {
+			DescriptorAllocation mSrvAllocation;
 			DirectX::TexMetadata metadata;
 			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			uint32_t srvIndex;

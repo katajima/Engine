@@ -39,14 +39,9 @@ namespace Engine {
 		std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 		std::vector<uint32_t> cachedLineIndices_;				// ライン
 
-		
-		
+
+
 		std::map<std::string, Animation> animations;			// 名前付きアニメーション
-		std::string currentAnimName = "Idle";					// 現在のアニメーション名前
-		std::string previousAnimName = "";						// 過去のアニメーション名前
-		float blendTime = 0.0f;									// ブレンドに使う経過時間
-		float blendDuration = 0.3f;								// ブレンドにかける合計時間
-		bool isBlending = false;
 		Skeleton skeleton{};										// スケルトン
 
 		int pad = 0;												// パディング
@@ -58,6 +53,12 @@ namespace Engine {
 
 	// モデル読み込みに関する
 	namespace LoadModel {
+        /// @brief UVの有無を確認してから頂点のテクスチャ座標を読み取る。
+        /// @param mesh 読み取り元メッシュ。
+        /// @param vertexIndex 頂点番号。
+        /// @return UVがない場合は中央座標。
+        Vector2 ReadTexcoord(const aiMesh& mesh, uint32_t vertexIndex);
+
 
 		/// <summary>
 		/// メッシュ読み込み
@@ -126,5 +127,3 @@ namespace Engine {
 
 	}
 }
-
-

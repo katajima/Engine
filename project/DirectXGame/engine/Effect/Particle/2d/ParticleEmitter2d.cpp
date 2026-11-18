@@ -1,6 +1,6 @@
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
 #include "ParticleEmitter2d.h"
 // engine
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
@@ -31,7 +31,9 @@ void Engine::ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, s
 }
 
 
-void Engine::ParticleEmitter2d::Update() {
+void Engine::ParticleEmitter2d::Update() { Update(particleManager->GetDeltaTime()); }
+
+void Engine::ParticleEmitter2d::Update(float deltaTime) {
 	ParticleGroup2d& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	// トランスフォーム更新
@@ -45,10 +47,9 @@ void Engine::ParticleEmitter2d::Update() {
 #endif // _DEBUG
 
 	// 出現
-	frequencyTime_ += MyGame::GameTime();
-	if (frequency_ <= frequencyTime_) {
+	const uint32_t burstCount = ConsumeEmissionBursts(frequencyTime_, deltaTime, frequency_);
+	for (uint32_t burst = 0; burst < burstCount; ++burst) {
 		Emit();
-		frequencyTime_ -= frequency_;
 	}
 	// 寿命が尽きたパーティクルを削除する処理
 	particleGroup.particle.remove_if([](const Particle& p)

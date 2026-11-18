@@ -1,4 +1,4 @@
-﻿#include "PSOManager.h"
+#include "PSOManager.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -12,7 +12,7 @@ void Engine::PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DX
 	useInputLayout_ = true;
 }
 
-void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
+Engine::ShaderBlobSet Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
 {
 	ShaderBlobSet shaderBlob{}; // コンパイル済みグラフィックスシェーダー一式
 
@@ -61,6 +61,7 @@ void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& g
 
 
 
+	return shaderBlob;
 }
 
 void Engine::PSOManager::SetRootSignature(
@@ -115,7 +116,7 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;// InputLayout
 
-	SetShederGraphics(graphicsPipelineStateDesc); // Sheder
+	const ShaderBlobSet shaderBlobs = SetShederGraphics(graphicsPipelineStateDesc);
 
 	graphicsPipelineStateDesc.BlendState = blendDesc; //BlendState
 

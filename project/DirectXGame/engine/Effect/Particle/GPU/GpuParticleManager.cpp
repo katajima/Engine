@@ -10,7 +10,6 @@
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 
-#include "DirectXgame/engine/MyGame/MyGame.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
 void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
@@ -76,7 +75,9 @@ void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManage
 }
 
 
-void Engine::GpuParticleManager::Update()
+void Engine::GpuParticleManager::Update() { Update(dxCommon->GetDeltaTime()); }
+
+void Engine::GpuParticleManager::Update(float deltaTime)
 {
 	if (!camera) return;
 
@@ -103,7 +104,7 @@ void Engine::GpuParticleManager::Update()
 		emitte.second->UpdateImGui();
 		ImGui::End();
 #endif // _DEBUG
-		emitte.second->Update(MyGame::GameTime());
+		emitte.second->Update(deltaTime);
 	}
 
 
@@ -111,7 +112,7 @@ void Engine::GpuParticleManager::Update()
 
 	// エミッター更新(ディスパッチ)
 	for (auto& group : gpuParticleGroup_) {
-		group.second.UpdateEmitte(MyGame::GameTime());
+		group.second.UpdateEmitte(deltaTime);
 	}
 
 
@@ -142,7 +143,7 @@ void Engine::GpuParticleManager::Update()
 	csTrailEmitPsoManager_->PreComputePSRS();
 
 	for (auto& group : gpuParticleGroup_) {
-		group.second.UpateTrailEmitte(MyGame::GameTime());
+		group.second.UpateTrailEmitte(deltaTime);
 	}
 
 	csTrailUpdatePsoManager_->PreComputePSRS();

@@ -281,7 +281,7 @@ namespace Character {
 		// コライダーコンポーネント更新
 		GetObjectComponent()->GetColliderComponent()->UpdateAll(*worldCollider_.get());
 		//武器更新
-		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
+		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetAnimationComponent()->GetSkeleton(), "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
 
 		// サブ武器更新

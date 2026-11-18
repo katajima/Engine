@@ -73,7 +73,12 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update(SceneManager* sceneManager, EntityManager* entity3DManager);
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(SceneManager* sceneManager, EntityManager* entity3DManager, float deltaTime);
+		/// @brief 現在のゲーム内更新時間を取得する。
+		/// @return 経過秒数。
+		float GetDeltaTime() const;
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -217,6 +222,7 @@ namespace Engine {
 		std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();
 
 		// 記録時間(FPS固定用)
+		float mDeltaTime = 0.0f;
 		std::chrono::steady_clock::time_point reference_;
 	};
 }

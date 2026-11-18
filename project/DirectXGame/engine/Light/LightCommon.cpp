@@ -78,6 +78,9 @@ void Engine::LightManager::DrawLight(IsLight is, int dire, int point, int spot)
 
 void Engine::LightManager::Update()
 {
+	if (!pointLightData || !directionalLightData || !spotLightData) {
+		return;
+	}
 	ZeroMemory(pointLightData, sizeof(PointLightData) * kNumMaxInstance);
 	ZeroMemory(directionalLightData, sizeof(DirectionalLightData) * kNumMaxInstance);
 	ZeroMemory(spotLightData, sizeof(SpotLightData) * kNumMaxInstance);
@@ -91,18 +94,18 @@ void Engine::LightManager::Update()
 	{
 		if (!light) continue;
 
-		if (light->GetType() == Lights::Type::Point)
+		if (light->GetType() == Lights::Type::Point && pointLightIndex < kNumMaxInstance)
 		{
 			light->SetLightData(&pointLightData[pointLightIndex]);
 			// LineCommon::GetInstance()->AddLightLine(pointLightData[pointLightIndex]);
 			++pointLightIndex;
 		}
-		else if (light->GetType() == Lights::Type::Directional)
+		else if (light->GetType() == Lights::Type::Directional && directionalLightIndex < kNumMaxInstance)
 		{
 			light->SetLightData(&directionalLightData[directionalLightIndex]);
 			++directionalLightIndex;
 		}
-		else if (light->GetType() == Lights::Type::Spot)
+		else if (light->GetType() == Lights::Type::Spot && spotLightIndex < kNumMaxInstance)
 		{
 			light->SetLightData(&spotLightData[spotLightIndex]);
 			//  LineCommon::GetInstance()->AddLightLine(spotLightData[spotLightIndex]);
@@ -183,11 +186,11 @@ void Engine::LightManager::Update()
 	{
 		if (!light) continue;
 
-		if (light->GetType() == Lights::Type::Point)
+		if (light->GetType() == Lights::Type::Point && pIndex < kNumMaxInstance)
 			light->UpdateFromData(&pointLightData[pIndex++]);
-		else if (light->GetType() == Lights::Type::Directional)
+		else if (light->GetType() == Lights::Type::Directional && dIndex < kNumMaxInstance)
 			light->UpdateFromData(&directionalLightData[dIndex++]);
-		else if (light->GetType() == Lights::Type::Spot)
+		else if (light->GetType() == Lights::Type::Spot && sIndex < kNumMaxInstance)
 			light->UpdateFromData(&spotLightData[sIndex++]);
 	}
 
@@ -204,3 +207,19 @@ void Engine::LightManager::ApplyGlobalVariables()
 
 
 
+
+bool Engine::LightManager::AddLight(std::shared_ptr<Lights> light) {
+			if (!light) {
+				return false;
+			}
+			const auto type = light->GetType();
+			const auto typeCount = std::count_if(m_lights.begin(), m_lights.end(), [type](const auto& entry) {
+				return entry && entry->GetType() == type;
+			});
+			if (typeCount >= kNumMaxInstance) {
+				return false;
+			}
+			light->SetNumber(static_cast<int>(m_lights.size()));
+			m_lights.push_back(std::move(light));
+			return true;
+		}

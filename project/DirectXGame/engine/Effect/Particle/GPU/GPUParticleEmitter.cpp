@@ -179,37 +179,7 @@ void Engine::BaseGpuParticleEmitter::UpdateImGui()
 #endif // _DEBUG
 }
 
-void Engine::BaseGpuParticleEmitter::Update(float deltaTime)
-{
-	// 加算
-	cbEmitterCommon_.frequencyTime += deltaTime;
-	cbEmitterCommon_.translate = worldTransform_.translate_;
 
-
-	// 射出間隔を上回ったら射出許可を出して時間を調整
-	if (cbEmitterCommon_.frequency <= cbEmitterCommon_.frequencyTime) {
-		cbEmitterCommon_.frequencyTime -= cbEmitterCommon_.frequency;
-		cbEmitterCommon_.emit = 1;
-
-	}
-	else {
-		// 射出間隔を上回っていないので、射出許可は出せない
-		cbEmitterCommon_.emit = 0;
-	}
-
-	if (!isEmitte_) {
-		cbEmitterCommon_.emit = 0;
-	}
-
-	// グループがあるなら
-	if (group) {
-		// 派生クラス固有の更新
-		UpdateUnique(deltaTime);
-		int count = int(cbEmitterCommon_.count);
-		int threadGroupCount = (count + count_ - 1) / count_;
-	}
-	worldTransform_.Update();
-}
 
 #pragma endregion // 共通処理
 

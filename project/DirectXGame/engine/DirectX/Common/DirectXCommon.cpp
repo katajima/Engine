@@ -139,6 +139,8 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 
 	// スワップチェーン用の描画後処理
 	swapChain_->PostDraw();
+	srvManager_->CollectRetiredDescriptors();
+	rtvManager_->CollectRetiredDescriptors();
 	postEffectManager_->ClearPostEffectBlock();
 	// FPS制限の更新
 	UpdateFixFPS();
@@ -232,10 +234,12 @@ void Engine::DirectXCommon::UpdateFixFPS()
 	reference_ = std::chrono::steady_clock::now();
 }
 
-void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager)
+void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager, float deltaTime)
 {
 	// DirectXとシーンの更新区間をフレーム内の主要区間として記録する。
 	ENGINE_CPU_PROFILE_SCOPE("DirectXCommon::Update");
+	mDeltaTime = deltaTime;
+	entity3DManager->SetDeltaTime(deltaTime);
 
 	// ライト
 	entity3DManager->GetLightManager()->Update();
@@ -246,15 +250,15 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 
 
 
-	sceneManager->Update();
+	sceneManager->Update(deltaTime);
 
 	postEffectManager_->Update(sceneManager->GetCamara());
 
-	entity3DManager->Update();
+	entity3DManager->Update(deltaTime);
 
-	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
+	entity3DManager->GetEffectManager()->GetParticleManager()->Update(deltaTime);
 
-	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update();
+	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update(deltaTime);
 
 	//entity3DManager->GetEffectManager()->GetParticleManager2d()->Update();
 
@@ -268,3 +272,5 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 	entity3DManager->Get3DLineCommon()->Update();
 
 }
+
+float Engine::DirectXCommon::GetDeltaTime() const { return mDeltaTime; }

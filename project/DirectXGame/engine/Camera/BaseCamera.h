@@ -37,6 +37,9 @@ public:
 	/// 更新
 	///</summary>
 	virtual void Update();
+	/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 
 
 
@@ -89,6 +92,7 @@ public:
 	void SetUseCamera(bool is) { useCamera = is; }
 
 protected:
+	float mDeltaTime = 0.0f;
 	void CreateFixedCamera(Engine::EntityManager* entityManager,const Transform& transform, float farClip);
 
 protected:
