@@ -14,7 +14,6 @@
 
 Engine::RenderTexture::~RenderTexture()
 {
-	rtvManager->DecAllocate();
 }
 
 void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
@@ -167,7 +166,9 @@ void Engine::RenderTexture::CreateResourcePixel()
 void Engine::RenderTexture::CreateRTV()
 {
 	// インデックスを割り当て
-	rtvIndex_ = rtvManager->Allocate();
+	mRtvAllocation = rtvManager->AllocateDescriptor();
+	mRtvAllocation.SetResource(resource_);
+	rtvIndex_ = mRtvAllocation.GetIndex();
 	// RTVを作成
 	rtvManager->CreateRTV(rtvIndex_, resource_.Get());
 
@@ -179,7 +180,9 @@ void Engine::RenderTexture::CreateRTV()
 void Engine::RenderTexture::CreateSRV()
 {
 	// インデックス割りて
-	srvIndex_ = srvManager->Allocate();
+	mSrvAllocation = srvManager->AllocateDescriptor();
+	mSrvAllocation.SetResource(resource_);
+	srvIndex_ = mSrvAllocation.GetIndex();
 	// SRVを作成
 	DirectX::TexMetadata metadata{};
 	metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;

@@ -184,23 +184,6 @@ void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::v
 
 }
 
-void Engine::AnimationFunction::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
-{
-	const auto& animations = modelData.animations;
-	auto it = animations.find(newAnimName);
-	if (it != animations.end()) {
-		if (modelData.currentAnimName != newAnimName) {
-			modelData.previousAnimName = modelData.currentAnimName;
-			modelData.currentAnimName = newAnimName;
-			modelData.blendTime = 0.0f;
-			modelData.blendDuration = blendDuration;
-			modelData.isBlending = true;
-		}
-	}
-
-
-}
-
 Engine::Joint* Engine::AnimationFunction::FindJointByName(Skeleton& skeleton, const std::string& name)
 {
 	auto it = skeleton.jointMap.find(name);

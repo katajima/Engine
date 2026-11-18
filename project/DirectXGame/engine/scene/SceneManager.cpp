@@ -15,20 +15,20 @@ void Engine::SceneManager::Init() {
 	finished_ = true;
 };
 
-void Engine::SceneManager::Update()
+void Engine::SceneManager::Update(float deltaTime)
 {
 	// シーン本体とフェード処理のCPU負荷を個別区間として記録する。
 	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Update");
 
 	// 通常シーン処理
 	if (scene_) {
-		scene_->AllUpdate();
+		scene_->AllUpdate(deltaTime);
 	}
 
 	// 各フェーズ処理
 	switch (phase_) {
 	case Phase::kFadeIn:
-		fade_->Update();
+		fade_->Update(deltaTime);
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
 		}
@@ -38,7 +38,7 @@ void Engine::SceneManager::Update()
 
 		break;
 	case Phase::kFadeOut:
-		fade_->Update();
+		fade_->Update(deltaTime);
 		if (fade_->IsFinished()) {
 			// フェードアウト完了 → シーン切り替え
 			if (scene_) {
@@ -79,7 +79,7 @@ void Engine::SceneManager::Update()
 		}
 		break;
 	case Phase::kLoading:
-		fade_->Update();
+		fade_->Update(deltaTime);
 		break;
 	}
 

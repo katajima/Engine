@@ -84,69 +84,69 @@ float Engine::AnimationComponent::WrapAnimationTime(float time, float duration) 
 	return wrapped;
 }
 
-float Engine::AnimationComponent::UpdateBlendRate(ModelData& modelData, float deltaTime)
+float Engine::AnimationComponent::UpdateBlendRate(const ModelData& modelData, float deltaTime)
 {
 	// ブレンド時間が0以下なら即座に現在アニメーションへ切り替える
-	if (modelData.blendDuration <= 0.0f) {
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+	if (mBlendDuration <= 0.0f) {
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 		return 1.0f;
 	}
 
 	// ブレンド経過時間を進めて0.0f～1.0fへ正規化する
-	modelData.blendTime += deltaTime;
-	float t = modelData.blendTime / modelData.blendDuration;
+	mBlendTime += deltaTime;
+	float t = mBlendTime / mBlendDuration;
 	t = std::clamp(t, 0.0f, 1.0f);
 
 	// Hermite補間でブレンド開始・終了をなめらかにする
 	float easedT = t * t * (3.0f - 2.0f * t);
 
 	// ブレンドが終わったら前アニメーション名を消して通常再生へ戻す
-	if (modelData.blendTime >= modelData.blendDuration) {
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+	if (mBlendTime >= mBlendDuration) {
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 	}
 
 	return easedT;
 }
 
-void Engine::AnimationComponent::ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime)
+void Engine::AnimationComponent::ApplySkinAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime)
 {
 	const auto& animations = modelData.animations;
 
 	// ブレンド中は前アニメーションと現在アニメーションを別々の時刻で評価する
-	if (modelData.isBlending && !modelData.previousAnimName.empty()) {
-		auto itPrev = animations.find(modelData.previousAnimName);
+	if (mIsBlending && !mPreviousAnimationName.empty()) {
+		auto itPrev = animations.find(mPreviousAnimationName);
 		if (itPrev != animations.end()) {
 			const Animation& previousAnimation = itPrev->second;
 			AdvancePreviousAnimationTime(previousAnimation, deltaTime);
 
-			Skeleton previousSkeleton = modelData.skeleton; // ブレンド元の姿勢を作る一時スケルトン
-			Skeleton currentSkeleton = modelData.skeleton;  // ブレンド先の姿勢を作る一時スケルトン
+			Skeleton previousSkeleton = mSkeleton; // ブレンド元の姿勢を作る一時スケルトン
+			Skeleton currentSkeleton = mSkeleton;  // ブレンド先の姿勢を作る一時スケルトン
 			AnimationFunction::ApplyAnimation(previousSkeleton, previousAnimation, previousAnimationTime_);
 			AnimationFunction::ApplyAnimation(currentSkeleton, currentAnimation, animationTime);
 
 			float t = UpdateBlendRate(modelData, deltaTime);
-			AnimationFunction::BlendSkeletons(modelData.skeleton, previousSkeleton, currentSkeleton, t);
+			AnimationFunction::BlendSkeletons(mSkeleton, previousSkeleton, currentSkeleton, t);
 			return;
 		}
 
 		// 前アニメーションが存在しなければブレンドを解除して通常再生へ戻す
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 	}
 
 	// ブレンドしていない場合は現在アニメーションだけを適用する
-	AnimationFunction::ApplyAnimation(modelData.skeleton, currentAnimation, animationTime);
+	AnimationFunction::ApplyAnimation(mSkeleton, currentAnimation, animationTime);
 }
 
-void Engine::AnimationComponent::ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime)
+void Engine::AnimationComponent::ApplyNodeAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime)
 {
 	const auto& animations = modelData.animations;
 
 	// 通常ノードアニメーションでも、前後アニメーションを別時刻で評価してブレンドする
-	if (modelData.isBlending && !modelData.previousAnimName.empty()) {
-		auto itPrev = animations.find(modelData.previousAnimName);
+	if (mIsBlending && !mPreviousAnimationName.empty()) {
+		auto itPrev = animations.find(mPreviousAnimationName);
 		if (itPrev != animations.end()) {
 			const Animation& previousAnimation = itPrev->second;
 			AdvancePreviousAnimationTime(previousAnimation, deltaTime);
@@ -178,8 +178,8 @@ void Engine::AnimationComponent::ApplyNodeAnimation(ModelData& modelData, const 
 		}
 
 		// 前アニメーションが存在しなければブレンドを解除して通常再生へ戻す
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 	}
 
 	// 各ノードのアニメーション行列を作る。既存仕様に合わせて最後に評価したノードをlocalMatrix_へ保持する
@@ -198,19 +198,15 @@ Matrix4x4 Engine::AnimationComponent::CalculateNodeLocalMatrix(const NodeAnimati
 	return MakeAffineMatrix(interpScale, interpRotate, interpTranslate);
 }
 
-void Engine::AnimationComponent::UpdateSkinClusters(ModelData& modelData)
+void Engine::AnimationComponent::UpdateSkinClusters(const ModelData& modelData)
 {
 	std::vector<Matrix4x4> cachedSkeletonMatrices;
-	for (auto& mesh : modelData.mesh) {
-		// メッシュまたはスキンクラスターが無い場合は更新を飛ばす
-		if (!mesh || !mesh->skinCluster) {
-			continue;
-		}
-		AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-	}
+	for (auto& cluster : mSkinClusters) {
+        AnimationFunction::UpdateSkinCluster(*cluster, mSkeleton, cachedSkeletonMatrices);
+    }
 }
 
-void Engine::AnimationComponent::UpdateMaterialGPUData(ModelData& modelData)
+void Engine::AnimationComponent::UpdateMaterialGPUData(const ModelData& modelData)
 {
 	// GPU転送用データは描画処理と同じフレーム内で更新するため、ここでは直接更新する。
 	for (auto& mesh : modelData.mesh) {
@@ -233,16 +229,17 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime, WorldTransform worl
 
 	auto& modelData = model->GetModelData();
 	const auto& animations = modelData.animations;
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 
 	if (itCurrent != animations.end()) {
 		const Animation& currentAnimation = itCurrent->second;
 		float deltaTime = deltatime * animationSpeed;
 		AdvanceAnimationTime(currentAnimation, deltaTime);
+        mSkeleton = modelData.skeleton;
 		ApplySkinAnimation(modelData, currentAnimation, deltaTime);
 
 		// スケルトン姿勢を更新してスキニング用パレットへ反映する
-		AnimationFunction::UpdateSkeleton(modelData.skeleton);
+		AnimationFunction::UpdateSkeleton(mSkeleton);
 		UpdateSkinClusters(modelData);
 
 		// スキニング後の頂点は既にスケルトン空間へ変換済みなので、描画時にルート行列を二重に掛けない
@@ -257,7 +254,7 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime, WorldTransform worl
 	// デバッグ用にスケルトンを描画する
 	AnimationFunction::DrawSkeleton(
 		lineCommon,
-		modelData.skeleton.joints,
+		mSkeleton.joints,
 		worldTransform.worldMat_.GetWorldPosition(),
 		worldTransform.scale_,
 		MakeRotateXYZ(worldTransform.rotate_)
@@ -278,7 +275,7 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 
 	auto& modelData = model->GetModelData();
 	const auto& animations = modelData.animations;
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 
 	if (itCurrent != animations.end()) {
 		const Animation& currentAnimation = itCurrent->second;
@@ -303,7 +300,7 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 
 	const auto& animations = model->GetModelData().animations;
 	const auto& modelData = model->GetModelData();
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 
 	// 現在のアニメーション名が見つからなかった場合は再生終了扱い
 	if (itCurrent == animations.end()) {
@@ -334,13 +331,19 @@ void Engine::AnimationComponent::SetAnimation(const std::string& name, float tim
 	}
 
 	// 切り替え前の時刻をブレンド元アニメーション用に保持する
-	if (modelData.currentAnimName != name) {
+	if (mCurrentAnimationName != name) {
 		previousAnimationTime_ = animationTime;
 		animationTime = 0.0f;
 		isPlaying = true;
 	}
 
-	AnimationFunction::SetAnimation(modelData, name, time);
+	if (mCurrentAnimationName != name) {
+        mPreviousAnimationName = mCurrentAnimationName;
+        mCurrentAnimationName = name;
+        mBlendTime = 0.0f;
+        mBlendDuration = time;
+        mIsBlending = true;
+    }
 }
 
 void Engine::AnimationComponent::SetEndAnimeTime() {
@@ -351,7 +354,7 @@ void Engine::AnimationComponent::SetEndAnimeTime() {
 
 	const auto& animations = model->GetModelData().animations;
 	const auto& modelData = model->GetModelData();
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 	if (itCurrent == animations.end()) {
 		return;
 	}
@@ -375,3 +378,32 @@ float Engine::AnimationComponent::GetEndAnimeTime(std::string name) const {
 	// 見つからない場合は0秒として扱う
 	return 0.0f;
 }
+
+void Engine::AnimationComponent::SetModel(Model* mod)
+{
+    model = mod;
+    mSkinClusters.clear();
+    mSkeleton = {};
+    mPreviousAnimationName.clear();
+    mCurrentAnimationName = "Idle";
+    mBlendTime = 0.0f;
+    mIsBlending = false;
+    animationTime = 0.0f;
+    previousAnimationTime_ = 0.0f;
+    isPlaying = true;
+    localMatrix_ = MakeIdentity4x4();
+    if (!model) return;
+    const auto& modelData = model->GetModelData();
+    mSkeleton = modelData.skeleton;
+    mSkinClusters = model->CreateSkinningInstances();
+    if (!modelData.animations.contains(mCurrentAnimationName) && !modelData.animations.empty()) {
+        mCurrentAnimationName = modelData.animations.begin()->first;
+    }
+    UpdateSkinClusters(modelData);
+}
+
+const Engine::Skeleton& Engine::AnimationComponent::GetSkeleton() const { return mSkeleton; }
+
+Engine::SkinCluster& Engine::AnimationComponent::GetSkinCluster(size_t meshIndex) { return *mSkinClusters.at(meshIndex); }
+
+const std::string& Engine::AnimationComponent::GetCurrentAnimationName() const { return mCurrentAnimationName; }

@@ -23,8 +23,10 @@ namespace Engine {
 		// 生成
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> index, size_t num = 1)
 		{
+			if (data_ && resource_) resource_->Unmap(0, nullptr);
+			if (resource_) dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 			this->dxCommon = dxCommon;	// DX共通クラス
-			const size_t bufferCount = (std::max)(size_t{ 1 }, num);
+			const size_t bufferCount = (std::max)(size_t{ 1 }, (std::max)(num, index.size()));
 
 			/// <summary>
 			/// リソース生成
@@ -41,7 +43,6 @@ namespace Engine {
 			if (!index.empty()) {
 				std::memcpy(Data(), index.data(), sizeof(Type) * index.size());
 			}
-			resource_->Unmap(0, nullptr);
 			/// <summary>
 			/// リソースの先頭のアドレスを作成する
 			/// </summary>
@@ -64,6 +65,9 @@ namespace Engine {
 					/// <summary>
 					/// バッファが不足している場合、再割り当て
 					/// </summary>
+					resource_->Unmap(0, nullptr);
+					data_ = nullptr;
+					dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 					resource_.Reset();
 
 					D3D12_HEAP_PROPERTIES heapProps = {};
@@ -76,6 +80,7 @@ namespace Engine {
 						// エラー処理
 						return;
 					}
+					resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 					/// <summary>
 					/// バッファビューの更新
@@ -85,12 +90,10 @@ namespace Engine {
 
 				}
 				// データのコピー
-				Type* data;
-				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data));
 				if (!index.empty()) {
-					memcpy(data, index.data(), sizeof(Type) * index.size());
+					memcpy(data_, index.data(), sizeof(Type) * index.size());
 				}
-				resource_->Unmap(0, nullptr);
+				bufferView.SizeInBytes = UINT(sizeof(Type) * index.size());
 			}
 		}
 

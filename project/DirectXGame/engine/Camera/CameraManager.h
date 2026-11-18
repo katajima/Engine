@@ -26,6 +26,9 @@ public:
 
 	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
 	void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 	/// <summary>登録解除と所有カメラの解放を行う。</summary>
 	void Finalize();
 

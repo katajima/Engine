@@ -336,7 +336,7 @@ Vector3 ClosestPoint::PointSegment(const Segment& segment, const Vector3& point)
 	float t = Dot(point - segment.origin, diff) / lenSq;
 	t = Math::Clamp(t, 0.0f, 1.0f);
 
-	return segment.origin - Multiply(diff, t);
+	return segment.origin + Multiply(diff, t);
 }
 // 線と三角
 Vector3 ClosestPoint::SegmentTriangle(const Segment& segment, const Triangle& triangle) {

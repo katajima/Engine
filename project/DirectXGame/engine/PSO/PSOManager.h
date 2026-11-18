@@ -99,6 +99,6 @@ namespace Engine {
 		/// <summary>
 		/// グラフィックパイプライン設定
 		/// </summary>
-		void SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline);
+		ShaderBlobSet SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline);
 	};
 }

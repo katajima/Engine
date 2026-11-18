@@ -78,6 +78,7 @@ namespace Engine {
 			Model* model;
 			bool flag;
 			uint32_t srvIndex;
+			DescriptorAllocation mSrvAllocation;
 			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			uint32_t instanceCount; // インスタンス数
 			ObjectGPU* instanceData; // インスタンシングデータを書き込むためのポインタ
@@ -110,7 +111,9 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 描画
 		/// </summary>

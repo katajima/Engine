@@ -314,10 +314,18 @@ TrailEffect* Engine::EntityManager::CreateTrailEffect(const std::string& name,
 	return raw;
 }
 
-void Engine::EntityManager::Update()
+void Engine::EntityManager::SetDeltaTime(float deltaTime) {
+	mDeltaTime = deltaTime;
+	for (auto& entity : entities_) {
+		if (entity) { entity->SetDeltaTime(deltaTime); }
+	}
+}
+
+void Engine::EntityManager::Update(float deltaTime)
 {
+	SetDeltaTime(deltaTime);
 	// オブジェクトインスタンシング更新
-	object3dInstanceManager_->Update();
+	object3dInstanceManager_->Update(deltaTime);
 
 	// オブジェクトが消えたときの処理
 	entities_.erase(
@@ -334,7 +342,7 @@ void Engine::EntityManager::Update()
 	for (auto& object : entities_) {
 		if (object) {
 			// 物理更新
-			object->RigidBodyUpdate();
+			object->RigidBodyUpdate(deltaTime);
 		}
 	}
 
@@ -344,7 +352,7 @@ void Engine::EntityManager::Update()
 		}
 
 		// Entityは種類に関係なく自分の更新責務を進める。
-		entity->Update();
+		entity->Update(deltaTime);
 
 		Object3d* object = dynamic_cast<Object3d*>(entity.get());
 		if (object) {
@@ -406,3 +414,5 @@ void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
 
 
 
+
+float Engine::EntityManager::GetDeltaTime() const { return mDeltaTime; }

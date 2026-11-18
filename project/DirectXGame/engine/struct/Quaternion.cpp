@@ -21,7 +21,7 @@ Quaternion Quaternion::operator*(const Quaternion& other) const {
     );
 }
 Quaternion Quaternion::operator*(const float& other) const { 
-    return Quaternion(w * other, x * other, y * other, z * other); 
+    return Quaternion(x * other, y * other, z * other, w * other);
 }
 
 Quaternion Quaternion::operator-() const

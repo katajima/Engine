@@ -5,6 +5,7 @@
 #include <wrl.h>
 
 #include <d3d12.h>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 #include "DirectXGame/engine/struct/Matrix4x4.h"
 #include "DirectXGame/engine/struct/Vector3.h"
@@ -93,6 +94,7 @@ namespace Engine {
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_{};
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};
 		uint32_t srvIndex_ = 0;
+		DescriptorAllocation mSrvAllocation;
 
 		std::unique_ptr<ConstantBuffer<ShadowData>> shadowData_;
 		Settings settings_{};

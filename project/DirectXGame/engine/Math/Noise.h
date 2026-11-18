@@ -5,6 +5,10 @@
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
 #include"MathFunctions.h"
+#include <algorithm>
+#include <array>
+#include <numeric>
+#include <random>
 
 
 #define HASH_SIZE 512
@@ -83,18 +87,11 @@ private:
 		// hの下位ビットが1の場合はvを、そうでない場合は-vを選択します。
 	}
 
-	/// <summary>
-	/// ハッシュ関数
-	/// </summary>
-	void Init_hash(int seed) {
-		srand(seed);
-		for (int i = 0; i < HASH_SIZE; i++) {
-			hashT[i] = rand() % HASH_SIZE;
-		}
-	}
-
+	/// @brief 指定シードから256要素の順列表を生成し、参照範囲を保証する。
+	/// @param seed 順列表の再現に使用するシード。
+	void InitHash(int seed);
 	// ハッシュテーブルの初期化
-	int hashT[HASH_SIZE] = {};
+	int mHashTable[HASH_SIZE] = {};
 
 	int g_HashCode[HASH_CODE_TABLE_NUM] = {};
 

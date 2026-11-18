@@ -2,10 +2,13 @@
 
 // C++
 #include <cstdint>
+#include <mutex>
+#include <vector>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 
 #include"DirectXGame/engine/struct/Structs3D.h"
@@ -31,10 +34,15 @@ namespace Engine {
         /// </summary>
         uint32_t Allocate();
 
+        /// @brief GPU完了後に返却されるRTV所有権を取得する。
+        /// @return 割り当て所有権。
+        DescriptorAllocation AllocateDescriptor();
+        /// @brief GPU待機完了後、破棄済みRTVを再利用可能にする。
+        void CollectRetiredDescriptors();
+
         /// <summary>
         /// デクリメント
         /// </summary>
-        void DecAllocate();
 
         /// <summary>
         /// デスクリプタハンドル計算
@@ -72,7 +80,8 @@ namespace Engine {
         Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
         // 次に使用するRTVインデックス
-        uint32_t useIndex = 0;
+        DescriptorAllocator mDescriptorAllocator{ kMaxRTVCount };
+        std::vector<DescriptorAllocation> mLegacyAllocations;
     private:
         DXGIDevice* dxgiDevice = nullptr;
         Command* command = nullptr;

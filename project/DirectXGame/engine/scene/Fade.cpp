@@ -1,7 +1,6 @@
 
 #include "Fade.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 
 /// <summary>
 /// 初期化
@@ -23,11 +22,13 @@ void Engine::Fade::Initialize(EntityManager* entityManager) {
 /// <summary>
 /// 毎フレーム処理
 /// </summary>
-void Engine::Fade::Update() {
+void Engine::Fade::Update() { Update(entityManager->GetDeltaTime()); }
+
+void Engine::Fade::Update(float deltaTime) {
 	if (status_ == Status::None) return;
 
 	// フェード時間はゲーム時間倍率を反映して進める
-	counter_ += MyGame::GameTime();
+	counter_ += deltaTime;
 
 
 	if (counter_ > duration_) {

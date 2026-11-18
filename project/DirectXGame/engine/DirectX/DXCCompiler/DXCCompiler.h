@@ -39,12 +39,12 @@ namespace Engine {
 
 	private:
 		// DXユーティル
-		IDxcUtils* dxcUtils_;
+		Microsoft::WRL::ComPtr<IDxcUtils> mDxcUtils;
 		// インクルードハンドラー
-		IDxcIncludeHandler* includeHandler_;
+		Microsoft::WRL::ComPtr<IDxcIncludeHandler> mIncludeHandler;
 		// DXCコンパイル
-		IDxcCompiler3* dxcCompiler_;
+		Microsoft::WRL::ComPtr<IDxcCompiler3> mDxcCompiler;
 		// エラー判別
-		HRESULT hr_;
+		HRESULT hr_ = S_OK;
 	};
 }

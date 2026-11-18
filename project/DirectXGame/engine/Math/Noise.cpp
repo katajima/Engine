@@ -16,7 +16,7 @@ void Noise::InitParameters()
 	Seed = 42;
 	noise = 255;
 
-	Init_hash(Seed);
+	InitHash(Seed);
 }
 
 void Noise::ImguiParameter()
@@ -32,7 +32,7 @@ void Noise::ImguiParameter()
 		ImGui::DragFloat("Max_value", &Max_value,0.01f);
 		ImGui::DragInt("Seed", &Seed);
 		if (ImGui::Button("InitSeed")) {
-			Init_hash(Seed);
+			InitHash(Seed);
 		}
 	}
 	ImGui::End();
@@ -55,18 +55,18 @@ float Noise::Noise2D(float x, float y)
     float v = Fade(y);
 
     // 周囲4点のハッシュ値を求める
-    int A = hashT[X] + Y;
-    int B = hashT[X + 1] + Y;
+    int A = mHashTable[X] + Y;
+    int B = mHashTable[X + 1] + Y;
 
     // 各グリッド点での勾配ノイズを取得
-    float n00 = Grad2(hashT[A], x, y);         // (0,0)
-    float n01 = Grad2(hashT[A + 1], x, y - 1); // (0,1)
-    float n10 = Grad2(hashT[B], x - 1, y);     // (1,0)
-    float n11 = Grad2(hashT[B + 1], x - 1, y - 1); // (1,1)
+    float n00 = Grad2(mHashTable[A], x, y);         // (0,0)
+    float n01 = Grad2(mHashTable[A + 1], x, y - 1); // (0,1)
+    float n10 = Grad2(mHashTable[B], x - 1, y);     // (1,0)
+    float n11 = Grad2(mHashTable[B + 1], x - 1, y - 1); // (1,1)
 
     // x方向の線形補間
-    float n0 = Lerp(n00, n01, u);
-    float n1 = Lerp(n10, n11, u);
+    float n0 = Lerp(n00, n10, u);
+    float n1 = Lerp(n01, n11, u);
 
     // y方向の線形補間を行い最終値を返す
     return Lerp(n0, n1, v);
@@ -100,3 +100,14 @@ float Noise::PerlinNoise(float x, float y)
     return total / max_value;
 }
 
+
+void Noise::InitHash(int seed) {
+		std::array<int, 256> permutation{};
+		std::iota(permutation.begin(), permutation.end(), 0);
+		std::mt19937 generator(static_cast<std::mt19937::result_type>(seed));
+		std::shuffle(permutation.begin(), permutation.end(), generator);
+		for (std::size_t i = 0; i < permutation.size(); ++i) {
+			mHashTable[i] = permutation[i];
+			mHashTable[i + permutation.size()] = permutation[i];
+		}
+	}

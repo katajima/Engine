@@ -91,7 +91,9 @@ void Engine::DepthStencil::CreateDepthStencilView()
 		DXGI_FORMAT_D24_UNORM_S8_UINT
 	);
 
-	srvIndex_ = srvManager->Allocate();
+	mSrvAllocation = srvManager->AllocateDescriptor();
+	mSrvAllocation.SetResource(depthStencilResource_);
+	srvIndex_ = mSrvAllocation.GetIndex();
 
 	// SRVを作成
 	DirectX::TexMetadata metadata{};

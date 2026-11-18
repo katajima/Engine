@@ -1,4 +1,5 @@
 #include "RenderComponent.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 
 
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
@@ -65,6 +66,7 @@ void Engine::RenderComponent::Update()
 void Engine::RenderComponent::Draw()
 {
 	if (!isDraw) return;
+    if (objectType_ == ObjectModelType::kSkinning && !mAnimator) return;
 	if (!isSkin_) return;
 
 	SkyBoxCommon* skyBoxCommon = entityManager->GetSkyBoxCommon();
@@ -168,7 +170,7 @@ void Engine::RenderComponent::Draw()
 			}
 
 
-			model->DrawSkinning(materialInstances_,datas);
+			model->DrawSkinning(materialInstances_,datas, mAnimator->get());
 		}
 		break;
 	case ObjectModelType::kPrimitive:
@@ -228,30 +230,34 @@ void Engine::RenderComponent::DrawShadowMap(ShadowMap* shadowMap)
 		}
 		break;
 	case ObjectModelType::kSkinning:
+    {
 		// スキニングはCSで変形済み頂点を作ってから、その頂点をシャドウマップへ描画する。
 		ObjectSkinningTypeDiscrimination(PSOType::ShadowMap);
 		transformation->GetCommandList(0);
 		shadowMap->SetGraphicsRootConstantBufferView(1);
 
+		size_t meshIndex = 0;
 		for (auto& mesh : model->GetModelData().mesh) {
+            auto& cluster = mAnimator->get().GetSkinCluster(meshIndex++);
 			if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
 				continue;
 			}
 
-			mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
+			mesh->GetCommandList(cluster.outputBufferView, mesh->GetVertexBufferView());
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
 				GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 
 			D3D12_RESOURCE_BARRIER barrier{};
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+			barrier.Transition.pResource = cluster.outputVertexResource.Get();
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
 		}
 		break;
+    }
 	default:
 		break;
 	}
@@ -304,13 +310,16 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 	skinning->DrawComputeSetting();
 
 	// メッシュごとに
+	size_t meshIndex = 0;
 	for (auto& mesh : model->GetModelData().mesh) {
+        auto& cluster = mAnimator->get().GetSkinCluster(meshIndex++);
+        if (type == PSOType::ShadowMap && mesh->material->GetMaterialInstance().alpha_ < 1.0f) continue;
 
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, mesh->skinCluster->influenceSrvHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, mesh->skinCluster->outputVertexUavHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInformation->GetGPUVirtualAddress());
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, cluster.paletteSrvHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, cluster.inputVertexSrvHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, cluster.influenceSrvHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, cluster.outputVertexUavHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, cluster.skinningInformation->GetGPUVirtualAddress());
 
 
 		skinning->GetDxCommon()->GetCommandList()->Dispatch(UINT(mesh->vertices.size() + 1023) / 1024, 1, 1);
@@ -319,7 +328,7 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.pResource = cluster.outputVertexResource.Get();
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
@@ -383,6 +392,8 @@ void Engine::RenderComponent::SetModel(Engine::Model* model) {
 	this->model = model;
 
 	materialInstances_.clear();
+    cbResources_.clear();
+    if (!model) return;
 	int i = 0;
 	for (auto& mesh : model->GetModelData().mesh) {
 		MaterialInstance matInst;
@@ -417,3 +428,6 @@ Engine::BasePrimitive* Engine::RenderComponent::GetPrimitive() { return primitiv
 #pragma endregion
 
 
+
+
+void Engine::RenderComponent::SetAnimationComponent(AnimationComponent& animator) { mAnimator = std::ref(animator); }

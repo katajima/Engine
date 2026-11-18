@@ -24,19 +24,20 @@ void Engine::RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 uint32_t Engine::RtvManager::Allocate()
 {
-	assert(kMaxRTVCount > useIndex);
-
-	// return する番号を一旦記録
-	int index = useIndex;
-	// 次回のために番号を1進める
-	useIndex++;
-	// 上で記録した番号をreturn
+	auto allocation = AllocateDescriptor();
+	const uint32_t index = allocation.GetIndex();
+	mLegacyAllocations.push_back(std::move(allocation));
 	return index;
 }
 
-void Engine::RtvManager::DecAllocate()
+Engine::DescriptorAllocation Engine::RtvManager::AllocateDescriptor()
 {
-	useIndex--;
+	return mDescriptorAllocator.Allocate();
+}
+
+void Engine::RtvManager::CollectRetiredDescriptors()
+{
+	mDescriptorAllocator.CollectRetired();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::RtvManager::GetCPUDescriptorHandle(uint32_t index)
@@ -105,6 +106,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::RtvManager::CreateRenderTextureRe
 
 void Engine::RtvManager::Finalize()
 {
+	mLegacyAllocations.clear();
+	mDescriptorAllocator.CollectRetired();
 	descriptorHeap.Reset();
 }
 

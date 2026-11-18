@@ -20,13 +20,13 @@ void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::Mod
 
 	kFileName = fileName;
 	kExtension = extensionName;
-	
-	// 凍結してフルパスを得る 
+
+	// 凍結してフルパスを得る
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
 
 	levelData_ = std::make_unique<LevelData>();
-	// "objects"の全オブジェクトを走査 
+	// "objects"の全オブジェクトを走査
 	for (nlohmann::json& object : deserialized["objects"]) {
 		// 有効無効フラグ
 		if (object.contains("object_disabled")) {
@@ -36,7 +36,7 @@ void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::Mod
 				continue;
 			}
 		}
-		
+
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(オブジェクト)
 		LoadDataFanc::ModelTransfom(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(出現位置)
@@ -60,7 +60,7 @@ void LoadLevelData::ReLoad()
 
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
-	// "objects"の全オブジェクトを走査 
+	// "objects"の全オブジェクトを走査
 	for (nlohmann::json& object : deserialized["objects"]) {
 		// 有効無効フラグ
 		if (object.contains("object_disabled")) {
@@ -105,12 +105,12 @@ void LoadLevelData::Update()
 
 void LoadLevelData::Draw3D()
 {
-	
+
 }
 
 void LoadLevelData::CreateObject3d(LevelData* levelData)
 {
-	const auto& models = modelManager->GetModel();
+
 
 
 	for (auto& objectData : levelData->objects) {
@@ -119,17 +119,15 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 
 		// obj
 		if (model == nullptr) {
-			auto it = models.find(objectData.fileName + ".obj");
-			if (it != models.end()) { model = it->second.get(); }
+			model = modelManager->FindModel(objectData.fileName + ".obj");
 		}
 
 		// gltf
 		if (model == nullptr) {
-			auto it = models.find(objectData.fileName + ".gltf");
-			if (it != models.end()) { model = it->second.get(); }
+			model = modelManager->FindModel(objectData.fileName + ".gltf");
 		}
 
-		// モデルを指定して3Dオブジェクトを生成 
+		// モデルを指定して3Dオブジェクトを生成
 		Engine::Object3d* newObject = entityManager->CreateObject3D(objectData.fileName, Engine::ObjectModelType::kNormal,{},{});
 		//newObject->Initialize(entity3DManager_);
 		newObject->SetModel(model);
@@ -149,9 +147,9 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 			aabb->SetIsStatic(true);
 			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
 		}
-		// 座標 
+		// 座標
 		newObject->GetWorldTransform().translate_ = objectData.position;
-		// 回転角 
+		// 回転角
 		newObject->GetWorldTransform().rotate_ = objectData.rotation;
 		// 大きさ
 		newObject->GetWorldTransform().scale_ = objectData.scale;
@@ -169,14 +167,14 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 		camera->Initialize(nullptr, entityManager, nullptr, {});
 		camera->GetUniqueCamera()->SetTransform({ cameraData.scale,
 			Math::DegreesToRadians(cameraData.rotation),cameraData.position });
-		
+
 		camera->SetName(cameraData.fileName);
 
 		cameras_.push_back(std::move(camera));
 	}
 
 
-	
+
 	// カメラマネージャーに追加
 	for (auto& camera : cameras_) {
 		cameraManager->AddCamera({ camera.get() ,false}, camera->GetName());
@@ -196,47 +194,47 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 	for (auto& pointData : levelData->pointDatas) {
 		std::shared_ptr<Engine::PointLight> point = std::make_shared<Engine::PointLight>();
 		point->point = pointData;
-		
+
 		lights_.push_back(point);
 	}
 	for (auto& spotData : levelData->spotDatas) {
 		std::shared_ptr<Engine::SpotLight> spot = std::make_shared<Engine::SpotLight>();
 		spot->spot = spotData;
-		
+
 		lights_.push_back(spot);
 	}
-	
+
 
 	for (auto& light : lights_) {
 		entityManager->GetLightManager()->AddLight(light);
 	}
 
-	
-	
+
+
 }
 
-void LoadLevelData::ClearData()  
-{  
+void LoadLevelData::ClearData()
+{
 	// Initialize前や二重Finalize時は破棄済みなので何もしない。
 	if (!levelData_) {
 		return;
 	}
 
-	// "LevelObject" タグを持つオブジェクトを全削除  
+	// "LevelObject" タグを持つオブジェクトを全削除
 	if (entityManager) {
 		entityManager->EraseObject3DByTag("LevelObject");
 	}
-	levelData_->objects.clear();  
-	levelData_->players.clear();  
-	levelData_->enemys.clear();  
-	levelData_->cameras.clear();  
-	objects_.clear();  
+	levelData_->objects.clear();
+	levelData_->players.clear();
+	levelData_->enemys.clear();
+	levelData_->cameras.clear();
+	objects_.clear();
 	levelData_->directionalDatas.clear();
 	levelData_->pointDatas.clear();
 	levelData_->spotDatas.clear();
 
 
-	
+
 	for (auto& light : lights_) {
 		light.reset();
 	}
@@ -246,15 +244,13 @@ void LoadLevelData::ClearData()
 	lights_.clear();
 
 
-	// カメラの削除処理を修正  
-	for (auto& camera : cameras_) {  
+	// カメラの削除処理を修正
+	for (auto& camera : cameras_) {
 		// CameraManagerは非所有参照だけを持つため、先に登録を外してからunique_ptrで破棄する。
 		if (cameraManager && camera) {
 			cameraManager->DeleteCamera(camera->GetName());
 		}
 		camera.reset();
-	}  
-	cameras_.clear();  
+	}
+	cameras_.clear();
 }
-
-

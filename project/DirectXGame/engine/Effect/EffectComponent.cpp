@@ -1,7 +1,6 @@
 #include "EffectComponent.h"
 #include <DirectXGame/engine/DirectX/Common/DirectXCommon.h>
 #include <DirectXGame/engine/Manager/Entity/EntityManager.h>
-#include <DirectXGame/engine/MyGame/MyGame.h>
 void Engine::EffectComponent::Init(EntityManager* entityManager, GlobalVariables* globalVariables)
 {
 	assert(entityManager && globalVariables);
@@ -245,22 +244,24 @@ void Engine::EffectComponent::RemovePrimitive(const std::string& name, ShapePara
 
 
 
-void Engine::EffectComponent::Update() {
+void Engine::EffectComponent::Update() { Update(entityManager->GetDeltaTime()); }
+
+void Engine::EffectComponent::Update(float deltaTime) {
 
 	// エミッタ更新
 	for(auto& [name, emitter] : emitters_) {
-		emitter->Update();
+		emitter->Update(deltaTime);
 	}
 
 	// トレイルエフェクト更新
 	for(auto& [name, trail] : trails_) {
-		trail->Update();
+		trail->Update(deltaTime);
 	}
 
 	// プリミティブ形状更新
 	for (auto& [type, primitiveMap] : primitives3D_) {
 		for (auto& [name, primitive] : primitiveMap) {
-			primitive->Update(MyGame::GameTime());
+			primitive->Update(deltaTime);
 		}
 	}
 

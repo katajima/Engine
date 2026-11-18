@@ -1,6 +1,7 @@
 #include "BaseCamera.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-#include "DirectXGame/engine/MyGame/MyGame.h"
+
 // 汎用カメラを初期化する。
 void BaseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position)
@@ -17,6 +18,8 @@ void BaseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* ent
 }
 
 // 特別な挙動を持たない汎用カメラを更新する。
+void BaseCamera::Update(float deltaTime) { mDeltaTime = deltaTime; Update(); }
+
 void BaseCamera::Update()
 {
 	// カメラの行列だけを更新し、派生クラス固有の制御は実行しない。
@@ -30,7 +33,7 @@ void BaseCamera::Update()
 /// オブジェクトの時間取得
 /// </summary>
 /// <returns></returns>
-float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
+float BaseCamera::GetTime() const { return mDeltaTime * timeSpeed_; }
 
 void BaseCamera::CreateFixedCamera(Engine::EntityManager* entityManager, const Transform& transform, float farClip) {
 	this->entityManager = entityManager;	// エンティティ3d

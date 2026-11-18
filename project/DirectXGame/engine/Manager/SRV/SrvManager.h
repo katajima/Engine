@@ -2,11 +2,14 @@
 
 // C++
 #include <cstdint>
+#include <mutex>
+#include <vector>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
 #include <atomic>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 
@@ -32,6 +35,14 @@ namespace Engine {
 		/// アロケート
 		/// </summary>
 		uint32_t Allocate();
+		/// @brief GPU完了後に返却されるデスクリプタ所有権を取得する。
+		/// @return 割り当て所有権。
+		DescriptorAllocation AllocateDescriptor();
+		/// @brief GPU待機完了後、破棄済みデスクリプタを再利用可能にする。
+		void CollectRetiredDescriptors();
+		/// @brief 一時リソースをGPU待機完了まで保持する。
+		/// @param resource コマンドが参照するリソース。
+		void RetainUntilGpuComplete(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
 
 		/// <summary>
 		/// デスクリプタハンドル計算
@@ -101,7 +112,10 @@ namespace Engine {
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
 		// 次に使用するSRVインデックス
-		std::atomic<uint32_t> useIndex_{ 0 };
+		// 先頭0はImGuiフォント専用として予約する。
+		DescriptorAllocator mDescriptorAllocator{ kMaxSRVCount, 1 };
+		std::vector<DescriptorAllocation> mLegacyAllocations;
+		std::mutex mLegacyMutex;
 
 	private:
 		DXGIDevice* dxgiDevice = nullptr;

@@ -5,7 +5,6 @@
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/engine/Animation/Animation.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -27,6 +26,7 @@ Engine::Object3d::Object3d() = default;
 Engine::Object3d::~Object3d() = default;
 
 void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType) {
+	SetDeltaTime(entityManager->GetDeltaTime());
 	this->entityManager = entityManager;														// エンティティ3d
 	this->object3dCommon = entityManager->GetObject3dCommon();								// オブジェクト共通クラス
 	this->skinningCommon = entityManager->GetSkinningCommon();								// スキニング共通クラス
@@ -80,6 +80,7 @@ void Engine::Object3d::InitAnimationComponent() {
 	animationComponent_ = std::make_unique<AnimationComponent>();
 	animationComponent_->Init(lineCommon);
 	animationComponent_->SetModel(renderComponent_->GetModel());
+	renderComponent_->SetAnimationComponent(*animationComponent_);
 }
 
 // 初期化
@@ -130,7 +131,7 @@ void Engine::Object3d::Update()
 	case ObjectModelType::kAnimation:
 
 		// アニメーションコンポーネント更新
-		animationComponent_->Update(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		animationComponent_->Update(mDeltaTime, transformComponent_->GetWorldTransform());
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
@@ -139,7 +140,7 @@ void Engine::Object3d::Update()
 	case ObjectModelType::kSkinning:
 
 		// アニメーションコンポーネント更新
-		animationComponent_->UpdateSkin(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		animationComponent_->UpdateSkin(mDeltaTime, transformComponent_->GetWorldTransform());
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
@@ -147,7 +148,7 @@ void Engine::Object3d::Update()
 		break;
 	case ObjectModelType::kPrimitive:
 		if (GetPrimitive()) {
-			GetPrimitive()->Update(MyGame::GameTime());
+			GetPrimitive()->Update(mDeltaTime);
 
 			transformation->Update(GetPrimitive(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
@@ -161,7 +162,7 @@ void Engine::Object3d::Update()
 		break;
 	case ObjectModelType::kOcean:
 		if (renderComponent_->GetOcean()) {
-			renderComponent_->GetOcean()->Update();
+			renderComponent_->GetOcean()->Update(mDeltaTime);
 
 			transformation->Update(renderComponent_->GetOcean(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
@@ -183,7 +184,7 @@ void Engine::Object3d::RigidBodyUpdate()
 	if (isDelete_) return;
 	// 物理
 	if (rigidBodyComponent_ && isRigidUpdate_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		rigidBodyComponent_->Integrate(mDeltaTime, transformComponent_->GetWorldTransform());
 	}
 }
 
@@ -322,6 +323,7 @@ void Engine::Object3d::DebugImguiModel()
 
 void Engine::Object3d::SetModel(Model* model){
 	renderComponent_->SetModel(model);
+	if (animationComponent_) { animationComponent_->SetModel(model); }
 }
 
 void Engine::Object3d::SetModel(const std::string& filePath)
@@ -329,6 +331,7 @@ void Engine::Object3d::SetModel(const std::string& filePath)
 	//モデルを検索してセット
 	Model* findModel = object3dCommon->GetDxCommon()->GetModelManager()->FindModel(filePath);
 	renderComponent_->SetModel(findModel);
+	if (animationComponent_) { animationComponent_->SetModel(findModel); }
 }
 
 #pragma endregion // その他

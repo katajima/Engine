@@ -7,6 +7,7 @@ using namespace Microsoft::WRL;
 
 // DirectX
 #include <d3d12.h>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 namespace Engine {
 	// 前方宣言
@@ -68,6 +69,7 @@ namespace Engine {
 		uint32_t dsvIndex_ = 0;
 		// デプスステンシル用リソースのSRVインデックス
 		uint32_t srvIndex_ = 0;
+		DescriptorAllocation mSrvAllocation;
 
 
 

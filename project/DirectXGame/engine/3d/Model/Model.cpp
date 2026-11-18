@@ -1,5 +1,6 @@
 // engine
 #include"Model.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 #include"ModelCommon.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
@@ -50,10 +51,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 		// スキンクラスター生成
 		CreateModel::CreateSkinCluster(modelData, modelCommon, gpuResourceMutex);
 
-		auto it = modelData.animations.find(modelData.currentAnimName);
-		if (it != modelData.animations.end()) {
-			AnimationFunction::ApplyAnimation(modelData.skeleton, it->second, 1.0f);
-		}
+
 	}
 
 	// マテリアル読み込み
@@ -76,7 +74,7 @@ void Engine::Model::Draw()
 {
 }
 
-void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr)
+void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr, AnimationComponent& animator)
 {
 	auto commandList = modelCommon->GetCommand()->GetList();
 
@@ -87,7 +85,7 @@ void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::v
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
+		mesh->GetCommandList(animator.GetSkinCluster(i).outputBufferView, mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
@@ -97,7 +95,7 @@ void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::v
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.pResource = animator.GetSkinCluster(i).outputVertexResource.Get();
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -158,4 +156,53 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	timer_.EndTimer();
 
 	return modelData;
+}
+
+std::vector<std::unique_ptr<Engine::SkinCluster>> Engine::Model::CreateSkinningInstances()
+{
+    std::vector<std::unique_ptr<SkinCluster>> instances;
+    for (const auto& mesh : modelData.mesh) {
+        auto instance = std::make_unique<SkinCluster>();
+        if (!mesh->skinCluster || modelData.skeleton.joints.empty()) {
+            instances.push_back(std::move(instance));
+            continue;
+        }
+        const auto& asset = *mesh->skinCluster;
+        // 入力頂点とウェイトは不変なので共有し、姿勢と変形結果だけを個体別に確保する。
+        instance->inverseBindPoseMatrices = asset.inverseBindPoseMatrices;
+        instance->influenceResource = asset.influenceResource;
+        instance->influenceSrvHandle = asset.influenceSrvHandle;
+        instance->inputVertexSrvHandle = asset.inputVertexSrvHandle;
+        instance->skinningInformation = asset.skinningInformation;
+        instance->mDescriptorAllocations = asset.mDescriptorAllocations;
+        const auto jointCount = modelData.skeleton.joints.size();
+        instance->paletteResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * jointCount);
+        WellForGPU* palette = nullptr;
+        instance->paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&palette));
+        instance->mappedPalette = {palette, jointCount};
+        auto paletteAllocation = srvManager->AllocateDescriptor();
+        paletteAllocation.SetResource(instance->paletteResource);
+        const auto paletteIndex = paletteAllocation.GetIndex();
+        srvManager->CreateSRVforStructuredBuffer(paletteIndex, instance->paletteResource.Get(), static_cast<UINT>(jointCount), sizeof(WellForGPU));
+        instance->paletteSrvHandle = {srvManager->GetCPUDescriptorHandle(paletteIndex), srvManager->GetGPUDescriptorHandle(paletteIndex)};
+        instance->mDescriptorAllocations.push_back(std::move(paletteAllocation));
+
+        instance->outputVertexResource = dxCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(VertexData) * mesh->vertices.size());
+        instance->outputBufferView = {instance->outputVertexResource->GetGPUVirtualAddress(), static_cast<UINT>(sizeof(VertexData) * mesh->vertices.size()), sizeof(VertexData)};
+        auto outputAllocation = srvManager->AllocateDescriptor();
+        outputAllocation.SetResource(instance->outputVertexResource);
+        const auto outputIndex = outputAllocation.GetIndex();
+        srvManager->CreateUAVforStructuredBuffer(outputIndex, instance->outputVertexResource.Get(), static_cast<UINT>(mesh->vertices.size()), sizeof(VertexData));
+        instance->outputVertexUavHandle = {srvManager->GetCPUDescriptorHandle(outputIndex), srvManager->GetGPUDescriptorHandle(outputIndex)};
+        instance->mDescriptorAllocations.push_back(std::move(outputAllocation));
+        D3D12_RESOURCE_BARRIER barrier{};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition.pResource = instance->outputVertexResource.Get();
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        dxCommon->GetCommandList()->ResourceBarrier(1, &barrier);
+        instances.push_back(std::move(instance));
+    }
+    return instances;
 }

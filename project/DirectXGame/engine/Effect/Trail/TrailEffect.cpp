@@ -1,7 +1,6 @@
 #include "TrailEffect.h"
 
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Math/LineCurveMath.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 
@@ -134,7 +133,7 @@ void Engine::TrailEffect::Update()
 
 	Vector3 start = worldtransformTstr_.worldMat_.GetWorldPosition();
 	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
-	const float deltaTime = MyGame::GameTime();
+	const float deltaTime = GetDeltaTime();
 
 	// 軌道を進めながら、リボンの両レールを現在の親位置へ追従させる。
 	if (trajectoryEnabled_) {

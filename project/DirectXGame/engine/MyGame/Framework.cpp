@@ -81,7 +81,7 @@ void Engine::Framework::Finalize()
 
 }
 
-void Engine::Framework::Update()
+void Engine::Framework::Update(float deltaTime)
 {
 	// 基盤更新全体を計測し、音声・入力・メッセージ処理の負荷を確認できるようにする。
 	ENGINE_CPU_PROFILE_SCOPE("Framework::Update");
@@ -104,6 +104,7 @@ void Engine::Framework::Run()
 {
 	// ゲームの初期化
 	Initialize();
+	auto previousTime = std::chrono::steady_clock::now();
 	while (true) {
 		// UpdateとDrawを含む1ループを1フレームとして記録する。
 		CpuProfiler::Get().BeginFrame();
@@ -112,7 +113,10 @@ void Engine::Framework::Run()
 			ENGINE_CPU_PROFILE_SCOPE("Frame");
 
 		// 毎フレーム更新
-			Update();
+			const auto currentTime = std::chrono::steady_clock::now();
+			const float deltaTime = std::chrono::duration<float>(currentTime - previousTime).count();
+			previousTime = currentTime;
+			Update(deltaTime);
 			// 終了リクエストが来たら描画をスキップしてフレームを閉じる。
 			if (!IsEndRequest()) {
 				// 描画
