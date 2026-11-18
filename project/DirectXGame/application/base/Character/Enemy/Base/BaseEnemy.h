@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+#include <optional>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "EnemyData.h"
 
@@ -62,12 +64,12 @@ namespace Character {
 		/// リロード
 		/// </summary>
 		virtual void Reload() {};
-		/// <summary>現在の攻撃・移動対象を取得する。</summary>
-		/// <returns>非所有ポインター。対象が設定されていない場合はnullptr。</returns>
+		/// @brief 手動ロックオン状態によらず、敵に割り当てられた追跡対象を取得する。
+		/// @return 非所有ポインター。対象未設定時はnullptr。
 		const BaseCharacter* GetTarget();
 
-		/// <summary>攻撃・移動対象となるキャラクターを設定する。</summary>
-		/// <param name="target">対象への非所有ポインター。解除時はnullptr。</param>
+		/// @brief 攻撃・移動対象を設定する。所有者は対象破棄後の更新前に解除する。
+		/// @param target 対象への非所有ポインター。解除時はnullptr。
 		void SetTargetCharacters(BaseCharacter* target);
 
 		/// <summary>敵固有の攻撃判断システムを取得する。</summary>
@@ -131,14 +133,14 @@ namespace Character {
 		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
 		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
-		/// <summary>現在のターゲット座標を取得する。</summary>
-		/// <returns>ターゲットのワールド座標。未設定時は既定のゼロベクトル。</returns>
+		/// @brief 現在の追跡対象の座標を取得する。
+		/// @return 対象のワールド座標。未設定時はゼロベクトル。
 		Vector3 GetTargetPos();
-		/// <summary>自身から現在ターゲットまでの距離を取得する。</summary>
-		/// <returns>ワールド単位の直線距離。</returns>
+		/// @brief 自身から追跡対象までの水平距離を取得する。
+		/// @return 水平距離。対象未設定時は正の無限大。
 		float GetTargetDistance();
-		/// <summary>自身からターゲットへ向かう方向を取得する。</summary>
-		/// <returns>正規化済みワールド方向。方向を算出できない場合はゼロベクトル。</returns>
+		/// @brief 自身から追跡対象へ向かう方向を取得する。
+		/// @return 正規化済みの方向。対象未設定時はゼロベクトル。
 		Vector3 TargetDirection();
 
 	protected:
@@ -164,6 +166,7 @@ namespace Character {
 		/// </summary>
 		void UpdateBaseEnemyGetValue();
 	protected:
+		std::optional<std::reference_wrapper<const BaseCharacter>> mTarget;
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
 		int crowdGroupId_ = 0; // 群衆グループID

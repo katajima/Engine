@@ -149,6 +149,8 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	ctx.target = lockOnSystem->GetTarget();
 	if (owner->GetCharacterType() == Type::Enemy) {
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(owner);
+		// 敵の移動には手動ロックオン状態ではなく、AIへ割り当てられた追跡対象を渡す。
+		ctx.target = enemy->GetTarget();
 		if (enemy->GetEnemyAiSystem()) {
 			// 攻撃役は攻撃スロットへ、それ以外は群れ行動で計算された位置へ向かわせる
 			const bool isAttackRing =

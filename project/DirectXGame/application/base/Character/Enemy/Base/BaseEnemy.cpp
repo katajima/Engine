@@ -15,6 +15,7 @@
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 #include "EnemyWaveExitState.h"
+#include <limits>
 
 namespace Character {
 	BaseEnemy::~BaseEnemy() = default;
@@ -23,18 +24,22 @@ namespace Character {
 	Vector3 BaseEnemy::GetTargetPos()
 	{
 		// ターゲット位置
-		return GetTarget()->GetWorldPosition();
+		const auto* target = GetTarget();
+		return target ? target->GetWorldPosition() : Vector3{};
 	}
 
 	float BaseEnemy::GetTargetDistance()
 	{
 		// ターゲットとの距離
-		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(GetTarget()->GetWorldPosition());
+		const auto* target = GetTarget();
+		return target ? GetWorldPosition().DistanceXZ(target->GetWorldPosition())
+			: (std::numeric_limits<float>::infinity)();
 	}
 
 	Vector3 BaseEnemy::TargetDirection()
 	{
 		// ターゲットの方向
+		if (!GetTarget()) { return {}; }
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
 
@@ -175,6 +180,8 @@ namespace Character {
 		}
 
 		assert(this);
+		// 追跡対象がいない間は、対象を必要とするAIと攻撃ステートを進めない。
+		if (!GetTarget() && !GetAttackController()->IsDebug()) { return; }
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		// 敵側も攻撃ノードのスーパーアーマーや無敵時間を共通更新する
@@ -235,7 +242,7 @@ namespace Character {
 #pragma endregion
 
 	void BaseEnemy::Move() {
-		if (isStopping_) return;
+		if (isStopping_ || !GetTarget()) return;
 		if (GetAttackController()->IsDebug()) {
 			return;
 		}
@@ -301,11 +308,17 @@ namespace Character {
 	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {
-		return GetAttackController()->GetLockOnSystem()->GetTarget();
+		return mTarget ? &mTarget->get() : nullptr;
 	}
 
 	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
-		GetAttackController()->GetLockOnSystem()->SetTargets({ target });
+		mTarget = target ? std::optional{std::cref(*target)} : std::nullopt;
+		if (target) {
+			GetAttackController()->GetLockOnSystem()->SetTargets({ target });
+		}
+		else {
+			GetAttackController()->GetLockOnSystem()->SetTargets({});
+		}
 	}
 
 }

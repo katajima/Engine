@@ -73,12 +73,12 @@ namespace Character {
 
 			if (character->GetCharacterType() == Type::Enemy) {
 				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+				// プレイヤー削除・死亡時も、更新前に古い追跡参照を解除する。
+				enemy->SetTargetCharacters(hasEnemyTarget ? player : nullptr);
 
 				if (enemy->GetAlive() && !enemy->IsWaveExiting()) {
 					debugEnemies.push_back(enemy);
 					if (hasEnemyTarget || enemy->GetAttackController()->IsDebug()) {
-						// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
-						enemy->SetTargetCharacters(player);
 						target.push_back(enemy);
 						enemies.push_back(enemy);
 					}
