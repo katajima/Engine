@@ -76,6 +76,7 @@ void Engine::Object3dInstanceManager::ReleaseGroupResource(ObjectGroup& group)
 		group.instanceData = nullptr;
 	}
 
+	group.mSrvAllocation = {};
 	group.resource.Reset();
 	group.object.clear();
 	group.idMap.clear();
@@ -85,7 +86,7 @@ void Engine::Object3dInstanceManager::ReleaseGroupResource(ObjectGroup& group)
 }
 
 
-void Engine::Object3dInstanceManager::Update() {
+void Engine::Object3dInstanceManager::Update(float deltaTime) {
 
 	// カメラあるなら
 	if (camera_) {
@@ -113,7 +114,7 @@ void Engine::Object3dInstanceManager::Update() {
 
 				if (group.instanceCount < kNumMaxInstance) {
 					// ワールド行列を計算
-					objectIterator->Update();
+					objectIterator->Update(deltaTime);
 
 					Matrix4x4 worldMatrix = objectIterator->transform.worldMat_;
 
@@ -157,7 +158,7 @@ void Engine::Object3dInstanceManager::Update() {
 
 				if (group.instanceCount < kNumMaxInstance) {
 					// ワールド行列を計算
-					objectIterator->Update();
+					objectIterator->Update(deltaTime);
 
 					Matrix4x4 worldMatrix = objectIterator->transform.worldMat_;
 
@@ -393,7 +394,9 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = srvManager->Allocate();
+	objectGroup.mSrvAllocation = srvManager->AllocateDescriptor();
+	objectGroup.mSrvAllocation.SetResource(objectGroup.resource);
+	objectGroup.srvIndex = objectGroup.mSrvAllocation.GetIndex();
 	objectGroup.instancingSrvHandleCPU = srvManager->GetCPUDescriptorHandle(
 		objectGroup.srvIndex);
 	objectGroup.instancingSrvHandleGPU = srvManager->GetGPUDescriptorHandle(
@@ -447,7 +450,9 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = srvManager->Allocate();
+	objectGroup.mSrvAllocation = srvManager->AllocateDescriptor();
+	objectGroup.mSrvAllocation.SetResource(objectGroup.resource);
+	objectGroup.srvIndex = objectGroup.mSrvAllocation.GetIndex();
 	objectGroup.instancingSrvHandleCPU = srvManager->GetCPUDescriptorHandle(
 		objectGroup.srvIndex);
 	objectGroup.instancingSrvHandleGPU = srvManager->GetGPUDescriptorHandle(

@@ -216,6 +216,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuEmitterTiming.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelVertexInput.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\EmissionTimer.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\DescriptorAllocation.cpp" />
+    <ClCompile Include="DirectXGame\engine\Entity\Entity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\FrameTime.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -1250,6 +1257,10 @@
     <None Include="resources\shaders\Trail\Trail.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\engine\Utility\EmissionTimer.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\DescriptorAllocation.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\FrameTime.h" />
     <ClInclude Include="externals\imgui\imgui.h">
       <Filter>imgui</Filter>
     </ClInclude>

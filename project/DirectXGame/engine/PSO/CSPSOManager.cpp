@@ -1,4 +1,5 @@
-﻿#include "CSPSOManager.h"
+#include <stdexcept>
+#include "CSPSOManager.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -35,6 +36,7 @@ void Engine::CSPSOManager::ComputePipelineState()
 	
 	hr_ = dxgiDevice->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
 		IID_PPV_ARGS(&computePSRS_.pipelineState));
+	if (FAILED(hr_)) throw std::runtime_error("CreateComputePipelineState failed");
 
 }
 

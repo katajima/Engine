@@ -6,6 +6,7 @@
 #include<wrl.h>
 #include<string>
 #include<vector>
+#include <algorithm>
 #include<format>
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
@@ -45,14 +46,10 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
-		/// <summary>
-		/// ライト追加
-		/// </summary>
-		void AddLight(std::shared_ptr<Lights> light) {
-			light->SetNumber(int(m_lights.size()));
-			m_lights.push_back(light);
-			//count++;
-		}
+		/// @brief GPU転送領域の上限を超えない場合にライトを登録する。
+		/// @param light 登録するライト。nullptrは登録しない。
+		/// @return 登録できた場合はtrue。同じ種類が10個ある場合はfalse。
+		bool AddLight(std::shared_ptr<Lights> light);
 		/// <summary>
 		/// ライト数取得
 		/// </summary>
@@ -95,7 +92,7 @@ namespace Engine {
 
 		DirectXCommon* dxCommon = nullptr;
 
-		const uint32_t kNumMaxInstance = 10;
+		static constexpr uint32_t kNumMaxInstance = 10;
 
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> directionalLightResource;
@@ -104,7 +101,7 @@ namespace Engine {
 
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> pointLightResource;
-		PointLightData* pointLightData;
+		PointLightData* pointLightData = nullptr;
 		const int pointMax = 3;
 
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -9,7 +9,7 @@
 namespace Engine {
 
 	// 親イベントを持たないイベントを表すインデックス値。
-	inline constexpr uint32_t kInvalidProfileEventIndex = std::numeric_limits<uint32_t>::max();
+	inline constexpr uint32_t kInvalidProfileEventIndex = (std::numeric_limits<uint32_t>::max)();
 
 	/// <summary>
 	/// CPU上で計測した1つのスコープの情報を保持する構造体。

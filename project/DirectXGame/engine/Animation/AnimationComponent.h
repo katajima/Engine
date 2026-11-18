@@ -24,7 +24,17 @@ namespace Engine {
 		/// <summary>
 		/// アニメーションするモデルを設定
 		/// </summary>
-		void SetModel(Model* mod) { model = mod; }
+		void SetModel(Model* mod);
+        /// @brief この個体の評価済みスケルトンを取得する。
+        /// @return モデル共有データから独立した姿勢。
+        const Skeleton& GetSkeleton() const;
+        /// @brief この個体のスキニング用GPUデータを取得する。
+        /// @param meshIndex メッシュの番号。
+        /// @return 個体別のパレットと出力バッファ。
+        SkinCluster& GetSkinCluster(size_t meshIndex);
+        /// @brief この個体が再生中のクリップ名を取得する。
+        /// @return 現在のアニメーション名。
+        const std::string& GetCurrentAnimationName() const;
 
 		/// <summary>
 		/// スキニング更新
@@ -103,15 +113,15 @@ namespace Engine {
 		/// <summary>
 		/// ブレンド率を更新して0.0f～1.0fの補間値を返す
 		/// </summary>
-		float UpdateBlendRate(ModelData& modelData, float deltaTime);
+		float UpdateBlendRate(const ModelData& modelData, float deltaTime);
 		/// <summary>
 		/// スキニング用のアニメーション姿勢を反映する
 		/// </summary>
-		void ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		void ApplySkinAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime);
 		/// <summary>
 		/// 通常ノード用のアニメーション姿勢を反映する
 		/// </summary>
-		void ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		void ApplyNodeAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime);
 		/// <summary>
 		/// ノードアニメーションからローカル行列を作成する
 		/// </summary>
@@ -119,14 +129,21 @@ namespace Engine {
 		/// <summary>
 		/// スキンクラスターのパレットを安全に更新する
 		/// </summary>
-		void UpdateSkinClusters(ModelData& modelData);
+		void UpdateSkinClusters(const ModelData& modelData);
 		/// <summary>
 		/// マテリアルのGPU転送を安全に更新する
 		/// </summary>
-		void UpdateMaterialGPUData(ModelData& modelData);
+		void UpdateMaterialGPUData(const ModelData& modelData);
 
 	private:
-		// アニメーション再生しているか
+		std::string mCurrentAnimationName = "Idle";
+        std::string mPreviousAnimationName;
+        float mBlendTime = 0.0f;
+        float mBlendDuration = 0.3f;
+        bool mIsBlending = false;
+        Skeleton mSkeleton{};
+        std::vector<std::unique_ptr<SkinCluster>> mSkinClusters;
+        // アニメーション再生しているか
 		bool isPlaying = true;
 		// 逆再生するか
 		bool isReversePlayback = false;

@@ -22,6 +22,7 @@ namespace Engine {
 	class ModelCommon;
 	class DirectXCommon;
 	class Material;
+	class AnimationComponent;
 
 	/// <summary>
 	/// モデルクラス
@@ -45,16 +46,22 @@ namespace Engine {
 		/// 通常描画
 		/// </summary>
 		void Draw();
+        /// @brief モデルの不変な入力バッファを共有し、個体別のスキニング出力を生成する。
+        /// @return メッシュ順のスキニングインスタンス。
+        std::vector<std::unique_ptr<SkinCluster>> CreateSkinningInstances();
 
 		/// <summary>
 		/// スキニング用描画
 		/// </summary>
-		void DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr);
+		void DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr, AnimationComponent& animator);
 
 		/// <summary>
 		/// ModelData取得
 		/// </summary>
 		ModelData& GetModelData() { return modelData; }
+        /// @brief 共有モデルの読み取り専用データを取得する。
+        /// @return クリップと初期姿勢を含む共有資産。
+        const ModelData& GetModelData() const { return modelData; }
 		/// <summary>
 		/// モデルのが透過物しているかを計算して透明度を返す
 		/// </summary>

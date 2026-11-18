@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "GpuParticleSystem.h"
 
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
@@ -216,7 +217,8 @@ void Engine::GpuParticleGroup::UpdateEmitte(float deltaTime)
 
 		// 1回の Emit で発生する数 = common.count
 		// threadGroups (= グループ数) を求める
-		uint32_t threadGroups = (common.count + threadCount - 1) / threadCount; // グループ数
+		const auto emissionCount = static_cast<uint32_t>((std::min)(static_cast<uint64_t>(common.count) * common.emit, static_cast<uint64_t>(cbMaxInstance_.Data()->maxInstance)));
+		uint32_t threadGroups = (emissionCount + threadCount - 1) / threadCount; // グループ数
 		uint32_t threadsForEmitter = threadGroups * threadCount; // スレッド数（THREAD_COUNT の倍）
 
 		PerEmitterDispatch info{};

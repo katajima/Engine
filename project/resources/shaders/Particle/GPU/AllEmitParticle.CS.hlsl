@@ -62,7 +62,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     // --- emit のループ（stride = myDispatch.totalThreadCount） ---
     uint stride = myDispatch.totalThreadCount;
-    for (uint emitIndex = localThreadIndex; emitIndex < emitter.count; emitIndex += stride)
+    for (uint emitIndex = localThreadIndex; emitIndex < GetEmissionParticleCount(emitter, gMaxInstance.maxInstance); emitIndex += stride)
     {
         int freeIdx;
         InterlockedAdd(gFreeListIndex[0], -1, freeIdx);

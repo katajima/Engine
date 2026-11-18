@@ -1,6 +1,5 @@
 #include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include <dinput.h>
 
@@ -74,7 +73,9 @@ void CameraManager::Finalize()
 	previousCameraName_.clear();
 }
 
-void CameraManager::Update()
+void CameraManager::Update() { Update(entityManager->GetDeltaTime()); }
+
+void CameraManager::Update(float deltaTime)
 {
 	// F3キーでデバッグカメラと直前のカメラを切り替える。
 	if (inputSystem && inputSystem->IsTriggerKey(DIK_F3)) {
@@ -102,13 +103,13 @@ void CameraManager::Update()
 
 		// 各カメラ更新
 		for (auto& cam : cameras) {
-			cam.second->Update();
+			cam.second->Update(deltaTime);
 		}
 
 		// 補間中
 		if (isInterpolating) {
 			// カメラ補間時間はゲーム時間倍率を反映して進める
-			currentTime += Engine::MyGame::GameTime();
+			currentTime += deltaTime;
 
 			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
 

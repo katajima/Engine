@@ -1,5 +1,6 @@
-﻿#include "ObjectComponent.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "ObjectComponent.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+
 #include <DirectXGame/engine/3d/Object/Object3dInstanceManager.h>
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
@@ -9,7 +10,7 @@
 /// オブジェクトの時間取得
 /// </summary>
 /// <returns></returns>
-float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
+float ObjectComponent::GetTime() const { return entityManager->GetDeltaTime() * timeSpeed_; }
 
 /// <summary>
 /// オブジェクトの時間設定
@@ -212,5 +213,5 @@ void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager,
 void ObjectComponent::Update() {
     // インスタンシング描画なら
     if (useInstancing)
-        objectInstance_->Update();
+        objectInstance_->Update(entityManager->GetDeltaTime());
 };

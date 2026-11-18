@@ -103,7 +103,9 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 
 
 
-	textureData.srvIndex = srvManager->Allocate();
+	textureData.mSrvAllocation = srvManager->AllocateDescriptor();
+	textureData.mSrvAllocation.SetResource(textureData.resource);
+	textureData.srvIndex = textureData.mSrvAllocation.GetIndex();
 	textureData.srvHandleCPU = srvManager->GetCPUDescriptorHandle(textureData.srvIndex);
 	textureData.srvHandleGPU = srvManager->GetGPUDescriptorHandle(textureData.srvIndex);
 

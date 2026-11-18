@@ -211,3 +211,9 @@ struct DispatchCount
     uint pad1;
     uint pad2;
 };
+// 経過した射出周期の分を合算し、粒子バッファの容量で制限する。
+uint GetEmissionParticleCount(EmitterCommon emitter, uint maxCount)
+{
+    if (emitter.emit == 0 || emitter.count == 0) return 0;
+    return emitter.count > maxCount / emitter.emit ? maxCount : emitter.count * emitter.emit;
+}

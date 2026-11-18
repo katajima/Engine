@@ -62,7 +62,15 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
+		/// @brief シーン更新前に各個体へ今回の更新時間を公開する。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void SetDeltaTime(float deltaTime);
+		/// @brief 現在の更新時間を取得する。
+		/// @return 経過秒数。
+		float GetDeltaTime() const;
 
 		/// <summary>
 		/// オブジェクトクリーン
@@ -211,6 +219,7 @@ namespace Engine {
 
 
 	private:
+		float mDeltaTime = 0.0f;
 		std::vector<std::unique_ptr<Entity>> entities_;
 
 		// Update時に毎フレーム作り直す描画キュー。順番はカメラ奥行きから自動で決める。

@@ -44,6 +44,10 @@ namespace Engine {
 		/// アニメーション(デルタ時間)
 		/// </summary>
 		void UpdateAmimetion(float time);
+		/// @brief 経過時間を指定してスプライトアニメーションを進める。
+		/// @param time 一枚の表示時間（秒）。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void UpdateAmimetion(float time, float deltaTime);
 
 		/// <summary>
 		/// 描画

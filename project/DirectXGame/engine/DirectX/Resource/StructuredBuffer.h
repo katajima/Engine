@@ -1,5 +1,6 @@
 #pragma once
 #include<wrl.h>
+#include <stdexcept>
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
@@ -29,6 +30,11 @@ namespace Engine {
 		// 生成
 		void CreateBuffer(DirectXCommon* dxCommon, int num = 1, bool useUav = false)
 		{
+			if (num <= 0) throw std::invalid_argument("StructuredBuffer element count must be positive");
+			if (data_ && resource_) resource_->Unmap(0, nullptr);
+			data_ = nullptr;
+			mSrvAllocation = {};
+			mUavAllocation = {};
 			this->dxCommon = dxCommon;	// DX共通クラス
 			useUav_ = useUav;	// uavを使うか
 			num_ = num;			// 生成個数
@@ -58,13 +64,17 @@ namespace Engine {
 
 
 
-			srvIndex_ = dxCommon->GetSrvManager()->Allocate();
+			mSrvAllocation = dxCommon->GetSrvManager()->AllocateDescriptor();
+			mSrvAllocation.SetResource(resource_);
+			srvIndex_ = mSrvAllocation.GetIndex();
 			srvHandleCPU_ = dxCommon->GetSrvManager()->GetCPUDescriptorHandle(srvIndex_);
 			srvHandleGPU_ = dxCommon->GetSrvManager()->GetGPUDescriptorHandle(srvIndex_);
 			dxCommon->GetSrvManager()->CreateSRVforStructuredBuffer(srvIndex_, resource_.Get(), num_, sizeof(Type));
 
 			if (useUav_) {
-				uavIndex_ = dxCommon->GetSrvManager()->Allocate();
+				mUavAllocation = dxCommon->GetSrvManager()->AllocateDescriptor();
+				mUavAllocation.SetResource(resource_);
+				uavIndex_ = mUavAllocation.GetIndex();
 				uavHandleCPU_ = dxCommon->GetSrvManager()->GetCPUDescriptorHandle(uavIndex_);
 				uavHandleGPU_ = dxCommon->GetSrvManager()->GetGPUDescriptorHandle(uavIndex_);
 				dxCommon->GetSrvManager()->CreateUAVforStructuredBuffer(uavIndex_, resource_.Get(), num_, sizeof(Type));
@@ -87,12 +97,7 @@ namespace Engine {
 
 			dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(index, srvHandleGPU_);
 
-			if (useUav_) {
-				/// <summary>
-				/// SRV → UAV に戻す
-				/// </summary>
-				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			}
+			// 描画が記録されるまでSRV状態を維持する。
 		}
 		// コンピュートパイプラインにバッファを設定
 		void SetComputeRootDescriptorTable(int index)
@@ -100,7 +105,6 @@ namespace Engine {
 			if (useUav_) {
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 				dxCommon->GetCommandList()->SetComputeRootDescriptorTable(index, uavHandleGPU_);
-				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
 			else {
 				/// <summary>
@@ -129,6 +133,9 @@ namespace Engine {
 		// StructuredBuffer クラス内に追加するメソッド
 		void CopyFrom(const void* srcData, size_t byteSize)
 		{
+			if (byteSize == 0) return;
+			if (!srcData || byteSize > static_cast<size_t>(num_) * sizeof(Type))
+				throw std::out_of_range("StructuredBuffer copy exceeds capacity");
 			assert(dxCommon && "StructuredBuffer::CopyFrom: dxCommon is null");
 			assert(srcData && "StructuredBuffer::CopyFrom: srcData is null");
 			size_t capacity = static_cast<size_t>(num_) * sizeof(Type);
@@ -217,7 +224,8 @@ namespace Engine {
 			/// </summary>
 			barrier_->UavDependence(resource_.Get());
 
-			// uploadBuffer は関数終了で破棄（ComPtr が自動で release）
+			// コマンドは後で実行されるため、コピー元をGPU完了まで保持する。
+			dxCommon->GetSrvManager()->RetainUntilGpuComplete(std::move(uploadBuffer));
 		}
 
 		// コピー
@@ -234,6 +242,8 @@ namespace Engine {
 		}
 
 	private:
+		DescriptorAllocation mSrvAllocation;
+		DescriptorAllocation mUavAllocation;
 		DirectXCommon* dxCommon = nullptr;
 
 		std::unique_ptr<Barrier> barrier_ = nullptr;	// バリア

@@ -1,5 +1,6 @@
 #pragma once
 #include"Framework.h"
+#include "DirectXGame/engine/Utility/FrameTime.h"
 #include "DirectXGame/engine/Base/Profiler/CpuProfilerWindow.h"
 
 namespace Engine {
@@ -23,7 +24,9 @@ namespace Engine {
 		/// <summary>
 		/// 毎フレーム更新
 		/// </summary>
-		void Update() override;
+		/// @brief 実測された経過時間でフレームを更新する。
+		/// @param deltaTime 前フレームから経過した実時間（秒）。
+		void Update(float deltaTime) override;
 
 		/// <summary>
 		/// 描画
@@ -48,15 +51,15 @@ namespace Engine {
 		/// <summary>
 		/// ゲーム内時間取得
 		/// </summary>
-		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
+		static float GameTime();
 		/// <summary>
-		/// 時間倍率を掛けていない固定デルタタイム取得
+		/// 時間倍率を掛けていない実測デルタタイム取得
 		/// </summary>
-		static float BaseDeltaTime() { return kDeltaTime_; };
+		static float BaseDeltaTime();
 		/// <summary>
 		/// 現在のゲーム内時間倍率取得
 		/// </summary>
-		static float GetTimeScale() { return kTimeSpeed_; };
+		static float GetTimeScale();
 		/// <summary>
 		/// ゲーム内時間倍率設定
 		/// </summary>
@@ -64,14 +67,16 @@ namespace Engine {
 		/// <summary>
 		/// 現在の時間
 		/// </summary>
-		static float NowTime() { return nowTime; };
+		static float NowTime();
 
 	private:
-		static float const kDeltaTime_;
+		static float mLegacyGameDeltaTime;
+		static float mLegacyUnscaledDeltaTime;
+		FrameTime mFrameTime;
 		static float kTimeSpeed_;
 		static float nowTime;
 	private:
-		std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+
 
 		float fps = 0.0f;
 

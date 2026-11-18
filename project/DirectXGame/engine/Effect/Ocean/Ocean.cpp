@@ -3,7 +3,6 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "OceanManager.h"
 #include "imgui.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 
 
 
@@ -81,11 +80,13 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 rang
 	index_ = 3;
 }
 
-void Engine::Ocean::Update()
+void Engine::Ocean::Update() { Update(entityManager->GetDeltaTime()); }
+
+void Engine::Ocean::Update(float deltaTime)
 {
 	for (size_t i = 0; i < index_; ++i) {
 		// 波の時間はゲーム時間倍率に合わせて進める
-		cbWaveResource_.Data()[i].time += MyGame::GameTime();
+		cbWaveResource_.Data()[i].time += deltaTime;
 	}
 	material->GPUData();
 }

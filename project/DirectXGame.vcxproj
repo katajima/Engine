@@ -109,6 +109,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuEmitterTiming.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelVertexInput.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\EmissionTimer.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\DescriptorAllocation.cpp" />
+    <ClCompile Include="DirectXGame\engine\Entity\Entity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\FrameTime.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.cpp" />
@@ -556,6 +563,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imnodes\LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\engine\Utility\EmissionTimer.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\DescriptorAllocation.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\FrameTime.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h" />

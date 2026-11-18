@@ -28,9 +28,26 @@ void Engine::SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 uint32_t Engine::SrvManager::Allocate()
 {
-	uint32_t index = useIndex_.fetch_add(1, std::memory_order_relaxed);
-	assert(index < kMaxSRVCount);
+	auto allocation = AllocateDescriptor();
+	const uint32_t index = allocation.GetIndex();
+	std::scoped_lock lock(mLegacyMutex);
+	mLegacyAllocations.push_back(std::move(allocation));
 	return index;
+}
+
+Engine::DescriptorAllocation Engine::SrvManager::AllocateDescriptor()
+{
+	return mDescriptorAllocator.Allocate();
+}
+
+void Engine::SrvManager::CollectRetiredDescriptors()
+{
+	mDescriptorAllocator.CollectRetired();
+}
+
+void Engine::SrvManager::RetainUntilGpuComplete(Microsoft::WRL::ComPtr<ID3D12Resource> resource)
+{
+	mDescriptorAllocator.RetainUntilGpuComplete(std::move(resource));
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::SrvManager::GetCPUDescriptorHandle(uint32_t index)
@@ -125,13 +142,12 @@ void Engine::SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex,
 
 bool Engine::SrvManager::IsMaxTexture()
 {
-	if (kMaxSRVCount > useIndex_) {
-		return true;
-	}
-	return false;
+	return mDescriptorAllocator.HasCapacity();
 }
 
 void Engine::SrvManager::Finalize()
 {
+	mLegacyAllocations.clear();
+	mDescriptorAllocator.CollectRetired();
 	descriptorHeap.Reset();
 }

@@ -14,6 +14,7 @@ using namespace Microsoft::WRL;
 //#include"DirectXGame/engine/struct/Structs3D.h"
 
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 namespace Engine {
 	// 前方宣言
@@ -112,6 +113,8 @@ namespace Engine {
 		uint32_t rtvIndex_ = 0;
 		// SRVインデックス
 		uint32_t srvIndex_ = 0;
+		DescriptorAllocation mSrvAllocation;
+		DescriptorAllocation mRtvAllocation;
 		// クリアカラー(赤)
 		const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
 

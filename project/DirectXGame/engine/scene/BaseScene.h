@@ -38,7 +38,9 @@ namespace Engine {
 		virtual void Update() = 0;
 
 		// 
-		void AllUpdate();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void AllUpdate(float deltaTime);
 
 		/// <summary>
 		/// 3D描画
@@ -149,6 +151,7 @@ namespace Engine {
 		Engine::Camera* camera = nullptr;
 		Engine::AudioManager* audioManager = nullptr;
 	protected:
+		float mDeltaTime = 0.0f;
 		bool initialized_ = false;
 	};
 }

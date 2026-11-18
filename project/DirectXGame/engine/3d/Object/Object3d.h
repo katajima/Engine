@@ -47,6 +47,7 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		using Entity::Update;
 		void Update() override;
 
 		/// <summary>

@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+#include <optional>
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -30,6 +32,7 @@ namespace Engine {
 	class Transformation;
 	class EntityManager;
 	class ShadowMap;
+    class AnimationComponent;
 
 	/// <summary>
 	/// 描画に関するコンポーネントクラス
@@ -75,6 +78,9 @@ namespace Engine {
 		/// モデル設定
 		/// </summary>
 		void SetModel(Model* model);
+        /// @brief 描画に使用する個体別アニメーターを設定する。
+        /// @param animator この描画コンポーネントと同じオブジェクトのアニメーター。
+        void SetAnimationComponent(AnimationComponent& animator);
 		/// <summary>
 		/// スカイボックス設定
 		/// </summary>
@@ -193,6 +199,7 @@ namespace Engine {
 	private: // 貰いもの
 		// 3Dエンティティマネージャー
 		EntityManager* entityManager = nullptr;
+		std::optional<std::reference_wrapper<AnimationComponent>> mAnimator;
 		// モデル
 		Model* model = nullptr;
 		// プリミティブ

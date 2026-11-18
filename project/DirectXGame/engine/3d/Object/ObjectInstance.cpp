@@ -1,8 +1,8 @@
-﻿#include "ObjectInstance.h"
+#include "ObjectInstance.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
+
 
 #pragma region ObjectInstance
 
@@ -38,7 +38,7 @@ void Engine::ObjectInstance::Initialize(EntityManager* entity3DManager, bool use
 
 }
 
-void Engine::ObjectInstance::Update() {
+void Engine::ObjectInstance::Update(float deltaTime) {
 	if (isDelete_) return;
 	transform.Update();
 	// コライダー
@@ -50,7 +50,7 @@ void Engine::ObjectInstance::Update() {
 
 	// 物理
 	if (GetRigidBodyComponent() && rigidUpdate_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), transform);
+		rigidBodyComponent_->Integrate(deltaTime, transform);
 	}
 }
 

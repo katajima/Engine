@@ -22,6 +22,19 @@ namespace Engine {
 		/// 毎フレーム更新。
 		/// </summary>
 		virtual void Update() {}
+
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		virtual void Update(float deltaTime);
+		/// @brief 物理更新へ今回の経過時間を渡す。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void RigidBodyUpdate(float deltaTime);
+		/// @brief 既存の引数なし更新にも同じ時間を公開する。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void SetDeltaTime(float deltaTime);
+		/// @brief この個体に渡された更新時間を取得する。
+		/// @return 経過秒数。
+		float GetDeltaTime() const;
 		/// <summary>
 		/// 通常描画。
 		/// </summary>
@@ -70,6 +83,7 @@ namespace Engine {
 		virtual const WorldTransform* GetWorldTransformPtr() const { return nullptr; }
 
 	protected:
+		float mDeltaTime = 0.0f;
 		// 名前
 		std::string name_{};
 		// タグ

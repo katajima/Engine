@@ -36,7 +36,7 @@ void FollowCamera::Update() {
 	if (useCamera) {
 		uniqueCamera_->GetPostEffectManager()->AddPipeline(uniqueCamera_->GetPostEffectPipeline());
 	}
-	controller->Update(Engine::MyGame::GameTime());
+	controller->Update(GetTime());
 	// カメラ更新
 	uniqueCamera_->UpdateMatrix();
 }

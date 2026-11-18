@@ -187,7 +187,9 @@ void Engine::ShadowMap::CreateDescriptors()
 	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 	dxgiDevice_->GetDevice()->CreateDepthStencilView(resource_.Get(), &dsvDesc, dsvHandle_);
 
-	srvIndex_ = srvManager_->Allocate();
+	mSrvAllocation = srvManager_->AllocateDescriptor();
+	mSrvAllocation.SetResource(resource_);
+	srvIndex_ = mSrvAllocation.GetIndex();
 	srvHandleCPU_ = srvManager_->GetCPUDescriptorHandle(srvIndex_);
 	srvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvIndex_);
 
