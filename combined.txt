@@ -19817,6 +19817,8 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	ctx.target = lockOnSystem->GetTarget();
 	if (owner->GetCharacterType() == Type::Enemy) {
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(owner);
+		// 敵の移動には手動ロックオン状態ではなく、AIへ割り当てられた追跡対象を渡す。
+		ctx.target = enemy->GetTarget();
 		if (enemy->GetEnemyAiSystem()) {
 			// 攻撃役は攻撃スロットへ、それ以外は群れ行動で計算された位置へ向かわせる
 			const bool isAttackRing =
@@ -20438,12 +20440,12 @@ namespace Character {
 
 			if (character->GetCharacterType() == Type::Enemy) {
 				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+				// プレイヤー削除・死亡時も、更新前に古い追跡参照を解除する。
+				enemy->SetTargetCharacters(hasEnemyTarget ? player : nullptr);
 
 				if (enemy->GetAlive() && !enemy->IsWaveExiting()) {
 					debugEnemies.push_back(enemy);
 					if (hasEnemyTarget || enemy->GetAttackController()->IsDebug()) {
-						// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
-						enemy->SetTargetCharacters(player);
 						target.push_back(enemy);
 						enemies.push_back(enemy);
 					}
@@ -24287,6 +24289,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.c
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 #include "EnemyWaveExitState.h"
+#include <limits>
 
 namespace Character {
 	BaseEnemy::~BaseEnemy() = default;
@@ -24295,18 +24298,22 @@ namespace Character {
 	Vector3 BaseEnemy::GetTargetPos()
 	{
 		// ターゲット位置
-		return GetTarget()->GetWorldPosition();
+		const auto* target = GetTarget();
+		return target ? target->GetWorldPosition() : Vector3{};
 	}
 
 	float BaseEnemy::GetTargetDistance()
 	{
 		// ターゲットとの距離
-		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(GetTarget()->GetWorldPosition());
+		const auto* target = GetTarget();
+		return target ? GetWorldPosition().DistanceXZ(target->GetWorldPosition())
+			: (std::numeric_limits<float>::infinity)();
 	}
 
 	Vector3 BaseEnemy::TargetDirection()
 	{
 		// ターゲットの方向
+		if (!GetTarget()) { return {}; }
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
 
@@ -24447,6 +24454,8 @@ namespace Character {
 		}
 
 		assert(this);
+		// 追跡対象がいない間は、対象を必要とするAIと攻撃ステートを進めない。
+		if (!GetTarget() && !GetAttackController()->IsDebug()) { return; }
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		// 敵側も攻撃ノードのスーパーアーマーや無敵時間を共通更新する
@@ -24507,7 +24516,7 @@ namespace Character {
 #pragma endregion
 
 	void BaseEnemy::Move() {
-		if (isStopping_) return;
+		if (isStopping_ || !GetTarget()) return;
 		if (GetAttackController()->IsDebug()) {
 			return;
 		}
@@ -24573,11 +24582,17 @@ namespace Character {
 	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {
-		return GetAttackController()->GetLockOnSystem()->GetTarget();
+		return mTarget ? &mTarget->get() : nullptr;
 	}
 
 	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
-		GetAttackController()->GetLockOnSystem()->SetTargets({ target });
+		mTarget = target ? std::optional{std::cref(*target)} : std::nullopt;
+		if (target) {
+			GetAttackController()->GetLockOnSystem()->SetTargets({ target });
+		}
+		else {
+			GetAttackController()->GetLockOnSystem()->SetTargets({});
+		}
 	}
 
 }
@@ -24587,6 +24602,8 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h
 ============================================================
 #pragma once
+#include <functional>
+#include <optional>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "EnemyData.h"
 
@@ -24650,12 +24667,12 @@ namespace Character {
 		/// リロード
 		/// </summary>
 		virtual void Reload() {};
-		/// <summary>現在の攻撃・移動対象を取得する。</summary>
-		/// <returns>非所有ポインター。対象が設定されていない場合はnullptr。</returns>
+		/// @brief 手動ロックオン状態によらず、敵に割り当てられた追跡対象を取得する。
+		/// @return 非所有ポインター。対象未設定時はnullptr。
 		const BaseCharacter* GetTarget();
 
-		/// <summary>攻撃・移動対象となるキャラクターを設定する。</summary>
-		/// <param name="target">対象への非所有ポインター。解除時はnullptr。</param>
+		/// @brief 攻撃・移動対象を設定する。所有者は対象破棄後の更新前に解除する。
+		/// @param target 対象への非所有ポインター。解除時はnullptr。
 		void SetTargetCharacters(BaseCharacter* target);
 
 		/// <summary>敵固有の攻撃判断システムを取得する。</summary>
@@ -24719,14 +24736,14 @@ namespace Character {
 		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
 		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
-		/// <summary>現在のターゲット座標を取得する。</summary>
-		/// <returns>ターゲットのワールド座標。未設定時は既定のゼロベクトル。</returns>
+		/// @brief 現在の追跡対象の座標を取得する。
+		/// @return 対象のワールド座標。未設定時はゼロベクトル。
 		Vector3 GetTargetPos();
-		/// <summary>自身から現在ターゲットまでの距離を取得する。</summary>
-		/// <returns>ワールド単位の直線距離。</returns>
+		/// @brief 自身から追跡対象までの水平距離を取得する。
+		/// @return 水平距離。対象未設定時は正の無限大。
 		float GetTargetDistance();
-		/// <summary>自身からターゲットへ向かう方向を取得する。</summary>
-		/// <returns>正規化済みワールド方向。方向を算出できない場合はゼロベクトル。</returns>
+		/// @brief 自身から追跡対象へ向かう方向を取得する。
+		/// @return 正規化済みの方向。対象未設定時はゼロベクトル。
 		Vector3 TargetDirection();
 
 	protected:
@@ -24752,6 +24769,7 @@ namespace Character {
 		/// </summary>
 		void UpdateBaseEnemyGetValue();
 	protected:
+		std::optional<std::reference_wrapper<const BaseCharacter>> mTarget;
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
 		int crowdGroupId_ = 0; // 群衆グループID
