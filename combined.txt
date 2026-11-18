@@ -447,12 +447,15 @@
     └──     └── ├── Model/
     └──     └── └── ├── Model.cpp
     └──     └── └── ├── Model.h
+    └──     └── └── ├── ModelAssetIdentity.cpp
+    └──     └── └── ├── ModelAssetIdentity.h
     └──     └── └── ├── ModelCommon.cpp
     └──     └── └── ├── ModelCommon.h
     └──     └── └── ├── ModelData.cpp
     └──     └── └── ├── ModelData.h
     └──     └── └── ├── ModelManager.cpp
     └──     └── └── ├── ModelManager.h
+    └──     └── └── ├── ModelVertexInput.cpp
     └──     └── └── ├── RenderComponent.cpp
     └──     └── └── └── RenderComponent.h
     └──     └── └── Object/
@@ -647,6 +650,7 @@
     └──     └── └── └── GPU/
     └──     └── └──     ├── GPUParticleEmitter.cpp
     └──     └── └──     ├── GPUParticleEmitter.h
+    └──     └── └──     ├── GpuEmitterTiming.cpp
     └──     └── └──     ├── GpuParticleData.h
     └──     └── └──     ├── GpuParticleField.cpp
     └──     └── └──     ├── GpuParticleField.h
@@ -667,6 +671,7 @@
     └──     └──     ├── TrailEffectManager.cpp
     └──     └──     └── TrailEffectManager.h
     └──     ├── Entity/
+    └──     └── ├── Entity.cpp
     └──     └── ├── Entity.h
     └──     └── ├── ModelEntity.h
     └──     └── ├── ObjectComponent.cpp
@@ -695,6 +700,8 @@
     └──     └── ├── DSV/
     └──     └── └── ├── DsvManager.cpp
     └──     └── └── └── DsvManager.h
+    └──     └── ├── DescriptorAllocation.cpp
+    └──     └── ├── DescriptorAllocation.h
     └──     └── ├── Effect/
     └──     └── └── ├── EffectManager.cpp
     └──     └── └── └── EffectManager.h
@@ -798,6 +805,10 @@
     └──     └── └── UIElement.h
     └──     ├── Utility/
     └──     └── ├── ConvertUtility.h
+    └──     └── ├── EmissionTimer.cpp
+    └──     └── ├── EmissionTimer.h
+    └──     └── ├── FrameTime.cpp
+    └──     └── ├── FrameTime.h
     └──     └── ├── MapUtility.h
     └──     └── ├── RangeUtility.h
     └──     └── ├── StringUtility.cpp
@@ -17984,7 +17995,7 @@ void FollowCamera::Update() {
 	if (useCamera) {
 		uniqueCamera_->GetPostEffectManager()->AddPipeline(uniqueCamera_->GetPostEffectPipeline());
 	}
-	controller->Update(Engine::MyGame::GameTime());
+	controller->Update(GetTime());
 	// カメラ更新
 	uniqueCamera_->UpdateMatrix();
 }
@@ -29183,7 +29194,7 @@ namespace Character {
 		// コライダーコンポーネント更新
 		GetObjectComponent()->GetColliderComponent()->UpdateAll(*worldCollider_.get());
 		//武器更新
-		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
+		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetAnimationComponent()->GetSkeleton(), "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
 
 		// サブ武器更新
@@ -44407,11 +44418,11 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/2d/Sprite.cpp
 ============================================================
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
 #include"Sprite.h"
 #include"SpriteCommon.h"
 #include <iostream>
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 
 void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad)
 {
@@ -44549,11 +44560,13 @@ void Engine::Sprite::Update()
 	material->GPUData();
 }
 
-void Engine::Sprite::UpdateAmimetion(float time)
-{
-	animeTime_ += MyGame::GameTime();
+void Engine::Sprite::UpdateAmimetion(float time) { UpdateAmimetion(time, spriteCommon->GetDxCommon()->GetDeltaTime()); }
 
-	if (animeTime_ >= time) {
+void Engine::Sprite::UpdateAmimetion(float time, float deltaTime)
+{
+	const uint32_t frameCount = ConsumeEmissionBursts(animeTime_, deltaTime, time);
+
+	for (uint32_t frame = 0; frame < frameCount; ++frame) {
 		textureLeftTop.x += animeSize_.x;
 		animeNum_.x++;
 
@@ -44569,7 +44582,6 @@ void Engine::Sprite::UpdateAmimetion(float time)
 				animeNum_.y = 0;
 			}
 		}
-		animeTime_ = 0;
 	}
 	Update();
 }
@@ -44666,6 +44678,10 @@ namespace Engine {
 		/// アニメーション(デルタ時間)
 		/// </summary>
 		void UpdateAmimetion(float time);
+		/// @brief 経過時間を指定してスプライトアニメーションを進める。
+		/// @param time 一枚の表示時間（秒）。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void UpdateAmimetion(float time, float deltaTime);
 
 		/// <summary>
 		/// 描画
@@ -45044,6 +45060,7 @@ File Path: project/DirectXGame/engine/3d/Model/Model.cpp
 ============================================================
 // engine
 #include"Model.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 #include"ModelCommon.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
@@ -45094,10 +45111,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 		// スキンクラスター生成
 		CreateModel::CreateSkinCluster(modelData, modelCommon, gpuResourceMutex);
 
-		auto it = modelData.animations.find(modelData.currentAnimName);
-		if (it != modelData.animations.end()) {
-			AnimationFunction::ApplyAnimation(modelData.skeleton, it->second, 1.0f);
-		}
+
 	}
 
 	// マテリアル読み込み
@@ -45120,7 +45134,7 @@ void Engine::Model::Draw()
 {
 }
 
-void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr)
+void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr, AnimationComponent& animator)
 {
 	auto commandList = modelCommon->GetCommand()->GetList();
 
@@ -45131,7 +45145,7 @@ void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::v
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
+		mesh->GetCommandList(animator.GetSkinCluster(i).outputBufferView, mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
@@ -45141,7 +45155,7 @@ void Engine::Model::DrawSkinning(std::vector<MaterialInstance> materials, std::v
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.pResource = animator.GetSkinCluster(i).outputVertexResource.Get();
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -45204,6 +45218,55 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	return modelData;
 }
 
+std::vector<std::unique_ptr<Engine::SkinCluster>> Engine::Model::CreateSkinningInstances()
+{
+    std::vector<std::unique_ptr<SkinCluster>> instances;
+    for (const auto& mesh : modelData.mesh) {
+        auto instance = std::make_unique<SkinCluster>();
+        if (!mesh->skinCluster || modelData.skeleton.joints.empty()) {
+            instances.push_back(std::move(instance));
+            continue;
+        }
+        const auto& asset = *mesh->skinCluster;
+        // 入力頂点とウェイトは不変なので共有し、姿勢と変形結果だけを個体別に確保する。
+        instance->inverseBindPoseMatrices = asset.inverseBindPoseMatrices;
+        instance->influenceResource = asset.influenceResource;
+        instance->influenceSrvHandle = asset.influenceSrvHandle;
+        instance->inputVertexSrvHandle = asset.inputVertexSrvHandle;
+        instance->skinningInformation = asset.skinningInformation;
+        instance->mDescriptorAllocations = asset.mDescriptorAllocations;
+        const auto jointCount = modelData.skeleton.joints.size();
+        instance->paletteResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * jointCount);
+        WellForGPU* palette = nullptr;
+        instance->paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&palette));
+        instance->mappedPalette = {palette, jointCount};
+        auto paletteAllocation = srvManager->AllocateDescriptor();
+        paletteAllocation.SetResource(instance->paletteResource);
+        const auto paletteIndex = paletteAllocation.GetIndex();
+        srvManager->CreateSRVforStructuredBuffer(paletteIndex, instance->paletteResource.Get(), static_cast<UINT>(jointCount), sizeof(WellForGPU));
+        instance->paletteSrvHandle = {srvManager->GetCPUDescriptorHandle(paletteIndex), srvManager->GetGPUDescriptorHandle(paletteIndex)};
+        instance->mDescriptorAllocations.push_back(std::move(paletteAllocation));
+
+        instance->outputVertexResource = dxCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(VertexData) * mesh->vertices.size());
+        instance->outputBufferView = {instance->outputVertexResource->GetGPUVirtualAddress(), static_cast<UINT>(sizeof(VertexData) * mesh->vertices.size()), sizeof(VertexData)};
+        auto outputAllocation = srvManager->AllocateDescriptor();
+        outputAllocation.SetResource(instance->outputVertexResource);
+        const auto outputIndex = outputAllocation.GetIndex();
+        srvManager->CreateUAVforStructuredBuffer(outputIndex, instance->outputVertexResource.Get(), static_cast<UINT>(mesh->vertices.size()), sizeof(VertexData));
+        instance->outputVertexUavHandle = {srvManager->GetCPUDescriptorHandle(outputIndex), srvManager->GetGPUDescriptorHandle(outputIndex)};
+        instance->mDescriptorAllocations.push_back(std::move(outputAllocation));
+        D3D12_RESOURCE_BARRIER barrier{};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition.pResource = instance->outputVertexResource.Get();
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        dxCommon->GetCommandList()->ResourceBarrier(1, &barrier);
+        instances.push_back(std::move(instance));
+    }
+    return instances;
+}
+
 
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/Model.h
@@ -45232,6 +45295,7 @@ namespace Engine {
 	class ModelCommon;
 	class DirectXCommon;
 	class Material;
+	class AnimationComponent;
 
 	/// <summary>
 	/// モデルクラス
@@ -45255,16 +45319,22 @@ namespace Engine {
 		/// 通常描画
 		/// </summary>
 		void Draw();
+        /// @brief モデルの不変な入力バッファを共有し、個体別のスキニング出力を生成する。
+        /// @return メッシュ順のスキニングインスタンス。
+        std::vector<std::unique_ptr<SkinCluster>> CreateSkinningInstances();
 
 		/// <summary>
 		/// スキニング用描画
 		/// </summary>
-		void DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr);
+		void DrawSkinning(std::vector<MaterialInstance> materials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr, AnimationComponent& animator);
 
 		/// <summary>
 		/// ModelData取得
 		/// </summary>
 		ModelData& GetModelData() { return modelData; }
+        /// @brief 共有モデルの読み取り専用データを取得する。
+        /// @return クリップと初期姿勢を含む共有資産。
+        const ModelData& GetModelData() const { return modelData; }
 		/// <summary>
 		/// モデルのが透過物しているかを計算して透明度を返す
 		/// </summary>
@@ -45295,6 +45365,74 @@ namespace Engine {
 
 	};
 }
+
+
+============================================================
+File Path: project/DirectXGame/engine/3d/Model/ModelAssetIdentity.cpp
+============================================================
+#include "ModelAssetIdentity.h"
+#include <algorithm>
+#include <cctype>
+
+std::string Engine::ModelAssetIdentity::Normalize(const std::string& filePath, const std::string& directory)
+{
+    std::filesystem::path path(filePath);
+    if (!path.is_absolute()) {
+        path = std::filesystem::path("resources/Models") / directory / path;
+    }
+    auto key = std::filesystem::absolute(path).lexically_normal().generic_string();
+    std::ranges::transform(key, key.begin(), [](unsigned char character) { return static_cast<char>(std::tolower(character)); });
+    return key;
+}
+
+bool Engine::ModelAssetIdentity::IsBasename(const std::string& filePath)
+{
+    return filePath.find_first_of("/\\") == std::string::npos;
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/engine/3d/Model/ModelAssetIdentity.h
+============================================================
+#pragma once
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
+#include <string>
+#include <stdexcept>
+
+namespace Engine::ModelAssetIdentity {
+    /// @brief モデルの完全パスを字句正規化し、Windowsの大文字小文字差を統一する。
+    /// @param filePath モデルファイル名またはパス。
+    /// @param directory モデルルートからの相対ディレクトリ。
+    /// @return キャッシュで使用する絶対パス。
+    std::string Normalize(const std::string& filePath, const std::string& directory = {});
+
+    /// @brief 従来のファイル名だけの検索指定か判定する。
+    /// @param filePath 検索指定。
+    /// @return ディレクトリを含まない場合はtrue。
+    bool IsBasename(const std::string& filePath);
+    /// @brief 完全IDまたは一意な従来ファイル名から共有資産を検索する。
+    /// @param assets 完全パスをキーに持つ資産マップ。
+    /// @param filePath 検索する完全パス、相対パスまたはファイル名。
+    /// @return 一致した位置。未登録の場合はend。
+    template<class AssetMap>
+    auto Find(const AssetMap& assets, const std::string& filePath)
+    {
+        const auto key = Normalize(filePath);
+        if (!IsBasename(filePath)) return assets.find(key);
+        auto result = assets.end();
+        const auto basename = std::filesystem::path(key).filename();
+        for (auto iterator = assets.begin(); iterator != assets.end(); ++iterator) {
+            if (std::filesystem::path(iterator->first).filename() != basename) continue;
+            if (result != assets.end()) throw std::runtime_error("Ambiguous model basename: " + filePath);
+            result = iterator;
+        }
+        return result;
+    }
+}
+
 
 
 ============================================================
@@ -45403,7 +45541,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
-			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+
 
 			if (modelData.isTangent) {
 				aiVector3D& tangent = mesh->mTangents[vertexIndex];
@@ -45426,12 +45564,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 
 			pMesh->vertices[vertexIndex].position = { -position.x + bakedOffset.x ,position.y + bakedOffset.y,position.z + bakedOffset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
-			if (mesh->HasTextureCoords(0)) {
-				pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			}
-			else {
-				pMesh->vertices[vertexIndex].texcoord = { 0.5f,0.5f };
-			}
+			pMesh->vertices[vertexIndex].texcoord = ReadTexcoord(*mesh, vertexIndex);
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 
@@ -45747,25 +45880,11 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 		// LiveObject出力でメッシュ単位のスキニングリソースを判別できるようにする
 		const std::wstring meshDebugName = StringUtility::ConvertString(mesh->name.empty() ? std::format("Mesh{}", meshIndex) : mesh->name);
 
-		//SkinCluster skinCluster;
-		skinCluster.srvUavIndices.wellSrvIndex = modelCommon->GetSrvManager()->Allocate();
-		skinCluster.srvUavIndices.influencesIndex = modelCommon->GetSrvManager()->Allocate();
-		skinCluster.srvUavIndices.inputVerticesIndex = modelCommon->GetSrvManager()->Allocate();
-		skinCluster.srvUavIndices.outputVerticesUavIndex = modelCommon->GetSrvManager()->Allocate();
-
-		// palette用のResourceを確保
-		skinCluster.paletteResource = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * modelData.skeleton.joints.size());
-		skinCluster.paletteResource->SetName(std::format(L"SkinCluster Palette : {}", meshDebugName).c_str());
-		WellForGPU* mappedPalette = nullptr;
-		skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
-		std::memset(mappedPalette, 0, sizeof(WellForGPU) * modelData.skeleton.joints.size());
-		skinCluster.mappedPalette = { mappedPalette, modelData.skeleton.joints.size() }; // spanを使ってアクセスするようにする
-
-		modelCommon->GetSrvManager()->CreateSRVforStructuredBuffer(skinCluster.srvUavIndices.wellSrvIndex, skinCluster.paletteResource.Get(), UINT(modelData.skeleton.joints.size()), sizeof(WellForGPU));
-		skinCluster.paletteSrvHandle.first = modelCommon->GetSrvManager()->GetCPUDescriptorHandle(skinCluster.srvUavIndices.wellSrvIndex);
-		skinCluster.paletteSrvHandle.second = modelCommon->GetSrvManager()->GetGPUDescriptorHandle(skinCluster.srvUavIndices.wellSrvIndex);
-
-
+        // キャッシュは不変の入力ウェイトと頂点だけを所有する。
+        auto influencesIndexAllocation = modelCommon->GetSrvManager()->AllocateDescriptor();
+        skinCluster.srvUavIndices.influencesIndex = influencesIndexAllocation.GetIndex();
+        auto inputVerticesIndexAllocation = modelCommon->GetSrvManager()->AllocateDescriptor();
+        skinCluster.srvUavIndices.inputVerticesIndex = inputVerticesIndexAllocation.GetIndex();
 
 		// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
 		skinCluster.influenceResource = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * mesh->vertices.size());
@@ -45780,6 +45899,8 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 		skinCluster.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * mesh->vertices.size());
 		skinCluster.influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
 
+        influencesIndexAllocation.SetResource(skinCluster.influenceResource);
+        skinCluster.mDescriptorAllocations.push_back(std::move(influencesIndexAllocation));
 		modelCommon->GetSrvManager()->CreateSRVforStructuredBuffer(skinCluster.srvUavIndices.influencesIndex, skinCluster.influenceResource.Get(), UINT(mesh->vertices.size()), sizeof(VertexInfluence));
 		skinCluster.influenceSrvHandle.first = modelCommon->GetSrvManager()->GetCPUDescriptorHandle(skinCluster.srvUavIndices.influencesIndex);
 		skinCluster.influenceSrvHandle.second = modelCommon->GetSrvManager()->GetGPUDescriptorHandle(skinCluster.srvUavIndices.influencesIndex);
@@ -45788,37 +45909,12 @@ void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* m
 
 
 		// inputVertex用
+        inputVerticesIndexAllocation.SetResource(mesh->GetVertexResource());
+        skinCluster.mDescriptorAllocations.push_back(std::move(inputVerticesIndexAllocation));
 		modelCommon->GetSrvManager()->CreateSRVforStructuredBuffer(skinCluster.srvUavIndices.inputVerticesIndex, mesh->GetVertexResource().Get(), UINT(mesh->vertices.size()), sizeof(VertexData));
 		skinCluster.inputVertexSrvHandle.first = modelCommon->GetSrvManager()->GetCPUDescriptorHandle(skinCluster.srvUavIndices.inputVerticesIndex);
 		skinCluster.inputVertexSrvHandle.second = modelCommon->GetSrvManager()->GetGPUDescriptorHandle(skinCluster.srvUavIndices.inputVerticesIndex);
 
-
-
-
-		// outputVertex用のResourceを確保。
-		skinCluster.outputVertexResource = modelCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(VertexData) * mesh->vertices.size());
-		skinCluster.outputVertexResource->SetName(std::format(L"SkinCluster OutputVertex : {}", meshDebugName).c_str());
-		VertexData* mappedOutputVertex = nullptr;
-
-		// 初期状態を UAV 用に遷移させる
-		D3D12_RESOURCE_BARRIER barrier{};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = skinCluster.outputVertexResource.Get();
-		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		modelCommon->GetCommand()->GetList()->ResourceBarrier(1, &barrier);
-
-
-		// outputVertex用のVB作成
-		skinCluster.outputBufferView.BufferLocation = skinCluster.outputVertexResource->GetGPUVirtualAddress();
-		skinCluster.outputBufferView.SizeInBytes = UINT(sizeof(VertexData) * mesh->vertices.size());
-		skinCluster.outputBufferView.StrideInBytes = sizeof(VertexData);
-
-		modelCommon->GetSrvManager()->CreateUAVforStructuredBuffer(skinCluster.srvUavIndices.outputVerticesUavIndex, skinCluster.outputVertexResource.Get(), UINT(mesh->vertices.size()), sizeof(VertexData));
-		skinCluster.outputVertexUavHandle.first = modelCommon->GetSrvManager()->GetCPUDescriptorHandle(skinCluster.srvUavIndices.outputVerticesUavIndex);
-		skinCluster.outputVertexUavHandle.second = modelCommon->GetSrvManager()->GetGPUDescriptorHandle(skinCluster.srvUavIndices.outputVerticesUavIndex);
 
 
 
@@ -45973,14 +46069,9 @@ namespace Engine {
 		std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 		std::vector<uint32_t> cachedLineIndices_;				// ライン
 
-		
-		
+
+
 		std::map<std::string, Animation> animations;			// 名前付きアニメーション
-		std::string currentAnimName = "Idle";					// 現在のアニメーション名前
-		std::string previousAnimName = "";						// 過去のアニメーション名前
-		float blendTime = 0.0f;									// ブレンドに使う経過時間
-		float blendDuration = 0.3f;								// ブレンドにかける合計時間
-		bool isBlending = false;
 		Skeleton skeleton{};										// スケルトン
 
 		int pad = 0;												// パディング
@@ -45992,6 +46083,12 @@ namespace Engine {
 
 	// モデル読み込みに関する
 	namespace LoadModel {
+        /// @brief UVの有無を確認してから頂点のテクスチャ座標を読み取る。
+        /// @param mesh 読み取り元メッシュ。
+        /// @param vertexIndex 頂点番号。
+        /// @return UVがない場合は中央座標。
+        Vector2 ReadTexcoord(const aiMesh& mesh, uint32_t vertexIndex);
+
 
 		/// <summary>
 		/// メッシュ読み込み
@@ -46062,12 +46159,12 @@ namespace Engine {
 }
 
 
-
-
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/ModelManager.cpp
 ============================================================
-﻿#include "ModelManager.h"
+#include "ModelManager.h"
+#include "ModelAssetIdentity.h"
+#include <stdexcept>
 #include"ModelCommon.h"
 #include"Model.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
@@ -46120,46 +46217,50 @@ void Engine::ModelManager::Finalize()
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
 {
+	const auto key = ModelAssetIdentity::Normalize(filePath, dire);
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
 		// 読み込み済みモデルを検索
-		if (models.contains(filePath)) {
+		if (models.contains(key)) {
 			return;
 		}
 	}
 
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
+	const std::filesystem::path sourcePath(key);
+    model->Initialize(dxCommon, modelCommon_.get(), sourcePath.parent_path().string(), sourcePath.filename().string(), "", &gpuResourceMutex_);
 
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
 		// モデルをmapコンテナに格納
-		models.insert(std::make_pair(filePath, std::move(model)));
+		models.insert(std::make_pair(key, std::move(model)));
 	}
 }
 
 void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
 {
+	const auto key = ModelAssetIdentity::Normalize(filePath, dire);
 	// すでにロード済みかロックを使って確認
 	{
 		std::lock_guard<std::mutex> lock(modelsMutex_);
-		if (models.contains(filePath) || loadingModelKeys_.contains(filePath)) {
+		if (models.contains(key) || loadingModelKeys_.contains(key)) {
 			return;
 		}
-		loadingModelKeys_.insert(filePath);
+		loadingModelKeys_.insert(key);
 	}
 
 	// 非同期に読み込み開始
-	std::future<void> future = std::async(std::launch::async, [this, filePath, dire]() {
+	std::future<void> future = std::async(std::launch::async, [this, filePath, dire, key]() {
 		std::unique_ptr<Model> model = std::make_unique<Model>();
 		// Assimp解析は各スレッドで進め、GPU共有リソースだけModel内部で短くロックする。
-		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire, &gpuResourceMutex_);
+		const std::filesystem::path sourcePath(key);
+        model->Initialize(dxCommon, modelCommon_.get(), sourcePath.parent_path().string(), sourcePath.filename().string(), "", &gpuResourceMutex_);
 
 		{
 			std::lock_guard<std::mutex> lock(modelsMutex_);
-			models.insert(std::make_pair(filePath, std::move(model)));
-			loadingModelKeys_.erase(filePath);
+			models.insert(std::make_pair(key, std::move(model)));
+			loadingModelKeys_.erase(key);
 		}
 		});
 
@@ -46189,17 +46290,10 @@ void Engine::ModelManager::WaitAllLoadFinished()
 
 Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 {
-	std::lock_guard<std::mutex> lock(modelsMutex_);
-	// 読み込み済みモデルを検索
-	if (models.contains(filePath)) {
-		// 読み込みモデルを戻り値としてreturn
-		return models.at(filePath).get();
-	}
-
-	// ファイル名一致なし
-	return nullptr;
+    std::lock_guard<std::mutex> lock(modelsMutex_);
+    const auto found = ModelAssetIdentity::Find(models, filePath);
+    return found == models.end() ? nullptr : found->second.get();
 }
-
 bool Engine::ModelManager::IsLoading() const
 {
 	std::lock_guard<std::mutex> futureLock(futuresMutex_);
@@ -46321,9 +46415,23 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/3d/Model/ModelVertexInput.cpp
+============================================================
+#include "ModelData.h"
+
+Vector2 Engine::LoadModel::ReadTexcoord(const aiMesh& mesh, uint32_t vertexIndex)
+        {
+            if (!mesh.HasTextureCoords(0)) return {0.5f, 0.5f};
+            const auto& texcoord = mesh.mTextureCoords[0][vertexIndex];
+            return {texcoord.x, texcoord.y};
+        }
+
+
+============================================================
 File Path: project/DirectXGame/engine/3d/Model/RenderComponent.cpp
 ============================================================
 #include "RenderComponent.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 
 
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
@@ -46390,6 +46498,7 @@ void Engine::RenderComponent::Update()
 void Engine::RenderComponent::Draw()
 {
 	if (!isDraw) return;
+    if (objectType_ == ObjectModelType::kSkinning && !mAnimator) return;
 	if (!isSkin_) return;
 
 	SkyBoxCommon* skyBoxCommon = entityManager->GetSkyBoxCommon();
@@ -46493,7 +46602,7 @@ void Engine::RenderComponent::Draw()
 			}
 
 
-			model->DrawSkinning(materialInstances_,datas);
+			model->DrawSkinning(materialInstances_,datas, mAnimator->get());
 		}
 		break;
 	case ObjectModelType::kPrimitive:
@@ -46553,30 +46662,34 @@ void Engine::RenderComponent::DrawShadowMap(ShadowMap* shadowMap)
 		}
 		break;
 	case ObjectModelType::kSkinning:
+    {
 		// スキニングはCSで変形済み頂点を作ってから、その頂点をシャドウマップへ描画する。
 		ObjectSkinningTypeDiscrimination(PSOType::ShadowMap);
 		transformation->GetCommandList(0);
 		shadowMap->SetGraphicsRootConstantBufferView(1);
 
+		size_t meshIndex = 0;
 		for (auto& mesh : model->GetModelData().mesh) {
+            auto& cluster = mAnimator->get().GetSkinCluster(meshIndex++);
 			if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
 				continue;
 			}
 
-			mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
+			mesh->GetCommandList(cluster.outputBufferView, mesh->GetVertexBufferView());
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
 				GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 
 			D3D12_RESOURCE_BARRIER barrier{};
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+			barrier.Transition.pResource = cluster.outputVertexResource.Get();
 			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
 		}
 		break;
+    }
 	default:
 		break;
 	}
@@ -46629,13 +46742,16 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 	skinning->DrawComputeSetting();
 
 	// メッシュごとに
+	size_t meshIndex = 0;
 	for (auto& mesh : model->GetModelData().mesh) {
+        auto& cluster = mAnimator->get().GetSkinCluster(meshIndex++);
+        if (type == PSOType::ShadowMap && mesh->material->GetMaterialInstance().alpha_ < 1.0f) continue;
 
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, mesh->skinCluster->influenceSrvHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, mesh->skinCluster->outputVertexUavHandle.second);
-		skinning->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInformation->GetGPUVirtualAddress());
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, cluster.paletteSrvHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, cluster.inputVertexSrvHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, cluster.influenceSrvHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, cluster.outputVertexUavHandle.second);
+		skinning->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, cluster.skinningInformation->GetGPUVirtualAddress());
 
 
 		skinning->GetDxCommon()->GetCommandList()->Dispatch(UINT(mesh->vertices.size() + 1023) / 1024, 1, 1);
@@ -46644,7 +46760,7 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.pResource = cluster.outputVertexResource.Get();
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
@@ -46708,6 +46824,8 @@ void Engine::RenderComponent::SetModel(Engine::Model* model) {
 	this->model = model;
 
 	materialInstances_.clear();
+    cbResources_.clear();
+    if (!model) return;
 	int i = 0;
 	for (auto& mesh : model->GetModelData().mesh) {
 		MaterialInstance matInst;
@@ -46744,10 +46862,15 @@ Engine::BasePrimitive* Engine::RenderComponent::GetPrimitive() { return primitiv
 
 
 
+void Engine::RenderComponent::SetAnimationComponent(AnimationComponent& animator) { mAnimator = std::ref(animator); }
+
+
 ============================================================
 File Path: project/DirectXGame/engine/3d/Model/RenderComponent.h
 ============================================================
 #pragma once
+#include <functional>
+#include <optional>
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -46779,6 +46902,7 @@ namespace Engine {
 	class Transformation;
 	class EntityManager;
 	class ShadowMap;
+    class AnimationComponent;
 
 	/// <summary>
 	/// 描画に関するコンポーネントクラス
@@ -46824,6 +46948,9 @@ namespace Engine {
 		/// モデル設定
 		/// </summary>
 		void SetModel(Model* model);
+        /// @brief 描画に使用する個体別アニメーターを設定する。
+        /// @param animator この描画コンポーネントと同じオブジェクトのアニメーター。
+        void SetAnimationComponent(AnimationComponent& animator);
 		/// <summary>
 		/// スカイボックス設定
 		/// </summary>
@@ -46942,6 +47069,7 @@ namespace Engine {
 	private: // 貰いもの
 		// 3Dエンティティマネージャー
 		EntityManager* entityManager = nullptr;
+		std::optional<std::reference_wrapper<AnimationComponent>> mAnimator;
 		// モデル
 		Model* model = nullptr;
 		// プリミティブ
@@ -46968,7 +47096,6 @@ File Path: project/DirectXGame/engine/3d/Object/Object3d.cpp
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/engine/Animation/Animation.h"
 #include "DirectXGame/engine/Camera/Camera.h"
@@ -46990,6 +47117,7 @@ Engine::Object3d::Object3d() = default;
 Engine::Object3d::~Object3d() = default;
 
 void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType) {
+	SetDeltaTime(entityManager->GetDeltaTime());
 	this->entityManager = entityManager;														// エンティティ3d
 	this->object3dCommon = entityManager->GetObject3dCommon();								// オブジェクト共通クラス
 	this->skinningCommon = entityManager->GetSkinningCommon();								// スキニング共通クラス
@@ -47043,6 +47171,7 @@ void Engine::Object3d::InitAnimationComponent() {
 	animationComponent_ = std::make_unique<AnimationComponent>();
 	animationComponent_->Init(lineCommon);
 	animationComponent_->SetModel(renderComponent_->GetModel());
+	renderComponent_->SetAnimationComponent(*animationComponent_);
 }
 
 // 初期化
@@ -47093,7 +47222,7 @@ void Engine::Object3d::Update()
 	case ObjectModelType::kAnimation:
 
 		// アニメーションコンポーネント更新
-		animationComponent_->Update(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		animationComponent_->Update(mDeltaTime, transformComponent_->GetWorldTransform());
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
@@ -47102,7 +47231,7 @@ void Engine::Object3d::Update()
 	case ObjectModelType::kSkinning:
 
 		// アニメーションコンポーネント更新
-		animationComponent_->UpdateSkin(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		animationComponent_->UpdateSkin(mDeltaTime, transformComponent_->GetWorldTransform());
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
@@ -47110,7 +47239,7 @@ void Engine::Object3d::Update()
 		break;
 	case ObjectModelType::kPrimitive:
 		if (GetPrimitive()) {
-			GetPrimitive()->Update(MyGame::GameTime());
+			GetPrimitive()->Update(mDeltaTime);
 
 			transformation->Update(GetPrimitive(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
@@ -47124,7 +47253,7 @@ void Engine::Object3d::Update()
 		break;
 	case ObjectModelType::kOcean:
 		if (renderComponent_->GetOcean()) {
-			renderComponent_->GetOcean()->Update();
+			renderComponent_->GetOcean()->Update(mDeltaTime);
 
 			transformation->Update(renderComponent_->GetOcean(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
@@ -47146,7 +47275,7 @@ void Engine::Object3d::RigidBodyUpdate()
 	if (isDelete_) return;
 	// 物理
 	if (rigidBodyComponent_ && isRigidUpdate_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		rigidBodyComponent_->Integrate(mDeltaTime, transformComponent_->GetWorldTransform());
 	}
 }
 
@@ -47285,6 +47414,7 @@ void Engine::Object3d::DebugImguiModel()
 
 void Engine::Object3d::SetModel(Model* model){
 	renderComponent_->SetModel(model);
+	if (animationComponent_) { animationComponent_->SetModel(model); }
 }
 
 void Engine::Object3d::SetModel(const std::string& filePath)
@@ -47292,6 +47422,7 @@ void Engine::Object3d::SetModel(const std::string& filePath)
 	//モデルを検索してセット
 	Model* findModel = object3dCommon->GetDxCommon()->GetModelManager()->FindModel(filePath);
 	renderComponent_->SetModel(findModel);
+	if (animationComponent_) { animationComponent_->SetModel(findModel); }
 }
 
 #pragma endregion // その他
@@ -47387,6 +47518,7 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		using Entity::Update;
 		void Update() override;
 
 		/// <summary>
@@ -47981,6 +48113,7 @@ void Engine::Object3dInstanceManager::ReleaseGroupResource(ObjectGroup& group)
 		group.instanceData = nullptr;
 	}
 
+	group.mSrvAllocation = {};
 	group.resource.Reset();
 	group.object.clear();
 	group.idMap.clear();
@@ -47990,7 +48123,7 @@ void Engine::Object3dInstanceManager::ReleaseGroupResource(ObjectGroup& group)
 }
 
 
-void Engine::Object3dInstanceManager::Update() {
+void Engine::Object3dInstanceManager::Update(float deltaTime) {
 
 	// カメラあるなら
 	if (camera_) {
@@ -48018,7 +48151,7 @@ void Engine::Object3dInstanceManager::Update() {
 
 				if (group.instanceCount < kNumMaxInstance) {
 					// ワールド行列を計算
-					objectIterator->Update();
+					objectIterator->Update(deltaTime);
 
 					Matrix4x4 worldMatrix = objectIterator->transform.worldMat_;
 
@@ -48062,7 +48195,7 @@ void Engine::Object3dInstanceManager::Update() {
 
 				if (group.instanceCount < kNumMaxInstance) {
 					// ワールド行列を計算
-					objectIterator->Update();
+					objectIterator->Update(deltaTime);
 
 					Matrix4x4 worldMatrix = objectIterator->transform.worldMat_;
 
@@ -48298,7 +48431,9 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = srvManager->Allocate();
+	objectGroup.mSrvAllocation = srvManager->AllocateDescriptor();
+	objectGroup.mSrvAllocation.SetResource(objectGroup.resource);
+	objectGroup.srvIndex = objectGroup.mSrvAllocation.GetIndex();
 	objectGroup.instancingSrvHandleCPU = srvManager->GetCPUDescriptorHandle(
 		objectGroup.srvIndex);
 	objectGroup.instancingSrvHandleGPU = srvManager->GetGPUDescriptorHandle(
@@ -48352,7 +48487,9 @@ void Engine::Object3dInstanceManager::CreateObject3dGroup(
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = srvManager->Allocate();
+	objectGroup.mSrvAllocation = srvManager->AllocateDescriptor();
+	objectGroup.mSrvAllocation.SetResource(objectGroup.resource);
+	objectGroup.srvIndex = objectGroup.mSrvAllocation.GetIndex();
 	objectGroup.instancingSrvHandleCPU = srvManager->GetCPUDescriptorHandle(
 		objectGroup.srvIndex);
 	objectGroup.instancingSrvHandleGPU = srvManager->GetGPUDescriptorHandle(
@@ -48831,6 +48968,7 @@ namespace Engine {
 			Model* model;
 			bool flag;
 			uint32_t srvIndex;
+			DescriptorAllocation mSrvAllocation;
 			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			uint32_t instanceCount; // インスタンス数
 			ObjectGPU* instanceData; // インスタンシングデータを書き込むためのポインタ
@@ -48863,7 +49001,9 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -49042,11 +49182,11 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/3d/Object/ObjectInstance.cpp
 ============================================================
-﻿#include "ObjectInstance.h"
+#include "ObjectInstance.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
+
 
 #pragma region ObjectInstance
 
@@ -49082,7 +49222,7 @@ void Engine::ObjectInstance::Initialize(EntityManager* entity3DManager, bool use
 
 }
 
-void Engine::ObjectInstance::Update() {
+void Engine::ObjectInstance::Update(float deltaTime) {
 	if (isDelete_) return;
 	transform.Update();
 	// コライダー
@@ -49094,7 +49234,7 @@ void Engine::ObjectInstance::Update() {
 
 	// 物理
 	if (GetRigidBodyComponent() && rigidUpdate_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), transform);
+		rigidBodyComponent_->Integrate(deltaTime, transform);
 	}
 }
 
@@ -49164,7 +49304,9 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 
 		/// <summary>
 		/// Object3d内でコライダーコンポーネントを更新するか
@@ -49405,23 +49547,6 @@ void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::v
 
 }
 
-void Engine::AnimationFunction::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
-{
-	const auto& animations = modelData.animations;
-	auto it = animations.find(newAnimName);
-	if (it != animations.end()) {
-		if (modelData.currentAnimName != newAnimName) {
-			modelData.previousAnimName = modelData.currentAnimName;
-			modelData.currentAnimName = newAnimName;
-			modelData.blendTime = 0.0f;
-			modelData.blendDuration = blendDuration;
-			modelData.isBlending = true;
-		}
-	}
-
-
-}
-
 Engine::Joint* Engine::AnimationFunction::FindJointByName(Skeleton& skeleton, const std::string& name)
 {
 	auto it = skeleton.jointMap.find(name);
@@ -49573,6 +49698,7 @@ File Path: project/DirectXGame/engine/Animation/Animation.h
 #include<vector>
 #include<format>
 #include<span>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 
 #include"imgui.h"
@@ -49740,7 +49866,8 @@ namespace Engine {
 		/// </summary>
 		void Finalize();
 
-		SkinningSRVUAV srvUavIndices;
+		std::vector<DescriptorAllocation> mDescriptorAllocations;
+		SkinningSRVUAV srvUavIndices{};
 
 		std::vector<Matrix4x4> inverseBindPoseMatrices;
 		std::map<std::string, JointWeightData> skinClusterData;	// ← 全体で1つだけ
@@ -49825,7 +49952,7 @@ namespace Engine {
 		/// <summary>
 		/// アニメーション適応
 		/// </summary>
-		void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
+
 
 
 
@@ -49954,69 +50081,69 @@ float Engine::AnimationComponent::WrapAnimationTime(float time, float duration) 
 	return wrapped;
 }
 
-float Engine::AnimationComponent::UpdateBlendRate(ModelData& modelData, float deltaTime)
+float Engine::AnimationComponent::UpdateBlendRate(const ModelData& modelData, float deltaTime)
 {
 	// ブレンド時間が0以下なら即座に現在アニメーションへ切り替える
-	if (modelData.blendDuration <= 0.0f) {
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+	if (mBlendDuration <= 0.0f) {
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 		return 1.0f;
 	}
 
 	// ブレンド経過時間を進めて0.0f～1.0fへ正規化する
-	modelData.blendTime += deltaTime;
-	float t = modelData.blendTime / modelData.blendDuration;
+	mBlendTime += deltaTime;
+	float t = mBlendTime / mBlendDuration;
 	t = std::clamp(t, 0.0f, 1.0f);
 
 	// Hermite補間でブレンド開始・終了をなめらかにする
 	float easedT = t * t * (3.0f - 2.0f * t);
 
 	// ブレンドが終わったら前アニメーション名を消して通常再生へ戻す
-	if (modelData.blendTime >= modelData.blendDuration) {
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+	if (mBlendTime >= mBlendDuration) {
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 	}
 
 	return easedT;
 }
 
-void Engine::AnimationComponent::ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime)
+void Engine::AnimationComponent::ApplySkinAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime)
 {
 	const auto& animations = modelData.animations;
 
 	// ブレンド中は前アニメーションと現在アニメーションを別々の時刻で評価する
-	if (modelData.isBlending && !modelData.previousAnimName.empty()) {
-		auto itPrev = animations.find(modelData.previousAnimName);
+	if (mIsBlending && !mPreviousAnimationName.empty()) {
+		auto itPrev = animations.find(mPreviousAnimationName);
 		if (itPrev != animations.end()) {
 			const Animation& previousAnimation = itPrev->second;
 			AdvancePreviousAnimationTime(previousAnimation, deltaTime);
 
-			Skeleton previousSkeleton = modelData.skeleton; // ブレンド元の姿勢を作る一時スケルトン
-			Skeleton currentSkeleton = modelData.skeleton;  // ブレンド先の姿勢を作る一時スケルトン
+			Skeleton previousSkeleton = mSkeleton; // ブレンド元の姿勢を作る一時スケルトン
+			Skeleton currentSkeleton = mSkeleton;  // ブレンド先の姿勢を作る一時スケルトン
 			AnimationFunction::ApplyAnimation(previousSkeleton, previousAnimation, previousAnimationTime_);
 			AnimationFunction::ApplyAnimation(currentSkeleton, currentAnimation, animationTime);
 
 			float t = UpdateBlendRate(modelData, deltaTime);
-			AnimationFunction::BlendSkeletons(modelData.skeleton, previousSkeleton, currentSkeleton, t);
+			AnimationFunction::BlendSkeletons(mSkeleton, previousSkeleton, currentSkeleton, t);
 			return;
 		}
 
 		// 前アニメーションが存在しなければブレンドを解除して通常再生へ戻す
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 	}
 
 	// ブレンドしていない場合は現在アニメーションだけを適用する
-	AnimationFunction::ApplyAnimation(modelData.skeleton, currentAnimation, animationTime);
+	AnimationFunction::ApplyAnimation(mSkeleton, currentAnimation, animationTime);
 }
 
-void Engine::AnimationComponent::ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime)
+void Engine::AnimationComponent::ApplyNodeAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime)
 {
 	const auto& animations = modelData.animations;
 
 	// 通常ノードアニメーションでも、前後アニメーションを別時刻で評価してブレンドする
-	if (modelData.isBlending && !modelData.previousAnimName.empty()) {
-		auto itPrev = animations.find(modelData.previousAnimName);
+	if (mIsBlending && !mPreviousAnimationName.empty()) {
+		auto itPrev = animations.find(mPreviousAnimationName);
 		if (itPrev != animations.end()) {
 			const Animation& previousAnimation = itPrev->second;
 			AdvancePreviousAnimationTime(previousAnimation, deltaTime);
@@ -50048,8 +50175,8 @@ void Engine::AnimationComponent::ApplyNodeAnimation(ModelData& modelData, const 
 		}
 
 		// 前アニメーションが存在しなければブレンドを解除して通常再生へ戻す
-		modelData.isBlending = false;
-		modelData.previousAnimName.clear();
+		mIsBlending = false;
+		mPreviousAnimationName.clear();
 	}
 
 	// 各ノードのアニメーション行列を作る。既存仕様に合わせて最後に評価したノードをlocalMatrix_へ保持する
@@ -50068,19 +50195,15 @@ Matrix4x4 Engine::AnimationComponent::CalculateNodeLocalMatrix(const NodeAnimati
 	return MakeAffineMatrix(interpScale, interpRotate, interpTranslate);
 }
 
-void Engine::AnimationComponent::UpdateSkinClusters(ModelData& modelData)
+void Engine::AnimationComponent::UpdateSkinClusters(const ModelData& modelData)
 {
 	std::vector<Matrix4x4> cachedSkeletonMatrices;
-	for (auto& mesh : modelData.mesh) {
-		// メッシュまたはスキンクラスターが無い場合は更新を飛ばす
-		if (!mesh || !mesh->skinCluster) {
-			continue;
-		}
-		AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-	}
+	for (auto& cluster : mSkinClusters) {
+        AnimationFunction::UpdateSkinCluster(*cluster, mSkeleton, cachedSkeletonMatrices);
+    }
 }
 
-void Engine::AnimationComponent::UpdateMaterialGPUData(ModelData& modelData)
+void Engine::AnimationComponent::UpdateMaterialGPUData(const ModelData& modelData)
 {
 	// GPU転送用データは描画処理と同じフレーム内で更新するため、ここでは直接更新する。
 	for (auto& mesh : modelData.mesh) {
@@ -50103,16 +50226,17 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime, WorldTransform worl
 
 	auto& modelData = model->GetModelData();
 	const auto& animations = modelData.animations;
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 
 	if (itCurrent != animations.end()) {
 		const Animation& currentAnimation = itCurrent->second;
 		float deltaTime = deltatime * animationSpeed;
 		AdvanceAnimationTime(currentAnimation, deltaTime);
+        mSkeleton = modelData.skeleton;
 		ApplySkinAnimation(modelData, currentAnimation, deltaTime);
 
 		// スケルトン姿勢を更新してスキニング用パレットへ反映する
-		AnimationFunction::UpdateSkeleton(modelData.skeleton);
+		AnimationFunction::UpdateSkeleton(mSkeleton);
 		UpdateSkinClusters(modelData);
 
 		// スキニング後の頂点は既にスケルトン空間へ変換済みなので、描画時にルート行列を二重に掛けない
@@ -50127,7 +50251,7 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime, WorldTransform worl
 	// デバッグ用にスケルトンを描画する
 	AnimationFunction::DrawSkeleton(
 		lineCommon,
-		modelData.skeleton.joints,
+		mSkeleton.joints,
 		worldTransform.worldMat_.GetWorldPosition(),
 		worldTransform.scale_,
 		MakeRotateXYZ(worldTransform.rotate_)
@@ -50148,7 +50272,7 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 
 	auto& modelData = model->GetModelData();
 	const auto& animations = modelData.animations;
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 
 	if (itCurrent != animations.end()) {
 		const Animation& currentAnimation = itCurrent->second;
@@ -50173,7 +50297,7 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 
 	const auto& animations = model->GetModelData().animations;
 	const auto& modelData = model->GetModelData();
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 
 	// 現在のアニメーション名が見つからなかった場合は再生終了扱い
 	if (itCurrent == animations.end()) {
@@ -50204,13 +50328,19 @@ void Engine::AnimationComponent::SetAnimation(const std::string& name, float tim
 	}
 
 	// 切り替え前の時刻をブレンド元アニメーション用に保持する
-	if (modelData.currentAnimName != name) {
+	if (mCurrentAnimationName != name) {
 		previousAnimationTime_ = animationTime;
 		animationTime = 0.0f;
 		isPlaying = true;
 	}
 
-	AnimationFunction::SetAnimation(modelData, name, time);
+	if (mCurrentAnimationName != name) {
+        mPreviousAnimationName = mCurrentAnimationName;
+        mCurrentAnimationName = name;
+        mBlendTime = 0.0f;
+        mBlendDuration = time;
+        mIsBlending = true;
+    }
 }
 
 void Engine::AnimationComponent::SetEndAnimeTime() {
@@ -50221,7 +50351,7 @@ void Engine::AnimationComponent::SetEndAnimeTime() {
 
 	const auto& animations = model->GetModelData().animations;
 	const auto& modelData = model->GetModelData();
-	auto itCurrent = animations.find(modelData.currentAnimName);
+	auto itCurrent = animations.find(mCurrentAnimationName);
 	if (itCurrent == animations.end()) {
 		return;
 	}
@@ -50245,6 +50375,35 @@ float Engine::AnimationComponent::GetEndAnimeTime(std::string name) const {
 	// 見つからない場合は0秒として扱う
 	return 0.0f;
 }
+
+void Engine::AnimationComponent::SetModel(Model* mod)
+{
+    model = mod;
+    mSkinClusters.clear();
+    mSkeleton = {};
+    mPreviousAnimationName.clear();
+    mCurrentAnimationName = "Idle";
+    mBlendTime = 0.0f;
+    mIsBlending = false;
+    animationTime = 0.0f;
+    previousAnimationTime_ = 0.0f;
+    isPlaying = true;
+    localMatrix_ = MakeIdentity4x4();
+    if (!model) return;
+    const auto& modelData = model->GetModelData();
+    mSkeleton = modelData.skeleton;
+    mSkinClusters = model->CreateSkinningInstances();
+    if (!modelData.animations.contains(mCurrentAnimationName) && !modelData.animations.empty()) {
+        mCurrentAnimationName = modelData.animations.begin()->first;
+    }
+    UpdateSkinClusters(modelData);
+}
+
+const Engine::Skeleton& Engine::AnimationComponent::GetSkeleton() const { return mSkeleton; }
+
+Engine::SkinCluster& Engine::AnimationComponent::GetSkinCluster(size_t meshIndex) { return *mSkinClusters.at(meshIndex); }
+
+const std::string& Engine::AnimationComponent::GetCurrentAnimationName() const { return mCurrentAnimationName; }
 
 
 ============================================================
@@ -50276,7 +50435,17 @@ namespace Engine {
 		/// <summary>
 		/// アニメーションするモデルを設定
 		/// </summary>
-		void SetModel(Model* mod) { model = mod; }
+		void SetModel(Model* mod);
+        /// @brief この個体の評価済みスケルトンを取得する。
+        /// @return モデル共有データから独立した姿勢。
+        const Skeleton& GetSkeleton() const;
+        /// @brief この個体のスキニング用GPUデータを取得する。
+        /// @param meshIndex メッシュの番号。
+        /// @return 個体別のパレットと出力バッファ。
+        SkinCluster& GetSkinCluster(size_t meshIndex);
+        /// @brief この個体が再生中のクリップ名を取得する。
+        /// @return 現在のアニメーション名。
+        const std::string& GetCurrentAnimationName() const;
 
 		/// <summary>
 		/// スキニング更新
@@ -50355,15 +50524,15 @@ namespace Engine {
 		/// <summary>
 		/// ブレンド率を更新して0.0f～1.0fの補間値を返す
 		/// </summary>
-		float UpdateBlendRate(ModelData& modelData, float deltaTime);
+		float UpdateBlendRate(const ModelData& modelData, float deltaTime);
 		/// <summary>
 		/// スキニング用のアニメーション姿勢を反映する
 		/// </summary>
-		void ApplySkinAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		void ApplySkinAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime);
 		/// <summary>
 		/// 通常ノード用のアニメーション姿勢を反映する
 		/// </summary>
-		void ApplyNodeAnimation(ModelData& modelData, const Animation& currentAnimation, float deltaTime);
+		void ApplyNodeAnimation(const ModelData& modelData, const Animation& currentAnimation, float deltaTime);
 		/// <summary>
 		/// ノードアニメーションからローカル行列を作成する
 		/// </summary>
@@ -50371,14 +50540,21 @@ namespace Engine {
 		/// <summary>
 		/// スキンクラスターのパレットを安全に更新する
 		/// </summary>
-		void UpdateSkinClusters(ModelData& modelData);
+		void UpdateSkinClusters(const ModelData& modelData);
 		/// <summary>
 		/// マテリアルのGPU転送を安全に更新する
 		/// </summary>
-		void UpdateMaterialGPUData(ModelData& modelData);
+		void UpdateMaterialGPUData(const ModelData& modelData);
 
 	private:
-		// アニメーション再生しているか
+		std::string mCurrentAnimationName = "Idle";
+        std::string mPreviousAnimationName;
+        float mBlendTime = 0.0f;
+        float mBlendDuration = 0.3f;
+        bool mIsBlending = false;
+        Skeleton mSkeleton{};
+        std::vector<std::unique_ptr<SkinCluster>> mSkinClusters;
+        // アニメーション再生しているか
 		bool isPlaying = true;
 		// 逆再生するか
 		bool isReversePlayback = false;
@@ -53254,13 +53430,13 @@ void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::Mod
 
 	kFileName = fileName;
 	kExtension = extensionName;
-	
-	// 凍結してフルパスを得る 
+
+	// 凍結してフルパスを得る
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
 
 	levelData_ = std::make_unique<LevelData>();
-	// "objects"の全オブジェクトを走査 
+	// "objects"の全オブジェクトを走査
 	for (nlohmann::json& object : deserialized["objects"]) {
 		// 有効無効フラグ
 		if (object.contains("object_disabled")) {
@@ -53270,7 +53446,7 @@ void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::Mod
 				continue;
 			}
 		}
-		
+
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(オブジェクト)
 		LoadDataFanc::ModelTransfom(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(出現位置)
@@ -53294,7 +53470,7 @@ void LoadLevelData::ReLoad()
 
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
-	// "objects"の全オブジェクトを走査 
+	// "objects"の全オブジェクトを走査
 	for (nlohmann::json& object : deserialized["objects"]) {
 		// 有効無効フラグ
 		if (object.contains("object_disabled")) {
@@ -53339,12 +53515,12 @@ void LoadLevelData::Update()
 
 void LoadLevelData::Draw3D()
 {
-	
+
 }
 
 void LoadLevelData::CreateObject3d(LevelData* levelData)
 {
-	const auto& models = modelManager->GetModel();
+
 
 
 	for (auto& objectData : levelData->objects) {
@@ -53353,17 +53529,15 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 
 		// obj
 		if (model == nullptr) {
-			auto it = models.find(objectData.fileName + ".obj");
-			if (it != models.end()) { model = it->second.get(); }
+			model = modelManager->FindModel(objectData.fileName + ".obj");
 		}
 
 		// gltf
 		if (model == nullptr) {
-			auto it = models.find(objectData.fileName + ".gltf");
-			if (it != models.end()) { model = it->second.get(); }
+			model = modelManager->FindModel(objectData.fileName + ".gltf");
 		}
 
-		// モデルを指定して3Dオブジェクトを生成 
+		// モデルを指定して3Dオブジェクトを生成
 		Engine::Object3d* newObject = entityManager->CreateObject3D(objectData.fileName, Engine::ObjectModelType::kNormal,{},{});
 		//newObject->Initialize(entity3DManager_);
 		newObject->SetModel(model);
@@ -53383,9 +53557,9 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 			aabb->SetIsStatic(true);
 			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
 		}
-		// 座標 
+		// 座標
 		newObject->GetWorldTransform().translate_ = objectData.position;
-		// 回転角 
+		// 回転角
 		newObject->GetWorldTransform().rotate_ = objectData.rotation;
 		// 大きさ
 		newObject->GetWorldTransform().scale_ = objectData.scale;
@@ -53403,14 +53577,14 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 		camera->Initialize(nullptr, entityManager, nullptr, {});
 		camera->GetUniqueCamera()->SetTransform({ cameraData.scale,
 			Math::DegreesToRadians(cameraData.rotation),cameraData.position });
-		
+
 		camera->SetName(cameraData.fileName);
 
 		cameras_.push_back(std::move(camera));
 	}
 
 
-	
+
 	// カメラマネージャーに追加
 	for (auto& camera : cameras_) {
 		cameraManager->AddCamera({ camera.get() ,false}, camera->GetName());
@@ -53430,47 +53604,47 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 	for (auto& pointData : levelData->pointDatas) {
 		std::shared_ptr<Engine::PointLight> point = std::make_shared<Engine::PointLight>();
 		point->point = pointData;
-		
+
 		lights_.push_back(point);
 	}
 	for (auto& spotData : levelData->spotDatas) {
 		std::shared_ptr<Engine::SpotLight> spot = std::make_shared<Engine::SpotLight>();
 		spot->spot = spotData;
-		
+
 		lights_.push_back(spot);
 	}
-	
+
 
 	for (auto& light : lights_) {
 		entityManager->GetLightManager()->AddLight(light);
 	}
 
-	
-	
+
+
 }
 
-void LoadLevelData::ClearData()  
-{  
+void LoadLevelData::ClearData()
+{
 	// Initialize前や二重Finalize時は破棄済みなので何もしない。
 	if (!levelData_) {
 		return;
 	}
 
-	// "LevelObject" タグを持つオブジェクトを全削除  
+	// "LevelObject" タグを持つオブジェクトを全削除
 	if (entityManager) {
 		entityManager->EraseObject3DByTag("LevelObject");
 	}
-	levelData_->objects.clear();  
-	levelData_->players.clear();  
-	levelData_->enemys.clear();  
-	levelData_->cameras.clear();  
-	objects_.clear();  
+	levelData_->objects.clear();
+	levelData_->players.clear();
+	levelData_->enemys.clear();
+	levelData_->cameras.clear();
+	objects_.clear();
 	levelData_->directionalDatas.clear();
 	levelData_->pointDatas.clear();
 	levelData_->spotDatas.clear();
 
 
-	
+
 	for (auto& light : lights_) {
 		light.reset();
 	}
@@ -53480,18 +53654,16 @@ void LoadLevelData::ClearData()
 	lights_.clear();
 
 
-	// カメラの削除処理を修正  
-	for (auto& camera : cameras_) {  
+	// カメラの削除処理を修正
+	for (auto& camera : cameras_) {
 		// CameraManagerは非所有参照だけを持つため、先に登録を外してからunique_ptrで破棄する。
 		if (cameraManager && camera) {
 			cameraManager->DeleteCamera(camera->GetName());
 		}
 		camera.reset();
-	}  
-	cameras_.clear();  
+	}
+	cameras_.clear();
 }
-
-
 
 
 ============================================================
@@ -53658,7 +53830,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Base/Profiler/CpuProfileData.h
 ============================================================
-#pragma once
+﻿#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -53669,7 +53841,7 @@ File Path: project/DirectXGame/engine/Base/Profiler/CpuProfileData.h
 namespace Engine {
 
 	// 親イベントを持たないイベントを表すインデックス値。
-	inline constexpr uint32_t kInvalidProfileEventIndex = std::numeric_limits<uint32_t>::max();
+	inline constexpr uint32_t kInvalidProfileEventIndex = (std::numeric_limits<uint32_t>::max)();
 
 	/// <summary>
 	/// CPU上で計測した1つのスコープの情報を保持する構造体。
@@ -54701,7 +54873,9 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 
 
 
-	textureData.srvIndex = srvManager->Allocate();
+	textureData.mSrvAllocation = srvManager->AllocateDescriptor();
+	textureData.mSrvAllocation.SetResource(textureData.resource);
+	textureData.srvIndex = textureData.mSrvAllocation.GetIndex();
 	textureData.srvHandleCPU = srvManager->GetCPUDescriptorHandle(textureData.srvIndex);
 	textureData.srvHandleGPU = srvManager->GetGPUDescriptorHandle(textureData.srvIndex);
 
@@ -54908,6 +55082,7 @@ File Path: project/DirectXGame/engine/Base/Texture/TextureManager.h
 #include<dxcapi.h>
 #include <filesystem>
 #include <mutex>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -55001,6 +55176,7 @@ namespace Engine {
 
 		//テクスチャ一枚分のデータ
 		struct TextureData {
+			DescriptorAllocation mSrvAllocation;
 			DirectX::TexMetadata metadata;
 			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			uint32_t srvIndex;
@@ -55391,8 +55567,9 @@ MakeUniqueDebug(const char* file, int line, Args&&... args) {
 File Path: project/DirectXGame/engine/Camera/BaseCamera.cpp
 ============================================================
 #include "BaseCamera.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-#include "DirectXGame/engine/MyGame/MyGame.h"
+
 // 汎用カメラを初期化する。
 void BaseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position)
@@ -55409,6 +55586,8 @@ void BaseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* ent
 }
 
 // 特別な挙動を持たない汎用カメラを更新する。
+void BaseCamera::Update(float deltaTime) { mDeltaTime = deltaTime; Update(); }
+
 void BaseCamera::Update()
 {
 	// カメラの行列だけを更新し、派生クラス固有の制御は実行しない。
@@ -55422,7 +55601,7 @@ void BaseCamera::Update()
 /// オブジェクトの時間取得
 /// </summary>
 /// <returns></returns>
-float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
+float BaseCamera::GetTime() const { return mDeltaTime * timeSpeed_; }
 
 void BaseCamera::CreateFixedCamera(Engine::EntityManager* entityManager, const Transform& transform, float farClip) {
 	this->entityManager = entityManager;	// エンティティ3d
@@ -55485,6 +55664,9 @@ public:
 	/// 更新
 	///</summary>
 	virtual void Update();
+	/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 
 
 
@@ -55537,6 +55719,7 @@ public:
 	void SetUseCamera(bool is) { useCamera = is; }
 
 protected:
+	float mDeltaTime = 0.0f;
 	void CreateFixedCamera(Engine::EntityManager* entityManager,const Transform& transform, float farClip);
 
 protected:
@@ -55567,7 +55750,6 @@ File Path: project/DirectXGame/engine/Camera/Camera.cpp
 ============================================================
 #include "Camera.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -56977,7 +57159,6 @@ File Path: project/DirectXGame/engine/Camera/CameraManager.cpp
 ============================================================
 #include "CameraManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include <dinput.h>
 
@@ -57051,7 +57232,9 @@ void CameraManager::Finalize()
 	previousCameraName_.clear();
 }
 
-void CameraManager::Update()
+void CameraManager::Update() { Update(entityManager->GetDeltaTime()); }
+
+void CameraManager::Update(float deltaTime)
 {
 	// F3キーでデバッグカメラと直前のカメラを切り替える。
 	if (inputSystem && inputSystem->IsTriggerKey(DIK_F3)) {
@@ -57079,13 +57262,13 @@ void CameraManager::Update()
 
 		// 各カメラ更新
 		for (auto& cam : cameras) {
-			cam.second->Update();
+			cam.second->Update(deltaTime);
 		}
 
 		// 補間中
 		if (isInterpolating) {
 			// カメラ補間時間はゲーム時間倍率を反映して進める
-			currentTime += Engine::MyGame::GameTime();
+			currentTime += deltaTime;
 
 			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
 
@@ -57273,6 +57456,9 @@ public:
 
 	/// <summary>登録カメラ、切り替え補間、共通出力カメラを1フレーム更新する。</summary>
 	void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 	/// <summary>登録解除と所有カメラの解放を行う。</summary>
 	void Finalize();
 
@@ -60927,7 +61113,8 @@ private:
 				}
 			}
 
-			// 最後に完了したワーカーが待機中のRunを起こす。
+			// 条件確認と待機開始の間に完了通知を失わないよう、同じmutexで更新する。
+			std::lock_guard<std::mutex> lock(mutex_);
 			if (remainingWorkers_.fetch_sub(1) == 1) {
 				completedCondition_.notify_one();
 			}
@@ -62408,6 +62595,8 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 
 	// スワップチェーン用の描画後処理
 	swapChain_->PostDraw();
+	srvManager_->CollectRetiredDescriptors();
+	rtvManager_->CollectRetiredDescriptors();
 	postEffectManager_->ClearPostEffectBlock();
 	// FPS制限の更新
 	UpdateFixFPS();
@@ -62501,10 +62690,12 @@ void Engine::DirectXCommon::UpdateFixFPS()
 	reference_ = std::chrono::steady_clock::now();
 }
 
-void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager)
+void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager, float deltaTime)
 {
 	// DirectXとシーンの更新区間をフレーム内の主要区間として記録する。
 	ENGINE_CPU_PROFILE_SCOPE("DirectXCommon::Update");
+	mDeltaTime = deltaTime;
+	entity3DManager->SetDeltaTime(deltaTime);
 
 	// ライト
 	entity3DManager->GetLightManager()->Update();
@@ -62515,15 +62706,15 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 
 
 
-	sceneManager->Update();
+	sceneManager->Update(deltaTime);
 
 	postEffectManager_->Update(sceneManager->GetCamara());
 
-	entity3DManager->Update();
+	entity3DManager->Update(deltaTime);
 
-	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
+	entity3DManager->GetEffectManager()->GetParticleManager()->Update(deltaTime);
 
-	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update();
+	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update(deltaTime);
 
 	//entity3DManager->GetEffectManager()->GetParticleManager2d()->Update();
 
@@ -62537,6 +62728,8 @@ void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* en
 	entity3DManager->Get3DLineCommon()->Update();
 
 }
+
+float Engine::DirectXCommon::GetDeltaTime() const { return mDeltaTime; }
 
 
 ============================================================
@@ -62617,7 +62810,12 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update(SceneManager* sceneManager, EntityManager* entity3DManager);
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(SceneManager* sceneManager, EntityManager* entity3DManager, float deltaTime);
+		/// @brief 現在のゲーム内更新時間を取得する。
+		/// @return 経過秒数。
+		float GetDeltaTime() const;
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -62761,6 +62959,7 @@ namespace Engine {
 		std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();
 
 		// 記録時間(FPS固定用)
+		float mDeltaTime = 0.0f;
 		std::chrono::steady_clock::time_point reference_;
 	};
 }
@@ -62826,19 +63025,20 @@ File Path: project/DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.cpp
 
 #include<format>
 #include<cassert>
+#include <stdexcept>
 
 void Engine::DXCCompiler::Initialize()
 {
 	//dxcCompilerを初期化
-	hr_ = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr_));
-	hr_ = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr_));
+	hr_ = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&mDxcUtils));
+	if (FAILED(hr_)) throw std::runtime_error("DXC operation failed");
+	hr_ = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mDxcCompiler));
+	if (FAILED(hr_)) throw std::runtime_error("DXC operation failed");
 
 
 	//現時点でincludeはしないが、includeに対応するための設定を行っておく
-	hr_ = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
-	assert(SUCCEEDED(hr_));
+	hr_ = mDxcUtils->CreateDefaultIncludeHandler(&mIncludeHandler);
+	if (FAILED(hr_)) throw std::runtime_error("DXC operation failed");
 }
 
 Microsoft::WRL::ComPtr<IDxcBlob> Engine::DXCCompiler::CompileShader(const std::wstring& filePach, const wchar_t* profile)
@@ -62848,10 +63048,10 @@ Microsoft::WRL::ComPtr<IDxcBlob> Engine::DXCCompiler::CompileShader(const std::w
 		//これからシェーダをコンパイルする旨をログに出す
 	Logger::Log(StringUtility::ConvertString(std::format(L"Begin CompileShader, path:{}, profile\n", filePach, profile)));
 	//hlslファイルを読む
-	IDxcBlobEncoding* shaderSource = nullptr;
-	hr_ = dxcUtils_->LoadFile(filePach.c_str(), nullptr, &shaderSource);
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource;
+	hr_ = mDxcUtils->LoadFile(filePach.c_str(), nullptr, &shaderSource);
 	//読めなかったら止める
-	assert(SUCCEEDED(hr_));
+	if (FAILED(hr_)) throw std::runtime_error("DXC operation failed");
 	//読み込んだファイル内容を設定する
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
@@ -62870,42 +63070,44 @@ Microsoft::WRL::ComPtr<IDxcBlob> Engine::DXCCompiler::CompileShader(const std::w
 	};
 
 	//実際にShaderをコンパイルする
-	IDxcResult* shaderResult = nullptr;
-	hr_ = dxcCompiler_->Compile(
+	Microsoft::WRL::ComPtr<IDxcResult> shaderResult;
+	hr_ = mDxcCompiler->Compile(
 		&shaderSourceBuffer,   //読み込んだファイル
 		arguments,             //コンパイルオプション
 		_countof(arguments),   //コンパイルオプションの数
-		includeHandler_,        //includeが含まれた諸々
+		mIncludeHandler.Get(),        //includeが含まれた諸々
 		IID_PPV_ARGS(&shaderResult) //コンパイル結果
 	);
 
 	//コンパイルエラーではなくdxcが起動できないなど致命的な状況
-	assert(SUCCEEDED(hr_));
+	if (FAILED(hr_)) throw std::runtime_error("DXC operation failed");
 
 
 	////------警告・エラーが出ていないか確認する------////
 
 	//警告・エラーが出たらログに出して止める
-	IDxcBlobUtf8* shaderError = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
 		Logger::Log(shaderError->GetStringPointer());
-		//警告・エラーダメゼッタイ
-		assert(false);
+
 	}
 
 
+	HRESULT compileStatus = S_OK;
+	if (FAILED(shaderResult->GetStatus(&compileStatus)) || FAILED(compileStatus))
+		throw std::runtime_error("Shader compilation failed");
 	////------Compile結果を受け取って返す------////
 
 	//コンパイル結果から実行用のバイナリ部分を取得
-	IDxcBlob* shaderBlob = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob;
 	hr_ = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-	assert(SUCCEEDED(hr_));
+	if (FAILED(hr_)) throw std::runtime_error("DXC operation failed");
 	//成功したログを出す
 	Logger::Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePach, profile)));
 	//もう使わないリソースを解放
-	shaderSource->Release();
-	shaderResult->Release();
+
+
 	//実行用バイナリを返却
 	return shaderBlob;
 }
@@ -62955,13 +63157,13 @@ namespace Engine {
 
 	private:
 		// DXユーティル
-		IDxcUtils* dxcUtils_;
+		Microsoft::WRL::ComPtr<IDxcUtils> mDxcUtils;
 		// インクルードハンドラー
-		IDxcIncludeHandler* includeHandler_;
+		Microsoft::WRL::ComPtr<IDxcIncludeHandler> mIncludeHandler;
 		// DXCコンパイル
-		IDxcCompiler3* dxcCompiler_;
+		Microsoft::WRL::ComPtr<IDxcCompiler3> mDxcCompiler;
 		// エラー判別
-		HRESULT hr_;
+		HRESULT hr_ = S_OK;
 	};
 }
 
@@ -63355,7 +63557,9 @@ void Engine::DepthStencil::CreateDepthStencilView()
 		DXGI_FORMAT_D24_UNORM_S8_UINT
 	);
 
-	srvIndex_ = srvManager->Allocate();
+	mSrvAllocation = srvManager->AllocateDescriptor();
+	mSrvAllocation.SetResource(depthStencilResource_);
+	srvIndex_ = mSrvAllocation.GetIndex();
 
 	// SRVを作成
 	DirectX::TexMetadata metadata{};
@@ -63383,6 +63587,7 @@ using namespace Microsoft::WRL;
 
 // DirectX
 #include <d3d12.h>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 namespace Engine {
 	// 前方宣言
@@ -63444,6 +63649,7 @@ namespace Engine {
 		uint32_t dsvIndex_ = 0;
 		// デプスステンシル用リソースのSRVインデックス
 		uint32_t srvIndex_ = 0;
+		DescriptorAllocation mSrvAllocation;
 
 
 
@@ -63606,7 +63812,6 @@ File Path: project/DirectXGame/engine/DirectX/RenderTexture/RenderTexture.cpp
 
 Engine::RenderTexture::~RenderTexture()
 {
-	rtvManager->DecAllocate();
 }
 
 void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
@@ -63759,7 +63964,9 @@ void Engine::RenderTexture::CreateResourcePixel()
 void Engine::RenderTexture::CreateRTV()
 {
 	// インデックスを割り当て
-	rtvIndex_ = rtvManager->Allocate();
+	mRtvAllocation = rtvManager->AllocateDescriptor();
+	mRtvAllocation.SetResource(resource_);
+	rtvIndex_ = mRtvAllocation.GetIndex();
 	// RTVを作成
 	rtvManager->CreateRTV(rtvIndex_, resource_.Get());
 
@@ -63771,7 +63978,9 @@ void Engine::RenderTexture::CreateRTV()
 void Engine::RenderTexture::CreateSRV()
 {
 	// インデックス割りて
-	srvIndex_ = srvManager->Allocate();
+	mSrvAllocation = srvManager->AllocateDescriptor();
+	mSrvAllocation.SetResource(resource_);
+	srvIndex_ = mSrvAllocation.GetIndex();
 	// SRVを作成
 	DirectX::TexMetadata metadata{};
 	metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -63799,6 +64008,7 @@ using namespace Microsoft::WRL;
 //#include"DirectXGame/engine/struct/Structs3D.h"
 
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 namespace Engine {
 	// 前方宣言
@@ -63897,6 +64107,8 @@ namespace Engine {
 		uint32_t rtvIndex_ = 0;
 		// SRVインデックス
 		uint32_t srvIndex_ = 0;
+		DescriptorAllocation mSrvAllocation;
+		DescriptorAllocation mRtvAllocation;
 		// クリアカラー(赤)
 		const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
 
@@ -64049,8 +64261,10 @@ namespace Engine {
 		// 生成
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> index, size_t num = 1)
 		{
+			if (data_ && resource_) resource_->Unmap(0, nullptr);
+			if (resource_) dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 			this->dxCommon = dxCommon;	// DX共通クラス
-			const size_t bufferCount = (std::max)(size_t{ 1 }, num);
+			const size_t bufferCount = (std::max)(size_t{ 1 }, (std::max)(num, index.size()));
 
 			/// <summary>
 			/// リソース生成
@@ -64067,7 +64281,6 @@ namespace Engine {
 			if (!index.empty()) {
 				std::memcpy(Data(), index.data(), sizeof(Type) * index.size());
 			}
-			resource_->Unmap(0, nullptr);
 			/// <summary>
 			/// リソースの先頭のアドレスを作成する
 			/// </summary>
@@ -64090,6 +64303,9 @@ namespace Engine {
 					/// <summary>
 					/// バッファが不足している場合、再割り当て
 					/// </summary>
+					resource_->Unmap(0, nullptr);
+					data_ = nullptr;
+					dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 					resource_.Reset();
 
 					D3D12_HEAP_PROPERTIES heapProps = {};
@@ -64102,6 +64318,7 @@ namespace Engine {
 						// エラー処理
 						return;
 					}
+					resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 					/// <summary>
 					/// バッファビューの更新
@@ -64111,12 +64328,10 @@ namespace Engine {
 
 				}
 				// データのコピー
-				Type* data;
-				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data));
 				if (!index.empty()) {
-					memcpy(data, index.data(), sizeof(Type) * index.size());
+					memcpy(data_, index.data(), sizeof(Type) * index.size());
 				}
-				resource_->Unmap(0, nullptr);
+				bufferView.SizeInBytes = UINT(sizeof(Type) * index.size());
 			}
 		}
 
@@ -64169,6 +64384,7 @@ File Path: project/DirectXGame/engine/DirectX/Resource/StructuredBuffer.h
 ============================================================
 #pragma once
 #include<wrl.h>
+#include <stdexcept>
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
@@ -64198,6 +64414,11 @@ namespace Engine {
 		// 生成
 		void CreateBuffer(DirectXCommon* dxCommon, int num = 1, bool useUav = false)
 		{
+			if (num <= 0) throw std::invalid_argument("StructuredBuffer element count must be positive");
+			if (data_ && resource_) resource_->Unmap(0, nullptr);
+			data_ = nullptr;
+			mSrvAllocation = {};
+			mUavAllocation = {};
 			this->dxCommon = dxCommon;	// DX共通クラス
 			useUav_ = useUav;	// uavを使うか
 			num_ = num;			// 生成個数
@@ -64227,13 +64448,17 @@ namespace Engine {
 
 
 
-			srvIndex_ = dxCommon->GetSrvManager()->Allocate();
+			mSrvAllocation = dxCommon->GetSrvManager()->AllocateDescriptor();
+			mSrvAllocation.SetResource(resource_);
+			srvIndex_ = mSrvAllocation.GetIndex();
 			srvHandleCPU_ = dxCommon->GetSrvManager()->GetCPUDescriptorHandle(srvIndex_);
 			srvHandleGPU_ = dxCommon->GetSrvManager()->GetGPUDescriptorHandle(srvIndex_);
 			dxCommon->GetSrvManager()->CreateSRVforStructuredBuffer(srvIndex_, resource_.Get(), num_, sizeof(Type));
 
 			if (useUav_) {
-				uavIndex_ = dxCommon->GetSrvManager()->Allocate();
+				mUavAllocation = dxCommon->GetSrvManager()->AllocateDescriptor();
+				mUavAllocation.SetResource(resource_);
+				uavIndex_ = mUavAllocation.GetIndex();
 				uavHandleCPU_ = dxCommon->GetSrvManager()->GetCPUDescriptorHandle(uavIndex_);
 				uavHandleGPU_ = dxCommon->GetSrvManager()->GetGPUDescriptorHandle(uavIndex_);
 				dxCommon->GetSrvManager()->CreateUAVforStructuredBuffer(uavIndex_, resource_.Get(), num_, sizeof(Type));
@@ -64256,12 +64481,7 @@ namespace Engine {
 
 			dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(index, srvHandleGPU_);
 
-			if (useUav_) {
-				/// <summary>
-				/// SRV → UAV に戻す
-				/// </summary>
-				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			}
+			// 描画が記録されるまでSRV状態を維持する。
 		}
 		// コンピュートパイプラインにバッファを設定
 		void SetComputeRootDescriptorTable(int index)
@@ -64269,7 +64489,6 @@ namespace Engine {
 			if (useUav_) {
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 				dxCommon->GetCommandList()->SetComputeRootDescriptorTable(index, uavHandleGPU_);
-				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
 			else {
 				/// <summary>
@@ -64298,6 +64517,9 @@ namespace Engine {
 		// StructuredBuffer クラス内に追加するメソッド
 		void CopyFrom(const void* srcData, size_t byteSize)
 		{
+			if (byteSize == 0) return;
+			if (!srcData || byteSize > static_cast<size_t>(num_) * sizeof(Type))
+				throw std::out_of_range("StructuredBuffer copy exceeds capacity");
 			assert(dxCommon && "StructuredBuffer::CopyFrom: dxCommon is null");
 			assert(srcData && "StructuredBuffer::CopyFrom: srcData is null");
 			size_t capacity = static_cast<size_t>(num_) * sizeof(Type);
@@ -64386,7 +64608,8 @@ namespace Engine {
 			/// </summary>
 			barrier_->UavDependence(resource_.Get());
 
-			// uploadBuffer は関数終了で破棄（ComPtr が自動で release）
+			// コマンドは後で実行されるため、コピー元をGPU完了まで保持する。
+			dxCommon->GetSrvManager()->RetainUntilGpuComplete(std::move(uploadBuffer));
 		}
 
 		// コピー
@@ -64403,6 +64626,8 @@ namespace Engine {
 		}
 
 	private:
+		DescriptorAllocation mSrvAllocation;
+		DescriptorAllocation mUavAllocation;
 		DirectXCommon* dxCommon = nullptr;
 
 		std::unique_ptr<Barrier> barrier_ = nullptr;	// バリア
@@ -64463,7 +64688,10 @@ namespace Engine {
 		// 生成
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> vertex, size_t num = 1)
 		{
+			if (data_ && resource_) resource_->Unmap(0, nullptr);
+			if (resource_) dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 			this->dxCommon = dxCommon;	// DX共通クラス
+			num = (std::max)(size_t{ 1 }, (std::max)(num, vertex.size()));
 
 			/// <summary>
 			/// リソース生成
@@ -64478,8 +64706,8 @@ namespace Engine {
 			/// </summary>
 			resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
-			std::memcpy(Data(), vertex.data(), sizeof(Type) * num);
-			resource_->Unmap(0, nullptr);  // 🔧 安全なタイミングでアンマップ
+			if (!vertex.empty()) std::memcpy(Data(), vertex.data(), sizeof(Type) * vertex.size());
+			// SpriteはData()へ直接書くため、リソースの使用中はMapを維持する。
 
 			/// <summary>
 			/// リソースの先頭のアドレスを作成する
@@ -64503,6 +64731,9 @@ namespace Engine {
 					/// <summary>
 					/// バッファが不足している場合、再割り当て
 					/// </summary>
+					resource_->Unmap(0, nullptr);
+					data_ = nullptr;
+					dxCommon->GetSrvManager()->RetainUntilGpuComplete(resource_);
 					resource_.Reset();
 
 					D3D12_HEAP_PROPERTIES heapProps = {};
@@ -64515,6 +64746,7 @@ namespace Engine {
 						// エラー処理
 						return;
 					}
+					resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 					/// <summary>
 					/// バッファビューの更新
@@ -64525,10 +64757,8 @@ namespace Engine {
 				}
 
 				// データのコピー
-				Type* data;
-				resource_->Map(0, nullptr, reinterpret_cast<void**>(&data));
-				memcpy(data, vertex.data(), requiredSize);
-				resource_->Unmap(0, nullptr);
+				if (!vertex.empty()) memcpy(data_, vertex.data(), requiredSize);
+				bufferView.SizeInBytes = UINT(requiredSize);
 			}
 		}
 
@@ -64871,7 +65101,9 @@ void Engine::ShadowMap::CreateDescriptors()
 	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 	dxgiDevice_->GetDevice()->CreateDepthStencilView(resource_.Get(), &dsvDesc, dsvHandle_);
 
-	srvIndex_ = srvManager_->Allocate();
+	mSrvAllocation = srvManager_->AllocateDescriptor();
+	mSrvAllocation.SetResource(resource_);
+	srvIndex_ = mSrvAllocation.GetIndex();
 	srvHandleCPU_ = srvManager_->GetCPUDescriptorHandle(srvIndex_);
 	srvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvIndex_);
 
@@ -64988,6 +65220,7 @@ File Path: project/DirectXGame/engine/DirectX/ShadowMap/ShadowMap.h
 #include <wrl.h>
 
 #include <d3d12.h>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 #include "DirectXGame/engine/struct/Matrix4x4.h"
 #include "DirectXGame/engine/struct/Vector3.h"
@@ -65076,6 +65309,7 @@ namespace Engine {
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_{};
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};
 		uint32_t srvIndex_ = 0;
+		DescriptorAllocation mSrvAllocation;
 
 		std::unique_ptr<ConstantBuffer<ShadowData>> shadowData_;
 		Settings settings_{};
@@ -65460,7 +65694,6 @@ File Path: project/DirectXGame/engine/Effect/EffectComponent.cpp
 #include "EffectComponent.h"
 #include <DirectXGame/engine/DirectX/Common/DirectXCommon.h>
 #include <DirectXGame/engine/Manager/Entity/EntityManager.h>
-#include <DirectXGame/engine/MyGame/MyGame.h>
 void Engine::EffectComponent::Init(EntityManager* entityManager, GlobalVariables* globalVariables)
 {
 	assert(entityManager && globalVariables);
@@ -65704,22 +65937,24 @@ void Engine::EffectComponent::RemovePrimitive(const std::string& name, ShapePara
 
 
 
-void Engine::EffectComponent::Update() {
+void Engine::EffectComponent::Update() { Update(entityManager->GetDeltaTime()); }
+
+void Engine::EffectComponent::Update(float deltaTime) {
 
 	// エミッタ更新
 	for(auto& [name, emitter] : emitters_) {
-		emitter->Update();
+		emitter->Update(deltaTime);
 	}
 
 	// トレイルエフェクト更新
 	for(auto& [name, trail] : trails_) {
-		trail->Update();
+		trail->Update(deltaTime);
 	}
 
 	// プリミティブ形状更新
 	for (auto& [type, primitiveMap] : primitives3D_) {
 		for (auto& [name, primitive] : primitiveMap) {
-			primitive->Update(MyGame::GameTime());
+			primitive->Update(deltaTime);
 		}
 	}
 
@@ -65792,6 +66027,9 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -68912,7 +69150,6 @@ File Path: project/DirectXGame/engine/Effect/Ocean/Ocean.cpp
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "OceanManager.h"
 #include "imgui.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 
 
 
@@ -68990,11 +69227,13 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 rang
 	index_ = 3;
 }
 
-void Engine::Ocean::Update()
+void Engine::Ocean::Update() { Update(entityManager->GetDeltaTime()); }
+
+void Engine::Ocean::Update(float deltaTime)
 {
 	for (size_t i = 0; i < index_; ++i) {
 		// 波の時間はゲーム時間倍率に合わせて進める
-		cbWaveResource_.Data()[i].time += MyGame::GameTime();
+		cbWaveResource_.Data()[i].time += deltaTime;
 	}
 	material->GPUData();
 }
@@ -69136,6 +69375,9 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// ImGui更新
 		/// </summary>
@@ -69405,9 +69647,9 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/2d/ParticleEmitter2d.cpp
 ============================================================
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
 #include "ParticleEmitter2d.h"
 // engine
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
@@ -69438,7 +69680,9 @@ void Engine::ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, s
 }
 
 
-void Engine::ParticleEmitter2d::Update() {
+void Engine::ParticleEmitter2d::Update() { Update(particleManager->GetDeltaTime()); }
+
+void Engine::ParticleEmitter2d::Update(float deltaTime) {
 	ParticleGroup2d& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	// トランスフォーム更新
@@ -69452,10 +69696,9 @@ void Engine::ParticleEmitter2d::Update() {
 #endif // _DEBUG
 
 	// 出現
-	frequencyTime_ += MyGame::GameTime();
-	if (frequency_ <= frequencyTime_) {
+	const uint32_t burstCount = ConsumeEmissionBursts(frequencyTime_, deltaTime, frequency_);
+	for (uint32_t burst = 0; burst < burstCount; ++burst) {
 		Emit();
-		frequencyTime_ -= frequency_;
 	}
 	// 寿命が尽きたパーティクルを削除する処理
 	particleGroup.particle.remove_if([](const Particle& p)
@@ -69575,6 +69818,9 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 出現
 		/// </summary>
@@ -69698,7 +69944,6 @@ File Path: project/DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.cpp
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Material/Material.h"
 
 #include "imgui.h"
@@ -69725,8 +69970,10 @@ void Engine::ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManage
 
 
 // 更新
-void Engine::ParticleManager2d::Update() {
-	float deltaTime = MyGame::GameTime(); // 毎フレーム一定時間と仮定
+void Engine::ParticleManager2d::Update() { Update(dxCommon->GetDeltaTime()); }
+
+void Engine::ParticleManager2d::Update(float deltaTime) {
+
 
 
 	std::for_each(std::execution::par, particleGroups.begin(), particleGroups.end(),
@@ -69887,6 +70134,8 @@ void Engine::ParticleManager2d::CreateGraphicsPipeline() {
 
 
 
+float Engine::ParticleManager2d::GetDeltaTime() const { return dxCommon->GetDeltaTime(); }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h
@@ -69938,7 +70187,13 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		/// @brief 親の更新ループから渡された時間を取得する。
+		/// @return ゲーム内の経過秒数。
+		float GetDeltaTime() const;
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -70033,11 +70288,11 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleData.cpp
 ============================================================
-﻿#include "ParticleData.h"
+#include "ParticleData.h"
 
 #include <DirectXGame/engine/Base/WinApp/WinApp.h>
 #include <DirectXGame/engine/Math/Random.h>
-#include <DirectXGame/engine/MyGame/MyGame.h>
+
 
 Matrix4x4 Engine::ParticleFunction::Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera)
 {
@@ -70147,7 +70402,7 @@ void Engine::ParticleFunction::Effect(ParticleGroup& group, std::list<Particle>:
 		else if (particleIterator->direction == 3) {// ←
 			noize.y = 0;
 		}
-		particleIterator->velocity += noize * MyGame::GameTime();
+		particleIterator->velocity += noize * deltaTime;
 	}
 
 	// 透過するか
@@ -70912,12 +71167,12 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleManager.cpp
 ============================================================
 #include "ParticleManager.h"
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
-#include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 
@@ -71215,7 +71470,9 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Engine::ParticleManager::Update() {
+void Engine::ParticleManager::Update() { Update(dxCommon->GetDeltaTime()); }
+
+void Engine::ParticleManager::Update(float deltaTime) {
 
 	if (particleGroups.empty()) {
 		return;
@@ -71228,7 +71485,7 @@ void Engine::ParticleManager::Update() {
 	ImGui::End();
 #endif // _DEBUG
 
-	float deltaTime = MyGame::GameTime(); // 毎フレーム一定時間と仮定
+
 
 	std::for_each(std::execution::par, particleGroups.begin(), particleGroups.end(),
 		[&](auto& pair) {
@@ -71692,6 +71949,8 @@ void Engine::ParticleManager::BlendMuliply()
 
 #pragma endregion // パイプライン関係
 
+float Engine::ParticleManager::GetDeltaTime() const { return dxCommon->GetDeltaTime(); }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleManager.h
@@ -71806,7 +72065,13 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		/// @brief 親の更新ループから渡された時間を取得する。
+		/// @return ゲーム内の経過秒数。
+		float GetDeltaTime() const;
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -71976,9 +72241,9 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/Emit/BaseParticleEmitter.cpp
 ============================================================
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
 #include "BaseParticleEmitter.h"
 // engine
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
@@ -72052,7 +72317,9 @@ void Engine::BaseParticleEmitter::Emit()
 }
 
 
-void Engine::BaseParticleEmitter::Update() {
+void Engine::BaseParticleEmitter::Update() { Update(particleManager->GetDeltaTime()); }
+
+void Engine::BaseParticleEmitter::Update(float deltaTime) {
 	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	ApplyGlobalVariables(); // グローバル変数適用
@@ -72151,10 +72418,9 @@ void Engine::BaseParticleEmitter::Update() {
 	UpdateUnique();
 
 	// 出現
-	frequencyTime_ += MyGame::GameTime();
-	if (frequency_ <= frequencyTime_) {
+	const uint32_t burstCount = ConsumeEmissionBursts(frequencyTime_, deltaTime, frequency_);
+	for (uint32_t burst = 0; burst < burstCount; ++burst) {
 		Emit();
-		frequencyTime_ -= frequency_;
 	}
 	if (isLine) {
 		DrawEmitterLine();
@@ -72270,6 +72536,9 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 発生
 		/// </summary>
@@ -72889,7 +73158,6 @@ File Path: project/DirectXGame/engine/Effect/Particle/Emit/ParticleEmitter.cpp
 
 // engine
 #include "ParticleEmitter.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
@@ -74082,37 +74350,7 @@ void Engine::BaseGpuParticleEmitter::UpdateImGui()
 #endif // _DEBUG
 }
 
-void Engine::BaseGpuParticleEmitter::Update(float deltaTime)
-{
-	// 加算
-	cbEmitterCommon_.frequencyTime += deltaTime;
-	cbEmitterCommon_.translate = worldTransform_.translate_;
 
-
-	// 射出間隔を上回ったら射出許可を出して時間を調整
-	if (cbEmitterCommon_.frequency <= cbEmitterCommon_.frequencyTime) {
-		cbEmitterCommon_.frequencyTime -= cbEmitterCommon_.frequency;
-		cbEmitterCommon_.emit = 1;
-
-	}
-	else {
-		// 射出間隔を上回っていないので、射出許可は出せない
-		cbEmitterCommon_.emit = 0;
-	}
-
-	if (!isEmitte_) {
-		cbEmitterCommon_.emit = 0;
-	}
-
-	// グループがあるなら
-	if (group) {
-		// 派生クラス固有の更新
-		UpdateUnique(deltaTime);
-		int count = int(cbEmitterCommon_.count);
-		int threadGroupCount = (count + count_ - 1) / count_;
-	}
-	worldTransform_.Update();
-}
 
 #pragma endregion // 共通処理
 
@@ -74419,6 +74657,28 @@ namespace Engine {
 		void DrawLine() override;
 	private:
 	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Effect/Particle/GPU/GpuEmitterTiming.cpp
+============================================================
+#include "GPUParticleEmitter.h"
+#include "DirectXGame/engine/Utility/EmissionTimer.h"
+#include <cmath>
+
+void Engine::BaseGpuParticleEmitter::Update(float deltaTime) {
+    deltaTime_ = std::isfinite(deltaTime) && deltaTime > 0.0f ? deltaTime : 0.0f;
+    // GPUへ周期の消費回数を渡し、一回あたりの設定個数は変更しない。
+    cbEmitterCommon_.emit = ConsumeEmissionBursts(cbEmitterCommon_.frequencyTime, deltaTime_, cbEmitterCommon_.frequency);
+    cbEmitterCommon_.translate = worldTransform_.translate_;
+    if (!isEmitte_) {
+        cbEmitterCommon_.emit = 0;
+    }
+    if (group) {
+        UpdateUnique(deltaTime_);
+    }
+    worldTransform_.Update();
 }
 
 
@@ -74768,7 +75028,6 @@ File Path: project/DirectXGame/engine/Effect/Particle/GPU/GpuParticleManager.cpp
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 
-#include "DirectXgame/engine/MyGame/MyGame.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
 void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
@@ -74834,7 +75093,9 @@ void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManage
 }
 
 
-void Engine::GpuParticleManager::Update()
+void Engine::GpuParticleManager::Update() { Update(dxCommon->GetDeltaTime()); }
+
+void Engine::GpuParticleManager::Update(float deltaTime)
 {
 	if (!camera) return;
 
@@ -74861,7 +75122,7 @@ void Engine::GpuParticleManager::Update()
 		emitte.second->UpdateImGui();
 		ImGui::End();
 #endif // _DEBUG
-		emitte.second->Update(MyGame::GameTime());
+		emitte.second->Update(deltaTime);
 	}
 
 
@@ -74869,7 +75130,7 @@ void Engine::GpuParticleManager::Update()
 
 	// エミッター更新(ディスパッチ)
 	for (auto& group : gpuParticleGroup_) {
-		group.second.UpdateEmitte(MyGame::GameTime());
+		group.second.UpdateEmitte(deltaTime);
 	}
 
 
@@ -74900,7 +75161,7 @@ void Engine::GpuParticleManager::Update()
 	csTrailEmitPsoManager_->PreComputePSRS();
 
 	for (auto& group : gpuParticleGroup_) {
-		group.second.UpateTrailEmitte(MyGame::GameTime());
+		group.second.UpateTrailEmitte(deltaTime);
 	}
 
 	csTrailUpdatePsoManager_->PreComputePSRS();
@@ -75318,6 +75579,9 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 描画
 		/// </summary>
@@ -75476,6 +75740,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Effect/Particle/GPU/GpuParticleSystem.cpp
 ============================================================
+#include <algorithm>
 #include "GpuParticleSystem.h"
 
 #include"DirectXGame/engine/Manager/Entity/EntityManager.h"
@@ -75694,7 +75959,8 @@ void Engine::GpuParticleGroup::UpdateEmitte(float deltaTime)
 
 		// 1回の Emit で発生する数 = common.count
 		// threadGroups (= グループ数) を求める
-		uint32_t threadGroups = (common.count + threadCount - 1) / threadCount; // グループ数
+		const auto emissionCount = static_cast<uint32_t>((std::min)(static_cast<uint64_t>(common.count) * common.emit, static_cast<uint64_t>(cbMaxInstance_.Data()->maxInstance)));
+		uint32_t threadGroups = (emissionCount + threadCount - 1) / threadCount; // グループ数
 		uint32_t threadsForEmitter = threadGroups * threadCount; // スレッド数（THREAD_COUNT の倍）
 
 		PerEmitterDispatch info{};
@@ -78457,7 +78723,6 @@ File Path: project/DirectXGame/engine/Effect/Trail/TrailEffect.cpp
 #include "TrailEffect.h"
 
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Math/LineCurveMath.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 
@@ -78590,7 +78855,7 @@ void Engine::TrailEffect::Update()
 
 	Vector3 start = worldtransformTstr_.worldMat_.GetWorldPosition();
 	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
-	const float deltaTime = MyGame::GameTime();
+	const float deltaTime = GetDeltaTime();
 
 	// 軌道を進めながら、リボンの両レールを現在の親位置へ追従させる。
 	if (trajectoryEnabled_) {
@@ -79207,6 +79472,7 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
+		using Entity::Update;
 		void Update() override;
 		/// <summary>
 		/// 描画
@@ -79515,6 +79781,21 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Entity/Entity.cpp
+============================================================
+#include "Entity.h"
+
+void Engine::Entity::Update(float deltaTime) { mDeltaTime = deltaTime; Update(); }
+
+void Engine::Entity::RigidBodyUpdate(float deltaTime) { mDeltaTime = deltaTime; RigidBodyUpdate(); }
+
+void Engine::Entity::SetDeltaTime(float deltaTime) { mDeltaTime = deltaTime; }
+
+float Engine::Entity::GetDeltaTime() const { return mDeltaTime; }
+
+
+
+============================================================
 File Path: project/DirectXGame/engine/Entity/Entity.h
 ============================================================
 #pragma once
@@ -79541,6 +79822,19 @@ namespace Engine {
 		/// 毎フレーム更新。
 		/// </summary>
 		virtual void Update() {}
+
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		virtual void Update(float deltaTime);
+		/// @brief 物理更新へ今回の経過時間を渡す。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void RigidBodyUpdate(float deltaTime);
+		/// @brief 既存の引数なし更新にも同じ時間を公開する。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void SetDeltaTime(float deltaTime);
+		/// @brief この個体に渡された更新時間を取得する。
+		/// @return 経過秒数。
+		float GetDeltaTime() const;
 		/// <summary>
 		/// 通常描画。
 		/// </summary>
@@ -79589,6 +79883,7 @@ namespace Engine {
 		virtual const WorldTransform* GetWorldTransformPtr() const { return nullptr; }
 
 	protected:
+		float mDeltaTime = 0.0f;
 		// 名前
 		std::string name_{};
 		// タグ
@@ -79645,8 +79940,9 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/Entity/ObjectComponent.cpp
 ============================================================
-﻿#include "ObjectComponent.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "ObjectComponent.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+
 #include <DirectXGame/engine/3d/Object/Object3dInstanceManager.h>
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
@@ -79656,7 +79952,7 @@ File Path: project/DirectXGame/engine/Entity/ObjectComponent.cpp
 /// オブジェクトの時間取得
 /// </summary>
 /// <returns></returns>
-float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
+float ObjectComponent::GetTime() const { return entityManager->GetDeltaTime() * timeSpeed_; }
 
 /// <summary>
 /// オブジェクトの時間設定
@@ -79859,7 +80155,7 @@ void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager,
 void ObjectComponent::Update() {
     // インスタンシング描画なら
     if (useInstancing)
-        objectInstance_->Update();
+        objectInstance_->Update(entityManager->GetDeltaTime());
 };
 
 
@@ -81436,6 +81732,9 @@ void Engine::LightManager::DrawLight(IsLight is, int dire, int point, int spot)
 
 void Engine::LightManager::Update()
 {
+	if (!pointLightData || !directionalLightData || !spotLightData) {
+		return;
+	}
 	ZeroMemory(pointLightData, sizeof(PointLightData) * kNumMaxInstance);
 	ZeroMemory(directionalLightData, sizeof(DirectionalLightData) * kNumMaxInstance);
 	ZeroMemory(spotLightData, sizeof(SpotLightData) * kNumMaxInstance);
@@ -81449,18 +81748,18 @@ void Engine::LightManager::Update()
 	{
 		if (!light) continue;
 
-		if (light->GetType() == Lights::Type::Point)
+		if (light->GetType() == Lights::Type::Point && pointLightIndex < kNumMaxInstance)
 		{
 			light->SetLightData(&pointLightData[pointLightIndex]);
 			// LineCommon::GetInstance()->AddLightLine(pointLightData[pointLightIndex]);
 			++pointLightIndex;
 		}
-		else if (light->GetType() == Lights::Type::Directional)
+		else if (light->GetType() == Lights::Type::Directional && directionalLightIndex < kNumMaxInstance)
 		{
 			light->SetLightData(&directionalLightData[directionalLightIndex]);
 			++directionalLightIndex;
 		}
-		else if (light->GetType() == Lights::Type::Spot)
+		else if (light->GetType() == Lights::Type::Spot && spotLightIndex < kNumMaxInstance)
 		{
 			light->SetLightData(&spotLightData[spotLightIndex]);
 			//  LineCommon::GetInstance()->AddLightLine(spotLightData[spotLightIndex]);
@@ -81541,11 +81840,11 @@ void Engine::LightManager::Update()
 	{
 		if (!light) continue;
 
-		if (light->GetType() == Lights::Type::Point)
+		if (light->GetType() == Lights::Type::Point && pIndex < kNumMaxInstance)
 			light->UpdateFromData(&pointLightData[pIndex++]);
-		else if (light->GetType() == Lights::Type::Directional)
+		else if (light->GetType() == Lights::Type::Directional && dIndex < kNumMaxInstance)
 			light->UpdateFromData(&directionalLightData[dIndex++]);
-		else if (light->GetType() == Lights::Type::Spot)
+		else if (light->GetType() == Lights::Type::Spot && sIndex < kNumMaxInstance)
 			light->UpdateFromData(&spotLightData[sIndex++]);
 	}
 
@@ -81563,6 +81862,22 @@ void Engine::LightManager::ApplyGlobalVariables()
 
 
 
+bool Engine::LightManager::AddLight(std::shared_ptr<Lights> light) {
+			if (!light) {
+				return false;
+			}
+			const auto type = light->GetType();
+			const auto typeCount = std::count_if(m_lights.begin(), m_lights.end(), [type](const auto& entry) {
+				return entry && entry->GetType() == type;
+			});
+			if (typeCount >= kNumMaxInstance) {
+				return false;
+			}
+			light->SetNumber(static_cast<int>(m_lights.size()));
+			m_lights.push_back(std::move(light));
+			return true;
+		}
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Light/LightCommon.h
@@ -81575,6 +81890,7 @@ File Path: project/DirectXGame/engine/Light/LightCommon.h
 #include<wrl.h>
 #include<string>
 #include<vector>
+#include <algorithm>
 #include<format>
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
@@ -81614,14 +81930,10 @@ namespace Engine {
 		/// 更新
 		/// </summary>
 		void Update();
-		/// <summary>
-		/// ライト追加
-		/// </summary>
-		void AddLight(std::shared_ptr<Lights> light) {
-			light->SetNumber(int(m_lights.size()));
-			m_lights.push_back(light);
-			//count++;
-		}
+		/// @brief GPU転送領域の上限を超えない場合にライトを登録する。
+		/// @param light 登録するライト。nullptrは登録しない。
+		/// @return 登録できた場合はtrue。同じ種類が10個ある場合はfalse。
+		bool AddLight(std::shared_ptr<Lights> light);
 		/// <summary>
 		/// ライト数取得
 		/// </summary>
@@ -81664,7 +81976,7 @@ namespace Engine {
 
 		DirectXCommon* dxCommon = nullptr;
 
-		const uint32_t kNumMaxInstance = 10;
+		static constexpr uint32_t kNumMaxInstance = 10;
 
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> directionalLightResource;
@@ -81673,7 +81985,7 @@ namespace Engine {
 
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> pointLightResource;
-		PointLightData* pointLightData;
+		PointLightData* pointLightData = nullptr;
 		const int pointMax = 3;
 
 
@@ -83114,6 +83426,151 @@ namespace Engine {
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Manager/DescriptorAllocation.cpp
+============================================================
+#include "DescriptorAllocation.h"
+
+#include <mutex>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
+namespace Engine {
+    namespace Detail {
+        struct RetiredDescriptor {
+            uint32_t mIndex = UINT32_MAX;
+            std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> mResources;
+            std::unique_ptr<RetiredDescriptor> mNext;
+        };
+        struct DescriptorPool {
+            std::mutex mMutex;
+            uint32_t mNext = 0;
+            uint32_t mCapacity = 0;
+            std::vector<uint32_t> mFreeIndices;
+            std::unique_ptr<RetiredDescriptor> mRetired;
+        };
+        struct DescriptorLease {
+            std::weak_ptr<DescriptorPool> mPool;
+            std::unique_ptr<RetiredDescriptor> mRetirement;
+            /// @brief 最後の所有者が破棄された領域とリソースをGPU完了待ちへ移す。
+            ~DescriptorLease() {
+                if (auto owner = mPool.lock()) {
+                    std::scoped_lock lock(owner->mMutex);
+                    mRetirement->mNext = std::move(owner->mRetired);
+                    owner->mRetired = std::move(mRetirement);
+                }
+            }
+        };
+    }
+}
+
+uint32_t Engine::DescriptorAllocation::GetIndex() const { if (!mLease) throw std::logic_error("Empty descriptor allocation"); return mLease->mRetirement->mIndex; }
+
+void Engine::DescriptorAllocation::SetResource(Microsoft::WRL::ComPtr<ID3D12Resource> resource) {
+    if (!mLease) throw std::logic_error("Empty descriptor allocation");
+    mLease->mRetirement->mResources.push_back(std::move(resource));
+}
+
+Engine::DescriptorAllocator::DescriptorAllocator(uint32_t capacity, uint32_t reservedCount) : mPool(std::make_shared<Detail::DescriptorPool>()) {
+    if (reservedCount > capacity) throw std::invalid_argument("Descriptor reservation exceeds capacity");
+    mPool->mNext = reservedCount;
+    mPool->mCapacity = capacity;
+    mPool->mFreeIndices.reserve(capacity);
+}
+
+Engine::DescriptorAllocation Engine::DescriptorAllocator::Allocate() {
+    auto lease = std::make_shared<Detail::DescriptorLease>();
+    lease->mRetirement = std::make_unique<Detail::RetiredDescriptor>();
+    std::scoped_lock lock(mPool->mMutex);
+    uint32_t index;
+    if (!mPool->mFreeIndices.empty()) { index = mPool->mFreeIndices.back(); mPool->mFreeIndices.pop_back(); }
+    else {
+        if (mPool->mNext >= mPool->mCapacity) throw std::overflow_error("Descriptor heap exhausted");
+        index = mPool->mNext++;
+    }
+    DescriptorAllocation allocation;
+    allocation.mLease = std::move(lease);
+    allocation.mLease->mPool = mPool;
+    allocation.mLease->mRetirement->mIndex = index;
+    return allocation;
+}
+
+void Engine::DescriptorAllocator::CollectRetired() {
+    std::scoped_lock lock(mPool->mMutex);
+    while (mPool->mRetired) {
+        auto entry = std::move(mPool->mRetired);
+        mPool->mRetired = std::move(entry->mNext);
+        if (entry->mIndex != UINT32_MAX) mPool->mFreeIndices.push_back(entry->mIndex);
+    }
+}
+
+void Engine::DescriptorAllocator::RetainUntilGpuComplete(Microsoft::WRL::ComPtr<ID3D12Resource> resource) {
+    auto entry = std::make_unique<Detail::RetiredDescriptor>();
+    entry->mResources.push_back(std::move(resource));
+    std::scoped_lock lock(mPool->mMutex);
+    entry->mNext = std::move(mPool->mRetired);
+    mPool->mRetired = std::move(entry);
+}
+
+bool Engine::DescriptorAllocator::HasCapacity() const {
+    std::scoped_lock lock(mPool->mMutex);
+    return !mPool->mFreeIndices.empty() || mPool->mNext < mPool->mCapacity;
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/engine/Manager/DescriptorAllocation.h
+============================================================
+#pragma once
+#include <cstdint>
+#include <d3d12.h>
+#include <wrl.h>
+#include <memory>
+
+namespace Engine {
+namespace Detail {
+    struct DescriptorLease;
+    struct DescriptorPool;
+}
+/// @brief デスクリプタ領域と関連リソースの所有権を共有する。
+class DescriptorAllocation {
+public:
+    /// @brief ヒープ内の割り当て位置を取得する。
+    /// @return 所有中のインデックス。
+    uint32_t GetIndex() const;
+    /// @brief リソースをデスクリプタと同じGPU完了時点まで保持する。
+    /// @param resource 保持するリソース。
+    void SetResource(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
+private:
+    friend class DescriptorAllocator;
+    std::shared_ptr<Detail::DescriptorLease> mLease;
+};
+/// @brief GPU完了通知後に解放領域を再利用する。
+class DescriptorAllocator {
+public:
+    /// @brief ヒープの容量と先頭予約数を指定する。
+    /// @param capacity ヒープ全体の容量。
+    /// @param reservedCount 外部ライブラリなどの予約数。
+    explicit DescriptorAllocator(uint32_t capacity, uint32_t reservedCount = 0);
+    /// @brief 未使用領域の所有権を取得する。
+    /// @return 割り当てた領域。
+    DescriptorAllocation Allocate();
+    /// @brief 記録済みコマンドのGPU完了後に保留領域を回収する。
+    void CollectRetired();
+    /// @brief 一時リソースを次のGPU完了通知まで保持する。
+    /// @param resource コピー元や再生成前のリソース。
+    void RetainUntilGpuComplete(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
+    /// @brief 新たに割り当て可能か確認する。
+    /// @return 空き領域がある場合はtrue。
+    bool HasCapacity() const;
+private:
+    std::shared_ptr<Detail::DescriptorPool> mPool;
+};
+}
+
+
+============================================================
 File Path: project/DirectXGame/engine/Manager/Effect/EffectManager.cpp
 ============================================================
 #include "EffectManager.h"
@@ -83563,10 +84020,18 @@ TrailEffect* Engine::EntityManager::CreateTrailEffect(const std::string& name,
 	return raw;
 }
 
-void Engine::EntityManager::Update()
+void Engine::EntityManager::SetDeltaTime(float deltaTime) {
+	mDeltaTime = deltaTime;
+	for (auto& entity : entities_) {
+		if (entity) { entity->SetDeltaTime(deltaTime); }
+	}
+}
+
+void Engine::EntityManager::Update(float deltaTime)
 {
+	SetDeltaTime(deltaTime);
 	// オブジェクトインスタンシング更新
-	object3dInstanceManager_->Update();
+	object3dInstanceManager_->Update(deltaTime);
 
 	// オブジェクトが消えたときの処理
 	entities_.erase(
@@ -83583,7 +84048,7 @@ void Engine::EntityManager::Update()
 	for (auto& object : entities_) {
 		if (object) {
 			// 物理更新
-			object->RigidBodyUpdate();
+			object->RigidBodyUpdate(deltaTime);
 		}
 	}
 
@@ -83593,7 +84058,7 @@ void Engine::EntityManager::Update()
 		}
 
 		// Entityは種類に関係なく自分の更新責務を進める。
-		entity->Update();
+		entity->Update(deltaTime);
 
 		Object3d* object = dynamic_cast<Object3d*>(entity.get());
 		if (object) {
@@ -83655,6 +84120,8 @@ void Engine::EntityManager::DrawShadowMap(ShadowMap* shadowMap)
 
 
 
+
+float Engine::EntityManager::GetDeltaTime() const { return mDeltaTime; }
 
 
 ============================================================
@@ -83724,7 +84191,15 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
+		/// @brief シーン更新前に各個体へ今回の更新時間を公開する。
+		/// @param deltaTime ゲーム内の経過秒数。
+		void SetDeltaTime(float deltaTime);
+		/// @brief 現在の更新時間を取得する。
+		/// @return 経過秒数。
+		float GetDeltaTime() const;
 
 		/// <summary>
 		/// オブジェクトクリーン
@@ -83873,6 +84348,7 @@ namespace Engine {
 
 
 	private:
+		float mDeltaTime = 0.0f;
 		std::vector<std::unique_ptr<Entity>> entities_;
 
 		// Update時に毎フレーム作り直す描画キュー。順番はカメラ奥行きから自動で決める。
@@ -83952,19 +84428,20 @@ void Engine::RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 uint32_t Engine::RtvManager::Allocate()
 {
-	assert(kMaxRTVCount > useIndex);
-
-	// return する番号を一旦記録
-	int index = useIndex;
-	// 次回のために番号を1進める
-	useIndex++;
-	// 上で記録した番号をreturn
+	auto allocation = AllocateDescriptor();
+	const uint32_t index = allocation.GetIndex();
+	mLegacyAllocations.push_back(std::move(allocation));
 	return index;
 }
 
-void Engine::RtvManager::DecAllocate()
+Engine::DescriptorAllocation Engine::RtvManager::AllocateDescriptor()
 {
-	useIndex--;
+	return mDescriptorAllocator.Allocate();
+}
+
+void Engine::RtvManager::CollectRetiredDescriptors()
+{
+	mDescriptorAllocator.CollectRetired();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::RtvManager::GetCPUDescriptorHandle(uint32_t index)
@@ -84033,6 +84510,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::RtvManager::CreateRenderTextureRe
 
 void Engine::RtvManager::Finalize()
 {
+	mLegacyAllocations.clear();
+	mDescriptorAllocator.CollectRetired();
 	descriptorHeap.Reset();
 }
 
@@ -84045,10 +84524,13 @@ File Path: project/DirectXGame/engine/Manager/RTV/RtvManager.h
 
 // C++
 #include <cstdint>
+#include <mutex>
+#include <vector>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 
 #include"DirectXGame/engine/struct/Structs3D.h"
@@ -84074,10 +84556,15 @@ namespace Engine {
         /// </summary>
         uint32_t Allocate();
 
+        /// @brief GPU完了後に返却されるRTV所有権を取得する。
+        /// @return 割り当て所有権。
+        DescriptorAllocation AllocateDescriptor();
+        /// @brief GPU待機完了後、破棄済みRTVを再利用可能にする。
+        void CollectRetiredDescriptors();
+
         /// <summary>
         /// デクリメント
         /// </summary>
-        void DecAllocate();
 
         /// <summary>
         /// デスクリプタハンドル計算
@@ -84115,7 +84602,8 @@ namespace Engine {
         Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
         // 次に使用するRTVインデックス
-        uint32_t useIndex = 0;
+        DescriptorAllocator mDescriptorAllocator{ kMaxRTVCount };
+        std::vector<DescriptorAllocation> mLegacyAllocations;
     private:
         DXGIDevice* dxgiDevice = nullptr;
         Command* command = nullptr;
@@ -84157,9 +84645,26 @@ void Engine::SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 uint32_t Engine::SrvManager::Allocate()
 {
-	uint32_t index = useIndex_.fetch_add(1, std::memory_order_relaxed);
-	assert(index < kMaxSRVCount);
+	auto allocation = AllocateDescriptor();
+	const uint32_t index = allocation.GetIndex();
+	std::scoped_lock lock(mLegacyMutex);
+	mLegacyAllocations.push_back(std::move(allocation));
 	return index;
+}
+
+Engine::DescriptorAllocation Engine::SrvManager::AllocateDescriptor()
+{
+	return mDescriptorAllocator.Allocate();
+}
+
+void Engine::SrvManager::CollectRetiredDescriptors()
+{
+	mDescriptorAllocator.CollectRetired();
+}
+
+void Engine::SrvManager::RetainUntilGpuComplete(Microsoft::WRL::ComPtr<ID3D12Resource> resource)
+{
+	mDescriptorAllocator.RetainUntilGpuComplete(std::move(resource));
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::SrvManager::GetCPUDescriptorHandle(uint32_t index)
@@ -84254,14 +84759,13 @@ void Engine::SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex,
 
 bool Engine::SrvManager::IsMaxTexture()
 {
-	if (kMaxSRVCount > useIndex_) {
-		return true;
-	}
-	return false;
+	return mDescriptorAllocator.HasCapacity();
 }
 
 void Engine::SrvManager::Finalize()
 {
+	mLegacyAllocations.clear();
+	mDescriptorAllocator.CollectRetired();
 	descriptorHeap.Reset();
 }
 
@@ -84273,11 +84777,14 @@ File Path: project/DirectXGame/engine/Manager/SRV/SrvManager.h
 
 // C++
 #include <cstdint>
+#include <mutex>
+#include <vector>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
 #include <atomic>
+#include "DirectXGame/engine/Manager/DescriptorAllocation.h"
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 
@@ -84303,6 +84810,14 @@ namespace Engine {
 		/// アロケート
 		/// </summary>
 		uint32_t Allocate();
+		/// @brief GPU完了後に返却されるデスクリプタ所有権を取得する。
+		/// @return 割り当て所有権。
+		DescriptorAllocation AllocateDescriptor();
+		/// @brief GPU待機完了後、破棄済みデスクリプタを再利用可能にする。
+		void CollectRetiredDescriptors();
+		/// @brief 一時リソースをGPU待機完了まで保持する。
+		/// @param resource コマンドが参照するリソース。
+		void RetainUntilGpuComplete(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
 
 		/// <summary>
 		/// デスクリプタハンドル計算
@@ -84372,7 +84887,10 @@ namespace Engine {
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
 		// 次に使用するSRVインデックス
-		std::atomic<uint32_t> useIndex_{ 0 };
+		// 先頭0はImGuiフォント専用として予約する。
+		DescriptorAllocator mDescriptorAllocator{ kMaxSRVCount, 1 };
+		std::vector<DescriptorAllocation> mLegacyAllocations;
+		std::mutex mLegacyMutex;
 
 	private:
 		DXGIDevice* dxgiDevice = nullptr;
@@ -86022,7 +86540,7 @@ Vector3 ClosestPoint::PointSegment(const Segment& segment, const Vector3& point)
 	float t = Dot(point - segment.origin, diff) / lenSq;
 	t = Math::Clamp(t, 0.0f, 1.0f);
 
-	return segment.origin - Multiply(diff, t);
+	return segment.origin + Multiply(diff, t);
 }
 // 線と三角
 Vector3 ClosestPoint::SegmentTriangle(const Segment& segment, const Triangle& triangle) {
@@ -86515,7 +87033,7 @@ void Noise::InitParameters()
 	Seed = 42;
 	noise = 255;
 
-	Init_hash(Seed);
+	InitHash(Seed);
 }
 
 void Noise::ImguiParameter()
@@ -86531,7 +87049,7 @@ void Noise::ImguiParameter()
 		ImGui::DragFloat("Max_value", &Max_value,0.01f);
 		ImGui::DragInt("Seed", &Seed);
 		if (ImGui::Button("InitSeed")) {
-			Init_hash(Seed);
+			InitHash(Seed);
 		}
 	}
 	ImGui::End();
@@ -86554,18 +87072,18 @@ float Noise::Noise2D(float x, float y)
     float v = Fade(y);
 
     // 周囲4点のハッシュ値を求める
-    int A = hashT[X] + Y;
-    int B = hashT[X + 1] + Y;
+    int A = mHashTable[X] + Y;
+    int B = mHashTable[X + 1] + Y;
 
     // 各グリッド点での勾配ノイズを取得
-    float n00 = Grad2(hashT[A], x, y);         // (0,0)
-    float n01 = Grad2(hashT[A + 1], x, y - 1); // (0,1)
-    float n10 = Grad2(hashT[B], x - 1, y);     // (1,0)
-    float n11 = Grad2(hashT[B + 1], x - 1, y - 1); // (1,1)
+    float n00 = Grad2(mHashTable[A], x, y);         // (0,0)
+    float n01 = Grad2(mHashTable[A + 1], x, y - 1); // (0,1)
+    float n10 = Grad2(mHashTable[B], x - 1, y);     // (1,0)
+    float n11 = Grad2(mHashTable[B + 1], x - 1, y - 1); // (1,1)
 
     // x方向の線形補間
-    float n0 = Lerp(n00, n01, u);
-    float n1 = Lerp(n10, n11, u);
+    float n0 = Lerp(n00, n10, u);
+    float n1 = Lerp(n01, n11, u);
 
     // y方向の線形補間を行い最終値を返す
     return Lerp(n0, n1, v);
@@ -86600,6 +87118,17 @@ float Noise::PerlinNoise(float x, float y)
 }
 
 
+void Noise::InitHash(int seed) {
+		std::array<int, 256> permutation{};
+		std::iota(permutation.begin(), permutation.end(), 0);
+		std::mt19937 generator(static_cast<std::mt19937::result_type>(seed));
+		std::shuffle(permutation.begin(), permutation.end(), generator);
+		for (std::size_t i = 0; i < permutation.size(); ++i) {
+			mHashTable[i] = permutation[i];
+			mHashTable[i + permutation.size()] = permutation[i];
+		}
+	}
+
 
 ============================================================
 File Path: project/DirectXGame/engine/Math/Noise.h
@@ -86611,6 +87140,10 @@ File Path: project/DirectXGame/engine/Math/Noise.h
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
 #include"MathFunctions.h"
+#include <algorithm>
+#include <array>
+#include <numeric>
+#include <random>
 
 
 #define HASH_SIZE 512
@@ -86689,18 +87222,11 @@ private:
 		// hの下位ビットが1の場合はvを、そうでない場合は-vを選択します。
 	}
 
-	/// <summary>
-	/// ハッシュ関数
-	/// </summary>
-	void Init_hash(int seed) {
-		srand(seed);
-		for (int i = 0; i < HASH_SIZE; i++) {
-			hashT[i] = rand() % HASH_SIZE;
-		}
-	}
-
+	/// @brief 指定シードから256要素の順列表を生成し、参照範囲を保証する。
+	/// @param seed 順列表の再現に使用するシード。
+	void InitHash(int seed);
 	// ハッシュテーブルの初期化
-	int hashT[HASH_SIZE] = {};
+	int mHashTable[HASH_SIZE] = {};
 
 	int g_HashCode[HASH_CODE_TABLE_NUM] = {};
 
@@ -88146,7 +88672,7 @@ void Engine::Framework::Finalize()
 
 }
 
-void Engine::Framework::Update()
+void Engine::Framework::Update(float deltaTime)
 {
 	// 基盤更新全体を計測し、音声・入力・メッセージ処理の負荷を確認できるようにする。
 	ENGINE_CPU_PROFILE_SCOPE("Framework::Update");
@@ -88169,6 +88695,7 @@ void Engine::Framework::Run()
 {
 	// ゲームの初期化
 	Initialize();
+	auto previousTime = std::chrono::steady_clock::now();
 	while (true) {
 		// UpdateとDrawを含む1ループを1フレームとして記録する。
 		CpuProfiler::Get().BeginFrame();
@@ -88177,7 +88704,10 @@ void Engine::Framework::Run()
 			ENGINE_CPU_PROFILE_SCOPE("Frame");
 
 		// 毎フレーム更新
-			Update();
+			const auto currentTime = std::chrono::steady_clock::now();
+			const float deltaTime = std::chrono::duration<float>(currentTime - previousTime).count();
+			previousTime = currentTime;
+			Update(deltaTime);
 			// 終了リクエストが来たら描画をスキップしてフレームを閉じる。
 			if (!IsEndRequest()) {
 				// 描画
@@ -88237,7 +88767,9 @@ namespace Engine {
 		/// <summary>
 		/// 毎フレーム更新
 		/// </summary>
-		virtual void Update();
+		/// @brief 実測された経過時間でフレームを更新する。
+		/// @param deltaTime 前フレームから経過した実時間（秒）。
+		virtual void Update(float deltaTime);
 
 		/// <summary>
 		/// 描画
@@ -88301,13 +88833,14 @@ File Path: project/DirectXGame/engine/MyGame/MyGame.cpp
 #include "DirectXGame/engine/Base/Profiler/ScopedCpuTimer.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
-const float Engine::MyGame::kDeltaTime_ = ConvertUtility::kDefaultDeltaTime;
+float Engine::MyGame::mLegacyGameDeltaTime = 0.0f;
+float Engine::MyGame::mLegacyUnscaledDeltaTime = 0.0f;
 float Engine::MyGame::kTimeSpeed_ = 1.0f;
 float Engine::MyGame::nowTime = 0.0f;
 
 void Engine::MyGame::SetTimeScale(float timeScale) {
 	// スロー演出などから呼ばれても破綻しないよう、時間倍率を安全な範囲に丸める
-	if (timeScale < 0.0f) {
+	if (!std::isfinite(timeScale) || timeScale < 0.0f) {
 		timeScale = 0.0f;
 	}
 	if (timeScale > 4.0f) {
@@ -88391,7 +88924,7 @@ void Engine::MyGame::Finalize()
 	Framework::Finalize();
 }
 
-void Engine::MyGame::Update()
+void Engine::MyGame::Update(float unscaledDeltaTime)
 {
 	// ゲーム固有の更新処理をフレーム階層へ記録する。
 	ENGINE_CPU_PROFILE_SCOPE("MyGame::Update");
@@ -88400,15 +88933,13 @@ void Engine::MyGame::Update()
 	// ImGuiの受付開始
 	dxCommon_->GetImGuiManager()->Begin();
 
-	Framework::Update();
+	Framework::Update(unscaledDeltaTime);
 
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-	nowTime += deltaTime;
-	if (deltaTime > 0) {
-		fps = 1.0f / deltaTime;
-	}
-	lastTime = currentTime;
+	mFrameTime.Update(unscaledDeltaTime, kTimeSpeed_);
+	mLegacyGameDeltaTime = mFrameTime.GetDeltaTime();
+	mLegacyUnscaledDeltaTime = mFrameTime.GetUnscaledDeltaTime();
+	nowTime = static_cast<float>(mFrameTime.GetElapsedTime());
+	fps = unscaledDeltaTime > 0.0f ? 1.0f / unscaledDeltaTime : 0.0f;
 
 #ifdef _DEBUG
 
@@ -88426,7 +88957,7 @@ void Engine::MyGame::Update()
 			// 時間関連のデバッグ項目を表示する。
 			if (ImGui::BeginMenu("Time")) {
 				ImGui::Text("FPS: %.2f", fps);
-				ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
+				ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f, 0.0f, 4.0f);
 				ImGui::EndMenu();
 			}
 
@@ -88451,7 +88982,7 @@ void Engine::MyGame::Update()
 	// グローバル変数の更新
 	globalVariables_->Update();
 
-	dxCommon_->Update(sceneManager_.get(), entityManager_.get());
+	dxCommon_->Update(sceneManager_.get(), entityManager_.get(), mFrameTime.GetDeltaTime());
 
 
 
@@ -88619,12 +89150,21 @@ void Engine::MyGame::LoadModel()
 	modelManager->WaitAllLoadFinished();
 }
 
+float Engine::MyGame::GameTime() { return mLegacyGameDeltaTime; }
+
+float Engine::MyGame::BaseDeltaTime() { return mLegacyUnscaledDeltaTime; }
+
+float Engine::MyGame::GetTimeScale() { return kTimeSpeed_; }
+
+float Engine::MyGame::NowTime() { return nowTime; }
+
 
 ============================================================
 File Path: project/DirectXGame/engine/MyGame/MyGame.h
 ============================================================
 #pragma once
 #include"Framework.h"
+#include "DirectXGame/engine/Utility/FrameTime.h"
 #include "DirectXGame/engine/Base/Profiler/CpuProfilerWindow.h"
 
 namespace Engine {
@@ -88648,7 +89188,9 @@ namespace Engine {
 		/// <summary>
 		/// 毎フレーム更新
 		/// </summary>
-		void Update() override;
+		/// @brief 実測された経過時間でフレームを更新する。
+		/// @param deltaTime 前フレームから経過した実時間（秒）。
+		void Update(float deltaTime) override;
 
 		/// <summary>
 		/// 描画
@@ -88673,15 +89215,15 @@ namespace Engine {
 		/// <summary>
 		/// ゲーム内時間取得
 		/// </summary>
-		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
+		static float GameTime();
 		/// <summary>
-		/// 時間倍率を掛けていない固定デルタタイム取得
+		/// 時間倍率を掛けていない実測デルタタイム取得
 		/// </summary>
-		static float BaseDeltaTime() { return kDeltaTime_; };
+		static float BaseDeltaTime();
 		/// <summary>
 		/// 現在のゲーム内時間倍率取得
 		/// </summary>
-		static float GetTimeScale() { return kTimeSpeed_; };
+		static float GetTimeScale();
 		/// <summary>
 		/// ゲーム内時間倍率設定
 		/// </summary>
@@ -88689,14 +89231,16 @@ namespace Engine {
 		/// <summary>
 		/// 現在の時間
 		/// </summary>
-		static float NowTime() { return nowTime; };
+		static float NowTime();
 
 	private:
-		static float const kDeltaTime_;
+		static float mLegacyGameDeltaTime;
+		static float mLegacyUnscaledDeltaTime;
+		FrameTime mFrameTime;
 		static float kTimeSpeed_;
 		static float nowTime;
 	private:
-		std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+
 
 		float fps = 0.0f;
 
@@ -90790,7 +91334,8 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/PSO/CSPSOManager.cpp
 ============================================================
-﻿#include "CSPSOManager.h"
+#include <stdexcept>
+#include "CSPSOManager.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -90827,6 +91372,7 @@ void Engine::CSPSOManager::ComputePipelineState()
 	
 	hr_ = dxgiDevice->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
 		IID_PPV_ARGS(&computePSRS_.pipelineState));
+	if (FAILED(hr_)) throw std::runtime_error("CreateComputePipelineState failed");
 
 }
 
@@ -91123,7 +91669,7 @@ namespace Engine {
 ============================================================
 File Path: project/DirectXGame/engine/PSO/PSOManager.cpp
 ============================================================
-﻿#include "PSOManager.h"
+#include "PSOManager.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
@@ -91137,7 +91683,7 @@ void Engine::PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DX
 	useInputLayout_ = true;
 }
 
-void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
+Engine::ShaderBlobSet Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
 {
 	ShaderBlobSet shaderBlob{}; // コンパイル済みグラフィックスシェーダー一式
 
@@ -91186,6 +91732,7 @@ void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& g
 
 
 
+	return shaderBlob;
 }
 
 void Engine::PSOManager::SetRootSignature(
@@ -91240,7 +91787,7 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;// InputLayout
 
-	SetShederGraphics(graphicsPipelineStateDesc); // Sheder
+	const ShaderBlobSet shaderBlobs = SetShederGraphics(graphicsPipelineStateDesc);
 
 	graphicsPipelineStateDesc.BlendState = blendDesc; //BlendState
 
@@ -91476,7 +92023,7 @@ namespace Engine {
 		/// <summary>
 		/// グラフィックパイプライン設定
 		/// </summary>
-		void SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline);
+		ShaderBlobSet SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline);
 	};
 }
 
@@ -94726,6 +95273,106 @@ namespace ConvertUtility
 
 
 ============================================================
+File Path: project/DirectXGame/engine/Utility/EmissionTimer.cpp
+============================================================
+#include "EmissionTimer.h"
+#include <algorithm>
+#include <cmath>
+
+namespace {
+constexpr uint32_t kMaxEmissionBurstsPerUpdate = 1024;
+}
+
+uint32_t Engine::ConsumeEmissionBursts(float& elapsedTime, float deltaTime, float interval) {
+    if (!std::isfinite(deltaTime) || deltaTime <= 0.0f || !std::isfinite(interval)) {
+        return 0;
+    }
+    if (interval <= 0.0f) {
+        elapsedTime = 0.0f;
+        return 1;
+    }
+    const double previous = std::isfinite(elapsedTime) ? (std::max)(elapsedTime, 0.0f) : 0.0;
+    const double accumulated = previous + deltaTime;
+    const double intervals = std::floor(accumulated / interval + 0.000001);
+    const auto count = static_cast<uint32_t>((std::min)(intervals, static_cast<double>(kMaxEmissionBurstsPerUpdate)));
+    elapsedTime = static_cast<float>((std::max)(0.0, accumulated - count * static_cast<double>(interval)));
+    return count;
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Utility/EmissionTimer.h
+============================================================
+#pragma once
+#include <cstdint>
+
+namespace Engine {
+/// @brief 経過した発生周期の回数を取り出し、余り時間を保持する。
+/// @param elapsedTime 未消費の経過秒数。
+/// @param deltaTime 今回の経過秒数。0以下なら発生しない。
+/// @param interval 発生間隔。0以下なら更新につき一回発生する。
+/// @return 今回実行する発生回数。負荷上限を超える分は次回へ繰り越す。
+uint32_t ConsumeEmissionBursts(float& elapsedTime, float deltaTime, float interval);
+}
+
+
+============================================================
+File Path: project/DirectXGame/engine/Utility/FrameTime.cpp
+============================================================
+#include "FrameTime.h"
+
+#include <algorithm>
+#include <cmath>
+
+void Engine::FrameTime::Update(float unscaledDeltaTime, float timeScale) {
+    mUnscaledDeltaTime = std::isfinite(unscaledDeltaTime) && unscaledDeltaTime > 0.0f
+        ? unscaledDeltaTime : 0.0f;
+    const float scale = std::isfinite(timeScale) ? (std::clamp)(timeScale, 0.0f, 4.0f) : 0.0f;
+    mDeltaTime = mUnscaledDeltaTime * scale;
+    mElapsedTime += mUnscaledDeltaTime;
+}
+
+float Engine::FrameTime::GetDeltaTime() const { return mDeltaTime; }
+
+float Engine::FrameTime::GetUnscaledDeltaTime() const { return mUnscaledDeltaTime; }
+
+double Engine::FrameTime::GetElapsedTime() const { return mElapsedTime; }
+
+
+============================================================
+File Path: project/DirectXGame/engine/Utility/FrameTime.h
+============================================================
+#pragma once
+
+
+namespace Engine {
+/// @brief 一つの実行ループが所有する実時間とゲーム時間を保持する。
+class FrameTime {
+public:
+    /// @brief 実測時間と倍率から今回の更新時間を計算する。
+    /// @param unscaledDeltaTime 前フレームから経過した実時間（秒）。
+    /// @param timeScale ゲーム時間倍率（0〜4）。
+    void Update(float unscaledDeltaTime, float timeScale);
+
+    /// @brief 時間倍率を反映した更新時間を取得する。
+    /// @return ゲーム内の経過秒数。
+    float GetDeltaTime() const;
+    /// @brief 時間倍率を反映しない更新時間を取得する。
+    /// @return 実時間の経過秒数。
+    float GetUnscaledDeltaTime() const;
+    /// @brief 計測開始以降の実時間を取得する。
+    /// @return 累積した実時間（秒）。
+    double GetElapsedTime() const;
+
+private:
+    float mDeltaTime = 0.0f;
+    float mUnscaledDeltaTime = 0.0f;
+    double mElapsedTime = 0.0;
+};
+}
+
+
+============================================================
 File Path: project/DirectXGame/engine/Utility/MapUtility.h
 ============================================================
 #pragma once
@@ -96340,15 +96987,15 @@ File Path: project/DirectXGame/engine/scene/BaseScene.cpp
 ============================================================
 #include "BaseScene.h"
 #include "SceneManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 
-void Engine::BaseScene::AllUpdate(){ Update();}
+
+void Engine::BaseScene::AllUpdate(float deltaTime){ mDeltaTime = deltaTime; Update();}
 
 void Engine::BaseScene::AllDraw2D(){ Draw2D();}
 
 SceneData& Engine::BaseScene::GetSceneData() { return sceneManager->GetSceneData(); }
 
-float Engine::BaseScene::GetTime() const { return MyGame::GameTime();}
+float Engine::BaseScene::GetTime() const { return mDeltaTime;}
 
 ============================================================
 File Path: project/DirectXGame/engine/scene/BaseScene.h
@@ -96393,7 +97040,9 @@ namespace Engine {
 		virtual void Update() = 0;
 
 		// 
-		void AllUpdate();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void AllUpdate(float deltaTime);
 
 		/// <summary>
 		/// 3D描画
@@ -96504,6 +97153,7 @@ namespace Engine {
 		Engine::Camera* camera = nullptr;
 		Engine::AudioManager* audioManager = nullptr;
 	protected:
+		float mDeltaTime = 0.0f;
 		bool initialized_ = false;
 	};
 }
@@ -96515,7 +97165,6 @@ File Path: project/DirectXGame/engine/scene/Fade.cpp
 
 #include "Fade.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 
 /// <summary>
 /// 初期化
@@ -96537,11 +97186,13 @@ void Engine::Fade::Initialize(EntityManager* entityManager) {
 /// <summary>
 /// 毎フレーム処理
 /// </summary>
-void Engine::Fade::Update() {
+void Engine::Fade::Update() { Update(entityManager->GetDeltaTime()); }
+
+void Engine::Fade::Update(float deltaTime) {
 	if (status_ == Status::None) return;
 
 	// フェード時間はゲーム時間倍率を反映して進める
-	counter_ += MyGame::GameTime();
+	counter_ += deltaTime;
 
 
 	if (counter_ > duration_) {
@@ -96681,6 +97332,9 @@ namespace Engine {
 		/// 毎フレーム処理
 		/// </summary>
 		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 
 		/// <summary>
 		/// 描画
@@ -96765,20 +97419,20 @@ void Engine::SceneManager::Init() {
 	finished_ = true;
 };
 
-void Engine::SceneManager::Update()
+void Engine::SceneManager::Update(float deltaTime)
 {
 	// シーン本体とフェード処理のCPU負荷を個別区間として記録する。
 	ENGINE_CPU_PROFILE_SCOPE("SceneManager::Update");
 
 	// 通常シーン処理
 	if (scene_) {
-		scene_->AllUpdate();
+		scene_->AllUpdate(deltaTime);
 	}
 
 	// 各フェーズ処理
 	switch (phase_) {
 	case Phase::kFadeIn:
-		fade_->Update();
+		fade_->Update(deltaTime);
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
 		}
@@ -96788,7 +97442,7 @@ void Engine::SceneManager::Update()
 
 		break;
 	case Phase::kFadeOut:
-		fade_->Update();
+		fade_->Update(deltaTime);
 		if (fade_->IsFinished()) {
 			// フェードアウト完了 → シーン切り替え
 			if (scene_) {
@@ -96829,7 +97483,7 @@ void Engine::SceneManager::Update()
 		}
 		break;
 	case Phase::kLoading:
-		fade_->Update();
+		fade_->Update(deltaTime);
 		break;
 	}
 
@@ -96975,7 +97629,9 @@ namespace Engine {
 		/// <summary>
 		/// 更新
 		/// </summary>
-		void Update();
+		/// @brief 経過時間を明示して更新する。
+		/// @param deltaTime 時間倍率を反映した経過秒数。
+		void Update(float deltaTime);
 		/// <summary>
 		/// 2d描画
 		/// </summary>
@@ -98652,7 +99308,7 @@ Quaternion Quaternion::operator*(const Quaternion& other) const {
     );
 }
 Quaternion Quaternion::operator*(const float& other) const { 
-    return Quaternion(w * other, x * other, y * other, z * other); 
+    return Quaternion(x * other, y * other, z * other, w * other);
 }
 
 Quaternion Quaternion::operator-() const
@@ -101273,6 +101929,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuEmitterTiming.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelVertexInput.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\EmissionTimer.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\DescriptorAllocation.cpp" />
+    <ClCompile Include="DirectXGame\engine\Entity\Entity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\FrameTime.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.cpp" />
@@ -101720,6 +102383,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imnodes\LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\engine\Utility\EmissionTimer.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\DescriptorAllocation.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\FrameTime.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboDebug.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\Debug\ComboEditorBlock.h" />
@@ -102357,6 +103024,13 @@ File Path: project/DirectXGame.vcxproj.filters
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuEmitterTiming.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelVertexInput.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\EmissionTimer.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\DescriptorAllocation.cpp" />
+    <ClCompile Include="DirectXGame\engine\Entity\Entity.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\FrameTime.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -103391,6 +104065,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <None Include="resources\shaders\Trail\Trail.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\engine\Utility\EmissionTimer.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelAssetIdentity.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\DescriptorAllocation.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\FrameTime.h" />
     <ClInclude Include="externals\imgui\imgui.h">
       <Filter>imgui</Filter>
     </ClInclude>
